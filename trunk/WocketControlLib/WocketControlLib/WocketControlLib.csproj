@@ -62,12 +62,6 @@
     <Compile Include="FeatureStream.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\FileMap\FileMap\FileMap.csproj">
-      <Project>{00F5F5FF-4C5A-43A2-A722-39EA0D6E384D}</Project>
-      <Name>FileMap</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="NLog.dll.nlog">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

@@ -75,14 +75,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\BluetoothLayer\BluetoothLayer\BluetoothLayer.csproj">
-      <Project>{65347E01-62B1-4FD2-B502-A33207971940}</Project>
-      <Name>BluetoothLayer</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\FileMap\FileMap\FileMap.csproj">
-      <Project>{00F5F5FF-4C5A-43A2-A722-39EA0D6E384D}</Project>
-      <Name>FileMap</Name>
-    </ProjectReference>
     <ProjectReference Include="..\ExampleSensor\ExampleSensor.csproj">
       <Project>{390AF7ED-5257-4C2E-99C4-52BEB424CBC1}</Project>
       <Name>ExampleSensor</Name>
