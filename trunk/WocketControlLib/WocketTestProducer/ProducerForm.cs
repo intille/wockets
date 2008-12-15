@@ -14,8 +14,6 @@ namespace WocketTestProducer
 {
     public partial class ProducerForm : Form
     {
-        private ExampleSensorA sensor;
-        private FeatureStream rawStream;
         private Thread readingThread;
         private bool killThread = false;
         private int[] buffer = new int[128];
@@ -44,14 +42,9 @@ namespace WocketTestProducer
 
         protected override void OnLoad(EventArgs e)
         {
-            base.OnLoad(e);/*
-            sensor = new AccelerometerSensor();//AccelerometerSensor.GetInstance();
-            rawStream = sensor.OpenFeature("raw", TimeSpan.FromMilliseconds(1), TimeSpan.FromMilliseconds(1), TimeSpan.FromMilliseconds(1), null);
-            sensor.Start();
-            readingThread = new Thread(new ThreadStart(readingFunction));
-            readingThread.Start();*/
+            base.OnLoad(e);
             tiltSensor = new WiTiltSensor(new byte[] { 0x00, 0x06, 0x66, 0x01, 0x57, 0xcc }, "1234");
-            //tiltSensor.onStart();
+
             tiltSensor.Start();
             xyMeanStream = tiltSensor.OpenFeature("meanDiffXY", TimeSpan.FromMilliseconds(400), TimeSpan.FromMilliseconds(600), TimeSpan.FromSeconds(2));//, TimeSpan.Zero, null);//tiltSensor.OpenFeature("rawX", WiTiltSensor.RAW_SIGNAL_PERIOD, WiTiltSensor.RAW_SIGNAL_PERIOD, TimeSpan.Zero, null);//
             yzMeanStream = tiltSensor.OpenFeature("meanDiffYZ", TimeSpan.FromMilliseconds(400), TimeSpan.FromMilliseconds(600), TimeSpan.FromSeconds(2));//, TimeSpan.Zero, null);
@@ -157,31 +150,10 @@ namespace WocketTestProducer
             outputLabel.Text = output;
         }
 
-        private void readingFunction()
-        {
-            int intsRead;
-            while (!killThread)
-            {
-            startloop:
-                intsRead = rawStream.readInts(buffer, 0, buffer.Length);
-                if (intsRead == 0)
-                {
-                    Thread.Sleep(50);
-                    goto startloop;
-                }
-                
-                //otherwise, intsRead is higher
-                for (int ii = 0; ii < intsRead - 1; ii++)
-                {
-                    if (buffer[ii] != buffer[ii + 1] - 1)
-                        throw new Exception("Got a value that isn't subsequent!");
-                }
-            }
-        }
+
 
         private void menuItem1_Click(object sender, EventArgs e)
         {
-            //controller.Release();
             killThread = true;
             readingThread.Join();
             tiltSensor.Stop();

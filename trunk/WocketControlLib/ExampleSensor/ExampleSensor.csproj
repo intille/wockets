@@ -56,6 +56,10 @@
     <Compile Include="WiTiltSensor.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\BluetoothLayer\BluetoothLayer\BluetoothLayer.csproj">
+      <Project>{65347E01-62B1-4FD2-B502-A33207971940}</Project>
+      <Name>BluetoothLayer</Name>
+    </ProjectReference>
     <ProjectReference Include="..\WocketControlLib\WocketControlLib.csproj">
       <Project>{2EEB010B-68F4-456D-BE8C-A3622C7E0B84}</Project>
       <Name>WocketControlLib</Name>

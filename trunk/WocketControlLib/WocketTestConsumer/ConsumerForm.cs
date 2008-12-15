@@ -6,7 +6,6 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using WocketControlLib;
-using Winterdom.IO.FileMap;
 using System.Runtime.InteropServices;
 using System.IO;
 using ExampleSensor;

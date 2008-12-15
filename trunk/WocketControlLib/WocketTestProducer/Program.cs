@@ -2,9 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 using WocketControlLib;
-using Winterdom.IO.FileMap;
 using System.IO;
-using BluetoothLayer;
 
 namespace WocketTestProducer
 {
@@ -47,9 +45,5 @@ namespace WocketTestProducer
             Application.Run(new ProducerForm());
         }
 
-        private static void main2()
-        {
-            BluetoothStream stream = BluetoothStream.OpenConnection(new byte[] { }, "1234");
-        }
     }
 }
