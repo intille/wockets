@@ -6,24 +6,7 @@ using NLog;
 using System.Collections;
 namespace WocketControlLib
 {
-    /*
-    public struct WocketCallback
-    {
-        public TimeSpan callingPeriod;
-        public WocketSensor.ReadFeatureDelegate callbackFunction;
-        public DateTime lastCall;
-        public int lastStreamPos;
-        public FeatureStream readStream;
-        public WocketCallback(TimeSpan callingPeriodParam, WocketSensor.ReadFeatureDelegate callbackFunctionParam, FeatureStream readStreamParam)
-        {
-            lastStreamPos = 0;
-            callingPeriod = callingPeriodParam;
-            callbackFunction = callbackFunctionParam;
-            readStream = readStreamParam;
-            lastCall = DateTime.Now;
-        }
-    }
-    */
+    
     public abstract class WocketSensor
     {
         
@@ -1149,11 +1132,15 @@ namespace WocketControlLib
         /// the feature that the caller is willing to accept. Must be non-zero</param>
         /// <param name="maxAcceptablePeriod">The maximum period (1/frequency) of 
         /// the feature that the caller is willing to accept. Must be non-zero</param>
+        /// <param name="requiredOldnessParam">The amount of time the sensor must
+        /// keep old sensor values in memory before discarding them and using the
+        /// memory for something else.</param>
         /// <returns>A FeatureStream. FeatureStreams are read-only. If the sensor 
         /// is already calculating this feature at a period that falls in the 
         /// specified range, the stream will read that feature. Otherwise,
         /// the stream will read a new feature whose period is the average
-        /// of the min and max acceptable periods</returns>
+        /// of the min and max acceptable periods. To find the period being used,
+        /// read the FeatureStream.Period property on the returned stream</returns>
         /// <exception>If either the (name,maxPeriod) or (name,minPeriod) pairs are rejected by the sensor as possible features</exception>
         /// <exception>If the requiredOldness param is less than either of the period parameters</exception>
         public FeatureStream OpenFeature(string name, TimeSpan minAcceptablePeriod, TimeSpan maxAcceptablePeriod, TimeSpan requiredOldnessParam)//,  TimeSpan callingPeriod, ReadFeatureDelegate callback)

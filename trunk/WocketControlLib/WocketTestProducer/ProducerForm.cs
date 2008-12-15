@@ -46,9 +46,9 @@ namespace WocketTestProducer
             tiltSensor = new WiTiltSensor(new byte[] { 0x00, 0x06, 0x66, 0x01, 0x57, 0xcc }, "1234");
 
             tiltSensor.Start();
-            xyMeanStream = tiltSensor.OpenFeature("meanDiffXY", TimeSpan.FromMilliseconds(400), TimeSpan.FromMilliseconds(600), TimeSpan.FromSeconds(2));//, TimeSpan.Zero, null);//tiltSensor.OpenFeature("rawX", WiTiltSensor.RAW_SIGNAL_PERIOD, WiTiltSensor.RAW_SIGNAL_PERIOD, TimeSpan.Zero, null);//
-            yzMeanStream = tiltSensor.OpenFeature("meanDiffYZ", TimeSpan.FromMilliseconds(400), TimeSpan.FromMilliseconds(600), TimeSpan.FromSeconds(2));//, TimeSpan.Zero, null);
-            zxMeanStream = tiltSensor.OpenFeature("meanDiffZX", TimeSpan.FromMilliseconds(400), TimeSpan.FromMilliseconds(600), TimeSpan.FromSeconds(2));//, TimeSpan.Zero, null);
+            xyMeanStream = tiltSensor.OpenFeature("meanX", TimeSpan.FromMilliseconds(400), TimeSpan.FromMilliseconds(600), TimeSpan.FromSeconds(2));//, TimeSpan.Zero, null);//tiltSensor.OpenFeature("rawX", WiTiltSensor.RAW_SIGNAL_PERIOD, WiTiltSensor.RAW_SIGNAL_PERIOD, TimeSpan.Zero, null);//
+            yzMeanStream = tiltSensor.OpenFeature("meanY", TimeSpan.FromMilliseconds(400), TimeSpan.FromMilliseconds(600), TimeSpan.FromSeconds(2));//, TimeSpan.Zero, null);
+            zxMeanStream = tiltSensor.OpenFeature("meanZ", TimeSpan.FromMilliseconds(400), TimeSpan.FromMilliseconds(600), TimeSpan.FromSeconds(2));//, TimeSpan.Zero, null);
             xVarianceStream = tiltSensor.OpenFeature("varianceX", TimeSpan.FromMilliseconds(400), TimeSpan.FromMilliseconds(600), TimeSpan.FromSeconds(2));
             yVarianceStream = tiltSensor.OpenFeature("varianceY", TimeSpan.FromMilliseconds(400), TimeSpan.FromMilliseconds(600), TimeSpan.FromSeconds(2));
             zVarianceStream = tiltSensor.OpenFeature("varianceZ", TimeSpan.FromMilliseconds(400), TimeSpan.FromMilliseconds(600), TimeSpan.FromSeconds(2));

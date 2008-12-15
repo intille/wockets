@@ -78,7 +78,8 @@ namespace WocketControlLib
         }
 
         public Feature Feature { get { return feature; } }
-
+        public TimeSpan Period { get { return feature.Period; } }
+        public int Available { get { lock (this) return availableBytes; } }
 
         public int readInts(int[] buffer, int offset, int length)
         {

@@ -44,9 +44,9 @@
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="InTheHand.Net.Personal, Version=2.1.0.0, Culture=neutral, PublicKeyToken=ea38caa273134499">
+    <Reference Include="InTheHand.Net.Personal, Version=2.3.0.0, Culture=neutral, PublicKeyToken=ea38caa273134499, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\BT_Test\InTheHand.Net.Personal.dll</HintPath>
+      <HintPath>..\..\lib\InTheHand.Net.Personal.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="OpenNETCF, Version=2.2.0.0, Culture=neutral, PublicKeyToken=e60dbea84bb431b7, processorArchitecture=MSIL" />

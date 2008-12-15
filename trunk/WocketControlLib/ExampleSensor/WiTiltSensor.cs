@@ -221,7 +221,7 @@ namespace ExampleSensor
                     case "rawZ":
                         writeFeatureValues(zBuffer, 0, samplesToUse, f);
                         break;
-                    case "meanDiffXY":
+                    case "meanX":
                         int samplesPerMean = (int)(f.Period.Ticks / RAW_SIGNAL_PERIOD.Ticks);
                         int numberOfMeans = samplesToUse / samplesPerMean;
                         for (int ii = 0; ii < numberOfMeans; ii++)
@@ -229,13 +229,13 @@ namespace ExampleSensor
                             int mean = 0;
                             for (int jj = 0; jj < samplesPerMean; jj++)
                             {
-                                mean += xBuffer[jj + ii * samplesPerMean] - yBuffer[jj + ii * samplesPerMean];
+                                mean += xBuffer[jj + ii * samplesPerMean];// -yBuffer[jj + ii * samplesPerMean];
                             }
                             otherFeaturesBuffer[ii] = (short)(mean / samplesPerMean);
                         }
                         writeFeatureValues(otherFeaturesBuffer, 0, numberOfMeans, f);
                         break;
-                    case "meanDiffYZ":
+                    case "meanY":
                         samplesPerMean = (int)(f.Period.Ticks / RAW_SIGNAL_PERIOD.Ticks);
                         numberOfMeans = samplesToUse / samplesPerMean;
                         for (int ii = 0; ii < numberOfMeans; ii++)
@@ -243,13 +243,13 @@ namespace ExampleSensor
                             int mean = 0;
                             for (int jj = 0; jj < samplesPerMean; jj++)
                             {
-                                mean += yBuffer[jj + ii * samplesPerMean] - zBuffer[jj + ii * samplesPerMean];
+                                mean += yBuffer[jj + ii * samplesPerMean];// -zBuffer[jj + ii * samplesPerMean];
                             }
                             otherFeaturesBuffer[ii] = (short)(mean / samplesPerMean);
                         }
                         writeFeatureValues(otherFeaturesBuffer, 0, numberOfMeans, f);
                         break;
-                    case "meanDiffZX":
+                    case "meanZ":
                         samplesPerMean = (int)(f.Period.Ticks / RAW_SIGNAL_PERIOD.Ticks);
                         numberOfMeans = samplesToUse / samplesPerMean;
                         for (int ii = 0; ii < numberOfMeans; ii++)
@@ -257,7 +257,7 @@ namespace ExampleSensor
                             int mean = 0;
                             for (int jj = 0; jj < samplesPerMean; jj++)
                             {
-                                mean += zBuffer[jj + ii * samplesPerMean] - xBuffer[jj + ii * samplesPerMean];
+                                mean += zBuffer[jj + ii * samplesPerMean];// -xBuffer[jj + ii * samplesPerMean];
                             }
                             otherFeaturesBuffer[ii] = (short)(mean / samplesPerMean);
                         }
@@ -354,7 +354,7 @@ namespace ExampleSensor
         protected override bool featureNameSupported(string name)
         {
             return name == "rawX" || name == "rawY" || name == "rawZ" ||
-                name == "meanDiffXY" || name == "meanDiffYZ" || name == "meanDiffZX" ||
+                name == "meanX" || name == "meanY" || name == "meanZ" ||
                 name == "varianceX" || name == "varianceY" || name == "varianceZ" ||
                 name == "batteryLevel" || name == "gyro";
         }*/
@@ -366,9 +366,9 @@ namespace ExampleSensor
                 case "rawY":
                 case "rawZ":
                     return period == RAW_SIGNAL_PERIOD;
-                case "meanDiffXY":
-                case "meanDiffYZ":
-                case "meanDiffZX":
+                case "meanX":
+                case "meanY":
+                case "meanZ":
                 case "varianceX":
                 case "varianceY":
                 case "varianceZ":
