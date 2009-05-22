@@ -280,6 +280,7 @@ namespace Wockets.Receivers
         IntPtr cthread;
 
         private static int iii = 0;
+        NetworkStream n;
         public static void Read_Callback(IAsyncResult ar)
         {
              
@@ -299,12 +300,12 @@ namespace Wockets.Receivers
             int currentSamples = 0;
             byte[] buffer = new byte[100];
 
-
+            n= btClient.GetStream();
             localBuffer = new byte[DEFAULT_BUFFER_SIZE];
             singleReadBuffer = new byte[DEFAULT_BUFFER_SIZE];
 
             TextWriter tttw = new StreamWriter("samples"+(iii++)+".csv");
-            NetworkStream n=btClient.GetStream();
+     
             int counter = 0;
             bool tt=n.CanTimeout;
             
@@ -382,15 +383,16 @@ namespace Wockets.Receivers
                              //bytesReceived = comPort2.FillBytesBuffer(singleReadBuffer);
 
                             currentTime = WocketsTimer.GetUnixTime();
-                            currentTime2 = currentTime;
-                            if (prevTime2 == 0)
-                                prevTime2 = currentTime2;
+                            //currentTime2 = currentTime;
+                            //if (prevTime2 == 0)
+                              //  prevTime2 = currentTime2;
 
                             //2 minutes passed
+                           /*
                             if ((prevTime2>0) && (currentTime2>0) && ((currentTime2 - prevTime2) >= 30000))
                             {
 
-            /*                  
+                         
                                 byte[] cmd = new byte[50];
                                 for (int i=0;(i<50);i++)
                                     cmd[i] = (byte)36;                    
@@ -405,13 +407,13 @@ namespace Wockets.Receivers
                                 Thread.Sleep(100);
                                 prevTime2 = currentTime2;
                                 socketDead = true;
-             */
+             
                                 n.Close();
                                 Close();
                                 return;
                             }
-    
-                            /*
+    */
+                            
                             if ((currentTime - prevTime) < 500)
                                 currentSamples += bytesReceived;
                             else
@@ -419,7 +421,7 @@ namespace Wockets.Receivers
                                 tttw.WriteLine(currentTime+"," + currentSamples/7);
                                 currentSamples = 0;
                             }
-                             */
+                             
                             prevTime = currentTime;
                             
                             
@@ -723,6 +725,7 @@ namespace Wockets.Receivers
 
         public void Close()
         {
+            n.Close();
             Dispose();
             ttw.Flush();
             ttw.Close();
