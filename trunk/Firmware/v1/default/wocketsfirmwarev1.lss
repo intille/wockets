@@ -1,0 +1,1426 @@
+
+wocketsfirmwarev1.elf:     file format elf32-avr
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         000006e6  00000000  00000000  00000074  2**1
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .bss          000002c9  00800100  00800100  0000075a  2**0
+                  ALLOC
+  2 .debug_aranges 000000c0  00000000  00000000  0000075a  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  3 .debug_pubnames 000004b9  00000000  00000000  0000081a  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  4 .debug_info   00000a4b  00000000  00000000  00000cd3  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  5 .debug_abbrev 0000054a  00000000  00000000  0000171e  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  6 .debug_line   00000b4c  00000000  00000000  00001c68  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  7 .debug_frame  000002e0  00000000  00000000  000027b4  2**2
+                  CONTENTS, READONLY, DEBUGGING
+  8 .debug_str    00000528  00000000  00000000  00002a94  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  9 .debug_loc    00000260  00000000  00000000  00002fbc  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 10 .debug_ranges 00000048  00000000  00000000  0000321c  2**0
+                  CONTENTS, READONLY, DEBUGGING
+
+Disassembly of section .text:
+
+00000000 <__vectors>:
+   0:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__ctors_end>
+   4:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+   8:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+   c:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  10:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  14:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  18:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  1c:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  20:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  24:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  28:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  2c:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  30:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  34:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  38:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  3c:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  40:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  44:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  48:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  4c:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  50:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  54:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  58:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  5c:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  60:	0c 94 a9 02 	jmp	0x552	; 0x552 <__vector_24>
+  64:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  68:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  6c:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  70:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  74:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+  78:	0c 94 50 00 	jmp	0xa0	; 0xa0 <__bad_interrupt>
+
+0000007c <__ctors_end>:
+  7c:	11 24       	eor	r1, r1
+  7e:	1f be       	out	0x3f, r1	; 63
+  80:	cf ef       	ldi	r28, 0xFF	; 255
+  82:	d8 e0       	ldi	r29, 0x08	; 8
+  84:	de bf       	out	0x3e, r29	; 62
+  86:	cd bf       	out	0x3d, r28	; 61
+
+00000088 <__do_clear_bss>:
+  88:	13 e0       	ldi	r17, 0x03	; 3
+  8a:	a0 e0       	ldi	r26, 0x00	; 0
+  8c:	b1 e0       	ldi	r27, 0x01	; 1
+  8e:	01 c0       	rjmp	.+2      	; 0x92 <.do_clear_bss_start>
+
+00000090 <.do_clear_bss_loop>:
+  90:	1d 92       	st	X+, r1
+
+00000092 <.do_clear_bss_start>:
+  92:	a9 3c       	cpi	r26, 0xC9	; 201
+  94:	b1 07       	cpc	r27, r17
+  96:	e1 f7       	brne	.-8      	; 0x90 <.do_clear_bss_loop>
+  98:	0e 94 a2 00 	call	0x144	; 0x144 <main>
+  9c:	0c 94 71 03 	jmp	0x6e2	; 0x6e2 <_exit>
+
+000000a0 <__bad_interrupt>:
+  a0:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
+
+000000a4 <TransmitFrames>:
+	TransmitByte(f.byte7);
+	
+}
+
+
+void TransmitFrames(){
+  a4:	cf 93       	push	r28
+  a6:	df 93       	push	r29
+  a8:	c5 e0       	ldi	r28, 0x05	; 5
+  aa:	d1 e0       	ldi	r29, 0x01	; 1
+	int i=0;
+	for (i=0;i<60;i++){
+	TransmitByte(f[i].byte1);
+  ac:	88 81       	ld	r24, Y
+  ae:	0e 94 9c 02 	call	0x538	; 0x538 <TransmitByte>
+	TransmitByte(f[i].byte2);
+  b2:	89 81       	ldd	r24, Y+1	; 0x01
+  b4:	0e 94 9c 02 	call	0x538	; 0x538 <TransmitByte>
+	TransmitByte(f[i].byte3);
+  b8:	8a 81       	ldd	r24, Y+2	; 0x02
+  ba:	0e 94 9c 02 	call	0x538	; 0x538 <TransmitByte>
+	TransmitByte(f[i].byte4);
+  be:	8b 81       	ldd	r24, Y+3	; 0x03
+  c0:	0e 94 9c 02 	call	0x538	; 0x538 <TransmitByte>
+	TransmitByte(f[i].byte5);
+  c4:	8c 81       	ldd	r24, Y+4	; 0x04
+  c6:	0e 94 9c 02 	call	0x538	; 0x538 <TransmitByte>
+	TransmitByte(f[i].byte6);
+  ca:	8d 81       	ldd	r24, Y+5	; 0x05
+  cc:	0e 94 9c 02 	call	0x538	; 0x538 <TransmitByte>
+	TransmitByte(f[i].byte7);
+  d0:	8e 81       	ldd	r24, Y+6	; 0x06
+  d2:	0e 94 9c 02 	call	0x538	; 0x538 <TransmitByte>
+  d6:	27 96       	adiw	r28, 0x07	; 7
+}
+
+
+void TransmitFrames(){
+	int i=0;
+	for (i=0;i<60;i++){
+  d8:	82 e0       	ldi	r24, 0x02	; 2
+  da:	c9 3a       	cpi	r28, 0xA9	; 169
+  dc:	d8 07       	cpc	r29, r24
+  de:	31 f7       	brne	.-52     	; 0xac <TransmitFrames+0x8>
+	TransmitByte(f[i].byte4);
+	TransmitByte(f[i].byte5);
+	TransmitByte(f[i].byte6);
+	TransmitByte(f[i].byte7);
+	}
+}
+  e0:	df 91       	pop	r29
+  e2:	cf 91       	pop	r28
+  e4:	08 95       	ret
+
+000000e6 <TransmitFrame>:
+WOCKETS_UNCOMPRESSED_FRAME ss;
+
+int status=0;//disconnected
+int firstConnection=0;
+
+void TransmitFrame(WOCKETS_UNCOMPRESSED_FRAME f){
+  e6:	df 93       	push	r29
+  e8:	cf 93       	push	r28
+  ea:	cd b7       	in	r28, 0x3d	; 61
+  ec:	de b7       	in	r29, 0x3e	; 62
+  ee:	27 97       	sbiw	r28, 0x07	; 7
+  f0:	0f b6       	in	r0, 0x3f	; 63
+  f2:	f8 94       	cli
+  f4:	de bf       	out	0x3e, r29	; 62
+  f6:	0f be       	out	0x3f, r0	; 63
+  f8:	cd bf       	out	0x3d, r28	; 61
+  fa:	29 83       	std	Y+1, r18	; 0x01
+  fc:	3a 83       	std	Y+2, r19	; 0x02
+  fe:	4b 83       	std	Y+3, r20	; 0x03
+ 100:	5c 83       	std	Y+4, r21	; 0x04
+ 102:	6d 83       	std	Y+5, r22	; 0x05
+ 104:	7e 83       	std	Y+6, r23	; 0x06
+ 106:	8f 83       	std	Y+7, r24	; 0x07
+	
+	TransmitByte(f.byte1);
+ 108:	82 2f       	mov	r24, r18
+ 10a:	0e 94 9c 02 	call	0x538	; 0x538 <TransmitByte>
+	TransmitByte(f.byte2);
+ 10e:	8a 81       	ldd	r24, Y+2	; 0x02
+ 110:	0e 94 9c 02 	call	0x538	; 0x538 <TransmitByte>
+	TransmitByte(f.byte3);
+ 114:	8b 81       	ldd	r24, Y+3	; 0x03
+ 116:	0e 94 9c 02 	call	0x538	; 0x538 <TransmitByte>
+	TransmitByte(f.byte4);
+ 11a:	8c 81       	ldd	r24, Y+4	; 0x04
+ 11c:	0e 94 9c 02 	call	0x538	; 0x538 <TransmitByte>
+	TransmitByte(f.byte5);
+ 120:	8d 81       	ldd	r24, Y+5	; 0x05
+ 122:	0e 94 9c 02 	call	0x538	; 0x538 <TransmitByte>
+	TransmitByte(f.byte6);
+ 126:	8e 81       	ldd	r24, Y+6	; 0x06
+ 128:	0e 94 9c 02 	call	0x538	; 0x538 <TransmitByte>
+	TransmitByte(f.byte7);
+ 12c:	8f 81       	ldd	r24, Y+7	; 0x07
+ 12e:	0e 94 9c 02 	call	0x538	; 0x538 <TransmitByte>
+	
+}
+ 132:	27 96       	adiw	r28, 0x07	; 7
+ 134:	0f b6       	in	r0, 0x3f	; 63
+ 136:	f8 94       	cli
+ 138:	de bf       	out	0x3e, r29	; 62
+ 13a:	0f be       	out	0x3f, r0	; 63
+ 13c:	cd bf       	out	0x3d, r28	; 61
+ 13e:	cf 91       	pop	r28
+ 140:	df 91       	pop	r29
+ 142:	08 95       	ret
+
+00000144 <main>:
+	TransmitByte(f[i].byte6);
+	TransmitByte(f[i].byte7);
+	}
+}
+int main()
+{
+ 144:	8f 92       	push	r8
+ 146:	9f 92       	push	r9
+ 148:	af 92       	push	r10
+ 14a:	bf 92       	push	r11
+ 14c:	cf 92       	push	r12
+ 14e:	df 92       	push	r13
+ 150:	ef 92       	push	r14
+ 152:	ff 92       	push	r15
+ 154:	0f 93       	push	r16
+ 156:	df 93       	push	r29
+ 158:	cf 93       	push	r28
+ 15a:	cd b7       	in	r28, 0x3d	; 61
+ 15c:	de b7       	in	r29, 0x3e	; 62
+ 15e:	2e 97       	sbiw	r28, 0x0e	; 14
+ 160:	0f b6       	in	r0, 0x3f	; 63
+ 162:	f8 94       	cli
+ 164:	de bf       	out	0x3e, r29	; 62
+ 166:	0f be       	out	0x3f, r0	; 63
+ 168:	cd bf       	out	0x3d, r28	; 61
+	r=0;
+ 16a:	10 92 b8 02 	sts	0x02B8, r1
+	seq_num=0;
+ 16e:	10 92 c3 02 	sts	0x02C3, r1
+ 172:	10 92 c2 02 	sts	0x02C2, r1
+	//Set up 16-bit counter:
+	TCCR1B |= (1<<CS12);  // Clock=8MHz/256, timer resolution= 32 us
+ 176:	80 91 81 00 	lds	r24, 0x0081
+ 17a:	84 60       	ori	r24, 0x04	; 4
+ 17c:	80 93 81 00 	sts	0x0081, r24
+	TCNT1=0;
+ 180:	10 92 85 00 	sts	0x0085, r1
+ 184:	10 92 84 00 	sts	0x0084, r1
+	//i=0xff;
+	//init_crc();
+	_atmega324p_init();
+ 188:	0e 94 b3 02 	call	0x566	; 0x566 <_atmega324p_init>
+	_atmega324p_yellow_led_on();
+else 
+_atmega324p_yellow_led_off();
+
+if (_rn41_is_connected()){
+	status=1;
+ 18c:	21 e0       	ldi	r18, 0x01	; 1
+ 18e:	e2 2e       	mov	r14, r18
+ 190:	f1 2c       	mov	r15, r1
+		//f[r].byte5=ss.byte5;
+		//f[r].byte6=ss.byte6;
+		//f[r].byte7=ss.byte7;
+		//r++;
+	//if (r==60){
+		TransmitFrame(encode(CHANNELID,adc_result[ADC0], (seq_num>>8), (seq_num & 0xFF), crcval));
+ 192:	4e 01       	movw	r8, r28
+ 194:	08 94       	sec
+ 196:	81 1c       	adc	r8, r1
+ 198:	91 1c       	adc	r9, r1
+ 19a:	98 e0       	ldi	r25, 0x08	; 8
+ 19c:	a9 2e       	mov	r10, r25
+ 19e:	b1 2c       	mov	r11, r1
+ 1a0:	ac 0e       	add	r10, r28
+ 1a2:	bd 1e       	adc	r11, r29
+    milliseconds can be achieved.
+ */
+void
+_delay_loop_2(uint16_t __count)
+{
+	__asm__ volatile (
+ 1a4:	80 e2       	ldi	r24, 0x20	; 32
+ 1a6:	c8 2e       	mov	r12, r24
+ 1a8:	8e e4       	ldi	r24, 0x4E	; 78
+ 1aa:	d8 2e       	mov	r13, r24
+		//PORTD=0XFF;
+      //_delay_ms(5000);
+		//PORTD=0;
+		//_delay_ms(5000);
+
+if (_rn41_is_discoverable())
+ 1ac:	0e 94 67 01 	call	0x2ce	; 0x2ce <_rn41_is_discoverable>
+ 1b0:	88 23       	and	r24, r24
+ 1b2:	19 f0       	breq	.+6      	; 0x1ba <main+0x76>
+	_atmega324p_yellow_led_on();
+ 1b4:	0e 94 84 02 	call	0x508	; 0x508 <_atmega324p_yellow_led_on>
+ 1b8:	02 c0       	rjmp	.+4      	; 0x1be <main+0x7a>
+else 
+_atmega324p_yellow_led_off();
+ 1ba:	0e 94 86 02 	call	0x50c	; 0x50c <_atmega324p_yellow_led_off>
+
+if (_rn41_is_connected()){
+ 1be:	0e 94 63 01 	call	0x2c6	; 0x2c6 <_rn41_is_connected>
+ 1c2:	88 23       	and	r24, r24
+ 1c4:	f9 f0       	breq	.+62     	; 0x204 <main+0xc0>
+	status=1;
+ 1c6:	f0 92 01 01 	sts	0x0101, r15
+ 1ca:	e0 92 00 01 	sts	0x0100, r14
+
+	//for first connection reset sequence number
+	if (firstConnection==0){
+ 1ce:	80 91 02 01 	lds	r24, 0x0102
+ 1d2:	90 91 03 01 	lds	r25, 0x0103
+ 1d6:	89 2b       	or	r24, r25
+ 1d8:	41 f4       	brne	.+16     	; 0x1ea <main+0xa6>
+		firstConnection=1;
+ 1da:	f0 92 03 01 	sts	0x0103, r15
+ 1de:	e0 92 02 01 	sts	0x0102, r14
+		seq_num=0;
+ 1e2:	10 92 c3 02 	sts	0x02C3, r1
+ 1e6:	10 92 c2 02 	sts	0x02C2, r1
+	}
+	if (TCNT1>=31250){
+ 1ea:	80 91 84 00 	lds	r24, 0x0084
+ 1ee:	90 91 85 00 	lds	r25, 0x0085
+ 1f2:	82 51       	subi	r24, 0x12	; 18
+ 1f4:	9a 47       	sbci	r25, 0x7A	; 122
+ 1f6:	18 f0       	brcs	.+6      	; 0x1fe <main+0xba>
+		_atmega324p_green_led_on();
+ 1f8:	0e 94 80 02 	call	0x500	; 0x500 <_atmega324p_green_led_on>
+ 1fc:	13 c0       	rjmp	.+38     	; 0x224 <main+0xe0>
+		}
+	else  _atmega324p_green_led_off();
+ 1fe:	0e 94 82 02 	call	0x504	; 0x504 <_atmega324p_green_led_off>
+ 202:	10 c0       	rjmp	.+32     	; 0x224 <main+0xe0>
+	}
+else{
+	_atmega324p_green_led_off();
+ 204:	0e 94 82 02 	call	0x504	; 0x504 <_atmega324p_green_led_off>
+
+	//reset sequence number if was connected then became disconnected
+	if (status==1)
+ 208:	80 91 00 01 	lds	r24, 0x0100
+ 20c:	90 91 01 01 	lds	r25, 0x0101
+ 210:	01 97       	sbiw	r24, 0x01	; 1
+ 212:	21 f4       	brne	.+8      	; 0x21c <main+0xd8>
+		seq_num=0;
+ 214:	10 92 c3 02 	sts	0x02C3, r1
+ 218:	10 92 c2 02 	sts	0x02C2, r1
+    status=0;
+ 21c:	10 92 01 01 	sts	0x0101, r1
+ 220:	10 92 00 01 	sts	0x0100, r1
+	}
+
+	
+		//sample accelerometer data, encode and transmit	
+		adc_result[ADC1]=_atmega324p_a2dConvert10bit(ADC1);
+ 224:	81 e0       	ldi	r24, 0x01	; 1
+ 226:	0e 94 50 02 	call	0x4a0	; 0x4a0 <_atmega324p_a2dConvert10bit>
+ 22a:	90 93 b3 02 	sts	0x02B3, r25
+ 22e:	80 93 b2 02 	sts	0x02B2, r24
+		adc_result[ADC2]=_atmega324p_a2dConvert10bit(ADC2);
+ 232:	82 e0       	ldi	r24, 0x02	; 2
+ 234:	0e 94 50 02 	call	0x4a0	; 0x4a0 <_atmega324p_a2dConvert10bit>
+ 238:	90 93 b5 02 	sts	0x02B5, r25
+ 23c:	80 93 b4 02 	sts	0x02B4, r24
+		adc_result[ADC3]=_atmega324p_a2dConvert10bit(ADC3);
+ 240:	83 e0       	ldi	r24, 0x03	; 3
+ 242:	0e 94 50 02 	call	0x4a0	; 0x4a0 <_atmega324p_a2dConvert10bit>
+ 246:	90 93 b7 02 	sts	0x02B7, r25
+ 24a:	80 93 b6 02 	sts	0x02B6, r24
+ 		//crcval=crc((unsigned char*) adc_result,6);
+		crcval=0;
+ 24e:	10 92 c4 03 	sts	0x03C4, r1
+		//f[r].byte5=ss.byte5;
+		//f[r].byte6=ss.byte6;
+		//f[r].byte7=ss.byte7;
+		//r++;
+	//if (r==60){
+		TransmitFrame(encode(CHANNELID,adc_result[ADC0], (seq_num>>8), (seq_num & 0xFF), crcval));
+ 252:	20 91 c2 02 	lds	r18, 0x02C2
+ 256:	30 91 c3 02 	lds	r19, 0x02C3
+ 25a:	60 91 b0 02 	lds	r22, 0x02B0
+ 25e:	70 91 b1 02 	lds	r23, 0x02B1
+ 262:	8f e0       	ldi	r24, 0x0F	; 15
+ 264:	90 e0       	ldi	r25, 0x00	; 0
+ 266:	43 2f       	mov	r20, r19
+ 268:	50 e0       	ldi	r21, 0x00	; 0
+ 26a:	30 70       	andi	r19, 0x00	; 0
+ 26c:	00 e0       	ldi	r16, 0x00	; 0
+ 26e:	0e 94 28 03 	call	0x650	; 0x650 <encode>
+ 272:	28 87       	std	Y+8, r18	; 0x08
+ 274:	39 87       	std	Y+9, r19	; 0x09
+ 276:	4a 87       	std	Y+10, r20	; 0x0a
+ 278:	5b 87       	std	Y+11, r21	; 0x0b
+ 27a:	6c 87       	std	Y+12, r22	; 0x0c
+ 27c:	7d 87       	std	Y+13, r23	; 0x0d
+ 27e:	8e 87       	std	Y+14, r24	; 0x0e
+ 280:	d4 01       	movw	r26, r8
+ 282:	f5 01       	movw	r30, r10
+ 284:	87 e0       	ldi	r24, 0x07	; 7
+ 286:	01 90       	ld	r0, Z+
+ 288:	0d 92       	st	X+, r0
+ 28a:	81 50       	subi	r24, 0x01	; 1
+ 28c:	e1 f7       	brne	.-8      	; 0x286 <main+0x142>
+ 28e:	29 81       	ldd	r18, Y+1	; 0x01
+ 290:	3a 81       	ldd	r19, Y+2	; 0x02
+ 292:	4b 81       	ldd	r20, Y+3	; 0x03
+ 294:	5c 81       	ldd	r21, Y+4	; 0x04
+ 296:	6d 81       	ldd	r22, Y+5	; 0x05
+ 298:	7e 81       	ldd	r23, Y+6	; 0x06
+ 29a:	8f 81       	ldd	r24, Y+7	; 0x07
+ 29c:	0e 94 73 00 	call	0xe6	; 0xe6 <TransmitFrame>
+				TransmitByte(',');
+		}
+		TransmitByte('>');*/
+		//end debugging
+         
+		seq_num=seq_num+1;
+ 2a0:	80 91 c2 02 	lds	r24, 0x02C2
+ 2a4:	90 91 c3 02 	lds	r25, 0x02C3
+ 2a8:	01 96       	adiw	r24, 0x01	; 1
+ 2aa:	90 93 c3 02 	sts	0x02C3, r25
+ 2ae:	80 93 c2 02 	sts	0x02C2, r24
+ 2b2:	c6 01       	movw	r24, r12
+ 2b4:	01 97       	sbiw	r24, 0x01	; 1
+ 2b6:	f1 f7       	brne	.-4      	; 0x2b4 <main+0x170>
+ 2b8:	79 cf       	rjmp	.-270    	; 0x1ac <main+0x68>
+
+000002ba <_rn41_init>:
+#include "avr_general.h"
+#include "bt_rn41.h"
+
+void _rn41_init(){
+	//set status pins as input
+	cbi(DDRD,BT_DISCOVERABLE_PIN);
+ 2ba:	55 98       	cbi	0x0a, 5	; 10
+	cbi(DDRD,BT_CONNECTED_PIN);
+ 2bc:	54 98       	cbi	0x0a, 4	; 10
+	cbi(DDRD,BT_RX_PIN);
+ 2be:	50 98       	cbi	0x0a, 0	; 10
+
+	//set RX and Reset PINS as output
+	sbi(DDRD,BT_TX_PIN);
+ 2c0:	51 9a       	sbi	0x0a, 1	; 10
+	sbi(PORTD,BT_RESET_PIN);  //turn on bt
+ 2c2:	5a 9a       	sbi	0x0b, 2	; 11
+
+}
+ 2c4:	08 95       	ret
+
+000002c6 <_rn41_is_connected>:
+
+
+unsigned char _rn41_is_connected(){
+
+	return (0x01 & (PIND>>BT_CONNECTED_PIN));
+ 2c6:	89 b1       	in	r24, 0x09	; 9
+ 2c8:	82 95       	swap	r24
+
+
+}
+ 2ca:	81 70       	andi	r24, 0x01	; 1
+ 2cc:	08 95       	ret
+
+000002ce <_rn41_is_discoverable>:
+
+
+unsigned char _rn41_is_discoverable(){
+
+	return (0x01 & (PIND>>BT_DISCOVERABLE_PIN));
+ 2ce:	89 b1       	in	r24, 0x09	; 9
+ 2d0:	82 95       	swap	r24
+ 2d2:	86 95       	lsr	r24
+}
+ 2d4:	81 70       	andi	r24, 0x01	; 1
+ 2d6:	08 95       	ret
+
+000002d8 <rn_41_off>:
+
+
+void rn_41_off(){
+	sbi(PORTB, BT_SW);  //turn off bt via switch
+ 2d8:	2c 9a       	sbi	0x05, 4	; 5
+}
+ 2da:	08 95       	ret
+
+000002dc <rn_41_on>:
+
+void rn_41_on(){
+	cbi(PORTB, BT_SW);
+ 2dc:	2c 98       	cbi	0x05, 4	; 5
+}
+ 2de:	08 95       	ret
+
+000002e0 <_rn41_reset>:
+
+void _rn41_reset(){
+	cbi(PORTD,BT_RESET_PIN);
+ 2e0:	5a 98       	cbi	0x0b, 2	; 11
+	sbi(PORTD,BT_RESET_PIN);
+ 2e2:	5a 9a       	sbi	0x0b, 2	; 11
+}
+ 2e4:	08 95       	ret
+
+000002e6 <_atmega324p_init_uart0>:
+#include <stdlib.h>
+
+
+void _atmega324p_init_uart0(unsigned int baud){
+	/* Set baud rate */
+	UBRR0H = (unsigned char)(baud>>8);
+ 2e6:	90 93 c5 00 	sts	0x00C5, r25
+	UBRR0L = (unsigned char)baud;
+ 2ea:	80 93 c4 00 	sts	0x00C4, r24
+	/* Enable receiver and transmitter */
+	UCSR0B = (1<<TXEN0);//|(1<<RXEN0);
+ 2ee:	88 e0       	ldi	r24, 0x08	; 8
+ 2f0:	80 93 c1 00 	sts	0x00C1, r24
+	/* Set frame format: 8data, 2stop bit */
+	//UCSR0C = (1<<USBS0)|(3<<UCSZ00);  //change 1 to 0 and &
+	UCSR0C = (3<<UCSZ00);  //change 1 to 0 and &
+ 2f4:	86 e0       	ldi	r24, 0x06	; 6
+ 2f6:	80 93 c2 00 	sts	0x00C2, r24
+}
+ 2fa:	08 95       	ret
+
+000002fc <_atmega324p_init_uart1>:
+
+void _atmega324p_init_uart1(unsigned int baud){
+	/* Set baud rate */
+	UBRR1H = (unsigned char)(baud>>8);
+ 2fc:	90 93 cd 00 	sts	0x00CD, r25
+	UBRR1L = (unsigned char)baud;
+ 300:	80 93 cc 00 	sts	0x00CC, r24
+	/* Enable receiver and transmitter */
+	UCSR1B = (1<<TXEN1)|(1<<RXEN1);
+ 304:	88 e1       	ldi	r24, 0x18	; 24
+ 306:	80 93 c9 00 	sts	0x00C9, r24
+	/* Set frame format: 8data, 2stop bit */
+	UCSR1C =(3<<UCSZ10);  //change 1 to 0 and &
+ 30a:	86 e0       	ldi	r24, 0x06	; 6
+ 30c:	80 93 ca 00 	sts	0x00CA, r24
+}
+ 310:	08 95       	ret
+
+00000312 <_atmega324p_enable_free_running_adc>:
+
+
+
+void _atmega324p_enable_free_running_adc(){
+	   
+   ADCSRB &= ~((1<<ADTS2) | (1<<ADTS1) | (1<<ADTS0)); //setting Free Running Mode
+ 312:	eb e7       	ldi	r30, 0x7B	; 123
+ 314:	f0 e0       	ldi	r31, 0x00	; 0
+ 316:	80 81       	ld	r24, Z
+ 318:	88 7f       	andi	r24, 0xF8	; 248
+ 31a:	80 83       	st	Z, r24
+   ADCSRA |= (1 << ADATE);   //has to be set to 1 for ADC
+ 31c:	ea e7       	ldi	r30, 0x7A	; 122
+ 31e:	f0 e0       	ldi	r31, 0x00	; 0
+ 320:	80 81       	ld	r24, Z
+ 322:	80 62       	ori	r24, 0x20	; 32
+ 324:	80 83       	st	Z, r24
+}
+ 326:	08 95       	ret
+
+00000328 <_atmega324p_disable_free_running_adc>:
+
+void _atmega324p_disable_free_running_adc(){
+	      
+   ADCSRA &= ~(1 << ADATE);   //has to be set to 1 for ADC
+ 328:	ea e7       	ldi	r30, 0x7A	; 122
+ 32a:	f0 e0       	ldi	r31, 0x00	; 0
+ 32c:	80 81       	ld	r24, Z
+ 32e:	8f 7d       	andi	r24, 0xDF	; 223
+ 330:	80 83       	st	Z, r24
+}
+ 332:	08 95       	ret
+
+00000334 <_atmega324p_set_prescalar_adc>:
+
+void _atmega324p_set_prescalar_adc(unsigned char prescalar){
+	if (prescalar==PRESCALAR_2){
+ 334:	88 23       	and	r24, r24
+ 336:	21 f4       	brne	.+8      	; 0x340 <_atmega324p_set_prescalar_adc+0xc>
+		ADCSRA &= ~((1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0));
+ 338:	80 91 7a 00 	lds	r24, 0x007A
+ 33c:	88 7f       	andi	r24, 0xF8	; 248
+ 33e:	36 c0       	rjmp	.+108    	; 0x3ac <_atmega324p_set_prescalar_adc+0x78>
+	}else if (prescalar==PRESCALAR_4){
+ 340:	81 30       	cpi	r24, 0x01	; 1
+ 342:	49 f4       	brne	.+18     	; 0x356 <_atmega324p_set_prescalar_adc+0x22>
+		ADCSRA &= ~((1 << ADPS2) | (1 << ADPS0));
+ 344:	80 91 7a 00 	lds	r24, 0x007A
+ 348:	8a 7f       	andi	r24, 0xFA	; 250
+ 34a:	80 93 7a 00 	sts	0x007A, r24
+		ADCSRA |= (1 << ADPS1);
+ 34e:	80 91 7a 00 	lds	r24, 0x007A
+ 352:	82 60       	ori	r24, 0x02	; 2
+ 354:	2b c0       	rjmp	.+86     	; 0x3ac <_atmega324p_set_prescalar_adc+0x78>
+	}else if (prescalar==PRESCALAR_8){
+ 356:	82 30       	cpi	r24, 0x02	; 2
+ 358:	49 f4       	brne	.+18     	; 0x36c <_atmega324p_set_prescalar_adc+0x38>
+		ADCSRA &= ~(1 << ADPS2);
+ 35a:	80 91 7a 00 	lds	r24, 0x007A
+ 35e:	8b 7f       	andi	r24, 0xFB	; 251
+ 360:	80 93 7a 00 	sts	0x007A, r24
+		ADCSRA |= ((1 << ADPS1) |(1 << ADPS0)) ;
+ 364:	80 91 7a 00 	lds	r24, 0x007A
+ 368:	83 60       	ori	r24, 0x03	; 3
+ 36a:	20 c0       	rjmp	.+64     	; 0x3ac <_atmega324p_set_prescalar_adc+0x78>
+	}else if (prescalar==PRESCALAR_16){
+ 36c:	83 30       	cpi	r24, 0x03	; 3
+ 36e:	49 f4       	brne	.+18     	; 0x382 <_atmega324p_set_prescalar_adc+0x4e>
+		ADCSRA &= ~((1 << ADPS1) |(1 << ADPS0));
+ 370:	80 91 7a 00 	lds	r24, 0x007A
+ 374:	8c 7f       	andi	r24, 0xFC	; 252
+ 376:	80 93 7a 00 	sts	0x007A, r24
+		ADCSRA |= (1 << ADPS2);
+ 37a:	80 91 7a 00 	lds	r24, 0x007A
+ 37e:	84 60       	ori	r24, 0x04	; 4
+ 380:	15 c0       	rjmp	.+42     	; 0x3ac <_atmega324p_set_prescalar_adc+0x78>
+	}else if (prescalar==PRESCALAR_32){
+ 382:	84 30       	cpi	r24, 0x04	; 4
+ 384:	49 f4       	brne	.+18     	; 0x398 <_atmega324p_set_prescalar_adc+0x64>
+		ADCSRA &= ~(1 << ADPS1);
+ 386:	80 91 7a 00 	lds	r24, 0x007A
+ 38a:	8d 7f       	andi	r24, 0xFD	; 253
+ 38c:	80 93 7a 00 	sts	0x007A, r24
+		ADCSRA |= ((1 << ADPS2)|(1 << ADPS0));
+ 390:	80 91 7a 00 	lds	r24, 0x007A
+ 394:	85 60       	ori	r24, 0x05	; 5
+ 396:	0a c0       	rjmp	.+20     	; 0x3ac <_atmega324p_set_prescalar_adc+0x78>
+	}else if (prescalar==PRESCALAR_64){
+ 398:	85 30       	cpi	r24, 0x05	; 5
+ 39a:	59 f4       	brne	.+22     	; 0x3b2 <_atmega324p_set_prescalar_adc+0x7e>
+		ADCSRA &= ~(1 << ADPS0);
+ 39c:	80 91 7a 00 	lds	r24, 0x007A
+ 3a0:	8e 7f       	andi	r24, 0xFE	; 254
+ 3a2:	80 93 7a 00 	sts	0x007A, r24
+		ADCSRA |= ((1 << ADPS2)|(1 << ADPS1));
+ 3a6:	80 91 7a 00 	lds	r24, 0x007A
+ 3aa:	86 60       	ori	r24, 0x06	; 6
+ 3ac:	80 93 7a 00 	sts	0x007A, r24
+ 3b0:	08 95       	ret
+	}else if (prescalar==PRESCALAR_128){		
+ 3b2:	86 30       	cpi	r24, 0x06	; 6
+ 3b4:	29 f4       	brne	.+10     	; 0x3c0 <_atmega324p_set_prescalar_adc+0x8c>
+		ADCSRA |= ((1 << ADPS2)|(1 << ADPS1)|(1 << ADPS0));
+ 3b6:	80 91 7a 00 	lds	r24, 0x007A
+ 3ba:	87 60       	ori	r24, 0x07	; 7
+ 3bc:	80 93 7a 00 	sts	0x007A, r24
+ 3c0:	08 95       	ret
+
+000003c2 <_atmega324p_set_reference_adc>:
+	}
+}
+
+//To do : add support to other than the internal
+void _atmega324p_set_reference_adc(){
+	ADMUX |= (1 << REFS0); // Set ADC reference to AVCC
+ 3c2:	ec e7       	ldi	r30, 0x7C	; 124
+ 3c4:	f0 e0       	ldi	r31, 0x00	; 0
+ 3c6:	80 81       	ld	r24, Z
+ 3c8:	80 64       	ori	r24, 0x40	; 64
+ 3ca:	80 83       	st	Z, r24
+}
+ 3cc:	08 95       	ret
+
+000003ce <_atmega324p_enable_adc>:
+
+void _atmega324p_enable_adc(){
+
+	sbi(ADCSRA,ADEN);// power up
+ 3ce:	ea e7       	ldi	r30, 0x7A	; 122
+ 3d0:	f0 e0       	ldi	r31, 0x00	; 0
+ 3d2:	80 81       	ld	r24, Z
+ 3d4:	80 68       	ori	r24, 0x80	; 128
+ 3d6:	80 83       	st	Z, r24
+
+	//both the following are needed to allow ADIF to be set when a conversion completes
+	sbi(ADCSRA,ADIE);//enable interrupts  
+ 3d8:	80 81       	ld	r24, Z
+ 3da:	88 60       	ori	r24, 0x08	; 8
+ 3dc:	80 83       	st	Z, r24
+	sei(); //sets the I bit in the SREG 
+ 3de:	78 94       	sei
+}
+ 3e0:	08 95       	ret
+
+000003e2 <_atmega324p_disable_adc>:
+
+void _atmega324p_disable_adc(){
+	cbi(ADCSRA,ADEN);// power down
+ 3e2:	ea e7       	ldi	r30, 0x7A	; 122
+ 3e4:	f0 e0       	ldi	r31, 0x00	; 0
+ 3e6:	80 81       	ld	r24, Z
+ 3e8:	8f 77       	andi	r24, 0x7F	; 127
+ 3ea:	80 83       	st	Z, r24
+	cbi(ADCSRA,ADIE);//disable interrupts
+ 3ec:	80 81       	ld	r24, Z
+ 3ee:	87 7f       	andi	r24, 0xF7	; 247
+ 3f0:	80 83       	st	Z, r24
+}
+ 3f2:	08 95       	ret
+
+000003f4 <_atmega324p_start_adc>:
+
+void _atmega324p_start_adc(){
+	sbi(ADCSRA, ADIF);   // clear hardware "conversion complete" flag 
+ 3f4:	ea e7       	ldi	r30, 0x7A	; 122
+ 3f6:	f0 e0       	ldi	r31, 0x00	; 0
+ 3f8:	80 81       	ld	r24, Z
+ 3fa:	80 61       	ori	r24, 0x10	; 16
+ 3fc:	80 83       	st	Z, r24
+	sbi(ADCSRA,ADSC);
+ 3fe:	80 81       	ld	r24, Z
+ 400:	80 64       	ori	r24, 0x40	; 64
+ 402:	80 83       	st	Z, r24
+}
+ 404:	08 95       	ret
+
+00000406 <_atmega324p_is_complete_adc>:
+
+//ADSC is 1 while converting, 0 when it is done.
+unsigned char _atmega324p_is_complete_adc(){
+	return bit_is_set(ADCSRA, ADSC);
+ 406:	80 91 7a 00 	lds	r24, 0x007A
+}
+ 40a:	80 74       	andi	r24, 0x40	; 64
+ 40c:	08 95       	ret
+
+0000040e <_atmega324p_set_channel_adc>:
+
+void _atmega324p_set_channel_adc(unsigned char channel){
+	if (channel==ADC0){
+ 40e:	88 23       	and	r24, r24
+ 410:	21 f4       	brne	.+8      	; 0x41a <_atmega324p_set_channel_adc+0xc>
+		cbi(ADMUX,0);
+ 412:	80 91 7c 00 	lds	r24, 0x007C
+ 416:	8e 7f       	andi	r24, 0xFE	; 254
+ 418:	05 c0       	rjmp	.+10     	; 0x424 <_atmega324p_set_channel_adc+0x16>
+		cbi(ADMUX,1);
+		cbi(ADMUX,2);
+		cbi(ADMUX,3);
+		cbi(ADMUX,4);
+	}
+	else if (channel==ADC1){
+ 41a:	81 30       	cpi	r24, 0x01	; 1
+ 41c:	49 f4       	brne	.+18     	; 0x430 <_atmega324p_set_channel_adc+0x22>
+		sbi(ADMUX,0);
+ 41e:	80 91 7c 00 	lds	r24, 0x007C
+ 422:	81 60       	ori	r24, 0x01	; 1
+ 424:	80 93 7c 00 	sts	0x007C, r24
+		cbi(ADMUX,1);
+ 428:	80 91 7c 00 	lds	r24, 0x007C
+ 42c:	8d 7f       	andi	r24, 0xFD	; 253
+ 42e:	0a c0       	rjmp	.+20     	; 0x444 <_atmega324p_set_channel_adc+0x36>
+		cbi(ADMUX,2);
+		cbi(ADMUX,3);
+		cbi(ADMUX,4);
+	}else if (channel==ADC2){
+ 430:	82 30       	cpi	r24, 0x02	; 2
+ 432:	d1 f4       	brne	.+52     	; 0x468 <_atmega324p_set_channel_adc+0x5a>
+		cbi(ADMUX,0);
+ 434:	80 91 7c 00 	lds	r24, 0x007C
+ 438:	8e 7f       	andi	r24, 0xFE	; 254
+ 43a:	80 93 7c 00 	sts	0x007C, r24
+		sbi(ADMUX,1);
+ 43e:	80 91 7c 00 	lds	r24, 0x007C
+ 442:	82 60       	ori	r24, 0x02	; 2
+ 444:	80 93 7c 00 	sts	0x007C, r24
+		cbi(ADMUX,2);
+ 448:	80 91 7c 00 	lds	r24, 0x007C
+ 44c:	8b 7f       	andi	r24, 0xFB	; 251
+ 44e:	80 93 7c 00 	sts	0x007C, r24
+		cbi(ADMUX,3);
+ 452:	80 91 7c 00 	lds	r24, 0x007C
+ 456:	87 7f       	andi	r24, 0xF7	; 247
+ 458:	80 93 7c 00 	sts	0x007C, r24
+		cbi(ADMUX,4);
+ 45c:	80 91 7c 00 	lds	r24, 0x007C
+ 460:	8f 7e       	andi	r24, 0xEF	; 239
+ 462:	80 93 7c 00 	sts	0x007C, r24
+ 466:	08 95       	ret
+	}else if (channel==ADC3){
+ 468:	83 30       	cpi	r24, 0x03	; 3
+ 46a:	c9 f4       	brne	.+50     	; 0x49e <_atmega324p_set_channel_adc+0x90>
+		sbi(ADMUX,0);
+ 46c:	80 91 7c 00 	lds	r24, 0x007C
+ 470:	81 60       	ori	r24, 0x01	; 1
+ 472:	80 93 7c 00 	sts	0x007C, r24
+		sbi(ADMUX,1);
+ 476:	80 91 7c 00 	lds	r24, 0x007C
+ 47a:	82 60       	ori	r24, 0x02	; 2
+ 47c:	80 93 7c 00 	sts	0x007C, r24
+		cbi(ADMUX,2);
+ 480:	80 91 7c 00 	lds	r24, 0x007C
+ 484:	8b 7f       	andi	r24, 0xFB	; 251
+ 486:	80 93 7c 00 	sts	0x007C, r24
+		cbi(ADMUX,3);
+ 48a:	80 91 7c 00 	lds	r24, 0x007C
+ 48e:	87 7f       	andi	r24, 0xF7	; 247
+ 490:	80 93 7c 00 	sts	0x007C, r24
+		cbi(ADMUX,4);
+ 494:	80 91 7c 00 	lds	r24, 0x007C
+ 498:	8f 7e       	andi	r24, 0xEF	; 239
+ 49a:	80 93 7c 00 	sts	0x007C, r24
+ 49e:	08 95       	ret
+
+000004a0 <_atmega324p_a2dConvert10bit>:
+	}*/
+}
+
+unsigned short _atmega324p_a2dConvert10bit(unsigned char channel){
+	//select channel
+	_atmega324p_set_channel_adc(channel);
+ 4a0:	0e 94 07 02 	call	0x40e	; 0x40e <_atmega324p_set_channel_adc>
+	cbi(ADCSRA,ADEN);// power down
+	cbi(ADCSRA,ADIE);//disable interrupts
+}
+
+void _atmega324p_start_adc(){
+	sbi(ADCSRA, ADIF);   // clear hardware "conversion complete" flag 
+ 4a4:	80 91 7a 00 	lds	r24, 0x007A
+ 4a8:	80 61       	ori	r24, 0x10	; 16
+ 4aa:	80 93 7a 00 	sts	0x007A, r24
+	sbi(ADCSRA,ADSC);
+ 4ae:	80 91 7a 00 	lds	r24, 0x007A
+ 4b2:	80 64       	ori	r24, 0x40	; 64
+ 4b4:	80 93 7a 00 	sts	0x007A, r24
+}
+
+//ADSC is 1 while converting, 0 when it is done.
+unsigned char _atmega324p_is_complete_adc(){
+	return bit_is_set(ADCSRA, ADSC);
+ 4b8:	80 91 7a 00 	lds	r24, 0x007A
+
+unsigned short _atmega324p_a2dConvert10bit(unsigned char channel){
+	//select channel
+	_atmega324p_set_channel_adc(channel);
+	_atmega324p_start_adc();
+	while(_atmega324p_is_complete_adc()); 
+ 4bc:	86 fd       	sbrc	r24, 6
+ 4be:	fc cf       	rjmp	.-8      	; 0x4b8 <_atmega324p_a2dConvert10bit+0x18>
+	return ((ADCL)|((ADCH)<<8));
+ 4c0:	20 91 78 00 	lds	r18, 0x0078
+ 4c4:	40 91 79 00 	lds	r20, 0x0079
+ 4c8:	94 2f       	mov	r25, r20
+ 4ca:	80 e0       	ldi	r24, 0x00	; 0
+ 4cc:	30 e0       	ldi	r19, 0x00	; 0
+ 4ce:	28 2b       	or	r18, r24
+ 4d0:	39 2b       	or	r19, r25
+}
+ 4d2:	c9 01       	movw	r24, r18
+ 4d4:	08 95       	ret
+
+000004d6 <_atmega324p_init_adc>:
+void _atmega324p_init_adc(){
+
+	//set the directional pins for the A/D converter
+	cbi(DDRA,X_PIN);
+ 4d6:	0b 98       	cbi	0x01, 3	; 1
+	cbi(DDRA,Y_PIN);
+ 4d8:	0a 98       	cbi	0x01, 2	; 1
+	cbi(DDRA,Z_PIN);
+ 4da:	09 98       	cbi	0x01, 1	; 1
+	}
+}
+
+//To do : add support to other than the internal
+void _atmega324p_set_reference_adc(){
+	ADMUX |= (1 << REFS0); // Set ADC reference to AVCC
+ 4dc:	ec e7       	ldi	r30, 0x7C	; 124
+ 4de:	f0 e0       	ldi	r31, 0x00	; 0
+ 4e0:	80 81       	ld	r24, Z
+ 4e2:	80 64       	ori	r24, 0x40	; 64
+ 4e4:	80 83       	st	Z, r24
+   // No MUX values needed to be changed to use ADC0
+   //ADCSRA |= (1 << ADATE);   //has to be set to 1 for ADC
+   //ADCSRB &= (0<<ADTS2) | (0<<ADTS1) | (0<<ADTS0); //setting Free Running Mode
+	
+	//_atmega324p_enable_free_running_adc();
+	_atmega324p_set_prescalar_adc(PRESCALAR_8);
+ 4e6:	82 e0       	ldi	r24, 0x02	; 2
+ 4e8:	0e 94 9a 01 	call	0x334	; 0x334 <_atmega324p_set_prescalar_adc>
+	ADMUX |= (1 << REFS0); // Set ADC reference to AVCC
+}
+
+void _atmega324p_enable_adc(){
+
+	sbi(ADCSRA,ADEN);// power up
+ 4ec:	ea e7       	ldi	r30, 0x7A	; 122
+ 4ee:	f0 e0       	ldi	r31, 0x00	; 0
+ 4f0:	80 81       	ld	r24, Z
+ 4f2:	80 68       	ori	r24, 0x80	; 128
+ 4f4:	80 83       	st	Z, r24
+
+	//both the following are needed to allow ADIF to be set when a conversion completes
+	sbi(ADCSRA,ADIE);//enable interrupts  
+ 4f6:	80 81       	ld	r24, Z
+ 4f8:	88 60       	ori	r24, 0x08	; 8
+ 4fa:	80 83       	st	Z, r24
+	sei(); //sets the I bit in the SREG 
+ 4fc:	78 94       	sei
+	_atmega324p_enable_adc();
+
+  // ADCSRA |= (1 << ADSC);  // Start A2D Conversions
+  //_atmega324p_start_adc();
+
+}
+ 4fe:	08 95       	ret
+
+00000500 <_atmega324p_green_led_on>:
+
+void _atmega324p_green_led_on(){
+	sbi(PORTC,GREEN_LED);
+ 500:	41 9a       	sbi	0x08, 1	; 8
+}
+ 502:	08 95       	ret
+
+00000504 <_atmega324p_green_led_off>:
+
+void _atmega324p_green_led_off(){
+	cbi(PORTC,GREEN_LED);
+ 504:	41 98       	cbi	0x08, 1	; 8
+}
+ 506:	08 95       	ret
+
+00000508 <_atmega324p_yellow_led_on>:
+
+
+void _atmega324p_yellow_led_on(){
+	sbi(PORTC,YELLOW_LED);
+ 508:	42 9a       	sbi	0x08, 2	; 8
+}
+ 50a:	08 95       	ret
+
+0000050c <_atmega324p_yellow_led_off>:
+
+void _atmega324p_yellow_led_off(){
+	cbi(PORTC,YELLOW_LED);
+ 50c:	42 98       	cbi	0x08, 2	; 8
+}
+ 50e:	08 95       	ret
+
+00000510 <_atmega324p_powerdown>:
+
+
+void _atmega324p_powerdown(){
+SMCR = 0x05;
+ 510:	85 e0       	ldi	r24, 0x05	; 5
+ 512:	83 bf       	out	0x33, r24	; 51
+}
+ 514:	08 95       	ret
+
+00000516 <_atmega324p_disable_JTAG>:
+//by default the interface is enabled to disable it JTD has to be written logic 1
+	// 2 times in 4 cycles.
+{
+	unsigned char sreg;
+
+	sreg = SREG;
+ 516:	8f b7       	in	r24, 0x3f	; 63
+	cli();
+ 518:	f8 94       	cli
+	MCUCR |= ( 1 <<JTD );
+ 51a:	95 b7       	in	r25, 0x35	; 53
+ 51c:	90 68       	ori	r25, 0x80	; 128
+ 51e:	95 bf       	out	0x35, r25	; 53
+	MCUCR |= ( 1 <<JTD );
+ 520:	95 b7       	in	r25, 0x35	; 53
+ 522:	90 68       	ori	r25, 0x80	; 128
+ 524:	95 bf       	out	0x35, r25	; 53
+	SREG = sreg;
+ 526:	8f bf       	out	0x3f, r24	; 63
+}
+ 528:	08 95       	ret
+
+0000052a <ReceiveByte>:
+
+
+unsigned char ReceiveByte( void )
+  {
+   while ( !(UCSR1A &  (1<<RXC1)) );     /*  Wait for incoming data   */
+ 52a:	80 91 c8 00 	lds	r24, 0x00C8
+ 52e:	87 ff       	sbrs	r24, 7
+ 530:	fc cf       	rjmp	.-8      	; 0x52a <ReceiveByte>
+   return UDR1;/* Return the   data */
+ 532:	80 91 ce 00 	lds	r24, 0x00CE
+  }
+ 536:	08 95       	ret
+
+00000538 <TransmitByte>:
+
+
+void TransmitByte( unsigned char data )
+{
+ 538:	98 2f       	mov	r25, r24
+  while ( !(UCSR0A & (1<<UDRE0)) );        /* Wait for   empty transmit buffer */
+ 53a:	80 91 c0 00 	lds	r24, 0x00C0
+ 53e:	85 ff       	sbrs	r24, 5
+ 540:	fc cf       	rjmp	.-8      	; 0x53a <TransmitByte+0x2>
+  UCSR0A=UCSR0A & 0xdf;
+ 542:	80 91 c0 00 	lds	r24, 0x00C0
+ 546:	8f 7d       	andi	r24, 0xDF	; 223
+ 548:	80 93 c0 00 	sts	0x00C0, r24
+  
+  UDR0 =  data;  /* Start transmission   */
+ 54c:	90 93 c6 00 	sts	0x00C6, r25
+   
+}
+ 550:	08 95       	ret
+
+00000552 <__vector_24>:
+	_atmega324p_init_adc();
+	
+}
+
+
+ISR(ADC_vect){
+ 552:	1f 92       	push	r1
+ 554:	0f 92       	push	r0
+ 556:	0f b6       	in	r0, 0x3f	; 63
+ 558:	0f 92       	push	r0
+ 55a:	11 24       	eor	r1, r1
+         TransmitByte(',');
+		  delta=0;
+ 	 
+	 _delay_ms(100);
+	 */
+}
+ 55c:	0f 90       	pop	r0
+ 55e:	0f be       	out	0x3f, r0	; 63
+ 560:	0f 90       	pop	r0
+ 562:	1f 90       	pop	r1
+ 564:	18 95       	reti
+
+00000566 <_atmega324p_init>:
+//by default the interface is enabled to disable it JTD has to be written logic 1
+	// 2 times in 4 cycles.
+{
+	unsigned char sreg;
+
+	sreg = SREG;
+ 566:	9f b7       	in	r25, 0x3f	; 63
+	cli();
+ 568:	f8 94       	cli
+	MCUCR |= ( 1 <<JTD );
+ 56a:	85 b7       	in	r24, 0x35	; 53
+ 56c:	80 68       	ori	r24, 0x80	; 128
+ 56e:	85 bf       	out	0x35, r24	; 53
+	MCUCR |= ( 1 <<JTD );
+ 570:	85 b7       	in	r24, 0x35	; 53
+ 572:	80 68       	ori	r24, 0x80	; 128
+ 574:	85 bf       	out	0x35, r24	; 53
+	SREG = sreg;
+ 576:	9f bf       	out	0x3f, r25	; 63
+#include <stdlib.h>
+
+
+void _atmega324p_init_uart0(unsigned int baud){
+	/* Set baud rate */
+	UBRR0H = (unsigned char)(baud>>8);
+ 578:	10 92 c5 00 	sts	0x00C5, r1
+	UBRR0L = (unsigned char)baud;
+ 57c:	8c e0       	ldi	r24, 0x0C	; 12
+ 57e:	80 93 c4 00 	sts	0x00C4, r24
+	/* Enable receiver and transmitter */
+	UCSR0B = (1<<TXEN0);//|(1<<RXEN0);
+ 582:	88 e0       	ldi	r24, 0x08	; 8
+ 584:	80 93 c1 00 	sts	0x00C1, r24
+	/* Set frame format: 8data, 2stop bit */
+	//UCSR0C = (1<<USBS0)|(3<<UCSZ00);  //change 1 to 0 and &
+	UCSR0C = (3<<UCSZ00);  //change 1 to 0 and &
+ 588:	86 e0       	ldi	r24, 0x06	; 6
+ 58a:	80 93 c2 00 	sts	0x00C2, r24
+
+	//initialize UART0, connected to the RX of the BT
+	_atmega324p_init_uart0( (unsigned int)12);
+
+	//set the BT
+	_rn41_init();
+ 58e:	0e 94 5d 01 	call	0x2ba	; 0x2ba <_rn41_init>
+
+    //initialize the accelerometer settings
+	_mma7260qt_init();
+ 592:	0e 94 f2 02 	call	0x5e4	; 0x5e4 <_mma7260qt_init>
+
+	//initialize the digital to analog converter
+	_atmega324p_init_adc();
+ 596:	0e 94 6b 02 	call	0x4d6	; 0x4d6 <_atmega324p_init_adc>
+	
+}
+ 59a:	08 95       	ret
+
+0000059c <_mma7260qt_set_sensitivity>:
+
+/** Here we will set the direction of the different ports ***/
+
+int _mma7260qt_set_sensitivity(unsigned char level){
+  	
+	if (level==_1_5G){
+ 59c:	88 23       	and	r24, r24
+ 59e:	11 f4       	brne	.+4      	; 0x5a4 <_mma7260qt_set_sensitivity+0x8>
+		cbi(PORTB,GS1_PIN);
+ 5a0:	28 98       	cbi	0x05, 0	; 5
+ 5a2:	03 c0       	rjmp	.+6      	; 0x5aa <_mma7260qt_set_sensitivity+0xe>
+		cbi(PORTB,GS2_PIN);
+		return 1;
+	}else if (level==_2G){
+ 5a4:	81 30       	cpi	r24, 0x01	; 1
+ 5a6:	19 f4       	brne	.+6      	; 0x5ae <_mma7260qt_set_sensitivity+0x12>
+		sbi(PORTB,GS1_PIN);
+ 5a8:	28 9a       	sbi	0x05, 0	; 5
+		cbi(PORTB,GS2_PIN);
+ 5aa:	29 98       	cbi	0x05, 1	; 5
+ 5ac:	0c c0       	rjmp	.+24     	; 0x5c6 <_mma7260qt_set_sensitivity+0x2a>
+		return 1;
+	}else if (level==_4G){
+ 5ae:	82 30       	cpi	r24, 0x02	; 2
+ 5b0:	19 f4       	brne	.+6      	; 0x5b8 <_mma7260qt_set_sensitivity+0x1c>
+		sbi(PORTB,GS2_PIN);
+ 5b2:	29 9a       	sbi	0x05, 1	; 5
+		cbi(PORTB,GS1_PIN);
+ 5b4:	28 98       	cbi	0x05, 0	; 5
+ 5b6:	07 c0       	rjmp	.+14     	; 0x5c6 <_mma7260qt_set_sensitivity+0x2a>
+		return 1;
+	}else if (level==_6G){
+ 5b8:	83 30       	cpi	r24, 0x03	; 3
+ 5ba:	19 f0       	breq	.+6      	; 0x5c2 <_mma7260qt_set_sensitivity+0x26>
+ 5bc:	20 e0       	ldi	r18, 0x00	; 0
+ 5be:	30 e0       	ldi	r19, 0x00	; 0
+ 5c0:	04 c0       	rjmp	.+8      	; 0x5ca <_mma7260qt_set_sensitivity+0x2e>
+		sbi(PORTB,GS1_PIN);
+ 5c2:	28 9a       	sbi	0x05, 0	; 5
+		sbi(PORTB,GS2_PIN);
+ 5c4:	29 9a       	sbi	0x05, 1	; 5
+ 5c6:	21 e0       	ldi	r18, 0x01	; 1
+ 5c8:	30 e0       	ldi	r19, 0x00	; 0
+		return 1;
+	}
+
+	return 0;
+}
+ 5ca:	c9 01       	movw	r24, r18
+ 5cc:	08 95       	ret
+
+000005ce <_mma7260qt_wakeup>:
+
+void _mma7260qt_wakeup(){
+	sbi(PORTB,SLP_PIN);
+ 5ce:	2b 9a       	sbi	0x05, 3	; 5
+
+}
+ 5d0:	08 95       	ret
+
+000005d2 <_mma7260qt_sleep>:
+
+void _mma7260qt_sleep(){
+	cbi(PORTB,SLP_PIN);
+ 5d2:	2b 98       	cbi	0x05, 3	; 5
+}
+ 5d4:	08 95       	ret
+
+000005d6 <_mma7260qt_is_asleep>:
+
+unsigned char _mma7260qt_is_asleep(){
+
+	return (0x01 & ~(PORTB>>SLP_PIN));
+ 5d6:	85 b1       	in	r24, 0x05	; 5
+ 5d8:	86 95       	lsr	r24
+ 5da:	86 95       	lsr	r24
+ 5dc:	86 95       	lsr	r24
+ 5de:	80 95       	com	r24
+}
+ 5e0:	81 70       	andi	r24, 0x01	; 1
+ 5e2:	08 95       	ret
+
+000005e4 <_mma7260qt_init>:
+
+//by default set sensitivity to 1.5G
+void _mma7260qt_init(){
+	
+	sbi(DDRB,GS1_PIN); //set to output
+ 5e4:	20 9a       	sbi	0x04, 0	; 4
+	sbi(DDRB,GS2_PIN); //set to output
+ 5e6:	21 9a       	sbi	0x04, 1	; 4
+	sbi(DDRB,SLP_PIN); //set to output
+ 5e8:	23 9a       	sbi	0x04, 3	; 4
+
+	//set X,Y,Z pins to input
+	cbi(DDRA, X_PIN);
+ 5ea:	0b 98       	cbi	0x01, 3	; 1
+	cbi(DDRA, Y_PIN);
+ 5ec:	0a 98       	cbi	0x01, 2	; 1
+	cbi(DDRA, Z_PIN);
+ 5ee:	09 98       	cbi	0x01, 1	; 1
+
+	//set other control pins to inputs --> move to seperate file later
+	cbi(DDRB, VSENSE_COMP_PB);
+ 5f0:	22 98       	cbi	0x04, 2	; 4
+	cbi(DDRA, VSENSE_COMP_PA);
+ 5f2:	08 98       	cbi	0x01, 0	; 1
+	cbi(DDRA, VSENSE_BAT);
+ 5f4:	0c 98       	cbi	0x01, 4	; 1
+	cbi(DDRA, DOCK_N);
+ 5f6:	0d 98       	cbi	0x01, 5	; 1
+
+	//set default sensitivity to 1.5G
+	_mma7260qt_set_sensitivity(_1_5G);
+ 5f8:	80 e0       	ldi	r24, 0x00	; 0
+ 5fa:	0e 94 ce 02 	call	0x59c	; 0x59c <_mma7260qt_set_sensitivity>
+
+	return 0;
+}
+
+void _mma7260qt_wakeup(){
+	sbi(PORTB,SLP_PIN);
+ 5fe:	2b 9a       	sbi	0x05, 3	; 5
+	//set default sensitivity to 1.5G
+	_mma7260qt_set_sensitivity(_1_5G);
+	//_mma7260qt_sleep(); //initially asleep
+	_mma7260qt_wakeup(); //initially awake
+	
+}
+ 600:	08 95       	ret
+
+00000602 <init_crc>:
+#include "crc.h"
+
+
+void init_crc(void){
+ 602:	20 e0       	ldi	r18, 0x00	; 0
+ 604:	30 e0       	ldi	r19, 0x00	; 0
+		remainder=dividend<< (WIDTH -8);
+
+		for (bit=8;bit>0;--bit)
+		{
+			if (remainder & TOPBIT)
+				remainder=(remainder<<1)^ POLYNOMIAL;
+ 606:	48 ed       	ldi	r20, 0xD8	; 216
+#include "crc.h"
+
+
+void init_crc(void){
+ 608:	82 2f       	mov	r24, r18
+ 60a:	98 e0       	ldi	r25, 0x08	; 8
+	{
+		remainder=dividend<< (WIDTH -8);
+
+		for (bit=8;bit>0;--bit)
+		{
+			if (remainder & TOPBIT)
+ 60c:	87 ff       	sbrs	r24, 7
+ 60e:	03 c0       	rjmp	.+6      	; 0x616 <init_crc+0x14>
+				remainder=(remainder<<1)^ POLYNOMIAL;
+ 610:	88 0f       	add	r24, r24
+ 612:	84 27       	eor	r24, r20
+ 614:	01 c0       	rjmp	.+2      	; 0x618 <init_crc+0x16>
+			else
+				remainder=(remainder<<1);
+ 616:	88 0f       	add	r24, r24
+	unsigned char bit;
+	for (dividend=0;(dividend<256);++dividend)
+	{
+		remainder=dividend<< (WIDTH -8);
+
+		for (bit=8;bit>0;--bit)
+ 618:	91 50       	subi	r25, 0x01	; 1
+ 61a:	c1 f7       	brne	.-16     	; 0x60c <init_crc+0xa>
+				remainder=(remainder<<1)^ POLYNOMIAL;
+			else
+				remainder=(remainder<<1);
+		}
+
+		crcTable[dividend]=remainder;
+ 61c:	f9 01       	movw	r30, r18
+ 61e:	ec 53       	subi	r30, 0x3C	; 60
+ 620:	fd 4f       	sbci	r31, 0xFD	; 253
+ 622:	80 83       	st	Z, r24
+
+void init_crc(void){
+	unsigned char remainder;
+	int dividend=0;
+	unsigned char bit;
+	for (dividend=0;(dividend<256);++dividend)
+ 624:	2f 5f       	subi	r18, 0xFF	; 255
+ 626:	3f 4f       	sbci	r19, 0xFF	; 255
+ 628:	81 e0       	ldi	r24, 0x01	; 1
+ 62a:	20 30       	cpi	r18, 0x00	; 0
+ 62c:	38 07       	cpc	r19, r24
+ 62e:	61 f7       	brne	.-40     	; 0x608 <init_crc+0x6>
+				remainder=(remainder<<1);
+		}
+
+		crcTable[dividend]=remainder;
+	}
+}
+ 630:	08 95       	ret
+
+00000632 <crc>:
+
+unsigned char crc(unsigned char message[],unsigned char length)
+{
+ 632:	dc 01       	movw	r26, r24
+ 634:	e0 e0       	ldi	r30, 0x00	; 0
+ 636:	90 e0       	ldi	r25, 0x00	; 0
+ 638:	07 c0       	rjmp	.+14     	; 0x648 <crc+0x16>
+	unsigned char byte=0;
+
+	for (byte=0;(byte<length);byte++)
+	{
+		data=message[byte]^(remainder >> (WIDTH-8));
+		remainder=crcTable[data] ^ (remainder<<8);
+ 63a:	8d 91       	ld	r24, X+
+ 63c:	e8 27       	eor	r30, r24
+ 63e:	f0 e0       	ldi	r31, 0x00	; 0
+ 640:	ec 53       	subi	r30, 0x3C	; 60
+ 642:	fd 4f       	sbci	r31, 0xFD	; 253
+ 644:	e0 81       	ld	r30, Z
+{
+	unsigned char data;
+	unsigned char remainder=0;
+	unsigned char byte=0;
+
+	for (byte=0;(byte<length);byte++)
+ 646:	9f 5f       	subi	r25, 0xFF	; 255
+ 648:	96 17       	cp	r25, r22
+ 64a:	b8 f3       	brcs	.-18     	; 0x63a <crc+0x8>
+		data=message[byte]^(remainder >> (WIDTH-8));
+		remainder=crcTable[data] ^ (remainder<<8);
+	}
+
+	return remainder;
+}
+ 64c:	8e 2f       	mov	r24, r30
+ 64e:	08 95       	ret
+
+00000650 <encode>:
+#include "encoder.h"
+
+WOCKETS_UNCOMPRESSED_FRAME encode(unsigned short channel,unsigned short x, unsigned short y, unsigned short z, unsigned char crc)
+{
+ 650:	0f 93       	push	r16
+ 652:	1f 93       	push	r17
+ 654:	df 93       	push	r29
+ 656:	cf 93       	push	r28
+ 658:	cd b7       	in	r28, 0x3d	; 61
+ 65a:	de b7       	in	r29, 0x3e	; 62
+ 65c:	27 97       	sbiw	r28, 0x07	; 7
+ 65e:	0f b6       	in	r0, 0x3f	; 63
+ 660:	f8 94       	cli
+ 662:	de bf       	out	0x3e, r29	; 62
+ 664:	0f be       	out	0x3f, r0	; 63
+ 666:	cd bf       	out	0x3d, r28	; 61
+ 668:	fa 01       	movw	r30, r20
+ 66a:	d9 01       	movw	r26, r18
+ 66c:	30 2f       	mov	r19, r16
+	frame.byte4 |=  ((unsigned char) ((x<<3) &0x78)) | ((unsigned char) ((y>>7)&0x07));
+	frame.byte5 |= ((unsigned char) (y&0x7f));
+	frame.byte6 |= ((unsigned char) ((z>>3)&0x7f));
+	frame.byte7 |= ((unsigned char) ((z<<4)&0x70));
+
+	return frame;
+ 66e:	0a 2f       	mov	r16, r26
+ 670:	02 95       	swap	r16
+ 672:	00 7f       	andi	r16, 0xF0	; 240
+ 674:	43 e0       	ldi	r20, 0x03	; 3
+ 676:	b6 95       	lsr	r27
+ 678:	a7 95       	ror	r26
+ 67a:	4a 95       	dec	r20
+ 67c:	e1 f7       	brne	.-8      	; 0x676 <encode+0x26>
+ 67e:	af 77       	andi	r26, 0x7F	; 127
+ 680:	1e 2f       	mov	r17, r30
+ 682:	1f 77       	andi	r17, 0x7F	; 127
+ 684:	ee 0f       	add	r30, r30
+ 686:	ef 2f       	mov	r30, r31
+ 688:	ee 1f       	adc	r30, r30
+ 68a:	ff 0b       	sbc	r31, r31
+ 68c:	f1 95       	neg	r31
+ 68e:	e7 70       	andi	r30, 0x07	; 7
+ 690:	96 2f       	mov	r25, r22
+ 692:	99 0f       	add	r25, r25
+ 694:	99 0f       	add	r25, r25
+ 696:	99 0f       	add	r25, r25
+ 698:	98 77       	andi	r25, 0x78	; 120
+ 69a:	e9 2b       	or	r30, r25
+ 69c:	43 2f       	mov	r20, r19
+ 69e:	42 95       	swap	r20
+ 6a0:	44 0f       	add	r20, r20
+ 6a2:	44 0f       	add	r20, r20
+ 6a4:	40 7c       	andi	r20, 0xC0	; 192
+ 6a6:	94 e0       	ldi	r25, 0x04	; 4
+ 6a8:	76 95       	lsr	r23
+ 6aa:	67 95       	ror	r22
+ 6ac:	9a 95       	dec	r25
+ 6ae:	e1 f7       	brne	.-8      	; 0x6a8 <encode+0x58>
+ 6b0:	6f 73       	andi	r22, 0x3F	; 63
+ 6b2:	46 2b       	or	r20, r22
+ 6b4:	36 95       	lsr	r19
+ 6b6:	88 0f       	add	r24, r24
+ 6b8:	88 0f       	add	r24, r24
+ 6ba:	88 0f       	add	r24, r24
+ 6bc:	82 68       	ori	r24, 0x82	; 130
+}
+ 6be:	28 2f       	mov	r18, r24
+ 6c0:	5e 2f       	mov	r21, r30
+ 6c2:	61 2f       	mov	r22, r17
+ 6c4:	7a 2f       	mov	r23, r26
+ 6c6:	80 2f       	mov	r24, r16
+ 6c8:	80 77       	andi	r24, 0x70	; 112
+ 6ca:	90 e0       	ldi	r25, 0x00	; 0
+ 6cc:	27 96       	adiw	r28, 0x07	; 7
+ 6ce:	0f b6       	in	r0, 0x3f	; 63
+ 6d0:	f8 94       	cli
+ 6d2:	de bf       	out	0x3e, r29	; 62
+ 6d4:	0f be       	out	0x3f, r0	; 63
+ 6d6:	cd bf       	out	0x3d, r28	; 61
+ 6d8:	cf 91       	pop	r28
+ 6da:	df 91       	pop	r29
+ 6dc:	1f 91       	pop	r17
+ 6de:	0f 91       	pop	r16
+ 6e0:	08 95       	ret
+
+000006e2 <_exit>:
+ 6e2:	f8 94       	cli
+
+000006e4 <__stop_program>:
+ 6e4:	ff cf       	rjmp	.-2      	; 0x6e4 <__stop_program>

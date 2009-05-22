@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="Winterdom.IO.FileMap" default="test">
+
+   <!--
+      Global Property declarations
+   -->
+   <property name="project.name" value="Winterdom.IO.FileMap"/>
+   <property name="src.base.dir" value="src/${project.name}"/>
+   <property name="src.tests.dir" value="src/${project.name}.Tests"/>
+   
+   <property name="output.dir" value="bin" />
+   <property name="verbose" value="false"/>
+   <property name="debug" value="true"/>
+
+   <property name="nant.settings.currentframework" value="net-1.1"/>   
+   
+   <!--
+      Clean the project's outputs
+   -->
+   <target name="clean">
+      <delete dir="${output.dir}" failonerror="false" />
+   </target>
+   
+   
+   <!--
+      Prepare project for build
+   -->
+   <target name="prepare">
+      <mkdir dir="${output.dir}"/>
+   </target>
+   
+   
+   <!--
+      Build the project
+   -->
+   <target name="build" depends="prepare">
+      <call target="build.src"/>
+      <call target="build.tests"/>
+   </target>
+
+   <!--
+      Build the Core source project
+   -->
+   <target name="build.src" depends="prepare">
+      <csc target="library" 
+           debug="${debug}" 
+           verbose="${verbose}"
+           output="${output.dir}/${project.name}.dll"
+         >
+         <sources basedir="${src.base.dir}">
+            <includes name="**/*.cs"/>
+         </sources>
+         <references>
+            <includes name="System.dll"/>
+            <includes name="System.Data.dll"/>
+            <includes name="System.Xml.dll"/>
+         </references>
+      </csc>
+   </target>
+
+   <!--
+      Build the tests
+   -->
+   <target name="build.tests" depends="prepare">
+      <csc target="library" 
+           debug="${debug}" 
+           verbose="${verbose}"
+           output="${output.dir}/${project.name}.Tests.dll"
+         >
+         <sources basedir="${src.tests.dir}">
+            <includes name="**/*.cs"/>
+         </sources>
+         <references>
+            <includes name="System.dll"/>
+            <includes name="System.Data.dll"/>
+            <includes name="System.Xml.dll"/>
+            <includes name="System.Web.dll"/>
+            <includes name="${nant.location}/nunit.framework.dll"/>
+            <includes name="${output.dir}/${project.name}.dll"/>
+         </references>
+      </csc>
+   </target>
+   
+
+   <!--
+      Test the project
+   -->
+   <target name="test" depends="build">
+      <nunit2>
+         <formatter type="Plain"/>
+         <test assemblyname="${output.dir}/${project.name}.Tests.dll" />
+      </nunit2>
+   </target>   
+
+</project>
