@@ -1,9 +1,0 @@
-C:\Wockets\projects\PC\obj\Debug\ResolveAssemblyReference.cache
-C:\Wockets\projects\PC\obj\Debug\WocketsApplication.Utils.Forms.FileBrowser.FileBrowserImages.resources
-C:\Wockets\projects\PC\obj\Debug\WocketsApplication.Properties.Resources.resources
-C:\Wockets\projects\PC\obj\Debug\WocketsApplication.Utils.Forms.FileBrowser.FileBrowserForm.resources
-C:\Wockets\projects\PC\obj\Debug\WocketsApplication.Utils.Forms.FileBrowser.FileListDialog.resources
-C:\Wockets\projects\PC\obj\Debug\WocketsApplication.Utils.Forms.FileBrowser.FolderBrowserForm.resources
-C:\Wockets\projects\PC\obj\Debug\WocketsApplication.Utils.Forms.Progress.PortableProgressBar.resources
-C:\Wockets\projects\PC\obj\Debug\WocketsApplication.WocketsForm.resources
-C:\Wockets\projects\PC\obj\Debug\WocketsApplication.csproj.GenerateResource.Cache
