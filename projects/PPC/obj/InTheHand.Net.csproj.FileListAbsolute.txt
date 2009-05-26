@@ -1,5 +1,0 @@
-C:\Wockets\projects\PPC\obj\Debug\InTheHand.Net.pdb
-C:\Wockets\projects\PPC\obj\Debug\ResolveAssemblyReference.cache
-C:\Wockets\bin\PPC\InTheHand.Net.dll
-C:\Wockets\bin\PPC\InTheHand.Net.pdb
-C:\Wockets\projects\PPC\obj\Debug\InTheHand.Net.dll
