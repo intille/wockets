@@ -101,6 +101,14 @@ namespace Wockets.Receivers
 
         public override bool Initialize()
         {
+
+            //instead setup the bluetooth connection over here
+            // instatiate a BT End Point
+            // Create a socket
+            // Connect
+            // Maintain the socket
+            // Close the network stream + socket to do the clean up
+
             try
             {
 #if (PocketPC)
