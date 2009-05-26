@@ -1,0 +1,5 @@
+C:\Wockets\projects\PPC\obj\Debug\Charts.pdb
+C:\Wockets\projects\PPC\obj\Debug\ResolveAssemblyReference.cache
+C:\Wockets\bin\PPC\Charts.dll
+C:\Wockets\bin\PPC\Charts.pdb
+C:\Wockets\projects\PPC\obj\Debug\Charts.dll

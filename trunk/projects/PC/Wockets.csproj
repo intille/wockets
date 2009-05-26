@@ -1,0 +1,208 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{16986364-6B54-443E-B1F3-A6F17F0523B2}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Wockets</RootNamespace>
+    <AssemblyName>Wockets</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\src\Wockets\Data\Accelerometers\AccelerationData.cs">
+      <Link>Data\Accelerometers\AccelerationData.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Accelerometers\SparkfunAccelerationData.cs">
+      <Link>Data\Accelerometers\SparkfunAccelerationData.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Classifiers\ClassifierConfiguration.cs">
+      <Link>Data\Classifiers\ClassifierConfiguration.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Annotation\Activity.cs">
+      <Link>Data\Annotation\Activity.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Annotation\ActivityList.cs">
+      <Link>Data\Annotation\ActivityList.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Annotation\Annotation.cs">
+      <Link>Data\Annotation\Annotation.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Annotation\AnnotationList.cs">
+      <Link>Data\Annotation\AnnotationList.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Annotation\AnnotationProtocol.cs">
+      <Link>Data\Annotation\AnnotationProtocol.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Annotation\AnnotationProtocolList.cs">
+      <Link>Data\Annotation\AnnotationProtocolList.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Annotation\ConcurrentActivityLists.cs">
+      <Link>Data\Annotation\ConcurrentActivityLists.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Annotation\Session.cs">
+      <Link>Data\Annotation\Session.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Classifiers\Trees\DTClassifier.cs">
+      <Link>Data\Classifiers\Trees\DTClassifier.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Classifiers\Trees\DTConfiguration.cs">
+      <Link>Data\Classifiers\Trees\DTConfiguration.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Classifiers\Utils\FeatureExtractor.cs">
+      <Link>Data\Classifiers\Utils\FeatureExtractor.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Converter\ArffConverter.cs">
+      <Link>Data\Converter\ArffConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Converter\CSVConverter.cs">
+      <Link>Data\Converter\CSVConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Logger\PLFormatLogger.cs">
+      <Link>Data\Logger\PLFormatLogger.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Plotters\WocketScalablePlotter.cs">
+      <Link>Data\Plotters\WocketScalablePlotter.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Decoders\Decoder.cs">
+      <Link>Decoders\Decoder.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Decoders\DecoderList.cs">
+      <Link>Decoders\DecoderList.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Decoders\DecoderTypes.cs">
+      <Link>Decoders\DecoderTypes.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Decoders\Accelerometers\MITesDecoder.cs">
+      <Link>Decoders\Accelerometers\MITesDecoder.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Decoders\Accelerometers\SparkfunDecoder.cs">
+      <Link>Decoders\Accelerometers\SparkfunDecoder.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Decoders\Accelerometers\WocketsDecoder.cs">
+      <Link>Decoders\Accelerometers\WocketsDecoder.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Receivers\ReceiverList.cs">
+      <Link>Receivers\ReceiverList.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Receivers\ReceiverTypes.cs">
+      <Link>Receivers\ReceiverTypes.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Sensors\Accelerometers\Accelerometer.cs">
+      <Link>Sensors\Accelerometers\Accelerometer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Sensors\Accelerometers\MITe.cs">
+      <Link>Sensors\Accelerometers\MITe.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Sensors\Accelerometers\Sparkfun.cs">
+      <Link>Sensors\Accelerometers\Sparkfun.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Sensors\Accelerometers\Wocket.cs">
+      <Link>Sensors\Accelerometers\Wocket.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Sensors\HeartRate\HeartRateSensor.cs">
+      <Link>Sensors\HeartRate\HeartRateSensor.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Sensors\Sensor.cs">
+      <Link>Sensors\Sensor.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Sensors\SensorClasses.cs">
+      <Link>Sensors\SensorClasses.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Sensors\SensorList.cs">
+      <Link>Sensors\SensorList.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Sensors\SensorTypes.cs">
+      <Link>Sensors\SensorTypes.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\DirectoryStructure.cs">
+      <Link>Utils\DirectoryStructure.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Accelerometers\MITesAccelerationData.cs">
+      <Link>Data\Accelerometers\MITesAccelerationData.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Properties\AssemblyInfo.cs">
+      <Link>Properties\AssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Receivers\Receiver.cs">
+      <Link>Receivers\Receiver.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Receivers\RFCOMMReceiver.cs">
+      <Link>Receivers\RFCOMMReceiver.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\SensorData.cs">
+      <Link>Data\SensorData.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Accelerometers\WocketsAccelerationData.cs">
+      <Link>Data\Accelerometers\WocketsAccelerationData.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\SensorDataTypes.cs">
+      <Link>Data\SensorDataTypes.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Receivers\SerialReceiver.cs">
+      <Link>Receivers\SerialReceiver.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Receivers\StandardCOMReceiver.cs">
+      <Link>Receivers\StandardCOMReceiver.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\WocketsTimer.cs">
+      <Link>Utils\WocketsTimer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\XMLSerializable.cs">
+      <Link>Utils\XMLSerializable.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\WocketsController.cs">
+      <Link>WocketsController.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\WocketsControllerList.cs">
+      <Link>WocketsControllerList.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="IO.csproj">
+      <Project>{1D75F70F-B268-4262-817A-4A0D39E90F86}</Project>
+      <Name>IO</Name>
+    </ProjectReference>
+    <ProjectReference Include="SerialIO.csproj">
+      <Project>{26831A48-F3A8-4019-8C62-842D3B8D2A6F}</Project>
+      <Name>SerialIO</Name>
+    </ProjectReference>
+    <ProjectReference Include="WocketsWeka.csproj">
+      <Project>{E5BB25A9-1913-4C1A-BBCF-51F2554D0C42}</Project>
+      <Name>WocketsWeka</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

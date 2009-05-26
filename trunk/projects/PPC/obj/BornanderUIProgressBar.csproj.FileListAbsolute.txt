@@ -1,0 +1,7 @@
+C:\Wockets\projects\PPC\obj\Debug\BornanderUIProgressBar.pdb
+C:\Wockets\projects\PPC\obj\Debug\ResolveAssemblyReference.cache
+C:\Wockets\projects\PPC\obj\Debug\Bornander.UI.BornanderProgressBar.BornanderProgressBar.resources
+C:\Wockets\projects\PPC\obj\Debug\BornanderUIProgressBar.csproj.GenerateResource.Cache
+C:\Wockets\bin\PPC\BornanderUIProgressBar.dll
+C:\Wockets\bin\PPC\BornanderUIProgressBar.pdb
+C:\Wockets\projects\PPC\obj\Debug\BornanderUIProgressBar.dll
