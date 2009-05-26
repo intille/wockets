@@ -1,5 +1,0 @@
-C:\Wockets\projects\PPC\obj\Debug\SerialIO.pdb
-C:\Wockets\projects\PPC\obj\Debug\ResolveAssemblyReference.cache
-C:\Wockets\bin\PPC\SerialIO.dll
-C:\Wockets\bin\PPC\SerialIO.pdb
-C:\Wockets\projects\PPC\obj\Debug\SerialIO.dll

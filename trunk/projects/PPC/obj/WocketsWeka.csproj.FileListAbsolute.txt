@@ -1,5 +1,0 @@
-C:\Wockets\projects\PPC\obj\Debug\WocketsWeka.pdb
-C:\Wockets\projects\PPC\obj\Debug\ResolveAssemblyReference.cache
-C:\Wockets\bin\PPC\WocketsWeka.dll
-C:\Wockets\bin\PPC\WocketsWeka.pdb
-C:\Wockets\projects\PPC\obj\Debug\WocketsWeka.dll
