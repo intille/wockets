@@ -417,17 +417,54 @@ namespace InTheHand.Net.Sockets
 
 		#region Connect
 
-        public static ManualResetEvent allDone =new ManualResetEvent(false);
+        private bool IsConnectionSuccessful = false;
+        private Exception socketexception;
+        private ManualResetEvent TimeoutObject = new ManualResetEvent(false);
 
-        public static void ConnectCallback1(IAsyncResult ar)
+
+        public void CallBackMethod(IAsyncResult asyncresult)
         {
-            //allDone.Set();
-            Socket s = (Socket)ar.AsyncState;
-            if ((s!=null) && (s.Connected))
-                s.EndConnect(ar);
-
+            BluetoothClient btclient = asyncresult.AsyncState as BluetoothClient;
+            btclient.EndConnect(asyncresult);            
         }
 
+
+        public void Connect(BluetoothEndPoint remoteEP, int timeoutMSec)
+        {
+            TimeoutObject.Reset();
+            socketexception = null;
+
+
+            if (cleanedUp)
+            {
+                throw new ObjectDisposedException(base.GetType().FullName);
+            }
+            if (remoteEP == null)
+            {
+                throw new ArgumentNullException("remoteEP");
+            }
+            clientSocket.BeginConnect(remoteEP, new AsyncCallback(CallBackMethod), clientSocket);
+
+            if (TimeoutObject.WaitOne(timeoutMSec, false))
+            {
+                if (IsConnectionSuccessful)
+                {
+                    active = true;
+                    return;
+                }
+                else
+                {
+                    throw socketexception;
+                }
+            }
+            else
+            {
+                clientSocket.Close();
+                throw new TimeoutException("TimeOut Exception");
+            }
+            
+            
+        }
 		/// <summary>
 		/// Connects a client to a specified endpoint.
 		/// </summary>
@@ -507,6 +544,9 @@ namespace InTheHand.Net.Sockets
             }
             BluetoothEndPoint point = new BluetoothEndPoint(address, service);
             this.Connect(point);
+            
+            
+            //this.Connect(point, 1000);
             
        
         }
@@ -595,6 +635,7 @@ namespace InTheHand.Net.Sockets
         public void Close()
         {
             Dispose();
+           
         }
         #endregion
 
