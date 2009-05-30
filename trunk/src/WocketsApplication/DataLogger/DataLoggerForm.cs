@@ -1434,7 +1434,7 @@ namespace WocketsApplication.DataLogger
         private bool isCollectingData = false;
 
 
-        //private TextWriter ttw = null;
+        private TextWriter ttw = null;
         //double prevTS = 0;
 
         private Thread plottingThread = null;
@@ -1458,7 +1458,7 @@ namespace WocketsApplication.DataLogger
                 }
 
 
-
+                
 
                 if (aPLFormatLogger != null)
                 {
@@ -1466,6 +1466,9 @@ namespace WocketsApplication.DataLogger
                     aPLFormatLogger.ShutdownFiles();
                 }
                 FeatureExtractor.Cleanup();
+
+                ttw.Flush();
+                ttw.Close();
 #if (PocketPC)
 
                 Application.Exit();
@@ -1482,21 +1485,11 @@ namespace WocketsApplication.DataLogger
             {
                 if (this.wocketsController._Receivers[i]._Type == ReceiverTypes.RFCOMM)
                 {
-                    if (this.wocketsController._Receivers[i]._Running == false) 
-                    {
-                        //receiver.Status = SXML.Receiver.STATUS_RESTARTING;
-                        //if (this.bluetoothConnectors[this.wocketsController._Receivers[i]._ID] != null)
-                        //    this.bluetoothConnectors[this.wocketsController._Receivers[i]._ID].Cleanup();                        
+                    if ((this.bluetoothConnectors[this.wocketsController._Receivers[i]._ID]!=null) &&
+                        (!this.bluetoothConnectors[this.wocketsController._Receivers[i]._ID].Reconnecting) &&
+                        (this.wocketsController._Receivers[i]._Running == false))
                         this.bluetoothConnectors[this.wocketsController._Receivers[i]._ID].Reconnect();
-                        /*
-                        {
-                            for (int j = 0; (j < this.wocketsController._Sensors.Count); j++)
-                            {
-                                if (this.wocketsController._Sensors[i]._Receiver==this.wocketsController._Receivers[i]._ID)
-                                    ((PictureBox)this.sensorStatus["Wocket" + this.wocketsController._Sensors[i]._ID]).Image = connectedWocketImage;
-                            }
-                        }*/
-                    }
+                    
                 }
 
             }
@@ -1540,8 +1533,8 @@ namespace WocketsApplication.DataLogger
             {
 
                 
-                ((PictureBox)this.sensorStatus["Wocket" + sensor._ID]).Image=disconnectedWocketImage;
-                this.bluetoothConnectors[currentReceiver._ID] = new BluetoothConnector(currentReceiver, this.wocketsController);
+                ((PictureBox)this.sensorStatus["Wocket" + sensor._ID]).Image=disconnectedWocketImage;                
+                this.bluetoothConnectors[currentReceiver._ID] = new BluetoothConnector(currentReceiver, this.wocketsController);                
                 currentReceiver._Running = false;
                 return;
             }
@@ -1674,7 +1667,10 @@ namespace WocketsApplication.DataLogger
             #endregion Classifying activities
 
             #region CollectingData
-            
+
+
+            if (ttw == null)
+                ttw = new StreamWriter("seqs.csv");
             isCollectingData = true;
             if (isCollectingData)
             {
@@ -1692,6 +1688,8 @@ namespace WocketsApplication.DataLogger
                             y = (int)((AccelerationData)this.wocketsController._Decoders[i]._Data[j]).Y;
                             z = (int)((AccelerationData)this.wocketsController._Decoders[i]._Data[j]).Z;
 
+                            int msec=(y<<8)|z;
+                            ttw.WriteLine(x + "," + msec);
                         }
                     }
             }

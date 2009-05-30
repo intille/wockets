@@ -670,7 +670,7 @@ namespace WocketsApplication.Calibrator
             if (MessageBox.Show("Are you sure you want to Quit MITes Software?", "Confirm", MessageBoxButtons.YesNo) == DialogResult.Yes)
 #endif
             {
-                this.readDataTimer.Enabled = false;
+                this.readDataTimer.Enabled = false;                
 
 
                 for (int i = 0; (i < this.wocketsController._Receivers.Count); i++)
