@@ -123,6 +123,30 @@ namespace Wockets.Receivers
             }
         }
 
+
+        public ArrayList BatchTimestamps
+        {
+            get
+            {
+                return this.bluetoothStream.BatchTimestamps;
+            }
+            set
+            {
+                this.bluetoothStream.BatchTimestamps = value;
+            }
+        }
+
+        public ArrayList BatchBytes
+        {
+            get
+            {
+                return this.bluetoothStream.BatchBytes;
+            }
+            set
+            {
+                this.bluetoothStream.BatchBytes = value;
+            }
+        }
         public override int Read()
         {
            
@@ -382,6 +406,43 @@ namespace Wockets.Receivers
         //public bool receiving = false;
         byte[] xxx = new byte[1];
         double sendTimer = 0;
+
+        //Use a counter to avoid calling the timer function
+        private int disconnectionCounter = 0;
+        private const int MAX_DISCONNECTION_COUNTER = 100; //approximately consider disconnected if 1 sec passes with no data
+
+        ArrayList batchTimestamps;
+        ArrayList batchBytes;
+        //int unprocessedReceiveCount;
+
+
+        public ArrayList BatchTimestamps
+        {
+            get
+            {
+                return this.batchTimestamps;
+            }
+
+            set
+            {
+                this.batchTimestamps = value;
+            }
+        }
+
+        public ArrayList BatchBytes
+        {
+            get
+            {
+                return this.batchBytes;
+            }
+
+            set
+            {
+                this.batchBytes = value;
+            }
+        }
+
+
         private void readingFunction()
         {
             double prevTime = 0;
@@ -395,8 +456,11 @@ namespace Wockets.Receivers
             singleReadBuffer = new byte[DEFAULT_BUFFER_SIZE];
 
             //TextWriter tttw = new StreamWriter("samples"+(iii++)+".csv");
-     
-            int counter = 0;
+
+
+
+            batchTimestamps = new ArrayList();
+            batchBytes = new ArrayList();
 
             while (!disposed)
             {
@@ -444,20 +508,31 @@ namespace Wockets.Receivers
                             btSocket.Send(cmd, 8, SocketFlags.None); ;
                             Thread.Sleep(100);
                              */
-                   
-                           if (btSocket.Available>0)
-                               bytesReceived = btSocket.Receive(singleReadBuffer, (DEFAULT_BUFFER_SIZE - currentBytes > singleReadBuffer.Length) ? singleReadBuffer.Length : DEFAULT_BUFFER_SIZE - currentBytes, SocketFlags.None);
+
+                            if (btSocket.Available > 0)
+                            {
+                                currentTime = WocketsTimer.GetUnixTime();
+                                bytesReceived = btSocket.Receive(singleReadBuffer, (DEFAULT_BUFFER_SIZE - currentBytes > singleReadBuffer.Length) ? singleReadBuffer.Length : DEFAULT_BUFFER_SIZE - currentBytes, SocketFlags.None);
+                                batchTimestamps.Add(currentTime);
+                                batchBytes.Add(bytesReceived);
+                            }
 
                            Thread.Sleep(10);
-
-                            currentTime = WocketsTimer.GetUnixTime();
+                            
 
                             if (bytesReceived > 0)
+                            {
                                 nodataTimer = currentTime;
+                                disconnectionCounter=0;
+                               // tttw.WriteLine(currentTime+","+bytesReceived);
+                                //tttw.Flush();
+                            }
                             else
                             {
-                                if ((currentTime - nodataTimer) > 1000)
-                                {                   
+                                disconnectionCounter++;
+                                //if ((currentTime - nodataTimer) > 1000)
+                                if (disconnectionCounter> MAX_DISCONNECTION_COUNTER)
+                                {
                                     socketDead = true;
                                     return;
                                 }
@@ -518,6 +593,8 @@ namespace Wockets.Receivers
                 }
 
             }
+
+            //tttw.Close();
 
         }
 
