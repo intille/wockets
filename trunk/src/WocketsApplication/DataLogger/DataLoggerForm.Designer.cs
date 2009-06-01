@@ -680,13 +680,13 @@ namespace WocketsApplication.DataLogger
                 p.Size = new Size(32, 32);
                 p.Image = connectedWocketImage;
                 p.Location = new System.Drawing.Point(currentTextX-33, currentTextY);
-                t.Text = "Wocket" + this.wocketsController._Sensors[i]._ID;
-                t.Name = t.Text;
+                t.Text = "W" + this.wocketsController._Sensors[i]._ID+ ": 90/90";
+                t.Name = "W" + this.wocketsController._Sensors[i]._ID;
                 t.Size = new System.Drawing.Size(textBoxWidth, textBoxHeight);
                 t.Location = new System.Drawing.Point(currentTextX, currentTextY);
                 t.Font = textFont;
-                this.sensorLabels.Add(t.Text, t);
-                this.sensorStatus.Add(t.Text, p);
+                this.sensorLabels.Add("W" + this.wocketsController._Sensors[i]._ID, t);
+                this.sensorStatus.Add("W" + this.wocketsController._Sensors[i]._ID, p);
                 //this.tabPage1.Controls.Add(t);
                 this.panel1.Controls.Add(t);
                 this.panel1.Controls.Add(p);
