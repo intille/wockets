@@ -219,6 +219,9 @@
     <Compile Include="..\..\src\Wockets\WocketsControllerList.cs">
       <Link>WocketsControllerList.cs</Link>
     </Compile>
+    <Compile Include="..\..\src\Wockets\Receivers\Radio_CMD.cs">
+      <Link>Receivers\Radio_CMD.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="InTheHand.Net.csproj">
