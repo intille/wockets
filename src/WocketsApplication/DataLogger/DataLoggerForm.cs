@@ -146,7 +146,27 @@ namespace WocketsApplication.DataLogger
         /// A variable that stores the longest label on a category button for dynamic resizing of the buttons
         /// </summary>
         private string longest_label = "";
+
         #endregion Definition of GUI Components
+
+        #region Sampling Rate Components
+        /// <summary>
+        /// An array for accumulating received packets to calculate sample rate.
+        /// </summary>
+        private int[] AccumPackets;
+        /// <summary>
+        /// Last time of rate calculation
+        /// </summary>
+        private long LastTime;
+        /// <summary>
+        /// Counter to determine when to take datetime
+        /// </summary>
+        private int SRcounter=0;
+        /// <summary>
+        /// Change in time since last calculation
+        /// </summary>
+        private long deltaT;
+        #endregion Sampling Rate Components
 
         #region Definition of Logging Variables and Flags
         /// <summary>
@@ -183,6 +203,7 @@ namespace WocketsApplication.DataLogger
 #if (PocketPC)
         //private BluetoothController[] bluetoothControllers;
         private BluetoothConnector[] bluetoothConnectors;
+
 #endif
         #endregion Definition of controllers for different reception channels
 
@@ -300,6 +321,9 @@ namespace WocketsApplication.DataLogger
                 InitializeDataLogger(storageDirectory, wocketsController, annotatedSession, classifierConfiguration);
             else if (mode == 3)
                 InitializeActivityTracker(storageDirectory, wocketsController, annotatedSession, classifierConfiguration);
+            this.AccumPackets = new int[wocketsController._Receivers.Count];
+            this.LastTime = DateTime.Now.Ticks;
+
 
         }
 
@@ -509,7 +533,7 @@ namespace WocketsApplication.DataLogger
             }
             catch (Exception e)
             {
-                ((PictureBox)this.sensorStatus["Wocket" + sensor._ID]).Image = disconnectedWocketImage;
+                ((PictureBox)this.sensorStatus["W" + sensor._ID]).Image = disconnectedWocketImage;
                 this.bluetoothConnectors[currentReceiver._ID] = new BluetoothConnector(currentReceiver, this.wocketsController);
                 currentReceiver._Running = false;          
             }
@@ -880,7 +904,7 @@ namespace WocketsApplication.DataLogger
 
                     string labelKey = "";
                  
-                    labelKey = "Wocket" + this.wocketsController._Sensors[i]._ID;                       
+                    labelKey = "W" + this.wocketsController._Sensors[i]._ID;                       
                     PictureBox p= (PictureBox)this.sensorStatus[labelKey];                       
                     p.Location = new System.Drawing.Point(currentTextX-33, currentTextY);
                     t = (System.Windows.Forms.Label)this.sensorLabels[labelKey];
@@ -1519,9 +1543,36 @@ namespace WocketsApplication.DataLogger
                             numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer, dataLength);
 
                         }
-                        
-            
-                        ((PictureBox)this.sensorStatus["Wocket" + this.wocketsController._Sensors[i]._ID]).Image = connectedWocketImage;
+
+                        #region Calculate Sampling Rate
+                        this.SRcounter += 1;
+                        this.AccumPackets[sensor._ID] += numDecodedPackets;
+                        if (this.SRcounter >= 100)
+                        {
+                            this.deltaT=Math.Abs(DateTime.Now.Ticks - this.LastTime);
+                            if (this.deltaT >= 50000000)
+                            {
+                                for (int x=0; x < this.wocketsController._Sensors.Count; x++)
+                                {
+                                    String labelKey = "W" + this.wocketsController._Sensors[x]._ID;
+                                    this.wocketsController._Sensors[x].setSR(this.AccumPackets[this.wocketsController._Sensors[i]._ID] /5);
+                                    Label t = (System.Windows.Forms.Label)this.sensorLabels[labelKey];
+                                    t.Text="W" + this.wocketsController._Sensors[i]._ID + ": " + this.wocketsController._Sensors[i].getSR() + "/90";
+                                }
+                                this.SRcounter = 0;
+                                this.LastTime = DateTime.Now.Ticks;
+                                for (int x=0; x < this.AccumPackets.Length; x++)
+                                {
+                                    this.AccumPackets[x] = 0;
+                                }
+                                
+                            }
+                        }
+
+
+                        #endregion Calculate Sampling Rate
+
+                        ((PictureBox)this.sensorStatus["W" + this.wocketsController._Sensors[i]._ID]).Image = connectedWocketImage;
                        
                     }
                 }
@@ -1533,7 +1584,7 @@ namespace WocketsApplication.DataLogger
             {
 
                 
-                ((PictureBox)this.sensorStatus["Wocket" + sensor._ID]).Image=disconnectedWocketImage;                
+                ((PictureBox)this.sensorStatus["W" + sensor._ID]).Image=disconnectedWocketImage;                
                 this.bluetoothConnectors[currentReceiver._ID] = new BluetoothConnector(currentReceiver, this.wocketsController);                
                 currentReceiver._Running = false;
                 return;
