@@ -24,7 +24,6 @@ namespace Wockets.Data.Plotters
         int[][] previousVals;
         double[] previousTimes;
         double[] scaleFactors;
-
         int[] plotFrom;
 
         public WocketsScalablePlotter(System.Windows.Forms.Panel aPanel, WocketsController wocketsController)
@@ -79,6 +78,17 @@ namespace Wockets.Data.Plotters
         private bool requiresFullRedraw = true;
         int lastColumn = 0;
         int firstColumn = 999999;
+        public int[] PlotFrom
+        {
+            get
+            {
+                return this.plotFrom;
+            }
+            set
+            {
+                this.plotFrom = value;
+            }
+        }
         public void Draw(Graphics g)
         {
 
@@ -91,7 +101,7 @@ namespace Wockets.Data.Plotters
 
 
                     int decoderID = this.wocketsController._Sensors[i]._Decoder;
-                    for (int j = 0; (j < this.wocketsController._Decoders[decoderID]._Size); j++)
+                    for (int j = this.plotFrom[decoderID]; (j < this.wocketsController._Decoders[decoderID]._Size); j++)
                     {
                         AccelerationData data = ((AccelerationData)this.wocketsController._Decoders[decoderID]._Data[j]);
 

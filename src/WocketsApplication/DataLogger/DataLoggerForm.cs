@@ -1464,7 +1464,7 @@ namespace WocketsApplication.DataLogger
         private bool isCollectingData = false;
 
 
-        private TextWriter ttw = null;
+       // private TextWriter ttw = null;
         //double prevTS = 0;
 
         private Thread plottingThread = null;
@@ -1497,8 +1497,8 @@ namespace WocketsApplication.DataLogger
                 }
                 FeatureExtractor.Cleanup();
 
-                ttw.Flush();
-                ttw.Close();
+               // ttw.Flush();
+               // ttw.Close();
 #if (PocketPC)
 
                 Application.Exit();
@@ -1547,9 +1547,67 @@ namespace WocketsApplication.DataLogger
                         if (dataLength > 0)
                         {                 
                             numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer, dataLength);
-
                         }
 
+                        #region
+
+
+                        /*
+                        #region Plot Decoded Data Only
+                        if ((this.tabControl1.SelectedIndex == 0) && (isPlotting))
+                        {
+                            aWocketsPlotter.PlotFrom[i] = decoder._Size-numDecodedPackets;
+                            GraphAccelerometerValues();
+                        }
+                        #endregion Plot Decoded Data Only
+
+                        */
+
+                        //clear processed timestamps
+                        /*
+                        if (currentReceiver._Type == ReceiverTypes.RFCOMM)
+                        {
+                            int numBatches = ((RFCOMMReceiver)currentReceiver).BatchBytes.Count;
+                            double t1 = (double)((RFCOMMReceiver)currentReceiver).BatchTimestamps[0];
+                            double t2 = (double)((RFCOMMReceiver)currentReceiver).BatchTimestamps[numBatches - 1];
+
+                            //If batches exceed 3 seconds
+                            if (t2 - t1 > 3000)
+                            {
+
+                                //Find the last batch for the decoded data and use its
+                                //timestamp as the last timestamp t2
+                                int sumBytes = numDecodedPackets * WocketsAccelerationData.NUM_RAW_BYTES;
+                                int lastBatch = -1;
+                                for (int j = 0; (j < numBatches); j++)
+                                {
+                                    sumBytes -= (int)((RFCOMMReceiver)currentReceiver).BatchBytes[j];
+                                    if (sumBytes <= 0)
+                                    {
+
+                                        t2 = (double)((RFCOMMReceiver)currentReceiver).BatchTimestamps[j];
+                                        //the decoded packets end at the end of a batch
+                                        if (sumBytes == 0)
+                                            lastBatch = j;
+                                        else //decoded packets are at the middle of a batch
+                                            lastBatch = j - 1;
+                                        break;
+                                    }
+                                }
+
+                                //Remove timestamp batches that have been completely decoded
+                                if (lastBatch >= 0)
+                                {
+                                    ((RFCOMMReceiver)currentReceiver).BatchBytes.RemoveRange(0, lastBatch + 1);
+                                    ((RFCOMMReceiver)currentReceiver).BatchTimestamps.RemoveRange(0, lastBatch + 1);
+
+                                    //Reset decoder
+                                    decoder._Size = 0;
+                                }
+
+                            }
+                        }*/
+                        #endregion
                         #region Calculate Sampling Rate
                         this.SRcounter += 1;
                         this.AccumPackets[sensor._ID] += numDecodedPackets;
@@ -1725,7 +1783,7 @@ namespace WocketsApplication.DataLogger
 
             #region CollectingData
 
-
+/*
             if (ttw == null)
                 ttw = new StreamWriter("seqs.csv");
             isCollectingData = true;
@@ -1750,10 +1808,10 @@ namespace WocketsApplication.DataLogger
                         }
                     }
             }
-             
+             */
             #endregion CollectingData
 
-
+            
             #region Store the sensor data
 #if (PocketPC)
             aPLFormatLogger.Save();
@@ -1763,27 +1821,20 @@ namespace WocketsApplication.DataLogger
             if (flushTimer > FLUSH_TIMER_MAX)
                 flushTimer = -1;
             flushTimer++;
-
+           
             #endregion Store the sensor data
 
+            
 
-#if (PocketPC)
-            //on BT reconnection and/or first loop data is out of sync from different BTs
-            //force a reset
-
-
-           
             if ((this.tabControl1.SelectedIndex == 0) && (isPlotting))
             {
                 GraphAccelerometerValues();
             }
-#endif
+
             //Reset all decoders
 
             for (int i = 0; (i < this.wocketsController._Decoders.Count); i++)
-                this.wocketsController._Decoders[i]._Size = 0;
-
-
+              this.wocketsController._Decoders[i]._Size = 0;
         }
 
 
