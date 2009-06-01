@@ -73,12 +73,10 @@ namespace Wockets.Data.Plotters
         private SolidBrush blueBrush = new SolidBrush(Color.LightBlue);
 
         private bool requiresFullRedraw = true;
+        int lastColumn = 0;
+        int firstColumn = 999999;
         public void Draw(Graphics g)
         {
-
-            int lastColumn = 0;
-            int firstColumn = 999999;
-
 
             for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
             {
@@ -86,7 +84,7 @@ namespace Wockets.Data.Plotters
 
                 if (this.wocketsController._Receivers[receiverID]._Running)
                 {
-       
+
 
                     int decoderID = this.wocketsController._Sensors[i]._Decoder;
                     for (int j = 0; (j < this.wocketsController._Decoders[decoderID]._Size); j++)
@@ -96,39 +94,36 @@ namespace Wockets.Data.Plotters
                         //check the data comes from the sensor i if the decoder is used with multiple sensors
                         if (data.SensorID == this.wocketsController._Sensors[i]._ID)
                         {
-                            //if ((previousVals[i][0] >= 0) && (previousVals[i][1] >= 0) && (previousVals[i][2] > 0))
-                            //{
-                                if (this.currentColumns[i] >= this.plotAreaSize.Width - 1)
-                                    requiresFullRedraw = true;
 
-                                if ((this.wocketsController._Sensors[data.SensorID])._Class == Wockets.Sensors.SensorClasses.HTCDiamondTouch)
-                                {
-                                    g.DrawEllipse(p[0], lastColumn, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.X), 2, 2);
-                                    g.DrawEllipse(p[1], lastColumn, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Y), 2, 2);
-                                    g.DrawEllipse(p[2], lastColumn, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Z), 2, 2);
-                                }
-                                else
-                                {
-                                    g.DrawLine(p[0], this.currentColumns[i], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * previousVals[i][0]), this.currentColumns[i] + 1, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.X));
-                                    g.DrawLine(p[1], this.currentColumns[i], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * previousVals[i][1]), this.currentColumns[i] + 1, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Y));
-                                    g.DrawLine(p[2], this.currentColumns[i], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * previousVals[i][2]), this.currentColumns[i] + 1, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Z));
-                                    if (this.currentColumns[i] > lastColumn)
-                                        lastColumn = this.currentColumns[i];
+                            if (this.currentColumns[i] >= this.plotAreaSize.Width - 1)
+                                requiresFullRedraw = true;
 
-                                    if (this.currentColumns[i] < firstColumn)
-                                        firstColumn = this.currentColumns[i];
-                                }
+                            if ((this.wocketsController._Sensors[data.SensorID])._Class == Wockets.Sensors.SensorClasses.HTCDiamondTouch)
+                            {
+                                g.DrawEllipse(p[0], lastColumn, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.X), 2, 2);
+                                g.DrawEllipse(p[1], lastColumn, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Y), 2, 2);
+                                g.DrawEllipse(p[2], lastColumn, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Z), 2, 2);
+                            }
+                            else
+                            {
+                                g.DrawLine(p[0], this.currentColumns[i], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * previousVals[i][0]), this.currentColumns[i] + 1, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.X));
+                                g.DrawLine(p[1], this.currentColumns[i], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * previousVals[i][1]), this.currentColumns[i] + 1, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Y));
+                                g.DrawLine(p[2], this.currentColumns[i], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * previousVals[i][2]), this.currentColumns[i] + 1, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Z));
+                                if (this.currentColumns[i] > lastColumn)
+                                    lastColumn = this.currentColumns[i];
 
-                                previousVals[i][0] = data.X;
-                                previousVals[i][1] = data.Y;
-                                previousVals[i][2] = data.Z;
-                                previousTimes[i] = data.UnixTimeStamp;
+                            }
 
-                                this.currentColumns[i] = this.currentColumns[i] + 1;
+                            previousVals[i][0] = data.X;
+                            previousVals[i][1] = data.Y;
+                            previousVals[i][2] = data.Z;
+                            previousTimes[i] = data.UnixTimeStamp;
 
-                           // }
+                            this.currentColumns[i] = this.currentColumns[i] + 1;
 
-                            
+
+
+
 
                         }
 
@@ -167,6 +162,8 @@ namespace Wockets.Data.Plotters
             }
             else
                 aPanel.Invalidate(new System.Drawing.Rectangle(firstColumn, 0, lastColumn-firstColumn, plotAreaSize.Height));
+
+            firstColumn = lastColumn;
 
         }
 
