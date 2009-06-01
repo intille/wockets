@@ -110,5 +110,6 @@ namespace Wockets.Receivers
 
 
         public abstract int CompareTo(object receiver);
+        
     }
 }
