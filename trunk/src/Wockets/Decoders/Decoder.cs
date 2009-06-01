@@ -21,6 +21,7 @@ namespace Wockets.Decoders
         protected byte[] packet;
         protected int packetPosition;
         private int id;
+        private int index;
         private static int IDCounter = 0;
         public Decoder(int bufferSize,int packetSize)
         {
@@ -29,9 +30,12 @@ namespace Wockets.Decoders
             this.packet = new byte[packetSize];
             this.packetPosition = 0;
             this.id = IDCounter++;
+            this.index = 0;
         }
 
         #region Access Properties
+
+
         public int _ID
         {
             get

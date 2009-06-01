@@ -14,7 +14,7 @@ namespace Wockets.Decoders.Accelerometers
         private const string WOCKETS_TYPE = "Wockets";
         #endregion Serialization Constants
 
-        private const int BUFFER_SIZE = 600; //BUG: should not exceed 4096 (Lower Level Buffer Size) / 6 (MITes Packet Size)
+        private const int BUFFER_SIZE = 900; //BUG: should not exceed 4096 (Lower Level Buffer Size) / 6 (MITes Packet Size)
         private bool headerSeen;
 
         public WocketsDecoder()
@@ -29,7 +29,7 @@ namespace Wockets.Decoders.Accelerometers
         public override int Decode(int sourceSensor,byte[] data, int length)       
         {
             int rawDataIndex = 0;
-            int decodedDataIndex = 0;
+            int decodedDataIndex = this._Size;
     
             if (length != 0) // Have some data
             {

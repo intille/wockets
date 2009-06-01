@@ -25,6 +25,8 @@ namespace Wockets.Data.Plotters
         double[] previousTimes;
         double[] scaleFactors;
 
+        int[] plotFrom;
+
         public WocketsScalablePlotter(System.Windows.Forms.Panel aPanel, WocketsController wocketsController)
         {
 
@@ -35,9 +37,11 @@ namespace Wockets.Data.Plotters
   
             scaleFactors = new double[this.wocketsController._Sensors.Count];
             currentColumns = new int[this.wocketsController._Sensors.Count];
+            plotFrom = new int[this.wocketsController._Sensors.Count];
             for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
             {
                 this.currentColumns[i] = 0;
+                this.plotFrom[i] = 0;
                 double range = ((Accelerometer)this.wocketsController._Sensors[i])._Max - ((Accelerometer)this.wocketsController._Sensors[i])._Min;
                 scaleFactors[i] = graphSize / range;
             }
