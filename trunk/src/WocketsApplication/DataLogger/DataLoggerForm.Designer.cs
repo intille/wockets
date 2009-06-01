@@ -83,14 +83,7 @@ namespace WocketsApplication.DataLogger
             this.menuItem1 = new System.Windows.Forms.MenuItem();
             this.menuItem2 = new System.Windows.Forms.MenuItem();
             this.menuItem3 = new System.Windows.Forms.MenuItem();
-            this.menuItem4 = new System.Windows.Forms.MenuItem();
-            this.menuItem5 = new System.Windows.Forms.MenuItem();
-            this.menuItem6 = new System.Windows.Forms.MenuItem();
-            this.menuItem7 = new System.Windows.Forms.MenuItem();
             this.menuItem8 = new System.Windows.Forms.MenuItem();
-            this.menuItem9 = new System.Windows.Forms.MenuItem();
-            this.menuItem21 = new System.Windows.Forms.MenuItem();
-            this.menuItem22 = new System.Windows.Forms.MenuItem();
             this.menuItem10 = new System.Windows.Forms.MenuItem();
             this.menuItem11 = new System.Windows.Forms.MenuItem();
             this.menuItem12 = new System.Windows.Forms.MenuItem();
@@ -138,65 +131,26 @@ namespace WocketsApplication.DataLogger
             // menuItem2
             // 
             this.menuItem2.MenuItems.Add(this.menuItem3);
-            this.menuItem2.MenuItems.Add(this.menuItem4);
-            this.menuItem2.MenuItems.Add(this.menuItem5);
-            this.menuItem2.MenuItems.Add(this.menuItem9);
             this.menuItem2.MenuItems.Add(this.menuItem10);
-            this.menuItem2.MenuItems.Add(this.menuItem13);
-            this.menuItem2.MenuItems.Add(this.menuItem16);
             this.menuItem2.Text = "Options";
             // 
             // menuItem3
             // 
-            this.menuItem3.Text = "Reset";
+            this.menuItem3.Text = "Power Saver";
+            MenuItem cur;
+            for (int i = 0; i < this.wocketsController._Sensors.Count; i++)
+            {
+                cur = new MenuItem();
+                cur.Text = "Wocket " + i;
+                cur.Click += new System.EventHandler(this.powersaver_Click);
+                this.menuItem3.MenuItems.Add(cur);
+            }
             this.menuItem3.Enabled = true;
-            // 
-            // menuItem4
-            // 
-            this.menuItem4.Text = "Check Data";
-            this.menuItem4.Enabled = false;
-            // 
-            // menuItem5
-            // 
-            this.menuItem5.MenuItems.Add(this.menuItem6);
-            this.menuItem5.MenuItems.Add(this.menuItem7);
-            this.menuItem5.MenuItems.Add(this.menuItem8);
-            this.menuItem5.Text = "Sync";
-            this.menuItem5.Enabled = false;
-            // 
-            // menuItem6
-            // 
-            this.menuItem6.Text = "Misc";
-            this.menuItem6.Enabled = false;
-            // 
-            // menuItem7
-            // 
-            this.menuItem7.Text = "Start Code";
-            this.menuItem7.Enabled = false;
             // 
             // menuItem8
             // 
             this.menuItem8.Text = "End Code";
             this.menuItem8.Enabled = false;
-            // 
-            // menuItem9
-            // 
-            this.menuItem9.MenuItems.Add(this.menuItem21);
-            this.menuItem9.MenuItems.Add(this.menuItem22);
-            this.menuItem9.Text = "Files";
-            this.menuItem9.Enabled = false;
-            // 
-            // menuItem21
-            // 
-            this.menuItem21.Text = "Simple";
-            this.menuItem21.Click += new System.EventHandler(this.menuItem21_Click);
-            this.menuItem21.Enabled = false;
-            // 
-            // menuItem22
-            // 
-            this.menuItem22.Text = "Detailed";
-            this.menuItem22.Click += new System.EventHandler(this.menuItem22_Click);
-            this.menuItem22.Enabled = false;
             // 
             // menuItem10
             // 
@@ -206,12 +160,12 @@ namespace WocketsApplication.DataLogger
             // 
             // menuItem11
             // 
-            this.menuItem11.Text = "Show";
-            this.menuItem11.Click += new System.EventHandler(this.menuItem11_Click);
+            this.menuItem11.Text = "Real Time";
+            this.menuItem11.Enabled = false;
             // 
             // menuItem12
             // 
-            this.menuItem12.Text = "Full Screen";
+            this.menuItem12.Text = "Buffered";
             this.menuItem12.Enabled = false;
             // 
             // menuItem13
@@ -1062,12 +1016,7 @@ namespace WocketsApplication.DataLogger
         private System.Windows.Forms.MenuItem menuItem1;
         private System.Windows.Forms.MenuItem menuItem2;
         private System.Windows.Forms.MenuItem menuItem3;
-        private System.Windows.Forms.MenuItem menuItem4;
-        private System.Windows.Forms.MenuItem menuItem5;
-        private System.Windows.Forms.MenuItem menuItem6;
-        private System.Windows.Forms.MenuItem menuItem7;
         private System.Windows.Forms.MenuItem menuItem8;
-        private System.Windows.Forms.MenuItem menuItem9;
         private System.Windows.Forms.MenuItem menuItem10;
         private System.Windows.Forms.MenuItem menuItem11;
         private System.Windows.Forms.MenuItem menuItem12;
@@ -1096,8 +1045,6 @@ namespace WocketsApplication.DataLogger
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Label label16;
         private System.Windows.Forms.Label label17;
-        private System.Windows.Forms.MenuItem menuItem21;
-        private System.Windows.Forms.MenuItem menuItem22;
         private System.Windows.Forms.Panel panel1, panel2, panel3, panel4, panel5;
         private System.Windows.Forms.Timer qualityTimer;
         private System.Windows.Forms.Timer HRTimer;

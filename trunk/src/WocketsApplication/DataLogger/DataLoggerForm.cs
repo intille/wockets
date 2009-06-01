@@ -1202,6 +1202,12 @@ namespace WocketsApplication.DataLogger
         {
         }
 
+        private void powersaver_Click(object sender, EventArgs e)
+        {
+            MenuItem mi = (MenuItem)sender;
+            mi.Checked = !(mi.Checked);
+        }
+
         private void menuItem1_Click(object sender, EventArgs e)
         {
 #if (PocketPC)

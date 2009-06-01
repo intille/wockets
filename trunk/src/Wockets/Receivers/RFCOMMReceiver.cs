@@ -21,7 +21,7 @@ using InTheHand.Net.Ports;
 
 namespace Wockets.Receivers
 {
-    public sealed class RFCOMMReceiver:SerialReceiver
+    public sealed class RFCOMMReceiver:SerialReceiver,Radio_CMD
     {
         #region Serialization Constants
         private const string RFCOMM_TYPE = "RFCOMM";      
@@ -46,6 +46,7 @@ namespace Wockets.Receivers
         private byte[] address_bytes;
         private string pin;
         private int sniffTime = 0;
+        private bool sniffMode;
 
         public RFCOMMReceiver()
         {
@@ -147,6 +148,86 @@ namespace Wockets.Receivers
                 return false;
             }
         }
+
+        #region Radio Commands
+
+        private void EnterCMD()
+        {
+            byte[] cmd = new byte[3];
+            for (int i = 0; (i < 3); i++)
+                cmd[i] = (byte)36;
+            this.bluetoothStream.Write(cmd,0,3);                   
+        }
+
+        private void ExitCMD()
+        {
+            byte[] cmd = new byte[3];
+            for (int i = 0; (i < 3); i++)
+                cmd[i] = (byte)'-';
+            this.bluetoothStream.Write(cmd, 0, 3);
+        }
+
+        public void Reset()
+        {
+            byte[] cmd = new byte[4];
+            cmd[0] = (byte)'R';
+            cmd[1] = (byte)',';
+            cmd[2] = (byte)'1';
+            cmd[3] = (byte)13;
+            this.bluetoothStream.Write(cmd, 0, 4);
+        }
+
+        public bool LowPower
+        {
+            get
+            {
+                return this.sniffMode;
+            }
+
+            set
+            {
+                if (value != this.sniffMode)
+                {
+                    if (value)
+                    {
+                        this.EnterCMD();
+                        Thread.Sleep(100);
+                        byte[] cmd = new byte[8];
+                        cmd[0] = (byte)'S';
+                        cmd[1] = (byte)'W';
+                        cmd[2] = (byte)',';
+                        cmd[3] = (byte)'0';
+                        cmd[4] = (byte)'6';
+                        cmd[5] = (byte)'4';
+                        cmd[6] = (byte)'0';
+                        cmd[7] = (byte)13;
+                        this.bluetoothStream.Write(cmd, 0, 8);
+                        Thread.Sleep(100);
+                        this.Reset();
+                    }
+                    else
+                    {
+                        this.EnterCMD();
+                        Thread.Sleep(100);
+                        byte[] cmd = new byte[8];
+                        cmd[0] = (byte)'S';
+                        cmd[1] = (byte)'W';
+                        cmd[2] = (byte)',';
+                        cmd[3] = (byte)'0';
+                        cmd[4] = (byte)'0';
+                        cmd[5] = (byte)'0';
+                        cmd[6] = (byte)'0';
+                        cmd[7] = (byte)13;
+                        this.bluetoothStream.Write(cmd, 0, 8);
+                        Thread.Sleep(100);
+                        this.Reset();
+
+                    }
+                }
+            }
+        }
+        #endregion Radio Commands
+
 
         #region Serialization Methods
         public override string ToXML()
@@ -345,7 +426,6 @@ namespace Wockets.Receivers
 
                         try
                         {
-
 
                             /*byte[] cmd = new byte[50];
                             for (int i = 0; (i < 50); i++)
