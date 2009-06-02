@@ -7,6 +7,7 @@ using Wockets.Data.Annotation;
 using Wockets.Utils;
 using WocketsApplication.Utils;
 using Wockets.Data.Classifiers.Utils;
+using Wockets.Data.Summary;
 
 #if (PocketPC)
 using OpenNETCF.GDIPlus;
@@ -53,7 +54,7 @@ namespace WocketsApplication.DataLogger
         }
 
 #if (PocketPC)
-     //   ActivityList aList;
+        ActivityListSummary aList;
 #endif
         //Intialize different interface components
         Image disconnectedWocketImage;
@@ -403,15 +404,36 @@ namespace WocketsApplication.DataLogger
             //this.tabPage3.Controls.Add(this.label6);
             //this.tabPage3.Controls.Add(this.label16);
 
-            /*GpStatusPlus stat = NativeMethods.GdiplusStartup(out token, input, out output);
+            GpStatusPlus stat = NativeMethods.GdiplusStartup(out token, input, out output);
             pieChart = new Charts.twodimensional.PieChart();
             pieChart.IsStretch = true;
-            this.aList = new ActivitySummary.Reader(null, this.dataDirectory).parse();
+            this.aList = new ActivityListSummary();
+            int chartIndex=0;
+            ActivitySummary asummary=null;
+            ActivityList chartCategory = this.annotatedSession.OverlappingActivityLists[0];
+            for (chartIndex = 0; (chartIndex < chartCategory.Count); chartIndex++)
+            {      
+                asummary = new ActivitySummary();
+                asummary.Name = chartCategory[chartIndex]._Name;
+                asummary.StartTime = 0;
+                asummary.EndTime = 0;
+                asummary.Percent = 1;
+                this.aList.Activities.Add(asummary);
+            }
+
+            asummary = new ActivitySummary();
+            asummary.Name = "empty2";
+            asummary.StartTime = 0;
+            asummary.EndTime = 0;
+            asummary.Percent = 100 - chartIndex;
+            this.aList.Activities.Add(asummary);
+
+   
             pieChart.Data = aList.toPercentHashtable();
             pieChart.SetActivity("No Activity");
             pieChart.SetTime(0, 0, 0);
             pieChart.SetCalories(0, 0);
-            this.tabPage3.Controls.Add(pieChart);*/
+            this.tabPage3.Controls.Add(pieChart);
             //pieChartClearButton = new Button();
             //pieChartClearButton.Text = "Clear";
             //pieChartClearButton.Name = "pieChartButton";
