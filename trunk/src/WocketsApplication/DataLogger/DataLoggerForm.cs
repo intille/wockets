@@ -1213,6 +1213,13 @@ namespace WocketsApplication.DataLogger
         {
         }
 
+        private void plotting_Click(object sender, EventArgs e)
+        {
+            MenuItem mi = (MenuItem)sender;
+            mi.Checked = !(mi.Checked);
+            this.isPlotting = mi.Checked;
+        }
+
         private void powersaver_Click(object sender, EventArgs e)
         {
             MenuItem mi = (MenuItem)sender;
