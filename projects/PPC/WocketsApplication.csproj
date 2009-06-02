@@ -191,6 +191,14 @@
       <Link>WocketsForm.Designer.cs</Link>
       <DependentUpon>WocketsForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="..\..\src\WocketsApplication\ActivityTracker\ActivityTrackerForm.cs">
+      <Link>ActivityTracker\ActivityTrackerForm.cs</Link>
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="..\..\src\WocketsApplication\ActivityTracker\ActivityTrackerForm.Designer.cs">
+      <Link>ActivityTracker\ActivityTrackerForm.Designer.cs</Link>
+      <DependentUpon>ActivityTrackerForm.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PPC\BornanderUIProgressBar.csproj">
@@ -293,9 +301,7 @@
     <None Include="..\..\bin\NeededFiles\Resources\xp_foreground1.png">
       <Link>Resources\xp_foreground1.png</Link>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="ActivityTracker\" />
+    <None Include="ClassDiagram1.cd" />
   </ItemGroup>
   <Import Condition="'$(TargetFrameworkVersion)' == 'v1.0'" Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.v1.targets" />
   <Import Condition="'$(TargetFrameworkVersion)' == 'v2.0'" Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />
