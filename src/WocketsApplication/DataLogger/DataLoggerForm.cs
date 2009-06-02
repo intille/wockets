@@ -617,11 +617,10 @@ namespace WocketsApplication.DataLogger
             InitializeInterface();
             while (progressMessage != null) Thread.Sleep(50);
             progressMessage = " Completed\r\n";
+            this.isPlotting = true;
 
-
-            //SetFormPositions();
+            //SetFormPositions();            
             aWocketsPlotter = new WocketsScalablePlotter(this.panel1, this.wocketsController);
-
 
             this.Resize += new EventHandler(OnResize);
 
@@ -703,20 +702,32 @@ namespace WocketsApplication.DataLogger
 
             #region Start Collecting Data
 
-
-
-            //if (this.sensors.TotalReceivers > 0)
-            //    isStartedReceiver = true;
-            //Start the built in polling thread            
-
+            Receiver currentReceiver = null;
+            Sensor sensor = null;
+            try
+            {
+                //Cleanup receiver buffers as they are out of sync due to BT connection delays
+                for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
+                {
+                    sensor = this.wocketsController._Sensors[i];
+                    currentReceiver = this.wocketsController._Receivers[sensor._Receiver];
+                    if (currentReceiver._Running == true)
+                        currentReceiver.Read();
+                }
+            }
+            catch (Exception e)
+            {
+                ((PictureBox)this.sensorStatus["W" + sensor._ID]).Image = disconnectedWocketImage;
+                this.bluetoothConnectors[currentReceiver._ID] = new BluetoothConnector(currentReceiver, this.wocketsController);
+                currentReceiver._Running = false;
+            }
 
             //Terminate the progress thread
             progressThreadQuit = true;
 
-
             //Enable all timer functions
             this.readDataTimer.Enabled = true;
-            this.qualityTimer.Enabled = true;
+            //this.qualityTimer.Enabled = true;
 
             #endregion Start Collecting Data
 
