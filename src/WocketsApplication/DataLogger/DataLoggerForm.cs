@@ -655,7 +655,7 @@ namespace WocketsApplication.DataLogger
             instances = new Instances(new StreamReader(this.storageDirectory + "\\realtime-output.arff"));
             instances.Class = instances.attribute(FeatureExtractor.ArffAttributeLabels.Length);
             classifier = new J48();
-            /* if (!File.Exists(this.storageDirectory+"\\model.xml"))
+             if (!File.Exists(this.storageDirectory+"\\model.xml"))
              {
                  classifier.buildClassifier(instances);
                  TextWriter tc = new StreamWriter("model.xml");
@@ -663,7 +663,7 @@ namespace WocketsApplication.DataLogger
                  tc.Flush();
                  tc.Close();
              }
-             else*/
+             else
             classifier.buildClassifier(this.storageDirectory + "\\model.xml", instances);
 
 
@@ -1476,6 +1476,9 @@ namespace WocketsApplication.DataLogger
         private TextWriter trainingTW = null;
 
         private Thread plottingThread = null;
+        private int totalCalories = 0;
+        private int currentCalories = 0;
+        private string previousActivity = "";
         private void readDataTimer_Tick(object sender, EventArgs e)
         {
 
@@ -1705,7 +1708,7 @@ namespace WocketsApplication.DataLogger
                             labelCounters[j] = 0;
                         }
 
-                        if ((mostActivity == "Flapping") || (mostActivity == "flapping"))
+                       /* if ((mostActivity == "Flapping") || (mostActivity == "flapping"))
                         {
 
                             vibrator.StartVibrate();
@@ -1741,8 +1744,8 @@ namespace WocketsApplication.DataLogger
                         if (vibrateTimer > 500) //5 seconds
                             vibrateTimer = -1;
                         vibrateTimer++;
-
-                        /*pieChart.SetActivity(mostActivity);
+                        */
+                        pieChart.SetActivity(mostActivity);
                         if (this.aList.getEmptyPercent() == 1)
                             this.aList.reset();
                         else
@@ -1784,7 +1787,7 @@ namespace WocketsApplication.DataLogger
                         pieChart.Data = this.aList.toPercentHashtable();
                         pieChart.Invalidate();
                         previousActivity = mostActivity;
-                        */
+                        
                     }
                 }
             }

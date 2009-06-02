@@ -409,7 +409,7 @@ namespace Wockets.Receivers
 
         //Use a counter to avoid calling the timer function
         private int disconnectionCounter = 0;
-        private const int MAX_DISCONNECTION_COUNTER = 100; //approximately consider disconnected if 1 sec passes with no data
+        private const int MAX_DISCONNECTION_COUNTER = 500; //approximately consider disconnected if 1 sec passes with no data
 
         ArrayList batchTimestamps;
         ArrayList batchBytes;
