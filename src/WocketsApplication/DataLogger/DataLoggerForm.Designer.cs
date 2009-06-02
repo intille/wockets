@@ -138,27 +138,21 @@ namespace WocketsApplication.DataLogger
             // menuItem3
             // 
             this.menuItem3.Text = "Power Saver";
-            MenuItem cur;
-            for (int i = 0; i < this.wocketsController._Sensors.Count; i++)
-            {
-                cur = new MenuItem();
-                cur.Text = "Wocket " + i;
-                cur.Click += new System.EventHandler(this.powersaver_Click);
-                this.menuItem3.MenuItems.Add(cur);
-            }
+            this.menuItem3.Click += new System.EventHandler(this.powersaver_Click);
             this.menuItem3.Enabled = true;
             // 
             // menuItem8
             // 
-            this.menuItem8.MenuItems.Add(this.menuItem12);
+            this.menuItem8.Click += new System.EventHandler(this.training_Click);
             this.menuItem8.Text = "Training";
             this.menuItem8.Enabled = true;
             // 
             // menuItem10
             // 
-            this.menuItem10.MenuItems.Add(this.menuItem11);
-            this.menuItem10.MenuItems.Add(this.menuItem13);
+            this.menuItem10.Click += new System.EventHandler(this.plotting_Click);
             this.menuItem10.Text = "Plotting";
+            this.menuItem10.Checked = true;
+            this.menuItem10.Enabled = true;
             // 
             // menuItem11
             // 
@@ -169,7 +163,6 @@ namespace WocketsApplication.DataLogger
             // 
             this.menuItem12.Text = "On";
             this.menuItem12.Enabled = true;
-            this.menuItem12.Click += new System.EventHandler(this.training_Click);
             // 
             // menuItem13
             // 
