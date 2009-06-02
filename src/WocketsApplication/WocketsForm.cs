@@ -142,8 +142,10 @@ namespace WocketsApplication
             #region Load Data Logger GUI
 
             #region Initialize GUI Components
-            ActivityTracker.ActivityTrackerForm activityTrackerForm = new WocketsApplication.ActivityTracker.ActivityTrackerForm(this.storageDirectory, this.wocketsController, this.annotatedSession, this.classifierConfiguration,3);
-            activityTrackerForm.Show();
+            DataLogger.DataLoggerForm dataLoggerForm = new WocketsApplication.DataLogger.DataLoggerForm(this.storageDirectory, this.wocketsController, this.annotatedSession, this.classifierConfiguration,3);
+            dataLoggerForm.Show();
+            //ActivityTracker.ActivityTrackerForm activityTrackerForm = new WocketsApplication.ActivityTracker.ActivityTrackerForm(this.storageDirectory, this.wocketsController, this.annotatedSession, this.classifierConfiguration,3);
+            //activityTrackerForm.Show();
 
             #endregion Initialize GUI Components
 
