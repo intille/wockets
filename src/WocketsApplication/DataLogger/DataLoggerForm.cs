@@ -856,21 +856,6 @@ namespace WocketsApplication.DataLogger
 
 
 
-        public bool AutoTraining
-        {
-            get
-            {
-                return this.menuItem7Tab2.Checked;
-            }
-        }
-
-        public bool IsTraining
-        {
-            get
-            {
-                return this.menuItem5Tab2.Checked;
-            }
-        }
 
 
 
@@ -1006,7 +991,7 @@ namespace WocketsApplication.DataLogger
         //Start a training session
         void menuItem5Tab2_Click(object sender, EventArgs e)
         {
-
+            /*
             this.arffFileName = this.dataDirectory + "\\output" + DateTime.Now.ToString().Replace('/', '_').Replace(':', '_').Replace(' ', '_') + ".arff";
             tw = new StreamWriter(arffFileName);
             if (AutoTraining == true)
@@ -1062,7 +1047,7 @@ namespace WocketsApplication.DataLogger
 
             this.overallTimer.start();
 
-
+            */
         }
 
         //Select manual mode session
@@ -1186,7 +1171,7 @@ namespace WocketsApplication.DataLogger
 
                 foreach (Button category_button in categoryButtons)
                     category_button.Enabled = true;
-
+                this.currentRecord = null;
             }
         }
 
@@ -1230,6 +1215,7 @@ namespace WocketsApplication.DataLogger
         {
             MenuItem mi = (MenuItem)sender;
             mi.Checked = !(mi.Checked);
+            this.isTraining = mi.Checked;
         }
 
         private void menuItem1_Click(object sender, EventArgs e)
@@ -1486,10 +1472,8 @@ namespace WocketsApplication.DataLogger
         #endregion Builtin Accelerometr Polling Thread
 
         private bool isCollectingData = false;
-
-
-       // private TextWriter ttw = null;
-        //double prevTS = 0;
+        private bool isTraining = false;
+        private TextWriter trainingTW = null;
 
         private Thread plottingThread = null;
         private void readDataTimer_Tick(object sender, EventArgs e)
@@ -1512,7 +1496,12 @@ namespace WocketsApplication.DataLogger
                 }
 
 
-                
+                if (trainingTW != null)
+                {
+                    trainingTW.Flush();
+                    trainingTW.Close();
+                    trainingTW = null;
+                }
 
                 if (aPLFormatLogger != null)
                 {
@@ -1805,9 +1794,48 @@ namespace WocketsApplication.DataLogger
 
             #endregion Classifying activities
 
+            #region Training
+
+            if (isTraining)
+            {
+                //create arff file
+                if (trainingTW == null)
+                {
+                    string arffFileName = this.storageDirectory+ "\\output" + DateTime.Now.ToString().Replace('/', '_').Replace(':', '_').Replace(' ', '_') + ".arff";
+                    trainingTW = new StreamWriter(arffFileName);
+                    trainingTW.WriteLine("@RELATION wockets");
+                    trainingTW.WriteLine(FeatureExtractor.GetArffHeader());
+                    trainingTW.Write("@ATTRIBUTE activity {");
+                    int i = 0;
+                    for (i = 0; (i < ((this.annotatedSession.OverlappingActivityLists[0]).Count - 1)); i++)
+                        trainingTW.Write(this.annotatedSession.OverlappingActivityLists[0][i]._Name.Replace(' ', '_') + ",");
+                    trainingTW.WriteLine(this.annotatedSession.OverlappingActivityLists[0][i]._Name.Replace(' ', '_') + "}");
+                    trainingTW.WriteLine("\n@DATA\n\n");
+                }
+
+                string current_activity = "unknown";
+                if (this.currentRecord != null)
+                    current_activity = this.currentRecord.Activities._CurrentActivity;
+                double lastTimeStamp = FeatureExtractor.StoreWocketsWindow();
+                if (FeatureExtractor.GenerateFeatureVector(lastTimeStamp))
+                {
+                    string arffSample = FeatureExtractor.toString() + "," + current_activity;
+                    trainingTW.WriteLine(arffSample);
+                }
+            }
+            else
+            {
+                if (trainingTW != null)
+                {
+                    trainingTW.Flush();
+                    trainingTW.Close();
+                    trainingTW = null;
+                }
+            }
+            #endregion Training
             #region CollectingData
 
-/*
+            /*
             if (ttw == null)
                 ttw = new StreamWriter("seqs.csv");
             isCollectingData = true;

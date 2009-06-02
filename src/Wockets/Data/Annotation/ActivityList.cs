@@ -45,7 +45,20 @@ namespace Wockets.Data.Annotation
             }
         }
 
+        public string _CurrentActivity
+        {
+            get
+            {
+                string combinedName = "";
+                for (int i = 0; (i < this.Count-1); i++)
+                    combinedName += this[i]._Name + "_";
+                combinedName += this[this.Count - 1]._Name;
+                return combinedName;
+            }
+        }
+
         #endregion Access Properties
+
 
         public string ToXML()
         {
