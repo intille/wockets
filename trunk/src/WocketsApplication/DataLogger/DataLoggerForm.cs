@@ -1818,12 +1818,14 @@ namespace WocketsApplication.DataLogger
 
                 string current_activity = "unknown";
                 if (this.currentRecord != null)
-                    current_activity = this.currentRecord.Activities._CurrentActivity;
-                double lastTimeStamp = FeatureExtractor.StoreWocketsWindow();
-                if (FeatureExtractor.GenerateFeatureVector(lastTimeStamp))
                 {
-                    string arffSample = FeatureExtractor.toString() + "," + current_activity;
-                    trainingTW.WriteLine(arffSample);
+                    double lastTimeStamp = FeatureExtractor.StoreWocketsWindow();
+                    if (FeatureExtractor.GenerateFeatureVector(lastTimeStamp))
+                    {
+                        current_activity = this.currentRecord.Activities._CurrentActivity;
+                        string arffSample = FeatureExtractor.toString() + "," + current_activity;
+                        trainingTW.WriteLine(arffSample);
+                    }
                 }
             }
             else
