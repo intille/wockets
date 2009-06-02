@@ -25,6 +25,8 @@ namespace Wockets.Data.Plotters
         double[] previousTimes;
         double[] scaleFactors;
         int[] plotFrom;
+        int[] lastColumn;
+        int[] firstColumn;
 
         public WocketsScalablePlotter(System.Windows.Forms.Panel aPanel, WocketsController wocketsController)
         {
@@ -37,10 +39,15 @@ namespace Wockets.Data.Plotters
             scaleFactors = new double[this.wocketsController._Sensors.Count];
             currentColumns = new int[this.wocketsController._Sensors.Count];
             plotFrom = new int[this.wocketsController._Sensors.Count];
+            firstColumn= new int[this.wocketsController._Sensors.Count];
+            lastColumn = new int[this.wocketsController._Sensors.Count];
+
             for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
             {
                 this.currentColumns[i] = 0;
                 this.plotFrom[i] = 0;
+                this.firstColumn[i] = 999999;
+                this.lastColumn[i] = 0;
                 double range = ((Accelerometer)this.wocketsController._Sensors[i])._Max - ((Accelerometer)this.wocketsController._Sensors[i])._Min;
                 scaleFactors[i] = graphSize / range;
             }
@@ -62,6 +69,7 @@ namespace Wockets.Data.Plotters
                 for (int j = 0; (j < 3); j++)
                     previousVals[i][j] = 0;
             }
+            
 
             p = new System.Drawing.Pen[SIGNALS_PER_AXIS];
 
@@ -76,8 +84,7 @@ namespace Wockets.Data.Plotters
         private SolidBrush blueBrush = new SolidBrush(Color.LightBlue);
 
         private bool requiresFullRedraw = true;
-        int lastColumn = 0;
-        int firstColumn = 999999;
+
         public int[] PlotFrom
         {
             get
@@ -114,17 +121,17 @@ namespace Wockets.Data.Plotters
 
                             if ((this.wocketsController._Sensors[data.SensorID])._Class == Wockets.Sensors.SensorClasses.HTCDiamondTouch)
                             {
-                                g.DrawEllipse(p[0], lastColumn, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.X), 2, 2);
-                                g.DrawEllipse(p[1], lastColumn, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Y), 2, 2);
-                                g.DrawEllipse(p[2], lastColumn, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Z), 2, 2);
+                                g.DrawEllipse(p[0], lastColumn[data.SensorID], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.X), 2, 2);
+                                g.DrawEllipse(p[1], lastColumn[data.SensorID], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Y), 2, 2);
+                                g.DrawEllipse(p[2], lastColumn[data.SensorID], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Z), 2, 2);
                             }
                             else
                             {
                                 g.DrawLine(p[0], this.currentColumns[i], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * previousVals[i][0]), this.currentColumns[i] + 1, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.X));
                                 g.DrawLine(p[1], this.currentColumns[i], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * previousVals[i][1]), this.currentColumns[i] + 1, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Y));
                                 g.DrawLine(p[2], this.currentColumns[i], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * previousVals[i][2]), this.currentColumns[i] + 1, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Z));
-                                if (this.currentColumns[i] > lastColumn)
-                                    lastColumn = this.currentColumns[i];
+                                if (this.currentColumns[i] > lastColumn[data.SensorID])
+                                    lastColumn[data.SensorID] = this.currentColumns[i];
 
                             }
 
@@ -147,7 +154,6 @@ namespace Wockets.Data.Plotters
             }
 
             //check if the columns are in sync within 30 points
-
             for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
             {
                 for (int j = i + 1; (j < this.wocketsController._Sensors.Count); j++)
@@ -167,17 +173,23 @@ namespace Wockets.Data.Plotters
                 this.aPanel.Width = this.aPanel.Width;
                 
                 g.FillRectangle(blueBrush, 0, 0, this.plotAreaSize.Width + 10, this.plotAreaSize.Height);
-                lastColumn = 0;
-                firstColumn = 0;
+
+
                 for (int k = 0; (k < this.wocketsController._Sensors.Count); k++)
+                {
                     this.currentColumns[k] = 0;
+                    lastColumn[k] = 0;
+                    firstColumn[k] = 999999;
+                }
                 aPanel.Invalidate();
                 requiresFullRedraw = false;
             }
             else
-                aPanel.Invalidate(new System.Drawing.Rectangle(firstColumn, 0, lastColumn-firstColumn, plotAreaSize.Height));
-
-            firstColumn = lastColumn;
+                for (int k = 0; (k < this.wocketsController._Sensors.Count); k++)
+                {
+                    aPanel.Invalidate(new System.Drawing.Rectangle(firstColumn[k], 0, lastColumn[k] - firstColumn[k], plotAreaSize.Height));
+                    firstColumn[k] = lastColumn[k];
+                }
 
         }
 
