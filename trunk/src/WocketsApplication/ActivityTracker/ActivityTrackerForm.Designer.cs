@@ -15,9 +15,10 @@ using Charts.twodimensional;
 
 using System.Threading;
 
-namespace WocketsApplication.DataLogger
+
+namespace WocketsApplication.ActivityTracker
 {
-    partial class DataLoggerForm
+    partial class ActivityTrackerForm
     {
         /// <summary>
         /// Required designer variable.
@@ -53,7 +54,7 @@ namespace WocketsApplication.DataLogger
         }
 
 #if (PocketPC)
-     //   ActivityList aList;
+        //   ActivityList aList;
 #endif
         //Intialize different interface components
         Image disconnectedWocketImage;
@@ -157,7 +158,7 @@ namespace WocketsApplication.DataLogger
             // menuItem10
             // 
             this.menuItem10.MenuItems.Add(this.menuItem11);
-            this.menuItem10.MenuItems.Add(this.menuItem13);
+            this.menuItem10.MenuItems.Add(this.menuItem12);
             this.menuItem10.Text = "Plotting";
             // 
             // menuItem11
@@ -169,12 +170,11 @@ namespace WocketsApplication.DataLogger
             // 
             this.menuItem12.Text = "On";
             this.menuItem12.Enabled = true;
-            this.menuItem12.Click += new System.EventHandler(this.training_Click);
             // 
             // menuItem13
             // 
-            this.menuItem13.Text = "Buffered";
-            this.menuItem13.Enabled = false;
+            this.menuItem13.Text = "Off";
+            this.menuItem13.Enabled = true;
             // 
             // menuItem14
             // 
@@ -330,7 +330,7 @@ namespace WocketsApplication.DataLogger
 
 
 
-            
+
 
 
 
@@ -604,9 +604,9 @@ namespace WocketsApplication.DataLogger
             int textBoxHeight = ((int)(0.35 * this.panel1.ClientSize.Height) - ((this.wocketsController._Sensors.Count - 1) * Constants.WIDGET_SPACING)) / num_rows;
             int textBoxWidth = ((this.panel1.ClientSize.Width - (3 * Constants.WIDGET_SPACING)) / 3);
             int currentTextY = (int)(this.panel1.ClientSize.Height * 0.60);
-            int leftTextX = Constants.WIDGET_SPACING+32;
-            int rightTextX = ((Constants.WIDGET_SPACING+32) * 2) + textBoxWidth;
-            int currentTextX = Constants.WIDGET_SPACING+32;
+            int leftTextX = Constants.WIDGET_SPACING + 32;
+            int rightTextX = ((Constants.WIDGET_SPACING + 32) * 2) + textBoxWidth;
+            int currentTextX = Constants.WIDGET_SPACING + 32;
             System.Windows.Forms.Label samplingLabel = new System.Windows.Forms.Label();
             samplingLabel.Width = textBoxWidth;
             samplingLabel.Height = textBoxHeight;
@@ -628,14 +628,14 @@ namespace WocketsApplication.DataLogger
             connectedWocketImage = (Image)new Bitmap(Constants.NETWORK_STATUS_DIRECTORY + "connected.gif");
             disconnectedWocketImage = (Image)new Bitmap(Constants.NETWORK_STATUS_DIRECTORY + "disconnected.gif");
             //foreach (Sensor sensor in this.sensors.Sensors)
-            for (int i=0;(i<this.wocketsController._Sensors.Count);i++)
+            for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
             {
                 System.Windows.Forms.Label t = new System.Windows.Forms.Label();
                 PictureBox p = new PictureBox();
                 p.Size = new Size(32, 32);
                 p.Image = connectedWocketImage;
-                p.Location = new System.Drawing.Point(currentTextX-33, currentTextY);
-                t.Text = "W" + this.wocketsController._Sensors[i]._ID+ ": 90/90";
+                p.Location = new System.Drawing.Point(currentTextX - 33, currentTextY);
+                t.Text = "W" + this.wocketsController._Sensors[i]._ID + ": 90/90";
                 t.Name = "W" + this.wocketsController._Sensors[i]._ID;
                 t.Size = new System.Drawing.Size(textBoxWidth, textBoxHeight);
                 t.Location = new System.Drawing.Point(currentTextX, currentTextY);
@@ -686,10 +686,10 @@ namespace WocketsApplication.DataLogger
 
 
             //foreach (Category category in this.annotation.Categories)
-            for (int i=0;(i<this.annotatedSession.OverlappingActivityLists.Count);i++)
+            for (int i = 0; (i < this.annotatedSession.OverlappingActivityLists.Count); i++)
             {
-                
-                ActivityList category=this.annotatedSession.OverlappingActivityLists[0];
+
+                ActivityList category = this.annotatedSession.OverlappingActivityLists[0];
                 System.Windows.Forms.Button button = new System.Windows.Forms.Button();
 
                 button.Location = new System.Drawing.Point(button_x, button_y + button_id * delta_y);
@@ -705,7 +705,7 @@ namespace WocketsApplication.DataLogger
 
                 //check the longest label for this button
                 //foreach (AXML.Label label in category.Labels)
-                for (int j=0;(j<category.Count);j++)
+                for (int j = 0; (j < category.Count); j++)
                 {
                     string newlabel = category[j]._Name;//label.Name;
 
@@ -789,7 +789,7 @@ namespace WocketsApplication.DataLogger
 
             //if there is more than one category, manual training is the only option
             //if (this.annotation.Categories.Count > 1)
-            if (this.annotatedSession.OverlappingActivityLists.Count>1)
+            if (this.annotatedSession.OverlappingActivityLists.Count > 1)
             {
                 this.menuItem7Tab2.Enabled = false;
                 this.menuItem8Tab2.Enabled = false;
@@ -839,12 +839,12 @@ namespace WocketsApplication.DataLogger
 #else
             if (MessageBox.Show("Are you sure you want to Quit MITes Software?", "Confirm", MessageBoxButtons.YesNo) == DialogResult.Yes)
 #endif
-           // {
-               isQuitting = true;
-              /* while(this.readDataTimer.Enabled)
-                   Thread.Sleep(50);*/
-                //this.readDataTimer.Enabled = false;
-                //this.qualityTimer.Enabled = false;
+            // {
+            isQuitting = true;
+            /* while(this.readDataTimer.Enabled)
+                 Thread.Sleep(50);*/
+            //this.readDataTimer.Enabled = false;
+            //this.qualityTimer.Enabled = false;
             //}
 
 
@@ -866,7 +866,7 @@ namespace WocketsApplication.DataLogger
             int label_height = 0;
 
             //if (this.sensors.IsHR)
-              //  label_height = (this.panel4.ClientSize.Height - Constants.SCREEN_TOP_MARGIN - Constants.SCREEN_BOTTOM_MARGIN - ((this.sensors.Sensors.Count) * Constants.WIDGET_SPACING)) / (this.sensors.Sensors.Count);
+            //  label_height = (this.panel4.ClientSize.Height - Constants.SCREEN_TOP_MARGIN - Constants.SCREEN_BOTTOM_MARGIN - ((this.sensors.Sensors.Count) * Constants.WIDGET_SPACING)) / (this.sensors.Sensors.Count);
             //else
             label_height = (this.panel4.ClientSize.Height - Constants.WIDGET_SPACING - Constants.WIDGET_SPACING - ((this.wocketsController._Sensors.Count) * Constants.WIDGET_SPACING)) / (this.wocketsController._Sensors.Count + 1);
 
@@ -890,7 +890,7 @@ namespace WocketsApplication.DataLogger
 
             counter++;
             //foreach (Sensor sensor in this.sensors.Sensors)
-            for (int i=0;(i<this.wocketsController._Sensors.Count);i++)
+            for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
             {
 
                 //setup the labels for the expected sampling rates
