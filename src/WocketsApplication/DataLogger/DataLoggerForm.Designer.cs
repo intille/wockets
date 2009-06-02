@@ -132,6 +132,7 @@ namespace WocketsApplication.DataLogger
             // 
             this.menuItem2.MenuItems.Add(this.menuItem3);
             this.menuItem2.MenuItems.Add(this.menuItem10);
+            this.menuItem2.MenuItems.Add(this.menuItem8);
             this.menuItem2.Text = "Options";
             // 
             // menuItem3
@@ -149,8 +150,9 @@ namespace WocketsApplication.DataLogger
             // 
             // menuItem8
             // 
-            this.menuItem8.Text = "End Code";
-            this.menuItem8.Enabled = false;
+            this.menuItem8.MenuItems.Add(this.menuItem12);
+            this.menuItem8.Text = "Training";
+            this.menuItem8.Enabled = true;
             // 
             // menuItem10
             // 
@@ -165,15 +167,13 @@ namespace WocketsApplication.DataLogger
             // 
             // menuItem12
             // 
-            this.menuItem12.Text = "Buffered";
-            this.menuItem12.Enabled = false;
+            this.menuItem12.Text = "On";
+            this.menuItem12.Enabled = true;
             // 
             // menuItem13
             // 
-            this.menuItem13.MenuItems.Add(this.menuItem14);
-            this.menuItem13.MenuItems.Add(this.menuItem15);
-            this.menuItem13.Text = "Sound";
-            this.menuItem13.Enabled = false;
+            this.menuItem13.Text = "Off";
+            this.menuItem13.Enabled = true;
             // 
             // menuItem14
             // 
