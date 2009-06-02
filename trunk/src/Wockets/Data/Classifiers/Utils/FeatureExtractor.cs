@@ -599,5 +599,17 @@ namespace Wockets.Data.Classifiers.Utils
             return DISTANCE_ATTRIBUTES + TOTAL_ATTRIBUTE + VARIANCE_ATTRIBUTES + RANGE_ATTRIBUTES +
                FFT_ATTRIBUTES + ENERGY_ATTRIBUTES + CORRELATION_ATTRIBUTES;
         }
+
+        public static string toString()
+        {
+            string s = "";
+            int i = 0;
+
+            for (i = 0; (i < features.Length - 1); i++)
+                s += features[i].ToString("F2") + ",";
+            s += features[i].ToString("F2");
+            return s;
+
+        }
     }
 }
