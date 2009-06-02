@@ -1219,6 +1219,12 @@ namespace WocketsApplication.DataLogger
             mi.Checked = !(mi.Checked);
         }
 
+        private void training_Click(object sender, EventArgs e)
+        {
+            MenuItem mi = (MenuItem)sender;
+            mi.Checked = !(mi.Checked);
+        }
+
         private void menuItem1_Click(object sender, EventArgs e)
         {
 #if (PocketPC)
@@ -1630,9 +1636,9 @@ namespace WocketsApplication.DataLogger
                                 for (int x=0; x < this.wocketsController._Sensors.Count; x++)
                                 {
                                     String labelKey = "W" + this.wocketsController._Sensors[x]._ID;
-                                    this.wocketsController._Sensors[x].setSR(this.AccumPackets[this.wocketsController._Sensors[i]._ID] /5);
+                                    this.wocketsController._Sensors[x].setSR(this.AccumPackets[this.wocketsController._Sensors[x]._ID] /5);
                                     Label t = (System.Windows.Forms.Label)this.sensorLabels[labelKey];
-                                    t.Text="W" + this.wocketsController._Sensors[i]._ID + ": " + this.wocketsController._Sensors[i].getSR() + "/90";
+                                    t.Text="W" + this.wocketsController._Sensors[x]._ID + ": " + this.wocketsController._Sensors[x].getSR() + "/90";
                                 }
                                 this.SRcounter = 0;
                                 this.LastTime = DateTime.Now.Ticks;
