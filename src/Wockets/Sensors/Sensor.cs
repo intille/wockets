@@ -34,7 +34,7 @@ namespace Wockets.Sensors
         private string description;
         private int id;
         private int sr;
-        private double actSR;
+        private int actSR;
 
         public Sensor(SensorTypes type,SensorClasses classname)
         {
@@ -69,12 +69,12 @@ namespace Wockets.Sensors
             }
         }
 
-        public void setSR(double i)
+        public void setSR(int i)
         {
             this.actSR = i;
         }
 
-        public double getSR()
+        public int getSR()
         {
             return this.actSR;
         }
