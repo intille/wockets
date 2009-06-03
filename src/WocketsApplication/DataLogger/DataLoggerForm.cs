@@ -1856,16 +1856,14 @@ namespace WocketsApplication.DataLogger
                         arffHeader+=this.annotatedSession.OverlappingActivityLists[0][i]._Name.Replace(' ', '_') + ",";
                     arffHeader+=this.annotatedSession.OverlappingActivityLists[0][i]._Name.Replace(' ', '_') + "}\n";
                     arffHeader+="\n@DATA\n\n";
-
+                    
+                    
+                    
                     trainingTW.WriteLine(arffHeader);
-                    trainingTW.Write("@ATTRIBUTE activity {");
-
                     string structureArffFile = this.storageDirectory + "\\structure.arff";
                     structureTW = new StreamWriter(structureArffFile);
                     structureTW.WriteLine("@RELATION wockets");
                     structureTW.WriteLine(arffHeader);
-                    structureTW.Write("@ATTRIBUTE activity {");
-
 
                 }
 
