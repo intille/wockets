@@ -503,6 +503,8 @@ namespace WocketsApplication.DataLogger
 #if (PocketPC)
 
             this.tabControl1.TabPages.RemoveAt(4);
+            this.tabControl1.TabPages.RemoveAt(3);
+            this.tabControl1.TabPages.RemoveAt(2);
             this.tabControl1.SelectedIndex = 0;
 #else
             this.ShowForms();
@@ -1433,9 +1435,6 @@ namespace WocketsApplication.DataLogger
 #if (PocketPC)
         void tabControl1_Changed(object sender, EventArgs e)
         {
-            if (this.tabControl1.SelectedIndex == 1)
-                this.Menu = this.mainMenuTab2;
-            else if (this.tabControl1.SelectedIndex == 0)
                 this.Menu = this.mainMenu1;
         }
 #endif
