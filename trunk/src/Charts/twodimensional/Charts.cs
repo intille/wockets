@@ -191,12 +191,12 @@ namespace Charts.twodimensional
 
             }
             string mets="?";
-            if (currentActivity == "walking")
-                mets = "2.5 METs";
-            else if (currentActivity == "fast-walking")
+            if (currentActivity == "walkingslow")
+                mets = "2 METs";
+            else if (currentActivity == "walkingbriskly")
+                mets = "3.8 METs";
+            else if (currentActivity == "jumpingjacks")
                 mets = "8 METs";
-            else if (currentActivity == "jumping-jacks")
-                mets = "2.5 METs";
             else if (currentActivity == "sitting")
                 mets = "1 MET";
             else if (currentActivity == "standing")
