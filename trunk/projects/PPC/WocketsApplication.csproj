@@ -301,7 +301,6 @@
     <None Include="..\..\bin\NeededFiles\Resources\xp_foreground1.png">
       <Link>Resources\xp_foreground1.png</Link>
     </None>
-    <None Include="ClassDiagram1.cd" />
   </ItemGroup>
   <Import Condition="'$(TargetFrameworkVersion)' == 'v1.0'" Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.v1.targets" />
   <Import Condition="'$(TargetFrameworkVersion)' == 'v2.0'" Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />
