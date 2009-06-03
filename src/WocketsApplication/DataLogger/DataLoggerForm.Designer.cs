@@ -367,8 +367,8 @@ namespace WocketsApplication.DataLogger
             // 
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
-            this.tabControl1.Controls.Add(this.tabPage3);
             this.tabControl1.Controls.Add(this.tabPage4);
+            this.tabControl1.Controls.Add(this.tabPage3);
             this.tabControl1.Controls.Add(this.tabPage5);
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Name = "tabControl1";
@@ -449,13 +449,13 @@ namespace WocketsApplication.DataLogger
             this.tabPage3.Text = "Summary";
             // tabPage4
             // 
-            this.panel4.Controls.Add(this.label8);
-            this.panel4.Controls.Add(this.label7);
-            this.panel4.Controls.Add(this.label9);
+            //this.panel4.Controls.Add(this.label8);
+            //this.panel4.Controls.Add(this.label7);
+            //this.panel4.Controls.Add(this.label9);
             this.tabPage4.Location = new System.Drawing.Point(0, 0);
             this.tabPage4.Name = "tabPage4";
             this.tabPage4.Size = new System.Drawing.Size(232, 239);
-            this.tabPage4.Text = "Quality";
+            this.tabPage4.Text = "Activity";
 
             //tabPage5
             //
@@ -622,7 +622,7 @@ namespace WocketsApplication.DataLogger
             int leftTextX = Constants.WIDGET_SPACING+32;
             int rightTextX = ((Constants.WIDGET_SPACING+32) * 2) + textBoxWidth;
             int currentTextX = Constants.WIDGET_SPACING+32;
-            System.Windows.Forms.Label samplingLabel = new System.Windows.Forms.Label();
+            this.samplingLabel = new System.Windows.Forms.Label();
             samplingLabel.Width = textBoxWidth;
             samplingLabel.Height = textBoxHeight;
 
@@ -650,7 +650,7 @@ namespace WocketsApplication.DataLogger
                 p.Size = new Size(32, 32);
                 p.Image = connectedWocketImage;
                 p.Location = new System.Drawing.Point(currentTextX-33, currentTextY);
-                t.Text = "W" + this.wocketsController._Sensors[i]._ID+ ": 90/90";
+                t.Text = "W" + this.wocketsController._Sensors[i]._ID;
                 t.Name = "W" + this.wocketsController._Sensors[i]._ID;
                 t.Size = new System.Drawing.Size(textBoxWidth, textBoxHeight);
                 t.Location = new System.Drawing.Point(currentTextX, currentTextY);
@@ -876,9 +876,9 @@ namespace WocketsApplication.DataLogger
             this.samplesPerSecond = new System.Windows.Forms.Label[this.wocketsController._Sensors.Count];//[this.sensors.MaximumSensorID + 1];
 
             int counter = 0;
-            int label_width = (this.panel4.ClientSize.Width - Constants.WIDGET_SPACING - Constants.WIDGET_SPACING) / 3;
+            label_width = (this.panel4.ClientSize.Width - Constants.WIDGET_SPACING - Constants.WIDGET_SPACING) / 3;
 
-            int label_height = 0;
+            label_height = 0;
 
             //if (this.sensors.IsHR)
               //  label_height = (this.panel4.ClientSize.Height - Constants.SCREEN_TOP_MARGIN - Constants.SCREEN_BOTTOM_MARGIN - ((this.sensors.Sensors.Count) * Constants.WIDGET_SPACING)) / (this.sensors.Sensors.Count);
@@ -889,7 +889,7 @@ namespace WocketsApplication.DataLogger
             this.button1.Width = label_width;
             this.button1.Height = label_height;
             this.button1.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Bold);
-            Font textFont = this.button1.Font =
+            textFont = this.button1.Font =
                 GUIHelper.CalculateBestFitFont(this.button1.Parent.CreateGraphics(), Constants.MIN_FONT,
                    Constants.MAX_FONT, this.button1.Size, "E(Samp. Rate) ", this.button1.Font, (float)0.9, (float)0.9);
 
