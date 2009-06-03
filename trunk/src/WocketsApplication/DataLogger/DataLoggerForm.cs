@@ -660,7 +660,7 @@ namespace WocketsApplication.DataLogger
 
             labelIndex = new Hashtable();
             //find arff file
-            string[] arffFiles = Directory.GetFileSystemEntries(aDataDirectory, "*.arff");
+            string[] arffFiles = Directory.GetFileSystemEntries(this.storageDirectory, "*.arff");
             if (arffFiles.Length != 1)
                 throw new Exception("Multiple Arff Files in Directory");
             instances = new Instances(new StreamReader(arffFiles[0]));
@@ -1505,6 +1505,7 @@ namespace WocketsApplication.DataLogger
         private bool isCollectingData = false;
         private bool isTraining = false;
         private TextWriter trainingTW = null;
+        private TextWriter structureTW = null;
 
         private Thread plottingThread = null;
         private int totalCalories = 0;
@@ -1845,16 +1846,27 @@ namespace WocketsApplication.DataLogger
                 //create arff file
                 if (trainingTW == null)
                 {
-                    string arffFileName = this.storageDirectory+ "\\output" + DateTime.Now.ToString().Replace('/', '_').Replace(':', '_').Replace(' ', '_') + ".arff";
-                    trainingTW = new StreamWriter(arffFileName);
+                    string arffFileName = this.storageDirectory+ "\\output" + DateTime.Now.ToString().Replace('/', '_').Replace(':', '_').Replace(' ', '_') + ".arff";                   
+                    trainingTW = new StreamWriter(arffFileName);                    
                     trainingTW.WriteLine("@RELATION wockets");
-                    trainingTW.WriteLine(FeatureExtractor.GetArffHeader());
-                    trainingTW.Write("@ATTRIBUTE activity {");
+                    string arffHeader = FeatureExtractor.GetArffHeader();
+                    arffHeader += "\n@ATTRIBUTE activity {";
                     int i = 0;
                     for (i = 0; (i < ((this.annotatedSession.OverlappingActivityLists[0]).Count - 1)); i++)
-                        trainingTW.Write(this.annotatedSession.OverlappingActivityLists[0][i]._Name.Replace(' ', '_') + ",");
-                    trainingTW.WriteLine(this.annotatedSession.OverlappingActivityLists[0][i]._Name.Replace(' ', '_') + "}");
-                    trainingTW.WriteLine("\n@DATA\n\n");
+                        arffHeader+=this.annotatedSession.OverlappingActivityLists[0][i]._Name.Replace(' ', '_') + ",";
+                    arffHeader+=this.annotatedSession.OverlappingActivityLists[0][i]._Name.Replace(' ', '_') + "}\n";
+                    arffHeader+="\n@DATA\n\n";
+
+                    trainingTW.WriteLine(arffHeader);
+                    trainingTW.Write("@ATTRIBUTE activity {");
+
+                    string structureArffFile = this.storageDirectory + "\\structure.arff";
+                    structureTW = new StreamWriter(structureArffFile);
+                    structureTW.WriteLine("@RELATION wockets");
+                    structureTW.WriteLine(arffHeader);
+                    structureTW.Write("@ATTRIBUTE activity {");
+
+
                 }
 
                 string current_activity = "unknown";
