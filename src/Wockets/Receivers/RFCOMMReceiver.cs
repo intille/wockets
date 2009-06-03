@@ -442,7 +442,7 @@ namespace Wockets.Receivers
             }
         }
 
-
+       
         private void readingFunction()
         {
             double prevTime = 0;
@@ -450,6 +450,9 @@ namespace Wockets.Receivers
             byte[] buffer = new byte[100];
 
             double nodataTimer = WocketsTimer.GetUnixTime();
+            int sendTimer = 0;
+            byte[] sendByte = new byte[1];
+            sendByte[0] = 0xff;
 
             n= btClient.GetStream();
             localBuffer = new byte[DEFAULT_BUFFER_SIZE];
@@ -509,6 +512,13 @@ namespace Wockets.Receivers
                             Thread.Sleep(100);
                              */
 
+                            if (sendTimer > 100)
+                            {                   
+                                btSocket.Send(sendByte,1, SocketFlags.None); ;
+                                sendTimer = 0;
+                                Thread.Sleep(100);
+                            }
+                            sendTimer++;
                             if (btSocket.Available > 0)
                             {
                                 currentTime = WocketsTimer.GetUnixTime();
