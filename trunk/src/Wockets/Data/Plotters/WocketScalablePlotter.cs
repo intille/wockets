@@ -121,9 +121,20 @@ namespace Wockets.Data.Plotters
 
                             if ((this.wocketsController._Sensors[data.SensorID])._Class == Wockets.Sensors.SensorClasses.HTCDiamondTouch)
                             {
-                                g.DrawEllipse(p[0], lastColumn[data.SensorID], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.X), 2, 2);
-                                g.DrawEllipse(p[1], lastColumn[data.SensorID], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Y), 2, 2);
-                                g.DrawEllipse(p[2], lastColumn[data.SensorID], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Z), 2, 2);
+                                if (this.wocketsController._Sensors.Count != 1)
+                                {
+                                    g.DrawEllipse(p[0], lastColumn[data.SensorID], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.X), 2, 2);
+                                    g.DrawEllipse(p[1], lastColumn[data.SensorID], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Y), 2, 2);
+                                    g.DrawEllipse(p[2], lastColumn[data.SensorID], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Z), 2, 2);
+                                }
+                                else
+                                {
+                                    g.DrawLine(p[0], this.currentColumns[i], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * previousVals[i][0]), this.currentColumns[i] + 1, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.X));
+                                    g.DrawLine(p[1], this.currentColumns[i], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * previousVals[i][1]), this.currentColumns[i] + 1, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Y));
+                                    g.DrawLine(p[2], this.currentColumns[i], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * previousVals[i][2]), this.currentColumns[i] + 1, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Z));
+                                }
+                                if (this.currentColumns[i] > lastColumn[data.SensorID])
+                                    lastColumn[data.SensorID] = this.currentColumns[i];
                             }
                             else
                             {
