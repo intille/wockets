@@ -660,22 +660,28 @@ namespace WocketsApplication.DataLogger
 
             labelIndex = new Hashtable();
             //find arff file
-            string[] arffFiles = Directory.GetFileSystemEntries(this.storageDirectory, "*.arff");
-            if (arffFiles.Length != 1)
-                throw new Exception("Multiple Arff Files in Directory");
-            instances = new Instances(new StreamReader(arffFiles[0]));
-            instances.Class = instances.attribute(FeatureExtractor.ArffAttributeLabels.Length);
+        
+            
             classifier = new J48();
-             if (!File.Exists(this.storageDirectory+"\\model.xml"))
-             {
-                 classifier.buildClassifier(instances);
-                 TextWriter tc = new StreamWriter(this.storageDirectory + "\\model.xml");
-                 classifier.toXML(tc);
-                 tc.Flush();
-                 tc.Close();
-             }
-             else
+            if (!File.Exists(this.storageDirectory + "\\model.xml"))
+            {
+                string[] arffFiles = Directory.GetFileSystemEntries(this.storageDirectory, "output*.arff");
+                if (arffFiles.Length != 1)
+                    throw new Exception("Multiple Arff Files in Directory");
+                instances = new Instances(new StreamReader(arffFiles[0]));
+                instances.Class = instances.attribute(FeatureExtractor.ArffAttributeLabels.Length);
+                classifier.buildClassifier(instances);
+                TextWriter tc = new StreamWriter(this.storageDirectory + "\\model.xml");
+                classifier.toXML(tc);
+                tc.Flush();
+                tc.Close();
+            }
+            else
+            {
+                instances = new Instances(new StreamReader(this.storageDirectory + "\\structure.arff"));
+                instances.Class = instances.attribute(FeatureExtractor.ArffAttributeLabels.Length);
                 classifier.buildClassifier(this.storageDirectory + "\\model.xml", instances);
+            }
 
 
             fvWekaAttributes = new FastVector(FeatureExtractor.ArffAttributeLabels.Length + 1);
@@ -1506,6 +1512,7 @@ namespace WocketsApplication.DataLogger
         private bool isTraining = false;
         private TextWriter trainingTW = null;
         private TextWriter structureTW = null;
+        private int structureFileExamples = 0;
 
         private Thread plottingThread = null;
         private int totalCalories = 0;
@@ -1825,6 +1832,7 @@ namespace WocketsApplication.DataLogger
                             currentCalories += 1;
                             totalCalories += 1;
                         }
+                   
                         pieChart.SetCalories(totalCalories, currentCalories);
                         pieChart.Data = this.aList.toPercentHashtable();
                         pieChart.Invalidate();
@@ -1866,7 +1874,6 @@ namespace WocketsApplication.DataLogger
                     structureTW.WriteLine(arffHeader);
 
                 }
-
                 string current_activity = "unknown";
                 if (this.currentRecord != null)
                 {
@@ -1876,6 +1883,11 @@ namespace WocketsApplication.DataLogger
                         current_activity = this.currentRecord.Activities._CurrentActivity;
                         string arffSample = FeatureExtractor.toString() + "," + current_activity;
                         trainingTW.WriteLine(arffSample);
+                        if (structureFileExamples < 10)
+                        {
+                            structureTW.WriteLine(arffSample);
+                            structureFileExamples++;
+                        }
                     }
                 }
             }
@@ -1883,6 +1895,9 @@ namespace WocketsApplication.DataLogger
             {
                 if (trainingTW != null)
                 {
+                    structureTW.Flush();
+                    structureTW.Close();                  
+                    structureTW = null;
                     trainingTW.Flush();
                     trainingTW.Close();
                     trainingTW = null;
