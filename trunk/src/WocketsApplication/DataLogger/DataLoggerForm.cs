@@ -659,19 +659,23 @@ namespace WocketsApplication.DataLogger
             #endregion Initialize Feature Extraction
 
             labelIndex = new Hashtable();
-            instances = new Instances(new StreamReader(this.storageDirectory + "\\realtime-output.arff"));
+            //find arff file
+            string[] arffFiles = Directory.GetFileSystemEntries(aDataDirectory, "*.arff");
+            if (arffFiles.Length != 1)
+                throw new Exception("Multiple Arff Files in Directory");
+            instances = new Instances(new StreamReader(arffFiles[0]));
             instances.Class = instances.attribute(FeatureExtractor.ArffAttributeLabels.Length);
             classifier = new J48();
              if (!File.Exists(this.storageDirectory+"\\model.xml"))
              {
                  classifier.buildClassifier(instances);
-                 TextWriter tc = new StreamWriter("model.xml");
+                 TextWriter tc = new StreamWriter(this.storageDirectory + "\\model.xml");
                  classifier.toXML(tc);
                  tc.Flush();
                  tc.Close();
              }
              else
-            classifier.buildClassifier(this.storageDirectory + "\\model.xml", instances);
+                classifier.buildClassifier(this.storageDirectory + "\\model.xml", instances);
 
 
             fvWekaAttributes = new FastVector(FeatureExtractor.ArffAttributeLabels.Length + 1);
