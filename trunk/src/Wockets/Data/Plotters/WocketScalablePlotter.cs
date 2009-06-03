@@ -98,7 +98,7 @@ namespace Wockets.Data.Plotters
         }
         public void Draw(Graphics g)
         {
-
+            int lastColumnDrawn = 0;
             for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
             {
                 int receiverID = this.wocketsController._Sensors[i]._Receiver;
@@ -115,6 +115,8 @@ namespace Wockets.Data.Plotters
                         //check the data comes from the sensor i if the decoder is used with multiple sensors
                         if (data.SensorID == this.wocketsController._Sensors[i]._ID)
                         {
+                            if (this.currentColumns[i] > lastColumnDrawn)
+                                lastColumnDrawn = this.currentColumns[i];
 
                             if (this.currentColumns[i] >= this.plotAreaSize.Width - 1)
                                 requiresFullRedraw = true;
@@ -123,9 +125,10 @@ namespace Wockets.Data.Plotters
                             {
                                 if (this.wocketsController._Sensors.Count != 1)
                                 {
-                                    g.DrawEllipse(p[0], lastColumn[data.SensorID], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.X), 2, 2);
-                                    g.DrawEllipse(p[1], lastColumn[data.SensorID], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Y), 2, 2);
-                                    g.DrawEllipse(p[2], lastColumn[data.SensorID], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Z), 2, 2);
+
+                                    g.DrawEllipse(p[0], lastColumnDrawn, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.X), 2, 2);
+                                    g.DrawEllipse(p[1], lastColumnDrawn, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Y), 2, 2);
+                                    g.DrawEllipse(p[2], lastColumnDrawn, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Z), 2, 2);
                                 }
                                 else
                                 {
