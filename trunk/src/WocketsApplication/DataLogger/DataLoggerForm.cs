@@ -109,6 +109,7 @@ namespace WocketsApplication.DataLogger
         /// </summary>
         private Hashtable sensorLabels;
         private Hashtable sensorStatus;
+        private Label samplingLabel;
         private System.Windows.Forms.Label[] labels;
         /// <summary>
         /// Expected sampling rate labels
@@ -146,10 +147,15 @@ namespace WocketsApplication.DataLogger
         /// A variable that stores the longest label on a category button for dynamic resizing of the buttons
         /// </summary>
         private string longest_label = "";
+        private int label_width;
+        private int label_height;
+        private Font textFont;
+
+        private Label[] ActGUIlabels;
 
         #endregion Definition of GUI Components
 
-        #region Sampling Rate Components
+        #region Sampling Rate and Activity Count Components
         /// <summary>
         /// An array for accumulating received packets to calculate sample rate.
         /// </summary>
@@ -166,7 +172,8 @@ namespace WocketsApplication.DataLogger
         /// Change in time since last calculation
         /// </summary>
         private long deltaT;
-        #endregion Sampling Rate Components
+        
+        #endregion Sampling Rate and Activity Count Components
 
         #region Definition of Logging Variables and Flags
         /// <summary>
@@ -687,6 +694,26 @@ namespace WocketsApplication.DataLogger
                 fvClassVal.addElement(label);
             }
 
+            this.ActGUIlabels = new Label[activityLabels.Length];
+            Label cur= new Label();
+            cur = new Label();
+            cur.Font = new System.Drawing.Font("Tahoma", 14F, System.Drawing.FontStyle.Bold);
+            cur.Text = "Best Guess:";
+            cur.Location = new Point(16, 16);
+            cur.Size = new Size(400, 50);
+            this.panel4.Controls.Add(cur);
+            Color blank = Color.FromArgb(240, 240, 240);
+            for (int i = 0; i < activityLabels.Length; i++)
+            {
+                cur = new Label();
+                cur.Font = new System.Drawing.Font("Tahoma", 14F, System.Drawing.FontStyle.Bold);
+                cur.Text = activityLabels[i];
+                cur.Location = new Point(16, 66 + i * 50);
+                cur.Size= new Size(400,50);
+                cur.ForeColor = blank;
+                this.ActGUIlabels[i] = cur;
+                this.panel4.Controls.Add(cur);
+            }
 
             weka.core.Attribute ClassAttribute = new weka.core.Attribute("activity", fvClassVal);
 
@@ -1632,13 +1659,17 @@ namespace WocketsApplication.DataLogger
                             this.deltaT=Math.Abs(DateTime.Now.Ticks - this.LastTime);
                             if (this.deltaT >= 50000000)
                             {
+                                
                                 for (int x=0; x < this.wocketsController._Sensors.Count; x++)
                                 {
                                     String labelKey = "W" + this.wocketsController._Sensors[x]._ID;
                                     this.wocketsController._Sensors[x].setSR(this.AccumPackets[this.wocketsController._Sensors[x]._ID] /5);
-                                    Label t = (System.Windows.Forms.Label)this.sensorLabels[labelKey];
-                                    t.Text="W" + this.wocketsController._Sensors[x]._ID + ": " + this.wocketsController._Sensors[x].getSR() + "/90";
+                                    //Label t = (System.Windows.Forms.Label)this.sensorLabels[labelKey];
+                                    //t.Text="W" + this.wocketsController._Sensors[x]._ID + ": " + this.wocketsController._Sensors[x].getSR() + "/90";
+                                    if (x == 0) this.AccumPackets[0] = 0;
+                                    this.AccumPackets[0] += this.wocketsController._Sensors[x].getSR();
                                 }
+                                this.samplingLabel.Text = "Samp Rate: " + this.AccumPackets[0] / this.wocketsController._Sensors.Count;
                                 this.SRcounter = 0;
                                 this.LastTime = DateTime.Now.Ticks;
                                 for (int x=0; x < this.AccumPackets.Length; x++)
@@ -1698,8 +1729,14 @@ namespace WocketsApplication.DataLogger
                         classificationCounter = 0;
                         int mostCount = 0;
                         string mostActivity = "";
+                        Color indicate;
+                        int level;
                         for (int j = 0; (j < labelCounters.Length); j++)
                         {
+                            level=240-240*labelCounters[j]/this.classifierConfiguration._SmoothWindows;
+                            indicate = Color.FromArgb(level, level, level);
+                            this.ActGUIlabels[j].ForeColor = indicate;
+                            this.ActGUIlabels[j].Invalidate();
                             if (labelCounters[j] > mostCount)
                             {
                                 mostActivity = activityLabels[j];
@@ -1839,6 +1876,7 @@ namespace WocketsApplication.DataLogger
             }
             #endregion Training
             #region CollectingData
+
 
             /*
             if (ttw == null)
