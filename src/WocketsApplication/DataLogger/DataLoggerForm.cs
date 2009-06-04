@@ -645,7 +645,9 @@ namespace WocketsApplication.DataLogger
 #if (PocketPC)
 
             this.tabControl1.TabPages.RemoveAt(4);
+            this.tabControl1.TabPages.RemoveAt(1);
             this.tabControl1.SelectedIndex = 0;
+            this.Text = "Activity Tracking";
 #else
             this.ShowForms();
 #endif
