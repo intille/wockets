@@ -921,7 +921,7 @@ namespace WocketsApplication.DataLogger
                     label.Text = "Sensor " + this.wocketsController._Sensors[i]._ID;
                     label.Font = textFont;
                     this.labels[sensor_id] = label;
-                    this.panel4.Controls.Add(label);
+                    //this.panel4.Controls.Add(label);
 
                     System.Windows.Forms.Label label2 = new System.Windows.Forms.Label();
                     //label2.AutoSize = true;
@@ -930,7 +930,7 @@ namespace WocketsApplication.DataLogger
                     label2.Name = "E(SR) " + this.wocketsController._Sensors[i]._ID;
                     label2.Text = "unknown"; //rate.ToString("00.00") + "%";
                     label2.Font = textFont;
-                    this.panel4.Controls.Add(label2);
+                    //this.panel4.Controls.Add(label2);
                     this.expectedLabels[sensor_id] = label2;
 
                     System.Windows.Forms.Label label3 = new System.Windows.Forms.Label();
@@ -940,7 +940,7 @@ namespace WocketsApplication.DataLogger
                     label2.Name = "Samples " + this.wocketsController._Sensors[i]._ID;
                     label3.Text = "unknown"; //rate.ToString("00.00") + "%";
                     label3.Font = textFont;
-                    this.panel4.Controls.Add(label3);
+                    //this.panel4.Controls.Add(label3);
                     this.samplesPerSecond[sensor_id] = label3;
 
                     counter++;
