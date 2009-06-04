@@ -1189,6 +1189,7 @@ namespace WocketsApplication.DataLogger
                 this.startStopButton.BackColor = System.Drawing.Color.Green;
                 this.overallTimer.reset();
                 this.goodTimer.reset();
+                extractedVectors = 0;
 
                 //store the current state of the categories
                 this.currentRecord._EndDate = DateTime.Now.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ssK");
@@ -1332,11 +1333,12 @@ namespace WocketsApplication.DataLogger
             }
             else
             {
-                if (control_id == GOOD_TIMER)
-                    this.label1.Text = label;
-                else if (control_id == OVERALL_TIMER)
+                //if (control_id == GOOD_TIMER)
+                 //   this.label1.Text = label;
+                if (control_id == OVERALL_TIMER)
                 {
                     this.label3.Text = label;
+                    this.label1.Text = extractedVectors.ToString();
 
                 }
 #if (PocketPC)
@@ -1517,6 +1519,7 @@ namespace WocketsApplication.DataLogger
         private int totalCalories = 0;
         private int currentCalories = 0;
         private string previousActivity = "";
+        private int extractedVectors = 0;
         private void readDataTimer_Tick(object sender, EventArgs e)
         {
 
@@ -1542,6 +1545,12 @@ namespace WocketsApplication.DataLogger
                     trainingTW.Flush();
                     trainingTW.Close();
                     trainingTW = null;
+                }
+                if (structureTW != null)
+                {
+                    structureTW.Flush();
+                    structureTW.Close();
+                    structureTW = null;
                 }
 
                 if (aPLFormatLogger != null)
@@ -1882,6 +1891,7 @@ namespace WocketsApplication.DataLogger
                         current_activity = this.currentRecord.Activities._CurrentActivity;
                         string arffSample = FeatureExtractor.toString() + "," + current_activity;
                         trainingTW.WriteLine(arffSample);
+                        extractedVectors++;
                         if (structureFileExamples < 10)
                         {
                             structureTW.WriteLine(arffSample);
