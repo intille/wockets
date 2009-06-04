@@ -168,7 +168,7 @@ namespace Wockets.Data.Plotters
             }
 
             //check if the columns are in sync within 30 points
-            for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
+            /*for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
             {
                 for (int j = i + 1; (j < this.wocketsController._Sensors.Count); j++)
                 {
@@ -180,7 +180,7 @@ namespace Wockets.Data.Plotters
                         break;
                     }
                 }
-            }
+            }*/
 
             if (requiresFullRedraw)
             {
