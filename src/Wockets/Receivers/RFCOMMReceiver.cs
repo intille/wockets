@@ -517,7 +517,7 @@ namespace Wockets.Receivers
                                 
                                 btSocket.Send(sendByte,1, SocketFlags.None); ;
                                 sendTimer = 0;
-                                Thread.Sleep(100);
+                                //Thread.Sleep(100);
                             }
                             sendTimer++;
                              
