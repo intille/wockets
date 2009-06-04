@@ -511,16 +511,15 @@ namespace Wockets.Receivers
                             btSocket.Send(cmd, 8, SocketFlags.None); ;
                             Thread.Sleep(100);
                              */
-                            
+                            /*
                             if (sendTimer > 2000)
                             {        
                                 
                                 btSocket.Send(sendByte,1, SocketFlags.None); ;
-                                sendTimer = 0;
-                                //Thread.Sleep(100);
+                                sendTimer = 0;                  
                             }
                             sendTimer++;
-                             
+                             */
                             if (btSocket.Available > 0)
                             {
                                 currentTime = WocketsTimer.GetUnixTime();
