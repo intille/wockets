@@ -117,7 +117,7 @@ namespace Wockets.Receivers
 #endif
                 return true;
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 return false;
             }
@@ -409,7 +409,7 @@ namespace Wockets.Receivers
 
         //Use a counter to avoid calling the timer function
         private int disconnectionCounter = 0;
-        private const int MAX_DISCONNECTION_COUNTER = 500; //approximately consider disconnected if 1 sec passes with no data
+        private const int MAX_DISCONNECTION_COUNTER = 1000; //approximately consider disconnected if 10 sec passes with no data
 
         ArrayList batchTimestamps;
         ArrayList batchBytes;
@@ -511,20 +511,22 @@ namespace Wockets.Receivers
                             btSocket.Send(cmd, 8, SocketFlags.None); ;
                             Thread.Sleep(100);
                              */
-
-                            if (sendTimer > 100)
-                            {                   
+                            
+                            if (sendTimer > 2000)
+                            {        
+                                
                                 btSocket.Send(sendByte,1, SocketFlags.None); ;
                                 sendTimer = 0;
                                 Thread.Sleep(100);
                             }
                             sendTimer++;
+                             
                             if (btSocket.Available > 0)
                             {
                                 currentTime = WocketsTimer.GetUnixTime();
                                 bytesReceived = btSocket.Receive(singleReadBuffer, (DEFAULT_BUFFER_SIZE - currentBytes > singleReadBuffer.Length) ? singleReadBuffer.Length : DEFAULT_BUFFER_SIZE - currentBytes, SocketFlags.None);
-                                batchTimestamps.Add(currentTime);
-                                batchBytes.Add(bytesReceived);
+                                //batchTimestamps.Add(currentTime);
+                               // batchBytes.Add(bytesReceived);
                             }
 
                            Thread.Sleep(10);
@@ -566,7 +568,7 @@ namespace Wockets.Receivers
                             
                         }
                         catch (Exception e)
-                        {
+                        {                          
                             socketDead = true;
                         }
                         
