@@ -213,6 +213,10 @@
       <Project>{90C9ADE0-EF58-449F-B13F-256BEA8F5FD7}</Project>
       <Name>OpenNETCF.GDIPlus</Name>
     </ProjectReference>
+    <ProjectReference Include="InTheHand.Net.csproj">
+      <Project>{4FA89FA9-C44E-4886-BB0B-A9AFB6DA1E08}</Project>
+      <Name>InTheHand.Net</Name>
+    </ProjectReference>
     <ProjectReference Include="WocketsWeka.csproj">
       <Project>{637F0352-A172-4CD3-8C6B-C318CC92C14B}</Project>
       <Name>WocketsWeka</Name>
