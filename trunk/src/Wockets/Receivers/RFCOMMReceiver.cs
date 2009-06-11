@@ -515,8 +515,9 @@ namespace Wockets.Receivers
                             if (sendTimer > 2000)
                             {        
                                 
-                                btSocket.Send(sendByte,1, SocketFlags.None); ;
+                                btSocket.Send(sendByte,1, SocketFlags.None);
                                 sendTimer = 0;
+                                Thread.Sleep(50);
                   
                             }
                             sendTimer++;
