@@ -35,6 +35,12 @@ using WocketsApplication.Utils;
 using WocketsApplication.Utils.Forms.Progress;
 
 using WocketsApplication.Feedback;
+#if (PocketPC)
+using InTheHand.Net;
+using InTheHand.Net.Sockets;
+using InTheHand.Net.Bluetooth;
+using InTheHand.Net.Ports;
+#endif
 
 namespace WocketsApplication.DataLogger
 {
@@ -109,6 +115,8 @@ namespace WocketsApplication.DataLogger
         /// </summary>
         private Hashtable sensorLabels;
         private Hashtable sensorStatus;
+        private Hashtable sensorBattery;
+        private Image[] batteryImg = new Image[] { (Image)new Bitmap(Constants.NETWORK_STATUS_DIRECTORY + "1.gif"), (Image)new Bitmap(Constants.NETWORK_STATUS_DIRECTORY + "2.gif"), (Image)new Bitmap(Constants.NETWORK_STATUS_DIRECTORY + "3.gif"), (Image)new Bitmap(Constants.NETWORK_STATUS_DIRECTORY + "4.gif"), (Image)new Bitmap(Constants.NETWORK_STATUS_DIRECTORY + "5.gif"), (Image)new Bitmap(Constants.NETWORK_STATUS_DIRECTORY + "6.gif") };
         private Label samplingLabel;
         private System.Windows.Forms.Label[] labels;
         /// <summary>
@@ -185,6 +193,10 @@ namespace WocketsApplication.DataLogger
         /// </summary>
         int flushTimer = 0;
 
+        private int offTimer = 0;
+
+        private bool activeRcv = false;
+
         #endregion Definition of Logging Variables and Flags
 
         #region Wockets and MITes Variables
@@ -226,6 +238,7 @@ namespace WocketsApplication.DataLogger
         //private MITesLoggerPLFormat aPLFormatLogger;
         private PLFormatLogger aPLFormatLogger;
         //private MITesActivityLogger aMITesActivityLogger;
+        private Wockets.Utils.Logger logger;
         #endregion Definition of logging functions
 
         #region Definition of built-in sensors polling threads   (Pocket PC Only)
@@ -330,7 +343,7 @@ namespace WocketsApplication.DataLogger
                 InitializeActivityTracker(storageDirectory, wocketsController, annotatedSession, classifierConfiguration);
             this.AccumPackets = new int[wocketsController._Receivers.Count];
             this.LastTime = DateTime.Now.Ticks;
-
+            this.logger = new Logger(this.storageDirectory);
 
         }
 
@@ -1524,6 +1537,24 @@ namespace WocketsApplication.DataLogger
         private int extractedVectors = 0;
         private void readDataTimer_Tick(object sender, EventArgs e)
         {
+            /*if (this.activeRcv)
+            {
+                this.offTimer++;
+                if (this.offTimer >= 100)
+                {
+                    this.activeRcv = false;
+                    for (int i = 0; (i < this.wocketsController._Receivers.Count); i++)
+                    {
+                        this.wocketsController._Receivers[i].Dispose();
+                    }
+                    BluetoothRadio.PrimaryRadio.Mode = RadioMode.PowerOff;
+                    logger.Warn("radio powering off");
+                    Thread.Sleep(60000);
+                    BluetoothRadio.PrimaryRadio.Mode = RadioMode.Connectable;
+                    logger.Warn("radio powering on");
+                    this.offTimer = 0;
+                }
+            }*/
 
             if (isQuitting)
             {
@@ -1580,10 +1611,13 @@ namespace WocketsApplication.DataLogger
             {
                 if (this.wocketsController._Receivers[i]._Type == ReceiverTypes.RFCOMM)
                 {
-                    if ((this.bluetoothConnectors[this.wocketsController._Receivers[i]._ID]!=null) &&
+                    if ((this.bluetoothConnectors[this.wocketsController._Receivers[i]._ID] != null) &&
                         (!this.bluetoothConnectors[this.wocketsController._Receivers[i]._ID].Reconnecting) &&
                         (this.wocketsController._Receivers[i]._Running == false))
+                    {
                         this.bluetoothConnectors[this.wocketsController._Receivers[i]._ID].Reconnect();
+                        logger.Warn("Reconnected");
+                    }
                     
                 }
 
@@ -1612,6 +1646,8 @@ namespace WocketsApplication.DataLogger
                         if (dataLength > 0)
                         {                 
                             numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer, dataLength);
+                            /*if (!this.activeRcv) logger.Warn("receiving data");
+                            this.activeRcv = true;*/
                         }
 
                         #region
