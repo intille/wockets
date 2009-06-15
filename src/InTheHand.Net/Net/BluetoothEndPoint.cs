@@ -57,7 +57,7 @@ namespace InTheHand.Net
 			
 			m_id = address;
 			m_service = service;
-			m_port = port;
+            m_port = port;
            
         }
             #endregion

@@ -26,21 +26,24 @@ namespace Wockets.Sensors
         protected const string TEXT_ATTRIBUTE = "text";
         #endregion Serialization Constants
 
-        private int decoder;
+        private Decoder decoder;
         private int receiver;
         private SensorClasses classname;
         private SensorTypes type;
+        private string rootStorageDirectory;
         private string location;
         private string description;
         private int id;
         private int sr;
         private int actSR;
+        private bool saving;
 
         public Sensor(SensorTypes type,SensorClasses classname)
         {
             this.classname = classname;
             this.type = type;
             this.sr = 0;
+            this.saving = false;
         }
         /*
         public Sensor(int id, SensorClasses classname, SensorTypes type, string location, string description)
@@ -57,6 +60,17 @@ namespace Wockets.Sensors
             return this.id.CompareTo(((Sensor)sensor)._ID);
         }
 
+        public bool _Saving
+        {
+            get
+            {
+                return this.saving;
+            }
+            set
+            {
+                this.saving = value;
+            }
+        }
         public int _SamplingRate
         {
             get
@@ -127,6 +141,19 @@ namespace Wockets.Sensors
             }
         }
 
+        public string _RootStorageDirectory
+        {
+            get
+            {
+                return this.rootStorageDirectory;
+            }
+
+            set
+            {
+                this.rootStorageDirectory = value;
+            }
+        }
+
         public string _Location
         {
             get
@@ -151,7 +178,7 @@ namespace Wockets.Sensors
             }
         }
 
-        public int _Decoder
+        public Decoder _Decoder
         {
             get
             {
@@ -204,6 +231,11 @@ namespace Wockets.Sensors
 
         public abstract string ToXML();
 
+        public abstract void Save();
+        public abstract void Load();
+
+        public abstract void Dispose();
+
         public virtual void FromXML(string xml)
         {
             XmlDocument dom = new XmlDocument();
@@ -233,7 +265,10 @@ namespace Wockets.Sensors
                         else if ((jNode.Name == Receiver.RECEIVER_ELEMENT) && (jAttribute.Name == ID_ATTRIBUTE))
                             this._Receiver = Convert.ToInt32(jAttribute.Value);
                         else if ((jNode.Name == Decoder.DECODER_ELEMENT) && (jAttribute.Name == ID_ATTRIBUTE))
-                            this._Decoder = Convert.ToInt32(jAttribute.Value);                      
+                        {
+                            this._Decoder = new Decoders.Accelerometers.GenericDecoder();
+                            this._Decoder._ID = Convert.ToInt32(jAttribute.Value);
+                        }
                         else if ((jNode.Name == LOCATION_ELEMENT) && (jAttribute.Name == TEXT_ATTRIBUTE))
                             this._Location = jAttribute.Value;
                         else if ((jNode.Name == DESCRIPTION_ELEMENT) && (jAttribute.Name == TEXT_ATTRIBUTE))

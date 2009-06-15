@@ -132,9 +132,16 @@ namespace Wockets
                     else if (jNode.Name == DecoderList.DECODERS_ELEMENT)
                         this.decoders.FromXML(jNode.OuterXml);
                     else if (jNode.Name == SensorList.SENSORS_ELEMENT)
-                        this.sensors.FromXML(jNode.OuterXml);                    
+                    {
+                        //the sensor by default loads with a generic decoder as a place holder with its ID set
+                        //to point to the right decoder in this.decoders
+                        this.sensors.FromXML(jNode.OuterXml);
+
+                        //the decoder references for the sensor have to be updated correctly
+                        for (int i = 0; (i < this.sensors.Count); i++)
+                            this.sensors[i]._Decoder = this.decoders[this.sensors[i]._Decoder._ID];
+                    }
                 }
-     
             }
         }
         #endregion Serialization Methods

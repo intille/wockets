@@ -513,7 +513,7 @@ namespace WocketsApplication.ActivityTracker
             #endregion Initialize Quality Tracking variables
 
             #region Initialize Logging
-            InitializeLogging(this.storageDirectory);
+            //InitializeLogging(this.storageDirectory);
             #endregion Initialize Logging
 
             #region Start Collecting Data
@@ -697,7 +697,7 @@ namespace WocketsApplication.ActivityTracker
             #endregion Initialize Quality Tracking variables
 
             #region Initialize Logging
-            InitializeLogging(this.storageDirectory);
+            //InitializeLogging(this.storageDirectory);
             #endregion Initialize Logging
 
             #region Start Collecting Data
@@ -1512,13 +1512,15 @@ namespace WocketsApplication.ActivityTracker
                 }
 
 
+                for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
+                    this.wocketsController._Sensors[i].Dispose();
 
-
-                if (aPLFormatLogger != null)
+               /* if (aPLFormatLogger != null)
                 {
                     aPLFormatLogger.FlushBytes();
                     aPLFormatLogger.ShutdownFiles();
-                }
+                }*/
+
                 FeatureExtractor.Cleanup();
 
                 // ttw.Flush();
@@ -1565,7 +1567,7 @@ namespace WocketsApplication.ActivityTracker
                     currentReceiver = this.wocketsController._Receivers[sensor._Receiver];
                     if (currentReceiver._Running == true)
                     {
-                        Decoder decoder = this.wocketsController._Decoders[sensor._Decoder];
+                        Decoder decoder = sensor._Decoder;
                         int dataLength = currentReceiver.Read();
                         int numDecodedPackets = 0;
                         if (dataLength > 0)

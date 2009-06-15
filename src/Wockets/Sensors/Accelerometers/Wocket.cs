@@ -21,6 +21,22 @@ namespace Wockets.Sensors.Accelerometers
         }
         */
 
+        public override void Save()
+        {
+            base.Save();
+        }
+
+        public override void Load()
+        {
+            base.Load();
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+        }
+
+
         public override string ToXML()
         {
             return base.ToXML("");

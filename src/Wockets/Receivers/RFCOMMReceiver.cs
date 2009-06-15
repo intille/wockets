@@ -123,7 +123,7 @@ namespace Wockets.Receivers
             }
         }
 
-
+        #if (PocketPC)
         public ArrayList BatchTimestamps
         {
             get
@@ -147,11 +147,16 @@ namespace Wockets.Receivers
                 this.bluetoothStream.BatchBytes = value;
             }
         }
+#endif
         public override int Read()
         {
-           
+                   #if (PocketPC)
            return  this.bluetoothStream.Read(this._Buffer, 0, this._Buffer.Length);
+#else
+            return 0;
+#endif
         }
+
         public override void Write(byte[] data, int length)
         {
             #if (PocketPC)
@@ -174,7 +179,7 @@ namespace Wockets.Receivers
         }
 
         #region Radio Commands
-
+                  #if (PocketPC)
         private void EnterCMD()
         {
             byte[] cmd = new byte[3];
@@ -191,16 +196,20 @@ namespace Wockets.Receivers
             this.bluetoothStream.Write(cmd, 0, 3);
         }
 
+
+#endif
+
         public void Reset()
         {
+#if (PocketPC)
             byte[] cmd = new byte[4];
             cmd[0] = (byte)'R';
             cmd[1] = (byte)',';
             cmd[2] = (byte)'1';
             cmd[3] = (byte)13;
             this.bluetoothStream.Write(cmd, 0, 4);
+#endif
         }
-
         public bool LowPower
         {
             get
@@ -210,6 +219,7 @@ namespace Wockets.Receivers
 
             set
             {
+                #if (PocketPC)
                 if (value != this.sniffMode)
                 {
                     if (value)
@@ -248,6 +258,7 @@ namespace Wockets.Receivers
 
                     }
                 }
+#endif
             }
         }
         #endregion Radio Commands

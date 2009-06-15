@@ -107,7 +107,7 @@ namespace Wockets.Data.Plotters
                 {
 
 
-                    int decoderID = this.wocketsController._Sensors[i]._Decoder;
+                    int decoderID = this.wocketsController._Sensors[i]._Decoder._ID;
                     for (int j = this.plotFrom[decoderID]; (j < this.wocketsController._Decoders[decoderID]._Size); j++)
                     {
                         AccelerationData data = ((AccelerationData)this.wocketsController._Decoders[decoderID]._Data[j]);

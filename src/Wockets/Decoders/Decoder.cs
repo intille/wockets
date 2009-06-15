@@ -23,6 +23,10 @@ namespace Wockets.Decoders
         private int id;
         private int index;
         private static int IDCounter = 0;
+
+        public Decoder()
+        {
+        }
         public Decoder(int bufferSize,int packetSize)
         {
             this.data = new SensorData[bufferSize];
