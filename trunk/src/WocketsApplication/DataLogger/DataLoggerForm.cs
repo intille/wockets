@@ -34,13 +34,10 @@ using Wockets.Data.Logger;
 using WocketsApplication.Utils;
 using WocketsApplication.Utils.Forms.Progress;
 
-using WocketsApplication.Feedback;
 #if (PocketPC)
-using InTheHand.Net;
-using InTheHand.Net.Sockets;
-using InTheHand.Net.Bluetooth;
-using InTheHand.Net.Ports;
+using WocketsApplication.Feedback;
 #endif
+
 
 namespace WocketsApplication.DataLogger
 {
@@ -240,7 +237,7 @@ namespace WocketsApplication.DataLogger
 
         #region Definition of logging functions
         //private MITesLoggerPLFormat aPLFormatLogger;
-        private PLFormatLogger aPLFormatLogger;
+        //private PLFormatLogger aPLFormatLogger;
         //private MITesActivityLogger aMITesActivityLogger;
         private Wockets.Utils.Logger logger;
         #endregion Definition of logging functions
@@ -311,9 +308,11 @@ namespace WocketsApplication.DataLogger
         /// </summary>
         private bool isClassifying;
 
+        #if (PocketPC)
         private int vibrateTimer = 0;
         private Vibrator vibrator = null;
         private bool vibrateStatus = false;
+#endif
 
         #endregion Definition of different software modes
 
@@ -438,7 +437,10 @@ namespace WocketsApplication.DataLogger
 
         public void InitializeDataLogger(string storageDirectory, WocketsController wocketsController, Session annotatedSession, DTConfiguration classifierConfiguration)
         {
+            #if (PocketPC)
             this.vibrator = new Vibrator();
+            #endif
+
             this.storageDirectory = storageDirectory;
             this.wocketsController = wocketsController;
             this.annotatedSession = annotatedSession;
@@ -539,7 +541,7 @@ namespace WocketsApplication.DataLogger
             #endregion Initialize Quality Tracking variables
 
             #region Initialize Logging
-            InitializeLogging(this.storageDirectory);
+            //InitializeLogging(this.storageDirectory);
             #endregion Initialize Logging
 
             #region Start Collecting Data
@@ -549,9 +551,11 @@ namespace WocketsApplication.DataLogger
             try
             {
                 //Cleanup receiver buffers as they are out of sync due to BT connection delays
+                //set them to saving mode
                 for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
                 {
                     sensor = this.wocketsController._Sensors[i];
+                    sensor._Saving = true;
                     currentReceiver = this.wocketsController._Receivers[sensor._Receiver];
                     if (currentReceiver._Running == true)
                         currentReceiver.Read();
@@ -755,7 +759,7 @@ namespace WocketsApplication.DataLogger
             #endregion Initialize Quality Tracking variables
 
             #region Initialize Logging
-            InitializeLogging(this.storageDirectory);
+            //InitializeLogging(this.storageDirectory);
             #endregion Initialize Logging
 
             #region Start Collecting Data
@@ -903,12 +907,12 @@ namespace WocketsApplication.DataLogger
 
 
         //Initialize objects for logging and storing wockets and MITes data
-        private void InitializeLogging(string dataDirectory)
+        /*private void InitializeLogging(string dataDirectory)
         {
 
             aPLFormatLogger = new PLFormatLogger(this.wocketsController,
                                                          dataDirectory + "\\data\\raw\\PLFormat\\");
-        }
+        }*/
     
         #endregion Initialization Methods
 
@@ -1597,11 +1601,14 @@ namespace WocketsApplication.DataLogger
                     structureTW = null;
                 }
 
-                if (aPLFormatLogger != null)
+                for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
+                    this.wocketsController._Sensors[i].Dispose();
+
+               /* if (aPLFormatLogger != null)
                 {
                     aPLFormatLogger.FlushBytes();
                     aPLFormatLogger.ShutdownFiles();
-                }
+                }*/
                 FeatureExtractor.Cleanup();
 
                // ttw.Flush();
@@ -1651,7 +1658,7 @@ namespace WocketsApplication.DataLogger
                     currentReceiver = this.wocketsController._Receivers[sensor._Receiver];
                     if (currentReceiver._Running == true)
                     {
-                        Decoder decoder = this.wocketsController._Decoders[sensor._Decoder];
+                        Decoder decoder = sensor._Decoder;
                         int dataLength = currentReceiver.Read();
                         int numDecodedPackets = 0;
                         if (dataLength > 0)
@@ -1995,6 +2002,7 @@ namespace WocketsApplication.DataLogger
 
             
             #region Store the sensor data
+            /*
 #if (PocketPC)
             aPLFormatLogger.Save();
 #endif
@@ -2003,7 +2011,9 @@ namespace WocketsApplication.DataLogger
             if (flushTimer > FLUSH_TIMER_MAX)
                 flushTimer = -1;
             flushTimer++;
-           
+           */
+            for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)            
+                this.wocketsController._Sensors[i].Save();            
             #endregion Store the sensor data
 
             

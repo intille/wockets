@@ -1,5 +1,7 @@
 using System;
 using System.Xml;
+using System.Collections;
+using System.IO;
 using Wockets.Sensors;
 using Wockets.Decoders;
 using Wockets.Receivers;
@@ -45,21 +47,29 @@ namespace Wockets.Sensors.Accelerometers
         private double max;
         #endregion calibration data
 
+        #region IO storage variables
+        private int presentHour = -1;
+        private string dayPath = "";
+        private ByteWriter bw = null;
+        private string currentDataFile = "";
+        private const string FILE_TYPE_PREFIX = "WocketsAccelBytes";
+        private const string FILE_EXT = "PLFormat";
+        private static int TIMESTAMP_AFTER_SAMPLES = 200;
+
+        private int timeSaveCount = TIMESTAMP_AFTER_SAMPLES;
+        private double aUnixTime = 0;
+        private double lastUnixTime = 0;
+        private bool isForceTimestampSave = true;
+        private int flushTimer = 0;
+        public static int MAX_FLUSH_TIME = 2000;
+
+        #endregion IO storage variables
+
         public Accelerometer(SensorClasses sensorclass):base(SensorTypes.ACCEL,sensorclass)
         {
         }
 
-       /* public Accelerometer(int id,SensorClasses classname, string location, string description):
-            base(id,classname, SensorTypes.ACCEL, location, description)
-        {
-            this.xmean = 0;
-            this.xstd = 0;
-            this.ymean = 0;
-            this.ystd = 0;
-            this.zmean = 0;
-            this.zstd = 0;
-        }
-        */
+
 
         public double _Min
         {
@@ -195,6 +205,189 @@ namespace Wockets.Sensors.Accelerometers
             {
                 this.zn1g = value;
             }
+        }
+
+        #region File Storage Methods
+        /// <summary>
+        /// Determine and create the directory where the raw data is saved in 1-hour chunks. 
+        /// </summary>
+        private void DetermineFilePath()
+        {
+            if (presentHour != DateTime.Now.Hour)
+            {
+                if (bw != null)
+                    bw.CloseFile();
+                presentHour = DateTime.Now.Hour;
+                // Need to create a new directory and switch the file name
+                dayPath = DirectoryStructure.DayDirectoryToUse(this._RootStorageDirectory);
+
+                // Make sure hour directory exists 
+                currentDataFile =  dayPath + "\\" + presentHour + "\\";
+                if (!System.IO.Directory.Exists(currentDataFile))
+                    System.IO.Directory.CreateDirectory(currentDataFile);
+
+                currentDataFile = currentDataFile + FILE_TYPE_PREFIX + "." +
+                               DirectoryStructure.GetDate() + "." + this._ID + "." + FILE_EXT;
+
+                bw = new ByteWriter(currentDataFile, true);
+                bw.OpenFile();
+
+                // Ensure that the first data point in the new file will start
+                // with the full, rather than differential, timecode info. 
+                isForceTimestampSave = true;
+            }
+
+        }
+
+        private int diffMS = 0;
+        private byte diffMSByte = 0;
+
+        private void WriteTimeDiff(double aUnixTime, double lastUnixTime, bool isForceTimeCodeSave)
+        {
+
+            diffMS = (int)(aUnixTime - lastUnixTime);
+
+            // Save a full timestamp if forced
+            // or time is > than 255 ms
+            if (isForceTimeCodeSave || (diffMS > 254))
+            {
+                //if (diffMS >= 254)
+                //    Console.WriteLine("Warning; Max on MS diff: " + diffMS);
+                diffMSByte = (byte)255;
+                bw.WriteByte(diffMSByte);
+                WriteTimeStampPLFormat(aUnixTime, bw);
+            }
+            else // diff MS in range and no forced timestamp save
+            {
+                diffMSByte = (byte)diffMS;
+                bw.WriteByte(diffMSByte);
+            }
+
+        }
+
+        private byte[] retBytes = new byte[6];
+        private void WriteTimeStampPLFormat(double unixTime, ByteWriter byteWriter)
+        {
+            WocketsTimer.GetUnixTimeBytes(unixTime, retBytes);
+            byteWriter.WriteBytes(retBytes, 6);
+        }
+        #endregion File Storage Methods
+
+        public override void Dispose()
+        {
+            if (bw != null)
+            {
+                bw.Flush();
+                bw.CloseFile();
+            }
+        }
+        public override void Save()
+        {
+            if (_Saving)
+            {
+                flushTimer++;
+                if (flushTimer >= MAX_FLUSH_TIME)
+                {
+                    bw.Flush();
+                    bw.CloseFile();
+                    bw = new ByteWriter(currentDataFile, false);
+                    bw.OpenFile(false);
+                    flushTimer = 0;
+                }
+
+
+                DetermineFilePath();
+                for (int i = 0; (i < this._Decoder._Size); i++)
+                {
+                    aUnixTime = this._Decoder._Data[i].UnixTimeStamp;
+
+                    if (aUnixTime < lastUnixTime)
+                    {
+                        Console.WriteLine("StepBackUnix!: " + (lastUnixTime - aUnixTime));
+                    }
+
+                    // Roughly once per second save full timestamp, no matter what
+                    if (isForceTimestampSave || (timeSaveCount == TIMESTAMP_AFTER_SAMPLES))
+                    {
+                        WriteTimeDiff(aUnixTime, lastUnixTime, true); // Force save
+                        timeSaveCount = 0;
+                    }
+                    else
+                    {
+                        WriteTimeDiff(aUnixTime, lastUnixTime, false);
+                        timeSaveCount++;
+                    }
+
+                    isForceTimestampSave = false;
+
+                    // Save Raw Bytes                        
+                    if (bw != null)
+                        for (int j = 0; j < this._Decoder._Data[i].NumRawBytes; j++)
+                            bw.WriteByte(this._Decoder._Data[i].RawBytes[j]);
+
+                    lastUnixTime = aUnixTime;
+                }
+            }
+        }
+
+        ArrayList someBinaryFiles = new ArrayList();
+        private ByteReader br;
+        private double dTimeStamp = 0;
+        private void GenerateBinaryFileList()
+        {
+
+            if (Directory.Exists(this._RootStorageDirectory) == false)
+                return;
+
+            string[] subdirectories = Directory.GetDirectories(this._RootStorageDirectory);
+            foreach (string subdirectory in subdirectories)
+            {
+                for (int i = 0; i < 30; i++)
+                {
+                    if (Directory.Exists(subdirectory + "\\" + i))
+                    {
+                        string[] matchingFiles = Directory.GetFiles(subdirectory + "\\" + i, FILE_TYPE_PREFIX + "*+" + this._ID + "." + FILE_EXT);
+                        for (int j = 0; (j < matchingFiles.Length); j++)
+                            someBinaryFiles.Add(matchingFiles[j]);
+                    }
+                }
+            }
+        }
+
+
+        private bool SetupNextFiles(int index)
+        {
+            dTimeStamp = 0;
+
+
+            if (br != null)
+                br.CloseFile();
+
+
+            br = null;
+
+            string f = ((string)someBinaryFiles[index]);
+
+            if (f != "")
+            {
+                br = new ByteReader(f);
+                br.OpenFile();
+                Console.WriteLine("Opening file for read: " + f);
+            }
+
+            if (br == null)
+                return false;
+            else
+                return true;
+        }
+
+        //Populates the decoder with the data read from the binary files
+        public override void Load()
+        {
+            //Generate the list of files to go through for this sensor
+            GenerateBinaryFileList();
+            SetupNextFiles(0);
+
         }
         protected string ToXML(string innerXML)
         {

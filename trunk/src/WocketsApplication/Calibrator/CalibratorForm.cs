@@ -881,7 +881,7 @@ namespace WocketsApplication.Calibrator
                     currentReceiver = this.wocketsController._Receivers[sensor._Receiver];
                     if (currentReceiver._Running == true)
                     {
-                        Decoder decoder = this.wocketsController._Decoders[sensor._Decoder];
+                        Decoder decoder = sensor._Decoder;
                         int dataLength = currentReceiver.Read();
                         int numDecodedPackets = 0;
                         if (dataLength > 0)

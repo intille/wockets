@@ -7,7 +7,7 @@ namespace Wockets.Data.Accelerometers
 {
     public sealed class WocketsAccelerationData: AccelerationData
     {
-        public const byte NUM_RAW_BYTES = 7;
+        public const byte NUM_RAW_BYTES = 5;
 
         public WocketsAccelerationData(byte sensorID): base(NUM_RAW_BYTES,sensorID)
         {           

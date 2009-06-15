@@ -14,7 +14,7 @@ namespace Wockets.Decoders.Accelerometers
         private const string WOCKETS_TYPE = "Wockets";
         #endregion Serialization Constants
 
-        private const int BUFFER_SIZE = 2000; //BUG: should not exceed 4096 (Lower Level Buffer Size) / 6 (MITes Packet Size)
+        private const int BUFFER_SIZE = 600; //BUG: should not exceed 4096 (Lower Level Buffer Size) / 6 (MITes Packet Size)
         private bool headerSeen;
 
         public WocketsDecoder()
@@ -60,16 +60,14 @@ namespace Wockets.Decoders.Accelerometers
                         //copy raw bytes
                         for (int i = 0; (i < WocketsAccelerationData.NUM_RAW_BYTES); i++)
                             datum.RawBytes[i] = this.packet[i];
-                        datum.Type = SensorDataType.ACCEL;
-                        //datum.Channel = (byte)((this.packet[0] & 0x38) >> 3);
-                        datum.RawBytes[0] = (byte)(((datum.RawBytes[0])&0xc7)|(sourceSensor<<3));
+                        datum.Type = SensorDataType.ACCEL;                       
+                        //datum.RawBytes[0] = (byte)(((datum.RawBytes[0])&0xc7)|(sourceSensor<<3));
                         datum.SensorID = (byte)sourceSensor;
-                        datum.X = (short)((((short)(this.packet[2] & 0x3f)) << 4) | (((short)(this.packet[3] & 0x78)) >> 3));
-                        datum.Y = (short)((((short)(this.packet[3] & 0x07)) << 7) | ((short)(this.packet[4] & 0x7f)));
-                        datum.Z = (short)((((short)(this.packet[5] & 0x7f)) << 3) | (((short)(this.packet[6] & 0x70)) >> 4));
+                        datum.X = (short)(( ((short)(this.packet[0] & 0x03)) << 8) | (((short)(this.packet[1] & 0x7f)) << 1) | (((short)(this.packet[2] & 0x40)) >>6));
+                        datum.Y = (short)((((short)(this.packet[2] & 0x3f)) << 4) | (((short)(this.packet[3] & 0x78)) >>3));
+                        datum.Z = (short)((((short)(this.packet[3] & 0x07)) << 7) | ((short)(this.packet[4] & 0x7f)));
                         //Set time stamps
                         datum.UnixTimeStamp = WocketsTimer.GetUnixTime();
-
        
                         //if (IsValid(datum))
                         decodedDataIndex++;

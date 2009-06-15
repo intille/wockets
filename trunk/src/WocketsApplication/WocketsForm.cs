@@ -97,6 +97,10 @@ namespace WocketsApplication
             try
             {
                 this.wocketsController.FromXML(this.storageDirectory + "\\SensorData.xml");
+
+                //setup where each sensors has to store its data
+                for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
+                    this.wocketsController._Sensors[i]._RootStorageDirectory = this.storageDirectory + "\\data\\raw\\PLFormat\\";
             }
             catch (Exception e)
             {
@@ -240,6 +244,10 @@ namespace WocketsApplication
             try
             {
                 this.wocketsController.FromXML(this.storageDirectory + "\\SensorData.xml");
+
+                //setup where each sensors has to store its data
+                for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
+                    this.wocketsController._Sensors[i]._RootStorageDirectory = this.storageDirectory + "\\data\\raw\\PLFormat\\";
             }
             catch (Exception e)
             {
@@ -315,6 +323,10 @@ namespace WocketsApplication
             try
             {
                 this.wocketsController.FromXML(this.storageDirectory + "\\SensorData.xml");
+
+                //setup where each sensors has to store its data
+                for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
+                    this.wocketsController._Sensors[i]._RootStorageDirectory = this.storageDirectory + "\\data\\raw\\PLFormat\\";
             }
             catch (Exception e)
             {
