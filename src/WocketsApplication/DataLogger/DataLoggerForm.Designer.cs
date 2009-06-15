@@ -126,8 +126,9 @@ namespace WocketsApplication.DataLogger
             // 
             // menuItem1
             // 
-            this.menuItem1.Text = "Quit";
-            this.menuItem1.Click += new System.EventHandler(this.menuItem1_Click);
+            this.menuItem1.Text = "Menu";
+            this.menuItem1.MenuItems.Add(this.menuItem12);
+            this.menuItem1.MenuItems.Add(this.menuItem13);
             // 
             // menuItem2
             // 
@@ -165,13 +166,15 @@ namespace WocketsApplication.DataLogger
             // 
             // menuItem12
             // 
-            this.menuItem12.Text = "On";
+            this.menuItem12.Text = "Quit";
             this.menuItem12.Enabled = true;
+            this.menuItem12.Click += new System.EventHandler(this.menuItem1_Click);
             // 
             // menuItem13
             // 
-            this.menuItem13.Text = "Buffered";
-            this.menuItem13.Enabled = false;
+            this.menuItem13.Text = "Minimize";
+            this.menuItem13.Enabled = true;
+            this.menuItem13.Click += new System.EventHandler(this.menuItem13_Click);
             // 
             // menuItem14
             // 

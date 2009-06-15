@@ -159,6 +159,10 @@ namespace WocketsApplication.DataLogger
         private int label_height;
         private Font textFont;
 
+        [DllImport("coredll.dll")]
+        static extern int ShowWindow(IntPtr hWnd, int nCmdShow);
+        const int SW_MINIMIZED = 6;
+
         private Label[] ActGUIlabels;
 
         #endregion Definition of GUI Components
@@ -1249,8 +1253,9 @@ namespace WocketsApplication.DataLogger
             }
         }
 
-        private void menuItem21_Click(object sender, EventArgs e)
+        private void menuItem13_Click(object sender, EventArgs e)
         {
+            ShowWindow(this.Handle, SW_MINIMIZED);
         }
 
         private void plotting_Click(object sender, EventArgs e)
