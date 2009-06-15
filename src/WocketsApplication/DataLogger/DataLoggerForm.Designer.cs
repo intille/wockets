@@ -133,6 +133,7 @@ namespace WocketsApplication.DataLogger
             // 
             this.menuItem2.MenuItems.Add(this.menuItem3);
             this.menuItem2.MenuItems.Add(this.menuItem10);
+            this.menuItem2.MenuItems.Add(this.menuItem11);
             this.menuItem2.MenuItems.Add(this.menuItem8);
             this.menuItem2.Text = "Options";
             // 
@@ -157,8 +158,10 @@ namespace WocketsApplication.DataLogger
             // 
             // menuItem11
             // 
-            this.menuItem11.Text = "Real Time";
-            this.menuItem11.Enabled = false;
+            this.menuItem11.Click += new System.EventHandler(this.saving_Click);
+            this.menuItem11.Text = "Saving Data";
+            this.menuItem11.Enabled = true;
+            this.menuItem11.Checked = true;
             // 
             // menuItem12
             // 
