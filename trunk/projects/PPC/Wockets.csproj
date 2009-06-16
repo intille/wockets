@@ -237,15 +237,26 @@
     <Compile Include="..\..\src\Wockets\Utils\Logger.cs">
       <Link>Utils\logger.cs</Link>
     </Compile>
+    <Compile Include="..\..\src\Wockets\Decoders\Accelerometers\GenericDecoder.cs">
+      <Link>Decoders\Accelerometers\GenericDecoder.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\ByteReader.cs">
+      <Link>Utils\ByteReader.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\ByteWriter.cs">
+      <Link>Utils\ByteWriter.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\FileReader.cs">
+      <Link>Utils\FileReader.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\FileWriter.cs">
+      <Link>Utils\FileWriter.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="InTheHand.Net.csproj">
       <Project>{4FA89FA9-C44E-4886-BB0B-A9AFB6DA1E08}</Project>
       <Name>InTheHand.Net</Name>
-    </ProjectReference>
-    <ProjectReference Include="IO.csproj">
-      <Project>{BF232194-2DC7-4BA7-91DC-0F803C4A6947}</Project>
-      <Name>IO</Name>
     </ProjectReference>
     <ProjectReference Include="SerialIO.csproj">
       <Project>{B1EB0DB9-052D-4C09-9C30-93363EC3EB46}</Project>

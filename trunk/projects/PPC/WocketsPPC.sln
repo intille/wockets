@@ -1,7 +1,5 @@
 Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual Studio 2005
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IO", "IO.csproj", "{BF232194-2DC7-4BA7-91DC-0F803C4A6947}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerialIO", "SerialIO.csproj", "{B1EB0DB9-052D-4C09-9C30-93363EC3EB46}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WocketsWeka", "WocketsWeka.csproj", "{637F0352-A172-4CD3-8C6B-C318CC92C14B}"
@@ -25,6 +23,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FixedPointFFT", "FixedPoint
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication", "..\TestApplication\TestApplication.csproj", "{24D2110A-D689-42EB-B111-A45AEA81E87C}"
 EndProject
+Project("{B900F1C2-3D47-4FEC-85B3-04AAF18C3634}") = "WocketsInstaller", "..\WocketsInstaller\WocketsInstaller.vddproj", "{228F8F79-1CD1-47AD-8D53-7DD413C9C9D5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,18 +35,6 @@ Global
 		Release|Pocket PC 2003 (ARMV4) = Release|Pocket PC 2003 (ARMV4)
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{BF232194-2DC7-4BA7-91DC-0F803C4A6947}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BF232194-2DC7-4BA7-91DC-0F803C4A6947}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BF232194-2DC7-4BA7-91DC-0F803C4A6947}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{BF232194-2DC7-4BA7-91DC-0F803C4A6947}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{BF232194-2DC7-4BA7-91DC-0F803C4A6947}.Debug|Mixed Platforms.Deploy.0 = Debug|Any CPU
-		{BF232194-2DC7-4BA7-91DC-0F803C4A6947}.Debug|Pocket PC 2003 (ARMV4).ActiveCfg = Debug|Any CPU
-		{BF232194-2DC7-4BA7-91DC-0F803C4A6947}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BF232194-2DC7-4BA7-91DC-0F803C4A6947}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BF232194-2DC7-4BA7-91DC-0F803C4A6947}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{BF232194-2DC7-4BA7-91DC-0F803C4A6947}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{BF232194-2DC7-4BA7-91DC-0F803C4A6947}.Release|Mixed Platforms.Deploy.0 = Release|Any CPU
-		{BF232194-2DC7-4BA7-91DC-0F803C4A6947}.Release|Pocket PC 2003 (ARMV4).ActiveCfg = Release|Any CPU
 		{B1EB0DB9-052D-4C09-9C30-93363EC3EB46}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B1EB0DB9-052D-4C09-9C30-93363EC3EB46}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B1EB0DB9-052D-4C09-9C30-93363EC3EB46}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
@@ -173,6 +161,12 @@ Global
 		{24D2110A-D689-42EB-B111-A45AEA81E87C}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{24D2110A-D689-42EB-B111-A45AEA81E87C}.Release|Mixed Platforms.Deploy.0 = Release|Any CPU
 		{24D2110A-D689-42EB-B111-A45AEA81E87C}.Release|Pocket PC 2003 (ARMV4).ActiveCfg = Release|Any CPU
+		{228F8F79-1CD1-47AD-8D53-7DD413C9C9D5}.Debug|Any CPU.ActiveCfg = Debug
+		{228F8F79-1CD1-47AD-8D53-7DD413C9C9D5}.Debug|Mixed Platforms.ActiveCfg = Debug
+		{228F8F79-1CD1-47AD-8D53-7DD413C9C9D5}.Debug|Pocket PC 2003 (ARMV4).ActiveCfg = Debug
+		{228F8F79-1CD1-47AD-8D53-7DD413C9C9D5}.Release|Any CPU.ActiveCfg = Release
+		{228F8F79-1CD1-47AD-8D53-7DD413C9C9D5}.Release|Mixed Platforms.ActiveCfg = Release
+		{228F8F79-1CD1-47AD-8D53-7DD413C9C9D5}.Release|Pocket PC 2003 (ARMV4).ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
