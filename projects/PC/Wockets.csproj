@@ -182,12 +182,41 @@
     <Compile Include="..\..\src\Wockets\WocketsControllerList.cs">
       <Link>WocketsControllerList.cs</Link>
     </Compile>
+    <Compile Include="..\..\src\Wockets\Receivers\Radio_CMD.cs">
+      <Link>Receivers\Radio_CMD.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Summary\Activity.cs">
+      <Link>Data\Summary\Activity.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Summary\ActivityList.cs">
+      <Link>Data\Summary\ActivityList.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Summary\Constants.cs">
+      <Link>Data\Summary\Constants.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Summary\Reader.cs">
+      <Link>Data\Summary\Reader.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\Logger.cs">
+      <Link>Utils\logger.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Decoders\Accelerometers\GenericDecoder.cs">
+      <Link>Decoders\Accelerometers\GenericDecoder.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\ByteReader.cs">
+      <Link>Utils\ByteReader.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\ByteWriter.cs">
+      <Link>Utils\ByteWriter.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\FileReader.cs">
+      <Link>Utils\FileReader.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\FileWriter.cs">
+      <Link>Utils\FileWriter.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="IO.csproj">
-      <Project>{1D75F70F-B268-4262-817A-4A0D39E90F86}</Project>
-      <Name>IO</Name>
-    </ProjectReference>
     <ProjectReference Include="SerialIO.csproj">
       <Project>{26831A48-F3A8-4019-8C62-842D3B8D2A6F}</Project>
       <Name>SerialIO</Name>
