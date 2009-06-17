@@ -26,9 +26,9 @@ namespace Wockets.Sensors.Accelerometers
             base.Save();
         }
 
-        public override void Load()
+        public override bool Load()
         {
-            base.Load();
+            return base.Load();
         }
         public override void Dispose()
         {

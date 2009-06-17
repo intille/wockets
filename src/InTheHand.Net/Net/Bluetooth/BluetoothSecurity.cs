@@ -123,7 +123,9 @@ namespace InTheHand.Net.Bluetooth
                 authenticators.Remove(device);
                 bwa.Dispose();
             }
+#if (PocketPC)
             authenticators.Add(device, new BluetoothWin32Authentication(device, pin));
+#endif
             return true;
             //else
             //{

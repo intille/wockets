@@ -64,7 +64,9 @@ namespace Wockets.Sensors
                             else if (sensorClass == SensorClasses.Sparkfun)
                                 sensor = new Sparkfun();
                             else if (sensorClass == SensorClasses.Wockets)
-                                sensor = new Wocket();                                                            
+                                sensor = new Wocket();
+                            else if (sensorClass == SensorClasses.HTCDiamondTouch)
+                                sensor = new HTCDiamondTouch();                          
                             sensor.FromXML(jNode.OuterXml);
                              this.Insert(sensor._ID,sensor);
                         }

@@ -28,6 +28,7 @@ namespace Wockets.Decoders.Accelerometers
                 this._Data[i] = new HTCDiamondTouchAccelerationData();
             this.packetPosition = 0;
             this.headerSeen = false;
+            this.type = DecoderTypes.HTCDiamondTouch;
         }
         /*
         public override bool IsValid(SensorData data)

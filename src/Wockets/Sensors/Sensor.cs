@@ -232,7 +232,10 @@ namespace Wockets.Sensors
         public abstract string ToXML();
 
         public abstract void Save();
-        public abstract void Load();
+
+        // this method loads the data from saved files one sample at a time
+        //and populates the decoder
+        public abstract bool Load();
 
         public abstract void Dispose();
 
