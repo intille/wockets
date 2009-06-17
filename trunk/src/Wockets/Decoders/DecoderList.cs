@@ -58,6 +58,8 @@ namespace Wockets.Decoders
                             decoder = new WocketsDecoder();
                         else if (decoderType == DecoderTypes.Sparkfun)
                             decoder = new SparkfunDecoder();
+                        else if (decoderType == DecoderTypes.HTCDiamondTouch)
+                            decoder = new HTCDiamondTouchDecoder();
 
                          decoder.FromXML(jNode.OuterXml);
                          this.Insert(decoder._ID,decoder);

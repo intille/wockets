@@ -24,6 +24,7 @@ namespace Wockets.Decoders.Accelerometers
                 this._Data[i] = new SparkfunAccelerationData();
             this.packetPosition = 0;
             this.headerSeen = false;
+            this.type = DecoderTypes.Sparkfun;
         }
 
 

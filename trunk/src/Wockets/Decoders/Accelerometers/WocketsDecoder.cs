@@ -24,6 +24,7 @@ namespace Wockets.Decoders.Accelerometers
                 this._Data[i] = new WocketsAccelerationData();
             this.packetPosition = 0;
             this.headerSeen = false;
+            this.type = DecoderTypes.Wockets;
         }
 
         public override int Decode(int sourceSensor,byte[] data, int length)       

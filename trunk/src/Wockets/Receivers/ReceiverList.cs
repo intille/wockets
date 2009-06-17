@@ -52,7 +52,9 @@ namespace Wockets.Receivers
                         if (receiverType == ReceiverTypes.RFCOMM)
                             receiver = new RFCOMMReceiver();
                         else if (receiverType == ReceiverTypes.StandardCOM)
-                            receiver = new StandardCOMReceiver();                                        
+                            receiver = new StandardCOMReceiver();
+                        else if (receiverType == ReceiverTypes.HTCDiamond)
+                            receiver = new HTCDiamondReceiver();              
                         receiver.FromXML(jNode.OuterXml);
                         this.Insert(receiver._ID,receiver);
 

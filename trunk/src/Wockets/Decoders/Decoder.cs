@@ -23,6 +23,7 @@ namespace Wockets.Decoders
         private int id;
         private int index;
         private static int IDCounter = 0;
+        protected DecoderTypes type;
 
         public Decoder()
         {
@@ -39,7 +40,18 @@ namespace Wockets.Decoders
 
         #region Access Properties
 
+        public DecoderTypes _Type
+        {
+            get
+            {
+                return this.type;
+            }
 
+            set
+            {
+                this.type = value;
+            }
+        }
         public int _ID
         {
             get

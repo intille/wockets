@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Xml;
+#if (PocketPC)
 using Microsoft.WindowsMobile.Status;
+#endif
 using Wockets.Data;
 using Wockets.Utils;
 
@@ -81,13 +83,14 @@ namespace Wockets.Receivers
     public delegate void OrientationChangedHandler(IGSensor sender);
     public interface IGSensor
     {
-
+#if (PocketPC)
         ScreenOrientation Orientation
         {
             get;
         }
 
         event OrientationChangedHandler OrientationChanged;
+#endif
     }
 
     struct HTCGSensorData
@@ -103,7 +106,7 @@ namespace Wockets.Receivers
 
     #endregion  HTC Diamond Objects
 
-    public class HTCDiamondReceiver : Receiver, IGSensor
+    public class HTCDiamondReceiver : Receiver , IGSensor
     {
 
         #region Serialization Constants
@@ -115,7 +118,7 @@ namespace Wockets.Receivers
         private int bufferIndex;
         private double lastTS;
         private int sampleTimeSpace = 0;
-
+#if (PocketPC)
         #region HTC Diamond Touch Code
         enum HTCSensor : uint
         {
@@ -164,8 +167,9 @@ namespace Wockets.Receivers
 
         #region ISensor Members
 
-
+#if (PocketPC)
         RegistryState myOrientationState = new RegistryState(@"HKEY_LOCAL_MACHINE\Software\HTC\HTCSensor\GSensor", "EventChanged");
+#endif
         // #define SN_GSENSOR_BITMASK  0xF
 
         public ScreenOrientation Orientation
@@ -192,7 +196,7 @@ namespace Wockets.Receivers
         #endregion
         #endregion HTC Diamond Touch Code
 
-
+#endif
 
         public HTCDiamondReceiver()
             : base()
@@ -205,10 +209,12 @@ namespace Wockets.Receivers
 
         public override bool Initialize()
         {
+#if (PocketPC)
             IntPtr hEvent = CreateEvent(IntPtr.Zero, true, false, "HTC_GSENSOR_SERVICESTART");
             SetEvent(hEvent);
             CloseHandle(hEvent);
             myOrientationState.Changed += new ChangeEventHandler(myOrientationState_Changed);
+#endif
             return true;
         }
 
@@ -227,11 +233,13 @@ namespace Wockets.Receivers
         /// </returns>
         public override int Read()
         {
+#if (PocketPC)
             //Check for the 20Hz
             double now = WocketsTimer.GetUnixTime();
             if ((now - lastTS) < this.sampleTimeSpace)
                 return 0;
             lastTS = now;
+
             HTCGSensorData data;
             HTCSensorGetDataOutput(myHandle, out data);
 
@@ -276,6 +284,7 @@ namespace Wockets.Receivers
 
             this._Buffer[this.bufferIndex++] = 0xff;
             this.bufferIndex = this.bufferIndex % this._Buffer.Length;
+#endif
             return BUFFER_SIZE;
         }
 
@@ -285,6 +294,7 @@ namespace Wockets.Receivers
         }
         public override bool Dispose()
         {
+#if (PocketPC)
             if (myHandle != IntPtr.Zero)
             {
                 HTCSensorClose(myHandle);
@@ -304,6 +314,7 @@ namespace Wockets.Receivers
             IntPtr hEvent = CreateEvent(IntPtr.Zero, true, false, "HTC_GSENSOR_SERVICESTOP");
             SetEvent(hEvent);
             CloseHandle(hEvent);
+#endif
             return true;
         }
 

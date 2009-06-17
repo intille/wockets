@@ -9,6 +9,7 @@ namespace Wockets.Decoders.Accelerometers
     {
         public GenericDecoder()
         {
+            this.type = DecoderTypes.Unknown;
         }
 
         public override int Decode(int sourceSensor, byte[] data, int length)

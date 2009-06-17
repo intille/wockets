@@ -346,7 +346,7 @@ namespace Wockets.Sensors.Accelerometers
                 {
                     if (Directory.Exists(subdirectory + "\\" + i))
                     {
-                        string[] matchingFiles = Directory.GetFiles(subdirectory + "\\" + i, FILE_TYPE_PREFIX + "*+" + this._ID + "." + FILE_EXT);
+                        string[] matchingFiles = Directory.GetFiles(subdirectory + "\\" + i, FILE_TYPE_PREFIX + "*" + this._ID + "." + FILE_EXT);
                         for (int j = 0; (j < matchingFiles.Length); j++)
                             someBinaryFiles.Add(matchingFiles[j]);
                     }
@@ -381,13 +381,77 @@ namespace Wockets.Sensors.Accelerometers
                 return true;
         }
 
+        private bool loading = false;
+        private int fileIndex = 0;
+        private byte[] b6 = new byte[6];
+        private byte[] b = new byte[1];
         //Populates the decoder with the data read from the binary files
-        public override void Load()
+        public override bool Load()
         {
+            //double lastUnixTime = aLastUnixTime; 
             //Generate the list of files to go through for this sensor
-            GenerateBinaryFileList();
-            SetupNextFiles(0);
+            if (loading == false)
+            {
+                GenerateBinaryFileList();
+                if (someBinaryFiles.Count < 1)
+                    throw new Exception("Error: no PLFormat files for sensor " + this._ID);
+                SetupNextFiles(0);
+                loading = true;
+            }
 
+            while (true)
+            {
+                try
+                {
+                    #region Read Timestamp
+                    if (!(br.ReadByte(b)))
+                        throw new Exception("Error: reading first byte in PLFormat file");
+
+                    //read a complete timestamp
+                    if (b[0] == ((int)255))
+                    {
+                        if (!(br.ReadBytes(b6)))
+                            throw new Exception("Error: reading full timestamp in PLFormat file");
+
+                        lastUnixTime = WocketsTimer.DecodeUnixTimeCodeBytesFixed(b6);
+                    }
+                    else //read a differential timestamp          
+                        lastUnixTime += (int)b[0];
+
+                    #endregion Read Timestamp
+
+                    DateTime dt = new DateTime();
+                    WocketsTimer.GetDateTime((long)lastUnixTime, out dt);
+
+                    int numRawBytes = 0;
+                    if (this._Decoder._Type == DecoderTypes.Wockets)
+                        numRawBytes = Data.Accelerometers.WocketsAccelerationData.NUM_RAW_BYTES;
+                    else if (this._Decoder._Type == DecoderTypes.HTCDiamondTouch)
+                        numRawBytes = Data.Accelerometers.HTCDiamondTouchAccelerationData.NUM_RAW_BYTES;
+
+                    byte[] tempByte = new byte[numRawBytes];
+                    if (!(br.ReadBytes(tempByte)))
+                        throw new Exception("Error: reading data in PLFormat file");
+
+                    this._Decoder._Size = 0;
+                    //Successfully decoded a packet
+                    if (this._Decoder.Decode(this._ID, tempByte, tempByte.Length) == 1)
+                    {
+                        this._Decoder._Data[0].UnixTimeStamp = lastUnixTime;
+                        break;
+                    }
+                    else //failed to decode a packet... check if this ever happens
+                        return false;
+                }
+                catch (Exception e)
+                {
+                    //if the data ended return false
+                    if (!((++fileIndex < someBinaryFiles.Count) && SetupNextFiles(fileIndex)))
+                        return false;
+                }
+            }
+
+            return true;
         }
         protected string ToXML(string innerXML)
         {
@@ -399,7 +463,7 @@ namespace Wockets.Sensors.Accelerometers
                 ZN1G_ATTRIBUTE + "=\"" + this.zn1g.ToString("0.00") + "\" " +
                 XSTD_ATTRIBUTE + "=\"" + this.xstd.ToString("0.00") + "\" " +
                 YSTD_ATTRIBUTE + "=\"" + this.ystd.ToString("0.00") + "\" " +
-                ZSTD_ATTRIBUTE + "=\"" + this.zstd.ToString("0.00") +  "\" />\n";
+                ZSTD_ATTRIBUTE + "=\"" + this.zstd.ToString("0.00") + "\" />\n";
             innerXML += "<" + RANGE_ELEMENT + " " + MAX_ATTRIBUTE +
                 "=\"" + this.max.ToString("0.00") + "\" " + MIN_ATTRIBUTE + "=\"" + this.min.ToString("0.00") + "\" />\n";
             return base.ToXML(innerXML);

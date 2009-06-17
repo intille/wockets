@@ -27,6 +27,7 @@ namespace Wockets.Decoders.Accelerometers
             for (int i = 0; (i < this._Data.Length); i++)
                 this._Data[i] = new MITesAccelerationData();
             this.packetPosition=NO_HEADER_SEEN;
+            this.type = DecoderTypes.MITes;
         }
 
 
