@@ -523,7 +523,7 @@ namespace WocketsApplication.Calibrator
             this.button2.Click += new EventHandler(button2_Click);
 
             // 
-            // button2
+            // button3
             // 
             this.button3.Location = new System.Drawing.Point(17, 80);
             this.button3.Name = "button3";
@@ -568,14 +568,14 @@ namespace WocketsApplication.Calibrator
             {
 
                 //Store calibration data
-                ((Wockets.Sensors.Accelerometers.Accelerometer)this.wocketsController._Sensors[0])._X1G = this.calibrations[0][2];
-                ((Wockets.Sensors.Accelerometers.Accelerometer)this.wocketsController._Sensors[0])._XN1G = this.calibrations[2][2];
+                ((Wockets.Sensors.Accelerometers.Accelerometer)this.wocketsController._Sensors[0])._X1G = this.calibrations[0][0];
+                ((Wockets.Sensors.Accelerometers.Accelerometer)this.wocketsController._Sensors[0])._XN1G = this.calibrations[2][0];
 
                 ((Wockets.Sensors.Accelerometers.Accelerometer)this.wocketsController._Sensors[0])._Y1G = this.calibrations[3][1];
                 ((Wockets.Sensors.Accelerometers.Accelerometer)this.wocketsController._Sensors[0])._YN1G = this.calibrations[1][1];
 
-                ((Wockets.Sensors.Accelerometers.Accelerometer)this.wocketsController._Sensors[0])._Z1G = this.calibrations[4][0];
-                ((Wockets.Sensors.Accelerometers.Accelerometer)this.wocketsController._Sensors[0])._ZN1G = this.calibrations[5][0];
+                ((Wockets.Sensors.Accelerometers.Accelerometer)this.wocketsController._Sensors[0])._Z1G = this.calibrations[4][2];
+                ((Wockets.Sensors.Accelerometers.Accelerometer)this.wocketsController._Sensors[0])._ZN1G = this.calibrations[5][2];
 
 
                 
