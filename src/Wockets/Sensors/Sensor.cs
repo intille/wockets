@@ -223,7 +223,7 @@ namespace Wockets.Sensors
             xml += "<" + Receiver.RECEIVER_ELEMENT + " " + ID_ATTRIBUTE +
           "=\"" + this.receiver + "\"></" + Receiver.RECEIVER_ELEMENT + ">\n";
             xml += "<" + Decoder.DECODER_ELEMENT + " " + ID_ATTRIBUTE +
-         "=\"" + this.decoder + "\"></" + Decoder.DECODER_ELEMENT + ">\n";
+         "=\"" + this.decoder._ID + "\"></" + Decoder.DECODER_ELEMENT + ">\n";
             xml += innerXML;
             xml += "</" + SENSOR_ELEMENT + ">\n";
             return xml;
