@@ -719,15 +719,7 @@ namespace Wockets.Receivers
                 else
                 {
 
-                    /*string comPortName = prepareCOMport(addr, "1234");
-                    newStream.comPortName = comPortName;
-                    newStream.comPort2 = new SerialPortController(true, false, 4096);//SerialPort(comPortName);
-                    newStream.comPort2.SetPort(comPortName );
-                    newStream.comPort2.SetBaudRate(19200);
-                    newStream.comPort2.SetParity(0);
-                    newStream.comPort2.SetStopBits(1);
-                    newStream.comPort2.SetDCB();
-              */
+
                     
                     newStream.btClient = new BluetoothClient();                   
                     byte[] reverseAddr = new byte[addr.Length];
@@ -745,9 +737,6 @@ namespace Wockets.Receivers
                         BluetoothAddress bt_addr = new BluetoothAddress(reverseAddr);
                         if (pin != null)
                             BluetoothSecurity.SetPin(bt_addr, pin);
-
-                       // BluetoothEndPoint point = new BluetoothEndPoint(bt_addr, BluetoothService.SerialPort);
-                        //newStream.btClient.Connect(point, 200);
 
                         newStream.btClient.Connect(bt_addr, BluetoothService.SerialPort);                        
                         newStream.btSocket = newStream.btClient.Client;                      
