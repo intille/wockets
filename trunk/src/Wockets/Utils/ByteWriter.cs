@@ -40,7 +40,7 @@ namespace Wockets.Utils
 
         private void SignalError(Exception e, String s)
         {
-            Console.WriteLine("Error in ByteWriter: " + e.Message + " " + s + " for file: " + fileName);
+            throw e;
         }
 
         private void Warning(String s)

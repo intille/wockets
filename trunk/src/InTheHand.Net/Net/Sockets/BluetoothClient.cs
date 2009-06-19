@@ -443,7 +443,7 @@ namespace InTheHand.Net.Sockets
             {
                 throw new ArgumentNullException("remoteEP");
             }
-            clientSocket.BeginConnect(remoteEP, new AsyncCallback(CallBackMethod), clientSocket);
+            clientSocket.BeginConnect(remoteEP, new AsyncCallback(CallBackMethod), this);
 
             if (TimeoutObject.WaitOne(timeoutMSec, false))
             {
@@ -543,6 +543,7 @@ namespace InTheHand.Net.Sockets
                 throw new ArgumentNullException("service");
             }
             BluetoothEndPoint point = new BluetoothEndPoint(address, service);
+           
             this.Connect(point);
             
             

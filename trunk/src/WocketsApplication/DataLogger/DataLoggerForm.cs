@@ -132,6 +132,14 @@ namespace WocketsApplication.DataLogger
         /// The progress thread object
         /// </summary>
         private Thread aProgressThread = null;
+
+        private Thread aPollingThread = null;
+        private bool aPollingThreadQuit=false;
+        private Thread aPlottingThread = null;
+        private bool plottingThreadQuit=false;
+        private Thread aSavingThread = null;
+        private bool savingThreadQuit=false;
+
         /// <summary>
         /// True if the progress thread should quit
         /// </summary>
@@ -454,6 +462,11 @@ namespace WocketsApplication.DataLogger
             aProgressThread = new Thread(new ThreadStart(ProgressThread));
             aProgressThread.Start();
 
+            //Initialize Plotting Thread
+            //aPlottingThread = new Thread(new ThreadStart(PlotWockets));
+            aSavingThread = new Thread(new ThreadStart(SaveWockets));
+            aPollingThread = new Thread(new ThreadStart(PollWockets));
+
             //this.bluetoothControllers = new BluetoothController[this.wocketsController._Receivers.Count];
             this.bluetoothConnectors = new BluetoothConnector[this.wocketsController._Receivers.Count];
 
@@ -567,6 +580,10 @@ namespace WocketsApplication.DataLogger
                 this.bluetoothConnectors[currentReceiver._ID] = new BluetoothConnector(currentReceiver, this.wocketsController);
                 currentReceiver._Running = false;          
             }
+
+            //aPlottingThread.Start();
+            //aSavingThread
+            aPollingThread.Start();
 
             //Terminate the progress thread
             progressThreadQuit = true;
@@ -1550,26 +1567,109 @@ namespace WocketsApplication.DataLogger
         private int currentCalories = 0;
         private string previousActivity = "";
         private int extractedVectors = 0;
+
+        private void PollWockets()
+        {
+            #region Poll All Wockets and MITes and Decode Data
+
+            Receiver currentReceiver = null;
+            Sensor sensor = null;
+            while (true)
+            {
+
+                #region Bluetooth Reconnection Code
+#if (PocketPC)
+
+                for (int i = 0; (i < this.wocketsController._Receivers.Count); i++)
+                {
+                    if (this.wocketsController._Receivers[i]._Type == ReceiverTypes.RFCOMM)
+                    {
+                        if ((this.bluetoothConnectors[this.wocketsController._Receivers[i]._ID] != null) &&
+                            (!this.bluetoothConnectors[this.wocketsController._Receivers[i]._ID].Reconnecting) &&
+                            (this.wocketsController._Receivers[i]._Running == false))
+                        {
+                            this.bluetoothConnectors[this.wocketsController._Receivers[i]._ID].Reconnect();
+                            logger.Warn("Reconnected");
+                        }
+
+                    }
+
+                }
+
+
+#endif
+
+                #endregion Bluetooth Reconnection Code
+
+                try
+                {
+                    for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
+                    {
+                        sensor = this.wocketsController._Sensors[i];
+                        currentReceiver = this.wocketsController._Receivers[sensor._Receiver];
+                        if (currentReceiver._Running == true)
+                        {
+                            Decoder decoder = sensor._Decoder;
+                            int dataLength = currentReceiver.Read();
+                            int numDecodedPackets = 0;
+                            if (dataLength > 0)
+                            {
+                                numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer, dataLength);
+                            }
+
+                            //((PictureBox)this.sensorStatus["W" + this.wocketsController._Sensors[i]._ID]).Image = connectedWocketImage;
+                        }
+                    }
+
+                }
+                //Thrown when there is a Bluetooth failure                    
+                //TODO: Make sure no USB failure happening
+                catch (Exception ex)
+                {
+
+
+                    //((PictureBox)this.sensorStatus["W" + sensor._ID]).Image = disconnectedWocketImage;
+                    this.bluetoothConnectors[currentReceiver._ID] = new BluetoothConnector(currentReceiver, this.wocketsController);
+                    currentReceiver._Running = false;
+                }
+
+                Thread.Sleep(50);
+            }
+
+
+
+            #endregion Poll All Wockets and MITes and Decode Data
+        }
+
+        private void PlotWockets()
+        {
+            while (true)
+            {
+                if ((this.tabControl1.SelectedIndex == 0) && (isPlotting))                
+                    GraphAccelerometerValues();                
+
+                Thread.Sleep(10);
+            }
+        }
+
+        private void SaveWockets()
+        {
+            while (true)
+            {
+                try
+                {
+                    for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
+                        this.wocketsController._Sensors[i].Save();   
+                }
+                catch (Exception ee)
+                {
+                    Console.WriteLine(ee.StackTrace);
+                }
+                Thread.Sleep(50);
+            }
+        }
         private void readDataTimer_Tick(object sender, EventArgs e)
         {
-            /*if (this.activeRcv)
-            {
-                this.offTimer++;
-                if (this.offTimer >= 100)
-                {
-                    this.activeRcv = false;
-                    for (int i = 0; (i < this.wocketsController._Receivers.Count); i++)
-                    {
-                        this.wocketsController._Receivers[i].Dispose();
-                    }
-                    BluetoothRadio.PrimaryRadio.Mode = RadioMode.PowerOff;
-                    logger.Warn("radio powering off");
-                    Thread.Sleep(60000);
-                    BluetoothRadio.PrimaryRadio.Mode = RadioMode.Connectable;
-                    logger.Warn("radio powering on");
-                    this.offTimer = 0;
-                }
-            }*/
 
             if (isQuitting)
             {
@@ -1611,8 +1711,6 @@ namespace WocketsApplication.DataLogger
                 }*/
                 FeatureExtractor.Cleanup();
 
-               // ttw.Flush();
-               // ttw.Close();
 #if (PocketPC)
 
                 Application.Exit();
@@ -1622,6 +1720,7 @@ namespace WocketsApplication.DataLogger
                 Environment.Exit(0);
 #endif
             }
+            /*
             #region Bluetooth Reconnection Code
 #if (PocketPC)
 
@@ -1664,68 +1763,15 @@ namespace WocketsApplication.DataLogger
                         if (dataLength > 0)
                         {                 
                             numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer, dataLength);
-                            /*if (!this.activeRcv) logger.Warn("receiving data");
-                            this.activeRcv = true;*/
+            
                         }
 
                         #region
 
 
-                        /*
-                        #region Plot Decoded Data Only
-                        if ((this.tabControl1.SelectedIndex == 0) && (isPlotting))
-                        {
-                            aWocketsPlotter.PlotFrom[i] = decoder._Size-numDecodedPackets;
-                            GraphAccelerometerValues();
-                        }
-                        #endregion Plot Decoded Data Only
-
-                        */
-
-                        //clear processed timestamps
-                        /*
-                        if (currentReceiver._Type == ReceiverTypes.RFCOMM)
-                        {
-                            int numBatches = ((RFCOMMReceiver)currentReceiver).BatchBytes.Count;
-                            double t1 = (double)((RFCOMMReceiver)currentReceiver).BatchTimestamps[0];
-                            double t2 = (double)((RFCOMMReceiver)currentReceiver).BatchTimestamps[numBatches - 1];
-
-                            //If batches exceed 3 seconds
-                            if (t2 - t1 > 3000)
-                            {
-
-                                //Find the last batch for the decoded data and use its
-                                //timestamp as the last timestamp t2
-                                int sumBytes = numDecodedPackets * WocketsAccelerationData.NUM_RAW_BYTES;
-                                int lastBatch = -1;
-                                for (int j = 0; (j < numBatches); j++)
-                                {
-                                    sumBytes -= (int)((RFCOMMReceiver)currentReceiver).BatchBytes[j];
-                                    if (sumBytes <= 0)
-                                    {
-
-                                        t2 = (double)((RFCOMMReceiver)currentReceiver).BatchTimestamps[j];
-                                        //the decoded packets end at the end of a batch
-                                        if (sumBytes == 0)
-                                            lastBatch = j;
-                                        else //decoded packets are at the middle of a batch
-                                            lastBatch = j - 1;
-                                        break;
-                                    }
-                                }
-
-                                //Remove timestamp batches that have been completely decoded
-                                if (lastBatch >= 0)
-                                {
-                                    ((RFCOMMReceiver)currentReceiver).BatchBytes.RemoveRange(0, lastBatch + 1);
-                                    ((RFCOMMReceiver)currentReceiver).BatchTimestamps.RemoveRange(0, lastBatch + 1);
-
-                                    //Reset decoder
-                                    decoder._Size = 0;
-                                }
-
-                            }
-                        }*/
+    
+         
+         
                         #endregion
                         #region Calculate Sampling Rate
                         this.SRcounter += 1;
@@ -1821,43 +1867,7 @@ namespace WocketsApplication.DataLogger
                             labelCounters[j] = 0;
                         }
 
-                       /* if ((mostActivity == "Flapping") || (mostActivity == "flapping"))
-                        {
-
-                            vibrator.StartVibrate();
-                            vibrateTimer = -1;
-                        }
-                        else if ((mostActivity == "Rocking") || (mostActivity == "rocking"))
-                        {
-
-                            vibrator.StartVibrate();
-                            vibrateTimer = -1;
-                        }
-                        else if ((mostActivity == "Flaprock") || (mostActivity == "flaprock"))
-                        {
-
-                            vibrator.StartVibrate();
-                            vibrateTimer = -1;
-                        }
-                        else
-                            vibrator.StopVibrate();
-
-                        if (vibrateStatus != vibrator.isVibrateON)
-                        {
-                            vibrateStatus = vibrator.isVibrateON;
-                            TextWriter vbtw = new StreamWriter(this.storageDirectory + "\\vibrate.csv", true);
-                            vbtw.Write(DateTime.Now.ToLongTimeString() + ",");
-                            if (vibrateStatus)
-                                vbtw.WriteLine("vibrate");
-                            else
-                                vbtw.WriteLine("stopvibrate");
-                            vbtw.Close();
-                        }
-
-                        if (vibrateTimer > 500) //5 seconds
-                            vibrateTimer = -1;
-                        vibrateTimer++;
-                        */
+    
                         pieChart.SetActivity(mostActivity);
                         if (this.aList.getEmptyPercent() == 1)
                             this.aList.reset();
@@ -1972,50 +1982,16 @@ namespace WocketsApplication.DataLogger
             #region CollectingData
 
 
-            /*
-            if (ttw == null)
-                ttw = new StreamWriter("seqs.csv");
-            isCollectingData = true;
-            if (isCollectingData)
-            {
-
-                //store sum of abs values of consecutive accelerometer readings                
-                for (int i = 0; (i < this.wocketsController._Decoders.Count); i++)
-                    for (int j = 0; (j < this.wocketsController._Decoders[i]._Size); j++)
-                    {
-
-                        if (this.wocketsController._Decoders[i]._Data[j].Type == SensorDataType.ACCEL)
-                        {
-                            int channel = 0, x = 0, y = 0, z = 0;
-                           // channel = (int)this.wocketsController._Decoders[i]._Data[j].Channel;
-                            x = (int)((AccelerationData)this.wocketsController._Decoders[i]._Data[j]).X;
-                            y = (int)((AccelerationData)this.wocketsController._Decoders[i]._Data[j]).Y;
-                            z = (int)((AccelerationData)this.wocketsController._Decoders[i]._Data[j]).Z;
-
-                            int msec=(y<<8)|z;
-                            ttw.WriteLine(x + "," + msec);
-                        }
-                    }
-            }
-             */
+           
             #endregion CollectingData
 
             
             #region Store the sensor data
-            /*
-#if (PocketPC)
-            aPLFormatLogger.Save();
-#endif
-            if (flushTimer == 0)
-                aPLFormatLogger.FlushBytes();
-            if (flushTimer > FLUSH_TIMER_MAX)
-                flushTimer = -1;
-            flushTimer++;
-           */
+
             for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)            
                 this.wocketsController._Sensors[i].Save();            
             #endregion Store the sensor data
-
+*/
             
 
             if ((this.tabControl1.SelectedIndex == 0) && (isPlotting))
@@ -2024,9 +2000,16 @@ namespace WocketsApplication.DataLogger
             }
 
             //Reset all decoders
-
-            for (int i = 0; (i < this.wocketsController._Decoders.Count); i++)
-              this.wocketsController._Decoders[i]._Size = 0;
+            /*
+            try
+            {
+                for (int i = 0; (i < this.wocketsController._Decoders.Count); i++)
+                    this.wocketsController._Decoders[i]._Size = 0;
+            }
+            catch (Exception ee)
+            {
+                Console.WriteLine(ee.StackTrace);
+            }*/
         }
 
 

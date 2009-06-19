@@ -14,9 +14,9 @@ namespace Wockets.Decoders.Accelerometers
         private const string WOCKETS_TYPE = "Wockets";
         #endregion Serialization Constants
 
-        private const int BUFFER_SIZE = 600; //BUG: should not exceed 4096 (Lower Level Buffer Size) / 6 (MITes Packet Size)
+        private const int BUFFER_SIZE = 600; 
         private bool headerSeen;
-
+        
         public WocketsDecoder()
             : base(BUFFER_SIZE,WocketsAccelerationData.NUM_RAW_BYTES)
         {
@@ -27,12 +27,12 @@ namespace Wockets.Decoders.Accelerometers
             this.type = DecoderTypes.Wockets;
         }
 
+ 
         public override int Decode(int sourceSensor,byte[] data, int length)       
         {
-            int rawDataIndex = 0;
-            int decodedDataIndex = this._Size;
-            int decodedBefore = this._Size;
-    
+            int rawDataIndex = 0;   
+            int numDecodedPackets=0;
+               
             if (length != 0) // Have some data
             {
                 while (rawDataIndex < length)
@@ -53,10 +53,10 @@ namespace Wockets.Decoders.Accelerometers
                     if ((this.packetPosition == WocketsAccelerationData.NUM_RAW_BYTES)) //a full packet was received
                     {
 
-                        if (decodedDataIndex >= this._Data.Length)
-                            throw new Exception("WocketsDecoder buffer too small " + this._Data.Length);
+                        //if (this.head >= this._Data.Length)
+                          //  throw new Exception("WocketsDecoder buffer too small " + this._Data.Length);
 
-                        WocketsAccelerationData datum = ((WocketsAccelerationData)this._Data[decodedDataIndex]);
+                        WocketsAccelerationData datum = ((WocketsAccelerationData)this._Data[this.head]);
                         datum.Reset();                        
                         //copy raw bytes
                         for (int i = 0; (i < WocketsAccelerationData.NUM_RAW_BYTES); i++)
@@ -71,15 +71,20 @@ namespace Wockets.Decoders.Accelerometers
                         datum.UnixTimeStamp = WocketsTimer.GetUnixTime();
        
                         //if (IsValid(datum))
-                        decodedDataIndex++;
+                         if (this.head>=(BUFFER_SIZE-1))
+                             this.head=0;
+                         else
+                            this.head++;
+                        numDecodedPackets++;
+                        //decodedDataIndex= decodedDataIndex% BUFFER_SIZE;
                         this.packetPosition = 0;
                         this.headerSeen = false;
                     }
  
                 }
             }
-            this._Size = decodedDataIndex;
-            return decodedDataIndex - decodedBefore;
+            //this._Size = decodedDataIndex;
+            return numDecodedPackets;
         }
 
 

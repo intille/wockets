@@ -48,7 +48,7 @@ namespace Wockets.Utils
         /// <param name="s">Additional description as String</param>
         private void SignalError(Exception e, String s)
         {
-            Console.WriteLine("Error in ByteReader: " + e.Message + " " + s + " for file: " + fileName);
+            throw e;
         }
 
         /// <summary>

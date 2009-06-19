@@ -453,6 +453,8 @@ namespace Wockets.Receivers
             }
         }
 
+
+
        
         private void readingFunction()
         {
@@ -737,25 +739,15 @@ namespace Wockets.Receivers
                     newStream.timeoutTimestamps = new List<DateTime>();
                     newStream.localBuffer = new byte[DEFAULT_BUFFER_SIZE];
                     newStream.singleReadBuffer = new byte[DEFAULT_BUFFER_SIZE];
-                    lock (lockObject)
-                    {
+                    //lock (lockObject)
+                    //{
                         BluetoothRadio.PrimaryRadio.Mode = RadioMode.Connectable;
                         BluetoothAddress bt_addr = new BluetoothAddress(reverseAddr);
                         if (pin != null)
                             BluetoothSecurity.SetPin(bt_addr, pin);
-                        /*
 
-                        Microsoft.Win32.RegistryKey rkPorts = Microsoft.Win32.Registry.LocalMachine.OpenSubKey("SOFTWARE\\Microsoft\\Bluetooth\\Serial\\Ports", true);
-                        Microsoft.Win32.RegistryKey rkNewPort = rkPorts.CreateSubKey(bt_addr.ToString("8"));                        
-                        rkNewPort.SetValue("RemoteDCB", 0);
-                        rkNewPort.SetValue("KeepDCD", 0);
-                        rkNewPort.SetValue("Port", 0);
-                      
-                        rkNewPort.Close();
-
-                        rkPorts.Close();
-               
-                         */
+                       // BluetoothEndPoint point = new BluetoothEndPoint(bt_addr, BluetoothService.SerialPort);
+                        //newStream.btClient.Connect(point, 200);
 
                         newStream.btClient.Connect(bt_addr, BluetoothService.SerialPort);                        
                         newStream.btSocket = newStream.btClient.Client;                      
@@ -766,23 +758,9 @@ namespace Wockets.Receivers
                       
 
                         
-                    }
+                    //}
                      
-                    //byte[] addr1 = { 0x00, 0x06, 0x66, 0x01, 0xab, 0x4b };
-       
-
-                    /*for (int ii = 0; ii < 100; ii++)
-                    {
-                        if (!newStream.comPort2.)
-                        {
-                            try
-                            {
-                                newStream.comPort2.PortOpen();
-                                break;
-                            }
-                            catch { continue; }
-                        }
-                    }*/
+  
                 }
 
                 newStream.readingThread = new Thread(new ThreadStart(newStream.readingFunction));
