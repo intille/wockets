@@ -112,6 +112,7 @@ namespace WocketsApplication.DataLogger
         /// </summary>
         private Hashtable sensorLabels;
         private Hashtable sensorStatus;
+        private Hashtable sensorStat;
         private Hashtable sensorBattery;
         private Image[] batteryImg = new Image[] { (Image)new Bitmap(Constants.NETWORK_STATUS_DIRECTORY + "1.gif"), (Image)new Bitmap(Constants.NETWORK_STATUS_DIRECTORY + "2.gif"), (Image)new Bitmap(Constants.NETWORK_STATUS_DIRECTORY + "3.gif"), (Image)new Bitmap(Constants.NETWORK_STATUS_DIRECTORY + "4.gif"), (Image)new Bitmap(Constants.NETWORK_STATUS_DIRECTORY + "5.gif"), (Image)new Bitmap(Constants.NETWORK_STATUS_DIRECTORY + "6.gif") };
         private Label samplingLabel;
@@ -537,6 +538,7 @@ namespace WocketsApplication.DataLogger
             this.tabControl1.TabPages.RemoveAt(4);
             this.tabControl1.TabPages.RemoveAt(3);
             this.tabControl1.TabPages.RemoveAt(2);
+            this.tabControl1.TabPages.RemoveAt(1);
             this.tabControl1.SelectedIndex = 0;
 #else
             this.ShowForms();
@@ -1589,7 +1591,7 @@ namespace WocketsApplication.DataLogger
                             (this.wocketsController._Receivers[i]._Running == false))
                         {
                             this.bluetoothConnectors[this.wocketsController._Receivers[i]._ID].Reconnect();
-                            logger.Warn("Reconnected");
+                            logger.Warn("Attempting to reconnect receiver number "+this.wocketsController._Receivers[i]._ID);
                         }
 
                     }
@@ -1617,7 +1619,7 @@ namespace WocketsApplication.DataLogger
                                 numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer, dataLength);
                             }
 
-                            //((PictureBox)this.sensorStatus["W" + this.wocketsController._Sensors[i]._ID]).Image = connectedWocketImage;
+                            this.sensorStat["W" + this.wocketsController._Sensors[i]._ID] = connectedWocketImage;
                         }
                     }
 
@@ -1627,8 +1629,8 @@ namespace WocketsApplication.DataLogger
                 catch (Exception ex)
                 {
 
-
-                    //((PictureBox)this.sensorStatus["W" + sensor._ID]).Image = disconnectedWocketImage;
+                    logger.Warn("Wocket " + sensor._ID + " has disconnected.");
+                    this.sensorStat["W" + sensor._ID] = disconnectedWocketImage;
                     this.bluetoothConnectors[currentReceiver._ID] = new BluetoothConnector(currentReceiver, this.wocketsController);
                     currentReceiver._Running = false;
                 }
@@ -1719,6 +1721,13 @@ namespace WocketsApplication.DataLogger
 #else
                 Environment.Exit(0);
 #endif
+            }
+
+            for (int i = 0; i < this.wocketsController._Sensors.Count; i++)
+            {
+                String key="W" + this.wocketsController._Sensors[i]._ID;
+                ((PictureBox)this.sensorStatus[key]).Image = (Image)this.sensorStat[key];
+
             }
             /*
             #region Bluetooth Reconnection Code
