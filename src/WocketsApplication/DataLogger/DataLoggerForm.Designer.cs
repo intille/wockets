@@ -621,6 +621,7 @@ namespace WocketsApplication.DataLogger
             //Intialize Labels 40% of the screen
             this.sensorLabels = new Hashtable();
             this.sensorStatus = new Hashtable();
+            this.sensorStat = new Hashtable();
             this.sensorBattery = new Hashtable();
             int num_rows = (int)((this.wocketsController._Sensors.Count + 2) / 2); //additional row for HR and total sampling rate
             int textBoxHeight = ((int)(0.35 * this.panel1.ClientSize.Height) - ((this.wocketsController._Sensors.Count - 1) * Constants.WIDGET_SPACING)) / num_rows;
@@ -660,7 +661,7 @@ namespace WocketsApplication.DataLogger
                 PictureBox p2 = new PictureBox();
                 p2.Size = new Size(32, 32);
                 p2.Image = this.batteryImg[0];
-                p2.Location = new System.Drawing.Point(currentTextX + 50, currentTextY);
+                p2.Location = new System.Drawing.Point(currentTextX + 50, currentTextY+5);
                 t.Text = "W" + this.wocketsController._Sensors[i]._ID;
                 t.Name = "W" + this.wocketsController._Sensors[i]._ID;
                 t.Size = new System.Drawing.Size(textBoxWidth, 32);
@@ -668,6 +669,7 @@ namespace WocketsApplication.DataLogger
                 t.Font = textFont;
                 this.sensorLabels.Add("W" + this.wocketsController._Sensors[i]._ID, t);
                 this.sensorStatus.Add("W" + this.wocketsController._Sensors[i]._ID, p);
+                this.sensorStat.Add("W" + this.wocketsController._Sensors[i]._ID, this.connectedWocketImage);
                 this.sensorBattery.Add("W" + this.wocketsController._Sensors[i]._ID, p2);
                 //this.tabPage1.Controls.Add(t);
                 this.panel1.Controls.Add(t);
@@ -679,7 +681,7 @@ namespace WocketsApplication.DataLogger
                 else
                 {
                     currentTextX = leftTextX;
-                    currentTextY += (textBoxHeight + 20 + Constants.WIDGET_SPACING);
+                    currentTextY += (textBoxHeight + Constants.WIDGET_SPACING);
                 }
             }
 
@@ -691,7 +693,6 @@ namespace WocketsApplication.DataLogger
             samplingLabel.Font = textFont;
             this.sensorLabels.Add("SampRate", samplingLabel);
             //this.tabPage1.Controls.Add(samplingLabel);
-            this.panel1.Controls.Add(samplingLabel);
             System.Windows.Forms.Label errorLabel = new System.Windows.Forms.Label();
             errorLabel.Size = new System.Drawing.Size(this.panel1.ClientSize.Width - 10, 30);
             errorLabel.Location = new System.Drawing.Point(5, 100);
