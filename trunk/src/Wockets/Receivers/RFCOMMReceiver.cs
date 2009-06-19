@@ -738,6 +738,7 @@ namespace Wockets.Receivers
                         if (pin != null)
                             BluetoothSecurity.SetPin(bt_addr, pin);
 
+                       
                         newStream.btClient.Connect(bt_addr, BluetoothService.SerialPort);                        
                         newStream.btSocket = newStream.btClient.Client;                      
                         newStream.btSocket.Blocking = true;
