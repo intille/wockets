@@ -18,16 +18,16 @@ using System.Threading;
 
 namespace InTheHand.Net.Sockets
 {
-	/// <summary>
-	/// Provides client connections for Bluetooth network services.
-	/// </summary>
-	/// <remarks>This class currently only supports devices which use the Microsoft Bluetooth stack, devices which use the WidComm stack will not work.</remarks>
-	public class BluetoothClient : IDisposable
-	{
+    /// <summary>
+    /// Provides client connections for Bluetooth network services.
+    /// </summary>
+    /// <remarks>This class currently only supports devices which use the Microsoft Bluetooth stack, devices which use the WidComm stack will not work.</remarks>
+    public class BluetoothClient : IDisposable
+    {
         private bool cleanedUp = false;
         private SocketOptionHelper m_optionHelper;
 
-		#region Constructor
+        #region Constructor
 #if WinCE
         static BluetoothClient()
         {
@@ -35,23 +35,23 @@ namespace InTheHand.Net.Sockets
         }
 #endif
 
-		/// <summary>
+        /// <summary>
         /// Creates a new instance of <see cref="BluetoothClient"/>.
-		/// </summary>
-		public BluetoothClient()
-		{
-                
+        /// </summary>
+        public BluetoothClient()
+        {
+
             try
             {
-                this.Client = new Socket(AddressFamily32.Bluetooth, SocketType.Stream, BluetoothProtocolType.RFComm);                            
-               
-   
+                this.Client = new Socket(AddressFamily32.Bluetooth, SocketType.Stream, BluetoothProtocolType.RFComm);
+
+
                 byte[] ttt = BitConverter.GetBytes(5000);
-//                this.Client.SetSocketOption(BluetoothSocketOptionLevel.RFComm, SocketOptionName.KeepAlive, true);
-                
+                //                this.Client.SetSocketOption(BluetoothSocketOptionLevel.RFComm, SocketOptionName.KeepAlive, true);
 
 
-                
+
+
                 //this.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName., 1000);
             }
             catch (SocketException se)
@@ -59,7 +59,7 @@ namespace InTheHand.Net.Sockets
                 throw new PlatformNotSupportedException("32feet.NET does not support the Bluetooth stack on this device.", se);
             }
             m_optionHelper = new SocketOptionHelper(this.Client);
-		}
+        }
         /// <summary>
         /// Initializes a new instance of the <see cref="BluetoothClient"/> class and binds it to the specified local endpoint.
         /// </summary>
@@ -78,97 +78,97 @@ namespace InTheHand.Net.Sockets
         }
 
         internal BluetoothClient(Socket acceptedSocket)
-		{
+        {
             this.Client = acceptedSocket;
             active = true;
             m_optionHelper = new SocketOptionHelper(this.Client);
         }
 
-		#endregion
+        #endregion
 
-		
-		#region Query Length
-		
-		//length of time for query
-		private TimeSpan inquiryLength = new TimeSpan(0,0,10);
 
-		/// <summary>
-		/// Amount of time allowed to perform the query.
-		/// </summary>
-		/// <remarks>On Windows CE the actual value used is expressed in units of 1.28 seconds, so will be the nearest match for the value supplied.
-		/// The default value is 10 seconds. The maximum is 60 seconds.</remarks>
-		public TimeSpan InquiryLength
-		{
-			get
-			{
-				return inquiryLength;
-			}
-			set
-			{
-				if((value.TotalSeconds > 0) && (value.TotalSeconds <= 60))
-				{
-					inquiryLength = value;
-				}
-				else
-				{
-					throw new  ArgumentOutOfRangeException("QueryLength must be a positive timespan between 0 and 60 seconds.");
-				}
-			}
-		}
-		#endregion
+        #region Query Length
 
-		#region Discover Devices
-		/// <summary>
-		/// Discovers accessible Bluetooth devices and returns their names and addresses.
-		/// </summary>
-		/// <returns>An array of BluetoothDeviceInfo objects describing the devices discovered.</returns>
-		public BluetoothDeviceInfo[] DiscoverDevices()
-		{
-			return DiscoverDevices(255,true,true,true);
-		}
-		
-		/// <summary>
-		/// Discovers accessible Bluetooth devices and returns their names and addresses.
-		/// </summary>
-		/// <param name="maxDevices">The maximum number of devices to get information about.</param>
-		/// <returns>An array of BluetoothDeviceInfo objects describing the devices discovered.</returns>
-		public BluetoothDeviceInfo[] DiscoverDevices(int maxDevices)
-		{
-			return DiscoverDevices(maxDevices,true,true,true);
-		}
+        //length of time for query
+        private TimeSpan inquiryLength = new TimeSpan(0, 0, 10);
 
-		/// <summary>
-		/// Discovers accessible Bluetooth devices and returns their names and addresses.
-		/// </summary>
-		/// <param name="maxDevices">The maximum number of devices to get information about.</param>
-		/// <param name="authenticated">True to return previously authenticated/paired devices.</param>
-		/// <param name="remembered">True to return remembered devices.</param>
-		/// <param name="unknown">True to return previously unknown devices.</param>
-		/// <returns>An array of BluetoothDeviceInfo objects describing the devices discovered.</returns>
-		public BluetoothDeviceInfo[] DiscoverDevices(int maxDevices, bool authenticated, bool remembered, bool unknown)
-		{
+        /// <summary>
+        /// Amount of time allowed to perform the query.
+        /// </summary>
+        /// <remarks>On Windows CE the actual value used is expressed in units of 1.28 seconds, so will be the nearest match for the value supplied.
+        /// The default value is 10 seconds. The maximum is 60 seconds.</remarks>
+        public TimeSpan InquiryLength
+        {
+            get
+            {
+                return inquiryLength;
+            }
+            set
+            {
+                if ((value.TotalSeconds > 0) && (value.TotalSeconds <= 60))
+                {
+                    inquiryLength = value;
+                }
+                else
+                {
+                    throw new ArgumentOutOfRangeException("QueryLength must be a positive timespan between 0 and 60 seconds.");
+                }
+            }
+        }
+        #endregion
+
+        #region Discover Devices
+        /// <summary>
+        /// Discovers accessible Bluetooth devices and returns their names and addresses.
+        /// </summary>
+        /// <returns>An array of BluetoothDeviceInfo objects describing the devices discovered.</returns>
+        public BluetoothDeviceInfo[] DiscoverDevices()
+        {
+            return DiscoverDevices(255, true, true, true);
+        }
+
+        /// <summary>
+        /// Discovers accessible Bluetooth devices and returns their names and addresses.
+        /// </summary>
+        /// <param name="maxDevices">The maximum number of devices to get information about.</param>
+        /// <returns>An array of BluetoothDeviceInfo objects describing the devices discovered.</returns>
+        public BluetoothDeviceInfo[] DiscoverDevices(int maxDevices)
+        {
+            return DiscoverDevices(maxDevices, true, true, true);
+        }
+
+        /// <summary>
+        /// Discovers accessible Bluetooth devices and returns their names and addresses.
+        /// </summary>
+        /// <param name="maxDevices">The maximum number of devices to get information about.</param>
+        /// <param name="authenticated">True to return previously authenticated/paired devices.</param>
+        /// <param name="remembered">True to return remembered devices.</param>
+        /// <param name="unknown">True to return previously unknown devices.</param>
+        /// <returns>An array of BluetoothDeviceInfo objects describing the devices discovered.</returns>
+        public BluetoothDeviceInfo[] DiscoverDevices(int maxDevices, bool authenticated, bool remembered, bool unknown)
+        {
             WqsOffset.AssertCheckLayout();
             CsaddrInfoOffsets.AssertCheckLayout();
             //
-			int discoveredDevices = 0;
-			ArrayList al = new ArrayList();
-			
-			int handle = 0;
-			int lookupresult = 0;
+            int discoveredDevices = 0;
+            ArrayList al = new ArrayList();
+
+            int handle = 0;
+            int lookupresult = 0;
 
 
-			
+
 #if WinCE
-            if(unknown)
+            if (unknown)
             {
 #endif
-				byte[] buffer = new byte[1024];
-				BitConverter.GetBytes(WqsOffset.StructLength_60).CopyTo(buffer, WqsOffset.dwSize_0);
-				BitConverter.GetBytes(WqsOffset.NsBth_16).CopyTo(buffer, WqsOffset.dwNameSpace_20);
+                byte[] buffer = new byte[1024];
+                BitConverter.GetBytes(WqsOffset.StructLength_60).CopyTo(buffer, WqsOffset.dwSize_0);
+                BitConverter.GetBytes(WqsOffset.NsBth_16).CopyTo(buffer, WqsOffset.dwNameSpace_20);
 
-				int bufferlen = buffer.Length;
+                int bufferlen = buffer.Length;
 
-				
+
                 BTHNS_INQUIRYBLOB bib = new BTHNS_INQUIRYBLOB();
                 bib.LAP = 0x9E8B33;
 
@@ -180,16 +180,16 @@ namespace InTheHand.Net.Sockets
 #endif
                 GCHandle hBib = GCHandle.Alloc(bib, GCHandleType.Pinned);
                 IntPtr pBib = hBib.AddrOfPinnedObject();
-                
+
                 BLOB b = new BLOB(8, pBib);
 
-			
+
                 GCHandle hBlob = GCHandle.Alloc(b, GCHandleType.Pinned);
 
                 Marshal32.WriteIntPtr(buffer, WqsOffset.lpBlob_56, hBlob.AddrOfPinnedObject());
-                		
 
-				//start looking for Bluetooth devices
+
+                //start looking for Bluetooth devices
                 LookupFlags flags = LookupFlags.Containers;
 
 #if WinXP
@@ -201,24 +201,24 @@ namespace InTheHand.Net.Sockets
 #endif
                 lookupresult = NativeMethods.WSALookupServiceBegin(buffer, flags, out handle);
 
-				hBlob.Free();
+                hBlob.Free();
                 hBib.Free();
 
-				while(discoveredDevices < maxDevices && lookupresult != -1)
-				{
+                while (discoveredDevices < maxDevices && lookupresult != -1)
+                {
 #if WinCE
-					lookupresult = NativeMethods.WSALookupServiceNext(handle, LookupFlags.ReturnAddr | LookupFlags.ReturnBlob , ref bufferlen, buffer);
+                    lookupresult = NativeMethods.WSALookupServiceNext(handle, LookupFlags.ReturnAddr | LookupFlags.ReturnBlob, ref bufferlen, buffer);
 #else
                     lookupresult = NativeMethods.WSALookupServiceNext(handle, LookupFlags.ReturnAddr , ref bufferlen, buffer);
 #endif
 
                     if (lookupresult != -1)
-					{
-						//increment found count
-						discoveredDevices++;
+                    {
+                        //increment found count
+                        discoveredDevices++;
 
-				
-						//status
+
+                        //status
 #if WinXP
                         BTHNS_RESULT status = (BTHNS_RESULT)BitConverter.ToInt32(buffer, WqsOffset.dwOutputFlags_52);
                         bool devAuthd = ((status & BTHNS_RESULT.Authenticated) == BTHNS_RESULT.Authenticated);
@@ -230,7 +230,7 @@ namespace InTheHand.Net.Sockets
                         bool include = (authenticated && devAuthd) || (remembered && devRembd) || (unknown && devUnkwn);
                         if (include)
 #else
-                        if(true)
+                        if (true)
 #endif
                         {
 #if WinCE
@@ -248,115 +248,115 @@ namespace InTheHand.Net.Sockets
                             //    LPSOCKADDR lpSockaddr;
                             //    INT iSockaddrLength;
                             //}
-							//pointer to outputbuffer
+                            //pointer to outputbuffer
                             IntPtr bufferptr = Marshal32.ReadIntPtr(buffer, WqsOffset.lpcsaBuffer_48);
-							//remote socket address
-							IntPtr sockaddrptr = Marshal32.ReadIntPtr(bufferptr, CsaddrInfoOffsets.OffsetRemoteAddr_lpSockaddr_8);
-							//remote socket len
-							int sockaddrlen = Marshal.ReadInt32(bufferptr, CsaddrInfoOffsets.OffsetRemoteAddr_iSockaddrLength_12);
-					
+                            //remote socket address
+                            IntPtr sockaddrptr = Marshal32.ReadIntPtr(bufferptr, CsaddrInfoOffsets.OffsetRemoteAddr_lpSockaddr_8);
+                            //remote socket len
+                            int sockaddrlen = Marshal.ReadInt32(bufferptr, CsaddrInfoOffsets.OffsetRemoteAddr_iSockaddrLength_12);
 
-							SocketAddress btsa = new SocketAddress(AddressFamily32.Bluetooth, sockaddrlen);
-						
-							for(int sockbyte = 0; sockbyte < sockaddrlen; sockbyte++)
-							{
-								btsa[sockbyte] = Marshal.ReadByte(sockaddrptr, sockbyte);
-							}
 
-							BluetoothEndPoint bep = new BluetoothEndPoint(null, BluetoothService.Empty);
-							bep = (BluetoothEndPoint)bep.Create(btsa);
-				
-							//new deviceinfo
-							BluetoothDeviceInfo newdevice;
+                            SocketAddress btsa = new SocketAddress(AddressFamily32.Bluetooth, sockaddrlen);
+
+                            for (int sockbyte = 0; sockbyte < sockaddrlen; sockbyte++)
+                            {
+                                btsa[sockbyte] = Marshal.ReadByte(sockaddrptr, sockbyte);
+                            }
+
+                            BluetoothEndPoint bep = new BluetoothEndPoint(null, BluetoothService.Empty);
+                            bep = (BluetoothEndPoint)bep.Create(btsa);
+
+                            //new deviceinfo
+                            BluetoothDeviceInfo newdevice;
 
 #if WinCE
-							newdevice = new BluetoothDeviceInfo(bep.Address, bir.cod);
+                            newdevice = new BluetoothDeviceInfo(bep.Address, bir.cod);
 #else
                             newdevice = new BluetoothDeviceInfo(bep.Address);
 #endif
-							//add to discovered list
-							al.Add(newdevice);
-						}
+                            //add to discovered list
+                            al.Add(newdevice);
+                        }
 
 
-					}
-				}
+                    }
+                }
 #if WinCE
-			}
+            }
 #endif
 
-			//stop looking
-            if(handle!=0)
-			{
-				lookupresult = NativeMethods.WSALookupServiceEnd(handle);
-			}
+            //stop looking
+            if (handle != 0)
+            {
+                lookupresult = NativeMethods.WSALookupServiceEnd(handle);
+            }
 
 #if WinCE
 
             //open bluetooth device key
             RegistryKey devkey = Registry.LocalMachine.OpenSubKey("Software\\Microsoft\\Bluetooth\\Device");
             bool addFromRegistry = authenticated || remembered;
-                
+
             if (devkey != null)
             {
-                    
+
                 //enumerate the keys
                 foreach (string devid in devkey.GetSubKeyNames())
-                {    
+                {
                     BluetoothAddress address;
 
                     if (BluetoothAddress.TryParse(devid, out address))
                     {
-                            //get friendly name
-                            RegistryKey thisdevkey = devkey.OpenSubKey(devid);
-                            string name = thisdevkey.GetValue("name", "").ToString();
-                            uint classOfDevice = Convert.ToUInt32(thisdevkey.GetValue("class", 0));
-                            thisdevkey.Close();
+                        //get friendly name
+                        RegistryKey thisdevkey = devkey.OpenSubKey(devid);
+                        string name = thisdevkey.GetValue("name", "").ToString();
+                        uint classOfDevice = Convert.ToUInt32(thisdevkey.GetValue("class", 0));
+                        thisdevkey.Close();
 
-                            //add to collection
-                            BluetoothDeviceInfo thisdevice = new BluetoothDeviceInfo(address, name, classOfDevice, true);
+                        //add to collection
+                        BluetoothDeviceInfo thisdevice = new BluetoothDeviceInfo(address, name, classOfDevice, true);
 
-                            int devindex = al.IndexOf(thisdevice);
+                        int devindex = al.IndexOf(thisdevice);
 
-                            if (devindex == -1)
+                        if (devindex == -1)
+                        {
+                            //if we intended to search for authenticated devices add this one to the collection
+                            if (addFromRegistry)
                             {
-                                //if we intended to search for authenticated devices add this one to the collection
-                                if (addFromRegistry)
-                                {
-                                    al.Add(thisdevice);
-                                }
+                                al.Add(thisdevice);
+                            }
+                        }
+                        else
+                        {
+                            if (addFromRegistry)
+                            {
+                                //set authenticated flag on existing discovered device
+                                ((BluetoothDeviceInfo)al[devindex]).Authenticated = true;
                             }
                             else
                             {
-                                if (addFromRegistry)
-                                {
-                                    //set authenticated flag on existing discovered device
-                                    ((BluetoothDeviceInfo)al[devindex]).Authenticated = true;
-                                }
-                                else
-                                {
-                                    //we want to exclude already authenticated devices so remove it from the collection
-                                    al.RemoveAt(devindex);
-                                }
+                                //we want to exclude already authenticated devices so remove it from the collection
+                                al.RemoveAt(devindex);
                             }
                         }
                     }
+                }
 
-                    devkey.Close();
+                devkey.Close();
             }
 #endif
 
-			
-			//return results
-			if(al.Count == 0)
-			{
-				//special case for empty collection
-				return new BluetoothDeviceInfo[0]{};
-			}
 
-			return (BluetoothDeviceInfo[])al.ToArray(typeof(BluetoothDeviceInfo));
-		}
-		#endregion
+            //return results
+            if (al.Count == 0)
+            {
+                //special case for empty collection
+                return new BluetoothDeviceInfo[0] { };
+            }
+
+            return (BluetoothDeviceInfo[])al.ToArray(typeof(BluetoothDeviceInfo));
+        }
+        #endregion
 
 
         #region Active
@@ -378,44 +378,44 @@ namespace InTheHand.Net.Sockets
         }
         #endregion
 
-		#region Available
-		/// <summary>
-		/// Gets the amount of data that has been received from the network and is available to be read.
-		/// </summary>
-		/// <value>The number of bytes of data received from the network and available to be read.</value>
-		/// <exception cref="ObjectDisposedException">The <see cref="Socket"/> has been closed.</exception>
-		public int Available
-		{
-			get
-			{
+        #region Available
+        /// <summary>
+        /// Gets the amount of data that has been received from the network and is available to be read.
+        /// </summary>
+        /// <value>The number of bytes of data received from the network and available to be read.</value>
+        /// <exception cref="ObjectDisposedException">The <see cref="Socket"/> has been closed.</exception>
+        public int Available
+        {
+            get
+            {
                 return clientSocket.Available;
-			}
-		}
-		#endregion
+            }
+        }
+        #endregion
 
-		#region Client
+        #region Client
 
         private Socket clientSocket;
 
-		/// <summary>
-		/// Gets or sets the underlying <see cref="Socket"/>.
-		/// </summary>
-		public Socket Client
-		{
-			get
-			{
+        /// <summary>
+        /// Gets or sets the underlying <see cref="Socket"/>.
+        /// </summary>
+        public Socket Client
+        {
+            get
+            {
                 return clientSocket;
-			}
+            }
             set
             {
                 this.clientSocket = value;
             }
 
-		}
+        }
 
-		#endregion
+        #endregion
 
-		#region Connect
+        #region Connect
 
         private bool IsConnectionSuccessful = false;
         private Exception socketexception;
@@ -425,7 +425,7 @@ namespace InTheHand.Net.Sockets
         public void CallBackMethod(IAsyncResult asyncresult)
         {
             BluetoothClient btclient = asyncresult.AsyncState as BluetoothClient;
-            btclient.EndConnect(asyncresult);            
+            btclient.EndConnect(asyncresult);
         }
 
 
@@ -443,7 +443,7 @@ namespace InTheHand.Net.Sockets
             {
                 throw new ArgumentNullException("remoteEP");
             }
-            clientSocket.BeginConnect(remoteEP, new AsyncCallback(CallBackMethod), this);
+            clientSocket.BeginConnect(remoteEP, new AsyncCallback(CallBackMethod), clientSocket);
 
             if (TimeoutObject.WaitOne(timeoutMSec, false))
             {
@@ -462,15 +462,15 @@ namespace InTheHand.Net.Sockets
                 clientSocket.Close();
                 throw new TimeoutException("TimeOut Exception");
             }
-            
-            
+
+
         }
-		/// <summary>
-		/// Connects a client to a specified endpoint.
-		/// </summary>
+        /// <summary>
+        /// Connects a client to a specified endpoint.
+        /// </summary>
         /// <param name="remoteEP">A <see cref="BluetoothEndPoint"/> that represents the remote device.</param>
         public void Connect(BluetoothEndPoint remoteEP)
-		{
+        {
             if (cleanedUp)
             {
                 throw new ObjectDisposedException(base.GetType().FullName);
@@ -482,17 +482,17 @@ namespace InTheHand.Net.Sockets
 
             //clientSocket.SetSocketOption(BluetoothSocketOptionLevel.RFComm, BluetoothSocketOptionName.SE);
             //StartAuthenticator(remoteEP.Address);
-           // byte[] link = new byte[32];          
+            // byte[] link = new byte[32];          
             //BitConverter.GetBytes(80).CopyTo(link, 0);
 
             //byte[] opt = new byte[2];
             //opt[1] = 0xff;
             //opt[2] = 0x00;
             //clientSocket.SetSocketOption(BluetoothSocketOptionLevel.RFComm, BluetoothSocketOptionName.SetMtuMinimum, 23);
-           //clientSocket.SetSocketOption(BluetoothSocketOptionLevel.RFComm, BluetoothSocketOptionName.s,255);
+            //clientSocket.SetSocketOption(BluetoothSocketOptionLevel.RFComm, BluetoothSocketOptionName.s,255);
 
-             //BitConverter.ToInt32(ttt, 0);
-           // clientSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, 200);
+            //BitConverter.ToInt32(ttt, 0);
+            // clientSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, 200);
             clientSocket.Connect(remoteEP);
             //int t = (int)clientSocket.GetSocketOption(BluetoothSocketOptionLevel.RFComm, BluetoothSocketOptionName.GetReceiveBuffer); //BitConverter.ToInt32(ttt, 0);
 
@@ -500,12 +500,12 @@ namespace InTheHand.Net.Sockets
             //this.m_optionHelper.EnterSniffMode();
 
             //allDone.Reset();
-           // clientSocket.BeginConnect(remoteEP, new AsyncCallback(ConnectCallback1), clientSocket);
+            // clientSocket.BeginConnect(remoteEP, new AsyncCallback(ConnectCallback1), clientSocket);
             //allDone.WaitOne();
             //clientSocket.
             //if (clientSocket.Connected)
             active = true;
-         
+
             /*
             ushort sniff_mode_max = 0xffff;
             ushort sniff_mode_min = 0x0001;
@@ -523,10 +523,10 @@ namespace InTheHand.Net.Sockets
             clientSocket.SetSocketOption(BluetoothSocketOptionLevel.RFComm, BluetoothSocketOptionName..EnterSniffMode, optl);
             */
 
-//           int  max = (int)clientSocket.GetSocketOption(BluetoothSocketOptionLevel.RFComm, BluetoothSocketOptionName.GetMtuMaximum);
-  //          int mtu=(int) clientSocket.GetSocketOption(BluetoothSocketOptionLevel.RFComm, BluetoothSocketOptionName.GetMtu);
-    //       int min = (int)clientSocket.GetSocketOption(BluetoothSocketOptionLevel.RFComm, BluetoothSocketOptionName.GetMtuMinimum);
-		}
+            //           int  max = (int)clientSocket.GetSocketOption(BluetoothSocketOptionLevel.RFComm, BluetoothSocketOptionName.GetMtuMaximum);
+            //          int mtu=(int) clientSocket.GetSocketOption(BluetoothSocketOptionLevel.RFComm, BluetoothSocketOptionName.GetMtu);
+            //       int min = (int)clientSocket.GetSocketOption(BluetoothSocketOptionLevel.RFComm, BluetoothSocketOptionName.GetMtuMinimum);
+        }
         /// <summary>
         /// Connects the client to a remote Bluetooth host using the specified Bluetooth address and service identifier. 
         /// </summary>
@@ -538,18 +538,17 @@ namespace InTheHand.Net.Sockets
             {
                 throw new ArgumentNullException("address");
             }
-            if (service==Guid.Empty)
+            if (service == Guid.Empty)
             {
                 throw new ArgumentNullException("service");
             }
             BluetoothEndPoint point = new BluetoothEndPoint(address, service);
-           
             this.Connect(point);
-            
-            
+
+
             //this.Connect(point, 1000);
-            
-       
+
+
         }
 
         #region Begin Connect
@@ -604,17 +603,17 @@ namespace InTheHand.Net.Sockets
 
         #region Connected
         /// <summary>
-		/// Gets a value indicating whether the underlying <see cref="Socket"/> for a <see cref="BluetoothClient"/> is connected to a remote host.
-		/// </summary>
-		/// <value>true if the <see cref="Client"/> socket was connected to a remote resource as of the most recent operation; otherwise, false.</value>
-		public bool Connected
-		{
-			get
-			{
-				return clientSocket.Connected;
-			}
-		}
-		#endregion
+        /// Gets a value indicating whether the underlying <see cref="Socket"/> for a <see cref="BluetoothClient"/> is connected to a remote host.
+        /// </summary>
+        /// <value>true if the <see cref="Client"/> socket was connected to a remote resource as of the most recent operation; otherwise, false.</value>
+        public bool Connected
+        {
+            get
+            {
+                return clientSocket.Connected;
+            }
+        }
+        #endregion
 
         #region Close
         /// <summary>
@@ -636,33 +635,33 @@ namespace InTheHand.Net.Sockets
         public void Close()
         {
             Dispose();
-           
+
         }
         #endregion
 
-		#region Get Stream
+        #region Get Stream
 
         private NetworkStream dataStream;
 
-		/// <summary>
-		/// Gets the underlying stream of data.
-		/// </summary>
-		/// <returns>The underlying <see cref="NetworkStream"/>.</returns>
-		/// <remarks><see cref="GetStream"/> returns a <see cref="NetworkStream"/> that you can use to send and receive data.
-		/// The <see cref="NetworkStream"/> class inherits from the <see cref="Stream"/> class, which provides a rich collection of methods and properties used to facilitate network communications.
+        /// <summary>
+        /// Gets the underlying stream of data.
+        /// </summary>
+        /// <returns>The underlying <see cref="NetworkStream"/>.</returns>
+        /// <remarks><see cref="GetStream"/> returns a <see cref="NetworkStream"/> that you can use to send and receive data.
+        /// The <see cref="NetworkStream"/> class inherits from the <see cref="Stream"/> class, which provides a rich collection of methods and properties used to facilitate network communications.
         /// <para>You must call the <see cref="Connect(InTheHand.Net.BluetoothEndPoint)"/> / <see cref="M:Connect(InTheHand.Net.BluetoothAddress,System.Guid)"/>
         /// method first, or the <see cref="GetStream"/> method will throw an <see cref="InvalidOperationException"/>.
-		/// After you have obtained the <see cref="NetworkStream"/>, call the <see cref="NetworkStream.Write"/> method to send data to the remote host.
-		/// Call the <see cref="NetworkStream.Read"/> method to receive data arriving from the remote host.
-		/// Both of these methods block until the specified operation is performed.
-		/// You can avoid blocking on a read operation by checking the <see cref="NetworkStream.DataAvailable"/> property.
-		/// A true value means that data has arrived from the remote host and is available for reading.
-		/// In this case, <see cref="NetworkStream.Read"/> is guaranteed to complete immediately.
-		/// If the remote host has shutdown its connection, <see cref="NetworkStream.Read"/> will immediately return with zero bytes.</para></remarks>
-		/// <exception cref="InvalidOperationException">The <see cref="BluetoothClient"/> is not connected to a remote host.</exception>
-		/// <exception cref="ObjectDisposedException">The <see cref="BluetoothClient"/> has been closed.</exception>
-		public NetworkStream GetStream()
-		{
+        /// After you have obtained the <see cref="NetworkStream"/>, call the <see cref="NetworkStream.Write"/> method to send data to the remote host.
+        /// Call the <see cref="NetworkStream.Read"/> method to receive data arriving from the remote host.
+        /// Both of these methods block until the specified operation is performed.
+        /// You can avoid blocking on a read operation by checking the <see cref="NetworkStream.DataAvailable"/> property.
+        /// A true value means that data has arrived from the remote host and is available for reading.
+        /// In this case, <see cref="NetworkStream.Read"/> is guaranteed to complete immediately.
+        /// If the remote host has shutdown its connection, <see cref="NetworkStream.Read"/> will immediately return with zero bytes.</para></remarks>
+        /// <exception cref="InvalidOperationException">The <see cref="BluetoothClient"/> is not connected to a remote host.</exception>
+        /// <exception cref="ObjectDisposedException">The <see cref="BluetoothClient"/> has been closed.</exception>
+        public NetworkStream GetStream()
+        {
             if (cleanedUp)
             {
                 throw new ObjectDisposedException(base.GetType().FullName);
@@ -675,88 +674,88 @@ namespace InTheHand.Net.Sockets
             if (dataStream == null)
             {
                 dataStream = new NetworkStream(this.Client, true);
-               
+
             }
-            
+
 
             return dataStream;
-		}
-		#endregion
-		
+        }
+        #endregion
 
-		#region Authenticate
-		/// <summary>
-		/// Gets or sets the authentication state of the current connect or behaviour to use when connection is established.
-		/// </summary>
-		/// <remarks>
-		/// For disconnected sockets, specifies that authentication is required in order for a connect or accept operation to complete successfully.
-		/// Setting this option actively initiates authentication during connection establishment, if the two Bluetooth devices were not previously authenticated.
-		/// The user interface for passkey exchange, if necessary, is provided by the operating system outside the application context.
-		/// For outgoing connections that require authentication, the connect operation fails with WSAEACCES if authentication is not successful.
-		/// In response, the application may prompt the user to authenticate the two Bluetooth devices before connection.
-		/// For incoming connections, the connection is rejected if authentication cannot be established and returns a WSAEHOSTDOWN error.
-		/// </remarks>
-		public bool Authenticate
-		{
+
+        #region Authenticate
+        /// <summary>
+        /// Gets or sets the authentication state of the current connect or behaviour to use when connection is established.
+        /// </summary>
+        /// <remarks>
+        /// For disconnected sockets, specifies that authentication is required in order for a connect or accept operation to complete successfully.
+        /// Setting this option actively initiates authentication during connection establishment, if the two Bluetooth devices were not previously authenticated.
+        /// The user interface for passkey exchange, if necessary, is provided by the operating system outside the application context.
+        /// For outgoing connections that require authentication, the connect operation fails with WSAEACCES if authentication is not successful.
+        /// In response, the application may prompt the user to authenticate the two Bluetooth devices before connection.
+        /// For incoming connections, the connection is rejected if authentication cannot be established and returns a WSAEHOSTDOWN error.
+        /// </remarks>
+        public bool Authenticate
+        {
             get { return m_optionHelper.Authenticate; }
             set { m_optionHelper.Authenticate = value; }
-		}
-		#endregion
+        }
+        #endregion
 
-		#region Encrypt
-		/// <summary>
-		/// On unconnected sockets, enforces encryption to establish a connection.
-		/// Encryption is only available for authenticated connections.
-		/// For incoming connections, a connection for which encryption cannot be established is automatically rejected and returns WSAEHOSTDOWN as the error.
-		/// For outgoing connections, the connect function fails with WSAEACCES if encryption cannot be established.
-		/// In response, the application may prompt the user to authenticate the two Bluetooth devices before connection.
-		/// </summary>
-		public bool Encrypt
-		{
+        #region Encrypt
+        /// <summary>
+        /// On unconnected sockets, enforces encryption to establish a connection.
+        /// Encryption is only available for authenticated connections.
+        /// For incoming connections, a connection for which encryption cannot be established is automatically rejected and returns WSAEHOSTDOWN as the error.
+        /// For outgoing connections, the connect function fails with WSAEACCES if encryption cannot be established.
+        /// In response, the application may prompt the user to authenticate the two Bluetooth devices before connection.
+        /// </summary>
+        public bool Encrypt
+        {
             get { return m_optionHelper.Encrypt; }
             set { m_optionHelper.Encrypt = value; }
-		}
-		#endregion
+        }
+        #endregion
 
-		
-		#region Link Key
-		/// <summary>
-		/// Returns link key associated with peer Bluetooth device.
-		/// </summary>
-		public Guid LinkKey
-		{
-			get
-			{
+
+        #region Link Key
+        /// <summary>
+        /// Returns link key associated with peer Bluetooth device.
+        /// </summary>
+        public Guid LinkKey
+        {
+            get
+            {
                 byte[] link = clientSocket.GetSocketOption(BluetoothSocketOptionLevel.RFComm, BluetoothSocketOptionName.GetLink, 32);
 
-				byte[] bytes = new byte[16];
-				Buffer.BlockCopy(link, 16, bytes, 0, 16);
-				return new Guid(bytes);
-			}
-		}
-		#endregion
+                byte[] bytes = new byte[16];
+                Buffer.BlockCopy(link, 16, bytes, 0, 16);
+                return new Guid(bytes);
+            }
+        }
+        #endregion
 
-		#region Link Policy
-		/// <summary>
-		/// Returns the Link Policy of the current connection.
-		/// </summary>
-		public LinkPolicy LinkPolicy
-		{
-			get
-			{
+        #region Link Policy
+        /// <summary>
+        /// Returns the Link Policy of the current connection.
+        /// </summary>
+        public LinkPolicy LinkPolicy
+        {
+            get
+            {
                 byte[] policy = clientSocket.GetSocketOption(BluetoothSocketOptionLevel.RFComm, BluetoothSocketOptionName.GetLinkPolicy, 4);
-				return (LinkPolicy)BitConverter.ToInt32(policy, 0);
-			}
-		}
+                return (LinkPolicy)BitConverter.ToInt32(policy, 0);
+            }
+        }
 
         public IntPtr GetSocketHandle()
         {
             return clientSocket.Handle;
         }
-		#endregion
+        #endregion
 
-	
-		#region Set PIN
+
+        #region Set PIN
         /// <summary>
         /// Sets the PIN associated with the currently connected device.
         /// </summary>
@@ -767,116 +766,116 @@ namespace InTheHand.Net.Sockets
             m_optionHelper.SetPin(((BluetoothEndPoint)clientSocket.RemoteEndPoint).Address, pin);
         }
 
-		/// <summary>
-		/// Set or change the PIN to be used with a specific remote device.
-		/// </summary>
-		/// <param name="device">Address of Bluetooth device.</param>
-		/// <param name="pin">PIN string consisting of 1 to 16 ASCII characters.</param>
+        /// <summary>
+        /// Set or change the PIN to be used with a specific remote device.
+        /// </summary>
+        /// <param name="device">Address of Bluetooth device.</param>
+        /// <param name="pin">PIN string consisting of 1 to 16 ASCII characters.</param>
         /// <remarks>Assigning null (Nothing in VB) or an empty String will revoke the PIN.</remarks>
-		public void SetPin(BluetoothAddress device, string pin)
+        public void SetPin(BluetoothAddress device, string pin)
         {
             m_optionHelper.SetPin(device, pin);
         }
         #endregion
 
 
-		#region Remote Machine Name
-		/// <summary>
-		/// Gets the name of the remote device.
-		/// </summary>
-		public string RemoteMachineName
-		{
-			get
-			{
+        #region Remote Machine Name
+        /// <summary>
+        /// Gets the name of the remote device.
+        /// </summary>
+        public string RemoteMachineName
+        {
+            get
+            {
                 return GetRemoteMachineName(clientSocket);
-			}
-		}
-		
-		/// <summary>
-		/// Gets the name of the specified remote device.
-		/// </summary>
-		/// <param name="a">Address of remote device.</param>
-		/// <returns>Friendly name of specified device.</returns>
-		public string GetRemoteMachineName(BluetoothAddress a)
-		{
+            }
+        }
+
+        /// <summary>
+        /// Gets the name of the specified remote device.
+        /// </summary>
+        /// <param name="a">Address of remote device.</param>
+        /// <returns>Friendly name of specified device.</returns>
+        public string GetRemoteMachineName(BluetoothAddress a)
+        {
 #if WinXP
             BluetoothDeviceInfo bdi = new BluetoothDeviceInfo(a);
             return bdi.DeviceName;
 #else
-			byte[] buffer = new byte[504];
-			//copy remote device address to buffer
-			Buffer.BlockCopy(a.ToByteArray(), 0, buffer, 0, 6);
+            byte[] buffer = new byte[504];
+            //copy remote device address to buffer
+            Buffer.BlockCopy(a.ToByteArray(), 0, buffer, 0, 6);
 
-			try
-			{
+            try
+            {
                 clientSocket.SetSocketOption(BluetoothSocketOptionLevel.RFComm, BluetoothSocketOptionName.ReadRemoteName, buffer);
-				string name = string.Empty;
+                string name = string.Empty;
                 name = System.Text.Encoding.Unicode.GetString(buffer, 8, 496);
-				
-				int offset = name.IndexOf('\0');
-				if(offset > -1)
-				{
-					name = name.Substring(0, offset);
-				}
 
-				return name;
-			}
-			catch(SocketException ex)
-			{
+                int offset = name.IndexOf('\0');
+                if (offset > -1)
+                {
+                    name = name.Substring(0, offset);
+                }
+
+                return name;
+            }
+            catch (SocketException ex)
+            {
                 System.Diagnostics.Debug.WriteLine("BluetoothClient GetRemoteMachineName(addr) ReadRemoteName failed: " + ex.Message);
-				return null;
-			}
+                return null;
+            }
 #endif
-		}
+        }
 
-		/// <summary>
-		/// Gets the name of a device by a specified socket.
-		/// </summary>
-		/// <param name="s"> A <see cref="Socket"/>.</param>
-		/// <returns>Returns a string value of the computer or device name.</returns>
-		public static string GetRemoteMachineName(Socket s)
-		{
+        /// <summary>
+        /// Gets the name of a device by a specified socket.
+        /// </summary>
+        /// <param name="s"> A <see cref="Socket"/>.</param>
+        /// <returns>Returns a string value of the computer or device name.</returns>
+        public static string GetRemoteMachineName(Socket s)
+        {
 #if WinXP
             BluetoothDeviceInfo bdi = new BluetoothDeviceInfo(((BluetoothEndPoint)s.RemoteEndPoint).Address);
             return bdi.DeviceName;
 #else
-			byte[] buffer = new byte[504];
-			//copy remote device address to buffer
-			Buffer.BlockCopy(((BluetoothEndPoint)s.RemoteEndPoint).Address.ToByteArray(), 0, buffer, 0, 6);
+            byte[] buffer = new byte[504];
+            //copy remote device address to buffer
+            Buffer.BlockCopy(((BluetoothEndPoint)s.RemoteEndPoint).Address.ToByteArray(), 0, buffer, 0, 6);
 
             string name = "";
 
-			try
-			{
+            try
+            {
                 s.SetSocketOption(BluetoothSocketOptionLevel.RFComm, BluetoothSocketOptionName.ReadRemoteName, buffer);
-				name = System.Text.Encoding.Unicode.GetString(buffer, 8, 496);
-				
-				int offset = name.IndexOf('\0');
-				if(offset > -1)
-				{
-					name = name.Substring(0, offset);
-				}
+                name = System.Text.Encoding.Unicode.GetString(buffer, 8, 496);
 
-				return name;
-			}
-			catch(SocketException ex)
-			{
+                int offset = name.IndexOf('\0');
+                if (offset > -1)
+                {
+                    name = name.Substring(0, offset);
+                }
+
+                return name;
+            }
+            catch (SocketException ex)
+            {
                 System.Diagnostics.Debug.WriteLine("BluetoothClient GetRemoteMachineName(socket) ReadRemoteName failed: " + ex.Message);
                 return null;
-			}
+            }
 #endif
-		}
-		#endregion
+        }
+        #endregion
 
-		#region IDisposable Members
+        #region IDisposable Members
 
-		/// <summary>
+        /// <summary>
         /// Releases the unmanaged resources used by the BluetoothClient and optionally releases the managed resources.
-		/// </summary>
+        /// </summary>
         /// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
-		protected virtual void Dispose(bool disposing)
-		{
-            if(!cleanedUp)
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!cleanedUp)
             {
                 if (disposing)
                 {
@@ -898,7 +897,7 @@ namespace InTheHand.Net.Sockets
 
                 cleanedUp = true;
             }
-		}
+        }
 
         /// <summary>
         /// Closes the <see cref="BluetoothClient"/> and the underlying connection.
@@ -906,20 +905,20 @@ namespace InTheHand.Net.Sockets
         /// -
         /// <seealso cref="M:InTheHand.Net.Sockets.BluetoothClient.Close"/>
         public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
-		/// <summary>
-		/// Frees resources used by the <see cref="BluetoothClient"/> class.
-		/// </summary>
-		~BluetoothClient()
-		{
-			Dispose(false);
-		}
+        /// <summary>
+        /// Frees resources used by the <see cref="BluetoothClient"/> class.
+        /// </summary>
+        ~BluetoothClient()
+        {
+            Dispose(false);
+        }
 
-		#endregion
+        #endregion
 
         #region Throw SocketException For HR
         internal static void ThrowSocketExceptionForHR(int errorCode)
@@ -935,10 +934,12 @@ namespace InTheHand.Net.Sockets
 
         internal static void ThrowSocketExceptionForHrExceptFor(int errorCode, params int[] nonErrorCodes)
         {
-            if (errorCode < 0) {
+            if (errorCode < 0)
+            {
                 int socketerror = 0;
                 socketerror = Marshal.GetLastWin32Error();
-                if (-1 != Array.IndexOf(nonErrorCodes, socketerror, 0, nonErrorCodes.Length)) {
+                if (-1 != Array.IndexOf(nonErrorCodes, socketerror, 0, nonErrorCodes.Length))
+                {
                     return;
                 }
                 throw new SocketException(socketerror);
@@ -980,7 +981,7 @@ namespace InTheHand.Net.Sockets
 #if WinCE
                     byte[] authbytes = m_socket.GetSocketOption(BluetoothSocketOptionLevel.RFComm, BluetoothSocketOptionName.GetAuthenticationEnabled, 4);
                     int auth = BitConverter.ToInt32(authbytes, 0);
-                    return (auth==0) ? false : true;
+                    return (auth == 0) ? false : true;
 #else
                     object auth = m_socket.GetSocketOption(BluetoothSocketOptionLevel.RFComm, BluetoothSocketOptionName.XPAuthenticate);
                     return authenticate;
@@ -1062,9 +1063,9 @@ namespace InTheHand.Net.Sockets
             public int EnterSniffMode()
             {
 
-                byte[] policy = m_socket.GetSocketOption(BluetoothSocketOptionLevel.RFComm, BluetoothSocketOptionName.EnterSniffMode, 4);                    
+                byte[] policy = m_socket.GetSocketOption(BluetoothSocketOptionLevel.RFComm, BluetoothSocketOptionName.EnterSniffMode, 4);
                 return (int)BitConverter.ToInt32(policy, 0);
-                
+
             }
             #endregion Enter Sniff Mode
 
