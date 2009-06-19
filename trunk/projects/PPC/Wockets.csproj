@@ -234,6 +234,15 @@
     <Compile Include="..\..\src\Wockets\Data\Summary\Reader.cs">
       <Link>Data\Summary\Reader.cs</Link>
     </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\CommandTypes.cs">
+      <Link>Data\Commands\CommandTypes.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\ReceiverCommand.cs">
+      <Link>Data\Commands\ReceiverCommand.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\RFCOMMCommand.cs">
+      <Link>Data\Commands\RFCOMMCommand.cs</Link>
+    </Compile>
     <Compile Include="..\..\src\Wockets\Utils\Logger.cs">
       <Link>Utils\logger.cs</Link>
     </Compile>
