@@ -27,6 +27,8 @@ namespace Wockets.Data.Plotters
         int[] plotFrom;
         int[] lastColumn;
         int[] firstColumn;
+        int[] decoderTails;
+        double[] lastUnixTimestamps;
 
         public WocketsScalablePlotter(System.Windows.Forms.Panel aPanel, WocketsController wocketsController)
         {
@@ -41,6 +43,8 @@ namespace Wockets.Data.Plotters
             plotFrom = new int[this.wocketsController._Sensors.Count];
             firstColumn= new int[this.wocketsController._Sensors.Count];
             lastColumn = new int[this.wocketsController._Sensors.Count];
+            decoderTails = new int[this.wocketsController._Sensors.Count];
+            lastUnixTimestamps = new double[this.wocketsController._Sensors.Count];
 
             for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
             {
@@ -48,6 +52,8 @@ namespace Wockets.Data.Plotters
                 this.plotFrom[i] = 0;
                 this.firstColumn[i] = 999999;
                 this.lastColumn[i] = 0;
+                this.decoderTails[i] = 0;
+                this.lastUnixTimestamps[i] = 0;
                 double range = ((Accelerometer)this.wocketsController._Sensors[i])._Max - ((Accelerometer)this.wocketsController._Sensors[i])._Min;
                 scaleFactors[i] = graphSize / range;
             }
@@ -107,11 +113,13 @@ namespace Wockets.Data.Plotters
                 {
 
 
-                    int decoderID = this.wocketsController._Sensors[i]._Decoder._ID;
-                    for (int j = this.plotFrom[decoderID]; (j < this.wocketsController._Decoders[decoderID]._Size); j++)
+                    //int decoderID = this.wocketsController._Sensors[i]._Decoder._ID;
+                    //for (int j = this.plotFrom[decoderID]; (j < this.wocketsController._Decoders[decoderID]._Size); j++)
+                    int tail = this.decoderTails[i];
+                    //while(tail<=this.wocketsController._Sensors[i]._Decoder._Head)
+                    AccelerationData data = ((AccelerationData)this.wocketsController._Sensors[i]._Decoder._Data[tail]);
+                    while (data.UnixTimeStamp > this.lastUnixTimestamps[i])
                     {
-                        AccelerationData data = ((AccelerationData)this.wocketsController._Decoders[decoderID]._Data[j]);
-
                         //check the data comes from the sensor i if the decoder is used with multiple sensors
                         if (data.SensorID == this.wocketsController._Sensors[i]._ID)
                         {
@@ -156,31 +164,21 @@ namespace Wockets.Data.Plotters
 
                             this.currentColumns[i] = this.currentColumns[i] + 1;
 
-
-
-
-
                         }
 
+
+                        this.lastUnixTimestamps[i] = data.UnixTimeStamp;
+                        if (tail >= (this.wocketsController._Sensors[i]._Decoder._Data.Length-1))
+                            tail = 0;
+                        else
+                            tail++;
+                        data = ((AccelerationData)this.wocketsController._Sensors[i]._Decoder._Data[tail]);
                     }
+                    this.decoderTails[i] = tail;
                 }
 
             }
 
-            //check if the columns are in sync within 30 points
-            /*for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
-            {
-                for (int j = i + 1; (j < this.wocketsController._Sensors.Count); j++)
-                {
-                    int size1 = this.wocketsController._Decoders[this.wocketsController._Sensors[i]._Decoder]._Size;
-                    int size2 = this.wocketsController._Decoders[this.wocketsController._Sensors[j]._Decoder]._Size;
-                    if ((size1 > 1) && (size2 > 1) && (Math.Abs(this.currentColumns[i] - this.currentColumns[j]) > 60))
-                    {
-                        requiresFullRedraw = true;
-                        break;
-                    }
-                }
-            }*/
 
             if (requiresFullRedraw)
             {

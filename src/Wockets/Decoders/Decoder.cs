@@ -24,6 +24,7 @@ namespace Wockets.Decoders
         private int index;
         private static int IDCounter = 0;
         protected DecoderTypes type;
+        protected int head = 0;  
 
         public Decoder()
         {
@@ -36,10 +37,18 @@ namespace Wockets.Decoders
             this.packetPosition = 0;
             this.id = IDCounter++;
             this.index = 0;
+            this.head = 0;
         }
 
         #region Access Properties
 
+        public int _Head
+        {
+            get
+            {
+                return this.head;
+            }
+        }
         public DecoderTypes _Type
         {
             get

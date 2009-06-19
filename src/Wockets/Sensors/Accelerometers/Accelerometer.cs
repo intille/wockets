@@ -2,6 +2,7 @@ using System;
 using System.Xml;
 using System.Collections;
 using System.IO;
+using Wockets.Data.Accelerometers;
 using Wockets.Sensors;
 using Wockets.Decoders;
 using Wockets.Receivers;
@@ -272,6 +273,8 @@ namespace Wockets.Sensors.Accelerometers
             byteWriter.WriteBytes(retBytes, 6);
         }
         #endregion File Storage Methods
+        int tail=0;
+        double tailUnixTimestamp=0;
 
         public override void Dispose()
         {
@@ -297,9 +300,12 @@ namespace Wockets.Sensors.Accelerometers
 
 
                 DetermineFilePath();
-                for (int i = 0; (i < this._Decoder._Size); i++)
+                AccelerationData data = ((AccelerationData)this._Decoder._Data[tail]);
+               // for (int i = 0; (i < this._Decoder._Size); i++)
+                //while(tail<this._Decoder._Head)
+                while (data.UnixTimeStamp > this.tailUnixTimestamp)
                 {
-                    aUnixTime = this._Decoder._Data[i].UnixTimeStamp;
+                    aUnixTime = data.UnixTimeStamp;
 
                     if (aUnixTime < lastUnixTime)
                     {
@@ -322,10 +328,16 @@ namespace Wockets.Sensors.Accelerometers
 
                     // Save Raw Bytes                        
                     if (bw != null)
-                        for (int j = 0; j < this._Decoder._Data[i].NumRawBytes; j++)
-                            bw.WriteByte(this._Decoder._Data[i].RawBytes[j]);
+                        for (int j = 0; j < data.NumRawBytes; j++)
+                            bw.WriteByte(data.RawBytes[j]);
 
                     lastUnixTime = aUnixTime;
+
+                    if (tail >= this._Decoder._Data.Length-1)
+                        tail = 0;
+                    else
+                        tail++;
+                    data = ((AccelerationData)this._Decoder._Data[tail]);
                 }
             }
         }
