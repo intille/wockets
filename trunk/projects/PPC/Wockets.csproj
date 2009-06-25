@@ -253,13 +253,16 @@
       <Link>Utils\ByteReader.cs</Link>
     </Compile>
     <Compile Include="..\..\src\Wockets\Utils\ByteWriter.cs">
-      <Link>Utils\ByteWriter.cs</Link> 
+      <Link>Utils\ByteWriter.cs</Link>
     </Compile>
     <Compile Include="..\..\src\Wockets\Utils\FileReader.cs">
       <Link>Utils\FileReader.cs</Link>
     </Compile>
     <Compile Include="..\..\src\Wockets\Utils\FileWriter.cs">
       <Link>Utils\FileWriter.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\BatteryResponse.cs" >
+      <Link>Data\Commands\BatteryResponse.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
