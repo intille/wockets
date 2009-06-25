@@ -17,6 +17,7 @@ namespace Wockets.Decoders
 
 
         private SensorData[] data;
+        private SensorData[] response;
         private int size;                
         protected byte[] packet;
         protected int packetPosition;
@@ -32,6 +33,7 @@ namespace Wockets.Decoders
         public Decoder(int bufferSize,int packetSize)
         {
             this.data = new SensorData[bufferSize];
+            this.response = new SensorData[10];
             this.size = 0;
             this.packet = new byte[packetSize];
             this.packetPosition = 0;
@@ -90,6 +92,14 @@ namespace Wockets.Decoders
             get
             {
                 return this.data;
+            }
+        }
+
+          public SensorData[] _Response
+        {
+            get
+            {
+                return this.response;
             }
         }
         #endregion Access Properties

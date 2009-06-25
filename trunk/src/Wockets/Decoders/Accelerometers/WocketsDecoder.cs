@@ -1,9 +1,11 @@
+
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Xml;
 using Wockets.Data;
 using Wockets.Data.Accelerometers;
+using Wockets.Data.Commands;
 using Wockets.Utils;
 
 namespace Wockets.Decoders.Accelerometers
@@ -16,7 +18,9 @@ namespace Wockets.Decoders.Accelerometers
 
         private const int BUFFER_SIZE = 600; 
         private bool headerSeen;
-        
+        private int bytesToRead = 0;
+        private SensorDataType packetType;
+
         public WocketsDecoder()
             : base(BUFFER_SIZE,WocketsAccelerationData.NUM_RAW_BYTES)
         {
@@ -32,6 +36,7 @@ namespace Wockets.Decoders.Accelerometers
         {
             int rawDataIndex = 0;   
             int numDecodedPackets=0;
+
                
             if (length != 0) // Have some data
             {
@@ -41,44 +46,63 @@ namespace Wockets.Decoders.Accelerometers
                     {
                         this.packetPosition = 0;
                         this.headerSeen = true;
+                        int headerByte=((byte)(((byte)data[rawDataIndex])<<1))>>6;
+                        if (headerByte==0){
+                            bytesToRead=WocketsAccelerationData.NUM_RAW_BYTES;
+                            packetType=SensorDataType.ACCEL;
+                        }
+                        else if (headerByte==2){                         
+                            bytesToRead=3;  
+                            packetType=SensorDataType.BATTERYLEVEL;
+                        }
                     }
-
-                    if ((this.headerSeen == true) && (this.packetPosition < WocketsAccelerationData.NUM_RAW_BYTES))
-                        this.packet[this.packetPosition] = data[rawDataIndex];
+                    
+                     if ((this.headerSeen == true) && (this.packetPosition < bytesToRead))
+                         this.packet[this.packetPosition] = data[rawDataIndex];
 
                     this.packetPosition++;
                     rawDataIndex++;
 
 
-                    if ((this.packetPosition == WocketsAccelerationData.NUM_RAW_BYTES)) //a full packet was received
+                    if ((this.packetPosition == bytesToRead)) //a full packet was received
                     {
+                        if (packetType == SensorDataType.ACCEL)
+                        {
 
-                        //if (this.head >= this._Data.Length)
-                          //  throw new Exception("WocketsDecoder buffer too small " + this._Data.Length);
+                            WocketsAccelerationData datum = ((WocketsAccelerationData)this._Data[this.head]);
+                            datum.Reset();
+                            //copy raw bytes
+                            for (int i = 0; (i < bytesToRead); i++)
+                                datum.RawBytes[i] = this.packet[i];
+                            datum.Type = SensorDataType.ACCEL;
+                            //datum.RawBytes[0] = (byte)(((datum.RawBytes[0])&0xc7)|(sourceSensor<<3));
+                            datum.SensorID = (byte)sourceSensor;
+                            datum.X = (short)((((short)(this.packet[0] & 0x03)) << 8) | (((short)(this.packet[1] & 0x7f)) << 1) | (((short)(this.packet[2] & 0x40)) >> 6));
+                            datum.Y = (short)((((short)(this.packet[2] & 0x3f)) << 4) | (((short)(this.packet[3] & 0x78)) >> 3));
+                            datum.Z = (short)((((short)(this.packet[3] & 0x07)) << 7) | ((short)(this.packet[4] & 0x7f)));
+                            //Set time stamps
+                            datum.UnixTimeStamp = WocketsTimer.GetUnixTime();
 
-                        WocketsAccelerationData datum = ((WocketsAccelerationData)this._Data[this.head]);
-                        datum.Reset();                        
-                        //copy raw bytes
-                        for (int i = 0; (i < WocketsAccelerationData.NUM_RAW_BYTES); i++)
-                            datum.RawBytes[i] = this.packet[i];
-                        datum.Type = SensorDataType.ACCEL;                       
-                        //datum.RawBytes[0] = (byte)(((datum.RawBytes[0])&0xc7)|(sourceSensor<<3));
-                        datum.SensorID = (byte)sourceSensor;
-                        datum.X = (short)(( ((short)(this.packet[0] & 0x03)) << 8) | (((short)(this.packet[1] & 0x7f)) << 1) | (((short)(this.packet[2] & 0x40)) >>6));
-                        datum.Y = (short)((((short)(this.packet[2] & 0x3f)) << 4) | (((short)(this.packet[3] & 0x78)) >>3));
-                        datum.Z = (short)((((short)(this.packet[3] & 0x07)) << 7) | ((short)(this.packet[4] & 0x7f)));
-                        //Set time stamps
-                        datum.UnixTimeStamp = WocketsTimer.GetUnixTime();
-       
-                        //if (IsValid(datum))
-                         if (this.head>=(BUFFER_SIZE-1))
-                             this.head=0;
-                         else
-                            this.head++;
-                        numDecodedPackets++;
-                        //decodedDataIndex= decodedDataIndex% BUFFER_SIZE;
-                        this.packetPosition = 0;
-                        this.headerSeen = false;
+                            //if (IsValid(datum))
+                            if (this.head >= (BUFFER_SIZE - 1))
+                                this.head = 0;
+                            else
+                                this.head++;
+                            numDecodedPackets++;
+                            //decodedDataIndex= decodedDataIndex% BUFFER_SIZE;
+                            this.packetPosition = 0;
+                            this.headerSeen = false;
+                        }
+                        else if (packetType == SensorDataType.BATTERYLEVEL)
+                        {
+                            
+                            BatteryResponse br = new BatteryResponse();
+                            for (int i = 0; (i < bytesToRead); i++)
+                                br.RawBytes[i] = this.packet[i];
+                            br.BatteryLevel = (((int)this.packet[1]) << 3) | ((this.packet[2] >> 4) & 0x07);
+                            this._Response[0] = br;
+                        
+                       }
                     }
  
                 }

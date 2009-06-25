@@ -118,7 +118,7 @@ namespace Wockets.Data.Plotters
                     int tail = this.decoderTails[i];
                     //while(tail<=this.wocketsController._Sensors[i]._Decoder._Head)
                     AccelerationData data = ((AccelerationData)this.wocketsController._Sensors[i]._Decoder._Data[tail]);
-                    while (data.UnixTimeStamp > this.lastUnixTimestamps[i])
+                    while (data.UnixTimeStamp >= this.lastUnixTimestamps[i])
                     {
                         //check the data comes from the sensor i if the decoder is used with multiple sensors
                         if (data.SensorID == this.wocketsController._Sensors[i]._ID)

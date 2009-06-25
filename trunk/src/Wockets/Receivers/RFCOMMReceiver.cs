@@ -355,7 +355,6 @@ namespace Wockets.Receivers
         //private static Thread readingThread = new Thread(new ThreadStart(readingLoop));
         private static Dictionary<BluetoothStream, int> timeouts = new Dictionary<BluetoothStream, int>();
 
-        private List<DateTime> timeoutTimestamps;
         private Thread readingThread;
 
         #region MS_Stack_variables
@@ -467,6 +466,12 @@ namespace Wockets.Receivers
             byte[] sendByte = new byte[1];
             sendByte[0] = 0xff;
 
+            //hack for battery
+            int batteryTimer = 0;
+            byte[] batteryByte = new byte[1];
+            batteryByte[0] = 0xA0;
+
+
             n= btClient.GetStream();
             localBuffer = new byte[DEFAULT_BUFFER_SIZE];
             singleReadBuffer = new byte[DEFAULT_BUFFER_SIZE];
@@ -534,6 +539,18 @@ namespace Wockets.Receivers
                   
                             }
                             sendTimer++;
+
+                            /*
+                            if (batteryTimer > 2000)
+                            {
+
+                                btSocket.Send(batteryByte, 1, SocketFlags.None);
+                                batteryTimer = 0;
+                                Thread.Sleep(50);
+
+                            }
+                            batteryTimer++;
+                             */
                              
                             if (btSocket.Available > 0)
                             {
@@ -714,6 +731,7 @@ namespace Wockets.Receivers
 
                     //now open the port
                     newStream.comPort = new SerialPort(newStream.comPortName);
+                
                     newStream.comPort.Open();
                 }
                 else
@@ -728,7 +746,7 @@ namespace Wockets.Receivers
                         reverseAddr[reverseAddr.Length - 1 - ii] = addr[ii];
                     }
 
-                    newStream.timeoutTimestamps = new List<DateTime>();
+
                     newStream.localBuffer = new byte[DEFAULT_BUFFER_SIZE];
                     newStream.singleReadBuffer = new byte[DEFAULT_BUFFER_SIZE];
                     //lock (lockObject)

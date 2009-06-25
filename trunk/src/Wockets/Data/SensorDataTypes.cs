@@ -72,6 +72,8 @@ namespace Wockets.Data
         /// Reservered for future Sensor expansion.
         /// </summary>
         RESERVED15,
+
+        BATTERYLEVEL,
         /// <summary>
         /// Mobile Sensor accelerometer data. 
         /// </summary>
