@@ -303,7 +303,7 @@ namespace Wockets.Sensors.Accelerometers
                 AccelerationData data = ((AccelerationData)this._Decoder._Data[tail]);
                // for (int i = 0; (i < this._Decoder._Size); i++)
                 //while(tail<this._Decoder._Head)
-                while (data.UnixTimeStamp > this.tailUnixTimestamp)
+                while (data.UnixTimeStamp >= this.tailUnixTimestamp)
                 {
                     aUnixTime = data.UnixTimeStamp;
 
@@ -332,13 +332,15 @@ namespace Wockets.Sensors.Accelerometers
                             bw.WriteByte(data.RawBytes[j]);
 
                     lastUnixTime = aUnixTime;
-
+                    this.tailUnixTimestamp = aUnixTime;
                     if (tail >= this._Decoder._Data.Length-1)
                         tail = 0;
                     else
                         tail++;
                     data = ((AccelerationData)this._Decoder._Data[tail]);
                 }
+
+               
             }
         }
 

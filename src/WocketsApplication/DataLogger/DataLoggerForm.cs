@@ -563,11 +563,12 @@ namespace WocketsApplication.DataLogger
 
             Receiver currentReceiver = null;
             Sensor sensor = null;
-            try
-            {
+         
                 //Cleanup receiver buffers as they are out of sync due to BT connection delays
                 //set them to saving mode
-                for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
+            for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
+            {
+                try
                 {
                     sensor = this.wocketsController._Sensors[i];
                     sensor._Saving = true;
@@ -575,17 +576,19 @@ namespace WocketsApplication.DataLogger
                     if (currentReceiver._Running == true)
                         currentReceiver.Read();
                 }
+                catch (Exception e)
+                {
+                    ((PictureBox)this.sensorStatus["W" + sensor._ID]).Image = disconnectedWocketImage;
+                    this.bluetoothConnectors[currentReceiver._ID] = new BluetoothConnector(currentReceiver, this.wocketsController);
+                    currentReceiver._Running = false;
+                }
             }
-            catch (Exception e)
-            {
-                ((PictureBox)this.sensorStatus["W" + sensor._ID]).Image = disconnectedWocketImage;
-                this.bluetoothConnectors[currentReceiver._ID] = new BluetoothConnector(currentReceiver, this.wocketsController);
-                currentReceiver._Running = false;          
-            }
+
 
             //aPlottingThread.Start();
             //aSavingThread
             aPollingThread.Start();
+            aSavingThread.Start();
 
             //Terminate the progress thread
             progressThreadQuit = true;
@@ -1667,7 +1670,7 @@ namespace WocketsApplication.DataLogger
                 {
                     Console.WriteLine(ee.StackTrace);
                 }
-                Thread.Sleep(50);
+                Thread.Sleep(2000);
             }
         }
         private void readDataTimer_Tick(object sender, EventArgs e)
