@@ -224,8 +224,20 @@
     <Compile Include="..\..\src\Wockets\Decoders\Accelerometers\HTCDiamondTouchDecoder.cs">
       <Link>Decoders\Accelerometers\HTCDiamondTouchDecoder.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Sensors\Accelerometers\HTCDiamondTouch.cs" >
+    <Compile Include="..\..\src\Wockets\Sensors\Accelerometers\HTCDiamondTouch.cs">
       <Link>Sensors\Accelerometers\HTCDiamondTouch.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\BatteryResponse.cs" >
+      <Link>Data\Commands\BatteryResponse.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\CommandTypes.cs" >
+      <Link>Data\Commands\CommandTypes.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\ReceiverCommand.cs" >
+      <Link>Data\Commands\ReceiverCommand.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\RFCOMMCommand.cs" >
+      <Link>Data\Commands\RFCOMMCommand.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
