@@ -19,9 +19,15 @@ namespace PCTestApplication
                 TextWriter tw = new StreamWriter(storage +"sensor" + wc._Sensors[i]._ID + ".csv");
                 try
                 {
+                    int lastDecodedIndex = 0;
                     while (wc._Sensors[i].Load())
                     {
-                        Wockets.Data.Accelerometers.AccelerationData data = (Wockets.Data.Accelerometers.AccelerationData)wc._Sensors[i]._Decoder._Data[0];
+                        if (wc._Sensors[i]._Decoder._Head == 0)
+                            lastDecodedIndex = wc._Sensors[i]._Decoder._Data.Length - 1;
+                        else
+                            lastDecodedIndex = wc._Sensors[i]._Decoder._Head - 1;
+
+                        Wockets.Data.Accelerometers.AccelerationData data = (Wockets.Data.Accelerometers.AccelerationData)wc._Sensors[i]._Decoder._Data[lastDecodedIndex];
                         tw.WriteLine(data.UnixTimeStamp + "," + data.X + "," + data.Y + "," + data.Z);
                     }
                 }

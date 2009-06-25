@@ -447,11 +447,17 @@ namespace Wockets.Sensors.Accelerometers
                     if (!(br.ReadBytes(tempByte)))
                         throw new Exception("Error: reading data in PLFormat file");
 
-                    this._Decoder._Size = 0;
+       
+                    int lastDecodedIndex = 0;
                     //Successfully decoded a packet
                     if (this._Decoder.Decode(this._ID, tempByte, tempByte.Length) == 1)
                     {
-                        this._Decoder._Data[0].UnixTimeStamp = lastUnixTime;
+
+                        if (this._Decoder._Head == 0)
+                            lastDecodedIndex = this._Decoder._Data.Length - 1;
+                        else
+                            lastDecodedIndex = this._Decoder._Head - 1;                        
+                        this._Decoder._Data[lastDecodedIndex].UnixTimeStamp = lastUnixTime;                       
                         break;
                     }
                     else //failed to decode a packet... check if this ever happens
