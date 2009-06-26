@@ -367,6 +367,7 @@ namespace WocketsApplication
             while (progressMessage != null) Thread.Sleep(50);
             progressMessage = " Loaded\r\n";
 
+            progressThreadQuit = true;
             #endregion Load Feature Extractor
 
             #region Load Data Logger GUI

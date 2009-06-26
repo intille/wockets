@@ -530,7 +530,7 @@ namespace Wockets.Receivers
                             Thread.Sleep(100);
                              */
                             
-                            if (sendTimer > 2000)
+                            if (sendTimer > 200)
                             {        
                                 
                                 btSocket.Send(sendByte,1, SocketFlags.None);
@@ -554,7 +554,8 @@ namespace Wockets.Receivers
                              
                             if (btSocket.Available > 0)
                             {
-                                currentTime = WocketsTimer.GetUnixTime();
+                                //currentTime = WocketsTimer.GetUnixTime();
+                                currentTime = WocketsTimer.TimeStamp; 
                                 bytesReceived = btSocket.Receive(singleReadBuffer, (DEFAULT_BUFFER_SIZE - currentBytes > singleReadBuffer.Length) ? singleReadBuffer.Length : DEFAULT_BUFFER_SIZE - currentBytes, SocketFlags.None);
                                 //batchTimestamps.Add(currentTime);
                                // batchBytes.Add(bytesReceived);
@@ -601,6 +602,8 @@ namespace Wockets.Receivers
                         catch (Exception e)
                         {                          
                             socketDead = true;
+                            Dispose();
+                            throw new Exception("socket is disconnected");
                         }
                         
                       
@@ -772,7 +775,7 @@ namespace Wockets.Receivers
                 }
 
                 newStream.readingThread = new Thread(new ThreadStart(newStream.readingFunction));
-                newStream.readingThread.Priority = ThreadPriority.Highest;
+                //newStream.readingThread.Priority = ThreadPriority.Highest;
                 newStream.readingThread.Start();
 
             }
