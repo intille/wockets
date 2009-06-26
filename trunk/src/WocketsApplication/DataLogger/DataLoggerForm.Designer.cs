@@ -337,8 +337,8 @@ namespace WocketsApplication.DataLogger
             // 
             // readDataTimer
             // 
-            this.readDataTimer.Enabled = false;
-            this.readDataTimer.Interval = 50;
+            this.readDataTimer.Enabled = true;
+            this.readDataTimer.Interval = 30;
             this.readDataTimer.Tick += new System.EventHandler(this.readDataTimer_Tick);
             // 
             // MITesDataCollectionForm

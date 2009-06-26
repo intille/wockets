@@ -1,10 +1,15 @@
 using System;
+using System.Threading;
 using System.Runtime.InteropServices;
 
 namespace Wockets.Utils
 {
     public class WocketsTimer
     {
+
+        public static Thread timerThread;
+
+        public static double TimeStamp;
 
         /// <summary>
         /// 
@@ -98,9 +103,22 @@ namespace Wockets.Utils
             referenceTime = ((TimeSpan)(DateTime.Now.Subtract(UnixRef))).TotalMilliseconds;
             //DateTime dt=(new DateTime(1970, 1, 1, 0, 0, 0)).AddMilliseconds(referenceTime);
             QueryPerformanceCounter(out referenceCounter);
+            initialized = true;
+            TimeStamp = WocketsTimer.GetUnixTime();
+            timerThread = new Thread(new ThreadStart(TimerThread));
+            timerThread.Priority = ThreadPriority.Highest;
+            timerThread.Start();
             //UnixTime.expectedSampleSpacing = (int) Math.Floor((double)expectedSampleSpacing);
         }
 
+        private static void TimerThread()
+        {
+            while (true)
+            {
+                TimeStamp = WocketsTimer.GetUnixTime();
+                Thread.Sleep(20);
+            }
+        }
         public static double LastTimeStamp
         {
             get

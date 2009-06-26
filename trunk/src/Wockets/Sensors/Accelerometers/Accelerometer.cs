@@ -303,7 +303,7 @@ namespace Wockets.Sensors.Accelerometers
                 AccelerationData data = ((AccelerationData)this._Decoder._Data[tail]);
                // for (int i = 0; (i < this._Decoder._Size); i++)
                 //while(tail<this._Decoder._Head)
-                while (data.UnixTimeStamp >= this.tailUnixTimestamp)
+                while ((data.UnixTimeStamp>0) && (data.UnixTimeStamp >= this.tailUnixTimestamp))
                 {
                     aUnixTime = data.UnixTimeStamp;
 

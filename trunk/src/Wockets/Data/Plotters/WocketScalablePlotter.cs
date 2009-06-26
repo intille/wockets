@@ -118,7 +118,7 @@ namespace Wockets.Data.Plotters
                     int tail = this.decoderTails[i];
                     //while(tail<=this.wocketsController._Sensors[i]._Decoder._Head)
                     AccelerationData data = ((AccelerationData)this.wocketsController._Sensors[i]._Decoder._Data[tail]);
-                    while (data.UnixTimeStamp >= this.lastUnixTimestamps[i])
+                    while ((data.UnixTimeStamp>0) && (data.UnixTimeStamp >= this.lastUnixTimestamps[i]))
                     {
                         //check the data comes from the sensor i if the decoder is used with multiple sensors
                         if (data.SensorID == this.wocketsController._Sensors[i]._ID)
@@ -127,7 +127,10 @@ namespace Wockets.Data.Plotters
                                 lastColumnDrawn = this.currentColumns[i];
 
                             if (this.currentColumns[i] >= this.plotAreaSize.Width - 1)
+                            {
                                 requiresFullRedraw = true;
+                                this.currentColumns[i] = 0;
+                            }
 
                             if ((this.wocketsController._Sensors[data.SensorID])._Class == Wockets.Sensors.SensorClasses.HTCDiamondTouch)
                             {
@@ -147,11 +150,13 @@ namespace Wockets.Data.Plotters
                                 if (this.currentColumns[i] > lastColumn[data.SensorID])
                                     lastColumn[data.SensorID] = this.currentColumns[i];
                             }
+
                             else
                             {
                                 g.DrawLine(p[0], this.currentColumns[i], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * previousVals[i][0]), this.currentColumns[i] + 1, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.X));
                                 g.DrawLine(p[1], this.currentColumns[i], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * previousVals[i][1]), this.currentColumns[i] + 1, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Y));
                                 g.DrawLine(p[2], this.currentColumns[i], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * previousVals[i][2]), this.currentColumns[i] + 1, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Z));
+
                                 if (this.currentColumns[i] > lastColumn[data.SensorID])
                                     lastColumn[data.SensorID] = this.currentColumns[i];
 

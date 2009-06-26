@@ -471,37 +471,7 @@ namespace WocketsApplication.DataLogger
             //this.bluetoothControllers = new BluetoothController[this.wocketsController._Receivers.Count];
             this.bluetoothConnectors = new BluetoothConnector[this.wocketsController._Receivers.Count];
 
-            #region Bluetooth reception channels initialization
-            //Initialize and search for wockets connections
-            while (progressMessage != null) Thread.Sleep(50);
-            progressMessage = "Initializing receivers ... searching " + this.wocketsController._Receivers.Count + " BT receivers\r\n";
 
-            //Try to initialize all receivers 10 times then exit
-            int initializationAttempt = 0;
-            while (initializationAttempt <= 10)
-            {
-                if (InitializeReceivers() == false)
-                {
-                    initializationAttempt++;
-
-                    if (initializationAttempt == 10)
-                    {
-                        MessageBox.Show("Exiting: Some receivers in your configuration were not initialized.");
-                        Application.Exit();
-                        System.Diagnostics.Process.GetCurrentProcess().Kill();
-                    }
-                    else
-                    {
-                        while (progressMessage != null) Thread.Sleep(50);
-                        progressMessage = "Failed to initialize some receivers. Retrying (" + initializationAttempt + ")...\r\n";
-                    }
-
-                }
-                else
-                    break;
-                Thread.Sleep(2000);
-            }
-            #endregion Bluetooth reception channels initialization
 
 
             #region Initialize GUI Components
@@ -559,6 +529,40 @@ namespace WocketsApplication.DataLogger
             //InitializeLogging(this.storageDirectory);
             #endregion Initialize Logging
 
+
+
+            #region Bluetooth reception channels initialization
+            //Initialize and search for wockets connections
+            while (progressMessage != null) Thread.Sleep(50);
+            progressMessage = "Initializing receivers ... searching " + this.wocketsController._Receivers.Count + " BT receivers\r\n";
+
+            //Try to initialize all receivers 10 times then exit
+            int initializationAttempt = 0;
+            while (initializationAttempt <= 10)
+            {
+                if (InitializeReceivers() == false)
+                {
+                    initializationAttempt++;
+
+                    if (initializationAttempt == 10)
+                    {
+                        MessageBox.Show("Exiting: Some receivers in your configuration were not initialized.");
+                        Application.Exit();
+                        System.Diagnostics.Process.GetCurrentProcess().Kill();
+                    }
+                    else
+                    {
+                        while (progressMessage != null) Thread.Sleep(50);
+                        progressMessage = "Failed to initialize some receivers. Retrying (" + initializationAttempt + ")...\r\n";
+                    }
+
+                }
+                else
+                    break;
+                //Thread.Sleep(2000);
+            }
+            #endregion Bluetooth reception channels initialization
+
             #region Start Collecting Data
 
             Receiver currentReceiver = null;
@@ -583,6 +587,8 @@ namespace WocketsApplication.DataLogger
                     currentReceiver._Running = false;
                 }
             }
+
+
 
 
             //aPlottingThread.Start();
@@ -1653,7 +1659,7 @@ namespace WocketsApplication.DataLogger
                 if ((this.tabControl1.SelectedIndex == 0) && (isPlotting))                
                     GraphAccelerometerValues();                
 
-                Thread.Sleep(10);
+                Thread.Sleep(50);
             }
         }
 
@@ -1670,7 +1676,7 @@ namespace WocketsApplication.DataLogger
                 {
                     Console.WriteLine(ee.StackTrace);
                 }
-                Thread.Sleep(2000);
+                Thread.Sleep(3000);
             }
         }
         private void readDataTimer_Tick(object sender, EventArgs e)
