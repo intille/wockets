@@ -561,8 +561,7 @@ namespace Wockets.Receivers
                                // batchBytes.Add(bytesReceived);
                             }
 
-                           Thread.Sleep(10);
-                            
+                           Thread.Sleep(50);                            
 
                             if (bytesReceived > 0)
                             {
@@ -576,9 +575,8 @@ namespace Wockets.Receivers
                                 disconnectionCounter++;
                                 //if ((currentTime - nodataTimer) > 1000)
                                 if (disconnectionCounter> MAX_DISCONNECTION_COUNTER)
-                                {
-                                    socketDead = true;
-                                    return;
+                                {                                  
+                                    throw new Exception("socket timed out");                                    
                                 }
                             }
                         /*
@@ -753,7 +751,7 @@ namespace Wockets.Receivers
                     newStream.localBuffer = new byte[DEFAULT_BUFFER_SIZE];
                     newStream.singleReadBuffer = new byte[DEFAULT_BUFFER_SIZE];
                     //lock (lockObject)
-                    //{
+                   // {
                         BluetoothRadio.PrimaryRadio.Mode = RadioMode.Connectable;
                         BluetoothAddress bt_addr = new BluetoothAddress(reverseAddr);
                         if (pin != null)
@@ -763,19 +761,14 @@ namespace Wockets.Receivers
                         newStream.btClient.Connect(bt_addr, BluetoothService.SerialPort);                        
                         newStream.btSocket = newStream.btClient.Client;                      
                         newStream.btSocket.Blocking = true;
-
-                    
-
-                      
-
-                        
+                                                               
                     //}
                      
   
                 }
 
                 newStream.readingThread = new Thread(new ThreadStart(newStream.readingFunction));
-                //newStream.readingThread.Priority = ThreadPriority.Highest;
+                newStream.readingThread.Priority = ThreadPriority.Highest;
                 newStream.readingThread.Start();
 
             }
@@ -899,6 +892,7 @@ namespace Wockets.Receivers
             }
 
             readingThread.Join();
+            //readingThread.Abort();
 
             if (usingWidcomm)
             {

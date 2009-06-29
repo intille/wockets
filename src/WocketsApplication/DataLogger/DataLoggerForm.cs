@@ -347,15 +347,16 @@ namespace WocketsApplication.DataLogger
 
         public DataLoggerForm(string storageDirectory, WocketsController wocketsController, Session annotatedSession, DTConfiguration classifierConfiguration, int mode)
         {
+            this.AccumPackets = new int[wocketsController._Receivers.Count];
+            this.LastTime = DateTime.Now.Ticks;
+            this.logger = new Logger(this.storageDirectory);
             if (mode == 1)
                 InitializeAnnotator(storageDirectory, wocketsController, annotatedSession, classifierConfiguration);
             else if (mode == 2)
                 InitializeDataLogger(storageDirectory, wocketsController, annotatedSession, classifierConfiguration);
             else if (mode == 3)
                 InitializeActivityTracker(storageDirectory, wocketsController, annotatedSession, classifierConfiguration);
-            this.AccumPackets = new int[wocketsController._Receivers.Count];
-            this.LastTime = DateTime.Now.Ticks;
-            this.logger = new Logger(this.storageDirectory);
+           
 
         }
 
@@ -1715,11 +1716,7 @@ namespace WocketsApplication.DataLogger
                 for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
                     this.wocketsController._Sensors[i].Dispose();
 
-               /* if (aPLFormatLogger != null)
-                {
-                    aPLFormatLogger.FlushBytes();
-                    aPLFormatLogger.ShutdownFiles();
-                }*/
+ 
                 FeatureExtractor.Cleanup();
 
 #if (PocketPC)
@@ -1738,112 +1735,13 @@ namespace WocketsApplication.DataLogger
                 ((PictureBox)this.sensorStatus[key]).Image = (Image)this.sensorStat[key];
 
             }
+
+            if ((this.tabControl1.SelectedIndex == 0) && (isPlotting))
+            {
+                GraphAccelerometerValues();
+            }
+
             /*
-            #region Bluetooth Reconnection Code
-#if (PocketPC)
-
-            for (int i = 0; (i < this.wocketsController._Receivers.Count); i++)
-            {
-                if (this.wocketsController._Receivers[i]._Type == ReceiverTypes.RFCOMM)
-                {
-                    if ((this.bluetoothConnectors[this.wocketsController._Receivers[i]._ID] != null) &&
-                        (!this.bluetoothConnectors[this.wocketsController._Receivers[i]._ID].Reconnecting) &&
-                        (this.wocketsController._Receivers[i]._Running == false))
-                    {
-                        this.bluetoothConnectors[this.wocketsController._Receivers[i]._ID].Reconnect();
-                        logger.Warn("Reconnected");
-                    }
-                    
-                }
-
-            }
-
-
-#endif
-
-            #endregion Bluetooth Reconnection Code
-
-            #region Poll All Wockets and MITes and Decode Data
-
-            Receiver currentReceiver = null;
-            Sensor sensor=null;
-            try
-            {
-                for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
-                {
-                    sensor = this.wocketsController._Sensors[i];
-                    currentReceiver = this.wocketsController._Receivers[sensor._Receiver];
-                    if (currentReceiver._Running == true)
-                    {
-                        Decoder decoder = sensor._Decoder;
-                        int dataLength = currentReceiver.Read();
-                        int numDecodedPackets = 0;
-                        if (dataLength > 0)
-                        {                 
-                            numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer, dataLength);
-            
-                        }
-
-                        #region
-
-
-    
-         
-         
-                        #endregion
-                        #region Calculate Sampling Rate
-                        this.SRcounter += 1;
-                        this.AccumPackets[sensor._ID] += numDecodedPackets;
-                        if (this.SRcounter >= 100)
-                        {
-                            this.deltaT=Math.Abs(DateTime.Now.Ticks - this.LastTime);
-                            if (this.deltaT >= 50000000)
-                            {
-                                
-                                for (int x=0; x < this.wocketsController._Sensors.Count; x++)
-                                {
-                                    String labelKey = "W" + this.wocketsController._Sensors[x]._ID;
-                                    this.wocketsController._Sensors[x].setSR(this.AccumPackets[this.wocketsController._Sensors[x]._ID] /5);
-                                    //Label t = (System.Windows.Forms.Label)this.sensorLabels[labelKey];
-                                    //t.Text="W" + this.wocketsController._Sensors[x]._ID + ": " + this.wocketsController._Sensors[x].getSR() + "/90";
-                                    if (x == 0) this.AccumPackets[0] = 0;
-                                    this.AccumPackets[0] += this.wocketsController._Sensors[x].getSR();
-                                }
-                                this.samplingLabel.Text = "Samp Rate: " + this.AccumPackets[0] / this.wocketsController._Sensors.Count;
-                                this.SRcounter = 0;
-                                this.LastTime = DateTime.Now.Ticks;
-                                for (int x=0; x < this.AccumPackets.Length; x++)
-                                {
-                                    this.AccumPackets[x] = 0;
-                                }
-                                
-                            }
-                        }
-
-
-                        #endregion Calculate Sampling Rate
-
-                        ((PictureBox)this.sensorStatus["W" + this.wocketsController._Sensors[i]._ID]).Image = connectedWocketImage;
-                       
-                    }
-                }
-
-            }
-            //Thrown when there is a Bluetooth failure                    
-            //TODO: Make sure no USB failure happening
-            catch (Exception ex)
-            {
-
-                
-                ((PictureBox)this.sensorStatus["W" + sensor._ID]).Image=disconnectedWocketImage;                
-                this.bluetoothConnectors[currentReceiver._ID] = new BluetoothConnector(currentReceiver, this.wocketsController);                
-                currentReceiver._Running = false;
-                return;
-            }
-
-
-
-            #endregion Poll All Wockets and MITes and Decode Data
 
             #region Classifying activities
 
@@ -2012,22 +1910,8 @@ namespace WocketsApplication.DataLogger
 */
             
 
-            if ((this.tabControl1.SelectedIndex == 0) && (isPlotting))
-            {
-                GraphAccelerometerValues();
-            }
+  
 
-            //Reset all decoders
-            /*
-            try
-            {
-                for (int i = 0; (i < this.wocketsController._Decoders.Count); i++)
-                    this.wocketsController._Decoders[i]._Size = 0;
-            }
-            catch (Exception ee)
-            {
-                Console.WriteLine(ee.StackTrace);
-            }*/
         }
 
 
