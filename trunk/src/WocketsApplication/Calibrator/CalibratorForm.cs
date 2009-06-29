@@ -183,7 +183,7 @@ namespace WocketsApplication.Calibrator
         private int calibrationCounter = 0;
         private const int CALIBRATION_SAMPLES = 1200;
         private int[][] samples;
-       
+        private double time=0;
 
         public CalibratorForm(string storageDirectory, WocketsController wocketsController)
         {
@@ -914,36 +914,32 @@ namespace WocketsApplication.Calibrator
                 //store sum of abs values of consecutive accelerometer readings                
             if (isCalibrating)
             {
-                for (int i = 0; (i < this.wocketsController._Decoders.Count); i++)
+                Decoder decoder = this.wocketsController._Decoders[0];
+                
+                if (this.calibrationCounter < CALIBRATION_SAMPLES)
                 {
-                    for (int j = 0; (j < this.wocketsController._Decoders[i]._Size); j++)
+                    for (int i = 0; (i < decoder._Data.Length); i++)
                     {
+                        if (this.calibrationCounter == CALIBRATION_SAMPLES)
+                            break;
 
-                        if (this.wocketsController._Decoders[i]._Data[j].Type == SensorDataType.ACCEL)
+                        if (decoder._Data[i].UnixTimeStamp > this.time && decoder._Data[i].Type == SensorDataType.ACCEL)
                         {
-                            if (this.calibrationCounter == CALIBRATION_SAMPLES)
-                                break;
-    
+                            this.samples[this.calibrationCounter][0] = (int)((AccelerationData)decoder._Data[i]).X;
+                            this.samples[this.calibrationCounter][1] = (int)((AccelerationData)decoder._Data[i]).Y;
+                            this.samples[this.calibrationCounter][2] = (int)((AccelerationData)decoder._Data[i]).Z;
 
-
-                            this.samples[this.calibrationCounter][0] = (int)((AccelerationData)this.wocketsController._Decoders[i]._Data[j]).X;
-                            this.samples[this.calibrationCounter][1] = (int)((AccelerationData)this.wocketsController._Decoders[i]._Data[j]).Y;
-                            this.samples[this.calibrationCounter][2] = (int)((AccelerationData)this.wocketsController._Decoders[i]._Data[j]).Z;
-
-
-                            this.calibrations[this.calibrationDirection][0] += (int)((AccelerationData)this.wocketsController._Decoders[i]._Data[j]).X;
-                            this.calibrations[this.calibrationDirection][1] += (int)((AccelerationData)this.wocketsController._Decoders[i]._Data[j]).Y;
-                            this.calibrations[this.calibrationDirection][2] += (int)((AccelerationData)this.wocketsController._Decoders[i]._Data[j]).Z;
+                            this.calibrations[this.calibrationDirection][0] += (int)((AccelerationData)decoder._Data[i]).X;
+                            this.calibrations[this.calibrationDirection][1] += (int)((AccelerationData)decoder._Data[i]).Y;
+                            this.calibrations[this.calibrationDirection][2] += (int)((AccelerationData)decoder._Data[i]).Z;
                             System.Windows.Forms.Label t = (System.Windows.Forms.Label)this.sensorLabels["calibration"];
 
-
                             this.calibrationCounter++;
-                            t.Text = "X=" + ((int)(this.calibrations[this.calibrationDirection][0] / this.calibrationCounter)) +
-                                "Y=" + ((int)(this.calibrations[this.calibrationDirection][1] / this.calibrationCounter)) +
-                                "Z=" + ((int)(this.calibrations[this.calibrationDirection][2] / this.calibrationCounter));
+                            t.Text = "X= " + ((int)(this.calibrations[this.calibrationDirection][0] / this.calibrationCounter)) +
+                                     " Y= " + ((int)(this.calibrations[this.calibrationDirection][1] / this.calibrationCounter)) +
+                                     " Z= " + ((int)(this.calibrations[this.calibrationDirection][2] / this.calibrationCounter));
 
-
-
+                            this.time = decoder._Data[i].UnixTimeStamp;
                         }
                     }
                 }
@@ -970,7 +966,7 @@ namespace WocketsApplication.Calibrator
                             this.pictureLabel.Text = "Place the wocket as shown";
 
                         if (calibrationDirection > 0)
-                            this.pictureLabel.Text += "\r\nX=" + ((int)this.calibrations[calibrationDirection - 1][0]) + "Y=" + ((int)this.calibrations[calibrationDirection - 1][1]) + "Z=" + ((int)this.calibrations[calibrationDirection - 1][2]);
+                            this.pictureLabel.Text += "\r\nX= " + ((int)this.calibrations[calibrationDirection - 1][0]) + " Y= " + ((int)this.calibrations[calibrationDirection - 1][1]) + " Z= " + ((int)this.calibrations[calibrationDirection - 1][2]);
 
                         this.pictureBox1.Image = this.calibrationImages[calibrationDirection];
                         this.panel2.Visible = true;
