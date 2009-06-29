@@ -48,13 +48,13 @@ namespace WocketsApplication.Utils
             {               
                 try
                 {
-                    receiver.Initialize();                    
-                    receiver._Running = true;                                        
+                    if (receiver.Initialize())   
+                        receiver._Running = true;                                                     
                 }
                 catch (Exception e)
-                {
-                    Thread.Sleep(500);
-                }                
+                {                   
+                }
+                Thread.Sleep(500);
               
             }
             Cleanup();
@@ -68,7 +68,7 @@ namespace WocketsApplication.Utils
                 reconnecting = true;
                 Thread.Sleep(1000);
                 reconnectionThread = new Thread(new ThreadStart(this.ReconnectThread));
-                //reconnectionThread.Priority = ThreadPriority.Highest;
+                reconnectionThread.Priority = ThreadPriority.Highest;
                 reconnectionThread.Start();                
             }
         }
