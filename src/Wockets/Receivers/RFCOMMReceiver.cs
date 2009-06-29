@@ -381,11 +381,18 @@ namespace Wockets.Receivers
         private SerialPortController comPort2;
         #endregion
 
+
+        /// <summary>
+        /// Synchronization Barrier for Fairness
+        /// </summary>
+
+        private static Barrier barrier=null;
         static BluetoothStream()
         {
             usingWidcomm = BluetoothRadio.PrimaryRadio == null;
             lockObject = new object();
-
+            if (barrier == null)
+                barrier = new Barrier(0);
         }
 
         private BluetoothStream()
@@ -595,6 +602,8 @@ namespace Wockets.Receivers
 
                             */            
                             prevTime = currentTime;
+
+                            barrier.Gather();
                             
                             
                         }
@@ -609,6 +618,12 @@ namespace Wockets.Receivers
                     }
                     catch (Exception e)
                     {
+                        lock (lockObject)
+                        {
+                            barrier.NumSynchronizedThreads = barrier.NumSynchronizedThreads - 1;
+                        }
+                        
+                        
                         return;
                     }
 
@@ -772,6 +787,11 @@ namespace Wockets.Receivers
                 newStream.readingThread = new Thread(new ThreadStart(newStream.readingFunction));
                 newStream.readingThread.Priority = ThreadPriority.Highest;
                 newStream.readingThread.Start();
+                lock (lockObject)
+                {
+                    if (barrier != null)                    
+                        barrier.NumSynchronizedThreads = barrier.NumSynchronizedThreads + 1;                    
+                }
 
             }
             catch (Exception e)
