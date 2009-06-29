@@ -12,7 +12,7 @@ namespace Wockets.Data.Commands
         {
         }
 
-        public int BatteryLevel
+        public int BatteryLevel 
         {
             get
             {
