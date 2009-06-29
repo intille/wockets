@@ -419,7 +419,7 @@ namespace Wockets.Receivers
 
         //Use a counter to avoid calling the timer function
         private int disconnectionCounter = 0;
-        private const int MAX_DISCONNECTION_COUNTER = 1000; //approximately consider disconnected if 10 sec passes with no data
+        private const int MAX_DISCONNECTION_COUNTER = 200; //approximately consider disconnected if 10 sec passes with no data
 
         ArrayList batchTimestamps;
         ArrayList batchBytes;
@@ -533,7 +533,8 @@ namespace Wockets.Receivers
                             if (sendTimer > 200)
                             {        
                                 
-                                btSocket.Send(sendByte,1, SocketFlags.None);
+                                if (btSocket.Send(sendByte,1, SocketFlags.None)<=0)
+                                    throw new Exception("send: socket timed out");  
                                 sendTimer = 0;
                                 Thread.Sleep(50);
                   
@@ -608,7 +609,7 @@ namespace Wockets.Receivers
                     }
                     catch (Exception e)
                     {
-                        throw e;
+                        return;
                     }
 
                     //this is a timeout. If we get too many of them, we classify that
@@ -738,8 +739,8 @@ namespace Wockets.Receivers
                 else
                 {
 
-
-                    
+                    if (newStream.readingThread != null)
+                        newStream.readingThread.Abort();                    
                     newStream.btClient = new BluetoothClient();                   
                     byte[] reverseAddr = new byte[addr.Length];
                     for (int ii = 0; ii < addr.Length; ii++)
@@ -767,6 +768,7 @@ namespace Wockets.Receivers
   
                 }
 
+               
                 newStream.readingThread = new Thread(new ThreadStart(newStream.readingFunction));
                 newStream.readingThread.Priority = ThreadPriority.Highest;
                 newStream.readingThread.Start();
@@ -891,7 +893,7 @@ namespace Wockets.Receivers
                 disposed = true;
             }
 
-            readingThread.Join();
+            //readingThread.Join();
             //readingThread.Abort();
 
             if (usingWidcomm)
@@ -910,11 +912,12 @@ namespace Wockets.Receivers
                 btSocket = null;
                 btClient = null;
                 n = null;
+              
                 
                 //BluetoothRadio.PrimaryRadio.Mode = RadioMode.Connectable;
                 
             }
-
+            //readingThread.Abort();
         }
 
         #endregion

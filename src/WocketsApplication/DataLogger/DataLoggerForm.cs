@@ -349,7 +349,7 @@ namespace WocketsApplication.DataLogger
         {
             this.AccumPackets = new int[wocketsController._Receivers.Count];
             this.LastTime = DateTime.Now.Ticks;
-            this.logger = new Logger(this.storageDirectory);
+            this.logger = new Logger(storageDirectory);
             if (mode == 1)
                 InitializeAnnotator(storageDirectory, wocketsController, annotatedSession, classifierConfiguration);
             else if (mode == 2)
@@ -560,7 +560,10 @@ namespace WocketsApplication.DataLogger
                 }
                 else
                     break;
-                //Thread.Sleep(2000);
+
+                //we noticed that without the delay the BT stack might fail to connect to all of them. Spacing them out is a good idea
+                
+                Thread.Sleep(500);
             }
             #endregion Bluetooth reception channels initialization
 
@@ -1613,7 +1616,7 @@ namespace WocketsApplication.DataLogger
 
                 #endregion Bluetooth Reconnection Code
 
-                try
+                try 
                 {
                     for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
                     {
