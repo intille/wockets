@@ -205,7 +205,9 @@ namespace WocketsApplication.DataLogger
 
         private int offTimer = 0;
 
-        private bool activeRcv = false;
+        private Sound alert = new Sound(Constants.NEEDED_FILES_PATH + "sounds\\stop.wav");
+        private int[] disconnected = new int[] { 0, 0, 0, 0, 0, 0 };
+        private bool play_sound = false;
 
         #endregion Definition of Logging Variables and Flags
 
@@ -1630,6 +1632,7 @@ namespace WocketsApplication.DataLogger
                             if (dataLength > 0)
                             {
                                 numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer, dataLength);
+                                this.disconnected[sensor._ID] = 0;
                             }
 
                             this.sensorStat["W" + this.wocketsController._Sensors[i]._ID] = connectedWocketImage;
@@ -1645,6 +1648,7 @@ namespace WocketsApplication.DataLogger
                 {
 
                     logger.Warn("Wocket " + sensor._ID + " has disconnected.");
+                    this.disconnected[sensor._ID] = 1;
                     this.sensorStat["W" + sensor._ID] = disconnectedWocketImage;
                     this.bluetoothConnectors[currentReceiver._ID] = new BluetoothConnector(currentReceiver, this.wocketsController);
                     currentReceiver._Running = false;
@@ -1688,6 +1692,29 @@ namespace WocketsApplication.DataLogger
         }
         private void readDataTimer_Tick(object sender, EventArgs e)
         {
+            int zeroes = 0;
+            for (int i = 0; i < 6; i++)
+            {
+                if (this.disconnected[i] != 0)
+                {
+                    this.disconnected[i]++;
+                    if (this.disconnected[i] >= 3600 && !this.play_sound)
+                    {
+                        this.play_sound = true;
+                        alert.LoopPlay();
+                    }
+                }
+                else
+                {
+                    zeroes += 1;
+                }
+            }
+
+            if (zeroes == 6 && this.play_sound)
+            {
+                alert.Play();
+                this.play_sound = false;
+            }
 
             if (isQuitting)
             {
