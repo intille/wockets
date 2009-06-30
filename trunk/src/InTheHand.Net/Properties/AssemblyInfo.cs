@@ -35,6 +35,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyCulture("")]
 [assembly: Guid("f8b087d0-bc47-48ca-958c-8fc6a41c1b65")]
 
+
 //
 // Version information for an assembly consists of the following four values:
 //
@@ -57,6 +58,6 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDelaySign(false)]
 //only sign on non-debug builds
 #if !DEBUG
-[assembly: AssemblyKeyFile("C:\\InTheHand.snk")]
+
 #endif
 [assembly: AssemblyKeyName("")]

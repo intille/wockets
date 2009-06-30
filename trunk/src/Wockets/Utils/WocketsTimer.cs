@@ -104,10 +104,10 @@ namespace Wockets.Utils
             //DateTime dt=(new DateTime(1970, 1, 1, 0, 0, 0)).AddMilliseconds(referenceTime);
             QueryPerformanceCounter(out referenceCounter);
             initialized = true;
-            TimeStamp = WocketsTimer.GetUnixTime();
-            timerThread = new Thread(new ThreadStart(TimerThread));
-            timerThread.Priority = ThreadPriority.Highest;
-            timerThread.Start();
+            //TimeStamp = WocketsTimer.GetUnixTime();
+            //timerThread = new Thread(new ThreadStart(TimerThread));
+            //timerThread.Priority = ThreadPriority.Highest;
+            //timerThread.Start();
             //UnixTime.expectedSampleSpacing = (int) Math.Floor((double)expectedSampleSpacing);
         }
 

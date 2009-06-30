@@ -1604,7 +1604,7 @@ namespace WocketsApplication.DataLogger
                             (this.wocketsController._Receivers[i]._Running == false))
                         {
                             this.bluetoothConnectors[this.wocketsController._Receivers[i]._ID].Reconnect();
-                            logger.Warn("Attempting to reconnect receiver number "+this.wocketsController._Receivers[i]._ID);
+                            logger.Warn("Attempting to reconnect receiver number " + this.wocketsController._Receivers[i]._ID);
                         }
 
                     }
@@ -1636,6 +1636,8 @@ namespace WocketsApplication.DataLogger
                         }
                     }
 
+                    UpdateGraph();
+            
                 }
                 //Thrown when there is a Bluetooth failure                    
                 //TODO: Make sure no USB failure happening
@@ -1648,11 +1650,12 @@ namespace WocketsApplication.DataLogger
                     currentReceiver._Running = false;
                 }
 
-                Thread.Sleep(50);
+
+                Thread.Sleep(10);
             }
 
 
-
+       
             #endregion Poll All Wockets and MITes and Decode Data
         }
 
@@ -1678,7 +1681,7 @@ namespace WocketsApplication.DataLogger
                 }
                 catch (Exception ee)
                 {
-                    Console.WriteLine(ee.StackTrace);
+                    logger.Error(ee);
                 }
                 Thread.Sleep(3000);
             }
@@ -1732,18 +1735,21 @@ namespace WocketsApplication.DataLogger
 #endif
             }
 
-            for (int i = 0; i < this.wocketsController._Sensors.Count; i++)
-            {
-                String key="W" + this.wocketsController._Sensors[i]._ID;
-                ((PictureBox)this.sensorStatus[key]).Image = (Image)this.sensorStat[key];
+            /* 
+         * 
+         for (int i = 0; i < this.wocketsController._Sensors.Count; i++)
+         {
+             String key="W" + this.wocketsController._Sensors[i]._ID;
+             ((PictureBox)this.sensorStatus[key]).Image = (Image)this.sensorStat[key];
 
-            }
+         }
 
-            if ((this.tabControl1.SelectedIndex == 0) && (isPlotting))
-            {
-                GraphAccelerometerValues();
-            }
-
+        
+         if ((this.tabControl1.SelectedIndex == 0) && (isPlotting))
+         {
+             GraphAccelerometerValues();
+         }
+         */
             /*
 
             #region Classifying activities
@@ -1918,6 +1924,33 @@ namespace WocketsApplication.DataLogger
         }
 
 
+        delegate void UpdateGraphCallback();
+        public void UpdateGraph()
+        {
+            // InvokeRequired required compares the thread ID of the
+            // calling thread to the thread ID of the creating thread.
+            // If these threads are different, it returns true.
+            if (this.panel1.InvokeRequired)
+            {
+                UpdateGraphCallback d = new UpdateGraphCallback(UpdateGraph);
+                this.Invoke(d, new object[] { });
+            }
+            else
+            {
+
+                for (int i = 0; i < this.wocketsController._Sensors.Count; i++)
+                {
+                    String key = "W" + this.wocketsController._Sensors[i]._ID;
+                    ((PictureBox)this.sensorStatus[key]).Image = (Image)this.sensorStat[key];
+
+                }
+
+                if ((this.tabControl1.SelectedIndex == 0) && (isPlotting))
+                {
+                    GraphAccelerometerValues();
+                }
+            }
+        }
         #endregion Timer Methods
     }
 }
