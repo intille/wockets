@@ -4,11 +4,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.50727</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{1D75F70F-B268-4262-817A-4A0D39E90F86}</ProjectGuid>
+    <ProjectGuid>{FBD9A0CC-6FF0-46E1-833A-ED80FD081241}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>IO</RootNamespace>
-    <AssemblyName>IO</AssemblyName>
+    <RootNamespace>SXML</RootNamespace>
+    <AssemblyName>SXML</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -33,13 +33,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\src\Obselete\IO\ByteReader.cs" />
-    <Compile Include="..\..\src\Obselete\IO\ByteWriter.cs" />
-    <Compile Include="..\..\src\Obselete\IO\FileReader.cs" />
-    <Compile Include="..\..\src\Obselete\IO\FileWriter.cs" />
-        <Compile Include="..\..\src\Obselete\IO\Properties\AssemblyInfo.cs">
-    	<Link>Properties\AssemblyInfo.cs</Link>
-    </Compile> 
+    <Compile Include="..\..\src\Obselete\SXML\Configuration.cs" />
+    <Compile Include="..\..\src\Obselete\SXML\ConfigurationReader.cs" />
+    <Compile Include="..\..\src\Obselete\SXML\Configurations.cs" />
+    <Compile Include="..\..\src\Obselete\SXML\Constants.cs" />
+    <Compile Include="..\..\src\Obselete\SXML\Properties\AssemblyInfo.cs">
+      <Link>Properties\AssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Obselete\SXML\Reader.cs" />
+    <Compile Include="..\..\src\Obselete\SXML\Sensor.cs" />
+    <Compile Include="..\..\src\Obselete\SXML\SensorAnnotation.cs" />
+    <Compile Include="..\..\src\Obselete\SXML\Receiver.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
