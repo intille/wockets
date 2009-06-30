@@ -79,6 +79,9 @@
     <Compile Include="..\..\src\WocketsApplication\Feedback\Vibrator.cs">
       <Link>Feedback\Vibrator.cs</Link>
     </Compile>
+    <Compile Include="..\..\src\WocketsApplication\Feedback\Sound.cs">
+      <Link>Feedback\Sound.cs</Link>
+    </Compile>
     <Compile Include="..\..\src\WocketsApplication\Utils\ATimer.cs">
       <Link>Utils\ATimer.cs</Link>
     </Compile>
@@ -199,6 +202,7 @@
       <Link>ActivityTracker\ActivityTrackerForm.Designer.cs</Link>
       <DependentUpon>ActivityTrackerForm.cs</DependentUpon>
     </Compile>
+
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PPC\BornanderUIProgressBar.csproj">
