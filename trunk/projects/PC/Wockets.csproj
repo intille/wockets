@@ -1,4 +1,4 @@
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -227,18 +227,19 @@
     <Compile Include="..\..\src\Wockets\Sensors\Accelerometers\HTCDiamondTouch.cs">
       <Link>Sensors\Accelerometers\HTCDiamondTouch.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\BatteryResponse.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Commands\BatteryResponse.cs">
       <Link>Data\Commands\BatteryResponse.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\CommandTypes.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Commands\CommandTypes.cs">
       <Link>Data\Commands\CommandTypes.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\ReceiverCommand.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Commands\ReceiverCommand.cs">
       <Link>Data\Commands\ReceiverCommand.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\RFCOMMCommand.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Commands\RFCOMMCommand.cs">
       <Link>Data\Commands\RFCOMMCommand.cs</Link>
     </Compile>
+    <Compile Include="Utils\Barrier.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="SerialIO.csproj">
