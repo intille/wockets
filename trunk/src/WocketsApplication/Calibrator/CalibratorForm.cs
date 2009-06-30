@@ -184,6 +184,7 @@ namespace WocketsApplication.Calibrator
         private const int CALIBRATION_SAMPLES = 1200;
         private int[][] samples;
         private double time=0;
+        private int currentIndex = 0;
 
         public CalibratorForm(string storageDirectory, WocketsController wocketsController)
         {
@@ -913,17 +914,27 @@ namespace WocketsApplication.Calibrator
   
                 //store sum of abs values of consecutive accelerometer readings                
             if (isCalibrating)
-            {
+            { 
                 Decoder decoder = this.wocketsController._Decoders[0];
-                
+
                 if (this.calibrationCounter < CALIBRATION_SAMPLES)
                 {
-                    for (int i = 0; (i < decoder._Data.Length); i++)
+                    if (this.calibrationCounter == 0)
+                        this.currentIndex = decoder._Head-1;
+
+                    if (this.currentIndex == -1)
+                        this.currentIndex = decoder._Data.Length - 1;
+
+                    /*
+                    if (this.currentIndex == decoder._Data.Length-1)
+                        this.currentIndex = 0;
+                    */
+                    for (int i = this.currentIndex; (i < decoder._Data.Length); i++)
                     {
                         if (this.calibrationCounter == CALIBRATION_SAMPLES)
                             break;
 
-                        if (decoder._Data[i].UnixTimeStamp > this.time && decoder._Data[i].Type == SensorDataType.ACCEL)
+                        if ((decoder._Data[i].UnixTimeStamp >= this.time) && (decoder._Data[i].Type == SensorDataType.ACCEL))
                         {
                             this.samples[this.calibrationCounter][0] = (int)((AccelerationData)decoder._Data[i]).X;
                             this.samples[this.calibrationCounter][1] = (int)((AccelerationData)decoder._Data[i]).Y;
@@ -935,11 +946,16 @@ namespace WocketsApplication.Calibrator
                             System.Windows.Forms.Label t = (System.Windows.Forms.Label)this.sensorLabels["calibration"];
 
                             this.calibrationCounter++;
-                            t.Text = "X= " + ((int)(this.calibrations[this.calibrationDirection][0] / this.calibrationCounter)) +
-                                     " Y= " + ((int)(this.calibrations[this.calibrationDirection][1] / this.calibrationCounter)) +
-                                     " Z= " + ((int)(this.calibrations[this.calibrationDirection][2] / this.calibrationCounter));
+                            t.Text = "X=" + ((int)(this.calibrations[this.calibrationDirection][0] / this.calibrationCounter)) +
+                                     "  Y=" + ((int)(this.calibrations[this.calibrationDirection][1] / this.calibrationCounter)) +
+                                     "  Z=" + ((int)(this.calibrations[this.calibrationDirection][2] / this.calibrationCounter));
 
                             this.time = decoder._Data[i].UnixTimeStamp;
+                        }
+                        else
+                        {
+                            this.currentIndex = decoder._Head-1;
+                            break;
                         }
                     }
                 }
@@ -966,7 +982,7 @@ namespace WocketsApplication.Calibrator
                             this.pictureLabel.Text = "Place the wocket as shown";
 
                         if (calibrationDirection > 0)
-                            this.pictureLabel.Text += "\r\nX= " + ((int)this.calibrations[calibrationDirection - 1][0]) + " Y= " + ((int)this.calibrations[calibrationDirection - 1][1]) + " Z= " + ((int)this.calibrations[calibrationDirection - 1][2]);
+                            this.pictureLabel.Text += "\r\nX=" + ((int)this.calibrations[calibrationDirection - 1][0]) + "  Y=" + ((int)this.calibrations[calibrationDirection - 1][1]) + "  Z=" + ((int)this.calibrations[calibrationDirection - 1][2]);
 
                         this.pictureBox1.Image = this.calibrationImages[calibrationDirection];
                         this.panel2.Visible = true;
