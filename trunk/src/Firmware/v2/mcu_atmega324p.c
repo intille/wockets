@@ -94,13 +94,13 @@ void _atmega324p_enable_adc(){
 	sbi(ADCSRA,ADEN);// power up
 
 	//both the following are needed to allow ADIF to be set when a conversion completes
-	sbi(ADCSRA,ADIE);//enable interrupts  
-	sei(); //sets the I bit in the SREG 
+	//sbi(ADCSRA,ADIE);//enable ADC conversion interrupts  
+	//sei(); //sets the I bit in the SREG 
 }
 
 void _atmega324p_disable_adc(){
 	cbi(ADCSRA,ADEN);// power down
-	cbi(ADCSRA,ADIE);//disable interrupts
+	//cbi(ADCSRA,ADIE);//disable interrupts
 }
 
 void _atmega324p_start_adc(){

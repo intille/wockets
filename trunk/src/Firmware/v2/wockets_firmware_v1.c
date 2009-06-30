@@ -142,7 +142,8 @@ int main()
 
 ISR(TIMER2_OVF_vect){
 
-
+		//reset timer
+		TCNT2=154;
 		if (sleep==0){
 			 if (_rn41_is_connected()){
 				_atmega324p_yellow_led_off();
@@ -219,6 +220,6 @@ ISR(TIMER2_OVF_vect){
 		}else{
 			_delay_ms(10000);
 		}
-	TCNT2=154;
+
 }
 
