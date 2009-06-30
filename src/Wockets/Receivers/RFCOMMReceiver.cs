@@ -391,8 +391,8 @@ namespace Wockets.Receivers
         {
             usingWidcomm = BluetoothRadio.PrimaryRadio == null;
             lockObject = new object();
-            if (barrier == null)
-                barrier = new Barrier(0);
+            //if (barrier == null)
+              //  barrier = new Barrier(0);
         }
 
         private BluetoothStream()
@@ -464,11 +464,11 @@ namespace Wockets.Receivers
        
         private void readingFunction()
         {
-            double prevTime = 0;
-            double currentTime=0;
+            //double prevTime = 0;
+            //double currentTime=0;
             byte[] buffer = new byte[100];
 
-            double nodataTimer = WocketsTimer.GetUnixTime();
+            //double nodataTimer = WocketsTimer.GetUnixTime();
             int sendTimer = 0;
             byte[] sendByte = new byte[1];
             sendByte[0] = 0xff;
@@ -563,17 +563,17 @@ namespace Wockets.Receivers
                             if (btSocket.Available > 0)
                             {
                                 //currentTime = WocketsTimer.GetUnixTime();
-                                currentTime = WocketsTimer.TimeStamp; 
+                               // currentTime = WocketsTimer.TimeStamp; 
                                 bytesReceived = btSocket.Receive(singleReadBuffer, (DEFAULT_BUFFER_SIZE - currentBytes > singleReadBuffer.Length) ? singleReadBuffer.Length : DEFAULT_BUFFER_SIZE - currentBytes, SocketFlags.None);
                                 //batchTimestamps.Add(currentTime);
                                // batchBytes.Add(bytesReceived);
                             }
 
-                           Thread.Sleep(50);                            
+                           Thread.Sleep(30);                            
 
                             if (bytesReceived > 0)
                             {
-                                nodataTimer = currentTime;
+                                //nodataTimer = currentTime;
                                 disconnectionCounter=0;
                                // tttw.WriteLine(currentTime+","+bytesReceived);
                                 //tttw.Flush();
@@ -601,9 +601,9 @@ namespace Wockets.Receivers
                             }
 
                             */            
-                            prevTime = currentTime;
+                            //prevTime = currentTime;
 
-                            barrier.Gather();
+//                            barrier.Gather();
                             
                             
                         }
@@ -618,11 +618,11 @@ namespace Wockets.Receivers
                     }
                     catch (Exception e)
                     {
-                        lock (lockObject)
+                      /*  lock (lockObject)
                         {
                             barrier.NumSynchronizedThreads = barrier.NumSynchronizedThreads - 1;
                         }
-                        
+                        */
                         
                         return;
                     }
@@ -785,13 +785,13 @@ namespace Wockets.Receivers
 
                
                 newStream.readingThread = new Thread(new ThreadStart(newStream.readingFunction));
-                newStream.readingThread.Priority = ThreadPriority.Highest;
+                //newStream.readingThread.Priority = ThreadPriority.Highest;
                 newStream.readingThread.Start();
-                lock (lockObject)
+               /* lock (lockObject)
                 {
                     if (barrier != null)                    
                         barrier.NumSynchronizedThreads = barrier.NumSynchronizedThreads + 1;                    
-                }
+                }*/
 
             }
             catch (Exception e)

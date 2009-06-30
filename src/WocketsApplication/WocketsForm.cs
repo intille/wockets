@@ -290,6 +290,9 @@ namespace WocketsApplication
 
             #endregion Load Feature Extractor
 
+
+            progressThreadQuit = true;
+
             #region Load Data Logger GUI
 
             #region Initialize GUI Components

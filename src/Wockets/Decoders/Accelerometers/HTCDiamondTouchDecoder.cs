@@ -15,7 +15,7 @@ namespace Wockets.Decoders.Accelerometers
         private const int HTCDIAMOND_CHANNEL = 83;
         #endregion Serialization Constants
 
-        private const int BUFFER_SIZE = 1; // should not exceed 4096 (Lower Level Buffer Size) / 6 (HTC Packet Size)
+        private const int BUFFER_SIZE = 100; // should not exceed 4096 (Lower Level Buffer Size) / 6 (HTC Packet Size)
         private bool headerSeen;
 
 
@@ -43,17 +43,17 @@ namespace Wockets.Decoders.Accelerometers
         public override int Decode(int sensorID, byte[] data, int length)
         {
             int rawDataIndex = 0;
-            int decodedDataIndex = 0;
+            int numDecodedPackets = 0;
 
 
             if ((length != 0) && (data[0] == 0xff) && (data[15] == 0xff) && (length == HTCDiamondTouchAccelerationData.NUM_RAW_BYTES)) // Have some data
             {
 
 
-                if (decodedDataIndex >= this._Data.Length)
-                    throw new Exception("HTC Diamond Touch buffer too small " + this._Data.Length);
+               // if (decodedDataIndex >= this._Data.Length)
+                //    throw new Exception("HTC Diamond Touch buffer too small " + this._Data.Length);
 
-                HTCDiamondTouchAccelerationData datum = ((HTCDiamondTouchAccelerationData)this._Data[decodedDataIndex]);
+                HTCDiamondTouchAccelerationData datum = ((HTCDiamondTouchAccelerationData)this._Data[this.head]);
                 datum.Reset();
                 //copy raw bytes
                 for (int i = 0; (i < HTCDiamondTouchAccelerationData.NUM_RAW_BYTES); i++)
@@ -67,14 +67,17 @@ namespace Wockets.Decoders.Accelerometers
                 datum.UnixTimeStamp = WocketsTimer.GetUnixTime();
 
                 //if (IsValid(datum))
-                decodedDataIndex++;
+                if (this.head >= (BUFFER_SIZE - 1))
+                    this.head = 0;
+                else
+                    this.head++;
 
+                numDecodedPackets++;
                 this.headerSeen = false;
-                this._Size = decodedDataIndex++;
 
             }
 
-            return 1;
+            return numDecodedPackets;
         }
 
 

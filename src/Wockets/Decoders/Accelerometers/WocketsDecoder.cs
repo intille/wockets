@@ -89,7 +89,7 @@ namespace Wockets.Decoders.Accelerometers
                             else
                                 this.head++;
                             numDecodedPackets++;
-                            //decodedDataIndex= decodedDataIndex% BUFFER_SIZE;
+
                             this.packetPosition = 0;
                             this.headerSeen = false;
                         }
