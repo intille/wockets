@@ -239,9 +239,15 @@
     <Compile Include="..\..\src\Wockets\Data\Commands\RFCOMMCommand.cs">
       <Link>Data\Commands\RFCOMMCommand.cs</Link>
     </Compile>
-    <Compile Include="Utils\Barrier.cs" />
+    <Compile Include="..\..\src\Wockets\Utils\Barrier.cs">
+    <Link>Utils\Barrier.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\MonitorEx.cs">
+    <Link>Utils\Barrier.cs</Link>
+    </Compile>
   </ItemGroup>
-  <ItemGroup>
+  
+<ItemGroup>
     <ProjectReference Include="SerialIO.csproj">
       <Project>{26831A48-F3A8-4019-8C62-842D3B8D2A6F}</Project>
       <Name>SerialIO</Name>
