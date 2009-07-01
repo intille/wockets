@@ -16,6 +16,9 @@ namespace WocketsApplication.Utils
         private WocketsController wocketController;
         private Thread reconnectionThread=null;
         private bool reconnecting = false;
+        private long time_disconnected = 0;
+        private long last_disconnection;
+        private int numDisconnections = 0;
 
 
 
@@ -25,6 +28,32 @@ namespace WocketsApplication.Utils
             this.wocketController = wocketController;
             this.receiver = receiver;
 
+        }
+
+        //Returns total time disconnected in seconds
+        public int TimeDisconnected
+        {
+            get
+            {
+                return (int)(this.time_disconnected / 10000000);
+            }
+            set
+            {
+                this.time_disconnected = (long)(value * 10000000);
+            }
+        }
+
+        public int Disconnections
+        {
+            get
+            {
+                return this.numDisconnections;
+            }
+
+            set
+            {
+                this.numDisconnections = value;
+            }
         }
 
         public bool Reconnecting
@@ -48,8 +77,12 @@ namespace WocketsApplication.Utils
             {               
                 try
                 {
-                    if (receiver.Initialize())   
-                        receiver._Running = true;                                                     
+                    if (receiver.Initialize())
+                    {
+                        receiver._Running = true;
+                        this.time_disconnected += (DateTime.Now.Ticks - this.last_disconnection);
+                        Wockets.Utils.Logger.Warn("Receiver " + receiver._ID + " has reconnected.");
+                    }                               
                 }
                 catch (Exception e)
                 {                   
@@ -65,6 +98,8 @@ namespace WocketsApplication.Utils
         {
             if (reconnectionThread == null)
             {
+                this.numDisconnections++;
+                this.last_disconnection = DateTime.Now.Ticks;
                 reconnecting = true;
                 Thread.Sleep(1000);
                 reconnectionThread = new Thread(new ThreadStart(this.ReconnectThread));
