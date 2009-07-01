@@ -466,14 +466,32 @@ namespace WocketsApplication.DataLogger
             //tabPage5
             //
 
-            this.tabPage5.Controls.Add(this.label17);
-            this.tabPage5.Controls.Add(this.pictureBox2);
-            this.tabPage5.Controls.Add(this.button2);
-
             this.tabPage5.Location = new System.Drawing.Point(0, 0);
             this.tabPage5.Name = "tabPage5";
             this.tabPage5.Size = new System.Drawing.Size(232, 239);
-            this.tabPage5.Text = "Calibrate";
+            this.tabPage5.Text = "Status";
+            this.SampLabels = new Label[this.wocketsController._Sensors.Count];
+
+            Label cur = new Label();
+            cur = new Label();
+            cur.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular);
+            cur.Text = "Samp/sec, #Disconnects, Time Disconnect";
+            cur.Location = new Point(5, 16);
+            cur.Size = new Size(500, 50);
+            this.panel5.Controls.Add(cur);
+            for (int i = 0; i < this.wocketsController._Sensors.Count; i++)
+            {
+                cur = new Label();
+                cur.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular);
+                cur.Text = "Sensor "+this.wocketsController._Sensors[i]._ID+": ?, ?, ?";
+                cur.Location = new Point(16, 66 + i * 30);
+                cur.Size = new Size(500, 40);
+                this.SampLabels[i] = cur;
+                this.panel5.Controls.Add(cur);
+                cur.BringToFront();
+            }
+
+
 
             //Add Panels to the tab pages
             this.tabPage1.Controls.Add(this.panel1);
@@ -606,8 +624,8 @@ namespace WocketsApplication.DataLogger
             //Initialize Tab control dimensions
             this.tabControl1.Width = this.ClientSize.Width;
             this.tabControl1.Height = this.ClientSize.Height;
-            this.tabPage1.Width = this.panel1.Width = this.tabPage2.Width = this.panel2.Width = this.tabPage3.Width = this.panel3.Width = this.tabPage4.Width = this.panel4.Width = this.tabControl1.ClientSize.Width;//-Constants.SCREEN_LEFT_MARGIN-Constants.SCREEN_RIGHT_MARGIN;
-            this.tabPage1.Height = this.panel1.Height = this.tabPage2.Height = this.panel2.Height = this.tabPage3.Height = this.panel3.Height = this.tabPage4.Height = this.panel4.Height = this.tabControl1.ClientSize.Height;
+            this.tabPage1.Width = this.panel1.Width = this.tabPage2.Width = this.panel2.Width = this.tabPage3.Width = this.panel3.Width = this.tabPage4.Width = this.panel4.Width = this.tabPage5.Width = this.panel5.Width =this.tabControl1.ClientSize.Width;//-Constants.SCREEN_LEFT_MARGIN-Constants.SCREEN_RIGHT_MARGIN;
+            this.tabPage1.Height = this.panel1.Height = this.tabPage2.Height = this.panel2.Height = this.tabPage3.Height = this.panel3.Height = this.tabPage4.Height = this.panel4.Height = this.tabPage5.Height = this.panel5.Height =this.tabControl1.ClientSize.Height;
 #else
             this.form1.Width = this.form2.Width = this.form3.Width = this.form4.Width = this.form5.Width = this.ClientSize.Width;
             this.form1.Height = this.form2.Height = this.form3.Height = this.form4.Height = this.form5.Height = this.ClientSize.Height;
@@ -926,40 +944,37 @@ namespace WocketsApplication.DataLogger
                 //setup the labels for the expected sampling rates
                 int sensor_id = Convert.ToInt32(this.wocketsController._Sensors[i]._ID);
 
-                if (sensor_id > 0) //exclude HR sensor
-                {
-                    System.Windows.Forms.Label label = new System.Windows.Forms.Label();
-                    //label.AutoSize = true;
-                    label.Size = new Size(label_width, label_height);
-                    label.Location = new System.Drawing.Point(Constants.WIDGET_SPACING, Constants.WIDGET_SPACING + (counter * (label_height + Constants.WIDGET_SPACING)));
-                    label.Name = this.wocketsController._Sensors[i]._ID.ToString();
-                    label.Text = "Sensor " + this.wocketsController._Sensors[i]._ID;
-                    label.Font = textFont;
-                    this.labels[sensor_id] = label;
-                    //this.panel4.Controls.Add(label);
+                System.Windows.Forms.Label label = new System.Windows.Forms.Label();
+                //label.AutoSize = true;
+                label.Size = new Size(label_width, label_height);
+                label.Location = new System.Drawing.Point(Constants.WIDGET_SPACING, Constants.WIDGET_SPACING + (counter * (label_height + Constants.WIDGET_SPACING)));
+                label.Name = this.wocketsController._Sensors[i]._ID.ToString();
+                label.Text = "Sensor " + this.wocketsController._Sensors[i]._ID;
+                label.Font = textFont;
+                this.labels[sensor_id] = label;
+                //this.panel5.Controls.Add(label);
 
-                    System.Windows.Forms.Label label2 = new System.Windows.Forms.Label();
-                    //label2.AutoSize = true;
-                    label2.Size = new Size(label_width, label_height);
-                    label2.Location = new System.Drawing.Point(Constants.WIDGET_SPACING + label_width + Constants.WIDGET_SPACING, Constants.WIDGET_SPACING + (counter * (label_height + Constants.WIDGET_SPACING)));
-                    label2.Name = "E(SR) " + this.wocketsController._Sensors[i]._ID;
-                    label2.Text = "unknown"; //rate.ToString("00.00") + "%";
-                    label2.Font = textFont;
-                    //this.panel4.Controls.Add(label2);
-                    this.expectedLabels[sensor_id] = label2;
+                System.Windows.Forms.Label label2 = new System.Windows.Forms.Label();
+                //label2.AutoSize = true;
+                label2.Size = new Size(label_width, label_height);
+                label2.Location = new System.Drawing.Point(Constants.WIDGET_SPACING + label_width + Constants.WIDGET_SPACING, Constants.WIDGET_SPACING + (counter * (label_height + Constants.WIDGET_SPACING)));
+                label2.Name = "E(SR) " + this.wocketsController._Sensors[i]._ID;
+                label2.Text = "unknown"; //rate.ToString("00.00") + "%";
+                label2.Font = textFont;
+                //this.panel5.Controls.Add(label2);
+                this.expectedLabels[sensor_id] = label2;
 
-                    System.Windows.Forms.Label label3 = new System.Windows.Forms.Label();
-                    //label2.AutoSize = true;
-                    label3.Size = new Size(label_width, label_height);
-                    label3.Location = new System.Drawing.Point(Constants.WIDGET_SPACING + label_width + Constants.WIDGET_SPACING + label_width + Constants.WIDGET_SPACING, Constants.WIDGET_SPACING + (counter * (label_height + Constants.WIDGET_SPACING)));
-                    label2.Name = "Samples " + this.wocketsController._Sensors[i]._ID;
-                    label3.Text = "unknown"; //rate.ToString("00.00") + "%";
-                    label3.Font = textFont;
-                    //this.panel4.Controls.Add(label3);
-                    this.samplesPerSecond[sensor_id] = label3;
+                System.Windows.Forms.Label label3 = new System.Windows.Forms.Label();
+                //label2.AutoSize = true;
+                label3.Size = new Size(label_width, label_height);
+                label3.Location = new System.Drawing.Point(Constants.WIDGET_SPACING + label_width + Constants.WIDGET_SPACING + label_width + Constants.WIDGET_SPACING, Constants.WIDGET_SPACING + (counter * (label_height + Constants.WIDGET_SPACING)));
+                label2.Name = "Samples " + this.wocketsController._Sensors[i]._ID;
+                label3.Text = "unknown"; //rate.ToString("00.00") + "%";
+                label3.Font = textFont;
+                //this.panel5.Controls.Add(label3);
+                this.samplesPerSecond[sensor_id] = label3;
 
-                    counter++;
-                }
+                counter++;
             }
             //#if (PocketPC)
             //            foreach (Sensor sensor in this.sensors.BuiltinSensors)

@@ -7,45 +7,45 @@ namespace Wockets.Utils
 {
     public class Logger
     {
-        private String errorPath;
-        private String warnPath;
-        private String debugPath;
+        private static String errorPath;
+        private static String warnPath;
+        private static String debugPath;
 
-        public Logger(String filePath)
+        public static void InitLogger(String filePath)
         {
             Directory.CreateDirectory(filePath+"\\data\\log");
-            this.errorPath = filePath + "\\data\\log\\error.txt";
-            this.warnPath = filePath + "\\data\\log\\warn.txt";
-            this.debugPath = filePath + "\\data\\log\\debug.txt";
-            FileStream a = new FileStream(this.errorPath, FileMode.Create);
+            errorPath = filePath + "\\data\\log\\error.txt";
+            warnPath = filePath + "\\data\\log\\warn.txt";
+            debugPath = filePath + "\\data\\log\\debug.txt";
+            FileStream a = new FileStream(errorPath, FileMode.Create);
             a.Close();
-            a = new FileStream(this.warnPath, FileMode.Create);
+            a = new FileStream(warnPath, FileMode.Create);
             a.Close();
-            a = new FileStream(this.debugPath, FileMode.Create);
+            a = new FileStream(debugPath, FileMode.Create);
             a.Close();
         }
 
-        public void Warn(String msg)
+        public static void Warn(String msg)
         {
 
-            StreamWriter writer = new StreamWriter(new FileStream(this.warnPath, FileMode.Append));
+            StreamWriter writer = new StreamWriter(new FileStream(warnPath, FileMode.Append));
             writer.WriteLine(DateTime.Now + " WARNING: " + msg);
             writer.Flush();
             writer.Close();
         }
 
-        public void Debug(String msg)
+        public static void Debug(String msg)
         {
 
-            StreamWriter writer = new StreamWriter(new FileStream(this.debugPath, FileMode.Append));
+            StreamWriter writer = new StreamWriter(new FileStream(debugPath, FileMode.Append));
             writer.WriteLine(DateTime.Now + " DEBUG: " + msg);
             writer.Flush();
             writer.Close();
         }
 
-        public void Error(Exception ex)
+        public static void Error(Exception ex)
         {
-            StreamWriter writer = new StreamWriter(new FileStream(this.errorPath, FileMode.Append));
+            StreamWriter writer = new StreamWriter(new FileStream(errorPath, FileMode.Append));
             writer.WriteLine(DateTime.Now + " Error:");
             writer.WriteLine(ex.Message.Trim());
             writer.WriteLine("Stack Trace    : " + ex.StackTrace.Trim());

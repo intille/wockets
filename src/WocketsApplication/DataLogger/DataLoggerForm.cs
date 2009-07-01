@@ -85,6 +85,7 @@ namespace WocketsApplication.DataLogger
         /// Measures the length of an activity as determined by the classifier
         /// </summary>
         private ATimer activityTimer;
+
         #endregion Definition of different timers
 
         #region GUI Delegates
@@ -170,6 +171,7 @@ namespace WocketsApplication.DataLogger
         const int SW_MINIMIZED = 6;
 
         private Label[] ActGUIlabels;
+        private Label[] SampLabels;
 
         #endregion Definition of GUI Components
 
@@ -181,15 +183,11 @@ namespace WocketsApplication.DataLogger
         /// <summary>
         /// Last time of rate calculation
         /// </summary>
-        private long LastTime;
-        /// <summary>
-        /// Counter to determine when to take datetime
-        /// </summary>
         private int SRcounter=0;
         /// <summary>
         /// Change in time since last calculation
         /// </summary>
-        private long deltaT;
+        private long LastTime;
         
         #endregion Sampling Rate and Activity Count Components
 
@@ -202,8 +200,6 @@ namespace WocketsApplication.DataLogger
         /// Counter used to log status data when it reaches its max
         /// </summary>
         int flushTimer = 0;
-
-        private int offTimer = 0;
 
         private Sound alert = new Sound(Constants.NEEDED_FILES_PATH + "sounds\\stop.wav");
         private int[] disconnected = new int[] { 0, 0, 0, 0, 0, 0 };
@@ -250,7 +246,6 @@ namespace WocketsApplication.DataLogger
         //private MITesLoggerPLFormat aPLFormatLogger;
         //private PLFormatLogger aPLFormatLogger;
         //private MITesActivityLogger aMITesActivityLogger;
-        private Wockets.Utils.Logger logger;
         #endregion Definition of logging functions
 
         #region Definition of built-in sensors polling threads   (Pocket PC Only)
@@ -350,8 +345,8 @@ namespace WocketsApplication.DataLogger
         public DataLoggerForm(string storageDirectory, WocketsController wocketsController, Session annotatedSession, DTConfiguration classifierConfiguration, int mode)
         {
             this.AccumPackets = new int[wocketsController._Receivers.Count];
+            Logger.InitLogger(storageDirectory);
             this.LastTime = DateTime.Now.Ticks;
-            this.logger = new Logger(storageDirectory);
             if (mode == 1)
                 InitializeAnnotator(storageDirectory, wocketsController, annotatedSession, classifierConfiguration);
             else if (mode == 2)
@@ -508,7 +503,6 @@ namespace WocketsApplication.DataLogger
             //Remove classifier tabs
 #if (PocketPC)
 
-            this.tabControl1.TabPages.RemoveAt(4);
             this.tabControl1.TabPages.RemoveAt(3);
             this.tabControl1.TabPages.RemoveAt(2);
             this.tabControl1.TabPages.RemoveAt(1);
@@ -635,6 +629,10 @@ namespace WocketsApplication.DataLogger
 
             //this.bluetoothControllers = new BluetoothController[this.wocketsController._Receivers.Count];
             this.bluetoothConnectors = new BluetoothConnector[this.wocketsController._Receivers.Count];
+            for (int i = 0; i < this.wocketsController._Receivers.Count; i++)
+            {
+                this.bluetoothConnectors[i] = null;
+            }
 
             #region Bluetooth reception channels initialization
             //Initialize and search for wockets connections
@@ -1606,7 +1604,6 @@ namespace WocketsApplication.DataLogger
                             (this.wocketsController._Receivers[i]._Running == false))
                         {
                             this.bluetoothConnectors[this.wocketsController._Receivers[i]._ID].Reconnect();
-                            logger.Warn("Attempting to reconnect receiver number " + this.wocketsController._Receivers[i]._ID);
                         }
 
                     }
@@ -1633,6 +1630,7 @@ namespace WocketsApplication.DataLogger
                             {
                                 numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer, dataLength);
                                 this.disconnected[sensor._ID] = 0;
+                                this.AccumPackets[i] += numDecodedPackets;
                             }
 
                             this.sensorStat["W" + this.wocketsController._Sensors[i]._ID] = connectedWocketImage;
@@ -1647,10 +1645,11 @@ namespace WocketsApplication.DataLogger
                 catch (Exception ex)
                 {
 
-                    logger.Warn("Wocket " + sensor._ID + " has disconnected.");
+                    Logger.Warn("Wocket " + sensor._ID + " has disconnected.");
                     this.disconnected[sensor._ID] = 1;
                     this.sensorStat["W" + sensor._ID] = disconnectedWocketImage;
-                    this.bluetoothConnectors[currentReceiver._ID] = new BluetoothConnector(currentReceiver, this.wocketsController);
+                    //if (this.bluetoothConnectors[currentReceiver._ID]==null)
+                        this.bluetoothConnectors[currentReceiver._ID] = new BluetoothConnector(currentReceiver, this.wocketsController);
                     currentReceiver._Running = false;
                 }
 
@@ -1685,7 +1684,7 @@ namespace WocketsApplication.DataLogger
                 }
                 catch (Exception ee)
                 {
-                    logger.Error(ee);
+                    Logger.Error(ee);
                 }
                 Thread.Sleep(3000);
             }
@@ -1714,6 +1713,35 @@ namespace WocketsApplication.DataLogger
             {
                 alert.Play();
                 this.play_sound = false;
+            }
+
+            this.SRcounter++;
+            if (this.SRcounter > 6000)//Update status interface every 15 minutes
+            {
+                String log = "\n-------------------------------------------------\nSample Rate, # of Disconnections, Time disconnected\n";
+                int disc;
+                int time;
+                String report;
+                long now = DateTime.Now.Ticks;
+                for (int i = 0; i < this.wocketsController._Sensors.Count; i++)
+                {
+                    if (this.bluetoothConnectors[this.wocketsController._Sensors[i]._ID] == null) disc = time = 0;
+                    else
+                    {
+                        disc = this.bluetoothConnectors[this.wocketsController._Sensors[i]._ID].Disconnections;
+                        time = this.bluetoothConnectors[this.wocketsController._Sensors[i]._ID].TimeDisconnected;
+                        this.bluetoothConnectors[this.wocketsController._Sensors[i]._ID].TimeDisconnected = 0;
+                        this.bluetoothConnectors[this.wocketsController._Sensors[i]._ID].Disconnections = 0;
+                    }
+                    report="Sensor " + this.wocketsController._Sensors[i]._ID + ": " + this.AccumPackets[i] / ((now - this.LastTime) / 10000000) + ", " + disc + ", " + time;
+                    this.SampLabels[i].Text = report;
+                    log += report + "\n";
+                    this.AccumPackets[i] = 0;
+                }
+                log += "--------------------------------------------------------";
+                Logger.Warn(log);
+                this.SRcounter = 0;
+                this.LastTime = now;
             }
 
             if (isQuitting)
