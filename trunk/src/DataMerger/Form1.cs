@@ -7,10 +7,11 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO;
 using System.Threading;
-using System.IO;
 using HousenCS.MITes;
 using System.Collections;
 using System.Text.RegularExpressions;
+using Wockets.Data.Annotation;
+using Wockets;
 
 namespace DataMerger
 {
@@ -269,30 +270,30 @@ namespace DataMerger
             /**** MITes,wockets Variables ****/
 
             //Variables that average raw values
-            int[] averageX;
-            int[] averageY;
-            int[] averageZ;
-            int[] averageRawX;
-            int[] averageRawY;
-            int[] averageRawZ;
+            int[] averageX = null;
+            int[] averageY = null;
+            int[] averageZ = null;
+            int[] averageRawX = null;
+            int[] averageRawY = null;
+            int[] averageRawZ = null;
 
             //variables for older activity count calculation
-            int[] prevX;
-            int[] prevY;
-            int[] prevZ;
-            int[] acCounters;
+            int[] prevX = null;
+            int[] prevY = null;
+            int[] prevZ = null;
+            int[] acCounters = null;
 
             //Variables to store raw data,running mean and areas under curve
-            int[, ,] rawData; //channel,axis ->data            
-            long[,] timeData; //channel ->timestamp
-            int[,] AUC;
-            double[] VMAG;
-            int[] head; //channel ->pointer to the head (circular)
-            double[] RMX;
-            double[] RMY;
-            double[] RMZ;
-            int[] RMSize;
-            int[] RMCount;
+            int[, ,] rawData = null; //channel,axis ->data            
+            long[,] timeData = null; //channel ->timestamp
+            int[,] AUC = null;
+            double[] VMAG = null;
+            int[] head = null; //channel ->pointer to the head (circular)
+            double[] RMX = null;
+            double[] RMY = null;
+            double[] RMZ = null;
+            int[] RMSize = null;
+ 
 
 
             //Size of the moving average
@@ -300,12 +301,54 @@ namespace DataMerger
 
 
             //CSV files that store data                    
-            TextWriter[] activityCountCSVs; //old activity count files
-            TextWriter[] aucCSVs; //AUC files
-            TextWriter[] vmagCSVs; //AUC files
-            TextWriter[] rmCSVs; //Running mean files
-            TextWriter[] samplingCSVs; //Sample Rate CSV       
-            TextWriter[] averagedRaw;  //Raw signal CSV
+            TextWriter[] activityCountCSVs=null; //old activity count files
+            TextWriter[] aucCSVs=null; //AUC files
+            TextWriter[] vmagCSVs = null; //AUC files
+            TextWriter[] rmCSVs = null; //Running mean files
+            TextWriter[] samplingCSVs = null; //Sample Rate CSV       
+            TextWriter[] averagedRaw = null;  //Raw signal CSV
+
+            TextWriter[] wactivityCountCSVs = null; //old activity count files
+            TextWriter[] waucCSVs = null; //AUC files
+            TextWriter[] wvmagCSVs = null; //AUC files
+            TextWriter[] wrmCSVs = null; //Running mean files
+            TextWriter[] wsamplingCSVs = null; //Sample Rate CSV       
+            TextWriter[] waveragedRaw = null;  //Raw signal CSV
+
+
+
+
+            //Variables that average raw values
+            int[] waverageX = null;
+            int[] waverageY = null;
+            int[] waverageZ = null;
+            int[] waverageRawX = null;
+            int[] waverageRawY = null;
+            int[] waverageRawZ = null;
+
+            //variables for older activity count calculation
+            int[] wprevX = null;
+            int[] wprevY = null;
+            int[] wprevZ = null;
+            int[] wacCounters = null;
+
+            //Variables to store raw data,running mean and areas under curve
+            int[, ,] wrawData = null; //channel,axis ->data            
+            long[,] wtimeData = null; //channel ->timestamp
+            int[,] wAUC = null;
+            double[] wVMAG = null;
+            int[] whead = null; //channel ->pointer to the head (circular)
+            double[] wRMX = null;
+            double[] wRMY = null;
+            double[] wRMZ = null;
+            int[] wRMSize = null;
+
+
+
+
+
+
+
             TextWriter masterCSV;      //Master CSV
             TextWriter hrCSV;       //HR CSV
 
@@ -776,11 +819,20 @@ namespace DataMerger
                                     else //3 tokens can either include minutes or hours can be mins:secs:00 or hrs:mins:secs
                                     {
 
+                                         //OXYCON BUG: The oxycon output files are very buggy
+                                        // sometimes they report min:sec:00 and sometimes hr:min:sec
 
-                                        oxyconTime = oxyconOriginTime.AddHours(Convert.ToDouble(timeTokens[0]));
-                                        oxyconTime = oxyconTime.AddMinutes(Convert.ToDouble(timeTokens[1]));
-                                        oxyconTime = oxyconTime.AddSeconds(Convert.ToDouble(timeTokens[2]));
-
+                                        if (Convert.ToDouble(timeTokens[0]) >= 24) //this is min:sec:00
+                                        {
+                                            oxyconTime = oxyconOriginTime.AddMinutes(Convert.ToDouble(timeTokens[0]));
+                                            oxyconTime = oxyconTime.AddSeconds(Convert.ToDouble(timeTokens[1]));
+                                        }
+                                        else  //this is hr:min:sec
+                                        {
+                                            oxyconTime = oxyconOriginTime.AddHours(Convert.ToDouble(timeTokens[0]));
+                                            oxyconTime = oxyconTime.AddMinutes(Convert.ToDouble(timeTokens[1]));
+                                            oxyconTime = oxyconTime.AddSeconds(Convert.ToDouble(timeTokens[2]));
+                                        }
 
                                     }
 
@@ -790,7 +842,8 @@ namespace DataMerger
                                     oxyconUnixTime = UnixTime.GetUnixTime(oxyconTime);
                                     string oxyconKey = oxyconTime.Year + "-" + oxyconTime.Month + "-" + oxyconTime.Day + "-" + oxyconTime.Hour + "-" + oxyconTime.Minute + "-" + oxyconTime.Second;
                                     string oxyconLine = "";
-
+                                    if (oxyconTime.Day >= 10)
+                                        Console.Write("");
                                     if ((tokens[1].Length > 0) && (tokens[1] != "-"))
                                         oxyconLine += Convert.ToInt32(tokens[1]);
                                     oxyconLine += ",";
@@ -830,8 +883,9 @@ namespace DataMerger
                     {
                         throw new Exception("Oxycon Flash: Parsing failed 2 " + e.Message);
                     }
+                
                 }
-                else if (file.Length == 2)
+                else if (file.Length == 2) //sometimes 2 oxycon sessions were recorded
                 {
 
                     TextReader oxyconOriginTR = new StreamReader(aDataDirectory + "\\OxyconSyncronizationTime.txt");
@@ -884,9 +938,17 @@ namespace DataMerger
                                     {
 
 
-                                        oxyconTime = oxyconOriginTime.AddHours(Convert.ToDouble(timeTokens[0]));
-                                        oxyconTime = oxyconTime.AddMinutes(Convert.ToDouble(timeTokens[1]));
-                                        oxyconTime = oxyconTime.AddSeconds(Convert.ToDouble(timeTokens[2]));
+                                        if (Convert.ToDouble(timeTokens[0]) >= 24) //this is min:sec:00
+                                        {
+                                            oxyconTime = oxyconOriginTime.AddMinutes(Convert.ToDouble(timeTokens[0]));
+                                            oxyconTime = oxyconTime.AddSeconds(Convert.ToDouble(timeTokens[1]));
+                                        }
+                                        else  //this is hr:min:sec
+                                        {
+                                            oxyconTime = oxyconOriginTime.AddHours(Convert.ToDouble(timeTokens[0]));
+                                            oxyconTime = oxyconTime.AddMinutes(Convert.ToDouble(timeTokens[1]));
+                                            oxyconTime = oxyconTime.AddSeconds(Convert.ToDouble(timeTokens[2]));
+                                        }
 
 
                                     }
@@ -995,10 +1057,18 @@ namespace DataMerger
                                     {
 
 
-                                        oxyconTime = oxyconOriginTime.AddHours(Convert.ToDouble(timeTokens[0]));
-                                        oxyconTime = oxyconTime.AddMinutes(Convert.ToDouble(timeTokens[1]));
-                                        oxyconTime = oxyconTime.AddSeconds(Convert.ToDouble(timeTokens[2]));
 
+                                        if (Convert.ToDouble(timeTokens[0]) >= 24) //this is min:sec:00
+                                        {
+                                            oxyconTime = oxyconOriginTime.AddMinutes(Convert.ToDouble(timeTokens[0]));
+                                            oxyconTime = oxyconTime.AddSeconds(Convert.ToDouble(timeTokens[1]));
+                                        }
+                                        else  //this is hr:min:sec
+                                        {
+                                            oxyconTime = oxyconOriginTime.AddHours(Convert.ToDouble(timeTokens[0]));
+                                            oxyconTime = oxyconTime.AddMinutes(Convert.ToDouble(timeTokens[1]));
+                                            oxyconTime = oxyconTime.AddSeconds(Convert.ToDouble(timeTokens[2]));
+                                        }
 
                                     }
 
@@ -1116,46 +1186,11 @@ namespace DataMerger
             }
             #endregion Read Sensewear data
 
-            AXML.Annotation aannotation = null;
-            SXML.SensorAnnotation sannotation = null;
-            //GeneralConfiguration configuration = null;
-            try
-            {
-                //configuration = new ConfigurationReader(aDataDirectory).parse();
-                AXML.Reader reader = new AXML.Reader(masterDirectory, aDataDirectory, "AnnotationIntervals.xml");
-                aannotation = reader.parse();
-                aannotation.RemoveData(filter);
-                aannotation.DataDirectory = aDataDirectory;
-                SXML.Reader sreader = new SXML.Reader(masterDirectory, aDataDirectory);
-                sannotation = sreader.parse(maxControllers);
-            }
-            catch (Exception e)
-            {
-                throw new Exception("MITes Configuration Files: Parsing failed " + e.Message);
-            }
 
-            //create some counters for activity counts
-            averageX = new int[sannotation.MaximumSensorID + 1];
-            averageY = new int[sannotation.MaximumSensorID + 1];
-            averageZ = new int[sannotation.MaximumSensorID + 1];
 
-            averageRawX = new int[sannotation.MaximumSensorID + 1];
-            averageRawY = new int[sannotation.MaximumSensorID + 1];
-            averageRawZ = new int[sannotation.MaximumSensorID + 1];
 
-            prevX = new int[sannotation.MaximumSensorID + 1];
-            prevY = new int[sannotation.MaximumSensorID + 1];
-            prevZ = new int[sannotation.MaximumSensorID + 1];
-            acCounters = new int[sannotation.MaximumSensorID + 1];
 
-            //Create CSV Arrays
-            activityCountCSVs = new StreamWriter[sannotation.MaximumSensorID + 1];
-            samplingCSVs = new StreamWriter[sannotation.MaximumSensorID + 1];
-            averagedRaw = new StreamWriter[sannotation.MaximumSensorID + 1];
-            aucCSVs = new StreamWriter[sannotation.MaximumSensorID + 1];
-            vmagCSVs = new StreamWriter[sannotation.MaximumSensorID + 1];
-            rmCSVs = new StreamWriter[sannotation.MaximumSensorID + 1];
-
+            #region Setup master and other sensor files
             try
             {
                 masterCSV = new StreamWriter(aDataDirectory + "\\MITesSummaryData.csv");
@@ -1176,39 +1211,251 @@ namespace DataMerger
                 throw new Exception("Unable to open CSV: cannot open file " + e.Message);
             }
 
-            foreach (AXML.Category category in aannotation.Categories)
-                master_csv_header += "," + category.Name;
+            #endregion Setup master and other sensor files
 
-
-            foreach (SXML.Sensor sensor in sannotation.Sensors)
+            #region Load Annotation
+            AXML.Annotation aannotation = null;         
+            try
             {
-                int sensor_id = Convert.ToInt32(sensor.ID);
-                string location = sensor.Location.Replace(' ', '-');
-                if (sensor_id > 0) //exclude HR
-                {
-                    activityCountCSVs[sensor_id] = new StreamWriter(aDataDirectory + "\\MITes_" + sensor_id.ToString("00") + "_SAD_" + location + ".csv");
-                    activityCountCSVs[sensor_id].WriteLine(csv_line1);
-                    rmCSVs[sensor_id] = new StreamWriter(aDataDirectory + "\\MITes_" + sensor_id.ToString("00") + "_RM_" + location + ".csv");
-                    rmCSVs[sensor_id].WriteLine(csv_line1);
-                    aucCSVs[sensor_id] = new StreamWriter(aDataDirectory + "\\MITes_" + sensor_id.ToString("00") + "_AUC_" + location + ".csv");
-                    aucCSVs[sensor_id].WriteLine(csv_line1);
-                    vmagCSVs[sensor_id] = new StreamWriter(aDataDirectory + "\\MITes_" + sensor_id.ToString("00") + "_VMAG_" + location + ".csv");
-                    vmagCSVs[sensor_id].WriteLine(csv_line6);
-                    averagedRaw[sensor_id] = new StreamWriter(aDataDirectory + "\\MITes_" + sensor_id.ToString("00") + "_1s-RawMean_" + location + ".csv");
-                    averagedRaw[sensor_id].WriteLine(csv_line1);
-                    samplingCSVs[sensor_id] = new StreamWriter(aDataDirectory + "\\MITes_" + sensor_id.ToString("00") + "_SampleRate_" + location + ".csv");
-                    samplingCSVs[sensor_id].WriteLine(csv_line2);
-                    master_csv_header += ",MITes" + sensor_id.ToString("00") + "_SR," + "MITes" + sensor_id.ToString("00") + "_AVRaw_X," +
-                        "MITes" + sensor_id.ToString("00") + "_AVRaw_Y," + "MITes" + sensor_id.ToString("00") + "_AVRaw_Z," + "MITes" + sensor_id.ToString("00") + "_SAD_X," +
-                        "MITes" + sensor_id.ToString("00") + "_SAD_Y," + "MITes" + sensor_id.ToString("00") + "_SAD_Z," + "MITes" + sensor_id.ToString("00") + "_AUC_X," +
-                        "MITes" + sensor_id.ToString("00") + "_AUC_Y," + "MITes" + sensor_id.ToString("00") + "_AUC_Z," + "MITes" + sensor_id.ToString("00") + "_AUC_XYZ," +
-                        "MITes" + sensor_id.ToString("00") + "_RM_X," + "MITes" + sensor_id.ToString("00") + "_RM_Y," + "MITes" + sensor_id.ToString("00") + "_RM_Z," +
-                        "MITes" + sensor_id.ToString("00") + "_RM_SIZE," + "MITes" + sensor_id.ToString("00") + "_VMAG";
 
-                }
+                AXML.Reader reader = new AXML.Reader(masterDirectory, aDataDirectory, "AnnotationIntervals.xml");
+                aannotation = reader.parse();
+                aannotation.RemoveData(filter);
+                aannotation.DataDirectory = aDataDirectory;
+
+            }     
+            catch (Exception e)
+            {
+                throw new Exception("MITes Configuration Files: Parsing failed " + e.Message);
             }
 
-            master_csv_header += ",HR,";
+            foreach (AXML.Category category in aannotation.Categories)
+                master_csv_header += "," + category.Name;
+            #endregion Load Annotation
+
+            #region Setup MITes Data
+
+            MITesDecoder aMITesDecoder=null;
+            MITesHRAnalyzer aMITesHRAnalyzer = null;
+            MITesLoggerReader aMITesLoggerReader = null;
+            SXML.SensorAnnotation sannotation = null;
+
+            if (Directory.Exists(aDataDirectory + "\\data\\"))
+            {
+   
+                try
+                {
+                    SXML.Reader sreader = new SXML.Reader(masterDirectory, aDataDirectory);
+                    sannotation = sreader.parse(maxControllers);
+                }
+                catch (Exception e)
+                {
+                    throw new Exception("MITes Configuration Files: Parsing failed " + e.Message);
+                }
+
+
+                //create some counters for activity counts
+                averageX = new int[sannotation.MaximumSensorID + 1];
+                averageY = new int[sannotation.MaximumSensorID + 1];
+                averageZ = new int[sannotation.MaximumSensorID + 1];
+
+                averageRawX = new int[sannotation.MaximumSensorID + 1];
+                averageRawY = new int[sannotation.MaximumSensorID + 1];
+                averageRawZ = new int[sannotation.MaximumSensorID + 1];
+
+                prevX = new int[sannotation.MaximumSensorID + 1];
+                prevY = new int[sannotation.MaximumSensorID + 1];
+                prevZ = new int[sannotation.MaximumSensorID + 1];
+                acCounters = new int[sannotation.MaximumSensorID + 1];
+
+                //Create CSV Arrays
+                activityCountCSVs = new StreamWriter[sannotation.MaximumSensorID + 1];
+                samplingCSVs = new StreamWriter[sannotation.MaximumSensorID + 1];
+                averagedRaw = new StreamWriter[sannotation.MaximumSensorID + 1];
+                aucCSVs = new StreamWriter[sannotation.MaximumSensorID + 1];
+                vmagCSVs = new StreamWriter[sannotation.MaximumSensorID + 1];
+                rmCSVs = new StreamWriter[sannotation.MaximumSensorID + 1];
+
+
+
+
+                foreach (SXML.Sensor sensor in sannotation.Sensors)
+                {
+                    int sensor_id = Convert.ToInt32(sensor.ID);
+                    string location = sensor.Location.Replace(' ', '-');
+                    if (sensor_id > 0) //exclude HR
+                    {
+                        activityCountCSVs[sensor_id] = new StreamWriter(aDataDirectory + "\\MITes_" + sensor_id.ToString("00") + "_SAD_" + location + ".csv");
+                        activityCountCSVs[sensor_id].WriteLine(csv_line1);
+                        rmCSVs[sensor_id] = new StreamWriter(aDataDirectory + "\\MITes_" + sensor_id.ToString("00") + "_RM_" + location + ".csv");
+                        rmCSVs[sensor_id].WriteLine(csv_line1);
+                        aucCSVs[sensor_id] = new StreamWriter(aDataDirectory + "\\MITes_" + sensor_id.ToString("00") + "_AUC_" + location + ".csv");
+                        aucCSVs[sensor_id].WriteLine(csv_line1);
+                        vmagCSVs[sensor_id] = new StreamWriter(aDataDirectory + "\\MITes_" + sensor_id.ToString("00") + "_VMAG_" + location + ".csv");
+                        vmagCSVs[sensor_id].WriteLine(csv_line6);
+                        averagedRaw[sensor_id] = new StreamWriter(aDataDirectory + "\\MITes_" + sensor_id.ToString("00") + "_1s-RawMean_" + location + ".csv");
+                        averagedRaw[sensor_id].WriteLine(csv_line1);
+                        samplingCSVs[sensor_id] = new StreamWriter(aDataDirectory + "\\MITes_" + sensor_id.ToString("00") + "_SampleRate_" + location + ".csv");
+                        samplingCSVs[sensor_id].WriteLine(csv_line2);
+                        master_csv_header += ",MITes" + sensor_id.ToString("00") + "_SR," + "MITes" + sensor_id.ToString("00") + "_AVRaw_X," +
+                            "MITes" + sensor_id.ToString("00") + "_AVRaw_Y," + "MITes" + sensor_id.ToString("00") + "_AVRaw_Z," + "MITes" + sensor_id.ToString("00") + "_SAD_X," +
+                            "MITes" + sensor_id.ToString("00") + "_SAD_Y," + "MITes" + sensor_id.ToString("00") + "_SAD_Z," + "MITes" + sensor_id.ToString("00") + "_AUC_X," +
+                            "MITes" + sensor_id.ToString("00") + "_AUC_Y," + "MITes" + sensor_id.ToString("00") + "_AUC_Z," + "MITes" + sensor_id.ToString("00") + "_AUC_XYZ," +
+                            "MITes" + sensor_id.ToString("00") + "_RM_X," + "MITes" + sensor_id.ToString("00") + "_RM_Y," + "MITes" + sensor_id.ToString("00") + "_RM_Z," +
+                            "MITes" + sensor_id.ToString("00") + "_RM_SIZE," + "MITes" + sensor_id.ToString("00") + "_VMAG";
+
+                    }
+                }
+
+                master_csv_header += ",HR,";
+
+
+
+                //Initialize arrays based on number of sensors
+                rawData = new int[sannotation.MaximumSensorID + 1, 3, 500];
+                timeData = new long[sannotation.MaximumSensorID + 1, 500];
+                AUC = new int[sannotation.MaximumSensorID + 1, 3];
+                VMAG = new double[sannotation.MaximumSensorID + 1];
+                head = new int[sannotation.MaximumSensorID + 1];
+
+                RMX = new double[sannotation.MaximumSensorID + 1];
+                RMY = new double[sannotation.MaximumSensorID + 1];
+                RMZ = new double[sannotation.MaximumSensorID + 1];
+                RMSize = new int[sannotation.MaximumSensorID + 1];
+
+
+                for (int i = 0; (i < head.Length); i++)
+                {
+                    head[i] = 0;
+                    RMX[i] = 0;
+                    RMY[i] = 0;
+                    RMZ[i] = 0;
+                    RMSize[i] = 0;
+                    VMAG[i] = 0;
+                    for (int j = 0; (j < 3); j++)
+                        AUC[i, j] = 0;
+                }
+
+                aMITesDecoder = new MITesDecoder();
+                aMITesHRAnalyzer = new MITesHRAnalyzer(aMITesDecoder);
+                aMITesLoggerReader = new MITesLoggerReader(aMITesDecoder, aDataDirectory);
+            }
+
+            #endregion Setup MITes Data
+
+            int channel = 0, x = 0, y = 0, z = 0;
+            double unixtimestamp = 0.0;
+            int activityIndex = 0;
+            AXML.AnnotatedRecord annotatedRecord = ((AXML.AnnotatedRecord)aannotation.Data[activityIndex]);
+            string current_activity = "";
+            for (int j = 0; (j < annotatedRecord.Labels.Count); j++)
+            {
+                if (j == annotatedRecord.Labels.Count - 1)
+                    current_activity += "";
+                else
+                    current_activity += ",";
+            }
+
+
+
+            #region Setup Wockets Data
+            int[] lastDecodedIndex = null;
+            WocketsController wcontroller=null;
+            double wunixtimestamp = 0.0;
+            if (Directory.Exists(aDataDirectory + "\\wockets\\"))
+            {
+                wcontroller = new WocketsController("", "", "");
+                wcontroller.FromXML(aDataDirectory + "\\wockets\\SensorData.xml");
+                lastDecodedIndex = new int[wcontroller._Sensors.Count];
+
+                wactivityCountCSVs = new StreamWriter[wcontroller._Sensors.Count];
+                wsamplingCSVs = new StreamWriter[wcontroller._Sensors.Count];
+                waveragedRaw = new StreamWriter[wcontroller._Sensors.Count];
+                waucCSVs = new StreamWriter[wcontroller._Sensors.Count];
+                wvmagCSVs = new StreamWriter[wcontroller._Sensors.Count];
+                wrmCSVs = new StreamWriter[wcontroller._Sensors.Count];
+                for (int i = 0; (i < wcontroller._Sensors.Count); i++)
+                {
+                    int sensor_id = wcontroller._Sensors[i]._ID;
+                    string location = wcontroller._Sensors[i]._Location.Replace(' ', '-');
+                    lastDecodedIndex[i] = 0;
+                    wactivityCountCSVs[sensor_id] = new StreamWriter(aDataDirectory + "\\Wocket_" + sensor_id.ToString("00") + "_SAD_" + location + ".csv");
+                    wactivityCountCSVs[sensor_id].WriteLine(csv_line1);
+                    wrmCSVs[sensor_id] = new StreamWriter(aDataDirectory + "\\Wocket_" + sensor_id.ToString("00") + "_RM_" + location + ".csv");
+                    wrmCSVs[sensor_id].WriteLine(csv_line1);
+                    waucCSVs[sensor_id] = new StreamWriter(aDataDirectory + "\\Wocket_" + sensor_id.ToString("00") + "_AUC_" + location + ".csv");
+                    waucCSVs[sensor_id].WriteLine(csv_line1);
+                    wvmagCSVs[sensor_id] = new StreamWriter(aDataDirectory + "\\Wocket_" + sensor_id.ToString("00") + "_VMAG_" + location + ".csv");
+                    wvmagCSVs[sensor_id].WriteLine(csv_line6);
+                    waveragedRaw[sensor_id] = new StreamWriter(aDataDirectory + "\\Wocket_" + sensor_id.ToString("00") + "_1s-RawMean_" + location + ".csv");
+                    waveragedRaw[sensor_id].WriteLine(csv_line1);
+                    wsamplingCSVs[sensor_id] = new StreamWriter(aDataDirectory + "\\Wocket_" + sensor_id.ToString("00") + "_SampleRate_" + location + ".csv");
+                    wsamplingCSVs[sensor_id].WriteLine(csv_line2);
+                    master_csv_header += ",Wocket" + sensor_id.ToString("00") + "_SR," + "Wocket" + sensor_id.ToString("00") + "_AVRaw_X," +
+                        "Wocket" + sensor_id.ToString("00") + "_AVRaw_Y," + "Wocket" + sensor_id.ToString("00") + "_AVRaw_Z," + "Wocket" + sensor_id.ToString("00") + "_SAD_X," +
+                        "Wocket" + sensor_id.ToString("00") + "_SAD_Y," + "Wocket" + sensor_id.ToString("00") + "_SAD_Z," + "Wocket" + sensor_id.ToString("00") + "_AUC_X," +
+                        "Wocket" + sensor_id.ToString("00") + "_AUC_Y," + "Wocket" + sensor_id.ToString("00") + "_AUC_Z," + "Wocket" + sensor_id.ToString("00") + "_AUC_XYZ," +
+                        "Wocket" + sensor_id.ToString("00") + "_RM_X," + "Wocket" + sensor_id.ToString("00") + "_RM_Y," + "Wocket" + sensor_id.ToString("00") + "_RM_Z," +
+                        "Wocket" + sensor_id.ToString("00") + "_RM_SIZE," + "Wocket" + sensor_id.ToString("00") + "_VMAG";
+                }
+
+
+                //create some counters for activity counts
+                waverageX = new int[wcontroller._Sensors.Count];
+                waverageY = new int[wcontroller._Sensors.Count];
+                waverageZ = new int[wcontroller._Sensors.Count];
+
+                waverageRawX = new int[wcontroller._Sensors.Count];
+                waverageRawY = new int[wcontroller._Sensors.Count];
+                waverageRawZ = new int[wcontroller._Sensors.Count];
+
+                wprevX = new int[wcontroller._Sensors.Count];
+                wprevY = new int[wcontroller._Sensors.Count];
+                wprevZ = new int[wcontroller._Sensors.Count];
+                wacCounters = new int[wcontroller._Sensors.Count];
+
+                //Create CSV Arrays
+                wactivityCountCSVs = new StreamWriter[wcontroller._Sensors.Count];
+                wsamplingCSVs = new StreamWriter[wcontroller._Sensors.Count];
+                waveragedRaw = new StreamWriter[wcontroller._Sensors.Count];
+                waucCSVs = new StreamWriter[wcontroller._Sensors.Count];
+                wvmagCSVs = new StreamWriter[wcontroller._Sensors.Count];
+                wrmCSVs = new StreamWriter[wcontroller._Sensors.Count];
+
+
+
+
+                //Initialize arrays based on number of sensors
+                wrawData = new int[wcontroller._Sensors.Count, 3, 500];
+                wtimeData = new long[wcontroller._Sensors.Count, 500];
+                wAUC = new int[wcontroller._Sensors.Count, 3];
+                wVMAG = new double[wcontroller._Sensors.Count];
+                whead = new int[wcontroller._Sensors.Count];
+
+                wRMX = new double[wcontroller._Sensors.Count];
+                wRMY = new double[wcontroller._Sensors.Count];
+                wRMZ = new double[wcontroller._Sensors.Count];
+                wRMSize = new int[wcontroller._Sensors.Count];
+
+
+                for (int i = 0; (i < whead.Length); i++)
+                {
+                    whead[i] = 0;
+                    wRMX[i] = 0;
+                    wRMY[i] = 0;
+                    wRMZ[i] = 0;
+                    wRMSize[i] = 0;
+                    wVMAG[i] = 0;
+                    for (int j = 0; (j < 3); j++)
+                        wAUC[i, j] = 0;
+                }
+            }
+            #endregion Setup Wockets Data
+
+
+
+
+
             for (int i = 0; (i < actigraphData.Length); i++)
             {
                 master_csv_header += "Actigraph" + (i + 1) + ",";
@@ -1229,59 +1476,831 @@ namespace DataMerger
             if ((omronCSV != null) && (omronFound))
                 omronCSV.WriteLine(omron_csv_header);
 
-            int channel = 0, x = 0, y = 0, z = 0;
-            double unixtimestamp = 0.0;
-            int activityIndex = 0;
-            AXML.AnnotatedRecord annotatedRecord = ((AXML.AnnotatedRecord)aannotation.Data[activityIndex]);
-            string current_activity = "";
-            for (int j = 0; (j < annotatedRecord.Labels.Count); j++)
+
+
+
+
+
+
+
+
+            AXML.AnnotatedRecord startRecord = ((AXML.AnnotatedRecord)aannotation.Data[0]);
+            string[] startDate=startRecord.StartDate.Split('-');
+            AXML.AnnotatedRecord lastRecord = ((AXML.AnnotatedRecord)aannotation.Data[aannotation.Data.Count - 1]);
+            string[] endDate = lastRecord.EndDate.Split('-');
+
+                            int startyear=0;
+                int startmonth=0;
+                int startday=0;
+                int starthr=25;
+                int startmin=0;
+                int startsec=0;
+
+                int endyear=0;
+                int endmonth=0;
+                int endday=0;
+                int endhr=-1;
+                int endmin=59;
+                int endsec=59;
+            //Calculate the starttime and endtime for the data
+            if (aMITesDecoder != null)
             {
-                if (j == annotatedRecord.Labels.Count - 1)
-                    current_activity += "";
+                string rawDirectory = aDataDirectory + "\\data\\raw\\PLFormat";
+
+
+                if (Directory.Exists(rawDirectory) == false)
+                    return;
+
+                string[] subdirectories = Directory.GetDirectories(rawDirectory);
+                foreach (string subdirectory in subdirectories)
+                {
+                    string[] datetokens=subdirectory.Split('\\');
+                    datetokens=datetokens[datetokens.Length-1].Split('-');
+                    int year=Convert.ToInt32(datetokens[0]);
+                    int month=Convert.ToInt32(datetokens[1]);
+                    int day=Convert.ToInt32(datetokens[2]);
+
+                    if ((startyear==0)|| (year<startyear))
+                        startyear=year;
+                    if ((endyear==0)|| (year>endyear))
+                        endyear=year;
+
+                    if ((startmonth==0)|| (month<startmonth))
+                        startmonth=month;
+                    if ((endmonth==0)|| (month>endmonth))
+                        endmonth=month;
+
+                    if ((startday==0)|| (day<startday))
+                        startday=day;
+                    if ((endday==0)|| (day>endday))
+                        endday=day;
+
+
+                    for (int i = 0; i < 30; i++)
+                    {
+                        if (Directory.Exists(subdirectory + "\\" + i))
+                        {
+                            int hr = i;
+                            if (hr < starthr)
+                                starthr = hr;
+                            if (hr > endhr)
+                                endhr = hr;
+                        }
+                        
+                    }
+                }
+            }
+
+            DateTime startDateTime = new DateTime(startyear, startmonth, startday, starthr, startmin, startsec);
+            //startDateTime = startDateTime.AddMinutes(-15.0);
+            DateTime endDateTime = new DateTime(endyear, endmonth, endday, endhr, endmin, endsec);
+            //endDateTime = endDateTime.AddMinutes(15.0);
+            DateTime currentDateTime = startDateTime;
+
+
+            DateTime origin = new DateTime(1970, 1, 1, 0, 0, 0, 0);        ;
+            TimeSpan diff;
+            string timestamp ="";
+            double currentUnixTime = 0;
+
+            #region Initialize CSV lines
+            string master_csv_line = "";
+            string hr_csv_line = "";
+            string[] actigraph_csv_line = new string[actigraphData.Length];
+            for (int i = 0; (i < actigraphData.Length); i++)
+                actigraph_csv_line[i] = "";
+            string sensewear_csv_line = "";
+            string zephyr_csv_line = "";
+            string oxycon_csv_line = "";
+            string omron_csv_line = "";
+            #endregion Initialize CSV lines
+
+            while (((TimeSpan)endDateTime.Subtract(currentDateTime)).TotalSeconds >= 0)
+            {
+                string key = currentDateTime.Year + "-" + currentDateTime.Month + "-" + currentDateTime.Day + "-" + currentDateTime.Hour + "-" + currentDateTime.Minute + "-" + currentDateTime.Second;
+                diff = currentDateTime.Subtract(origin);
+                timestamp = diff.TotalMilliseconds + "," + currentDateTime.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ssK");
+                currentUnixTime = diff.TotalMilliseconds;
+
+                #region Setup prefix of CSV lines
+                master_csv_line = timestamp;
+                hr_csv_line = timestamp;
+                for (int i = 0; (i < actigraphData.Length); i++)
+                    actigraph_csv_line[i] = timestamp;
+                sensewear_csv_line = timestamp;
+                zephyr_csv_line = timestamp;
+                oxycon_csv_line = timestamp;
+                omron_csv_line = timestamp;
+                master_csv_line += "," + current_activity;
+                #endregion Setup prefix of CSV lines
+
+
+
+                if (CSVProgress == "")
+                    CSVProgress = "Synchronizing " +  currentDateTime.ToLongDateString() + " " +  currentDateTime.ToLongTimeString();
+
+
+
+                #region Load Activity Label
+                if (currentUnixTime > annotatedRecord.EndUnix)
+                {
+                    current_activity = "";
+                    for (int j = 0; (j < annotatedRecord.Labels.Count); j++)
+                    {
+                        if (j == annotatedRecord.Labels.Count - 1)
+                            current_activity += "";
+                        else
+                            current_activity += ",";
+                    }
+                    if (activityIndex < aannotation.Data.Count - 1)
+                    {
+                        activityIndex++;
+                        annotatedRecord = ((AXML.AnnotatedRecord)aannotation.Data[activityIndex]);
+                    }
+                }
+
+
+                if ((currentUnixTime >= annotatedRecord.StartUnix) &&
+                     (currentUnixTime <= annotatedRecord.EndUnix))
+                {
+
+                    current_activity = "";
+                    for (int j = 0; (j < annotatedRecord.Labels.Count); j++)
+                    {
+                        if (j == annotatedRecord.Labels.Count - 1)
+                            current_activity += ((AXML.Label)annotatedRecord.Labels[j]).Name;
+                        else
+                            current_activity += ((AXML.Label)annotatedRecord.Labels[j]).Name + ",";
+                    }
+
+
+
+                    current_activity = current_activity.Replace("none", "").Replace('-', '_').Replace(':', '_').Replace('%', '_').Replace('/', '_');
+                    current_activity = Regex.Replace(current_activity, "[_]+", "_");
+                    current_activity = Regex.Replace(current_activity, "^[_]+", "");
+                    current_activity = Regex.Replace(current_activity, "[_]+$", "");
+                }
+                #endregion Load Activity Label
+
+                //if there is MITes data
+                if (aMITesDecoder != null)
+                {
+
+                    #region Load MITes data if needed
+
+                    //always have at least 5 seconds worth of data for the MITes
+                    while (((unixtimestamp - currentUnixTime) <= MEAN_SIZE) && (aMITesLoggerReader.GetSensorData(10)))
+                    {
+                        channel = aMITesDecoder.GetSomeMITesData()[0].channel;
+
+                        if (channel == 0)
+                        {
+                            //Store raw heart rate
+                            int hr = aMITesHRAnalyzer.UpdateOffline();
+                            if (hr > 0)
+                            {
+                                rawData[channel, 0, head[channel]] = hr;
+                                timeData[channel, head[channel]] = (long)unixtimestamp;
+                                head[channel] = (head[channel] + 1) % 500;
+                            }
+                        }
+                        else
+                        {
+                            x = aMITesDecoder.GetSomeMITesData()[0].x;
+                            y = aMITesDecoder.GetSomeMITesData()[0].y;
+                            z = aMITesDecoder.GetSomeMITesData()[0].z;
+                            unixtimestamp = aMITesDecoder.GetSomeMITesData()[0].unixTimeStamp;
+                            rawData[channel, 0, head[channel]] = x;
+                            rawData[channel, 1, head[channel]] = y;
+                            rawData[channel, 2, head[channel]] = z;
+                            timeData[channel, head[channel]] = (long)unixtimestamp;
+                            head[channel] = (head[channel] + 1) % 500;
+                        }
+
+                    }
+
+                    #endregion Load MITes data if needed
+
+                    #region Calculate Statistics
+
+                    foreach (SXML.Sensor sensor in sannotation.Sensors)
+                    {
+                        channel = Convert.ToInt32(sensor.ID);
+                        if (channel == 0)
+                            continue;
+                        double runningMeanX = 0;
+                        double runningMeanY = 0;
+                        double runningMeanZ = 0;
+                        int numMeanPts = 0;
+                        int headPtr = head[channel] - 1;
+                        if (headPtr < 0)
+                            headPtr = 499;
+
+                        //compute running means
+
+
+                        while ((timeData[channel, headPtr] > 0) && ((currentUnixTime - timeData[channel, headPtr]) <= MEAN_SIZE) && (numMeanPts <= 499))
+                        {
+                            runningMeanX += rawData[channel, 0, headPtr];
+                            runningMeanY += rawData[channel, 1, headPtr];
+                            runningMeanZ += rawData[channel, 2, headPtr];
+                            numMeanPts++;
+                            headPtr--;
+                            if (headPtr < 0)
+                                headPtr = 499;
+                        }
+
+                        runningMeanX = runningMeanX / numMeanPts;
+                        runningMeanY = runningMeanY / numMeanPts;
+                        runningMeanZ = runningMeanZ / numMeanPts;
+                        RMX[channel] = runningMeanX;
+                        RMY[channel] = runningMeanY;
+                        RMZ[channel] = runningMeanZ;
+                        RMSize[channel] = numMeanPts;
+                        //RMCount[channel] = RMCount[channel] + 1;
+
+                        headPtr = head[channel] - 1;
+                        if (headPtr < 0)
+                            headPtr = 499;
+                        //compute values per second
+                        while ((timeData[channel, headPtr] > 0) && ((currentUnixTime - timeData[channel, headPtr]) <= 1000) && (numMeanPts <= 499))
+                        {
+
+                            //Calculate MITes Raw Values
+                            if ((channel != 0) && (channel <= sannotation.MaximumSensorID)) //if junk comes ignore it
+                            {
+                                if ((prevX[channel] > 0) && (prevY[channel] > 0) && (prevZ[channel] > 0) && (rawData[channel, 0, headPtr] > 0) && (rawData[channel, 1, headPtr] > 0) && (rawData[channel, 2, headPtr] > 0))
+                                {
+                                    averageX[channel] = averageX[channel] + Math.Abs(prevX[channel] - rawData[channel, 0, headPtr]);
+                                    averageRawX[channel] = averageRawX[channel] + rawData[channel, 0, headPtr];
+                                    averageY[channel] = averageY[channel] + Math.Abs(prevY[channel] - rawData[channel, 1, headPtr]);
+                                    averageRawY[channel] = averageRawY[channel] + rawData[channel, 1, headPtr];
+                                    averageZ[channel] = averageZ[channel] + Math.Abs(prevZ[channel] - rawData[channel, 2, headPtr]);
+                                    averageRawZ[channel] = averageRawZ[channel] + rawData[channel, 2, headPtr];
+                                    acCounters[channel] = acCounters[channel] + 1;
+                                }
+
+                                prevX[channel] = rawData[channel, 0, headPtr];
+                                prevY[channel] = rawData[channel, 1, headPtr];
+                                prevZ[channel] = rawData[channel, 2, headPtr];
+
+
+                                //current data item
+                                //headPtr = head[channel];
+                                int prevHead = headPtr - 1;
+                                if (prevHead < 0)
+                                    prevHead = 499;
+
+
+                                //trapezoid
+                                //double a2=rawData[channel, 0, headPtr];
+                                //double a1=rawData[channel, 0, prevHead];
+                                //a2 = a2 - runningMeanX;
+                                //a1 = a1 - runningMeanX;
+
+                                double t2 = timeData[channel, headPtr];
+                                double t1 = timeData[channel, prevHead];
+                                if ((t2 > 0) & (t1 > 0))
+                                {
+
+                                    AUC[channel, 0] = AUC[channel, 0] + (int)Math.Abs((rawData[channel, 0, headPtr] - runningMeanX));
+                                    AUC[channel, 1] = AUC[channel, 1] + (int)Math.Abs((rawData[channel, 1, headPtr] - runningMeanY));
+                                    AUC[channel, 2] = AUC[channel, 2] + (int)Math.Abs((rawData[channel, 2, headPtr] - runningMeanZ));
+                                    VMAG[channel] = VMAG[channel] + Math.Sqrt(Math.Pow((double)(rawData[channel, 0, headPtr] - runningMeanX), 2.0) + Math.Pow((double)(rawData[channel, 1, headPtr] - runningMeanY), 2.0) + Math.Pow((double)(rawData[channel, 2, headPtr] - runningMeanZ), 2.0));
+                                }
+
+                                headPtr--;
+                                if (headPtr < 0)
+                                    headPtr = 499;
+                            }
+                        }
+                    }
+
+                    #endregion Calculate Statistics
+
+                    #region Append MITes Statistics
+                    foreach (SXML.Sensor sensor in sannotation.Sensors)
+                    {
+                        csv_line1 = timestamp;
+                        csv_line2 = timestamp;
+                        csv_line3 = timestamp;
+                        csv_line4 = timestamp;
+                        csv_line5 = timestamp;
+                        csv_line6 = timestamp;
+
+                        int sensor_id = Convert.ToInt32(sensor.ID);
+
+
+                        if (sensor_id > 0) //No HR
+                        {
+                            if (acCounters[sensor_id] > 0)
+                            {
+                                csv_line2 += "," + acCounters[sensor_id];
+
+                                csv_line1 += "," + ((double)(averageX[sensor_id] / (double)acCounters[sensor_id])).ToString("00.00") + ",";
+                                csv_line1 += ((double)(averageY[sensor_id] / (double)acCounters[sensor_id])).ToString("00.00") + ",";
+                                csv_line1 += ((double)(averageZ[sensor_id] / (double)acCounters[sensor_id])).ToString("00.00");
+
+                                csv_line3 += "," + ((int)(averageRawX[sensor_id] / acCounters[sensor_id])) + ",";
+                                csv_line3 += ((int)(averageRawY[sensor_id] / acCounters[sensor_id])) + ",";
+                                csv_line3 += ((int)(averageRawZ[sensor_id] / acCounters[sensor_id]));
+
+                                csv_line4 += "," + ((double)RMX[sensor_id]).ToString("00.00") + ",";
+                                csv_line4 += ((double)RMY[sensor_id]).ToString("00.00") + ",";
+                                csv_line4 += ((double)RMZ[sensor_id]).ToString("00.00");
+
+                                csv_line5 += "," + ((double)AUC[sensor_id, 0]).ToString("00.00") + ",";
+                                csv_line5 += ((double)AUC[sensor_id, 1]).ToString("00.00") + ",";
+                                csv_line5 += ((double)AUC[sensor_id, 2]).ToString("00.00") + ",";
+                                csv_line5 += ((double)(AUC[sensor_id, 0] + AUC[sensor_id, 1] + AUC[sensor_id, 2])).ToString("00.00");
+
+                                csv_line6 += "," + ((double)(VMAG[sensor_id] / (double)acCounters[sensor_id])).ToString("00.00");
+
+                                master_csv_line += "," + acCounters[sensor_id];
+                                master_csv_line += "," + ((int)(averageRawX[sensor_id] / acCounters[sensor_id])) + ",";
+                                master_csv_line += ((int)(averageRawY[sensor_id] / acCounters[sensor_id])) + ",";
+                                master_csv_line += ((int)(averageRawZ[sensor_id] / acCounters[sensor_id]));
+                                master_csv_line += "," + ((double)(averageX[sensor_id] / (double)acCounters[sensor_id])).ToString("00.00") + ",";
+                                master_csv_line += ((double)(averageY[sensor_id] / (double)acCounters[sensor_id])).ToString("00.00") + ",";
+                                master_csv_line += ((double)(averageZ[sensor_id] / (double)acCounters[sensor_id])).ToString("00.00") + ",";
+
+                                master_csv_line += ((double)AUC[sensor_id, 0]).ToString("00.00") + ",";
+                                master_csv_line += ((double)AUC[sensor_id, 1]).ToString("00.00") + ",";
+                                master_csv_line += ((double)AUC[sensor_id, 2]).ToString("00.00") + ",";
+                                master_csv_line += ((double)(AUC[sensor_id, 0] + AUC[sensor_id, 1] + AUC[sensor_id, 2])).ToString("00.00") + ",";
+
+                                master_csv_line += ((double)RMX[sensor_id]).ToString("00.00") + ",";
+                                master_csv_line += ((double)RMY[sensor_id]).ToString("00.00") + ",";
+                                master_csv_line += ((double)RMZ[sensor_id]).ToString("00.00") + ",";
+                                master_csv_line += ((double)RMSize[sensor_id]).ToString("00.00") + ",";
+                                master_csv_line += ((double)(VMAG[sensor_id] / (double)acCounters[sensor_id])).ToString("00.00");
+
+
+                            }
+                            else
+                            {
+                                csv_line1 += ",,,,";
+                                csv_line3 += ",,,,";
+                                csv_line2 += ",0";
+                                csv_line4 += ",,,,";
+                                csv_line5 += ",,,,,";
+                                csv_line6 += ",";
+                                master_csv_line += ",0,,,,,,,,,,,,,,,";
+                            }
+
+                            //Store data in CSV files
+                            activityCountCSVs[sensor_id].WriteLine(csv_line1);
+                            samplingCSVs[sensor_id].WriteLine(csv_line2);
+                            averagedRaw[sensor_id].WriteLine(csv_line3);
+                            rmCSVs[sensor_id].WriteLine(csv_line4);
+                            aucCSVs[sensor_id].WriteLine(csv_line5);
+                            vmagCSVs[sensor_id].WriteLine(csv_line6);
+
+                        }
+
+                        averageX[sensor_id] = 0;
+                        averageY[sensor_id] = 0;
+                        averageZ[sensor_id] = 0;
+                        averageRawX[sensor_id] = 0;
+                        averageRawY[sensor_id] = 0;
+                        averageRawZ[sensor_id] = 0;
+                        //prevX[sensor_id] = 0;
+                        //prevY[sensor_id] = 0;
+                        //prevY[sensor_id] = 0;
+                        acCounters[sensor_id] = 0;
+                        RMX[sensor_id] = 0;
+                        RMY[sensor_id] = 0;
+                        RMZ[sensor_id] = 0;
+                        RMSize[sensor_id] = 0;
+                        VMAG[sensor_id] = 0;
+                        for (int j = 0; (j < 3); j++)
+                            AUC[sensor_id, j] = 0;
+                    }
+
+
+                    #region Write CSV line for MITes HR
+                    if (hrCount > 0)
+                    {
+                        hrCSV.WriteLine(hr_csv_line + "," + (int)(sumHR / hrCount));
+                        master_csv_line = master_csv_line + "," + (int)(sumHR / hrCount) + ",";
+                    }
+                    else
+                    {
+                        hrCSV.WriteLine(hr_csv_line + ",");
+                        master_csv_line = master_csv_line + ",,";
+                    }
+                    #endregion Write CSV line for MITes HR
+
+
+                    #endregion Append MITes Statistics
+
+                }
+
+
+                //if there is Wockets data
+                if ( wcontroller != null)
+                {
+
+                    #region Load Wockets data if needed
+                    for (int i = 0; (i < wcontroller._Sensors.Count); i++)
+                    {
+                     
+                        //always have at least 5 seconds worth of data for the MITes
+                        while (((wunixtimestamp - currentUnixTime) <= MEAN_SIZE) && (wcontroller._Sensors[i].Load()))
+                        {
+
+                            if (wcontroller._Sensors[i]._Decoder._Head == 0)
+                                lastDecodedIndex[i] = wcontroller._Sensors[i]._Decoder._Data.Length - 1;
+                            else
+                                lastDecodedIndex[i] = wcontroller._Sensors[i]._Decoder._Head - 1;
+
+                            Wockets.Data.Accelerometers.AccelerationData data = (Wockets.Data.Accelerometers.AccelerationData)wcontroller._Sensors[i]._Decoder._Data[lastDecodedIndex[i]];
+                            wrawData[wcontroller._Sensors[i]._ID, 0, head[wcontroller._Sensors[i]._ID]] = data.X;
+                            wrawData[wcontroller._Sensors[i]._ID, 1, head[wcontroller._Sensors[i]._ID]] = data.Y;
+                            wrawData[wcontroller._Sensors[i]._ID, 2, head[wcontroller._Sensors[i]._ID]] = data.Z;
+                            wtimeData[wcontroller._Sensors[i]._ID, head[wcontroller._Sensors[i]._ID]] = (long)data.UnixTimeStamp;
+                            whead[wcontroller._Sensors[i]._ID] = (head[wcontroller._Sensors[i]._ID] + 1) % 500;
+
+
+                        }
+                    }
+
+                    #endregion Load Wockets data if needed
+
+                    #region Calculate Statistics
+
+                    for (int i = 0; (i < wcontroller._Sensors.Count); i++)
+                    {
+                        double wrunningMeanX = 0;
+                        double wrunningMeanY = 0;
+                        double wrunningMeanZ = 0;
+                        int wnumMeanPts = 0;
+                  
+                        int wheadPtr = whead[wcontroller._Sensors[i]._ID] - 1;
+                        if (wheadPtr < 0)
+                            wheadPtr = 499;
+
+                        //compute running means
+
+
+                        while ((wtimeData[wcontroller._Sensors[i]._ID, wheadPtr] > 0) && ((currentUnixTime - wtimeData[wcontroller._Sensors[i]._ID, wheadPtr]) <= MEAN_SIZE) && (wnumMeanPts <= 499))
+                        {
+                            wrunningMeanX += wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr];
+                            wrunningMeanY += wrawData[wcontroller._Sensors[i]._ID, 1, wheadPtr];
+                            wrunningMeanZ += wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr];
+                            wnumMeanPts++;
+                            wheadPtr--;
+                            if (wheadPtr < 0)
+                                wheadPtr = 499;
+                        }
+
+                        wrunningMeanX = wrunningMeanX / wnumMeanPts;
+                        wrunningMeanY = wrunningMeanY / wnumMeanPts;
+                        wrunningMeanZ = wrunningMeanZ / wnumMeanPts;
+                        wRMX[wcontroller._Sensors[i]._ID] = wrunningMeanX;
+                        wRMY[wcontroller._Sensors[i]._ID] = wrunningMeanY;
+                        wRMZ[wcontroller._Sensors[i]._ID] = wrunningMeanZ;
+                        wRMSize[wcontroller._Sensors[i]._ID] = wnumMeanPts;
+                        //RMCount[wcontroller._Sensors[i]._ID] = RMCount[wcontroller._Sensors[i]._ID] + 1;
+
+                        wheadPtr = whead[wcontroller._Sensors[i]._ID] - 1;
+                        if (wheadPtr < 0)
+                            wheadPtr = 499;
+                        //compute values per second
+                        while ((wtimeData[wcontroller._Sensors[i]._ID, wheadPtr] > 0) && ((currentUnixTime - wtimeData[wcontroller._Sensors[i]._ID, wheadPtr]) <= 1000) && (wnumMeanPts <= 499))
+                        {
+
+                            //Calculate MITes Raw Values
+                            if ((wcontroller._Sensors[i]._ID != 0) && (wcontroller._Sensors[i]._ID <= sannotation.MaximumSensorID)) //if junk comes ignore it
+                            {
+                                if ((wprevX[wcontroller._Sensors[i]._ID] > 0) && (wprevY[wcontroller._Sensors[i]._ID] > 0) && (wprevZ[wcontroller._Sensors[i]._ID] > 0) && (wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr] > 0) && (wrawData[wcontroller._Sensors[i]._ID, 1, wheadPtr] > 0) && (wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr] > 0))
+                                {
+                                    waverageX[wcontroller._Sensors[i]._ID] = waverageX[wcontroller._Sensors[i]._ID] + Math.Abs(wprevX[wcontroller._Sensors[i]._ID] - wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr]);
+                                    waverageRawX[wcontroller._Sensors[i]._ID] = waverageRawX[wcontroller._Sensors[i]._ID] + wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr];
+                                    waverageY[wcontroller._Sensors[i]._ID] = waverageY[wcontroller._Sensors[i]._ID] + Math.Abs(wprevY[wcontroller._Sensors[i]._ID] - wrawData[wcontroller._Sensors[i]._ID, 1, wheadPtr]);
+                                    waverageRawY[wcontroller._Sensors[i]._ID] = waverageRawY[wcontroller._Sensors[i]._ID] + wrawData[wcontroller._Sensors[i]._ID, 1, wheadPtr];
+                                    waverageZ[wcontroller._Sensors[i]._ID] = waverageZ[wcontroller._Sensors[i]._ID] + Math.Abs(wprevZ[wcontroller._Sensors[i]._ID] - wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr]);
+                                    waverageRawZ[wcontroller._Sensors[i]._ID] = waverageRawZ[wcontroller._Sensors[i]._ID] + wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr];
+                                    wacCounters[wcontroller._Sensors[i]._ID] = wacCounters[wcontroller._Sensors[i]._ID] + 1;
+                                }
+
+                                wprevX[wcontroller._Sensors[i]._ID] = wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr];
+                                wprevY[wcontroller._Sensors[i]._ID] = wrawData[wcontroller._Sensors[i]._ID, 1, wheadPtr];
+                                wprevZ[wcontroller._Sensors[i]._ID] = wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr];
+
+
+                                //current data item
+                                //headPtr = head[wcontroller._Sensors[i]._ID];
+                                int wprevHead = wheadPtr - 1;
+                                if (wprevHead < 0)
+                                    wprevHead = 499;
+
+
+                                //trapezoid
+                                //double a2=rawData[wcontroller._Sensors[i]._ID, 0, headPtr];
+                                //double a1=rawData[wcontroller._Sensors[i]._ID, 0, prevHead];
+                                //a2 = a2 - runningMeanX;
+                                //a1 = a1 - runningMeanX;
+
+                                double wt2 = wtimeData[wcontroller._Sensors[i]._ID, wheadPtr];
+                                double wt1 = wtimeData[wcontroller._Sensors[i]._ID, wprevHead];
+                                if ((wt2 > 0) & (wt1 > 0))
+                                {
+
+                                    wAUC[wcontroller._Sensors[i]._ID, 0] = wAUC[wcontroller._Sensors[i]._ID, 0] + (int)Math.Abs((wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr] - wrunningMeanX));
+                                    wAUC[wcontroller._Sensors[i]._ID, 1] = wAUC[wcontroller._Sensors[i]._ID, 1] + (int)Math.Abs((wrawData[wcontroller._Sensors[i]._ID, 1, wheadPtr] - wrunningMeanY));
+                                    wAUC[wcontroller._Sensors[i]._ID, 2] = wAUC[wcontroller._Sensors[i]._ID, 2] + (int)Math.Abs((wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr] - wrunningMeanZ));
+                                    wVMAG[wcontroller._Sensors[i]._ID] = wVMAG[wcontroller._Sensors[i]._ID] + Math.Sqrt(Math.Pow((double)(wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr] - wrunningMeanX), 2.0) + Math.Pow((double)(wrawData[wcontroller._Sensors[i]._ID, 1, wheadPtr] - wrunningMeanY), 2.0) + Math.Pow((double)(wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr] - wrunningMeanZ), 2.0));
+                                }
+
+                                wheadPtr--;
+                                if (wheadPtr < 0)
+                                    wheadPtr = 499;
+                            }
+                        }
+                    }
+
+                    #endregion Calculate Statistics
+
+                    #region Append Wockets Statistics
+
+                    for (int i = 0; (i < wcontroller._Sensors.Count); i++)
+                    {
+                        int sensor_id = wcontroller._Sensors[i]._ID;
+                        csv_line1 = timestamp;
+                        csv_line2 = timestamp;
+                        csv_line3 = timestamp;
+                        csv_line4 = timestamp;
+                        csv_line5 = timestamp;
+                        csv_line6 = timestamp;
+
+                        if (acCounters[sensor_id] > 0)
+                        {
+                            csv_line2 += "," + acCounters[sensor_id];
+
+                            csv_line1 += "," + ((double)(averageX[sensor_id] / (double)acCounters[sensor_id])).ToString("00.00") + ",";
+                            csv_line1 += ((double)(averageY[sensor_id] / (double)acCounters[sensor_id])).ToString("00.00") + ",";
+                            csv_line1 += ((double)(averageZ[sensor_id] / (double)acCounters[sensor_id])).ToString("00.00");
+
+                            csv_line3 += "," + ((int)(averageRawX[sensor_id] / acCounters[sensor_id])) + ",";
+                            csv_line3 += ((int)(averageRawY[sensor_id] / acCounters[sensor_id])) + ",";
+                            csv_line3 += ((int)(averageRawZ[sensor_id] / acCounters[sensor_id]));
+
+                            csv_line4 += "," + ((double)RMX[sensor_id]).ToString("00.00") + ",";
+                            csv_line4 += ((double)RMY[sensor_id]).ToString("00.00") + ",";
+                            csv_line4 += ((double)RMZ[sensor_id]).ToString("00.00");
+
+                            csv_line5 += "," + ((double)AUC[sensor_id, 0]).ToString("00.00") + ",";
+                            csv_line5 += ((double)AUC[sensor_id, 1]).ToString("00.00") + ",";
+                            csv_line5 += ((double)AUC[sensor_id, 2]).ToString("00.00") + ",";
+                            csv_line5 += ((double)(AUC[sensor_id, 0] + AUC[sensor_id, 1] + AUC[sensor_id, 2])).ToString("00.00");
+
+                            csv_line6 += "," + ((double)(VMAG[sensor_id] / (double)acCounters[sensor_id])).ToString("00.00");
+
+                            master_csv_line += "," + acCounters[sensor_id];
+                            master_csv_line += "," + ((int)(averageRawX[sensor_id] / acCounters[sensor_id])) + ",";
+                            master_csv_line += ((int)(averageRawY[sensor_id] / acCounters[sensor_id])) + ",";
+                            master_csv_line += ((int)(averageRawZ[sensor_id] / acCounters[sensor_id]));
+                            master_csv_line += "," + ((double)(averageX[sensor_id] / (double)acCounters[sensor_id])).ToString("00.00") + ",";
+                            master_csv_line += ((double)(averageY[sensor_id] / (double)acCounters[sensor_id])).ToString("00.00") + ",";
+                            master_csv_line += ((double)(averageZ[sensor_id] / (double)acCounters[sensor_id])).ToString("00.00") + ",";
+
+                            master_csv_line += ((double)AUC[sensor_id, 0]).ToString("00.00") + ",";
+                            master_csv_line += ((double)AUC[sensor_id, 1]).ToString("00.00") + ",";
+                            master_csv_line += ((double)AUC[sensor_id, 2]).ToString("00.00") + ",";
+                            master_csv_line += ((double)(AUC[sensor_id, 0] + AUC[sensor_id, 1] + AUC[sensor_id, 2])).ToString("00.00") + ",";
+
+                            master_csv_line += ((double)RMX[sensor_id]).ToString("00.00") + ",";
+                            master_csv_line += ((double)RMY[sensor_id]).ToString("00.00") + ",";
+                            master_csv_line += ((double)RMZ[sensor_id]).ToString("00.00") + ",";
+                            master_csv_line += ((double)RMSize[sensor_id]).ToString("00.00") + ",";
+                            master_csv_line += ((double)(VMAG[sensor_id] / (double)acCounters[sensor_id])).ToString("00.00");
+
+
+                        }
+                        else
+                        {
+                            csv_line1 += ",,,,";
+                            csv_line3 += ",,,,";
+                            csv_line2 += ",0";
+                            csv_line4 += ",,,,";
+                            csv_line5 += ",,,,,";
+                            csv_line6 += ",";
+                            master_csv_line += ",0,,,,,,,,,,,,,,,";
+                        }
+
+                        //Store data in CSV files
+                        wactivityCountCSVs[sensor_id].WriteLine(csv_line1);
+                        wsamplingCSVs[sensor_id].WriteLine(csv_line2);
+                        waveragedRaw[sensor_id].WriteLine(csv_line3);
+                        wrmCSVs[sensor_id].WriteLine(csv_line4);
+                        waucCSVs[sensor_id].WriteLine(csv_line5);
+                        wvmagCSVs[sensor_id].WriteLine(csv_line6);
+
+
+
+                        waverageX[sensor_id] = 0;
+                        waverageY[sensor_id] = 0;
+                        waverageZ[sensor_id] = 0;
+                        waverageRawX[sensor_id] = 0;
+                        waverageRawY[sensor_id] = 0;
+                        waverageRawZ[sensor_id] = 0;
+                        //prevX[sensor_id] = 0;
+                        //prevY[sensor_id] = 0;
+                        //prevY[sensor_id] = 0;
+                        wacCounters[sensor_id] = 0;
+                        wRMX[sensor_id] = 0;
+                        wRMY[sensor_id] = 0;
+                        wRMZ[sensor_id] = 0;
+                        wRMSize[sensor_id] = 0;
+                        wVMAG[sensor_id] = 0;
+                        for (int j = 0; (j < 3); j++)
+                            wAUC[sensor_id, j] = 0;
+                    }
+
+
+
+                    #endregion Append Wockets Statistics
+
+                }
+                #region Write CSV lines for Actigraphs
+                for (int i = 0; (i < actigraphData.Length); i++)
+                {
+                    if (actigraphData[i].ContainsKey(key) == false)
+                    {
+                        actigraphCSV[i].WriteLine(actigraph_csv_line[i] + ",");
+                        master_csv_line = master_csv_line + ",";
+                    }
+                    else
+                    {
+
+                        actigraphCSV[i].WriteLine(actigraph_csv_line[i] + "," + actigraphData[i][key]);
+                        master_csv_line = master_csv_line + actigraphData[i][key] + ",";
+                    }
+                }
+                #endregion Write CSV lines for Actigraphs
+                #region Write CSV line for Sensewear
+                if ((sensewearFound) && (sensewearCSV != null))
+                {
+                    if (SSR.ContainsKey(key))
+                    {
+                        sensewearCSV.WriteLine(sensewear_csv_line + "," + (int)SSR[key] + "," + (double)STrans[key] +
+                            "," + (double)SLong[key] + "," + (double)SAcc[key]);
+                        master_csv_line = master_csv_line + (int)SSR[key] + "," + (double)STrans[key] +
+                            "," + (double)SLong[key] + "," + (double)SAcc[key];
+                    }
+                    else
+                    {
+                        sensewearCSV.WriteLine(sensewear_csv_line + ",,,,");
+                        master_csv_line = master_csv_line + ",,,";
+                    }
+                }
                 else
-                    current_activity += ",";
+                    master_csv_line = master_csv_line + ",,,";
+                #endregion Write CSV line for Sensewear
+
+                #region Write CSV line for Zephyr
+                if ((zephyrFound) && (zephyrCSV != null))
+                {
+                    if (zephyrData.ContainsKey(key))
+                    {
+                        zephyrCSV.WriteLine(zephyr_csv_line + "," + ((string)zephyrData[key]));
+                        master_csv_line = master_csv_line + "," + ((string)zephyrData[key]);
+                    }
+                    else
+                    {
+                        zephyrCSV.WriteLine(zephyr_csv_line + ",,,,,,,,,,,,,,,,");
+                        master_csv_line = master_csv_line + ",,,,,,,,,,,,,,,,";
+                    }
+                }
+                else
+                    master_csv_line = master_csv_line + ",,,,,,,,,,,,,,,,";
+                #endregion Write CSV line for Zephyr
+
+                #region Write CSV line for Oxycon
+                if ((oxyconFound) && (oxyconCSV != null))
+                {
+                    if (oxyconData.ContainsKey(key))
+                    {
+                        oxyconCSV.WriteLine(oxycon_csv_line + "," + ((string)oxyconData[key]));
+                        master_csv_line = master_csv_line + "," + ((string)oxyconData[key]);
+
+
+
+                    }
+                    else
+                    {
+                        oxyconCSV.WriteLine(zephyr_csv_line + ",,,,,,,,");
+                        master_csv_line = master_csv_line + ",,,,,,,,";
+                    }
+                }
+                else
+                    master_csv_line = master_csv_line + ",,,,,,,,";
+                #endregion Write CSV line for Oxycon
+
+                #region Write CSV line for Omron
+                if ((omronFound) && (omronCSV != null))
+                {
+                    if (omronData.Contains(key))
+                    {
+                        omronCSV.WriteLine(omron_csv_line + "," + ((int)omronData[key]));
+                        master_csv_line = master_csv_line + "," + ((int)omronData[key]);
+                    }
+                    else
+                    {
+                        omronCSV.WriteLine(omron_csv_line + ",");
+                        master_csv_line = master_csv_line + ",";
+                    }
+                }
+                else
+                    master_csv_line = master_csv_line + ",";
+                #endregion Write CSV line for Omron
+
+                #region Write master CSV line
+                masterCSV.WriteLine(master_csv_line);
+                #endregion Write master CSV line
+
+                //reinitialize variables
+                hrCount = 0;
+                sumHR = 0;
+
+
+                
+                
+                currentDateTime=currentDateTime.AddSeconds(1.0);
             }
 
 
-
-
-            //Initialize arrays based on number of sensors
-            rawData = new int[sannotation.MaximumSensorID + 1, 3, 500];
-            timeData = new long[sannotation.MaximumSensorID + 1, 500];
-            AUC = new int[sannotation.MaximumSensorID + 1, 3];
-            VMAG = new double[sannotation.MaximumSensorID + 1];
-            head = new int[sannotation.MaximumSensorID + 1];
-
-            RMX = new double[sannotation.MaximumSensorID + 1];
-            RMY = new double[sannotation.MaximumSensorID + 1];
-            RMZ = new double[sannotation.MaximumSensorID + 1];
-            RMSize = new int[sannotation.MaximumSensorID + 1];
-            RMCount = new int[sannotation.MaximumSensorID + 1];
-
-            for (int i = 0; (i < head.Length); i++)
+            #region Close all files
+            if (aMITesDecoder != null)
             {
-                head[i] = 0;
-                RMX[i] = 0;
-                RMY[i] = 0;
-                RMZ[i] = 0;
-                RMSize[i] = 0;
-                RMCount[i] = 0;
-                VMAG[i] = 0;
-                for (int j = 0; (j < 3); j++)
-                    AUC[i, j] = 0;
+                foreach (SXML.Sensor sensor in sannotation.Sensors)
+                {
+                    int sensor_id = Convert.ToInt32(sensor.ID);
+                    if (sensor_id > 0)
+                    {
+                        activityCountCSVs[sensor_id].Flush();
+                        samplingCSVs[sensor_id].Flush();
+                        averagedRaw[sensor_id].Flush();
+                        rmCSVs[sensor_id].Flush();
+                        aucCSVs[sensor_id].Flush();
+                        vmagCSVs[sensor_id].Flush();
+                        activityCountCSVs[sensor_id].Close();
+                        samplingCSVs[sensor_id].Close();
+                        averagedRaw[sensor_id].Close();
+                        rmCSVs[sensor_id].Close();
+                        aucCSVs[sensor_id].Close();
+                        vmagCSVs[sensor_id].Close();
+                    }
+                }
+
+                hrCSV.Flush();
+                hrCSV.Close();
             }
+
+            if (wcontroller != null)
+            {
+                for (int i = 0; (i < wcontroller._Sensors.Count); i++)
+                {
+                    int sensor_id = wcontroller._Sensors[i]._ID;
+                    wactivityCountCSVs[sensor_id].Flush();
+                    wsamplingCSVs[sensor_id].Flush();
+                    waveragedRaw[sensor_id].Flush();
+                    wrmCSVs[sensor_id].Flush();
+                    waucCSVs[sensor_id].Flush();
+                    wvmagCSVs[sensor_id].Flush();
+                    wactivityCountCSVs[sensor_id].Close();
+                    wsamplingCSVs[sensor_id].Close();
+                    waveragedRaw[sensor_id].Close();
+                    wrmCSVs[sensor_id].Close();
+                    waucCSVs[sensor_id].Close();
+                    wvmagCSVs[sensor_id].Close();
+                }
+            }
+
+            masterCSV.Flush();   
+            masterCSV.Close();
+            for (int i = 0; (i < actigraphCSV.Length); i++)
+                actigraphCSV[i].Close();
+            if (sensewearCSV != null)
+                sensewearCSV.Close();
+            if (zephyrCSV != null)
+                zephyrCSV.Close();
+            if (oxyconCSV != null)
+                oxyconCSV.Close();
+            if (omronCSV != null)
+                omronCSV.Close();
+
+            #endregion Close all files
 
             //Initialize MITes Decoders + configuration
+
+
+            /*
             MITesDecoder aMITesDecoder = new MITesDecoder();
             MITesHRAnalyzer aMITesHRAnalyzer = new MITesHRAnalyzer(aMITesDecoder);
             MITesLoggerReader aMITesLoggerReader = new MITesLoggerReader(aMITesDecoder, aDataDirectory);
-            //Extractor.Initialize(aMITesDecoder, aDataDirectory, aannotation, sannotation, configuration);
             bool isData = aMITesLoggerReader.GetSensorData(10);
-            //Decode MITes Data            
-            //TextWriter tww = new StreamWriter("sequences1.csv");
-            long refUnix = -1;
-            long first0TS = -1;
-            int lastChannel = -1;
             do
             {
 
@@ -1335,11 +2354,6 @@ namespace DataMerger
                      (lastTimeStamp <= annotatedRecord.EndUnix))
                 {
 
-
-
-
-
-
                     current_activity = "";
                     for (int j = 0; (j < annotatedRecord.Labels.Count); j++)
                     {
@@ -1348,8 +2362,6 @@ namespace DataMerger
                         else
                             current_activity += ((AXML.Label)annotatedRecord.Labels[j]).Name + ",";
                     }
-
-
 
                     current_activity = current_activity.Replace("none", "").Replace('-', '_').Replace(':', '_').Replace('%', '_').Replace('/', '_');
                     current_activity = Regex.Replace(current_activity, "[_]+", "_");
@@ -1790,7 +2802,8 @@ namespace DataMerger
                         for (int j = 0; (j < 3); j++)
                             AUC[sensor_id, j] = 0;
 
-                    }
+               
+     }
                     #endregion Write CSV line for MITes
 
                     #region Write CSV line for MITes HR
@@ -1915,40 +2928,9 @@ namespace DataMerger
             //tww.Flush();
             //tww.Close();
             //Completed Synchronizing - Flush and close files
-            foreach (SXML.Sensor sensor in sannotation.Sensors)
-            {
-                int sensor_id = Convert.ToInt32(sensor.ID);
-                if (sensor_id > 0)
-                {
-                    activityCountCSVs[sensor_id].Flush();
-                    samplingCSVs[sensor_id].Flush();
-                    averagedRaw[sensor_id].Flush();
-                    rmCSVs[sensor_id].Flush();
-                    aucCSVs[sensor_id].Flush();
-                    vmagCSVs[sensor_id].Flush();
-                    activityCountCSVs[sensor_id].Close();
-                    samplingCSVs[sensor_id].Close();
-                    averagedRaw[sensor_id].Close();
-                    rmCSVs[sensor_id].Close();
-                    aucCSVs[sensor_id].Close();
-                    vmagCSVs[sensor_id].Close();
-                }
-            }
 
-            masterCSV.Flush();
-            hrCSV.Flush();
-            masterCSV.Close();
-            hrCSV.Close();
-            for (int i = 0; (i < actigraphCSV.Length); i++)
-                actigraphCSV[i].Close();
-            if (sensewearCSV != null)
-                sensewearCSV.Close();
-            if (zephyrCSV != null)
-                zephyrCSV.Close();
-            if (oxyconCSV != null)
-                oxyconCSV.Close();
-            if (omronCSV != null)
-                omronCSV.Close();
+          */
+
         }
 
 
@@ -1961,7 +2943,7 @@ namespace DataMerger
 
 
 
-
+        
 
 
     }
