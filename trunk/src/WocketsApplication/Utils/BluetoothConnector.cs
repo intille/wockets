@@ -90,7 +90,7 @@ namespace WocketsApplication.Utils
                 Thread.Sleep(500);
               
             }
-            Cleanup();
+            //Cleanup();
             
         }
 

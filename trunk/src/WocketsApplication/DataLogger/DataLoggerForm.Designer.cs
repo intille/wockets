@@ -482,7 +482,7 @@ namespace WocketsApplication.DataLogger
             for (int i = 0; i < this.wocketsController._Sensors.Count; i++)
             {
                 cur = new Label();
-                cur.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular);
+                cur.Font = new System.Drawing.Font("Tahoma", 10F, System.Drawing.FontStyle.Regular);
                 cur.Text = "Sensor "+this.wocketsController._Sensors[i]._ID+": ?, ?, ?";
                 cur.Location = new Point(16, 66 + i * 30);
                 cur.Size = new Size(500, 40);
