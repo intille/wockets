@@ -373,6 +373,7 @@ namespace Wockets.Receivers
         //reading functions that the socket is dead and the stream should throw
         //an exception
         private bool socketDead = false;
+        private bool timeOut = false;
         #endregion
 
         #region Widcomm_Stack_variables
@@ -610,8 +611,10 @@ namespace Wockets.Receivers
                         catch (Exception e)
                         {                          
                             socketDead = true;
+                            if (e.Message.Equals("socket timed out")) this.timeOut = true;
+                            else this.timeOut = false;
                             Dispose();
-                            throw new Exception("socket is disconnected");
+                            throw new Exception(e.Message);
                         }
                         
                       
@@ -807,7 +810,8 @@ namespace Wockets.Receivers
         public int Read(byte[] destination, int offset, int length)
         {
             if (disposed)
-                throw new ObjectDisposedException("BluetoothStream");
+                if (this.timeOut)throw new ObjectDisposedException("timed out");
+                else throw new ObjectDisposedException("disconnected");
 
 
             if (usingWidcomm)
@@ -819,7 +823,8 @@ namespace Wockets.Receivers
                 if (socketDead)
                 {
                     Dispose();
-                    throw new Exception("socket is disconnected");
+                    if (this.timeOut) throw new Exception("timed out");
+                    else throw new Exception("disconnected");
                 }
 
                 if (tail == head)
