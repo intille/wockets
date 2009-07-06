@@ -21,10 +21,10 @@ using InTheHand.Net.Ports;
 
 namespace Wockets.Receivers
 {
-    public sealed class RFCOMMReceiver:SerialReceiver,Radio_CMD
+    public sealed class RFCOMMReceiver : SerialReceiver, Radio_CMD
     {
         #region Serialization Constants
-        private const string RFCOMM_TYPE = "RFCOMM";      
+        private const string RFCOMM_TYPE = "RFCOMM";
         private const string MACADDRESS_ATTRIBUTE = "MacAddress";
         private const string PIN_ATTRIBUTE = "PIN";
         private const string TSNIFF_ATTRIBUTE = "TSniff";
@@ -41,7 +41,7 @@ namespace Wockets.Receivers
 #if (PocketPC)
         private BluetoothStream bluetoothStream;
 #endif
-        private const int MAC_SIZE = 6;        
+        private const int MAC_SIZE = 6;
         private string address;
         private byte[] address_bytes;
         private string pin;
@@ -50,7 +50,7 @@ namespace Wockets.Receivers
 
         public RFCOMMReceiver()
         {
-            this.type = ReceiverTypes.RFCOMM;            
+            this.type = ReceiverTypes.RFCOMM;
         }
         /*
         public RFCOMMReceiver(string address,string pin)
@@ -123,7 +123,7 @@ namespace Wockets.Receivers
             }
         }
 
-        #if (PocketPC)
+#if (PocketPC)
         public ArrayList BatchTimestamps
         {
             get
@@ -136,6 +136,18 @@ namespace Wockets.Receivers
             }
         }
 
+
+        public double _LastTimestamps
+        {
+            get
+            {
+                return this.bluetoothStream.LastTimestamp;
+            }
+            set
+            {
+                this.bluetoothStream.LastTimestamp = value;
+            }
+        }
         public byte[] ReceiverBuffer
         {
             get
@@ -188,8 +200,8 @@ namespace Wockets.Receivers
 #endif
         public override int Read()
         {
-                   #if (PocketPC)
-           return  this.bluetoothStream.Read(this._Buffer, 0, this._Buffer.Length);
+#if (PocketPC)
+            return this.bluetoothStream.Read(this._Buffer, 0, this._Buffer.Length);
 #else
             return 0;
 #endif
@@ -197,9 +209,9 @@ namespace Wockets.Receivers
 
         public override void Write(byte[] data, int length)
         {
-            #if (PocketPC)
+#if (PocketPC)
             this.bluetoothStream.Write(data, 0, length);
-            #endif
+#endif
         }
         public override bool Dispose()
         {
@@ -217,13 +229,13 @@ namespace Wockets.Receivers
         }
 
         #region Radio Commands
-                  #if (PocketPC)
+#if (PocketPC)
         private void EnterCMD()
         {
             byte[] cmd = new byte[3];
             for (int i = 0; (i < 3); i++)
                 cmd[i] = (byte)36;
-            this.bluetoothStream.Write(cmd,0,3);                   
+            this.bluetoothStream.Write(cmd, 0, 3);
         }
 
         private void ExitCMD()
@@ -257,7 +269,7 @@ namespace Wockets.Receivers
 
             set
             {
-                #if (PocketPC)
+#if (PocketPC)
                 if (value != this.sniffMode)
                 {
                     if (value)
@@ -305,10 +317,10 @@ namespace Wockets.Receivers
         #region Serialization Methods
         public override string ToXML()
         {
-            string xml = "<"+RFCOMMReceiver.RECEIVER_ELEMENT+" ";
+            string xml = "<" + RFCOMMReceiver.RECEIVER_ELEMENT + " ";
             xml += RFCOMMReceiver.ID_ATTRIBUTE + "=\"" + this._ID + "\" ";
-            xml += RFCOMMReceiver.TYPE_ATTRIBUTE+"=\"" + RFCOMMReceiver.RFCOMM_TYPE + "\" ";
-            xml += RFCOMMReceiver.MACADDRESS_ATTRIBUTE + "=\""+this.address+"\" ";
+            xml += RFCOMMReceiver.TYPE_ATTRIBUTE + "=\"" + RFCOMMReceiver.RFCOMM_TYPE + "\" ";
+            xml += RFCOMMReceiver.MACADDRESS_ATTRIBUTE + "=\"" + this.address + "\" ";
             xml += RFCOMMReceiver.PIN_ATTRIBUTE + "=\"" + this.pin + "\" ";
             xml += RFCOMMReceiver.TSNIFF_ATTRIBUTE + "=\"" + this.sniffTime + "\" ";
             xml += RFCOMMReceiver.PORT_NUMBER_ATTRIBUTE + "=\"" + this._PortNumber + "\" ";
@@ -332,7 +344,7 @@ namespace Wockets.Receivers
                 {
 
                     if ((xAttribute.Name == RFCOMMReceiver.TYPE_ATTRIBUTE) && (xAttribute.Value != RFCOMMReceiver.RFCOMM_TYPE))
-                        throw new Exception("XML Parsing error - RFCOMM receiver parsing a receiver of a different type " + xAttribute.Value);  
+                        throw new Exception("XML Parsing error - RFCOMM receiver parsing a receiver of a different type " + xAttribute.Value);
                     else if (xAttribute.Name == RFCOMMReceiver.MACADDRESS_ATTRIBUTE)
                     {
                         this.address = xAttribute.Value;
@@ -365,7 +377,7 @@ namespace Wockets.Receivers
                     else if (xAttribute.Name == RFCOMMReceiver.BUFFERSIZE_ATTRIBUTE)
                         this._Buffer = new byte[Convert.ToInt32(xAttribute.Value)];
                     else if (xAttribute.Name == RFCOMMReceiver.MAX_SR_ATTRIBUTE)
-                        this._MaximumSamplingRate= Convert.ToInt32(xAttribute.Value);
+                        this._MaximumSamplingRate = Convert.ToInt32(xAttribute.Value);
                     else if (xAttribute.Name == RFCOMMReceiver.ID_ATTRIBUTE)
                         this._ID = Convert.ToInt32(xAttribute.Value);
 
@@ -425,13 +437,13 @@ namespace Wockets.Receivers
         /// Synchronization Barrier for Fairness
         /// </summary>
 
-        private static Barrier barrier=null;
+        private static Barrier barrier = null;
         static BluetoothStream()
         {
             usingWidcomm = BluetoothRadio.PrimaryRadio == null;
             lockObject = new object();
             //if (barrier == null)
-              //  barrier = new Barrier(0);
+            //  barrier = new Barrier(0);
         }
 
         private BluetoothStream()
@@ -452,7 +464,7 @@ namespace Wockets.Receivers
         NetworkStream n;
         public static void Read_Callback(IAsyncResult ar)
         {
-             
+
             //BluetoothStream so = ( BluetoothStream)ar.AsyncState;
             //so.bytesReceived= so.btSocket.EndReceive(ar);
             //so.receiving = false;
@@ -542,6 +554,18 @@ namespace Wockets.Receivers
                 this.singleReadBuffer = value;
             }
         }
+        private double lastTimestamp=0;
+        public double LastTimestamp
+        {
+            get
+            {
+                return this.lastTimestamp;
+            }
+            set
+            {
+                this.lastTimestamp = value;
+            }
+        }
         private void readingFunction()
         {
             //double prevTime = 0;
@@ -559,7 +583,7 @@ namespace Wockets.Receivers
             batteryByte[0] = 0xA0;
 
 
-            n= btClient.GetStream();
+            n = btClient.GetStream();
             //localBuffer = new byte[DEFAULT_BUFFER_SIZE];
             singleReadBuffer = new byte[DEFAULT_BUFFER_SIZE];
 
@@ -593,15 +617,15 @@ namespace Wockets.Receivers
                         try
                         {
 
-                            
+
                             if (sendTimer > 200)
-                            {        
-                                
-                                if (btSocket.Send(sendByte,1, SocketFlags.None)<=0)
-                                    throw new Exception("send: socket timed out");  
+                            {
+
+                                if (btSocket.Send(sendByte, 1, SocketFlags.None) <= 0)
+                                    throw new Exception("send: socket timed out");
                                 sendTimer = 0;
                                 Thread.Sleep(50);
-                  
+
                             }
                             sendTimer++;
 
@@ -620,6 +644,7 @@ namespace Wockets.Receivers
                             int availableBytes = btSocket.Available;
                             if (availableBytes > 0)
                             {
+                                this.lastTimestamp = WocketsTimer.GetUnixTime();
                                 bytesReceived = 0;
                                 //if we will pass the end of buffer receive till the end then receive the rest
                                 if ((tail + availableBytes) > singleReadBuffer.Length)
@@ -631,36 +656,36 @@ namespace Wockets.Receivers
                                 bytesReceived += btSocket.Receive(singleReadBuffer, tail, availableBytes, SocketFlags.None);
                                 //batchTimestamps.Add(currentTime);
                                 //batchBytes.Add(bytesReceived);
-                                tail=(tail+bytesReceived) % DEFAULT_BUFFER_SIZE;
+                                tail = (tail + bytesReceived) % DEFAULT_BUFFER_SIZE;
                             }
 
-                           Thread.Sleep(30);                            
+                            Thread.Sleep(30);
 
-                            if (bytesReceived > 0)                                                            
-                                disconnectionCounter=0;                            
+                            if (bytesReceived > 0)
+                                disconnectionCounter = 0;
                             else
                             {
                                 disconnectionCounter++;
-                                if (disconnectionCounter> MAX_DISCONNECTION_COUNTER)                                            
-                                    throw new Exception("socket timed out");                                                                    
+                                if (disconnectionCounter > MAX_DISCONNECTION_COUNTER)
+                                    throw new Exception("socket timed out");
                             }
 
-                            
+
                         }
                         catch (Exception e)
-                        {                          
+                        {
                             socketDead = true;
                             if (e.Message.Equals("socket timed out")) this.timeOut = true;
                             else this.timeOut = false;
                             Dispose();
                             throw new Exception(e.Message);
                         }
-                        
-                      
+
+
                     }
                     catch (Exception e)
                     {
-                        
+
                         return;
                     }
 
@@ -675,8 +700,8 @@ namespace Wockets.Receivers
         // Bluetooth Parameters
         private static InTheHand.Net.BluetoothAddress blt_address;
         private static BluetoothClient blt;
-        private static BluetoothEndPoint blt_endPoint;  
-        private static int prevPort=1;
+        private static BluetoothEndPoint blt_endPoint;
+        private static int prevPort = 1;
         public static string prepareCOMport(byte[] addr, string pin)
         {
             if (!usingWidcomm)
@@ -726,11 +751,11 @@ namespace Wockets.Receivers
                 else
                     throw new Exception("Got a null pointer from the WIDCOMM code");
             }
-            
+
         }
 
 
- 
+
         /// <summary>
         /// Opens a Bluetooth connection with the specified address and returns
         /// a BluetoothStream object which can be used to communicate over that
@@ -745,7 +770,7 @@ namespace Wockets.Receivers
         public static BluetoothStream OpenConnection(byte[] addr, string pin)
         {
             BluetoothStream newStream = new BluetoothStream();
-          
+
             try
             {
 
@@ -762,15 +787,15 @@ namespace Wockets.Receivers
 
                     //now open the port
                     newStream.comPort = new SerialPort(newStream.comPortName);
-                
+
                     newStream.comPort.Open();
                 }
                 else
                 {
 
                     if (newStream.readingThread != null)
-                        newStream.readingThread.Abort();                    
-                    newStream.btClient = new BluetoothClient();                   
+                        newStream.readingThread.Abort();
+                    newStream.btClient = new BluetoothClient();
                     byte[] reverseAddr = new byte[addr.Length];
                     for (int ii = 0; ii < addr.Length; ii++)
                     {
@@ -781,31 +806,31 @@ namespace Wockets.Receivers
                     newStream.localBuffer = new byte[DEFAULT_BUFFER_SIZE];
                     newStream.singleReadBuffer = new byte[DEFAULT_BUFFER_SIZE];
                     //lock (lockObject)
-                   // {
-                        BluetoothRadio.PrimaryRadio.Mode = RadioMode.Connectable;
-                        BluetoothAddress bt_addr = new BluetoothAddress(reverseAddr);
-                        if (pin != null)
-                            BluetoothSecurity.SetPin(bt_addr, pin);
+                    // {
+                    BluetoothRadio.PrimaryRadio.Mode = RadioMode.Connectable;
+                    BluetoothAddress bt_addr = new BluetoothAddress(reverseAddr);
+                    if (pin != null)
+                        BluetoothSecurity.SetPin(bt_addr, pin);
 
-                       
-                        newStream.btClient.Connect(bt_addr, BluetoothService.SerialPort);                        
-                        newStream.btSocket = newStream.btClient.Client;                      
-                        newStream.btSocket.Blocking = true;
-                                                               
+
+                    newStream.btClient.Connect(bt_addr, BluetoothService.SerialPort);
+                    newStream.btSocket = newStream.btClient.Client;
+                    newStream.btSocket.Blocking = true;
+
                     //}
-                     
-  
+
+
                 }
 
-               
+
                 newStream.readingThread = new Thread(new ThreadStart(newStream.readingFunction));
                 //newStream.readingThread.Priority = ThreadPriority.Highest;
                 newStream.readingThread.Start();
-               /* lock (lockObject)
-                {
-                    if (barrier != null)                    
-                        barrier.NumSynchronizedThreads = barrier.NumSynchronizedThreads + 1;                    
-                }*/
+                /* lock (lockObject)
+                 {
+                     if (barrier != null)                    
+                         barrier.NumSynchronizedThreads = barrier.NumSynchronizedThreads + 1;                    
+                 }*/
 
             }
             catch (Exception e)
@@ -817,11 +842,11 @@ namespace Wockets.Receivers
         }
 
 
-   
+
         public int Read(byte[] destination, int offset, int length)
         {
             if (disposed)
-                if (this.timeOut)throw new ObjectDisposedException("timed out");
+                if (this.timeOut) throw new ObjectDisposedException("timed out");
                 else throw new ObjectDisposedException("disconnected");
 
 
@@ -887,7 +912,7 @@ namespace Wockets.Receivers
             //n.Close();
             Dispose();
             //ttw.Flush();
-           // ttw.Close();
+            // ttw.Close();
         }
 
         private static bool isNewEnough(DateTime timestamp)
@@ -904,7 +929,7 @@ namespace Wockets.Receivers
 
         //[DllImport("coredll.dll", EntryPoint = "CeGetThreadPriority", SetLastError = true)]
         //public static extern int CeGetThreadPriority(IntPtr hThread); 
-     
+
 
         [DllImport("WidcommWrapper.dll", CharSet = CharSet.Auto, EntryPoint = "?prepareCOMport@@YAPA_WQAE@Z")]
         private static extern IntPtr prepareCOMportWidcomm(byte[] addr);
@@ -938,20 +963,20 @@ namespace Wockets.Receivers
             }
             else
             {
-                               
 
-                n.Close();               
-                btSocket.Close();                
+
+                n.Close();
+                btSocket.Close();
                 btClient.Close();
-               
+
                 //ms_stream = null;
                 btSocket = null;
                 btClient = null;
                 n = null;
-              
-                
+
+
                 //BluetoothRadio.PrimaryRadio.Mode = RadioMode.Connectable;
-                
+
             }
             //readingThread.Abort();
         }
