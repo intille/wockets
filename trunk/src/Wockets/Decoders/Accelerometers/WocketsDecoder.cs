@@ -20,6 +20,7 @@ namespace Wockets.Decoders.Accelerometers
         private bool headerSeen;
         private int bytesToRead = 0;
         private SensorDataType packetType;
+        private double lastTimestamp;
 
         public WocketsDecoder()
             : base(BUFFER_SIZE,WocketsAccelerationData.NUM_RAW_BYTES)
@@ -32,11 +33,13 @@ namespace Wockets.Decoders.Accelerometers
         }
 
 
-        public override int Decode(int sourceSensor, byte[] data, int head, int tail)
+        public override int Decode(int sourceSensor, byte[] data, int head, int tail,double samplespacing,double lasttimestamp)
         {
 
             int rawDataIndex = head;
             int numDecodedPackets = 0;
+            int bufferHead = this.head;
+
 
             while (rawDataIndex !=tail)
             {
@@ -69,7 +72,7 @@ namespace Wockets.Decoders.Accelerometers
                     if (packetType == SensorDataType.ACCEL)
                     {
 
-                        WocketsAccelerationData datum = ((WocketsAccelerationData)this._Data[this.head]);
+                        WocketsAccelerationData datum = ((WocketsAccelerationData)this._Data[bufferHead]);
                         datum.Reset();
                         //copy raw bytes
                         for (int i = 0; (i < bytesToRead); i++)
@@ -84,10 +87,10 @@ namespace Wockets.Decoders.Accelerometers
                         datum.UnixTimeStamp = WocketsTimer.GetUnixTime();
 
                         //if (IsValid(datum))
-                        if (this.head >= (BUFFER_SIZE - 1))
-                            this.head = 0;
+                        if (bufferHead >= (BUFFER_SIZE - 1))
+                            bufferHead = 0;
                         else
-                            this.head++;
+                            bufferHead++;
                         numDecodedPackets++;
 
                         this.packetPosition = 0;
@@ -107,8 +110,30 @@ namespace Wockets.Decoders.Accelerometers
 
             }
 
+            //Fix timestamps
+ 
+            double currentTimestamp = lasttimestamp - numDecodedPackets * samplespacing;
+            
+            if (currentTimestamp < this.lastTimestamp) //no problem
+            {
+                samplespacing = (lasttimestamp - this.lastTimestamp) / numDecodedPackets;
+                currentTimestamp = samplespacing + this.lastTimestamp;
+            }
+            int currentHead = this.head;
+            for (int i = 0; (i < numDecodedPackets); i++)
+            {
+                ((WocketsAccelerationData)this._Data[currentHead]).UnixTimeStamp = currentTimestamp;
+                currentTimestamp += samplespacing;
 
+                if (currentHead >= (BUFFER_SIZE - 1))
+                    currentHead = 0;
+                else
+                    currentHead++;
+            }
 
+            this.lastTimestamp = currentTimestamp;
+    
+            this.head = bufferHead;
             //this._Size = decodedDataIndex;
             return numDecodedPackets;
         }
