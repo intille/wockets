@@ -31,7 +31,87 @@ namespace Wockets.Decoders.Accelerometers
             this.type = DecoderTypes.Wockets;
         }
 
- 
+
+        public override int Decode(int sourceSensor, byte[] data, int head, int tail)
+        {
+
+            int rawDataIndex = head;
+            int numDecodedPackets = 0;
+
+            while (rawDataIndex !=tail)
+            {
+                if ((data[rawDataIndex] & 0x80) != 0) //grab the next 6 bytes
+                {
+                    this.packetPosition = 0;
+                    this.headerSeen = true;
+                    int headerByte = ((byte)(((byte)data[rawDataIndex]) << 1)) >> 6;
+                    if (headerByte == 0)
+                    {
+                        bytesToRead = WocketsAccelerationData.NUM_RAW_BYTES;
+                        packetType = SensorDataType.ACCEL;
+                    }
+                    else if (headerByte == 2)
+                    {
+                        bytesToRead = 3;
+                        packetType = SensorDataType.BATTERYLEVEL;
+                    }
+                }
+
+                if ((this.headerSeen == true) && (this.packetPosition < bytesToRead))
+                    this.packet[this.packetPosition] = data[rawDataIndex];
+
+                this.packetPosition++;
+                rawDataIndex=(rawDataIndex+1)%data.Length;
+
+
+                if ((this.packetPosition == bytesToRead)) //a full packet was received
+                {
+                    if (packetType == SensorDataType.ACCEL)
+                    {
+
+                        WocketsAccelerationData datum = ((WocketsAccelerationData)this._Data[this.head]);
+                        datum.Reset();
+                        //copy raw bytes
+                        for (int i = 0; (i < bytesToRead); i++)
+                            datum.RawBytes[i] = this.packet[i];
+                        datum.Type = SensorDataType.ACCEL;
+                        //datum.RawBytes[0] = (byte)(((datum.RawBytes[0])&0xc7)|(sourceSensor<<3));
+                        datum.SensorID = (byte)sourceSensor;
+                        datum.X = (short)((((short)(this.packet[0] & 0x03)) << 8) | (((short)(this.packet[1] & 0x7f)) << 1) | (((short)(this.packet[2] & 0x40)) >> 6));
+                        datum.Y = (short)((((short)(this.packet[2] & 0x3f)) << 4) | (((short)(this.packet[3] & 0x78)) >> 3));
+                        datum.Z = (short)((((short)(this.packet[3] & 0x07)) << 7) | ((short)(this.packet[4] & 0x7f)));
+                        //Set time stamps
+                        datum.UnixTimeStamp = WocketsTimer.GetUnixTime();
+
+                        //if (IsValid(datum))
+                        if (this.head >= (BUFFER_SIZE - 1))
+                            this.head = 0;
+                        else
+                            this.head++;
+                        numDecodedPackets++;
+
+                        this.packetPosition = 0;
+                        this.headerSeen = false;
+                    }
+                    else if (packetType == SensorDataType.BATTERYLEVEL)
+                    {
+
+                        BatteryResponse br = new BatteryResponse();
+                        for (int i = 0; (i < bytesToRead); i++)
+                            br.RawBytes[i] = this.packet[i];
+                        br.BatteryLevel = (((int)this.packet[1]) << 3) | ((this.packet[2] >> 4) & 0x07);
+                        this._Response[0] = br;
+
+                    }
+                }
+
+            }
+
+
+
+            //this._Size = decodedDataIndex;
+            return numDecodedPackets;
+        }
         public override int Decode(int sourceSensor,byte[] data, int length)       
         {
             int rawDataIndex = 0;   

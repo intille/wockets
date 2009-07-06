@@ -136,6 +136,44 @@ namespace Wockets.Receivers
             }
         }
 
+        public byte[] ReceiverBuffer
+        {
+            get
+            {
+                if (this.bluetoothStream.IsDisposed)
+                    throw new ObjectDisposedException("BluetoothStream");
+                return this.bluetoothStream.ReceiverBuffer;
+            }
+        }
+
+
+        public int _Head
+        {
+            get
+            {
+                if (this.bluetoothStream.IsDisposed)
+                    throw new ObjectDisposedException("BluetoothStream");
+                return this.bluetoothStream.Head;
+            }
+            set
+            {
+                this.bluetoothStream.Head = value;
+            }
+        }
+
+        public int _Tail
+        {
+            get
+            {
+                if (this.bluetoothStream.IsDisposed)
+                    throw new ObjectDisposedException("BluetoothStream");
+                return this.bluetoothStream.Tail;
+            }
+            set
+            {
+                this.bluetoothStream.Tail = value;
+            }
+        }
         public ArrayList BatchBytes
         {
             get
@@ -433,6 +471,13 @@ namespace Wockets.Receivers
         ArrayList batchBytes;
         //int unprocessedReceiveCount;
 
+        public bool IsDisposed
+        {
+            get
+            {
+                return this.disposed;
+            }
+        }
 
         public ArrayList BatchTimestamps
         {
@@ -461,8 +506,42 @@ namespace Wockets.Receivers
         }
 
 
+        public int Head
+        {
+            get
+            {
+                return this.head;
+            }
 
-       
+            set
+            {
+                this.head = value;
+            }
+        }
+        public int Tail
+        {
+            get
+            {
+                return this.tail;
+            }
+
+            set
+            {
+                this.tail = value;
+            }
+        }
+
+        public byte[] ReceiverBuffer
+        {
+            get
+            {
+                return this.singleReadBuffer;
+            }
+            set
+            {
+                this.singleReadBuffer = value;
+            }
+        }
         private void readingFunction()
         {
             //double prevTime = 0;
@@ -481,7 +560,7 @@ namespace Wockets.Receivers
 
 
             n= btClient.GetStream();
-            localBuffer = new byte[DEFAULT_BUFFER_SIZE];
+            //localBuffer = new byte[DEFAULT_BUFFER_SIZE];
             singleReadBuffer = new byte[DEFAULT_BUFFER_SIZE];
 
             //TextWriter tttw = new StreamWriter("samples"+(iii++)+".csv");
@@ -499,17 +578,11 @@ namespace Wockets.Receivers
                 }
                 else
                 {
-                    //if (!comPort.IsOpen)
-                      //  return;
                     if (!btClient.Connected)
                         return;
 
                     int bytesReceived = 0;
                     bool readHappened = false;
-                    int currentBytes = tail - head;
-                    if (currentBytes < 0)
-                        currentBytes = DEFAULT_BUFFER_SIZE + currentBytes;
-
 
 
                     try
@@ -520,23 +593,6 @@ namespace Wockets.Receivers
                         try
                         {
 
-                            /*byte[] cmd = new byte[50];
-                            for (int i = 0; (i < 50); i++)
-                                cmd[i] = (byte)36;
-                            //SW,0640 1 sec
-                            btSocket.Send(cmd, 3, SocketFlags.None);
-                            Thread.Sleep(100);
-                            cmd[0] = (byte)'S';
-                            cmd[1] = (byte)'I';
-                            cmd[2] = (byte)',';
-                            cmd[3] = (byte)'0';
-                            cmd[4] = (byte)'2';
-                            cmd[5] = (byte)'0';
-                            cmd[6] = (byte)'0';
-                            cmd[7] = (byte)13;
-                            btSocket.Send(cmd, 8, SocketFlags.None); ;
-                            Thread.Sleep(100);
-                             */
                             
                             if (sendTimer > 200)
                             {        
@@ -560,52 +616,35 @@ namespace Wockets.Receivers
                             }
                             batteryTimer++;
                              */
-                             
-                            if (btSocket.Available > 0)
+
+                            int availableBytes = btSocket.Available;
+                            if (availableBytes > 0)
                             {
-                                //currentTime = WocketsTimer.GetUnixTime();
-                               // currentTime = WocketsTimer.TimeStamp; 
-                                bytesReceived = btSocket.Receive(singleReadBuffer, (DEFAULT_BUFFER_SIZE - currentBytes > singleReadBuffer.Length) ? singleReadBuffer.Length : DEFAULT_BUFFER_SIZE - currentBytes, SocketFlags.None);
+                                bytesReceived = 0;
+                                //if we will pass the end of buffer receive till the end then receive the rest
+                                if ((tail + availableBytes) > singleReadBuffer.Length)
+                                {
+                                    bytesReceived = btSocket.Receive(singleReadBuffer, tail, singleReadBuffer.Length - tail, SocketFlags.None);
+                                    availableBytes -= bytesReceived;
+                                    tail = (tail + bytesReceived) % DEFAULT_BUFFER_SIZE;
+                                }
+                                bytesReceived += btSocket.Receive(singleReadBuffer, tail, availableBytes, SocketFlags.None);
                                 //batchTimestamps.Add(currentTime);
-                               // batchBytes.Add(bytesReceived);
+                                //batchBytes.Add(bytesReceived);
+                                tail=(tail+bytesReceived) % DEFAULT_BUFFER_SIZE;
                             }
 
                            Thread.Sleep(30);                            
 
-                            if (bytesReceived > 0)
-                            {
-                                //nodataTimer = currentTime;
-                                disconnectionCounter=0;
-                               // tttw.WriteLine(currentTime+","+bytesReceived);
-                                //tttw.Flush();
-                            }
+                            if (bytesReceived > 0)                                                            
+                                disconnectionCounter=0;                            
                             else
                             {
                                 disconnectionCounter++;
-                                //if ((currentTime - nodataTimer) > 1000)
-                                if (disconnectionCounter> MAX_DISCONNECTION_COUNTER)
-                                {                                  
-                                    throw new Exception("socket timed out");                                    
-                                }
-                            }
-                        /*
-                            if (sendTimer == 0)
-                                sendTimer = currentTime;
-
-                            if ((currentTime-sendTimer) >= 1000)
-                            {
-                                btSocket.Send(xxx);
-                                if (xxx[0] == 255)
-                                    xxx[0] = 0;
-                                xxx[0] = (byte)(xxx[0] + 1);
-                                sendTimer = 0;
+                                if (disconnectionCounter> MAX_DISCONNECTION_COUNTER)                                            
+                                    throw new Exception("socket timed out");                                                                    
                             }
 
-                            */            
-                            //prevTime = currentTime;
-
-//                            barrier.Gather();
-                            
                             
                         }
                         catch (Exception e)
@@ -621,43 +660,15 @@ namespace Wockets.Receivers
                     }
                     catch (Exception e)
                     {
-                      /*  lock (lockObject)
-                        {
-                            barrier.NumSynchronizedThreads = barrier.NumSynchronizedThreads - 1;
-                        }
-                        */
                         
                         return;
-                    }
-
-                    //this is a timeout. If we get too many of them, we classify that
-                    //as a socket that has been disconnected
-                   
-                    /*if (readHappened && bytesReceived == 0)
-                    {
-                        List<DateTime> newTimeouts = timeoutTimestamps.FindAll(oldEnoughPredicate);
-                        newTimeouts.Add(DateTime.Now);
-                        if (newTimeouts.Count > MAX_TIMEOUTS)
-                        {
-                            socketDead = true;
-                        }
-                        timeoutTimestamps = newTimeouts;
-                    }*/
-                   
- 
-
-                    int ii;
-                    for (ii = 0; ii < bytesReceived && ii < (DEFAULT_BUFFER_SIZE - currentBytes); ii++)
-                    {
-                        localBuffer[tail++] = singleReadBuffer[ii];
-                        tail %= DEFAULT_BUFFER_SIZE;
                     }
 
                 }
 
             }
 
-            //tttw.Close();
+
 
         }
 
