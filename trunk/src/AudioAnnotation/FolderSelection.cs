@@ -9,27 +9,63 @@ using System.IO;
 
 
 
-namespace TestApplication_Annotation
+namespace AudioAnnotation
 {
     public partial class FolderSelection : Form
     {
         private static string driveLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        private DirectoryInfo folder;
-        //private System.Windows.Forms.ImageList imageList1;
-        private string sCurPath = "";
-        private TextWriter tw;
-        private TextReader tr;
+        public DirectoryInfo folder;
+        public string fullPath;
+
+        //private string sCurPath = "";
+        
+        
+        //private TextWriter tw;
+        //private TextReader tr;
         //private FileStream spath;
+        //private System.Windows.Forms.ImageList imageList1;
+
+
+        //private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog;
+
+       // private System.Windows.Forms.Button btnOpenFolder;
+       // private System.Windows.Forms.ListBox listBox1;
+       // private System.Windows.Forms.Label lblSelectedPath;
+		
+
+
 
 
         public FolderSelection(string spath)
         {
             InitializeComponent();
-            fillTree(spath);
-           
+            //fillTree(spath);
+
         }
 
 
+
+        #region  new code
+
+
+
+
+
+        private void clearListBox()
+        {
+            this.listBox1.Items.Clear();
+        }
+
+
+
+        #endregion
+
+
+
+
+#region old code
+
+        /*
         /// <summary> method fillTree
         /// <para>This method is used to initially fill the treeView control with a list
         /// of available drives from which you can search for the desired folder.</para>
@@ -59,7 +95,8 @@ namespace TestApplication_Annotation
                      //sCurPath = tr.ReadLine();
                      //tr.Close();
 
-                     sCurPath = Application.StartupPath;
+                    // sCurPath = Application.StartupPath;
+
                  }
                  else
                  {
@@ -274,9 +311,11 @@ namespace TestApplication_Annotation
 
         private void treeView1_BeforeSelect(object sender, TreeViewCancelEventArgs e)
         {
-            getSubDirs(e.Node);					// get the sub-folders for the selected node.
-            textBox1.Text = fixPath(e.Node);	// update the user selection text box.
-            folder = new DirectoryInfo(e.Node.FullPath);	// get it's Directory info.
+            //getSubDirs(e.Node);					// get the sub-folders for the selected node.
+            //textBox1.Text = fixPath(e.Node);	// update the user selection text box.
+            //folder = new DirectoryInfo(e.Node.FullPath);	// get it's Directory info.
+
+            fillTree(e.Node.FullPath);
 
         }
 
@@ -288,11 +327,12 @@ namespace TestApplication_Annotation
 	
         }
 
+
         private void button_select_Click(object sender, EventArgs e)
         {
-            tw = new StreamWriter("DataInputPath.txt");
-            tw.Write(folder.FullName);
-            tw.Close();
+            //tw = new StreamWriter("DataInputPath.txt");
+            //tw.Write(folder.FullName);
+            //tw.Close();
 
             this.DialogResult = DialogResult.OK;
             this.Close();
@@ -332,21 +372,52 @@ namespace TestApplication_Annotation
         /// <returns>The full DirectoryInfo object associated with the selected folder.</returns>
         /// <see cref="System.IO.DirectoryInfo"/>
         /// </summary>
-        public DirectoryInfo info
-        {
-            get { return ((folder != null && folder.Exists)) ? folder : null; }
-        }
+        
 
         
 
         private void treeView1_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
         {
-            string node_path = e.Node.FullPath;
-            fillTree(node_path);
+            //string node_path = e.Node.FullPath;
+            //fillTree(node_path);
         }
 
-     
+        */
+        #endregion
 
+
+
+       
+        private void button_open_folder_Click(object sender, EventArgs e)
+        {
+            this.folderBrowserDialog.RootFolder = System.Environment.SpecialFolder.Desktop;
+            this.folderBrowserDialog.ShowNewFolderButton = false;
+            DialogResult result = this.folderBrowserDialog.ShowDialog();
+            if (result == DialogResult.OK)
+            {
+                this.clearListBox();
+
+                // retrieve the name of the selected folder
+                fullPath = this.folderBrowserDialog.SelectedPath;
+
+                // print the folder name on a label
+                //this.lblSelectedPath.Text = foldername;
+                textBox1.Text = fullPath;
+
+                folder = new DirectoryInfo(fullPath);
+
+                // iterate over all files in the selected folder and add them to 
+                // the listbox.
+                foreach (string filename in Directory.GetFiles(fullPath))
+                    this.listBox1.Items.Add(filename);
+            }
+        }
+
+
+        public DirectoryInfo info
+        {
+            get { return ((folder != null && folder.Exists)) ? folder : null; }
+        }
 
 
 

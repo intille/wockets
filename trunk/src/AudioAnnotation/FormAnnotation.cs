@@ -10,7 +10,7 @@ using System.IO;
 using Wockets.Data.Annotation;
 
 
-namespace TestApplication_Annotation
+namespace AudioAnnotation
 {
     public partial class FormAnnotation : Form
     {
@@ -23,29 +23,25 @@ namespace TestApplication_Annotation
 
         private FileInfo file_session = null;
 
-        //private int fptr;
+       
         private System.Media.SoundPlayer myPlayer;
 
       
         private int index_ID = 0;
         private int index_Posture_Lock = 1;
-        private int index_label_Posture = 2;
+        private int index_category_label = 2;
         private int index_label_StartEnd = 3;
-        private int index_activity_lock_2 = 4;
-        private int index_label_Activity = 5;
-        private int index_label_StartEnd_A = 6;
-       
-        private int index_time = 7;
-        private int index_label_Time = 8;
-        private int index_notes= 9;
-        private int index_Status = 10;
-        private int index_StartID = 11;
-        private int index_EndID = 12;
+        
+        private int index_time = 4;
+        private int index_label_Time = 5;
+        private int index_Notes= 6;
+        private int index_Status = 7;
+        private int index_StartID = 8;
+        private int index_EndID = 9;
 
-        private int index_combo_type_1  = 13;
-        private int index_combo_label_1 = 14;
-        private int index_combo_type_2  = 15;
-        private int index_combo_label_2 = 16;
+        private int index_combo_type_1  = 10;
+        private int index_combo_label_1 = 11;
+       
 
         private string StartDate="";
         private string EndDate="";
@@ -57,7 +53,6 @@ namespace TestApplication_Annotation
         
         string tlabel = " ";
         string next_tlabel = " ";
-        
         string status_tlabel = " ";
 
         private int current_row = 0;
@@ -67,8 +62,9 @@ namespace TestApplication_Annotation
         private DataGridViewCellStyle cur_cellStyle = null;
         DataGridViewComboBoxCell cellComboBox = null;
 
-        private BindingList<string> list_postures = new BindingList<string>();
-        private BindingList<string> list_categories = new BindingList<string>();
+        private BindingList<string> list_category_name = new BindingList<string>();
+        private BindingList<string> list_category_1 = new BindingList<string>();
+        private BindingList<string> list_category_2 = new BindingList<string>();
 
         private BindingList<string> LabelsList = new BindingList<string>();
 
@@ -79,24 +75,25 @@ namespace TestApplication_Annotation
         private string DataSessionDir  = "";
         private string DataAudioDir    = "";
 
-        private bool SessionLoaded     = false;
+        private int  SessionPart        = 1;
+        private bool SessionStarted     = false;
+
+        private Session XmlSession = null; 
+        private BindingList<ActivityList> CActivityList = null;
+
 
         #endregion
 
-
-        private Session XmlSession = new Session();
-        private BindingList<ActivityList> CActivityList = new BindingList<ActivityList>();
-
+      
+        #region initialize
 
         public FormAnnotation()
         {
             InitializeComponent();
 
+            //datagridview settings
+            InitializeDataGridView(dataGridView1);
         }
-
-
-
-        #region initialize
 
         private void InitializeDataGridView(DataGridView dgview)
         {
@@ -145,9 +142,13 @@ namespace TestApplication_Annotation
             dgview.AutoSizeColumnsMode =
                 DataGridViewAutoSizeColumnsMode.Fill;
             dgview.ScrollBars = ScrollBars.Vertical;
+
+            // Configure the top left header cell as a reset button.
+            dataGridView1.TopLeftHeaderCell.Value = "Play";
+            dataGridView1.TopLeftHeaderCell.Style.SelectionBackColor = System.Drawing.Color.DarkSeaGreen;
+
            
         }
-
 
         // Border Style
         static DataGridViewHeaderBorderStyle ProperColumnHeadersBorderStyle
@@ -160,12 +161,10 @@ namespace TestApplication_Annotation
             }
         }
 
-        
-
         #endregion
 
 
-        #region Read Data
+        #region Load Grid Data
 
         // Load Data from the DataSet into the ListView
         private bool LoadList(DataGridView dgview)
@@ -192,17 +191,10 @@ namespace TestApplication_Annotation
                     dgview.Rows[n].Cells[index_ID].Value = n.ToString();
 
 
-                    //Main Label : Posture
-                    dgview.Rows[n].Cells[index_Posture_Lock].Value = false;
-                    cellComboBox = (DataGridViewComboBoxCell)dataGridView1.Rows[n].Cells[index_label_Posture];
-                    set_ComboBox(cellComboBox, n, index_label_Posture, 2, " ");
-
-
-                    //Concurrent Label: Activity 2
-                    dgview.Rows[n].Cells[index_activity_lock_2].Value = false;
-                    cellComboBox = (DataGridViewComboBoxCell)dataGridView1.Rows[n].Cells[index_label_Activity];
-                    set_ComboBox(cellComboBox, n, index_label_Activity, 2, " ");
-
+                    //Category Labels 
+                     dgview.Rows[n].Cells[index_Posture_Lock].Value = true;
+                    cellComboBox = (DataGridViewComboBoxCell)dataGridView1.Rows[n].Cells[index_category_label];
+                    set_ComboBox(cellComboBox, n, index_category_label, 2, " ");
 
 
                     // creation time
@@ -232,11 +224,7 @@ namespace TestApplication_Annotation
                 CStartEnd.Items.Add("End");
                 CStartEnd.Items.Add("Start");
 
-                CStartEnd_Activity.Items.Add(" ");
-                CStartEnd_Activity.Items.Add("End");
-                CStartEnd_Activity.Items.Add("Start");
-
-
+             
                 result = true;
             }
             else
@@ -246,7 +234,6 @@ namespace TestApplication_Annotation
 
             return result;
         }
-
 
         private void LoadAudioFiles()
         { 
@@ -276,9 +263,6 @@ namespace TestApplication_Annotation
       
         }
 
-
-
-
         private bool AudioDir_Exist()
         {
             bool result = false;
@@ -291,7 +275,7 @@ namespace TestApplication_Annotation
 
             return result;
         }
-
+        
         private bool SessionDir_Exist()
         {
             bool result = false;
@@ -310,97 +294,210 @@ namespace TestApplication_Annotation
             return result;
         }
        
-        private void LoadData()
+        private bool LoadData()
         {
+
+            bool is_data_loaded = false;
+           
+
             try
             {
-                
+                string name = " ";
 
-                string name = textBox_2.Text.Trim();
-
-                if ( SessionDir_Exist())
+                if (SessionPart == 1)
+                { //name = textBox_2.Text.Trim(); 
+                    name = "session_p1.txt";
+                }
+                else if (SessionPart == 2)
                 {
-                    LoadActivityLabels();
+                    name = "session_p2.txt";
+                }
 
-                    if (name.CompareTo("") != 0)
+                if (SessionDir_Exist())
+                {
+                    if (LoadActivityLabels())
                     {
-                        if (name.Contains(".txt") == false)
-                        { name = name + ".txt"; }
+                        LoadGridColumnHeaders();
 
-
-                        name = DataSessionDir + name;
-
-                        string[] session_files = Directory.GetFiles(DataSessionDir);
-                        DataSessionName = "";
-
-                        for (int i = 0; i < session_files.Length; i++)
+                        if (name.CompareTo("") != 0)
                         {
-                            if (name.CompareTo(session_files[i]) == 0)
+                            if (name.Contains(".txt") == false)
+                            { name = name + ".txt"; }
+
+
+                            name = DataSessionDir + name;
+
+                            string[] session_files = Directory.GetFiles(DataSessionDir);
+                            DataSessionName = "";
+
+                            for (int i = 0; i < session_files.Length; i++)
                             {
-                                DataSessionName = session_files[i];
-                                break;
+                                if (name.CompareTo(session_files[i]) == 0)
+                                {
+                                    int is_started = IsSessionStarted();
+                                    if (is_started == 1)
+                                    { DataSessionName = session_files[i]; }
+                                    else if( is_started == -1)
+                                    {
+                                        return false;
+                                    }
+                                    
+                                    break;
+                                }
                             }
-                        }
 
 
-                        //if session name file not found
-                        if (DataSessionName.CompareTo("") == 0)
+                            //if session name file not found
+                            if (DataSessionName.CompareTo("") == 0)
+                            {
+                                DataSessionName = name;
+
+                                //Load list
+                                if (LoadList(dataGridView1) == false)
+                                {
+                                    label_play.Text = "No audio files were found. Please check the directory name.";
+                                    XmlSession = null;
+                                }
+                                else
+                                { is_data_loaded = true; }
+
+                            }
+                            else
+                            {
+                                // !note: this should return an OK value
+                                LoadRowsToGrid(DataSessionName);
+                                is_data_loaded = true;
+
+                                if (files.Length > 0)
+                                {
+                                    StartDate = files[0].LastWriteTime.ToShortDateString();
+                                    EndDate = files[files.Length - 1].LastWriteTime.ToShortDateString();
+                                }
+
+                            }
+
+                        } //if textbox is blank
+                        else
                         {
-                            DataSessionName = name;
+                            DataSessionName = DataSessionDir +
+                                               "Session_" + DateTime.Now.Year.ToString() + "-" +
+                                               DateTime.Now.Month.ToString() + "-" +
+                                               DateTime.Now.Day.ToString() + ".txt";
 
                             //Load list
                             if (LoadList(dataGridView1) == false)
                             {
                                 label_play.Text = "No audio files were found. Please check the directory name.";
+                                XmlSession = null;
                             }
-
-                        }
-                        else
-                        {
-                            LoadRowsToGrid(DataSessionName);
-
-                            if (files.Length > 0)
-                            {
-                                StartDate = files[0].LastWriteTime.ToShortDateString();
-                                EndDate = files[files.Length - 1].LastWriteTime.ToShortDateString();
-                            }
+                            else
+                            { is_data_loaded = true; }
 
                         }
 
-                    } //if txtbox is blank
+                    }// if Xml file not loaded
                     else
                     {
-                        DataSessionName = DataSessionDir + 
-                                           "Session_" + DateTime.Now.Year.ToString() + "-" +
-                                           DateTime.Now.Month.ToString() + "-" +
-                                           DateTime.Now.Day.ToString() + ".txt";
-
-                        //Load list
-                        if (LoadList(dataGridView1) == false)
-                        {
-                            label_play.Text = "No audio files were found. Please check the directory name.";
-                        }
-
+                        label_play.Text = " Protocol file (ActivityLabelsRealtime.xml) was not found. The category labels cannot be loaded.";
+                        XmlSession = null;
                     }
+
+
                 }
                 else //if SessionDir doesn't exist
-                { 
-                   label_play.Text = "No .wav audio files where found in the selected directory.";
+                {
+                    label_play.Text = "No .wav audio files where found in the selected directory.";
+                    XmlSession = null;
                 }
 
+
+                return is_data_loaded;
             } // end try
 
             catch (Exception err)
             {
                 Console.WriteLine(err.Message);
+
+                return false;
             }
         }
+
+        private void LoadGridColumnHeaders()
+        {
+
+            if (list_category_name != null)
+            {
+                if (list_category_name.Count > 0)
+                {
+                    if (SessionPart == 1)
+                    { dataGridView1.Columns[index_category_label].HeaderText = list_category_name[0].ToUpper(); }
+                    else if(SessionPart == 2)
+                    { dataGridView1.Columns[index_category_label].HeaderText = list_category_name[1].ToUpper(); }
+                }
+            }       
+        
+        }
+
+
+        private void LoadViewGrid(string vw)
+        {
+            if (vw.CompareTo("grid") == 0)
+            {
+                //------ hide ------------
+                textBox_1.Visible = false;
+                textBox_2.Visible = false;
+                textBox_instructions.Visible = false;
+                
+                label_files_path.Visible = false;
+                label_protocol_path.Visible = false;
+
+                button_1.Visible = false;
+                button_2.Visible = false;
+                button_3.Visible = false;
+
+                //------ show ------------
+                label_instructions_1.Visible = true;
+
+                button_add_label.Visible = true;
+                button_remove_label.Visible = true;
+
+                button_save.Visible = true;
+
+                button_generate.Visible = true;
+                button_generate.Enabled = false;
+
+                button_exit.Visible = true;
+                
+                button_session_part.Visible = true;
+
+                dataGridView1.Visible = true;
+
+                label_instructions_2.Visible = true;
+                label_play.Visible = true;
+
+                label_date.Visible = true;
+                label_date.Text = "Session Date: " + StartDate;
+
+                label_instructions_1.Text = "Press F1 to play audio file. Press F2 to edit field.";
+                label_instructions_2.Text = "Status:";
+
+                //---------------------------
+
+
+
+            }
+            else if (vw.CompareTo("select") == 0)
+            {
+
+            }
+        }
+
 
         #endregion
 
 
         #region tree view
-
+        /*
         private void treeView1_BeforeExpand(object sender, TreeViewCancelEventArgs e)
         {
             getSubDirs(e.Node);					// get the sub-folders for the selected node.
@@ -420,8 +517,6 @@ namespace TestApplication_Annotation
         {
             get { return ((folder != null && folder.Exists)) ? folder : null; }
         }
-
-
 
 
         private void getSubDirs(TreeNode parent)
@@ -488,9 +583,9 @@ namespace TestApplication_Annotation
             }
             return sRet;
         }
-
+        */
         #endregion
-
+        
 
         #region Buttons
 
@@ -516,32 +611,90 @@ namespace TestApplication_Annotation
         {
             try
             {
+              
+                this.folderBrowserDialog.RootFolder = System.Environment.SpecialFolder.Desktop;
+                this.folderBrowserDialog.ShowNewFolderButton = false;
 
-                FolderSelection dlg = new FolderSelection(textBox_1.Text);
+                DialogResult result = this.folderBrowserDialog.ShowDialog();
 
-                if (dlg.ShowDialog() == DialogResult.OK)
-                {
-                    folder = dlg.info;
-                    textBox_1.Text = dlg.fullPath;
+                if (result == DialogResult.OK)
+                {                  
+                    string fullPath = this.folderBrowserDialog.SelectedPath;
+                    textBox_1.Text = fullPath;
+
+                    folder = new DirectoryInfo(fullPath);
+       
 
                     files_wav = folder.GetFiles("*.wav");
                     files = folder.GetFiles("*.msv");
 
                     if (files_wav.Length != files.Length)
-                    { label_play.Text = "Warning: mistmatch between number of msv and wav files!"; }
+                    {  textBox_instructions.Text = "Warning: mistmatch between number of msv and wav files!"; }
 
                     if (files_wav.Length > 0)
                     {
                         DataAudioDir = files_wav[0].DirectoryName;
+
+                        if (textBox_2.Text.Trim().CompareTo("") == 0)
+                        { textBox_instructions.Text = "Please provide a valid path for the protocol file, then click Start."; }
+                        else
+                        { textBox_instructions.Text = ""; }
                     }
                     else
                     {
                         textBox_instructions.Text = "No audio files were found. Please check for the right directory.";
                     }
+                  
+                }
 
-                    
 
-                }//end if dlg
+            } // end try
+
+            catch (Exception err)
+            {
+                Console.WriteLine(err.Message);
+            }
+        }
+
+        private void button_3_Click(object sender, EventArgs e)
+        {
+            try
+            {
+
+                this.openFileDialog.Title = "";
+                
+                this.openFileDialog.InitialDirectory = this.folderBrowserDialog.SelectedPath;
+                this.openFileDialog.Filter = "All files (*.xml)|*.xml";
+                this.openFileDialog.FilterIndex = 2;
+                this.openFileDialog.RestoreDirectory = true;
+
+
+                if (this.openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    string fname = this.openFileDialog.FileName;
+
+                    if (File.Exists(fname))
+                    {
+                        textBox_2.Text = fname;
+
+                        if (textBox_1.Text.Trim().CompareTo("") == 0)
+                        {
+                            textBox_instructions.Text = "Please provide a valid path for the audio files, then click Start.";
+                        }
+                        else
+                        { textBox_instructions.Text = "";
+                          textBox_instructions.Text = "";
+                        }
+                    }
+                    else
+                    { textBox_2.Text = ""; }
+
+                }
+                else
+                {
+                    textBox_instructions.Text = "Protocol file path not valid. Please check for the right directory.";
+                }
+
 
             } // end try
 
@@ -552,8 +705,6 @@ namespace TestApplication_Annotation
         }
 
 
-      
-
         private void button_add_label_Click(object sender, EventArgs e)
         {
           
@@ -562,7 +713,7 @@ namespace TestApplication_Annotation
                 current_row = 0;
                 dataGridView1.Rows.Insert(current_row, 1);
 
-                initialize_row(current_row, 2, " ", current_row + 1, index_label_Posture);
+                initialize_row(current_row, 2, " ", current_row + 1, index_category_label);
                 
             }
             else
@@ -594,8 +745,8 @@ namespace TestApplication_Annotation
                         dataGridView1.Rows[current_row].Cells[index_StartID].Value = 0;
                     }
 
-                    if (dataGridView1.Rows[startRow].Cells[index_label_Posture].Value != null)
-                    { label_row = dataGridView1.Rows[startRow].Cells[index_label_Posture].Value.ToString(); }
+                    if (dataGridView1.Rows[startRow].Cells[index_category_label].Value != null)
+                    { label_row = dataGridView1.Rows[startRow].Cells[index_category_label].Value.ToString(); }
                     typeCombo = 1;
                 }
                 else
@@ -607,7 +758,7 @@ namespace TestApplication_Annotation
                 dataGridView1.Rows.Insert(index_new_row, 1);
 
                 // initialize the row according if start label is open or not
-                initialize_row(index_new_row, typeCombo, label_row, index_new_row +1, index_label_Posture);
+                initialize_row(index_new_row, typeCombo, label_row, index_new_row +1, index_category_label);
             }
 
 
@@ -648,19 +799,6 @@ namespace TestApplication_Annotation
         }
 
        
-
-        private void dataGridView1_KeyDown(object sender, KeyEventArgs e)
-        {
-            Keys key = e.KeyCode;
-
-            if ( key == Keys.F1 )
-            {
-                PlayFile(current_row);
-            }
-
-
-        }
-
         #endregion
 
 
@@ -721,9 +859,8 @@ namespace TestApplication_Annotation
             // initialize values
             dataGridView1.Rows[row].Cells[index_ID].Value = "-----";
 
-            dataGridView1.Rows[row].Cells[index_Posture_Lock].Value = false;
-            dataGridView1.Rows[row].Cells[index_activity_lock_2].Value = false;
-
+            dataGridView1.Rows[row].Cells[index_Posture_Lock].Value = true;
+            
             //Label Posture
             cellComboBox = (DataGridViewComboBoxCell)dataGridView1.Rows[row].Cells[index_label];
             cellComboBox.Items.Clear();
@@ -735,15 +872,18 @@ namespace TestApplication_Annotation
             }
             else if ((TypeCombo == 2) || (TypeCombo == 3)) //full 
             {
-                if (index_label == index_label_Posture)
+                if (index_label == index_category_label)
                 {
-                    for (int i = 0; i < list_postures.Count; i++)
-                    { cellComboBox.Items.Add(list_postures[i]); }
-                }
-                else if (index_label == index_label_Activity)
-                {
-                    for (int i = 0; i < list_postures.Count; i++)
-                    { cellComboBox.Items.Add(list_categories[i]); }
+                    if (SessionPart == 1)
+                    {
+                        for (int i = 0; i < list_category_1.Count; i++)
+                        { cellComboBox.Items.Add(list_category_1[i]); }
+                    }
+                    else if (SessionPart == 2)
+                    {
+                        for (int i = 0; i < list_category_1.Count; i++)
+                        { cellComboBox.Items.Add(list_category_name[i]); }
+                    }
                 }
 
             }
@@ -764,11 +904,13 @@ namespace TestApplication_Annotation
         }
 
 
-
-        private void fill_row(int row, int TypeCombo, string row_label, int row_label_time, int index_label, string status, int open_row, int end_row)
+        private void fill_row(int row, int TypeCombo, string row_label, int row_label_time, int index_label, 
+                              string status, int open_row, int end_row, bool is_row_new)
         {
-        
-            initialize_row(row,TypeCombo,row_label,row_label_time,index_label);
+
+            if (is_row_new == true)
+            { initialize_row(row, TypeCombo, row_label, row_label_time, index_label); }
+
 
             dataGridView1.Rows[row].Cells[index_label].Value = row_label;
 
@@ -810,9 +952,9 @@ namespace TestApplication_Annotation
 
             // fill "end" in inserted row and close label
             if (set_label_time == true)
-            { fill_row(start_row, 2, row_label, close_row, index_label, "start", start_row, close_row); }
+            { fill_row(start_row, 2, row_label, close_row, index_label, "start", start_row, close_row, true); }
             else
-            { fill_row(start_row, 2, row_label, -1, index_label, "start", start_row, close_row); }
+            { fill_row(start_row, 2, row_label, -1, index_label, "start", start_row, close_row, true); }
 
             return start_row;
         }
@@ -831,9 +973,9 @@ namespace TestApplication_Annotation
 
             // fill "end" in inserted row and close label
             if (set_label_time == true)
-            { fill_row(close_row, 1, tlabel, close_row + 1, index_label, "end", open_row, close_row); }
+            { fill_row(close_row, 1, tlabel, close_row + 1, index_label, "end", open_row, close_row, true); }
             else
-            { fill_row(close_row, 1, tlabel, -1, index_label, "end", open_row, close_row); }
+            { fill_row(close_row, 1, tlabel, -1, index_label, "end", open_row, close_row, true); }
 
             return close_row;
         }
@@ -856,18 +998,19 @@ namespace TestApplication_Annotation
         private void SaveRowsToGrid(string fname)
         {
             string row_string = "";
-            //file_session = new FileInfo("DataSession.txt");
 
-            file_session = new FileInfo(fname);
+            
+                file_session = new FileInfo(fname);
+            
 
-            if (file_session.Exists == true)
-            {
-                file_session.Delete();
-            }
-           
-            //tw = new StreamWriter("DataSession.txt");
-            tw = new StreamWriter(fname);
-            tw.WriteLine(StartDate + ";" + EndDate + ";");
+                if (file_session.Exists == true)
+                {
+                    file_session.Delete();
+                }
+
+
+                tw = new StreamWriter(fname);
+                tw.WriteLine(StartDate + ";" + EndDate + ";");
 
                 if (dataGridView1.Rows.Count > 0)
                 {
@@ -879,10 +1022,10 @@ namespace TestApplication_Annotation
                     }
                 }
 
-             tw.Close();
+                tw.Close();
 
-             label_play.Text = "The session has been saved.";
-
+                label_play.Text = "The session has been saved.";
+            
         }
 
         private void get_string(int row, out string st) 
@@ -909,6 +1052,7 @@ namespace TestApplication_Annotation
                         value = "False";
                     }
                 }
+                /*
                 else if (i == index_activity_lock_2)
                 {
                     if (dataGridView1.Rows[row].Cells[index_activity_lock_2].Value != null)
@@ -924,16 +1068,31 @@ namespace TestApplication_Annotation
                         value = "False";
                     }
                 }
+                 */ 
                 else if (i == index_combo_type_1)
                 {
-                    if (dataGridView1.Rows[row].Cells[index_label_Posture] != null)
+                    if (dataGridView1.Rows[row].Cells[index_category_label] != null)
                     {
-                        cellComboBox = (DataGridViewComboBoxCell)dataGridView1.Rows[row].Cells[index_label_Posture];
+                        
+                        cellComboBox = (DataGridViewComboBoxCell)dataGridView1.Rows[row].Cells[index_category_label];
 
-                        if ((cellComboBox.Items.Count == list_postures.Count) || (cellComboBox.Items.Count == 0))
-                        { value = "F"; }
-                        else
-                        { value = "S"; }
+                        if (SessionPart == 1)
+                        {
+                            if ( (cellComboBox.Items.Count == list_category_1.Count) ||
+                                 (cellComboBox.Items.Count == 0))
+                            { value = "F"; }
+                            else 
+                            { value = "S"; }
+                        }
+                        else if (SessionPart == 2)
+                        {
+                            if ((cellComboBox.Items.Count == list_category_2.Count) ||
+                                 (cellComboBox.Items.Count == 0))
+                            { value = "F"; }
+                            else
+                            { value = "S"; }
+                        }
+                       
                     }
                     else
                     {
@@ -941,15 +1100,16 @@ namespace TestApplication_Annotation
                     }
               
                 }
+                    /*
                 else if (i == index_combo_type_2)
                 {
 
-                    if (dataGridView1.Rows[row].Cells[index_label_Activity] != null)
+                    if (dataGridView1.Rows[row].Cells[index_category_label_2] != null)
                     {
-                        cellComboBox = (DataGridViewComboBoxCell)dataGridView1.Rows[row].Cells[index_label_Activity];
+                        cellComboBox = (DataGridViewComboBoxCell)dataGridView1.Rows[row].Cells[index_category_label_2];
 
 
-                        if ((cellComboBox.Items.Count == list_postures.Count) || (cellComboBox.Items.Count == 0))
+                        if ((cellComboBox.Items.Count == list_category_1.Count) || (cellComboBox.Items.Count == 0))
                         { value = "F"; }
                         else
                         { value = "S"; }
@@ -959,25 +1119,30 @@ namespace TestApplication_Annotation
                         value = "F";
                     }
                 }
+                     */
+
                 else if (i == index_combo_label_1)
                 {
-                    if (dataGridView1.Rows[row].Cells[index_label_Posture].Value != null)
+                    if (dataGridView1.Rows[row].Cells[index_category_label].Value != null)
                     {
-                        value = dataGridView1.Rows[row].Cells[index_label_Posture].Value.ToString();
+                        value = dataGridView1.Rows[row].Cells[index_category_label].Value.ToString();
                     }
                     else
                     {   value = " "; }
 
                 }
+                    /*
                 else if (i == index_combo_label_2)
                 {
-                    if (dataGridView1.Rows[row].Cells[index_label_Activity].Value != null)
+                    if (dataGridView1.Rows[row].Cells[index_category_label_2].Value != null)
                     {
-                        value = dataGridView1.Rows[row].Cells[index_label_Activity].Value.ToString();
+                        value = dataGridView1.Rows[row].Cells[index_category_label_2].Value.ToString();
                     }
                     else
                     { value = " "; }
                 }
+                     * */
+
                 else
                 {
                     if (dataGridView1.Rows[row].Cells[i].Value != null)
@@ -1002,15 +1167,12 @@ namespace TestApplication_Annotation
         private void LoadRowsToGrid(string fname)
         {
             string row_string = "";
-            int row = 0;
-            int NumberOfRows;
-
-            //file_session = new FileInfo("DataSession.txt");
+           
             file_session = new FileInfo(fname);
 
             if (file_session.Exists == false)
             {
-                label_play.Text = "A saved session file was not found in folder. A new session file will be created.";
+                label_play.Text ="Session " + SessionPart.ToString()  +" was not found. A new session file will be created.";
                 
             }
             else
@@ -1018,19 +1180,13 @@ namespace TestApplication_Annotation
 
                 DeleteAllRows();
 
+             
                 // Set End-Start
                 CStartEnd.Items.Add(" ");
                 CStartEnd.Items.Add("End");
                 CStartEnd.Items.Add("Start");
 
-                CStartEnd_Activity.Items.Add(" ");
-                CStartEnd_Activity.Items.Add("End");
-                CStartEnd_Activity.Items.Add("Start");
-
-
-
-
-
+             
                 tr = new StreamReader(fname);
                 row_string = tr.ReadLine();
 
@@ -1052,7 +1208,6 @@ namespace TestApplication_Annotation
                     WriteRow(row_string);
 
                     row_string = tr.ReadLine();
-                    //row = row + 1;
                 }
 
 
@@ -1085,6 +1240,7 @@ namespace TestApplication_Annotation
                     else
                     { dataGridView1.Rows[row].Cells[i].Value = false; }
                 }
+                /*
                 else if (i == index_activity_lock_2)
                 {
                     if (ncells[i].CompareTo("True") == 0)
@@ -1092,7 +1248,9 @@ namespace TestApplication_Annotation
                     else
                     { dataGridView1.Rows[row].Cells[i].Value = false; }
                 }
-                else if ((i == index_label_Posture) || (i == index_label_Activity))
+                 */ 
+
+                else if (i == index_category_label)
                 { 
                     // Do nothing
                 }
@@ -1101,23 +1259,26 @@ namespace TestApplication_Annotation
                     dataGridView1.Rows[row].Cells[i].Value = ncells[i];
 
                     if (dataGridView1.Rows[row].Cells[index_combo_type_1].Value.ToString().CompareTo("S") == 0)
-                    { set_ComboBox(cellComboBox, row, index_label_Posture,1, ncells[i]); }
+                    { set_ComboBox(cellComboBox, row, index_category_label,1, ncells[i]); }
                     else
-                    { set_ComboBox(cellComboBox, row, index_label_Posture, 2, ncells[i]); }
+                    { set_ComboBox(cellComboBox, row, index_category_label, 2, ncells[i]); }
 
-                    dataGridView1.Rows[row].Cells[index_label_Posture].Value = ncells[index_label_Posture];
+                    dataGridView1.Rows[row].Cells[index_category_label].Value = ncells[index_category_label];
                 }
+                    /*
                 else if (i == index_combo_label_2)
                 {
                     dataGridView1.Rows[row].Cells[i].Value = ncells[i];
 
                     if (dataGridView1.Rows[row].Cells[index_combo_type_2].Value.ToString().CompareTo("S") == 0)
-                    { set_ComboBox(cellComboBox, row, index_label_Activity, 1, ncells[i]); }
+                    { set_ComboBox(cellComboBox, row, index_category_label_2, 1, ncells[i]); }
                     else
-                    { set_ComboBox(cellComboBox, row,index_label_Activity, 2, ncells[i]); }
+                    { set_ComboBox(cellComboBox, row,index_category_label_2, 2, ncells[i]); }
 
-                    dataGridView1.Rows[row].Cells[index_label_Activity].Value = ncells[index_label_Activity];
+                    dataGridView1.Rows[row].Cells[index_category_label_2].Value = ncells[index_category_label_2];
                 }
+                     */
+ 
                 else
                 {
                     dataGridView1.Rows[row].Cells[i].Value = ncells[i];
@@ -1140,6 +1301,128 @@ namespace TestApplication_Annotation
                     dataGridView1.Rows.RemoveAt(dataGridView1.Rows.Count - 1);
                 }
             } 
+        }
+
+        #endregion
+        
+
+        #region Sessions
+        
+        private void SaveCurrentSessionToFile()
+        {
+            string row_string = "";
+            string fname = DataSessionName;
+
+            if (SessionPart == 1)
+            {
+                fname = DataSessionDir + "session_p1.txt";
+                file_session = new FileInfo(fname);
+            }
+            else if (SessionPart == 2)
+            {
+                fname = DataSessionDir + "session_p2.txt";
+                file_session = new FileInfo(fname);
+            }
+
+            if (file_session.Exists == true)
+            {
+                file_session.Delete();
+            }
+
+
+            tw = new StreamWriter(fname);
+            tw.WriteLine(StartDate + ";" + EndDate + ";");
+
+            if (dataGridView1.Rows.Count > 0)
+            {
+                for (int i = 0; i < dataGridView1.Rows.Count; i++)
+                {
+                    get_string(i, out row_string);
+                    tw.WriteLine(row_string);
+
+                }
+            }
+
+            tw.Close();
+
+            label_play.Text = "The session has been saved.";
+
+        }
+
+
+        private void LoadSessionToGrid()
+        {
+            string row_string = "";
+            string fname = DataSessionName;
+
+            //file_session = new FileInfo(fname);
+            if (SessionPart == 1)
+            {
+                fname = DataSessionDir + "session_p1.txt";
+                file_session = new FileInfo(fname);
+            }
+            else if (SessionPart == 2)
+            {
+                fname = DataSessionDir + "session_p2.txt";
+                file_session = new FileInfo(fname);
+            }
+
+
+
+
+            if (file_session.Exists == false)
+            {
+                label_play.Text = "A saved session file was not found in folder. A new session file will be created.";
+
+            }
+            else
+            {
+
+                DeleteAllRows();
+
+                // Set End-Start
+                CStartEnd.Items.Add(" ");
+                CStartEnd.Items.Add("End");
+                CStartEnd.Items.Add("Start");
+
+
+
+
+
+                tr = new StreamReader(fname);
+                row_string = tr.ReadLine();
+
+
+                if (row_string != null)
+                {
+
+                    string[] ncells = row_string.Split(';');
+                    StartDate = ncells[0];
+                    EndDate = ncells[1];
+
+                    row_string = tr.ReadLine();
+                }
+
+
+
+                while (row_string != null)
+                {
+                    WriteRow(row_string);
+
+                    row_string = tr.ReadLine();
+                    
+                }
+
+
+                tr.Close();
+
+                label_play.Text = "The Session has been loaded.";
+
+
+            }
+
+
+
         }
 
         #endregion
@@ -1169,18 +1452,23 @@ namespace TestApplication_Annotation
         }
 
 
-        private int check_label_lock(bool is_unlocked, bool is_label_open, int row, int index_label, string cur_label)
+        private int check_label_lock(bool is_unlocked, bool is_label_open, int row, 
+                                     int index_label, string cur_label, int open_row, 
+                                     string open_label)
         {
             string prev_label = " ";
             string prev_status = " ";
+            int prev_row = row - 1;
+
+            int result = -1;
 
             if (row > 0)
             {
-                if (dataGridView1.Rows[row - 1].Cells[index_label].Value != null)
-                { prev_label = dataGridView1.Rows[row - 1].Cells[index_label].Value.ToString(); }
+                if (dataGridView1.Rows[prev_row].Cells[index_label].Value != null)
+                { prev_label = dataGridView1.Rows[prev_row].Cells[index_label].Value.ToString(); }
 
-                if (dataGridView1.Rows[row - 1].Cells[index_Status].Value != null)
-                { prev_status = dataGridView1.Rows[row - 1].Cells[index_Status].Value.ToString(); }
+                if (dataGridView1.Rows[prev_row].Cells[index_Status].Value != null)
+                { prev_status = dataGridView1.Rows[prev_row].Cells[index_Status].Value.ToString(); }
             }
 
             if (is_label_open)
@@ -1189,61 +1477,43 @@ namespace TestApplication_Annotation
                 {
                     if (cur_label.CompareTo(" ") != 0) // label no blank
                     {
-                        if (cur_label.CompareTo(prev_label) != 0) // current label different to previous
+                        if(cur_label.CompareTo(prev_label) != 0) // current label different to previous
                         {
                             if ((prev_status.CompareTo("start") == 0) ||
                                  (prev_status.CompareTo("start_on") == 0))
                             {
 
-                                int prev_row = row;
+                                if (prev_label.CompareTo(" ") != 0)
+                                {
+                                    prev_row = row;
 
-                                //insert row above
-                                dataGridView1.Rows.Insert(prev_row, 1);
+                                    //insert row above
+                                    dataGridView1.Rows.Insert(prev_row, 1);
 
-                                // update row number, row++
-                                row = row + 1;
+                                    // update row number, row++
+                                    row = row + 1;
+                                    
+                                    // fill "end" in inserted row and close label
+                                    fill_row(prev_row, 1, prev_label, row, index_category_label, "end", prev_row - 1, prev_row, true);
+                                    result = 1;
+                                }
+                                else 
+                                {
+                                    if (cur_label.CompareTo(open_label) != 0)
+                                    {
+                                        fill_row(prev_row, 1, open_label, row, index_category_label, "end", prev_row - 1, prev_row, false);
+                                        result = 0;
+                                    }
 
-                                // fill "end" in inserted row and close label
-                                fill_row(prev_row, 1, prev_label, row, index_label_Posture, "end", prev_row - 1, prev_row);
-
-
+                                }
                             }
-                            else if (prev_status.CompareTo(" ") == 0)
-                            {
-                                // check if label is open
-                                // if label open, close it. Then, continue
-                                // if label no open, continue 
-                            }
-                            /*
-                            else if (prev_status.CompareTo("end") == 0)
-                            {
-                                // continue, do nothing
-                                // don't modify combobox
-                            }
-                           */ 
-                        }
-                       
-                        /*
-                        else // current label similar to previous
-                        {
-                            // close label, but this is handled by the main software
-                        }
-                        */  
-                         
+                            
+                        }    
                     }
-                        /*
-                    else // if label "blank", do nothing
-                    {
-                        // System.Console.WriteLine("This branch needs revision");
-                    }
-                         */
- 
                 }
-               // else
-               // { /* do nothing, continue*/ }
             }
 
-            return row;
+            return result;
         }
 
 
@@ -1266,7 +1536,7 @@ namespace TestApplication_Annotation
 
                 if ((i > start_row) || (block == false))
                 {
-                    cellComboBox = (DataGridViewComboBoxCell)dataGridView1.Rows[i].Cells[index_label_Posture];
+                    cellComboBox = (DataGridViewComboBoxCell)dataGridView1.Rows[i].Cells[index_category_label];
 
                     if (TypeFill == 1)
                     {
@@ -1274,12 +1544,11 @@ namespace TestApplication_Annotation
                         cellComboBox.Items.Add(" ");
                         cellComboBox.Items.Add(row_label);
                     }
-
                     else if ((TypeFill == 2) || (TypeFill == 3))
                     {
                         cellComboBox.Items.Clear();
-                        for (int j = 0; j < list_postures.Count; j++)
-                        { cellComboBox.Items.Add(list_postures[j]); }
+                        for (int j = 0; j < list_category_1.Count; j++)
+                        { cellComboBox.Items.Add(list_category_1[j]); }
                     }
                 }
 
@@ -1294,7 +1563,7 @@ namespace TestApplication_Annotation
                         dataGridView1.Rows[i].Cells[index_EndID].Value = -1;
 
                         dataGridView1.Rows[i].Cells[index_label_StartEnd].Value = " ";
-                        dataGridView1.Rows[i].Cells[index_label_Posture].Value = " ";
+                        dataGridView1.Rows[i].Cells[index_category_label].Value = " ";
                         dataGridView1.Rows[i].Cells[index_Status].Value = " ";
 
                     }
@@ -1314,7 +1583,7 @@ namespace TestApplication_Annotation
                         dataGridView1.Rows[i].Cells[index_EndID].Value = end_row;
 
                         dataGridView1.Rows[i].Cells[index_label_StartEnd].Value = " ";
-                        dataGridView1.Rows[i].Cells[index_label_Posture].Value = " ";
+                        dataGridView1.Rows[i].Cells[index_category_label].Value = " ";
                         dataGridView1.Rows[i].Cells[index_Status].Value = " ";
 
                     }
@@ -1340,7 +1609,7 @@ namespace TestApplication_Annotation
                         dataGridView1.Rows[i].Cells[index_EndID].Value = end_row;
 
                         dataGridView1.Rows[i].Cells[index_label_StartEnd].Value = " ";
-                        dataGridView1.Rows[i].Cells[index_label_Posture].Value = " ";
+                        dataGridView1.Rows[i].Cells[index_category_label].Value = " ";
                         dataGridView1.Rows[i].Cells[index_Status].Value = " ";
                     }
                     else
@@ -1365,7 +1634,7 @@ namespace TestApplication_Annotation
                         dataGridView1.Rows[i].Cells[index_EndID].Value = i;
 
                         dataGridView1.Rows[i].Cells[index_label_StartEnd].Value = " ";
-                        dataGridView1.Rows[i].Cells[index_label_Posture].Value = " ";
+                        dataGridView1.Rows[i].Cells[index_category_label].Value = " ";
                         dataGridView1.Rows[i].Cells[index_Status].Value = " ";
                     }
                     else
@@ -1409,15 +1678,40 @@ namespace TestApplication_Annotation
                 else //full
                 {
                     combo.Items.Clear();
-                    for (int j = 0; j < list_postures.Count; j++)
-                    { combo.Items.Add(list_postures[j]); }
+
+                    if (index_label == index_category_label)
+                    {
+                        if (SessionPart == 1)
+                        {
+                            for (int j = 0; j < list_category_1.Count; j++)
+                            { combo.Items.Add(list_category_1[j]); }
+                        }
+                        else if (SessionPart == 2)
+                        {
+                            for (int j = 0; j < list_category_2.Count; j++)
+                            { combo.Items.Add(list_category_2[j]); }
+                        }
+                    }
                 }
             }
             else //if (fill_type == 2) //full
             {
                 combo.Items.Clear();
-                for (int j = 0; j < list_postures.Count; j++)
-                { combo.Items.Add(list_postures[j]); }
+
+                if (index_label == index_category_label)
+                {
+                    if (SessionPart == 1)
+                    {
+                        for (int j = 0; j < list_category_1.Count; j++)
+                        { combo.Items.Add(list_category_1[j]); }
+                    }
+                    else if (SessionPart == 2)
+                    {
+                        for (int j = 0; j < list_category_2.Count; j++)
+                        { combo.Items.Add(list_category_2[j]); }
+                    }
+                }
+
             }
 
         }
@@ -1685,25 +1979,23 @@ namespace TestApplication_Annotation
             }
 
         }
-
-
+           
         private void dataGridView1_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
-            if (dataGridView1.Focused)
+            if (dataGridView1.Focused) 
             {
+            
                 int column = e.ColumnIndex;
                 int row = e.RowIndex;
-
                 nrows = dataGridView1.Rows.Count;
 
                 try
                 {
                     #region Label Posture
 
-                    if ( (column == index_label_Posture) && (is_busy ==0) )
+                    if ( (column == index_category_label) && (is_busy ==0) )
                     {
                         bool is_label_open;
-                        bool is_end_list;
                         int open_row;
                         int close_row;
                         bool is_unlocked = false;
@@ -1714,19 +2006,20 @@ namespace TestApplication_Annotation
 
                         is_busy = 1;
                         is_label_open = true;
-                        is_end_list = false;
+                        //is_end_list = false;
+
+                        //===========================
+                        // Status
+                        // out row, nrows
+                        // tlabel, isunlocked, open_row, close_row, status_tlabel, is_label_open
+                        // end_label
 
                         tlabel= dataGridView1.Rows[row].Cells[column].Value.ToString();
 
                         if( dataGridView1.Rows[row].Cells[index_Posture_Lock].Value != null)
                         { is_unlocked = (bool) dataGridView1.Rows[row].Cells[index_Posture_Lock].Value;}
 
-                        if (is_unlocked == true)
-                        { row = check_label_lock(is_unlocked, is_label_open, row, index_label_Posture, tlabel);
-                          nrows = dataGridView1.Rows.Count;
-                        }
 
-                      
                         status_tlabel = dataGridView1.Rows[row].Cells[index_Status].Value.ToString();
 
                         open_row = search_open_row_backwards(row);
@@ -1734,36 +2027,44 @@ namespace TestApplication_Annotation
                          if( (open_row == row) || (row == 0))
                          { is_label_open = false;}
 
-                        //======================
+
+                         start_label = dataGridView1.Rows[open_row].Cells[index_category_label].Value.ToString();
+
+                         if (is_unlocked == true)
+                         {
+                            int result = check_label_lock(is_unlocked,is_label_open, row, index_category_label, 
+                                                     tlabel, open_row, start_label);
+
+
+                             if (result > -1)
+                             {
+                                 //Update open_row value
+                                 open_row = row;
+                                 is_label_open = false;
+                                 start_label = tlabel;
+
+                                 if (result == 1)
+                                 {
+                                     row = row + 1;
+                                     nrows = dataGridView1.Rows.Count;
+                                 }
+                             }
+                         }
+
+
                          close_row = search_close_row_forward(row, nrows, open_row, is_label_open);
 
                          if ( (is_label_open == false) && (tlabel.CompareTo(" ") != 0))
                          {
                              if (close_row >= nrows)
                              {
-                                 #region
-                                 /*
-                                 // need to insert an end row below
-                                 dataGridView1.Rows.Insert(row + 1, 1);
-
-                                 // update number of rows, and close_row
-                                 nrows = dataGridView1.Rows.Count;
-                                 close_row = row + 1;
-                                 
-                                 // fill "end" in inserted row and close label
-                                 fill_row(close_row, 1, tlabel, -1, index_label_Posture, "end",open_row, close_row);
-                             
-                                  */
-                                 #endregion
-
-                                 close_row = add_end_row( row +1, out nrows,tlabel, index_label_Posture, open_row,false);
+                                 close_row = add_end_row( row +1, out nrows,tlabel, index_category_label, open_row,false);
                              }
                              else if (close_row <= open_row)
                              {
                                  // if label needs to be closed, because "end" or "start_on"
                                  // perhaps do not work when the end row is separated several lines from open row
-                                     close_row = add_end_row(row + 1, out nrows, tlabel, index_label_Posture, open_row, true);
-                                 
+                                     close_row = add_end_row(row + 1, out nrows, tlabel, index_category_label, open_row, true);
                              }
                          }
 
@@ -1777,33 +2078,18 @@ namespace TestApplication_Annotation
                         else if( (close_row < nrows ) &&
                             (dataGridView1.Rows[close_row].Cells[index_Status].Value.ToString().CompareTo("start") == 0))
                         {
-                            #region
-                            /*
-                            // need to insert an end row below
-                            dataGridView1.Rows.Insert(row + 1, 1);
-
-                            // update number of rows, and close_row
-                            nrows = dataGridView1.Rows.Count;
-                            close_row = row + 1;
-
-                            // fill "end" in inserted row and close label
-                            fill_row(close_row, 1, tlabel,close_row +1, index_label_Posture, "end", open_row, close_row);
-                            */
-                            #endregion
-
-                            close_row = add_end_row(row + 1, out nrows, tlabel, index_label_Posture, open_row, true);
+                           close_row = add_end_row(row + 1, out nrows, tlabel, index_category_label, open_row, true);
                         }
 
                         
+                        if (dataGridView1.Rows[close_row].Cells[index_category_label].Value == null)
+                        { dataGridView1.Rows[close_row].Cells[index_category_label].Value = " "; }
 
-                         //=====================
+                        end_label = dataGridView1.Rows[close_row].Cells[index_category_label].Value.ToString();
 
-                        if (dataGridView1.Rows[close_row].Cells[index_label_Posture].Value == null)
-                        { dataGridView1.Rows[close_row].Cells[index_label_Posture].Value = " "; }
+                        //======================
 
-                        end_label = dataGridView1.Rows[close_row].Cells[index_label_Posture].Value.ToString();
-                        
-                       
+
 
                         if(is_label_open == false) 
                         {
@@ -1818,8 +2104,9 @@ namespace TestApplication_Annotation
                                    
                                     dataGridView1.Rows[row].Cells[index_EndID].Value = close_row; 
                                     
-
-                                    if (set_status_forward(open_row, close_row, tlabel, 1, true, open_row) == -1)
+                                    // set type combo to state 4 == do not change
+                                    // before 1
+                                    if (set_status_forward(open_row, close_row, tlabel, 4, true, open_row) == -1)
                                     {
                                         System.Console.WriteLine("Error, end label was found before");
                                     }
@@ -1834,6 +2121,8 @@ namespace TestApplication_Annotation
                                     dataGridView1.Rows[row].Cells[index_EndID].Value = -1;
                                     
                                     // cleanup
+                                    // set type combo to state 4 == do not change
+                                    // before 3
                                         if (set_status_forward(open_row, close_row, tlabel, 3, false, open_row) == -1)
                                         { System.Console.WriteLine("Error, end label was found before"); }
                                     
@@ -1850,9 +2139,11 @@ namespace TestApplication_Annotation
 
                                        
                                         dataGridView1.Rows[close_row].Cells[index_Status].Value = "end";
-                                        dataGridView1.Rows[close_row].Cells[index_label_Posture].Value = tlabel;
-
-                                        if (set_status_forward(open_row, close_row, tlabel, 1, true, open_row) == -1) 
+                                        dataGridView1.Rows[close_row].Cells[index_category_label].Value = tlabel;
+                                        
+                                        // set type combo to state 4 == do not change
+                                        // before 1
+                                        if (set_status_forward(open_row, close_row, tlabel, 4, true, open_row) == -1) 
                                         { System.Console.WriteLine("Error, end label was found before"); }
 
 
@@ -1861,20 +2152,22 @@ namespace TestApplication_Annotation
                                     {
                                       
                                         dataGridView1.Rows[row].Cells[index_label_StartEnd].Value = " ";
-                                        dataGridView1.Rows[row].Cells[index_label_Posture].Value = " ";
+                                        dataGridView1.Rows[row].Cells[index_category_label].Value = " ";
 
                                         if (row != open_row)
                                         {
                                             dataGridView1.Rows[open_row].Cells[index_label_StartEnd].Value = " ";
-                                            dataGridView1.Rows[open_row].Cells[index_label_Posture].Value = " ";
+                                            dataGridView1.Rows[open_row].Cells[index_category_label].Value = " ";
                                         }
 
                                         dataGridView1.Rows[close_row].Cells[index_label_StartEnd].Value = " ";
-                                        dataGridView1.Rows[close_row].Cells[index_label_Posture].Value = " ";
+                                        dataGridView1.Rows[close_row].Cells[index_category_label].Value = " ";
 
 
 
                                         // cleanup
+                                        // set type combo to state 4 == do not change
+                                        // before 3
                                         if (set_status_forward(open_row, close_row, tlabel, 3, false, open_row) == -1)
                                         {
                                             System.Console.WriteLine("Error, end label was found before");
@@ -1896,9 +2189,11 @@ namespace TestApplication_Annotation
 
                                         
                                         dataGridView1.Rows[close_row].Cells[index_Status].Value = "end";
-                                        dataGridView1.Rows[close_row].Cells[index_label_Posture].Value = tlabel;
+                                        dataGridView1.Rows[close_row].Cells[index_category_label].Value = tlabel;
 
-                                        if (set_status_forward(open_row, close_row, tlabel, 1, true, open_row) == -1)
+                                        // set type combo to state 4 == do not change
+                                        // before 1
+                                        if (set_status_forward(open_row, close_row, tlabel, 4, true, open_row) == -1)
                                         {
                                             System.Console.WriteLine("Error, end label was found before");
                                         }
@@ -1907,19 +2202,21 @@ namespace TestApplication_Annotation
                                     {
 
                                         dataGridView1.Rows[row].Cells[index_label_StartEnd].Value = " ";
-                                        dataGridView1.Rows[row].Cells[index_label_Posture].Value = " ";
+                                        dataGridView1.Rows[row].Cells[index_category_label].Value = " ";
 
                                         if (row != open_row)
                                         {
                                             dataGridView1.Rows[open_row].Cells[index_label_StartEnd].Value = " ";
-                                            dataGridView1.Rows[open_row].Cells[index_label_Posture].Value = " ";
+                                            dataGridView1.Rows[open_row].Cells[index_category_label].Value = " ";
                                         }
 
                                         dataGridView1.Rows[close_row].Cells[index_label_StartEnd].Value = " ";
-                                        dataGridView1.Rows[close_row].Cells[index_label_Posture].Value = " ";
+                                        dataGridView1.Rows[close_row].Cells[index_category_label].Value = " ";
 
 
                                         // cleanup
+                                        // set type combo to state 4 == do not change
+                                        // before 3
                                         if (set_status_forward(open_row, close_row, tlabel, 3, false, open_row) == -1)
                                         {
                                             System.Console.WriteLine("Error, end label was found before");
@@ -1945,9 +2242,12 @@ namespace TestApplication_Annotation
                                     if (dataGridView1.Rows[row + 1].Cells[index_Status].Value.ToString().CompareTo("start") != 0) //start is not next
                                     {
                                         //close_row = search_close_row_forward(row, nrows);
-                                        start_label = dataGridView1.Rows[open_row].Cells[index_label_Posture].Value.ToString();
+                                        start_label = dataGridView1.Rows[open_row].Cells[index_category_label].Value.ToString();
 
-                                        if (set_status_forward(row+1, close_row, start_label, 1, false, open_row) == -1)
+
+                                        // set type combo to state 4 == do not change
+                                        //before 1
+                                        if (set_status_forward(row+1, close_row, start_label, 4, false, open_row) == -1)
                                         {
                                             System.Console.WriteLine("Error, end label was found before");
                                         }
@@ -1957,7 +2257,7 @@ namespace TestApplication_Annotation
                                 }
                                 else
                                 {
-                                    start_label = dataGridView1.Rows[open_row].Cells[index_label_Posture].Value.ToString();
+                                    start_label = dataGridView1.Rows[open_row].Cells[index_category_label].Value.ToString();
 
                                     if (start_label.CompareTo(tlabel) == 0)
                                     {
@@ -1971,6 +2271,8 @@ namespace TestApplication_Annotation
                                             dataGridView1.Rows[row].Cells[index_label_StartEnd].Value = "End";
                                             dataGridView1.Rows[row].Cells[index_EndID].Value = row;
 
+                                            // set type combo to state 4 == do not change
+                                            // before 3
                                             if (set_status_forward(row + 1, close_row, "", 3, false, row + 1) == -1)
                                             {
                                                 System.Console.WriteLine("Error, end label was found before");
@@ -1986,7 +2288,9 @@ namespace TestApplication_Annotation
                                     else
                                     {
                                         //set the right labels in the combo
-                                        if (set_status_forward(open_row, close_row, start_label,1, true, open_row) == -1)
+                                        // set type combo to state 4 == do not change
+                                        // before 1
+                                        if (set_status_forward(open_row, close_row, start_label,4, true, open_row) == -1)
                                         {
                                             System.Console.WriteLine("Error, end label was found before");
                                         }
@@ -2005,7 +2309,7 @@ namespace TestApplication_Annotation
                                 else // if no blank
                                 { 
                                    //set end
-                                    start_label = dataGridView1.Rows[open_row].Cells[index_label_Posture].Value.ToString();
+                                    start_label = dataGridView1.Rows[open_row].Cells[index_category_label].Value.ToString();
 
                                     if (start_label.CompareTo(tlabel) == 0)
                                     {
@@ -2027,6 +2331,8 @@ namespace TestApplication_Annotation
                                             dataGridView1.Rows[row + 1].Cells[index_Status].Value = "start";
                                             dataGridView1.Rows[close_row].Cells[index_Status].Value = "end";
 
+                                            // set type combo to state 4 == do not change
+                                            // before 3
                                             if (set_status_forward(row + 1, close_row, "", 3, false, row + 1) == -1)
                                             {
                                                 System.Console.WriteLine("Error, end label was found before");
@@ -2069,14 +2375,18 @@ namespace TestApplication_Annotation
 
                         if (is_unlocked) // set combo to full == 2
                         {
-                            set_ComboBox(cellComboBox, row, index_label_Posture, 2, "");
+                            // set type combo to state 4 == do not change
+                            //before 2
+                            set_ComboBox(cellComboBox, row, index_category_label, 4, "");
                         }
                         else // set combo to simple == 1
                         {
-                            if (dataGridView1.Rows[open_row].Cells[index_label_Posture].Value  != null)
-                            { tlabel = dataGridView1.Rows[open_row].Cells[index_label_Posture].Value.ToString(); }
+                            if (dataGridView1.Rows[open_row].Cells[index_category_label].Value  != null)
+                            { tlabel = dataGridView1.Rows[open_row].Cells[index_category_label].Value.ToString(); }
 
-                            set_ComboBox(cellComboBox, row, index_label_Posture, 1, tlabel);
+                            // set type combo to state 4 == do not change
+                            // before 1
+                            set_ComboBox(cellComboBox, row, index_category_label, 4, tlabel);
                         }
 
                     }
@@ -2103,9 +2413,7 @@ namespace TestApplication_Annotation
                                  dataGridView1.Rows[row].Cells[index_Status].Value = "start";
                                  dataGridView1.Rows[row].Cells[index_StartID].Value = row;
                                  
-                                 // search the end forwards (update all cells)
-                                 //dataGridView1.Rows[row].Cells[index_EndID].Value = -1;
-
+       
                              }
                              else if (status_label.CompareTo("End") == 0)
                              {
@@ -2115,14 +2423,14 @@ namespace TestApplication_Annotation
                                  if (row > 0)
                                  {
                                      // search the start backwards (update all cells)
-                                     if (dataGridView1.Rows[row - 1].Cells[index_label_Posture].Value != null)
-                                     {  start_label = dataGridView1.Rows[row - 1].Cells[index_label_Posture].Value.ToString();}
+                                     if (dataGridView1.Rows[row - 1].Cells[index_category_label].Value != null)
+                                     {  start_label = dataGridView1.Rows[row - 1].Cells[index_category_label].Value.ToString();}
                                      
-                                     if (dataGridView1.Rows[row].Cells[index_label_Posture].Value != null)
-                                     {end_label = dataGridView1.Rows[row].Cells[index_label_Posture].Value.ToString();}
+                                     if (dataGridView1.Rows[row].Cells[index_category_label].Value != null)
+                                     {end_label = dataGridView1.Rows[row].Cells[index_category_label].Value.ToString();}
 
-                                     if (dataGridView1.Rows[row+1].Cells[index_label_Posture].Value != null)
-                                     { next_label = dataGridView1.Rows[row+1].Cells[index_label_Posture].Value.ToString(); }
+                                     if (dataGridView1.Rows[row+1].Cells[index_category_label].Value != null)
+                                     { next_label = dataGridView1.Rows[row+1].Cells[index_category_label].Value.ToString(); }
 
 
                                      if(start_label.CompareTo(end_label) != 0) 
@@ -2133,7 +2441,7 @@ namespace TestApplication_Annotation
                                         if (prev_status_label.CompareTo("end") == 0)
                                          {
                                              //insert a start
-                                             add_start_row(row, out nrows, end_label, index_label_Posture, row + 1, true);
+                                             add_start_row(row, out nrows, end_label, index_category_label, row + 1, true);
 
                                              next_end = row + 2;
 
@@ -2142,6 +2450,7 @@ namespace TestApplication_Annotation
                                              else
                                              { next_end = nrows - 1; }
 
+                                             
                                              if (cleanup_forward(row + 2, next_end, " ") == -1)
                                              { label_play.Text = "Cleanup was not finished successfully. Please check annotations."; }
 
@@ -2151,9 +2460,9 @@ namespace TestApplication_Annotation
                                              // check start-end labels are similar
                                              // if similar do nothing
                                              // if not similar, set label to start label, lock combo and sent message
-                                             set_ComboBox(cellComboBox, row, index_label_Posture, 1, start_label);
+                                             set_ComboBox(cellComboBox, row, index_category_label, 1, start_label);
 
-                                             dataGridView1.Rows[row].Cells[index_label_Posture].Value = start_label;
+                                             dataGridView1.Rows[row].Cells[index_category_label].Value = start_label;
                                              label_play.Text = "END of label was set to open START label. START/END labels should match. To modify it, change START label.";
 
                                          }
@@ -2219,11 +2528,11 @@ namespace TestApplication_Annotation
                                                  // only start is possible if next_end > row
                                                  if ((next_end > row) && (next_end < nrows))
                                                  {
-                                                     end_label = dataGridView1.Rows[next_end].Cells[index_label_Posture].Value.ToString();
+                                                     end_label = dataGridView1.Rows[next_end].Cells[index_category_label].Value.ToString();
 
                                                      dataGridView1.Rows[row].Cells[index_Status].Value = "start";
                                                      dataGridView1.Rows[row].Cells[index_label_StartEnd].Value = "Start";
-                                                     dataGridView1.Rows[row].Cells[index_label_Posture].Value = end_label;
+                                                     dataGridView1.Rows[row].Cells[index_category_label].Value = end_label;
 
                                                      label_play.Text = "The END Label could not be set. START/ERROR mismatch. To modified it, edit the START label.";
                                                  }
@@ -2241,7 +2550,7 @@ namespace TestApplication_Annotation
                                  dataGridView1.Rows[row].Cells[index_Status].Value = " ";
                                  //dataGridView1.Rows[row].Cells[index_StartID].Value = -1;
                                  //dataGridView1.Rows[row].Cells[index_EndID].Value = -1;
-                                 dataGridView1.Rows[row].Cells[index_label_Posture].Value = " ";
+                                 dataGridView1.Rows[row].Cells[index_category_label].Value = " ";
                              }
                             
                          }
@@ -2249,12 +2558,6 @@ namespace TestApplication_Annotation
                     }
                     #endregion 
 
-                    #region Activity
-                    else if (column == index_label_Activity)
-                    {
-
-                    }
-                    #endregion
 
                 }// finish try
                 catch
@@ -2267,7 +2570,7 @@ namespace TestApplication_Annotation
                    
                 }
 
-            }// finish if
+            }// finish if focused
         }
         
         private void dataGridView1_DataError(object sender, DataGridViewDataErrorEventArgs e)
@@ -2285,7 +2588,14 @@ namespace TestApplication_Annotation
            
             this.dataGridView1.Height = (int)System.Math.Round(0.65 * this.Height);
 
-           
+            
+            textBox_instructions.Text = "Please provide a valid path for the audio and protocol files, then click Start.";
+        }
+
+
+        private void FormAnnotation_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            SaveCurrentSessionToFile();
         }
 
 
@@ -2300,6 +2610,577 @@ namespace TestApplication_Annotation
 
 
 
+        private void dataGridView1_KeyDown(object sender, KeyEventArgs e)
+        {
+            Keys key = e.KeyCode;
+
+            if (key == Keys.F1)
+            {
+                PlayFile(current_row);
+            }
+            
+        }
+
+
+
+        #endregion
+
+
+
+        #region User Actions
+                 
+        
+        private void ProcessAction_Category_2(int column, int row, int index_label, int index_lock)
+        {
+
+            #region
+
+            if ( (column == index_label) && (is_busy ==0) )
+              {
+                        bool is_label_open;
+                        bool is_end_list;
+                        int open_row;
+                        int close_row;
+                        bool is_unlocked = false;
+
+                        string end_label = " ";
+                        string start_label = " ";
+
+                        string tlabel;
+                      
+                        is_label_open = true;
+                        is_end_list = false;
+
+
+                        is_busy = 1;
+
+                         
+                         // Get Status
+                         //========================
+                        tlabel= dataGridView1.Rows[row].Cells[column].Value.ToString();
+
+                        if( dataGridView1.Rows[row].Cells[index_lock].Value != null)
+                        { is_unlocked = (bool) dataGridView1.Rows[row].Cells[index_lock].Value;}
+
+                        
+                      
+                        status_tlabel = dataGridView1.Rows[row].Cells[index_Status].Value.ToString();
+
+                        open_row = search_open_row_backwards(row);
+                     
+                         if( (open_row == row) || (row == 0))
+                         { is_label_open = false;}
+
+                        /* if (is_unlocked == true)
+                         {
+                             row = check_label_lock(is_unlocked, is_label_open, row, index_label, tlabel, tlabel);
+                             nrows = dataGridView1.Rows.Count;
+                         }
+                  */
+
+                         close_row = search_close_row_forward(row, nrows, open_row, is_label_open);
+
+                         if ( (is_label_open == false) && (tlabel.CompareTo(" ") != 0))
+                         {
+                             if (close_row >= nrows)
+                             {
+                                 #region
+                                 /*
+                                 // need to insert an end row below
+                                 dataGridView1.Rows.Insert(row + 1, 1);
+
+                                 // update number of rows, and close_row
+                                 nrows = dataGridView1.Rows.Count;
+                                 close_row = row + 1;
+                                 
+                                 // fill "end" in inserted row and close label
+                                 fill_row(close_row, 1, tlabel, -1, index_label, "end",open_row, close_row);
+                             
+                                  */
+                                 #endregion
+
+                                 close_row = add_end_row( row +1, out nrows,tlabel, index_label, open_row,false);
+                             }
+                             else if (close_row <= open_row)
+                             {
+                                 // if label needs to be closed, because "end" or "start_on"
+                                 // perhaps do not work when the end row is separated several lines from open row
+                                     close_row = add_end_row(row + 1, out nrows, tlabel, index_label, open_row, true);
+                                 
+                             }
+                         }
+
+                         if (close_row >= nrows)
+                         {
+                             close_row = nrows - 1;
+                         }
+
+                        if (dataGridView1.Rows[close_row].Cells[index_Status].Value == null)
+                        { dataGridView1.Rows[close_row].Cells[index_Status].Value = " "; }
+                        else if( (close_row < nrows ) &&
+                            (dataGridView1.Rows[close_row].Cells[index_Status].Value.ToString().CompareTo("start") == 0))
+                        {
+                            close_row = add_end_row(row + 1, out nrows, tlabel, index_label, open_row, true);
+                        }
+
+                        
+
+
+                        if (dataGridView1.Rows[close_row].Cells[index_label].Value == null)
+                        { dataGridView1.Rows[close_row].Cells[index_label].Value = " "; }
+
+                        end_label = dataGridView1.Rows[close_row].Cells[index_label].Value.ToString();
+
+                        //======================
+
+
+                        if(is_label_open == false) 
+                        {
+                            if (end_label.CompareTo(" ") == 0)
+                            {
+                                if (tlabel.CompareTo(" ") == 1) // no blank
+                                {
+                                    dataGridView1.Rows[row].Cells[index_Status].Value = "start";
+                                    dataGridView1.Rows[row].Cells[index_StartID].Value = open_row;
+                                    dataGridView1.Rows[row].Cells[index_label_StartEnd].Value = "Start";
+
+                                   
+                                    dataGridView1.Rows[row].Cells[index_EndID].Value = close_row; 
+                                    
+
+                                    if (set_status_forward(open_row, close_row, tlabel, 1, true, open_row) == -1)
+                                    {
+                                        System.Console.WriteLine("Error, end label was found before");
+                                    }
+                                    
+                                }
+                                else //blank 
+                                {
+                                    dataGridView1.Rows[row].Cells[index_Status].Value = " ";
+                                    dataGridView1.Rows[row].Cells[index_StartID].Value = -1;
+                                    dataGridView1.Rows[row].Cells[index_label_StartEnd].Value = " ";
+
+                                    dataGridView1.Rows[row].Cells[index_EndID].Value = -1;
+                                    
+                                    // cleanup
+                                        if (set_status_forward(open_row, close_row, tlabel, 3, false, open_row) == -1)
+                                        { System.Console.WriteLine("Error, end label was found before"); }
+                                    
+
+                                }
+                            }
+                            else //end_label not blank
+                            {
+                                if (status_tlabel.CompareTo("start") == 0)
+                                {
+                                    if (tlabel.CompareTo(" ") == 1) //no blank
+                                    {
+                                        dataGridView1.Rows[row].Cells[index_Status].Value = "start";
+
+                                       
+                                        dataGridView1.Rows[close_row].Cells[index_Status].Value = "end";
+                                        dataGridView1.Rows[close_row].Cells[index_label].Value = tlabel;
+
+                                        if (set_status_forward(open_row, close_row, tlabel, 1, true, open_row) == -1) 
+                                        { System.Console.WriteLine("Error, end label was found before"); }
+
+
+                                    }
+                                    else //blank
+                                    {
+                                      
+                                        dataGridView1.Rows[row].Cells[index_label_StartEnd].Value = " ";
+                                        dataGridView1.Rows[row].Cells[index_label].Value = " ";
+
+                                        if (row != open_row)
+                                        {
+                                            dataGridView1.Rows[open_row].Cells[index_label_StartEnd].Value = " ";
+                                            dataGridView1.Rows[open_row].Cells[index_label].Value = " ";
+                                        }
+
+                                        dataGridView1.Rows[close_row].Cells[index_label_StartEnd].Value = " ";
+                                        dataGridView1.Rows[close_row].Cells[index_label].Value = " ";
+
+
+
+                                        // cleanup
+                                        if (set_status_forward(open_row, close_row, tlabel, 3, false, open_row) == -1)
+                                        {
+                                            System.Console.WriteLine("Error, end label was found before");
+                                        }
+                                       
+                                    }
+
+                                }
+                                else
+                                {
+
+                                    // this start needs to stop with other start
+                                    // end label is incorrect, should be " "
+                                    //System.Console.WriteLine("This case needs to be considered");
+
+                                    if (tlabel.CompareTo(" ") == 1) //no blank
+                                    {
+                                        dataGridView1.Rows[row].Cells[index_Status].Value = "start";
+
+                                        
+                                        dataGridView1.Rows[close_row].Cells[index_Status].Value = "end";
+                                        dataGridView1.Rows[close_row].Cells[index_label].Value = tlabel;
+
+                                        if (set_status_forward(open_row, close_row, tlabel, 1, true, open_row) == -1)
+                                        {
+                                            System.Console.WriteLine("Error, end label was found before");
+                                        }
+                                    }
+                                    else //blank
+                                    {
+
+                                        dataGridView1.Rows[row].Cells[index_label_StartEnd].Value = " ";
+                                        dataGridView1.Rows[row].Cells[index_label].Value = " ";
+
+                                        if (row != open_row)
+                                        {
+                                            dataGridView1.Rows[open_row].Cells[index_label_StartEnd].Value = " ";
+                                            dataGridView1.Rows[open_row].Cells[index_label].Value = " ";
+                                        }
+
+                                        dataGridView1.Rows[close_row].Cells[index_label_StartEnd].Value = " ";
+                                        dataGridView1.Rows[close_row].Cells[index_label].Value = " ";
+
+
+                                        // cleanup
+                                        if (set_status_forward(open_row, close_row, tlabel, 3, false, open_row) == -1)
+                                        {
+                                            System.Console.WriteLine("Error, end label was found before");
+                                        }
+
+                                    }
+
+
+                                }
+                            }
+                        }
+                        else //is_label_open == 1
+                        {
+                            if (end_label.CompareTo(" ") == 0)
+                            {
+                                if (tlabel.CompareTo(" ") == 0) // blank
+                                {
+                                    dataGridView1.Rows[row].Cells[index_Status].Value = "start_on";
+                                    dataGridView1.Rows[row].Cells[index_StartID].Value = open_row;
+                                    dataGridView1.Rows[row].Cells[index_label_StartEnd].Value = " ";
+                                    dataGridView1.Rows[row].Cells[index_EndID].Value = -1;
+
+                                    if (dataGridView1.Rows[row + 1].Cells[index_Status].Value.ToString().CompareTo("start") != 0) //start is not next
+                                    {
+                                        //close_row = search_close_row_forward(row, nrows);
+                                        start_label = dataGridView1.Rows[open_row].Cells[index_label].Value.ToString();
+
+                                        if (set_status_forward(row+1, close_row, start_label, 1, false, open_row) == -1)
+                                        {
+                                            System.Console.WriteLine("Error, end label was found before");
+                                        }
+                                    }
+
+
+                                }
+                                else
+                                {
+                                    start_label = dataGridView1.Rows[open_row].Cells[index_label].Value.ToString();
+
+                                    if (start_label.CompareTo(tlabel) == 0)
+                                    {
+                                       
+
+                                        if (status_tlabel.CompareTo("start") != 0) //different to start
+                                        {
+                                            // set the end
+                                            dataGridView1.Rows[row].Cells[index_Status].Value = "end";
+                                            dataGridView1.Rows[row].Cells[index_StartID].Value = open_row;
+                                            dataGridView1.Rows[row].Cells[index_label_StartEnd].Value = "End";
+                                            dataGridView1.Rows[row].Cells[index_EndID].Value = row;
+
+                                            if (set_status_forward(row + 1, close_row, "", 3, false, row + 1) == -1)
+                                            {
+                                                System.Console.WriteLine("Error, end label was found before");
+                                            }
+
+                                        }
+                                        else
+                                        {
+                                            // This needs to be considered !!!!
+                                            System.Console.WriteLine("This case needs to be considered");
+                                        }
+                                    }
+                                    else
+                                    {
+                                        //set the right labels in the combo
+                                        if (set_status_forward(open_row, close_row, start_label,1, true, open_row) == -1)
+                                        {
+                                            System.Console.WriteLine("Error, end label was found before");
+                                        }
+                                    }
+                                }// ends tlabel "no blank" endlabel " "
+                            } // ends end label " "
+                            else
+                            {
+                                if (tlabel.CompareTo(" ") == 0) // blank
+                                {
+                                    dataGridView1.Rows[row].Cells[index_Status].Value = "start_on";
+                                    dataGridView1.Rows[row].Cells[index_StartID].Value = open_row;
+                                    dataGridView1.Rows[row].Cells[index_label_StartEnd].Value = " ";
+                                    dataGridView1.Rows[row].Cells[index_EndID].Value = close_row; 
+                                }
+                                else // if no blank
+                                { 
+                                   //set end
+                                    start_label = dataGridView1.Rows[open_row].Cells[index_label].Value.ToString();
+
+                                    if (start_label.CompareTo(tlabel) == 0)
+                                    {
+                                        if (row == close_row) //is this the end?
+                                        {
+                                            dataGridView1.Rows[row].Cells[index_Status].Value = "end";
+                                            dataGridView1.Rows[row].Cells[index_StartID].Value = open_row;
+                                            dataGridView1.Rows[row].Cells[index_label_StartEnd].Value = "End";
+                                            dataGridView1.Rows[row].Cells[index_EndID].Value = row;
+                                        }
+                                        else if (row < close_row)
+                                        {
+                                            dataGridView1.Rows[row].Cells[index_Status].Value = "end";
+                                            dataGridView1.Rows[row].Cells[index_StartID].Value = open_row;
+                                            dataGridView1.Rows[row].Cells[index_label_StartEnd].Value = "End";
+                                            dataGridView1.Rows[row].Cells[index_EndID].Value = row;
+
+                                            //cleanup the rest
+                                            dataGridView1.Rows[row + 1].Cells[index_Status].Value = "start";
+                                            dataGridView1.Rows[close_row].Cells[index_Status].Value = "end";
+
+                                            if (set_status_forward(row + 1, close_row, "", 3, false, row + 1) == -1)
+                                            {
+                                                System.Console.WriteLine("Error, end label was found before");
+                                            }
+                                        }
+                                        else
+                                        {
+                                            System.Console.WriteLine("Error, end label was found before");
+                                        }
+                                    }
+                                }
+                            }
+
+                        }// ends "is label open == 1"
+                        
+                        is_busy = 0;
+                        tlabel = " ";
+                        status_tlabel = " ";
+                       
+
+                    }// ends "is column posture" 
+                    
+                    #endregion
+
+                    #region Label Posture Lock
+
+                    else if ((column == index_lock) && (is_busy == 0))  // Lock index activated
+                    { 
+                        bool is_unlocked = false;
+                        int open_row = row;
+                        tlabel = " ";
+
+                        if(  dataGridView1.Rows[row].Cells[index_StartID].Value != null)
+                        { open_row = (int)dataGridView1.Rows[row].Cells[index_StartID].Value;}
+
+                        if (dataGridView1.Rows[row].Cells[index_lock].Value != null)
+                        {
+                            is_unlocked = (bool)dataGridView1.Rows[row].Cells[index_lock].Value;
+                        }
+
+                        if (is_unlocked) // set combo to full == 2
+                        {
+                            set_ComboBox(cellComboBox, row, index_label, 2, "");
+                        }
+                        else // set combo to simple == 1
+                        {
+                            if (dataGridView1.Rows[open_row].Cells[index_label].Value  != null)
+                            { tlabel = dataGridView1.Rows[open_row].Cells[index_label].Value.ToString(); }
+
+                            set_ComboBox(cellComboBox, row, index_label, 1, tlabel);
+                        }
+
+                    }
+                    #endregion
+
+                    #region Label Posture Start/End
+
+                    else if (column == index_label_StartEnd)
+                    {
+                        string prev_status_label = " ";
+                        string status_label = " ";
+                        string next_label = " ";
+                        string start_label = " ";
+                        string end_label = " ";
+
+                        int next_end = row+1;
+
+                          if( is_busy == 0)
+                         {
+                             status_label= dataGridView1.Rows[row].Cells[column].Value.ToString();
+
+                             if( status_label.CompareTo("Start") == 0)
+                             {
+                                 dataGridView1.Rows[row].Cells[index_Status].Value = "start";
+                                 dataGridView1.Rows[row].Cells[index_StartID].Value = row;
+                                 
+                                 // search the end forwards (update all cells)
+                                 //dataGridView1.Rows[row].Cells[index_EndID].Value = -1;
+
+                             }
+                             else if (status_label.CompareTo("End") == 0)
+                             {
+                                 dataGridView1.Rows[row].Cells[index_Status].Value = "end";
+                                 dataGridView1.Rows[row].Cells[index_EndID].Value = row;
+
+                                 if (row > 0)
+                                 {
+                                     // search the start backwards (update all cells)
+                                     if (dataGridView1.Rows[row - 1].Cells[index_label].Value != null)
+                                     {  start_label = dataGridView1.Rows[row - 1].Cells[index_label].Value.ToString();}
+                                     
+                                     if (dataGridView1.Rows[row].Cells[index_label].Value != null)
+                                     {end_label = dataGridView1.Rows[row].Cells[index_label].Value.ToString();}
+
+                                     if (dataGridView1.Rows[row+1].Cells[index_label].Value != null)
+                                     { next_label = dataGridView1.Rows[row+1].Cells[index_label].Value.ToString(); }
+
+
+                                     if(start_label.CompareTo(end_label) != 0) 
+                                     {
+                                         if (dataGridView1.Rows[row - 1].Cells[index_Status].Value != null)
+                                         { prev_status_label = dataGridView1.Rows[row - 1].Cells[index_Status].Value.ToString(); }
+                                    
+                                        if (prev_status_label.CompareTo("end") == 0)
+                                         {
+                                             //insert a start
+                                             add_start_row(row, out nrows, end_label, index_label, row + 1, true);
+
+                                             next_end = row + 2;
+
+                                             if (next_end < nrows)
+                                             { next_end = search_close_row_forward(next_end, nrows, next_end, false); }
+                                             else
+                                             { next_end = nrows - 1; }
+
+                                             if (cleanup_forward(row + 2, next_end, " ") == -1)
+                                             { label_play.Text = "Cleanup was not finished successfully. Please check annotations."; }
+
+                                         }
+                                         else if (prev_status_label.CompareTo("start") == 0)
+                                         {
+                                             // check start-end labels are similar
+                                             // if similar do nothing
+                                             // if not similar, set label to start label, lock combo and sent message
+                                             set_ComboBox(cellComboBox, row, index_label, 1, start_label);
+
+                                             dataGridView1.Rows[row].Cells[index_label].Value = start_label;
+                                             label_play.Text = "END of label was set to open START label. START/END labels should match. To modify it, change START label.";
+
+                                         }
+                                         else if (prev_status_label.CompareTo(" ") == 0)
+                                        {  
+                                             //check if the label is close
+                                            // search the start backwards (update all cells)
+                                            int open_row = search_open_row_backwards(row);
+                                             
+                                            bool is_label_open = true;
+
+                                            if ((open_row == row) || (open_row == 0))
+                                            { is_label_open = false; }
+
+                                            int close_row = search_close_row_forward(row + 1, nrows, open_row, is_label_open);
+                                            
+                                            if (close_row >= nrows)
+                                            { close_row = nrows -1; }
+                                            else if (close_row <= open_row)
+                                            {
+                                                close_row = row + 1;
+                                            }
+
+                                            if (is_label_open == false)
+                                            {
+                                                // this end label is wrong, 
+                                                // only start is possible if next_end > row
+                                             
+                                                    dataGridView1.Rows[row].Cells[index_Status].Value = "start";
+                                                    dataGridView1.Rows[row].Cells[index_label_StartEnd].Value = "Start";
+                                                    
+                                                   if (set_status_forward(row, close_row, end_label, 1, true, open_row) == -1)
+                                                    { System.Console.WriteLine("Error, end label was found before");}
+
+                                                    label_play.Text = "The END Label could not be set. START/ERROR mismatch. To modified it, edit the START label.";
+                                            }
+                                        }
+                                     }
+
+                                     // if row and next similar
+                                     if( end_label.CompareTo( next_label) == 0 )
+                                     {
+
+                                         if (dataGridView1.Rows[row +1].Cells[index_Status].Value != null)
+                                         { prev_status_label = dataGridView1.Rows[row +1].Cells[index_Status].Value.ToString(); }
+
+                                         if (prev_status_label.CompareTo("end") == 0)
+                                         {
+                                             // search the start backwards (update all cells)
+                                             int open_row = search_open_row_backwards(row);
+
+                                             bool is_label_open = true;
+
+                                             if ((open_row == row) || (open_row == 0))
+                                             { is_label_open = false; }
+
+                                             next_end = search_close_row_forward(row, nrows, open_row, is_label_open);
+
+                                             // search end forward 
+                                             if (is_label_open == false)
+                                             {
+                                                 // this end label is wrong, 
+                                                 // only start is possible if next_end > row
+                                                 if ((next_end > row) && (next_end < nrows))
+                                                 {
+                                                     end_label = dataGridView1.Rows[next_end].Cells[index_label].Value.ToString();
+
+                                                     dataGridView1.Rows[row].Cells[index_Status].Value = "start";
+                                                     dataGridView1.Rows[row].Cells[index_label_StartEnd].Value = "Start";
+                                                     dataGridView1.Rows[row].Cells[index_label].Value = end_label;
+
+                                                     label_play.Text = "The END Label could not be set. START/ERROR mismatch. To modified it, edit the START label.";
+                                                 }
+
+                                             }
+                                            
+                                         }
+                                     }
+                                   
+                                 }
+                             }
+                             else  // blank
+                             {
+                                 // search start/end fwrd-backwards
+                                 dataGridView1.Rows[row].Cells[index_Status].Value = " ";
+                                 //dataGridView1.Rows[row].Cells[index_StartID].Value = -1;
+                                 //dataGridView1.Rows[row].Cells[index_EndID].Value = -1;
+                                 dataGridView1.Rows[row].Cells[index_label].Value = " ";
+                             }
+                            
+                         }
+                         
+                    }
+                    #endregion 
+
+
+       
+                }
 
         #endregion
 
@@ -2308,40 +3189,67 @@ namespace TestApplication_Annotation
 
 
 
-        public void LoadActivityLabels()
+        public bool LoadActivityLabels()
         {
+            bool is_file_found = false;
 
-
-            string labels_file_name = DataSessionDir + "ActivityLabelsRealtime.xml";
-
-            if (File.Exists(labels_file_name))
+            if (XmlSession == null)
             {
-                XmlSession.FromXML(labels_file_name);
+                XmlSession = new Session();
+                CActivityList = new BindingList<ActivityList>();
 
 
-                for (int i = 0; i < XmlSession.OverlappingActivityLists.Count; i++)
+                //string labels_file_name = DataSessionDir + "ActivityLabelsRealtime.xml";
+
+                //if (File.Exists(labels_file_name) == false)
+                //{ labels_file_name = "ActivityLabelsRealtime.xml"; }
+
+                string labels_file_name = textBox_2.Text;
+
+
+                if (File.Exists(labels_file_name))
                 {
-                    CActivityList.Add(XmlSession.OverlappingActivityLists[i]);
+                    is_file_found = true;
 
-                    list_categories.Add(CActivityList[i]._Name);
+                    Activity[] activityArray;
 
-                    Activity[] actArray = CActivityList[i].ToArray();
+                    XmlSession.FromXML(labels_file_name);
 
-                    list_postures.Add(" ");
-                    
-                    for (int j = 0; j < CActivityList[i].Count - 1; j++)
+
+                    for (int i = 0; i < XmlSession.OverlappingActivityLists.Count; i++)
                     {
+                        CActivityList.Add(XmlSession.OverlappingActivityLists[i]);
 
-                        list_postures.Add(actArray[j]._Name);
+                        list_category_name.Add(CActivityList[i]._Name);
+
+                        // only two activity categories can be loaded
+                        if (i == 0)
+                        {
+                            activityArray = CActivityList[i].ToArray();
+                            list_category_1.Add(" ");
+
+                            for (int j = 0; j < CActivityList[i].Count - 1; j++)
+                            { list_category_1.Add(activityArray[j]._Name); }
+                        }
+                        else if (i == 1)
+                        {
+                            activityArray = CActivityList[i].ToArray();
+                            list_category_2.Add(" ");
+
+                            for (int j = 0; j < CActivityList[i].Count - 1; j++)
+                            { list_category_2.Add(activityArray[j]._Name); }
+
+                        }
 
                     }
-                }
 
+                }
             }
-            else
-            { label_play.Text = "ActivityLabelsRealtime.xml file location is not valid. Please make sure the file is in the WocketsFiles directory."; }
-                   
+               
+
+                 return is_file_found;
         }
+
 
         private void GenerateActivityLabels()
         { 
@@ -2374,8 +3282,8 @@ namespace TestApplication_Annotation
 
             while (end_row < nrows)
             {
-                label_start = dataGridView1.Rows[start_row].Cells[index_label_Posture].Value.ToString();
-                label_end = dataGridView1.Rows[end_row].Cells[index_label_Posture].Value.ToString();
+                label_start = dataGridView1.Rows[start_row].Cells[index_category_label].Value.ToString();
+                label_end = dataGridView1.Rows[end_row].Cells[index_category_label].Value.ToString();
                 
                 start_time = dataGridView1.Rows[start_row].Cells[index_label_Time].Value.ToString();
                 end_time = dataGridView1.Rows[end_row].Cells[index_label_Time].Value.ToString();
@@ -2387,9 +3295,9 @@ namespace TestApplication_Annotation
                     //search for the category
                     category = -1;
 
-                    for (int i = 0; i < list_postures.Count; i++)
+                    for (int i = 0; i < list_category_1.Count; i++)
                     {
-                        label_end = list_postures[i];
+                        label_end = list_category_1[i];
 
                         if (label_end.CompareTo(" ") == 0)
                         { category = category + 1; }
@@ -2408,7 +3316,7 @@ namespace TestApplication_Annotation
                         //write record to list
                         record_string = start_row.ToString() +  ";" + end_row.ToString()  + ";" +
                                         start_time.ToString() + ";" + end_time.ToString() + ";" +
-                                        label_start + ";" + list_categories[category];
+                                        label_start + ";" + list_category_name[category];
 
 
                         txw.WriteLine(record_string);
@@ -2439,7 +3347,7 @@ namespace TestApplication_Annotation
                     //write record to list
                     record_string = start_row.ToString()  + ";" + end_row.ToString()  + ";" +
                                     start_time.ToString() + ";" + end_time.ToString() + ";" +
-                                    label_start + ";" + list_categories[category] + ";**" ;
+                                    label_start + ";" + list_category_name[category] + ";**" ;
 
                     txw.WriteLine(record_string);
                     LabelsList.Add(record_string);
@@ -2521,107 +3429,58 @@ namespace TestApplication_Annotation
         }
        
         
-        public static bool IsValidDirectory(string aDirPath)
-        {
-            //string subjectDataFile = aDirPath + "\\SubjectData.xml";
-            //string sensorDataFile = aDirPath + "\\SensorData.xml";
-            //string activityLabelsFile = aDirPath + "\\ActivityLabelsRealtime.xml";
-            
-            string activityLabelsFile = "ActivityLabelsRealtime.xml";
-
-            if (//File.Exists(subjectDataFile) &&
-                //File.Exists(sensorDataFile) &&
-                File.Exists(activityLabelsFile))
-                return true;
-            else
-                return false;
-
-            
-        }
-
        
         #endregion
 
 
         #region Load/Save buttons
 
-        private void button_save_Click(object sender, EventArgs e)
-        {
-           
-                SaveRowsToGrid(DataSessionName);
-               
-
-        }
+        
 
         private void button_2_Click(object sender, EventArgs e)
         {
             // Check if the audio files path exist
-            DirectoryInfo directory = new DirectoryInfo(textBox_1.Text);
-
-            if (directory.Exists)
+            if( Directory.Exists(textBox_1.Text) )
             {
-
+                
+                DirectoryInfo directory = new DirectoryInfo(textBox_1.Text);
                 DataAudioDir = directory.FullName;
 
+
                 //Initialize Components
-                // create a player to be used in the application
-                myPlayer = new System.Media.SoundPlayer();
+                if( LoadData() )
+                { 
+                    LoadViewGrid("grid");
+                  
+                    // create a player to be used in the application
+                    myPlayer = new System.Media.SoundPlayer();
+                }
+                else
+                {
+                    textBox_instructions.Text = label_play.Text;
+                }
 
-                //Fill datagridview settings
-                InitializeDataGridView(dataGridView1);
 
-                LoadData();
-
-                LoadViewGrid("grid");
             }
             else
             { 
                // send a warning saying that directory doesn't exist.
+                if (textBox_1.Text.CompareTo("") == 0)
+                {
+                    textBox_instructions.Text = "To proceed, please enter a directory path.";
+                }
+                else
+                {
+                    textBox_instructions.Text = "The directory was not found. Please check the path.";
+                }
             }
 
         }
 
 
-        private void LoadViewGrid(string vw)
+        private void button_save_Click(object sender, EventArgs e)
         {
-            if (vw.CompareTo("grid") == 0)
-            {
-                //------ hide ------------
-                textBox_1.Visible = false;
-                textBox_2.Visible = false;
-                textBox_instructions.Visible = false;
-
-                button_1.Visible = false;
-                button_2.Visible = false;
-
-                //------ show ------------
-                button_add_label.Visible = true;
-                button_remove_label.Visible = true;
-
-                button_save.Visible = true;
-                button_generate.Visible = true;
-
-                button_exit.Visible = true;
-
-                dataGridView1.Visible = true;
-                
-                label_play.Visible = true;
-                
-                label_date.Visible = true;
-                label_date.Text = "Session Date: "+ StartDate;
-
-                label_instructions_1.Text = "Press F1 to play audio file. Press F2 to edit field.";
-                label_instructions_2.Text = "Status:";
-
-                //---------------------------
-
-
-
-            }
-            else if (vw.CompareTo("select") == 0)
-            { 
-            
-            }
+            SaveCurrentSessionToFile();
         }
 
         private void button_generate_Click(object sender, EventArgs e)
@@ -2638,13 +3497,159 @@ namespace TestApplication_Annotation
             Application.Exit();
         }
 
+        private void button_session_part_Click(object sender, EventArgs e)
+        {
+            button_session_part.Enabled = false;
+
+            if (button_session_part.Text.CompareTo("Next Category") == 0)
+            {
+                SaveCurrentSessionToFile();
+                SessionPart = 2;
+
+                LoadData();
+
+                LoadSessionView_2();
+
+                button_session_part.Text = "Previous Category";
+
+            }
+            else
+            {
+
+                SaveCurrentSessionToFile();
+                SessionPart = 1;
+
+                LoadData();
+
+                LoadSessionView_1();
+
+                button_session_part.Text = "Next Category";
+
+            }
+
+
+            button_session_part.Enabled = true;
+
+        }
+
+
+        private void LoadSessionView_1()
+        {
+
+                //------ hide ------------
+                button_generate.Enabled= false;
+                //button_exit.Enabled = true;
+
+                //---------------------------
+        
+        }
+
+
+        private void LoadSessionView_2()
+        {
+
+            //------ Show ------------
+            button_generate.Enabled = true;
+            //button_exit.Enabled = true;
+
+            //---------------------------
+
+        }
+
+        
+
+        private int IsSessionStarted()
+        {
+           int is_started = -1;
+            
+                PopUp_Message_Window dlg = new PopUp_Message_Window();
+
+                this.Enabled = false;
+                //this.BackColor = Color.Black;
+                textBox_instructions.BackColor = Color.DimGray;
+
+                DialogResult dlg_res = dlg.ShowDialog();
+
+                // if create session was selected
+                if (dlg_res == DialogResult.No)
+                {
+                    string fname;
+                    string fname_bk;
+
+                    // Backup previous session files
+                    fname = DataSessionDir + "session_p1.txt";
+                    fname_bk = DataSessionDir + "session_p1_backup.txt";
+                    
+                    if (File.Exists(fname))
+                    {
+                        if (File.Exists(fname_bk))
+                        { File.Delete(fname_bk); }
+
+                        File.Copy(fname, fname_bk);
+                        File.Delete(fname);
+                    }
+
+
+                    // Backup previous session files
+                    fname = DataSessionDir + "session_p2.txt";
+                    fname_bk = DataSessionDir + "session_p2_backup.txt";
+
+                    if (File.Exists(fname))
+                    {
+                        if (File.Exists(fname_bk))
+                        { File.Delete(fname_bk); }
+
+                        File.Copy(fname, fname_bk);
+                        File.Delete(fname);
+                    }
+
+                    SessionStarted = true;
+                    is_started = 0;
+
+                    this.BackColor = Color.DimGray;
+                    textBox_instructions.BackColor = Color.YellowGreen;
+                    this.Enabled = true;
+
+                } // if load session was selected
+                else if (dlg_res == DialogResult.OK)
+                {
+                    is_started = 1;
+
+                    SessionStarted = true;
+                    is_started = 0;
+
+                    this.BackColor = Color.DimGray;
+                    textBox_instructions.BackColor = Color.YellowGreen;
+                    this.Enabled = true;
+
+                }// if session selection was canceled
+                else if (dlg_res == DialogResult.Cancel)
+                {
+                    SessionStarted = false;
+                    XmlSession = null;
+                   
+
+                    this.BackColor = Color.DimGray;
+                    textBox_instructions.BackColor = Color.YellowGreen;
+                    this.Enabled = true;
+
+                    label_play.Text = "To create or load a previous session must be selected. Otherwise, the annotation program cannot start.";
+
+                }
+
+
+             return is_started;
+
+           
+        }
+
+
+
+
+
         #endregion
 
-
-
-
-
-
+        
 
     }
 }

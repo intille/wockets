@@ -1,4 +1,4 @@
-namespace TestApplication_Annotation
+namespace AudioAnnotation
 {
     partial class FormAnnotation
     {
@@ -30,18 +30,18 @@ namespace TestApplication_Annotation
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle61 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle62 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle70 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle71 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle72 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle63 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle64 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle65 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle66 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle67 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle68 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle69 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle25 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle26 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle34 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle35 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle36 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle27 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle28 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle29 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle30 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle31 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle32 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle33 = new System.Windows.Forms.DataGridViewCellStyle();
             this.button_1 = new System.Windows.Forms.Button();
             this.textBox_1 = new System.Windows.Forms.TextBox();
             this.label_date = new System.Windows.Forms.Label();
@@ -50,19 +50,14 @@ namespace TestApplication_Annotation
             this.CPostureLock = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.CPosture = new System.Windows.Forms.DataGridViewComboBoxColumn();
             this.CStartEnd = new System.Windows.Forms.DataGridViewComboBoxColumn();
-            this.CListActivity_2 = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            this.CConcurrentActivity = new System.Windows.Forms.DataGridViewComboBoxColumn();
-            this.CStartEnd_Activity = new System.Windows.Forms.DataGridViewComboBoxColumn();
             this.CTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.CTimeLabel = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.CNotes = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.CStatus = new System.Windows.Forms.DataGridViewComboBoxColumn();
             this.CStartID = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.CEndID = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.CCombo_Simple_1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.CCombo_Type = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.CCombo_Label_1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.CCombo_Simple_2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.CCombo_Label_2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.label_play = new System.Windows.Forms.Label();
             this.button_add_label = new System.Windows.Forms.Button();
             this.textBox_2 = new System.Windows.Forms.TextBox();
@@ -74,12 +69,18 @@ namespace TestApplication_Annotation
             this.button_generate = new System.Windows.Forms.Button();
             this.button_exit = new System.Windows.Forms.Button();
             this.textBox_instructions = new System.Windows.Forms.TextBox();
+            this.button_session_part = new System.Windows.Forms.Button();
+            this.label_files_path = new System.Windows.Forms.Label();
+            this.label_protocol_path = new System.Windows.Forms.Label();
+            this.button_3 = new System.Windows.Forms.Button();
+            this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
+            this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
             // button_1
             // 
-            this.button_1.Location = new System.Drawing.Point(735, 6);
+            this.button_1.Location = new System.Drawing.Point(935, 120);
             this.button_1.Name = "button_1";
             this.button_1.Size = new System.Drawing.Size(101, 23);
             this.button_1.TabIndex = 0;
@@ -89,9 +90,9 @@ namespace TestApplication_Annotation
             // 
             // textBox_1
             // 
-            this.textBox_1.Location = new System.Drawing.Point(171, 6);
+            this.textBox_1.Location = new System.Drawing.Point(157, 122);
             this.textBox_1.Name = "textBox_1";
-            this.textBox_1.Size = new System.Drawing.Size(558, 20);
+            this.textBox_1.Size = new System.Drawing.Size(758, 20);
             this.textBox_1.TabIndex = 1;
             // 
             // label_date
@@ -109,62 +110,57 @@ namespace TestApplication_Annotation
             // dataGridView1
             // 
             this.dataGridView1.AccessibleRole = System.Windows.Forms.AccessibleRole.None;
-            dataGridViewCellStyle61.NullValue = null;
-            this.dataGridView1.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle61;
+            dataGridViewCellStyle25.NullValue = null;
+            this.dataGridView1.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle25;
             this.dataGridView1.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.ColumnHeader;
             this.dataGridView1.BackgroundColor = System.Drawing.Color.YellowGreen;
             this.dataGridView1.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.Sunken;
-            dataGridViewCellStyle62.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle62.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle62.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle62.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle62.SelectionBackColor = System.Drawing.Color.DarkSeaGreen;
-            dataGridViewCellStyle62.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle62.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dataGridView1.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle62;
+            dataGridViewCellStyle26.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle26.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle26.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle26.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle26.SelectionBackColor = System.Drawing.Color.DarkSeaGreen;
+            dataGridViewCellStyle26.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle26.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dataGridView1.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle26;
             this.dataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.CID,
             this.CPostureLock,
             this.CPosture,
             this.CStartEnd,
-            this.CListActivity_2,
-            this.CConcurrentActivity,
-            this.CStartEnd_Activity,
             this.CTime,
             this.CTimeLabel,
             this.CNotes,
             this.CStatus,
             this.CStartID,
             this.CEndID,
-            this.CCombo_Simple_1,
-            this.CCombo_Label_1,
-            this.CCombo_Simple_2,
-            this.CCombo_Label_2});
-            dataGridViewCellStyle70.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle70.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle70.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle70.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle70.SelectionBackColor = System.Drawing.Color.DarkSeaGreen;
-            dataGridViewCellStyle70.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle70.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dataGridView1.DefaultCellStyle = dataGridViewCellStyle70;
+            this.CCombo_Type,
+            this.CCombo_Label_1});
+            dataGridViewCellStyle34.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle34.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle34.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle34.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle34.SelectionBackColor = System.Drawing.Color.DarkSeaGreen;
+            dataGridViewCellStyle34.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle34.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dataGridView1.DefaultCellStyle = dataGridViewCellStyle34;
             this.dataGridView1.GridColor = System.Drawing.Color.LightGray;
             this.dataGridView1.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.dataGridView1.Location = new System.Drawing.Point(0, 148);
+            this.dataGridView1.Location = new System.Drawing.Point(3, 148);
             this.dataGridView1.MultiSelect = false;
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.RowHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
-            dataGridViewCellStyle71.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle71.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle71.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle71.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle71.SelectionBackColor = System.Drawing.Color.DarkSeaGreen;
-            dataGridViewCellStyle71.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle71.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dataGridView1.RowHeadersDefaultCellStyle = dataGridViewCellStyle71;
+            dataGridViewCellStyle35.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle35.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle35.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle35.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle35.SelectionBackColor = System.Drawing.Color.DarkSeaGreen;
+            dataGridViewCellStyle35.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle35.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dataGridView1.RowHeadersDefaultCellStyle = dataGridViewCellStyle35;
             this.dataGridView1.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders;
-            dataGridViewCellStyle72.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            this.dataGridView1.RowsDefaultCellStyle = dataGridViewCellStyle72;
+            dataGridViewCellStyle36.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            this.dataGridView1.RowsDefaultCellStyle = dataGridViewCellStyle36;
             this.dataGridView1.RowTemplate.DefaultCellStyle.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
             this.dataGridView1.RowTemplate.Resizable = System.Windows.Forms.DataGridViewTriState.False;
             this.dataGridView1.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
@@ -182,10 +178,10 @@ namespace TestApplication_Annotation
             // 
             // CID
             // 
-            dataGridViewCellStyle63.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
-            dataGridViewCellStyle63.NullValue = null;
-            dataGridViewCellStyle63.SelectionBackColor = System.Drawing.Color.DarkSeaGreen;
-            this.CID.DefaultCellStyle = dataGridViewCellStyle63;
+            dataGridViewCellStyle27.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
+            dataGridViewCellStyle27.NullValue = null;
+            dataGridViewCellStyle27.SelectionBackColor = System.Drawing.Color.DarkSeaGreen;
+            this.CID.DefaultCellStyle = dataGridViewCellStyle27;
             this.CID.FillWeight = 80F;
             this.CID.HeaderText = "Audio ID";
             this.CID.Name = "CID";
@@ -194,64 +190,43 @@ namespace TestApplication_Annotation
             // 
             // CPostureLock
             // 
-            dataGridViewCellStyle64.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle64.NullValue = "True";
-            this.CPostureLock.DefaultCellStyle = dataGridViewCellStyle64;
+            dataGridViewCellStyle28.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle28.NullValue = "False";
+            this.CPostureLock.DefaultCellStyle = dataGridViewCellStyle28;
             this.CPostureLock.FillWeight = 50F;
-            this.CPostureLock.HeaderText = "Unlock";
+            this.CPostureLock.HeaderText = "Auto Stop";
             this.CPostureLock.Name = "CPostureLock";
-            this.CPostureLock.Width = 47;
+            this.CPostureLock.Visible = false;
+            this.CPostureLock.Width = 60;
             // 
             // CPosture
             // 
-            dataGridViewCellStyle65.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            this.CPosture.DefaultCellStyle = dataGridViewCellStyle65;
-            this.CPosture.DisplayStyle = System.Windows.Forms.DataGridViewComboBoxDisplayStyle.Nothing;
+            dataGridViewCellStyle29.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            this.CPosture.DefaultCellStyle = dataGridViewCellStyle29;
+            this.CPosture.DisplayStyle = System.Windows.Forms.DataGridViewComboBoxDisplayStyle.ComboBox;
+            this.CPosture.DisplayStyleForCurrentCellOnly = true;
             this.CPosture.FillWeight = 200F;
-            this.CPosture.HeaderText = "Main Activity";
+            this.CPosture.HeaderText = "Category";
             this.CPosture.MaxDropDownItems = 30;
             this.CPosture.Name = "CPosture";
-            this.CPosture.Width = 73;
+            this.CPosture.Width = 55;
             // 
             // CStartEnd
             // 
-            this.CStartEnd.DisplayStyle = System.Windows.Forms.DataGridViewComboBoxDisplayStyle.Nothing;
+            this.CStartEnd.DisplayStyle = System.Windows.Forms.DataGridViewComboBoxDisplayStyle.ComboBox;
+            this.CStartEnd.DisplayStyleForCurrentCellOnly = true;
             this.CStartEnd.HeaderText = "Start/End Tag";
             this.CStartEnd.Name = "CStartEnd";
             this.CStartEnd.Resizable = System.Windows.Forms.DataGridViewTriState.True;
             this.CStartEnd.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             // 
-            // CListActivity_2
-            // 
-            this.CListActivity_2.FillWeight = 50F;
-            this.CListActivity_2.HeaderText = "Unlock";
-            this.CListActivity_2.Name = "CListActivity_2";
-            this.CListActivity_2.Width = 47;
-            // 
-            // CConcurrentActivity
-            // 
-            this.CConcurrentActivity.DisplayStyle = System.Windows.Forms.DataGridViewComboBoxDisplayStyle.Nothing;
-            this.CConcurrentActivity.FillWeight = 200F;
-            this.CConcurrentActivity.HeaderText = "Concurrent Activity";
-            this.CConcurrentActivity.Name = "CConcurrentActivity";
-            this.CConcurrentActivity.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.CConcurrentActivity.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.CConcurrentActivity.Width = 121;
-            // 
-            // CStartEnd_Activity
-            // 
-            this.CStartEnd_Activity.DisplayStyle = System.Windows.Forms.DataGridViewComboBoxDisplayStyle.Nothing;
-            this.CStartEnd_Activity.HeaderText = "Start/End Tag";
-            this.CStartEnd_Activity.Name = "CStartEnd_Activity";
-            this.CStartEnd_Activity.Width = 81;
-            // 
             // CTime
             // 
-            dataGridViewCellStyle66.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle66.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
-            dataGridViewCellStyle66.Format = "T";
-            dataGridViewCellStyle66.SelectionBackColor = System.Drawing.Color.DarkSeaGreen;
-            this.CTime.DefaultCellStyle = dataGridViewCellStyle66;
+            dataGridViewCellStyle30.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle30.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
+            dataGridViewCellStyle30.Format = "T";
+            dataGridViewCellStyle30.SelectionBackColor = System.Drawing.Color.DarkSeaGreen;
+            this.CTime.DefaultCellStyle = dataGridViewCellStyle30;
             this.CTime.HeaderText = "Creation Time";
             this.CTime.Name = "CTime";
             this.CTime.ReadOnly = true;
@@ -265,8 +240,8 @@ namespace TestApplication_Annotation
             // 
             // CNotes
             // 
-            dataGridViewCellStyle67.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            this.CNotes.DefaultCellStyle = dataGridViewCellStyle67;
+            dataGridViewCellStyle31.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            this.CNotes.DefaultCellStyle = dataGridViewCellStyle31;
             this.CNotes.FillWeight = 150F;
             this.CNotes.HeaderText = "Notes";
             this.CNotes.Name = "CNotes";
@@ -284,9 +259,9 @@ namespace TestApplication_Annotation
             // 
             // CStartID
             // 
-            dataGridViewCellStyle68.Format = "N0";
-            dataGridViewCellStyle68.NullValue = null;
-            this.CStartID.DefaultCellStyle = dataGridViewCellStyle68;
+            dataGridViewCellStyle32.Format = "N0";
+            dataGridViewCellStyle32.NullValue = null;
+            this.CStartID.DefaultCellStyle = dataGridViewCellStyle32;
             this.CStartID.HeaderText = "StartID";
             this.CStartID.Name = "CStartID";
             this.CStartID.ReadOnly = true;
@@ -295,64 +270,49 @@ namespace TestApplication_Annotation
             // 
             // CEndID
             // 
-            dataGridViewCellStyle69.Format = "N0";
-            dataGridViewCellStyle69.NullValue = null;
-            this.CEndID.DefaultCellStyle = dataGridViewCellStyle69;
+            dataGridViewCellStyle33.Format = "N0";
+            dataGridViewCellStyle33.NullValue = null;
+            this.CEndID.DefaultCellStyle = dataGridViewCellStyle33;
             this.CEndID.HeaderText = "EndID";
             this.CEndID.Name = "CEndID";
             this.CEndID.ReadOnly = true;
             this.CEndID.Visible = false;
             this.CEndID.Width = 62;
             // 
-            // CCombo_Simple_1
+            // CCombo_Type
             // 
-            this.CCombo_Simple_1.HeaderText = "Combo_Simple_1";
-            this.CCombo_Simple_1.Name = "CCombo_Simple_1";
-            this.CCombo_Simple_1.ReadOnly = true;
-            this.CCombo_Simple_1.Visible = false;
-            this.CCombo_Simple_1.Width = 114;
+            this.CCombo_Type.HeaderText = "Combo_Simple";
+            this.CCombo_Type.Name = "CCombo_Type";
+            this.CCombo_Type.ReadOnly = true;
+            this.CCombo_Type.Visible = false;
+            this.CCombo_Type.Width = 102;
             // 
             // CCombo_Label_1
             // 
-            this.CCombo_Label_1.HeaderText = "Combo_Label_1";
+            this.CCombo_Label_1.HeaderText = "Combo_Label";
             this.CCombo_Label_1.Name = "CCombo_Label_1";
             this.CCombo_Label_1.ReadOnly = true;
             this.CCombo_Label_1.Visible = false;
-            this.CCombo_Label_1.Width = 109;
-            // 
-            // CCombo_Simple_2
-            // 
-            this.CCombo_Simple_2.HeaderText = "Combo_Simple_2";
-            this.CCombo_Simple_2.Name = "CCombo_Simple_2";
-            this.CCombo_Simple_2.ReadOnly = true;
-            this.CCombo_Simple_2.Visible = false;
-            this.CCombo_Simple_2.Width = 114;
-            // 
-            // CCombo_Label_2
-            // 
-            this.CCombo_Label_2.HeaderText = "Combo_Label_2";
-            this.CCombo_Label_2.Name = "CCombo_Label_2";
-            this.CCombo_Label_2.ReadOnly = true;
-            this.CCombo_Label_2.Visible = false;
-            this.CCombo_Label_2.Width = 109;
+            this.CCombo_Label_1.Width = 97;
             // 
             // label_play
             // 
             this.label_play.BackColor = System.Drawing.Color.White;
             this.label_play.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label_play.ForeColor = System.Drawing.Color.DarkSeaGreen;
-            this.label_play.Location = new System.Drawing.Point(171, 40);
+            this.label_play.Location = new System.Drawing.Point(154, 41);
             this.label_play.Name = "label_play";
-            this.label_play.Size = new System.Drawing.Size(865, 23);
+            this.label_play.Size = new System.Drawing.Size(882, 23);
             this.label_play.TabIndex = 9;
-            this.label_play.Text = "waiting for status ...";
+            this.label_play.Text = "OK ...";
+            this.label_play.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.label_play.Visible = false;
             // 
             // button_add_label
             // 
-            this.button_add_label.Location = new System.Drawing.Point(40, 99);
+            this.button_add_label.Location = new System.Drawing.Point(219, 99);
             this.button_add_label.Name = "button_add_label";
-            this.button_add_label.Size = new System.Drawing.Size(101, 29);
+            this.button_add_label.Size = new System.Drawing.Size(101, 28);
             this.button_add_label.TabIndex = 11;
             this.button_add_label.Text = "Add Row";
             this.button_add_label.UseVisualStyleBackColor = true;
@@ -361,16 +321,16 @@ namespace TestApplication_Annotation
             // 
             // textBox_2
             // 
-            this.textBox_2.Location = new System.Drawing.Point(171, 43);
+            this.textBox_2.Location = new System.Drawing.Point(157, 159);
             this.textBox_2.Name = "textBox_2";
-            this.textBox_2.Size = new System.Drawing.Size(558, 20);
+            this.textBox_2.Size = new System.Drawing.Size(758, 20);
             this.textBox_2.TabIndex = 13;
             // 
             // button_remove_label
             // 
-            this.button_remove_label.Location = new System.Drawing.Point(466, 99);
+            this.button_remove_label.Location = new System.Drawing.Point(37, 99);
             this.button_remove_label.Name = "button_remove_label";
-            this.button_remove_label.Size = new System.Drawing.Size(101, 29);
+            this.button_remove_label.Size = new System.Drawing.Size(101, 28);
             this.button_remove_label.TabIndex = 14;
             this.button_remove_label.Text = "Remove Row";
             this.button_remove_label.UseVisualStyleBackColor = true;
@@ -387,6 +347,7 @@ namespace TestApplication_Annotation
             this.label_instructions_1.Size = new System.Drawing.Size(111, 15);
             this.label_instructions_1.TabIndex = 15;
             this.label_instructions_1.Text = "Audio Files Path";
+            this.label_instructions_1.Visible = false;
             // 
             // label_instructions_2
             // 
@@ -398,23 +359,24 @@ namespace TestApplication_Annotation
             this.label_instructions_2.Size = new System.Drawing.Size(100, 15);
             this.label_instructions_2.TabIndex = 16;
             this.label_instructions_2.Text = "Session Name";
+            this.label_instructions_2.Visible = false;
             // 
             // button_save
             // 
-            this.button_save.Location = new System.Drawing.Point(253, 99);
+            this.button_save.Location = new System.Drawing.Point(577, 99);
             this.button_save.Name = "button_save";
-            this.button_save.Size = new System.Drawing.Size(101, 29);
+            this.button_save.Size = new System.Drawing.Size(101, 28);
             this.button_save.TabIndex = 17;
-            this.button_save.Text = "Save Session";
+            this.button_save.Text = "Save Category";
             this.button_save.UseVisualStyleBackColor = true;
             this.button_save.Visible = false;
             this.button_save.Click += new System.EventHandler(this.button_save_Click);
             // 
             // button_2
             // 
-            this.button_2.Location = new System.Drawing.Point(735, 40);
+            this.button_2.Location = new System.Drawing.Point(397, 295);
             this.button_2.Name = "button_2";
-            this.button_2.Size = new System.Drawing.Size(101, 23);
+            this.button_2.Size = new System.Drawing.Size(281, 52);
             this.button_2.TabIndex = 18;
             this.button_2.Text = "Start";
             this.button_2.UseVisualStyleBackColor = true;
@@ -422,9 +384,9 @@ namespace TestApplication_Annotation
             // 
             // button_generate
             // 
-            this.button_generate.Location = new System.Drawing.Point(679, 99);
+            this.button_generate.Location = new System.Drawing.Point(756, 99);
             this.button_generate.Name = "button_generate";
-            this.button_generate.Size = new System.Drawing.Size(101, 29);
+            this.button_generate.Size = new System.Drawing.Size(101, 28);
             this.button_generate.TabIndex = 19;
             this.button_generate.Text = "Generate Xml";
             this.button_generate.UseVisualStyleBackColor = true;
@@ -433,9 +395,9 @@ namespace TestApplication_Annotation
             // 
             // button_exit
             // 
-            this.button_exit.Location = new System.Drawing.Point(892, 99);
+            this.button_exit.Location = new System.Drawing.Point(935, 99);
             this.button_exit.Name = "button_exit";
-            this.button_exit.Size = new System.Drawing.Size(101, 29);
+            this.button_exit.Size = new System.Drawing.Size(101, 28);
             this.button_exit.TabIndex = 20;
             this.button_exit.Text = "Exit Session";
             this.button_exit.UseVisualStyleBackColor = true;
@@ -447,12 +409,55 @@ namespace TestApplication_Annotation
             this.textBox_instructions.BackColor = System.Drawing.Color.YellowGreen;
             this.textBox_instructions.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.textBox_instructions.ForeColor = System.Drawing.Color.White;
-            this.textBox_instructions.Location = new System.Drawing.Point(35, 148);
+            this.textBox_instructions.Location = new System.Drawing.Point(37, 201);
             this.textBox_instructions.Multiline = true;
             this.textBox_instructions.Name = "textBox_instructions";
-            this.textBox_instructions.Size = new System.Drawing.Size(1001, 35);
+            this.textBox_instructions.Size = new System.Drawing.Size(1002, 35);
             this.textBox_instructions.TabIndex = 21;
             this.textBox_instructions.Text = " ";
+            // 
+            // button_session_part
+            // 
+            this.button_session_part.Location = new System.Drawing.Point(398, 99);
+            this.button_session_part.Name = "button_session_part";
+            this.button_session_part.Size = new System.Drawing.Size(101, 28);
+            this.button_session_part.TabIndex = 22;
+            this.button_session_part.Text = "Next Category";
+            this.button_session_part.UseVisualStyleBackColor = true;
+            this.button_session_part.Visible = false;
+            this.button_session_part.Click += new System.EventHandler(this.button_session_part_Click);
+            // 
+            // label_files_path
+            // 
+            this.label_files_path.AutoSize = true;
+            this.label_files_path.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label_files_path.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
+            this.label_files_path.Location = new System.Drawing.Point(37, 123);
+            this.label_files_path.Name = "label_files_path";
+            this.label_files_path.Size = new System.Drawing.Size(111, 15);
+            this.label_files_path.TabIndex = 23;
+            this.label_files_path.Text = "Audio Files Path";
+            // 
+            // label_protocol_path
+            // 
+            this.label_protocol_path.AutoSize = true;
+            this.label_protocol_path.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label_protocol_path.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
+            this.label_protocol_path.Location = new System.Drawing.Point(37, 160);
+            this.label_protocol_path.Name = "label_protocol_path";
+            this.label_protocol_path.Size = new System.Drawing.Size(93, 15);
+            this.label_protocol_path.TabIndex = 24;
+            this.label_protocol_path.Text = "Protocol Path";
+            // 
+            // button_3
+            // 
+            this.button_3.Location = new System.Drawing.Point(935, 159);
+            this.button_3.Name = "button_3";
+            this.button_3.Size = new System.Drawing.Size(101, 23);
+            this.button_3.TabIndex = 25;
+            this.button_3.Text = "Browse";
+            this.button_3.UseVisualStyleBackColor = true;
+            this.button_3.Click += new System.EventHandler(this.button_3_Click);
             // 
             // FormAnnotation
             // 
@@ -460,6 +465,10 @@ namespace TestApplication_Annotation
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.DimGray;
             this.ClientSize = new System.Drawing.Size(1075, 529);
+            this.Controls.Add(this.button_3);
+            this.Controls.Add(this.label_protocol_path);
+            this.Controls.Add(this.label_files_path);
+            this.Controls.Add(this.button_session_part);
             this.Controls.Add(this.textBox_instructions);
             this.Controls.Add(this.button_exit);
             this.Controls.Add(this.button_generate);
@@ -470,14 +479,15 @@ namespace TestApplication_Annotation
             this.Controls.Add(this.button_remove_label);
             this.Controls.Add(this.button_add_label);
             this.Controls.Add(this.label_play);
-            this.Controls.Add(this.dataGridView1);
             this.Controls.Add(this.label_date);
             this.Controls.Add(this.textBox_1);
             this.Controls.Add(this.button_1);
             this.Controls.Add(this.textBox_2);
+            this.Controls.Add(this.dataGridView1);
             this.Name = "FormAnnotation";
-            this.Text = "Wockets Annotation";
+            this.Text = "Audio Annotation";
             this.Load += new System.EventHandler(this.FormAnnotation_Load);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FormAnnotation_FormClosing);
             this.Resize += new System.EventHandler(this.FormAnnotation_Resize);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.ResumeLayout(false);
@@ -499,26 +509,27 @@ namespace TestApplication_Annotation
         private System.Windows.Forms.Label label_instructions_2;
         private System.Windows.Forms.Button button_save;
         private System.Windows.Forms.Button button_2;
+        private System.Windows.Forms.Button button_generate;
+        private System.Windows.Forms.Button button_exit;
+        private System.Windows.Forms.TextBox textBox_instructions;
         private System.Windows.Forms.DataGridViewTextBoxColumn CID;
         private System.Windows.Forms.DataGridViewCheckBoxColumn CPostureLock;
         private System.Windows.Forms.DataGridViewComboBoxColumn CPosture;
         private System.Windows.Forms.DataGridViewComboBoxColumn CStartEnd;
-        private System.Windows.Forms.DataGridViewCheckBoxColumn CListActivity_2;
-        private System.Windows.Forms.DataGridViewComboBoxColumn CConcurrentActivity;
-        private System.Windows.Forms.DataGridViewComboBoxColumn CStartEnd_Activity;
         private System.Windows.Forms.DataGridViewTextBoxColumn CTime;
         private System.Windows.Forms.DataGridViewTextBoxColumn CTimeLabel;
         private System.Windows.Forms.DataGridViewTextBoxColumn CNotes;
         private System.Windows.Forms.DataGridViewComboBoxColumn CStatus;
         private System.Windows.Forms.DataGridViewTextBoxColumn CStartID;
         private System.Windows.Forms.DataGridViewTextBoxColumn CEndID;
-        private System.Windows.Forms.DataGridViewTextBoxColumn CCombo_Simple_1;
+        private System.Windows.Forms.DataGridViewTextBoxColumn CCombo_Type;
         private System.Windows.Forms.DataGridViewTextBoxColumn CCombo_Label_1;
-        private System.Windows.Forms.DataGridViewTextBoxColumn CCombo_Simple_2;
-        private System.Windows.Forms.DataGridViewTextBoxColumn CCombo_Label_2;
-        private System.Windows.Forms.Button button_generate;
-        private System.Windows.Forms.Button button_exit;
-        private System.Windows.Forms.TextBox textBox_instructions;
+        private System.Windows.Forms.Button button_session_part;
+        private System.Windows.Forms.Label label_files_path;
+        private System.Windows.Forms.Label label_protocol_path;
+        private System.Windows.Forms.Button button_3;
+        private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog;
+        private System.Windows.Forms.OpenFileDialog openFileDialog;
     }
 }
 
