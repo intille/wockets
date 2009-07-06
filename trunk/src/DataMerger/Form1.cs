@@ -67,8 +67,8 @@ namespace DataMerger
                     //annotation files   
                     if (File.Exists(this.textBox1.Text + "\\AnnotationIntervals.xml"))
                         this.progressForm.AppendLog("Annotation File .....................Found\r\n");
-                    else
-                        throw new Exception("Annotation File ....................Not Found\r\n");
+                    //else
+                    //    throw new Exception("Annotation File ....................Not Found\r\n");
 
                     if (File.Exists(this.textBox1.Text + "\\ActivityLabelsRealtime.xml"))
                         this.progressForm.AppendLog("Activity Labels File .....................Found\r\n");
@@ -1217,11 +1217,13 @@ namespace DataMerger
             AXML.Annotation aannotation = null;         
             try
             {
-
-                AXML.Reader reader = new AXML.Reader(masterDirectory, aDataDirectory, "AnnotationIntervals.xml");
-                aannotation = reader.parse();
-                aannotation.RemoveData(filter);
-                aannotation.DataDirectory = aDataDirectory;
+                if (File.Exists(aDataDirectory + "\\AnnotationIntervals.xml"))
+                {
+                    AXML.Reader reader = new AXML.Reader(masterDirectory, aDataDirectory, "AnnotationIntervals.xml");
+                    aannotation = reader.parse();
+                    aannotation.RemoveData(filter);
+                    aannotation.DataDirectory = aDataDirectory;
+                }
 
             }     
             catch (Exception e)
@@ -1229,8 +1231,11 @@ namespace DataMerger
                 throw new Exception("MITes Configuration Files: Parsing failed " + e.Message);
             }
 
-            foreach (AXML.Category category in aannotation.Categories)
-                master_csv_header += "," + category.Name;
+            if (aannotation != null)
+            {
+                foreach (AXML.Category category in aannotation.Categories)
+                    master_csv_header += "," + category.Name;
+            }
             #endregion Load Annotation
 
             #region Setup MITes Data
@@ -1345,27 +1350,42 @@ namespace DataMerger
 
             int channel = 0, x = 0, y = 0, z = 0;
             double unixtimestamp = 0.0;
-            int activityIndex = 0;
-            AXML.AnnotatedRecord annotatedRecord = ((AXML.AnnotatedRecord)aannotation.Data[activityIndex]);
             string current_activity = "";
-            for (int j = 0; (j < annotatedRecord.Labels.Count); j++)
+            int activityIndex = 0;
+            AXML.AnnotatedRecord annotatedRecord = null;
+            if (aannotation != null)
             {
-                if (j == annotatedRecord.Labels.Count - 1)
-                    current_activity += "";
-                else
-                    current_activity += ",";
+            
+                annotatedRecord = ((AXML.AnnotatedRecord)aannotation.Data[activityIndex]);
+            
+                for (int j = 0; (j < annotatedRecord.Labels.Count); j++)
+                {
+                    if (j == annotatedRecord.Labels.Count - 1)
+                        current_activity += "";
+                    else
+                        current_activity += ",";
+                }
+
+
             }
-
-
 
             #region Setup Wockets Data
             int[] lastDecodedIndex = null;
             WocketsController wcontroller=null;
-            double wunixtimestamp = 0.0;
+            double[] wunixtimestamp = null;
+            
             if (Directory.Exists(aDataDirectory + "\\wockets\\"))
             {
                 wcontroller = new WocketsController("", "", "");
                 wcontroller.FromXML(aDataDirectory + "\\wockets\\SensorData.xml");
+                wunixtimestamp = new double[wcontroller._Sensors.Count];
+                
+                for (int i = 0; (i < wcontroller._Sensors.Count); i++)
+                {
+                    wcontroller._Sensors[i]._RootStorageDirectory = aDataDirectory + "\\wockets\\data\\raw\\PLFormat\\";
+                    wunixtimestamp[i] = 0.0;
+                }
+
                 lastDecodedIndex = new int[wcontroller._Sensors.Count];
 
                 wactivityCountCSVs = new StreamWriter[wcontroller._Sensors.Count];
@@ -1414,13 +1434,7 @@ namespace DataMerger
                 wprevZ = new int[wcontroller._Sensors.Count];
                 wacCounters = new int[wcontroller._Sensors.Count];
 
-                //Create CSV Arrays
-                wactivityCountCSVs = new StreamWriter[wcontroller._Sensors.Count];
-                wsamplingCSVs = new StreamWriter[wcontroller._Sensors.Count];
-                waveragedRaw = new StreamWriter[wcontroller._Sensors.Count];
-                waucCSVs = new StreamWriter[wcontroller._Sensors.Count];
-                wvmagCSVs = new StreamWriter[wcontroller._Sensors.Count];
-                wrmCSVs = new StreamWriter[wcontroller._Sensors.Count];
+     
 
 
 
@@ -1483,13 +1497,10 @@ namespace DataMerger
 
 
 
-
-            AXML.AnnotatedRecord startRecord = ((AXML.AnnotatedRecord)aannotation.Data[0]);
-            string[] startDate=startRecord.StartDate.Split('-');
-            AXML.AnnotatedRecord lastRecord = ((AXML.AnnotatedRecord)aannotation.Data[aannotation.Data.Count - 1]);
-            string[] endDate = lastRecord.EndDate.Split('-');
-
-                            int startyear=0;
+                int year=0;
+                    int month=0;
+                    int day=0;    
+                int startyear=0;
                 int startmonth=0;
                 int startday=0;
                 int starthr=25;
@@ -1502,7 +1513,10 @@ namespace DataMerger
                 int endhr=-1;
                 int endmin=59;
                 int endsec=59;
-            //Calculate the starttime and endtime for the data
+
+
+                
+            //check mites start and end times
             if (aMITesDecoder != null)
             {
                 string rawDirectory = aDataDirectory + "\\data\\raw\\PLFormat";
@@ -1516,9 +1530,9 @@ namespace DataMerger
                 {
                     string[] datetokens=subdirectory.Split('\\');
                     datetokens=datetokens[datetokens.Length-1].Split('-');
-                    int year=Convert.ToInt32(datetokens[0]);
-                    int month=Convert.ToInt32(datetokens[1]);
-                    int day=Convert.ToInt32(datetokens[2]);
+                    year=Convert.ToInt32(datetokens[0]);
+                    month=Convert.ToInt32(datetokens[1]);
+                    day=Convert.ToInt32(datetokens[2]);
 
                     if ((startyear==0)|| (year<startyear))
                         startyear=year;
@@ -1549,6 +1563,88 @@ namespace DataMerger
                         
                     }
                 }
+            }
+
+            //check wockets start and end times
+            if (wcontroller != null)
+            {
+                string rawDirectory = aDataDirectory + "\\wockets\\data\\raw\\PLFormat";
+
+
+                if (Directory.Exists(rawDirectory) == false)
+                    return;
+
+                string[] subdirectories = Directory.GetDirectories(rawDirectory);
+                foreach (string subdirectory in subdirectories)
+                {
+                    string[] datetokens = subdirectory.Split('\\');
+                    datetokens = datetokens[datetokens.Length - 1].Split('-');
+                    year = Convert.ToInt32(datetokens[0]);
+                    month = Convert.ToInt32(datetokens[1]);
+                    day = Convert.ToInt32(datetokens[2]);
+
+                    if ((startyear == 0) || (year < startyear))
+                        startyear = year;
+                    if ((endyear == 0) || (year > endyear))
+                        endyear = year;
+
+                    if ((startmonth == 0) || (month < startmonth))
+                        startmonth = month;
+                    if ((endmonth == 0) || (month > endmonth))
+                        endmonth = month;
+
+                    if ((startday == 0) || (day < startday))
+                        startday = day;
+                    if ((endday == 0) || (day > endday))
+                        endday = day;
+
+
+                    for (int i = 0; i < 30; i++)
+                    {
+                        if (Directory.Exists(subdirectory + "\\" + i))
+                        {
+                            int hr = i;
+                            if (hr < starthr)
+                                starthr = hr;
+                            if (hr > endhr)
+                                endhr = hr;
+                        }
+
+                    }
+                }
+            }
+
+            //check annotation start and end times
+            if (aannotation != null)
+            {
+                AXML.AnnotatedRecord record = ((AXML.AnnotatedRecord)aannotation.Data[0]);
+                year = Convert.ToInt32(record.StartDate.Split('-')[2]);
+                month = Convert.ToInt32(record.StartDate.Split('-')[0]);
+                day = Convert.ToInt32(record.StartDate.Split('-')[1]);
+                if ((startyear == 0) || (year < startyear))
+                    startyear = year;
+
+                if ((startmonth == 0) || (month < startmonth))
+                    startmonth = month;
+                if ((startday == 0) || (day < startday))
+                    startday = day;
+
+                if (record.StartHour < starthr)
+                    starthr = record.StartHour;
+
+                record = ((AXML.AnnotatedRecord)aannotation.Data[aannotation.Data.Count - 1]);
+                year = Convert.ToInt32(record.StartDate.Split('-')[2]);
+                month = Convert.ToInt32(record.StartDate.Split('-')[0]);
+                day = Convert.ToInt32(record.StartDate.Split('-')[1]);
+
+                if ((endyear == 0) || (year > endyear))
+                    endyear = year;
+                if ((endmonth == 0) || (month > endmonth))
+                    endmonth = month;
+                if ((endday == 0) || (day > endday))
+                    endday = day;
+                if (record.EndHour > endhr)
+                    endhr = record.EndHour;
             }
 
             DateTime startDateTime = new DateTime(startyear, startmonth, startday, starthr, startmin, startsec);
@@ -1599,49 +1695,51 @@ namespace DataMerger
                 if (CSVProgress == "")
                     CSVProgress = "Synchronizing " +  currentDateTime.ToLongDateString() + " " +  currentDateTime.ToLongTimeString();
 
-
-
-                #region Load Activity Label
-                if (currentUnixTime > annotatedRecord.EndUnix)
-                {
-                    current_activity = "";
-                    for (int j = 0; (j < annotatedRecord.Labels.Count); j++)
-                    {
-                        if (j == annotatedRecord.Labels.Count - 1)
-                            current_activity += "";
-                        else
-                            current_activity += ",";
-                    }
-                    if (activityIndex < aannotation.Data.Count - 1)
-                    {
-                        activityIndex++;
-                        annotatedRecord = ((AXML.AnnotatedRecord)aannotation.Data[activityIndex]);
-                    }
-                }
-
-
-                if ((currentUnixTime >= annotatedRecord.StartUnix) &&
-                     (currentUnixTime <= annotatedRecord.EndUnix))
+                if (aannotation != null)
                 {
 
-                    current_activity = "";
-                    for (int j = 0; (j < annotatedRecord.Labels.Count); j++)
+                    #region Load Activity Label
+                    if (currentUnixTime > annotatedRecord.EndUnix)
                     {
-                        if (j == annotatedRecord.Labels.Count - 1)
-                            current_activity += ((AXML.Label)annotatedRecord.Labels[j]).Name;
-                        else
-                            current_activity += ((AXML.Label)annotatedRecord.Labels[j]).Name + ",";
+                        current_activity = "";
+                        for (int j = 0; (j < annotatedRecord.Labels.Count); j++)
+                        {
+                            if (j == annotatedRecord.Labels.Count - 1)
+                                current_activity += "";
+                            else
+                                current_activity += ",";
+                        }
+                        if (activityIndex < aannotation.Data.Count - 1)
+                        {
+                            activityIndex++;
+                            annotatedRecord = ((AXML.AnnotatedRecord)aannotation.Data[activityIndex]);
+                        }
                     }
 
 
+                    if ((currentUnixTime >= annotatedRecord.StartUnix) &&
+                         (currentUnixTime <= annotatedRecord.EndUnix))
+                    {
 
-                    current_activity = current_activity.Replace("none", "").Replace('-', '_').Replace(':', '_').Replace('%', '_').Replace('/', '_');
-                    current_activity = Regex.Replace(current_activity, "[_]+", "_");
-                    current_activity = Regex.Replace(current_activity, "^[_]+", "");
-                    current_activity = Regex.Replace(current_activity, "[_]+$", "");
+                        current_activity = "";
+                        for (int j = 0; (j < annotatedRecord.Labels.Count); j++)
+                        {
+                            if (j == annotatedRecord.Labels.Count - 1)
+                                current_activity += ((AXML.Label)annotatedRecord.Labels[j]).Name;
+                            else
+                                current_activity += ((AXML.Label)annotatedRecord.Labels[j]).Name + ",";
+                        }
+
+
+
+                        current_activity = current_activity.Replace("none", "").Replace('-', '_').Replace(':', '_').Replace('%', '_').Replace('/', '_');
+                        current_activity = Regex.Replace(current_activity, "[_]+", "_");
+                        current_activity = Regex.Replace(current_activity, "^[_]+", "");
+                        current_activity = Regex.Replace(current_activity, "[_]+$", "");
+                    }
+                    #endregion Load Activity Label
+
                 }
-                #endregion Load Activity Label
-
                 //if there is MITes data
                 if (aMITesDecoder != null)
                 {
@@ -1686,87 +1784,100 @@ namespace DataMerger
                     foreach (SXML.Sensor sensor in sannotation.Sensors)
                     {
                         channel = Convert.ToInt32(sensor.ID);
-                        if (channel == 0)
-                            continue;
-                        double runningMeanX = 0;
-                        double runningMeanY = 0;
-                        double runningMeanZ = 0;
-                        int numMeanPts = 0;
+             
+
+                       
                         int headPtr = head[channel] - 1;
                         if (headPtr < 0)
                             headPtr = 499;
 
-                        //compute running means
 
-
-                        while ((timeData[channel, headPtr] > 0) && ((currentUnixTime - timeData[channel, headPtr]) <= MEAN_SIZE) && (numMeanPts <= 499))
+                        if (channel > 0)
                         {
-                            runningMeanX += rawData[channel, 0, headPtr];
-                            runningMeanY += rawData[channel, 1, headPtr];
-                            runningMeanZ += rawData[channel, 2, headPtr];
-                            numMeanPts++;
-                            headPtr--;
+                            double runningMeanX = 0;
+                            double runningMeanY = 0;
+                            double runningMeanZ = 0;
+                            int numMeanPts = 0;
+
+                            //compute running means
+                            // && ((timeData[channel, headPtr] - currentUnixTime) <=MEAN_SIZE)
+
+                            while ((timeData[channel, headPtr] > 0) && (headPtr != head[channel]) && (numMeanPts <= 499))
+                            {
+                                runningMeanX += rawData[channel, 0, headPtr];
+                                runningMeanY += rawData[channel, 1, headPtr];
+                                runningMeanZ += rawData[channel, 2, headPtr];
+                                numMeanPts++;
+                                headPtr--;
+                                if (headPtr < 0)
+                                    headPtr = 499;
+                            }
+
+                            runningMeanX = runningMeanX / numMeanPts;
+                            runningMeanY = runningMeanY / numMeanPts;
+                            runningMeanZ = runningMeanZ / numMeanPts;
+                            RMX[channel] = runningMeanX;
+                            RMY[channel] = runningMeanY;
+                            RMZ[channel] = runningMeanZ;
+                            RMSize[channel] = numMeanPts;
+
+                            //RMCount[channel] = RMCount[channel] + 1;
+
+                            headPtr = head[channel] - 1;
                             if (headPtr < 0)
                                 headPtr = 499;
-                        }
+                            //compute values per second
 
-                        runningMeanX = runningMeanX / numMeanPts;
-                        runningMeanY = runningMeanY / numMeanPts;
-                        runningMeanZ = runningMeanZ / numMeanPts;
-                        RMX[channel] = runningMeanX;
-                        RMY[channel] = runningMeanY;
-                        RMZ[channel] = runningMeanZ;
-                        RMSize[channel] = numMeanPts;
-                        //RMCount[channel] = RMCount[channel] + 1;
-
-                        headPtr = head[channel] - 1;
-                        if (headPtr < 0)
-                            headPtr = 499;
-                        //compute values per second
-                        while ((timeData[channel, headPtr] > 0) && ((currentUnixTime - timeData[channel, headPtr]) <= 1000) && (numMeanPts <= 499))
-                        {
-
-                            //Calculate MITes Raw Values
-                            if ((channel != 0) && (channel <= sannotation.MaximumSensorID)) //if junk comes ignore it
+                            while ((timeData[channel, headPtr] > 0) && (headPtr != head[channel]))
                             {
-                                if ((prevX[channel] > 0) && (prevY[channel] > 0) && (prevZ[channel] > 0) && (rawData[channel, 0, headPtr] > 0) && (rawData[channel, 1, headPtr] > 0) && (rawData[channel, 2, headPtr] > 0))
-                                {
-                                    averageX[channel] = averageX[channel] + Math.Abs(prevX[channel] - rawData[channel, 0, headPtr]);
-                                    averageRawX[channel] = averageRawX[channel] + rawData[channel, 0, headPtr];
-                                    averageY[channel] = averageY[channel] + Math.Abs(prevY[channel] - rawData[channel, 1, headPtr]);
-                                    averageRawY[channel] = averageRawY[channel] + rawData[channel, 1, headPtr];
-                                    averageZ[channel] = averageZ[channel] + Math.Abs(prevZ[channel] - rawData[channel, 2, headPtr]);
-                                    averageRawZ[channel] = averageRawZ[channel] + rawData[channel, 2, headPtr];
-                                    acCounters[channel] = acCounters[channel] + 1;
-                                }
-
-                                prevX[channel] = rawData[channel, 0, headPtr];
-                                prevY[channel] = rawData[channel, 1, headPtr];
-                                prevZ[channel] = rawData[channel, 2, headPtr];
-
-
-                                //current data item
-                                //headPtr = head[channel];
-                                int prevHead = headPtr - 1;
-                                if (prevHead < 0)
-                                    prevHead = 499;
-
-
-                                //trapezoid
-                                //double a2=rawData[channel, 0, headPtr];
-                                //double a1=rawData[channel, 0, prevHead];
-                                //a2 = a2 - runningMeanX;
-                                //a1 = a1 - runningMeanX;
-
-                                double t2 = timeData[channel, headPtr];
-                                double t1 = timeData[channel, prevHead];
-                                if ((t2 > 0) & (t1 > 0))
+                                if (((timeData[channel, headPtr] - currentUnixTime) >= 0) && ((timeData[channel, headPtr] - currentUnixTime) <= 1000))
                                 {
 
-                                    AUC[channel, 0] = AUC[channel, 0] + (int)Math.Abs((rawData[channel, 0, headPtr] - runningMeanX));
-                                    AUC[channel, 1] = AUC[channel, 1] + (int)Math.Abs((rawData[channel, 1, headPtr] - runningMeanY));
-                                    AUC[channel, 2] = AUC[channel, 2] + (int)Math.Abs((rawData[channel, 2, headPtr] - runningMeanZ));
-                                    VMAG[channel] = VMAG[channel] + Math.Sqrt(Math.Pow((double)(rawData[channel, 0, headPtr] - runningMeanX), 2.0) + Math.Pow((double)(rawData[channel, 1, headPtr] - runningMeanY), 2.0) + Math.Pow((double)(rawData[channel, 2, headPtr] - runningMeanZ), 2.0));
+                                    //Calculate MITes Raw Values
+                                    if ((channel != 0) && (channel <= sannotation.MaximumSensorID)) //if junk comes ignore it
+                                    {
+                                        if ((prevX[channel] > 0) && (prevY[channel] > 0) && (prevZ[channel] > 0) && (rawData[channel, 0, headPtr] > 0) && (rawData[channel, 1, headPtr] > 0) && (rawData[channel, 2, headPtr] > 0))
+                                        {
+                                            averageX[channel] = averageX[channel] + Math.Abs(prevX[channel] - rawData[channel, 0, headPtr]);
+                                            averageRawX[channel] = averageRawX[channel] + rawData[channel, 0, headPtr];
+                                            averageY[channel] = averageY[channel] + Math.Abs(prevY[channel] - rawData[channel, 1, headPtr]);
+                                            averageRawY[channel] = averageRawY[channel] + rawData[channel, 1, headPtr];
+                                            averageZ[channel] = averageZ[channel] + Math.Abs(prevZ[channel] - rawData[channel, 2, headPtr]);
+                                            averageRawZ[channel] = averageRawZ[channel] + rawData[channel, 2, headPtr];
+                                            acCounters[channel] = acCounters[channel] + 1;
+                                        }
+
+                                        prevX[channel] = rawData[channel, 0, headPtr];
+                                        prevY[channel] = rawData[channel, 1, headPtr];
+                                        prevZ[channel] = rawData[channel, 2, headPtr];
+
+
+                                        //current data item
+                                        //headPtr = head[channel];
+                                        int prevHead = headPtr - 1;
+                                        if (prevHead < 0)
+                                            prevHead = 499;
+
+
+                                        //trapezoid
+                                        //double a2=rawData[channel, 0, headPtr];
+                                        //double a1=rawData[channel, 0, prevHead];
+                                        //a2 = a2 - runningMeanX;
+                                        //a1 = a1 - runningMeanX;
+
+                                        double t2 = timeData[channel, headPtr];
+                                        double t1 = timeData[channel, prevHead];
+                                        if ((t2 > 0) & (t1 > 0))
+                                        {
+
+                                            AUC[channel, 0] = AUC[channel, 0] + (int)Math.Abs((rawData[channel, 0, headPtr] - runningMeanX));
+                                            AUC[channel, 1] = AUC[channel, 1] + (int)Math.Abs((rawData[channel, 1, headPtr] - runningMeanY));
+                                            AUC[channel, 2] = AUC[channel, 2] + (int)Math.Abs((rawData[channel, 2, headPtr] - runningMeanZ));
+                                            VMAG[channel] = VMAG[channel] + Math.Sqrt(Math.Pow((double)(rawData[channel, 0, headPtr] - runningMeanX), 2.0) + Math.Pow((double)(rawData[channel, 1, headPtr] - runningMeanY), 2.0) + Math.Pow((double)(rawData[channel, 2, headPtr] - runningMeanZ), 2.0));
+                                        }
+
+
+                                    }
                                 }
 
                                 headPtr--;
@@ -1774,13 +1885,10 @@ namespace DataMerger
                                     headPtr = 499;
                             }
                         }
-                    }
 
-                    #endregion Calculate Statistics
 
-                    #region Append MITes Statistics
-                    foreach (SXML.Sensor sensor in sannotation.Sensors)
-                    {
+
+
                         csv_line1 = timestamp;
                         csv_line2 = timestamp;
                         csv_line3 = timestamp;
@@ -1857,6 +1965,34 @@ namespace DataMerger
                             vmagCSVs[sensor_id].WriteLine(csv_line6);
 
                         }
+                        else
+                        {
+      
+                            hrCount=0;
+                           sumHR=0;
+                            while ((timeData[0, headPtr] > 0) && (headPtr != head[0]))
+                            {
+                                if (((timeData[0, headPtr] - currentUnixTime) >= 0) && ((timeData[0, headPtr] - currentUnixTime) <= 1000))
+                                {
+
+                                    sumHR += rawData[0, 0, headPtr];
+                                    hrCount++;
+                                }
+                                headPtr--;
+                                if (headPtr < 0)
+                                    headPtr = 499;
+                            }
+                            if (hrCount > 0)
+                            {
+                                hrCSV.WriteLine(hr_csv_line + "," + (int)(sumHR / hrCount));
+                                master_csv_line = master_csv_line + "," + (int)(sumHR / hrCount) + ",";
+                            }
+                            else
+                            {
+                                hrCSV.WriteLine(hr_csv_line + ",");
+                                master_csv_line = master_csv_line + ",,";
+                            }
+                        }
 
                         averageX[sensor_id] = 0;
                         averageY[sensor_id] = 0;
@@ -1877,18 +2013,16 @@ namespace DataMerger
                             AUC[sensor_id, j] = 0;
                     }
 
+                    #endregion Calculate Statistics
+
+                    #region Append MITes Statistics
+
+                    
+                    
+
 
                     #region Write CSV line for MITes HR
-                    if (hrCount > 0)
-                    {
-                        hrCSV.WriteLine(hr_csv_line + "," + (int)(sumHR / hrCount));
-                        master_csv_line = master_csv_line + "," + (int)(sumHR / hrCount) + ",";
-                    }
-                    else
-                    {
-                        hrCSV.WriteLine(hr_csv_line + ",");
-                        master_csv_line = master_csv_line + ",,";
-                    }
+    
                     #endregion Write CSV line for MITes HR
 
 
@@ -1906,7 +2040,7 @@ namespace DataMerger
                     {
                      
                         //always have at least 5 seconds worth of data for the MITes
-                        while (((wunixtimestamp - currentUnixTime) <= MEAN_SIZE) && (wcontroller._Sensors[i].Load()))
+                        while (((wunixtimestamp[i] - currentUnixTime) <= MEAN_SIZE) && (wcontroller._Sensors[i].Load()))
                         {
 
                             if (wcontroller._Sensors[i]._Decoder._Head == 0)
@@ -1915,14 +2049,15 @@ namespace DataMerger
                                 lastDecodedIndex[i] = wcontroller._Sensors[i]._Decoder._Head - 1;
 
                             Wockets.Data.Accelerometers.AccelerationData data = (Wockets.Data.Accelerometers.AccelerationData)wcontroller._Sensors[i]._Decoder._Data[lastDecodedIndex[i]];
-                            wrawData[wcontroller._Sensors[i]._ID, 0, head[wcontroller._Sensors[i]._ID]] = data.X;
-                            wrawData[wcontroller._Sensors[i]._ID, 1, head[wcontroller._Sensors[i]._ID]] = data.Y;
-                            wrawData[wcontroller._Sensors[i]._ID, 2, head[wcontroller._Sensors[i]._ID]] = data.Z;
-                            wtimeData[wcontroller._Sensors[i]._ID, head[wcontroller._Sensors[i]._ID]] = (long)data.UnixTimeStamp;
-                            whead[wcontroller._Sensors[i]._ID] = (head[wcontroller._Sensors[i]._ID] + 1) % 500;
-
+                            wrawData[wcontroller._Sensors[i]._ID, 0, whead[wcontroller._Sensors[i]._ID]] = data.X;
+                            wrawData[wcontroller._Sensors[i]._ID, 1, whead[wcontroller._Sensors[i]._ID]] = data.Y;
+                            wrawData[wcontroller._Sensors[i]._ID, 2, whead[wcontroller._Sensors[i]._ID]] = data.Z;
+                            wtimeData[wcontroller._Sensors[i]._ID, whead[wcontroller._Sensors[i]._ID]] = (long)data.UnixTimeStamp;
+                            wunixtimestamp[i] = data.UnixTimeStamp;
+                            whead[wcontroller._Sensors[i]._ID] = (whead[wcontroller._Sensors[i]._ID] + 1) % 500;
 
                         }
+
                     }
 
                     #endregion Load Wockets data if needed
@@ -1943,7 +2078,7 @@ namespace DataMerger
                         //compute running means
 
 
-                        while ((wtimeData[wcontroller._Sensors[i]._ID, wheadPtr] > 0) && ((currentUnixTime - wtimeData[wcontroller._Sensors[i]._ID, wheadPtr]) <= MEAN_SIZE) && (wnumMeanPts <= 499))
+                        while ((wtimeData[wcontroller._Sensors[i]._ID, wheadPtr] > 0) && (wheadPtr != whead[wcontroller._Sensors[i]._ID]) && (wnumMeanPts <= 499))                        
                         {
                             wrunningMeanX += wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr];
                             wrunningMeanY += wrawData[wcontroller._Sensors[i]._ID, 1, wheadPtr];
@@ -1967,12 +2102,16 @@ namespace DataMerger
                         if (wheadPtr < 0)
                             wheadPtr = 499;
                         //compute values per second
-                        while ((wtimeData[wcontroller._Sensors[i]._ID, wheadPtr] > 0) && ((currentUnixTime - wtimeData[wcontroller._Sensors[i]._ID, wheadPtr]) <= 1000) && (wnumMeanPts <= 499))
+
+
+
+
+                        while ((wtimeData[wcontroller._Sensors[i]._ID, wheadPtr] > 0) && (wheadPtr!=whead[wcontroller._Sensors[i]._ID]) )
                         {
 
-                            //Calculate MITes Raw Values
-                            if ((wcontroller._Sensors[i]._ID != 0) && (wcontroller._Sensors[i]._ID <= sannotation.MaximumSensorID)) //if junk comes ignore it
+                            if (((wtimeData[wcontroller._Sensors[i]._ID, wheadPtr] - currentUnixTime) >= 0) && ((wtimeData[wcontroller._Sensors[i]._ID, wheadPtr] - currentUnixTime) <= 1000))
                             {
+
                                 if ((wprevX[wcontroller._Sensors[i]._ID] > 0) && (wprevY[wcontroller._Sensors[i]._ID] > 0) && (wprevZ[wcontroller._Sensors[i]._ID] > 0) && (wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr] > 0) && (wrawData[wcontroller._Sensors[i]._ID, 1, wheadPtr] > 0) && (wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr] > 0))
                                 {
                                     waverageX[wcontroller._Sensors[i]._ID] = waverageX[wcontroller._Sensors[i]._ID] + Math.Abs(wprevX[wcontroller._Sensors[i]._ID] - wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr]);
@@ -2013,19 +2152,17 @@ namespace DataMerger
                                     wVMAG[wcontroller._Sensors[i]._ID] = wVMAG[wcontroller._Sensors[i]._ID] + Math.Sqrt(Math.Pow((double)(wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr] - wrunningMeanX), 2.0) + Math.Pow((double)(wrawData[wcontroller._Sensors[i]._ID, 1, wheadPtr] - wrunningMeanY), 2.0) + Math.Pow((double)(wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr] - wrunningMeanZ), 2.0));
                                 }
 
-                                wheadPtr--;
-                                if (wheadPtr < 0)
-                                    wheadPtr = 499;
+
+
                             }
+
+                            wheadPtr--;
+                            if (wheadPtr < 0)
+                                wheadPtr = 499;
                         }
-                    }
 
-                    #endregion Calculate Statistics
+                        #region Append Wockets Statistics
 
-                    #region Append Wockets Statistics
-
-                    for (int i = 0; (i < wcontroller._Sensors.Count); i++)
-                    {
                         int sensor_id = wcontroller._Sensors[i]._ID;
                         csv_line1 = timestamp;
                         csv_line2 = timestamp;
@@ -2034,47 +2171,47 @@ namespace DataMerger
                         csv_line5 = timestamp;
                         csv_line6 = timestamp;
 
-                        if (acCounters[sensor_id] > 0)
+                        if (wacCounters[sensor_id] > 0)
                         {
                             csv_line2 += "," + acCounters[sensor_id];
 
-                            csv_line1 += "," + ((double)(averageX[sensor_id] / (double)acCounters[sensor_id])).ToString("00.00") + ",";
-                            csv_line1 += ((double)(averageY[sensor_id] / (double)acCounters[sensor_id])).ToString("00.00") + ",";
-                            csv_line1 += ((double)(averageZ[sensor_id] / (double)acCounters[sensor_id])).ToString("00.00");
+                            csv_line1 += "," + ((double)(waverageX[sensor_id] / (double)wacCounters[sensor_id])).ToString("00.00") + ",";
+                            csv_line1 += ((double)(waverageY[sensor_id] / (double)wacCounters[sensor_id])).ToString("00.00") + ",";
+                            csv_line1 += ((double)(waverageZ[sensor_id] / (double)wacCounters[sensor_id])).ToString("00.00");
 
-                            csv_line3 += "," + ((int)(averageRawX[sensor_id] / acCounters[sensor_id])) + ",";
-                            csv_line3 += ((int)(averageRawY[sensor_id] / acCounters[sensor_id])) + ",";
-                            csv_line3 += ((int)(averageRawZ[sensor_id] / acCounters[sensor_id]));
+                            csv_line3 += "," + ((int)(waverageRawX[sensor_id] / wacCounters[sensor_id])) + ",";
+                            csv_line3 += ((int)(waverageRawY[sensor_id] / wacCounters[sensor_id])) + ",";
+                            csv_line3 += ((int)(waverageRawZ[sensor_id] / wacCounters[sensor_id]));
 
-                            csv_line4 += "," + ((double)RMX[sensor_id]).ToString("00.00") + ",";
-                            csv_line4 += ((double)RMY[sensor_id]).ToString("00.00") + ",";
-                            csv_line4 += ((double)RMZ[sensor_id]).ToString("00.00");
+                            csv_line4 += "," + ((double)wRMX[sensor_id]).ToString("00.00") + ",";
+                            csv_line4 += ((double)wRMY[sensor_id]).ToString("00.00") + ",";
+                            csv_line4 += ((double)wRMZ[sensor_id]).ToString("00.00");
 
-                            csv_line5 += "," + ((double)AUC[sensor_id, 0]).ToString("00.00") + ",";
-                            csv_line5 += ((double)AUC[sensor_id, 1]).ToString("00.00") + ",";
-                            csv_line5 += ((double)AUC[sensor_id, 2]).ToString("00.00") + ",";
-                            csv_line5 += ((double)(AUC[sensor_id, 0] + AUC[sensor_id, 1] + AUC[sensor_id, 2])).ToString("00.00");
+                            csv_line5 += "," + ((double)wAUC[sensor_id, 0]).ToString("00.00") + ",";
+                            csv_line5 += ((double)wAUC[sensor_id, 1]).ToString("00.00") + ",";
+                            csv_line5 += ((double)wAUC[sensor_id, 2]).ToString("00.00") + ",";
+                            csv_line5 += ((double)(wAUC[sensor_id, 0] + wAUC[sensor_id, 1] + wAUC[sensor_id, 2])).ToString("00.00");
 
-                            csv_line6 += "," + ((double)(VMAG[sensor_id] / (double)acCounters[sensor_id])).ToString("00.00");
+                            csv_line6 += "," + ((double)(wVMAG[sensor_id] / (double)wacCounters[sensor_id])).ToString("00.00");
 
-                            master_csv_line += "," + acCounters[sensor_id];
-                            master_csv_line += "," + ((int)(averageRawX[sensor_id] / acCounters[sensor_id])) + ",";
-                            master_csv_line += ((int)(averageRawY[sensor_id] / acCounters[sensor_id])) + ",";
-                            master_csv_line += ((int)(averageRawZ[sensor_id] / acCounters[sensor_id]));
-                            master_csv_line += "," + ((double)(averageX[sensor_id] / (double)acCounters[sensor_id])).ToString("00.00") + ",";
-                            master_csv_line += ((double)(averageY[sensor_id] / (double)acCounters[sensor_id])).ToString("00.00") + ",";
-                            master_csv_line += ((double)(averageZ[sensor_id] / (double)acCounters[sensor_id])).ToString("00.00") + ",";
+                            master_csv_line += "," + wacCounters[sensor_id];
+                            master_csv_line += "," + ((int)(waverageRawX[sensor_id] / wacCounters[sensor_id])) + ",";
+                            master_csv_line += ((int)(waverageRawY[sensor_id] / wacCounters[sensor_id])) + ",";
+                            master_csv_line += ((int)(waverageRawZ[sensor_id] / wacCounters[sensor_id]));
+                            master_csv_line += "," + ((double)(waverageX[sensor_id] / (double)wacCounters[sensor_id])).ToString("00.00") + ",";
+                            master_csv_line += ((double)(waverageY[sensor_id] / (double)wacCounters[sensor_id])).ToString("00.00") + ",";
+                            master_csv_line += ((double)(waverageZ[sensor_id] / (double)wacCounters[sensor_id])).ToString("00.00") + ",";
 
-                            master_csv_line += ((double)AUC[sensor_id, 0]).ToString("00.00") + ",";
-                            master_csv_line += ((double)AUC[sensor_id, 1]).ToString("00.00") + ",";
-                            master_csv_line += ((double)AUC[sensor_id, 2]).ToString("00.00") + ",";
-                            master_csv_line += ((double)(AUC[sensor_id, 0] + AUC[sensor_id, 1] + AUC[sensor_id, 2])).ToString("00.00") + ",";
+                            master_csv_line += ((double)wAUC[sensor_id, 0]).ToString("00.00") + ",";
+                            master_csv_line += ((double)wAUC[sensor_id, 1]).ToString("00.00") + ",";
+                            master_csv_line += ((double)wAUC[sensor_id, 2]).ToString("00.00") + ",";
+                            master_csv_line += ((double)(wAUC[sensor_id, 0] + wAUC[sensor_id, 1] + wAUC[sensor_id, 2])).ToString("00.00") + ",";
 
-                            master_csv_line += ((double)RMX[sensor_id]).ToString("00.00") + ",";
-                            master_csv_line += ((double)RMY[sensor_id]).ToString("00.00") + ",";
-                            master_csv_line += ((double)RMZ[sensor_id]).ToString("00.00") + ",";
-                            master_csv_line += ((double)RMSize[sensor_id]).ToString("00.00") + ",";
-                            master_csv_line += ((double)(VMAG[sensor_id] / (double)acCounters[sensor_id])).ToString("00.00");
+                            master_csv_line += ((double)wRMX[sensor_id]).ToString("00.00") + ",";
+                            master_csv_line += ((double)wRMY[sensor_id]).ToString("00.00") + ",";
+                            master_csv_line += ((double)wRMZ[sensor_id]).ToString("00.00") + ",";
+                            master_csv_line += ((double)wRMSize[sensor_id]).ToString("00.00") + ",";
+                            master_csv_line += ((double)(wVMAG[sensor_id] / (double)wacCounters[sensor_id])).ToString("00.00");
 
 
                         }
@@ -2116,11 +2253,18 @@ namespace DataMerger
                         wVMAG[sensor_id] = 0;
                         for (int j = 0; (j < 3); j++)
                             wAUC[sensor_id, j] = 0;
+
+                        #endregion Append Wockets Statistics
                     }
 
+                    #endregion Calculate Statistics
+
+            
+
+        
 
 
-                    #endregion Append Wockets Statistics
+    
 
                 }
                 #region Write CSV lines for Actigraphs
