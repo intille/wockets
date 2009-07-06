@@ -489,7 +489,7 @@ namespace NESPDataViewer
             
 
         }
-        private void CreateAccelerationGraph(int paneOrder, string filepath, string channel, string location)
+        private void CreateAccelerationGraph(int paneOrder, string filepath, string channel, string location,string type)
         {
             #region ACCELERATION X Y Z
             string[] accel = FileReadWrite.ReadLinesFromFile(filepath);
@@ -531,7 +531,7 @@ namespace NESPDataViewer
 
             #region SAMPLE RATES
             string[] samp = new string[0];
-            string[] matches = Directory.GetFiles(Path.GetDirectoryName(filepath), String.Format("MITES_{0}_SampleRate*", channel));
+            string[] matches = Directory.GetFiles(Path.GetDirectoryName(filepath), String.Format(type + "_{0}_SampleRate*", channel));
             if (matches.Length == 1)
                 samp = FileReadWrite.ReadLinesFromFile(matches[0]);
 
@@ -556,8 +556,8 @@ namespace NESPDataViewer
             #endregion
 
             #region ACTIVITY COUNTS
-            string[] counts = new string[0];            
-            matches = Directory.GetFiles(Path.GetDirectoryName(filepath),String.Format("MITES_{0}_SAD*",channel));
+            string[] counts = new string[0];
+            matches = Directory.GetFiles(Path.GetDirectoryName(filepath), String.Format(type + "_{0}_SAD*", channel));
             if (matches.Length == 1)
                 counts = FileReadWrite.ReadLinesFromFile(matches[0]);
             PointPairList listActivityCounts = new PointPairList();
@@ -582,7 +582,7 @@ namespace NESPDataViewer
 
             #region AUC
             string[] aucs = new string[0];
-            matches = Directory.GetFiles(Path.GetDirectoryName(filepath), String.Format("MITES_{0}_AUC*", channel));
+            matches = Directory.GetFiles(Path.GetDirectoryName(filepath), String.Format(type+"_{0}_AUC*", channel));
             if (matches.Length == 1)
                 aucs = FileReadWrite.ReadLinesFromFile(matches[0]);
             PointPairList listAUCs = new PointPairList();
@@ -608,7 +608,7 @@ namespace NESPDataViewer
             #region VMAGS
 
              string[] vmags = new string[0];
-             matches = Directory.GetFiles(Path.GetDirectoryName(filepath), String.Format("MITES_{0}_VMAG*", channel));
+             matches = Directory.GetFiles(Path.GetDirectoryName(filepath), String.Format(type+"_{0}_VMAG*", channel));
             if (matches.Length == 1)
                 vmags = FileReadWrite.ReadLinesFromFile(matches[0]);
 
@@ -634,12 +634,15 @@ namespace NESPDataViewer
 
 
 
-            AddAccelerationCurve("MITes " + channel + " " + location, location,listX, listY, listZ,listActivityCounts,listSampleRates,listAUCs,listVMAGs);
-            paneOrders.Add("MITes " + channel + " " + location,paneOrder);
+            AddAccelerationCurve(type+" " + channel + " " + location, location,listX, listY, listZ,listActivityCounts,listSampleRates,listAUCs,listVMAGs);
+            paneOrders.Add(type + " " + channel + " " + location, paneOrder);
             WidenDatesIfNeeded(listX);
         }
 
         #endregion
+
+
+
 
 
 
@@ -1573,7 +1576,24 @@ namespace NESPDataViewer
                     channel = sensorinfo[1];
                     location = sensorinfo[3];
                 }
-                CreateAccelerationGraph(paneOrdering, files[i], channel, location);
+                CreateAccelerationGraph(paneOrdering, files[i], channel, location,"MITes");
+                paneOrdering++;
+            }
+            #endregion
+
+
+            #region WOCKETS ACCELEROMETER GRAPHS
+            files = Directory.GetFiles(path, "Wocket*Raw*");
+            for (int i = 0; i < files.Length; i++)
+            {
+                string channel = "", location = "";
+                string[] sensorinfo = Path.GetFileNameWithoutExtension(files[i]).Split('_');
+                if (sensorinfo.Length >= 4)
+                {
+                    channel = sensorinfo[1];
+                    location = sensorinfo[3];
+                }
+                CreateAccelerationGraph(paneOrdering, files[i], channel, location,"Wocket");
                 paneOrdering++;
             }
             #endregion

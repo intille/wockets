@@ -10,8 +10,8 @@ namespace PCTestApplication
     {
         static void Main(string[] args)
         {
-           
-            string storage=@"C:\SampleFile\";
+
+            string storage = @"C:\Users\albinali\Desktop\data\mites data\wockets\";
             WocketsController wc = new WocketsController("", "", "");
             wc.FromXML(storage+"SensorData.xml");
             int[] lostSeconds = new int[wc._Sensors.Count];
