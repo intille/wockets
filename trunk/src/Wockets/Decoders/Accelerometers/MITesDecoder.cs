@@ -43,7 +43,10 @@ namespace Wockets.Decoders.Accelerometers
             return true;
         }*/
 
-
+        public override int Decode(int sourceSensor, byte[] data, int head, int tail)
+        {
+            return 0;
+        }
         //exception thrown only when there is an overflow
         public override int Decode(int sensorID, byte[] data, int length)
         {

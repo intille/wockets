@@ -27,7 +27,10 @@ namespace Wockets.Decoders.Accelerometers
             this.type = DecoderTypes.Sparkfun;
         }
 
-
+        public override int Decode(int sourceSensor, byte[] data, int head, int tail)
+        {
+            return 0;
+        }
         public override int Decode(int sourceSensor, byte[] data, int length)
         {
             int rawDataIndex = 0;
