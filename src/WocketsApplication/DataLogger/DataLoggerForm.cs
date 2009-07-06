@@ -1631,17 +1631,42 @@ namespace WocketsApplication.DataLogger
                         if (currentReceiver._Running == true)
                         {
                             Decoder decoder = sensor._Decoder;
-                            int dataLength = currentReceiver.Read();
                             int numDecodedPackets = 0;
-                            if (dataLength > 0)
+                            if (currentReceiver._Type == ReceiverTypes.HTCDiamond) 
                             {
-                                numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer, dataLength);
-                                this.disconnected[sensor._ID] = 0;
-                                this.AccumPackets[i] += numDecodedPackets;
+                                int dataLength = currentReceiver.Read();
+                                if (dataLength > 0)
+                                {
+                                    numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer, dataLength);
+                                    this.disconnected[sensor._ID] = 0;
+                                    this.AccumPackets[i] += numDecodedPackets;
+                                }
                                 this.AccumPackets[i + 6] += numDecodedPackets;
                             }
+                            else
+                            {
+                                /*int dataLength = currentReceiver.Read();
+                                int numDecodedPackets = 0;
+                                if (dataLength > 0)
+                                {
+                                    numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer, dataLength);
+                                    this.disconnected[sensor._ID] = 0;
+                                    this.AccumPackets[i] += numDecodedPackets;
+                                }
+                                */
 
-                            this.sensorStat["W" + this.wocketsController._Sensors[i]._ID] = connectedWocketImage;
+                                int dataLength = ((RFCOMMReceiver)currentReceiver)._Tail - ((RFCOMMReceiver)currentReceiver)._Head;
+                                if (dataLength < 0)
+                                    dataLength = (((RFCOMMReceiver)currentReceiver).ReceiverBuffer.Length - ((RFCOMMReceiver)currentReceiver)._Head) + ((RFCOMMReceiver)currentReceiver)._Tail;
+                                if (dataLength > 0)
+                                {
+                                    numDecodedPackets = decoder.Decode(sensor._ID, ((RFCOMMReceiver)currentReceiver).ReceiverBuffer, ((RFCOMMReceiver)currentReceiver)._Head, ((RFCOMMReceiver)currentReceiver)._Tail, 12.0, ((RFCOMMReceiver)currentReceiver)._LastTimestamps);
+                                    ((RFCOMMReceiver)currentReceiver)._Head = ((RFCOMMReceiver)currentReceiver)._Tail;                                   
+                                    this.disconnected[sensor._ID] = 0;
+                                    this.AccumPackets[i] += numDecodedPackets;
+                                }
+                                this.sensorStat["W" + this.wocketsController._Sensors[i]._ID] = connectedWocketImage;
+                            }
                         }
                     }
 
