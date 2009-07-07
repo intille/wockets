@@ -153,7 +153,6 @@ namespace WocketsApplication
 
             #endregion Initialize GUI Components
 
-
             #endregion Load Data Logger GUI
 
         }

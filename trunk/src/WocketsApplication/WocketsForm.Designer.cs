@@ -293,7 +293,6 @@ namespace WocketsApplication
 
         void activityTrackerButton_Click(object sender, EventArgs e)
         {
-
             if (this.lForm == null)
             {
 
@@ -421,9 +420,7 @@ namespace WocketsApplication
 
             if (lForm.Visible == false)
                 lForm.Show();
-
         }
-
 
         #endregion Interface Functions Wockets Form
 
@@ -715,8 +712,6 @@ namespace WocketsApplication
 
         #endregion Sensors Configuration Form
 
-        #region Data Storage Location
-
 
         private System.Windows.Forms.Form lForm;
         private System.Windows.Forms.MainMenu lFormMainMenu;
@@ -725,140 +720,6 @@ namespace WocketsApplication
         private System.Windows.Forms.Button lFormBrowseButton;
         private System.Windows.Forms.Button lFormNextButton;
         private System.Windows.Forms.Button lFormBackButton;
-
-        void sFormNextButton_Click(object sender, System.EventArgs e)
-        {
-            if (this.lForm == null)
-            {
-
-                this.lForm = new System.Windows.Forms.Form();
-                this.lFormMainMenu = new System.Windows.Forms.MainMenu();
-                this.lFormLabel = new System.Windows.Forms.Label();
-                this.lFormTextBox = new System.Windows.Forms.TextBox();
-                this.lFormBrowseButton = new System.Windows.Forms.Button();
-                this.lFormNextButton = new System.Windows.Forms.Button();
-                this.lFormBackButton = new System.Windows.Forms.Button();
-           
-                // 
-                // lFormLabel
-                // 
-                this.lFormLabel.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold);
-                this.lFormLabel.Location = new System.Drawing.Point(16, 23);
-                this.lFormLabel.Name = "label1";
-                this.lFormLabel.Size = new System.Drawing.Size(199, 32);
-                this.lFormLabel.TabIndex = 5;
-                this.lFormLabel.Text = "Where do you want to store your data?";
-                // 
-                // lFormTextBox
-                // 
-                this.lFormTextBox.Enabled = false;
-                this.lFormTextBox.Location = new System.Drawing.Point(16, 70);
-                this.lFormTextBox.Name = "lFormTextBox";
-                this.lFormTextBox.Size = new System.Drawing.Size(199, 20);
-                this.lFormTextBox.TabIndex = 1;
-                // 
-                // lFormBrowseButton
-                // 
-                this.lFormBrowseButton.Location = new System.Drawing.Point(16, 97);
-                this.lFormBrowseButton.Name = "lFormBrowseButton";
-                this.lFormBrowseButton.Size = new System.Drawing.Size(199, 20);
-                this.lFormBrowseButton.TabIndex = 2;
-                this.lFormBrowseButton.Text = "Choose a directory";
-                this.lFormBrowseButton.Click += new System.EventHandler(this.lFormBrowseButton_Click);
-                // 
-                // lFormNextButton
-                // 
-                this.lFormNextButton.Enabled = false;
-                this.lFormNextButton.Location = new System.Drawing.Point(143, 139);
-                this.lFormNextButton.Name = "lFormNextButton";
-                this.lFormNextButton.Size = new System.Drawing.Size(72, 20);
-                this.lFormNextButton.TabIndex = 3;
-                this.lFormNextButton.Text = "Next";
-                this.lFormNextButton.Click += new System.EventHandler(this.lFormNextButton_Click);
-                // 
-                // lFormBackButton
-                // 
-                this.lFormBackButton.Location = new System.Drawing.Point(16, 139);
-                this.lFormBackButton.Name = "lFormBackButton";
-                this.lFormBackButton.Size = new System.Drawing.Size(72, 20);
-                this.lFormBackButton.TabIndex = 4;
-                this.lFormBackButton.Text = "Back";
-                this.lFormBackButton.Click += new System.EventHandler(this.lFormBackButton_Click);
-                // 
-                // lForm
-                // 
-                this.lForm.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
-                this.lForm.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-                this.lForm.AutoScroll = true;
-                this.lForm.ClientSize = new System.Drawing.Size(240, 268);
-                this.lForm.Controls.Add(this.lFormBrowseButton);
-                this.lForm.Controls.Add(this.lFormNextButton);
-                this.lForm.Controls.Add(this.lFormBackButton);
-                this.lForm.Controls.Add(this.lFormTextBox);
-                this.lForm.Controls.Add(this.lFormLabel);
-                this.lForm.Menu = this.mainMenu1;
-                this.lForm.Name = "WhereStoreDataForm";
-                this.lForm.Text = "Collect Data...";
-                this.lForm.ResumeLayout(false);
-
-
-
-                this.lForm.Width = System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width;
-                if (this.lForm.Width > Constants.MAX_FORM_WIDTH)
-                    this.lForm.Width = Constants.MAX_FORM_WIDTH;
-                this.lForm.Height = System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height;
-                if (this.lForm.Height > Constants.MAX_FORM_HEIGHT)
-                    this.lForm.Height = Constants.MAX_FORM_HEIGHT;
-
- 
-                int widgetHeight = (this.ClientSize.Height - (5 * Constants.WIDGET_SPACING)) /4;
-                int widgetWidth = (int)(this.lForm.ClientSize.Width - Constants.WIDGET_SPACING );
-
-                widgetHeight = (int)(0.9 * widgetHeight);
-                widgetWidth = (int)(0.9 * widgetWidth);
-
-                //adjust top label size and location
-                this.lFormLabel.Text = "Where do you want to store your data?";
-                this.lFormLabel.Width = widgetWidth;
-                this.lFormLabel.Height = widgetHeight;
-                this.lFormLabel.Location = new Point((int)Constants.WIDGET_SPACING, (int)Constants.WIDGET_SPACING);
-                this.lFormLabel.Font =  GUIHelper.CalculateBestFitFont(this.lFormLabel.Parent.CreateGraphics(), Constants.MIN_FONT,
-                       Constants.MAX_FONT, this.lFormLabel.Size, this.lFormLabel.Text, this.lFormLabel.Font, (float)0.9, (float)0.9);
-
-                //adjust textbox
-                this.lFormTextBox.Width = widgetWidth;
-                this.lFormTextBox.Height = widgetHeight;
-                this.lFormTextBox.Location = new Point((int)Constants.WIDGET_SPACING, Constants.WIDGET_SPACING + this.lFormLabel.Location.Y + this.lFormLabel.Height + Constants.WIDGET_SPACING);
-                this.lFormTextBox.Font = this.lFormLabel.Font;
-
-                this.lFormBrowseButton.Width = widgetWidth;
-                this.lFormBrowseButton.Height = widgetHeight;
-                this.lFormBrowseButton.Location = new Point((int)Constants.WIDGET_SPACING, Constants.WIDGET_SPACING + this.lFormTextBox.Location.Y + this.lFormTextBox.Height + Constants.WIDGET_SPACING);
-                this.lFormBrowseButton.Font =  GUIHelper.CalculateBestFitFont(this.lFormBrowseButton.Parent.CreateGraphics(), Constants.MIN_FONT,
-                       Constants.MAX_FONT, this.lFormBrowseButton.Size, this.lFormLabel.Text, this.lFormBrowseButton.Font, (float)0.9, (float)0.9);
-
-
-                this.lFormNextButton.Width = (int)(widgetWidth * 0.50);
-                this.lFormBackButton.Width = (int)(widgetWidth * 0.50);
-                this.lFormNextButton.Height = (int)(widgetHeight * 1.0);
-                this.lFormBackButton.Height = (int)(widgetHeight * 1.0);
-
-
-                this.lFormBackButton.Location = new Point((int)Constants.WIDGET_SPACING, (int)(this.lFormBrowseButton.Location.Y + this.lFormBrowseButton.Height + Constants.WIDGET_SPACING));
-                this.lFormNextButton.Location = new Point((int)(Constants.WIDGET_SPACING + this.lFormNextButton.Width + Constants.WIDGET_SPACING),
-                    (int)(this.lFormBrowseButton.Location.Y + this.lFormBrowseButton.Height + Constants.WIDGET_SPACING));
-                this.lFormNextButton.Font = this.lFormBackButton.Font =  GUIHelper.CalculateBestFitFont(this.lFormNextButton.Parent.CreateGraphics(), Constants.MIN_FONT,
-                    Constants.MAX_FONT, this.lFormNextButton.Size, "Next", this.lFormNextButton.Font, (float)0.9, (float)0.9);
-
-
-            }
-            
-            if (lForm.Visible == false)
-                lForm.Show();
-
-            this.sForm.Visible = false;
-        }
-
 
         void lFormClassisifierBrowseButton_Click(object sender, System.EventArgs e)
         {
@@ -928,9 +789,29 @@ namespace WocketsApplication
             this.lForm.Visible = false;
         }
 
-        void lFormNextButton_Click(object sender, System.EventArgs e)
+        void sFormNextButton_Click(object sender, System.EventArgs e)
         {
-            this.lForm.Visible = false;
+             //initialize the path as an empty string
+            string firstCard = "";
+
+            System.IO.DirectoryInfo di = new System.IO.DirectoryInfo("\\");
+            System.IO.FileSystemInfo[] fsi = di.GetFileSystemInfos();
+           
+            //iterate through them
+            for (int x = 0; x < fsi.Length; x++)
+            {
+                //check to see if this is a temporary storage card (e.g. SD card)
+                if ((fsi[x].Attributes & System.IO.FileAttributes.Temporary) == System.IO.FileAttributes.Temporary)
+                {
+                    //if so, return the path
+                    firstCard = fsi[x].FullName;
+                    break;
+                }
+            }
+            string name = firstCard + "\\Wockets\\w" + DateTime.Now.Month + "-" + DateTime.Now.Day + "-" + DateTime.Now.Hour + "_" + DateTime.Now.Minute + "_" + DateTime.Now.Second;
+            Directory.CreateDirectory(name);
+            this.storageDirectory = name;
+            this.sForm.Visible = false;
             try
             {
                 InitializeDataLogger();
@@ -942,7 +823,7 @@ namespace WocketsApplication
             }
         }
 
-        #endregion Data Storage Location
+
 
         private System.Windows.Forms.Button dataLoggerButton;
         private System.Windows.Forms.Button activityTrackerButton;
