@@ -113,7 +113,6 @@ namespace WocketsApplication.DataLogger
         /// </summary>
         private Hashtable sensorLabels;
         private Hashtable sensorStatus;
-        private Hashtable sensorStat;
         private Hashtable sensorBattery;
         
         private Image[] batteryImg = new Image[] { (Image)new Bitmap(Constants.NETWORK_STATUS_DIRECTORY + "1.gif"), (Image)new Bitmap(Constants.NETWORK_STATUS_DIRECTORY + "2.gif"), (Image)new Bitmap(Constants.NETWORK_STATUS_DIRECTORY + "3.gif"), (Image)new Bitmap(Constants.NETWORK_STATUS_DIRECTORY + "4.gif"), (Image)new Bitmap(Constants.NETWORK_STATUS_DIRECTORY + "5.gif"), (Image)new Bitmap(Constants.NETWORK_STATUS_DIRECTORY + "6.gif") };
@@ -1666,8 +1665,8 @@ namespace WocketsApplication.DataLogger
                                     ((RFCOMMReceiver)currentReceiver)._Head = tail;                                   
                                     this.disconnected[sensor._ID] = 0;
                                     this.AccumPackets[i] += numDecodedPackets;
+                                    this.AccumPackets[i+6] += numDecodedPackets;
                                 }
-                                this.sensorStat["W" + this.wocketsController._Sensors[i]._ID] = connectedWocketImage;
                             }
 
                             this.wocketsController._Sensors[i].Save();   
@@ -1682,9 +1681,8 @@ namespace WocketsApplication.DataLogger
                 catch (Exception ex)
                 {
 
-                    Logger.Warn("Wocket " + sensor._ID + " has "+ex.Message+".");
+                    Logger.Warn("Wocket " + sensor._ID + " has disconnected.");
                     this.disconnected[sensor._ID] = 1;
-                    this.sensorStat["W" + sensor._ID] = disconnectedWocketImage;
                     if (this.bluetoothConnectors[currentReceiver._ID]==null)
                     {
                         this.bluetoothConnectors[currentReceiver._ID] = new BluetoothConnector(currentReceiver, this.wocketsController);
@@ -2034,8 +2032,11 @@ namespace WocketsApplication.DataLogger
 
                 for (int i = 0; i < this.wocketsController._Sensors.Count; i++)
                 {
-                    String key = "W" + this.wocketsController._Sensors[i]._ID;
-                    ((PictureBox)this.sensorStatus[key]).Image = (Image)this.sensorStat[key];
+                    String key = "W" + this.wocketsController._Receivers[i]._ID;
+                    if (this.wocketsController._Receivers[i]._Running)
+                        ((PictureBox)this.sensorStatus[key]).Image = (Image)this.connectedWocketImage;
+                    else
+                        ((PictureBox)this.sensorStatus[key]).Image = (Image)this.disconnectedWocketImage;
 
                 }
 
