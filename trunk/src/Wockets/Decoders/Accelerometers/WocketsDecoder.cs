@@ -16,7 +16,7 @@ namespace Wockets.Decoders.Accelerometers
         private const string WOCKETS_TYPE = "Wockets";
         #endregion Serialization Constants
 
-        private const int BUFFER_SIZE = 600; 
+        private const int BUFFER_SIZE = 200; 
         private bool headerSeen;
         private int bytesToRead = 0;
         private SensorDataType packetType;
@@ -111,7 +111,7 @@ namespace Wockets.Decoders.Accelerometers
             }
 
             //Fix timestamps
- 
+ /*
             double currentTimestamp = lasttimestamp - numDecodedPackets * samplespacing;
             
             if (currentTimestamp < this.lastTimestamp) //no problem
@@ -132,7 +132,7 @@ namespace Wockets.Decoders.Accelerometers
             }
 
             this.lastTimestamp = currentTimestamp;
-    
+  */
             this.head = bufferHead;
             //this._Size = decodedDataIndex;
             return numDecodedPackets;

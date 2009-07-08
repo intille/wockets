@@ -297,13 +297,15 @@ namespace Wockets.Sensors.Accelerometers
                     bw.OpenFile(false);
                     flushTimer = 0;
                 }
-
+                //only save when 1/2 of the buffer is full
+                if (Math.Abs(tail - this._Decoder._Head) < (this._Decoder._Data / 2))
+                    return;
 
                 DetermineFilePath();
                 AccelerationData data = ((AccelerationData)this._Decoder._Data[tail]);
                // for (int i = 0; (i < this._Decoder._Size); i++)
                 //while(tail<this._Decoder._Head)
-                while ((data.UnixTimeStamp>0) && (data.UnixTimeStamp >= this.tailUnixTimestamp))
+                while ((tail!=this._Decoder._Head) && (data.UnixTimeStamp>0) && (data.UnixTimeStamp >= this.tailUnixTimestamp))
                 {
                     aUnixTime = data.UnixTimeStamp;
 
@@ -532,3 +534,4 @@ namespace Wockets.Sensors.Accelerometers
 
     }
 }
+

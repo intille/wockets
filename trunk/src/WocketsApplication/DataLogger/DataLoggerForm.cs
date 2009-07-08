@@ -464,7 +464,7 @@ namespace WocketsApplication.DataLogger
 
             //Initialize Plotting Thread
             //aPlottingThread = new Thread(new ThreadStart(PlotWockets));
-            aSavingThread = new Thread(new ThreadStart(SaveWockets));
+            //aSavingThread = new Thread(new ThreadStart(SaveWockets));
             aPollingThread = new Thread(new ThreadStart(PollWockets));
 
             //this.bluetoothControllers = new BluetoothController[this.wocketsController._Receivers.Count];
@@ -595,7 +595,7 @@ namespace WocketsApplication.DataLogger
             //aPlottingThread.Start();
             //aSavingThread
             aPollingThread.Start();
-            aSavingThread.Start();
+            //aSavingThread.Start();
 
             //Terminate the progress thread
             progressThreadQuit = true;
@@ -1660,13 +1660,17 @@ namespace WocketsApplication.DataLogger
                                     dataLength = (((RFCOMMReceiver)currentReceiver).ReceiverBuffer.Length - ((RFCOMMReceiver)currentReceiver)._Head) + ((RFCOMMReceiver)currentReceiver)._Tail;
                                 if (dataLength > 0)
                                 {
-                                    numDecodedPackets = decoder.Decode(sensor._ID, ((RFCOMMReceiver)currentReceiver).ReceiverBuffer, ((RFCOMMReceiver)currentReceiver)._Head, ((RFCOMMReceiver)currentReceiver)._Tail, 12.0, ((RFCOMMReceiver)currentReceiver)._LastTimestamps);
-                                    ((RFCOMMReceiver)currentReceiver)._Head = ((RFCOMMReceiver)currentReceiver)._Tail;                                   
+                                    int tail = ((RFCOMMReceiver)currentReceiver)._Tail;
+                                    int head = ((RFCOMMReceiver)currentReceiver)._Head;
+                                    numDecodedPackets = decoder.Decode(sensor._ID, ((RFCOMMReceiver)currentReceiver).ReceiverBuffer, head, tail, 12.0, ((RFCOMMReceiver)currentReceiver)._LastTimestamps);
+                                    ((RFCOMMReceiver)currentReceiver)._Head = tail;                                   
                                     this.disconnected[sensor._ID] = 0;
                                     this.AccumPackets[i] += numDecodedPackets;
                                 }
                                 this.sensorStat["W" + this.wocketsController._Sensors[i]._ID] = connectedWocketImage;
                             }
+
+                            this.wocketsController._Sensors[i].Save();   
                         }
                     }
 
@@ -1751,7 +1755,7 @@ namespace WocketsApplication.DataLogger
             }
 
             this.SRcounter++;
-            if (this.SRcounter > 6000)//Update status interface every 5 minutes
+            if (this.SRcounter > 600)//Update status interface every 5 minutes
             {
                 String log="";
                 int disc;
