@@ -808,7 +808,7 @@ namespace WocketsApplication
                     break;
                 }
             }
-            string name = firstCard + "\\Wockets\\w" + DateTime.Now.Month + "-" + DateTime.Now.Day + "-" + DateTime.Now.Hour + "_" + DateTime.Now.Minute + "_" + DateTime.Now.Second;
+            string name = firstCard + "\\Wockets\\Session" + DateTime.Now.Month + "-" + DateTime.Now.Day + "-" + DateTime.Now.Hour + "-" + DateTime.Now.Minute + "-" + DateTime.Now.Second;
             Directory.CreateDirectory(name);
             this.storageDirectory = name;
             this.sForm.Visible = false;

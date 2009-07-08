@@ -639,7 +639,6 @@ namespace WocketsApplication.DataLogger
             //Intialize Labels 40% of the screen
             this.sensorLabels = new Hashtable();
             this.sensorStatus = new Hashtable();
-            this.sensorStat = new Hashtable();
             this.sensorBattery = new Hashtable();
             int num_rows = (int)((this.wocketsController._Sensors.Count + 2) / 2); //additional row for HR and total sampling rate
             int textBoxHeight = ((int)(0.35 * this.panel1.ClientSize.Height) - ((this.wocketsController._Sensors.Count - 1) * Constants.WIDGET_SPACING)) / num_rows;
@@ -687,7 +686,6 @@ namespace WocketsApplication.DataLogger
                 t.Font = textFont;
                 this.sensorLabels.Add("W" + this.wocketsController._Sensors[i]._ID, t);
                 this.sensorStatus.Add("W" + this.wocketsController._Sensors[i]._ID, p);
-                this.sensorStat.Add("W" + this.wocketsController._Sensors[i]._ID, this.connectedWocketImage);
                 this.sensorBattery.Add("W" + this.wocketsController._Sensors[i]._ID, p2);
                 //this.tabPage1.Controls.Add(t);
                 this.panel1.Controls.Add(t);
