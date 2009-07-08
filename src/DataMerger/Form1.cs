@@ -1648,6 +1648,8 @@ namespace DataMerger
                     endday = day;
                 if (record.EndHour > endhr)
                     endhr = record.EndHour;
+                if ((record.EndMinute < 54) && (record.EndMinute < endmin))
+                    endmin = record.EndMinute + 5;
             }
 
             DateTime startDateTime = new DateTime(startyear, startmonth, startday, starthr, startmin, startsec);

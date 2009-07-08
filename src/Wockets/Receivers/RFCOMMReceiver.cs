@@ -644,6 +644,7 @@ namespace Wockets.Receivers
                             int availableBytes = btSocket.Available;
                             if (availableBytes > 0)
                             {
+                                int currentHead = head;
                                 this.lastTimestamp = WocketsTimer.GetUnixTime();
                                 bytesReceived = 0;
                                 //if we will pass the end of buffer receive till the end then receive the rest
@@ -656,7 +657,15 @@ namespace Wockets.Receivers
                                 bytesReceived += btSocket.Receive(singleReadBuffer, tail, availableBytes, SocketFlags.None);
                                 //batchTimestamps.Add(currentTime);
                                 //batchBytes.Add(bytesReceived);
+
+
+                                //int origTail = tail;
                                 tail = (tail + bytesReceived) % DEFAULT_BUFFER_SIZE;
+                                //if (((origTail < head) && (tail >= head)) ||
+                                 //     (origTail > head) && (tail < origTail) && (tail >= head))
+                                  //  throw new Exception("Overflow");
+
+                                
                             }
 
                             Thread.Sleep(30);

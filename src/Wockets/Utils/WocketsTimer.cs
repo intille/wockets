@@ -31,7 +31,8 @@ namespace Wockets.Utils
         public static double MilliInHour = 3600000;
 
         private static System.Int64 counter = 0;
-        private static System.Int64 referenceCounter = 0;
+        private static double referenceCounter = 0;
+        
         private static System.Int64 freq = 0;
         private static double referenceTime;
         private static double max_previous_time = 0;
@@ -102,7 +103,9 @@ namespace Wockets.Utils
             freq_1 = 1.0 / (double)freq;
             referenceTime = ((TimeSpan)(DateTime.Now.Subtract(UnixRef))).TotalMilliseconds;
             //DateTime dt=(new DateTime(1970, 1, 1, 0, 0, 0)).AddMilliseconds(referenceTime);
-            QueryPerformanceCounter(out referenceCounter);
+            System.Int64 refCount = 0;
+            QueryPerformanceCounter(out refCount);
+            referenceCounter = (double)refCount;
             initialized = true;
             //TimeStamp = WocketsTimer.GetUnixTime();
             //timerThread = new Thread(new ThreadStart(TimerThread));
@@ -126,6 +129,8 @@ namespace Wockets.Utils
                 return WocketsTimer.previousTime;
             }
         }
+        private static int x = 0;
+        private static System.Int64 prevCount=0;
         public static double GetUnixTime()
         {
             //Initialize precise timer if not initialized
@@ -136,9 +141,24 @@ namespace Wockets.Utils
             }
 
             QueryPerformanceCounter(out counter);
-            current_time = (double)(referenceTime + (((counter - referenceCounter)  * freq_1)*1000.0));
+            if (prevCount >= counter)
+            {
+                referenceCounter = counter;
+                referenceTime = ((TimeSpan)(DateTime.Now.Subtract(UnixRef))).TotalMilliseconds;
+                if (referenceTime <= previousTime)
+                    referenceTime = previousTime + 1;
+            }
 
-            /*double diff = current_time - previousTime;
+            current_time = (double)(referenceTime + ((((double)counter - referenceCounter) * freq_1) * 1000.0));
+            previousTime = current_time;            
+            prevCount = counter;
+            
+            
+            //current_time = x++;
+            //double diff = current_time - previousTime;
+            //if (diff<=1)
+            //    current_time = previousTime + 1.0;
+            /*
 
             if (diff <= 1)
             {
