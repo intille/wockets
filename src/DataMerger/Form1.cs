@@ -72,8 +72,8 @@ namespace DataMerger
 
                     if (File.Exists(this.textBox1.Text + "\\ActivityLabelsRealtime.xml"))
                         this.progressForm.AppendLog("Activity Labels File .....................Found\r\n");
-                    else
-                        throw new Exception("Activity Labels File ....................Not Found");
+                   // else
+                    //    throw new Exception("Activity Labels File ....................Not Found");
 
                     //sensewear
                     file = Directory.GetFileSystemEntries(this.textBox1.Text, "*-sensewear*.csv");
@@ -81,8 +81,8 @@ namespace DataMerger
                         this.progressForm.AppendLog("Sensewear File .....................Found\r\n");
                     else if (file.Length == 0)
                         this.progressForm.AppendLog("Sensewear File ..................... Not Found\r\n");
-                    else
-                        throw new Exception("Sensewear naming problem. Too many sensewear files.");
+                    //else
+                     //   throw new Exception("Sensewear naming problem. Too many sensewear files.");
 
 
                     //actigraph
@@ -105,8 +105,8 @@ namespace DataMerger
                             this.progressForm.AppendLog("Oxycon PC File .....................Found\r\n");
                         else if (file.Length == 0)
                             this.progressForm.AppendLog("Oxycon PC File .....................Not Found\r\n");
-                        else
-                            throw new Exception("Oxycon PC naming problem. Too many Oxycon PC files.");
+                       // else
+                        //    throw new Exception("Oxycon PC naming problem. Too many Oxycon PC files.");
 
                         file = Directory.GetFileSystemEntries(this.textBox1.Text, "*-flashcard.dat");
                         if (file.Length == 1)
@@ -122,8 +122,8 @@ namespace DataMerger
                             else
                                 this.progressForm.AppendLog("Oxycon Flash file not found.... manual inspection needed");
                         }
-                        else
-                            throw new Exception("Oxycon Flash naming problem. Too many Oxycon Flash files.");
+                        //else
+                           // throw new Exception("Oxycon Flash naming problem. Too many Oxycon Flash files.");
 
                     }
                     else
@@ -137,8 +137,8 @@ namespace DataMerger
                         this.progressForm.AppendLog("Omron File .....................Found\r\n");
                     else if (file.Length == 0)
                         this.progressForm.AppendLog("Omron File ..................... Not Found\r\n");
-                    else
-                        throw new Exception("Omron naming problem. Too many Omron files.");
+                   // else
+                   //     throw new Exception("Omron naming problem. Too many Omron files.");
 
                     //zephyr
 
@@ -147,49 +147,52 @@ namespace DataMerger
                         this.progressForm.AppendLog("Zephyr File .....................Found\r\n");
                     else if (file.Length == 0)
                         this.progressForm.AppendLog("Zephyr File ..................... Not Found\r\n");
-                    else
-                        throw new Exception("Zephyr naming problem. Too many Omron files.");
+                   // else
+                       // throw new Exception("Zephyr naming problem. Too many Omron files.");
 
                     //MITes
 
                     //configuration files
                     if (File.Exists(this.textBox1.Text + "\\Configuration.xml"))
                         this.progressForm.AppendLog("Configuration.xml File .....................Found\r\n");
-                    else
-                        throw new Exception("Configuration.xml File ....................Not Found");
+                   // else
+                    //    throw new Exception("Configuration.xml File ....................Not Found");
 
                     if (File.Exists(this.textBox1.Text + "\\SensorData.xml"))
                         this.progressForm.AppendLog("SensorData.xml File .....................Found\r\n");
-                    else
-                        throw new Exception("SensorData.xml File ....................Not Found");
+                   // else
+                   //     throw new Exception("SensorData.xml File ....................Not Found");
 
                     if (File.Exists(this.textBox1.Text + "\\SensorData.xml"))
                         this.progressForm.AppendLog("SensorData.xml File .....................Found\r\n");
-                    else
-                        throw new Exception("SensorData.xml File ....................Not Found");
+                  //  else
+                    //    throw new Exception("SensorData.xml File ....................Not Found");
 
                     if (Directory.Exists(this.textBox1.Text + "\\data\\raw\\PLFormat"))
                         this.progressForm.AppendLog("PLFormat Data Directory .....................Found\r\n");
                     else //Attempt to Fix
                     {
                         this.progressForm.AppendLog("Non PLFormat Data Directory .....................Fixing\r\n");
-                        file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\data\\raw", "*.PLFormat");
-                        //MITesAccelBytes.2008-6-12-13-42-12-671
-                        if (file.Length == 1)
+                        if (Directory.Exists(this.textBox1.Text + "\\data\\raw"))
                         {
+                            file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\data\\raw", "*.PLFormat");
+                            //MITesAccelBytes.2008-6-12-13-42-12-671
+                            if (file.Length == 1)
+                            {
 
-                            string timestamp = file[0].Substring(file[0].IndexOf("MITesAccelBytes.") + 16);
-                            timestamp = timestamp.Substring(0, timestamp.IndexOf(".PLFormat"));
-                            string[] times = timestamp.Split('-');
-                            string date = times[0] + "-" + Convert.ToInt32(times[1]).ToString("00") + "-" + Convert.ToInt32(times[2]).ToString("00");
-                            string hour = Convert.ToInt32(times[3]).ToString();
+                                string timestamp = file[0].Substring(file[0].IndexOf("MITesAccelBytes.") + 16);
+                                timestamp = timestamp.Substring(0, timestamp.IndexOf(".PLFormat"));
+                                string[] times = timestamp.Split('-');
+                                string date = times[0] + "-" + Convert.ToInt32(times[1]).ToString("00") + "-" + Convert.ToInt32(times[2]).ToString("00");
+                                string hour = Convert.ToInt32(times[3]).ToString();
 
-                            Directory.CreateDirectory(this.textBox1.Text + "\\data\\raw\\PLFormat\\" + date);
-                            Directory.CreateDirectory(this.textBox1.Text + "\\data\\raw\\PLFormat\\" + date + "\\" + hour);
-                            File.Copy(file[0], this.textBox1.Text + "\\data\\raw\\PLFormat\\" + date + "\\" + hour + "\\" + file[0].Substring(file[0].IndexOf("MITesAccelBytes.")));
+                                Directory.CreateDirectory(this.textBox1.Text + "\\data\\raw\\PLFormat\\" + date);
+                                Directory.CreateDirectory(this.textBox1.Text + "\\data\\raw\\PLFormat\\" + date + "\\" + hour);
+                                File.Copy(file[0], this.textBox1.Text + "\\data\\raw\\PLFormat\\" + date + "\\" + hour + "\\" + file[0].Substring(file[0].IndexOf("MITesAccelBytes.")));
+                            }
+                            else
+                                throw new Exception("Old Format: More than 1 file ....................manual fix needed");
                         }
-                        else
-                            throw new Exception("Old Format: More than 1 file ....................manual fix needed");
                     }
 
                 }
@@ -215,7 +218,7 @@ namespace DataMerger
             }
             catch (Exception e)
             {
-                MessageBox.Show("Error: Format error in the CSV files " + e.Message);
+                MessageBox.Show("Error: Format error in the CSV files " + e.StackTrace);
                 Environment.Exit(0);
             }
             converted = true;
@@ -2173,7 +2176,7 @@ namespace DataMerger
 
                         if (wacCounters[sensor_id] > 0)
                         {
-                            csv_line2 += "," + acCounters[sensor_id];
+                            csv_line2 += "," + wacCounters[sensor_id];
 
                             csv_line1 += "," + ((double)(waverageX[sensor_id] / (double)wacCounters[sensor_id])).ToString("00.00") + ",";
                             csv_line1 += ((double)(waverageY[sensor_id] / (double)wacCounters[sensor_id])).ToString("00.00") + ",";
@@ -2267,6 +2270,8 @@ namespace DataMerger
     
 
                 }
+
+
                 #region Write CSV lines for Actigraphs
                 for (int i = 0; (i < actigraphData.Length); i++)
                 {

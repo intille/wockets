@@ -16,8 +16,11 @@ namespace PCTestApplication
             wc.FromXML(storage+"SensorData.xml");
             int[] lostSeconds = new int[wc._Sensors.Count];
             double[] prevUnix = new double[wc._Sensors.Count];
+            
             for (int i = 0; (i < wc._Sensors.Count); i++)
             {
+                double firstT = 0, lastT = 0;
+                int count = 0;
                 wc._Sensors[i]._RootStorageDirectory=storage+"data\\raw\\PLFormat\\";
                 TextWriter tw = new StreamWriter(storage +"sensor" + wc._Sensors[i]._ID + ".csv");
                 try
@@ -29,8 +32,13 @@ namespace PCTestApplication
                             lastDecodedIndex = wc._Sensors[i]._Decoder._Data.Length - 1;
                         else
                             lastDecodedIndex = wc._Sensors[i]._Decoder._Head - 1;
+                        count++;
 
-                        Wockets.Data.Accelerometers.AccelerationData data = (Wockets.Data.Accelerometers.AccelerationData)wc._Sensors[i]._Decoder._Data[lastDecodedIndex];            
+                       
+                        Wockets.Data.Accelerometers.AccelerationData data = (Wockets.Data.Accelerometers.AccelerationData)wc._Sensors[i]._Decoder._Data[lastDecodedIndex];
+                        if (firstT == 0)
+                            firstT = data.UnixTimeStamp;
+                        lastT = data.UnixTimeStamp;
                         tw.WriteLine(data.UnixTimeStamp + "," + data.X + "," + data.Y + "," + data.Z);
 
                         if ((prevUnix[i]>1000) &&((data.UnixTimeStamp-prevUnix[i])>60000))
@@ -43,6 +51,10 @@ namespace PCTestApplication
                 catch (Exception)
                 {
                 }
+                double sr = count;
+                double timer = (lastT - firstT) / 1000.0;
+                sr = sr / timer;
+                tw.WriteLine("SR: " + sr);
                 tw.WriteLine("lost " + lostSeconds[i]);
                 tw.Flush();
                 tw.Close();
