@@ -15,7 +15,7 @@ namespace Wockets.Decoders.Accelerometers
         private const int HTCDIAMOND_CHANNEL = 83;
         #endregion Serialization Constants
 
-        private const int BUFFER_SIZE = 100; // should not exceed 4096 (Lower Level Buffer Size) / 6 (HTC Packet Size)
+        private const int BUFFER_SIZE = 200; // should not exceed 4096 (Lower Level Buffer Size) / 6 (HTC Packet Size)
         private bool headerSeen;
 
 

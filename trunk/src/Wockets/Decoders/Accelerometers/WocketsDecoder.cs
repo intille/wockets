@@ -16,7 +16,7 @@ namespace Wockets.Decoders.Accelerometers
         private const string WOCKETS_TYPE = "Wockets";
         #endregion Serialization Constants
 
-        private const int BUFFER_SIZE = 200; 
+        private const int BUFFER_SIZE = 1200; 
         private bool headerSeen;
         private int bytesToRead = 0;
         private SensorDataType packetType;
@@ -74,6 +74,7 @@ namespace Wockets.Decoders.Accelerometers
 
                         WocketsAccelerationData datum = ((WocketsAccelerationData)this._Data[bufferHead]);
                         datum.Reset();
+                        datum.UnixTimeStamp = WocketsTimer.GetUnixTime();
                         //copy raw bytes
                         for (int i = 0; (i < bytesToRead); i++)
                             datum.RawBytes[i] = this.packet[i];
@@ -83,8 +84,10 @@ namespace Wockets.Decoders.Accelerometers
                         datum.X = (short)((((short)(this.packet[0] & 0x03)) << 8) | (((short)(this.packet[1] & 0x7f)) << 1) | (((short)(this.packet[2] & 0x40)) >> 6));
                         datum.Y = (short)((((short)(this.packet[2] & 0x3f)) << 4) | (((short)(this.packet[3] & 0x78)) >> 3));
                         datum.Z = (short)((((short)(this.packet[3] & 0x07)) << 7) | ((short)(this.packet[4] & 0x7f)));
-                        //Set time stamps
-                        datum.UnixTimeStamp = WocketsTimer.GetUnixTime();
+                        //Set time stamps                       
+                        datum._PeggyBacked = ((this.packet[0] & 0x1c) > 0);
+                        if (datum._PeggyBacked)
+                            datum._PeggyBacked = true;
 
                         //if (IsValid(datum))
                         if (bufferHead >= (BUFFER_SIZE - 1))

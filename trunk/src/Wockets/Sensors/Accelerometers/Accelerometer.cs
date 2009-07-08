@@ -61,7 +61,7 @@ namespace Wockets.Sensors.Accelerometers
         private double aUnixTime = 0;
         private double lastUnixTime = 0;
         private bool isForceTimestampSave = true;
-        private int flushTimer = 0;
+        private int flushTimer = 0;        
         public static int MAX_FLUSH_TIME = 2000;
 
         #endregion IO storage variables
@@ -284,10 +284,14 @@ namespace Wockets.Sensors.Accelerometers
                 bw.CloseFile();
             }
         }
+
+        private int lastHead = 0;
         public override void Save()
         {
             if (_Saving)
             {
+                int currentHead = this._Decoder._Head;
+
                 flushTimer++;
                 if (flushTimer >= MAX_FLUSH_TIME)
                 {
@@ -297,15 +301,19 @@ namespace Wockets.Sensors.Accelerometers
                     bw.OpenFile(false);
                     flushTimer = 0;
                 }
+
                 //only save when 1/2 of the buffer is full
-                if (Math.Abs(tail - this._Decoder._Head) < (this._Decoder._Data / 2))
+                if (Math.Abs(tail - currentHead) < (this._Decoder._Data.Length / 2))
                     return;
+                if (((lastHead<tail) && (currentHead>tail)) || 
+                ((lastHead<tail) && (lastHead>currentHead) && (currentHead<tail)))
+                    throw new Exception("Overflow");
 
                 DetermineFilePath();
-                AccelerationData data = ((AccelerationData)this._Decoder._Data[tail]);
+                AccelerationData data = ((AccelerationData)this._Decoder._Data[tail]);               
                // for (int i = 0; (i < this._Decoder._Size); i++)
                 //while(tail<this._Decoder._Head)
-                while ((tail!=this._Decoder._Head) && (data.UnixTimeStamp>0) && (data.UnixTimeStamp >= this.tailUnixTimestamp))
+                while ((tail != currentHead) && (data.UnixTimeStamp > 0) && (data.UnixTimeStamp >= this.tailUnixTimestamp))
                 {
                     aUnixTime = data.UnixTimeStamp;
 
@@ -340,8 +348,12 @@ namespace Wockets.Sensors.Accelerometers
                     else
                         tail++;
                     data = ((AccelerationData)this._Decoder._Data[tail]);
+
+                    if ((tail != currentHead) && (data.UnixTimeStamp > 0) && (!(data.UnixTimeStamp >= this.tailUnixTimestamp)))
+                        tail = tail; 
                 }
 
+                lastHead = currentHead;
                
             }
         }
@@ -503,7 +515,7 @@ namespace Wockets.Sensors.Accelerometers
                 foreach (XmlNode jNode in iNode.ChildNodes)
                 {
                     foreach (XmlAttribute jAttribute in jNode.Attributes)
-                    {
+                    {                     
                         if ((jNode.Name == CALIBRATION_ELEMENT) && (jAttribute.Name == X1G_ATTRIBUTE))
                             this.x1g = Convert.ToDouble(jAttribute.Value);
                         else if ((jNode.Name == CALIBRATION_ELEMENT) && (jAttribute.Name == XN1G_ATTRIBUTE))

@@ -8,6 +8,7 @@ namespace Wockets.Data.Accelerometers
     public sealed class WocketsAccelerationData: AccelerationData
     {
         public const byte NUM_RAW_BYTES = 5;
+        private bool peggyBacked = false;
 
         public WocketsAccelerationData(byte sensorID): base(NUM_RAW_BYTES,sensorID)
         {           
@@ -16,6 +17,19 @@ namespace Wockets.Data.Accelerometers
         public WocketsAccelerationData()
             : base(NUM_RAW_BYTES, 0)
         {
+        }
+
+        public bool _PeggyBacked
+        {
+            get
+            {
+                return this.peggyBacked;
+            }
+
+            set
+            {
+                this.peggyBacked = value;
+            }
         }
     }
 }
