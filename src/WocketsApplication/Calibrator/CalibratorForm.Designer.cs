@@ -594,6 +594,9 @@ namespace WocketsApplication.Calibrator
                 ((Wockets.Sensors.Accelerometers.Accelerometer)this.wocketsController._Sensors[0])._YSTD = Math.Sqrt(((Wockets.Sensors.Accelerometers.Accelerometer)this.wocketsController._Sensors[0])._YSTD) / (CALIBRATION_SAMPLES-1);
                 ((Wockets.Sensors.Accelerometers.Accelerometer)this.wocketsController._Sensors[0])._ZSTD = Math.Sqrt(((Wockets.Sensors.Accelerometers.Accelerometer)this.wocketsController._Sensors[0])._ZSTD) / (CALIBRATION_SAMPLES-1);
 
+                //calculate SR
+                ((Wockets.Sensors.Accelerometers.Accelerometer)this.wocketsController._Sensors[0])._SamplingRate = (int)(this.sampleCounter /((this.endTime - this.startTime)/10000000));
+
                 TextWriter tw = new StreamWriter(Constants.SENSOR_CONFIGURATIONS_DIRECTORY+this.wocketsController._FileName);
                 tw.WriteLine(this.wocketsController.ToXML());
                 tw.Flush();
