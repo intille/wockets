@@ -186,6 +186,130 @@ namespace WocketsApplication.Calibrator
         private double time=0;
         private int currentIndex = 0;
 
+        private int sampleCounter = 0;
+        private long startTime;
+        private long endTime;
+        private bool isTracking = false;
+
+        private Thread aPollingThread = null;
+        private bool aPollingThreadQuit = false;
+
+        private void PollWockets()
+        {
+            #region Poll All Wockets and MITes and Decode Data
+
+            Receiver currentReceiver = null;
+            Sensor sensor = null;
+            while (true)
+            {
+
+                #region Bluetooth Reconnection Code
+#if (PocketPC)
+
+                for (int i = 0; (i < this.wocketsController._Receivers.Count); i++)
+                {
+                    if (this.wocketsController._Receivers[i]._Type == ReceiverTypes.RFCOMM)
+                    {
+                        if ((this.bluetoothConnectors[this.wocketsController._Receivers[i]._ID] != null) &&
+                            (!this.bluetoothConnectors[this.wocketsController._Receivers[i]._ID].Reconnecting) &&
+                            (this.wocketsController._Receivers[i]._Running == false))
+                        {
+                            this.bluetoothConnectors[this.wocketsController._Receivers[i]._ID].Reconnect();
+                        }
+                        if ((this.bluetoothConnectors[this.wocketsController._Receivers[i]._ID] != null) &&
+                        (this.bluetoothConnectors[this.wocketsController._Receivers[i]._ID].Reconnecting) &&
+                        (this.wocketsController._Receivers[i]._Running == true))
+                        {
+                            this.bluetoothConnectors[this.wocketsController._Receivers[i]._ID].Cleanup();
+                        }
+
+                    }
+
+                }
+
+
+#endif
+
+                #endregion Bluetooth Reconnection Code
+
+                try
+                {
+                    for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
+                    {
+                        sensor = this.wocketsController._Sensors[i];
+                        currentReceiver = this.wocketsController._Receivers[sensor._Receiver];
+                        if (currentReceiver._Running == true)
+                        {
+                            Decoder decoder = sensor._Decoder;
+                            int numDecodedPackets = 0;
+                            if (currentReceiver._Type == ReceiverTypes.HTCDiamond)
+                            {
+                                int dataLength = currentReceiver.Read();
+                                if (dataLength > 0)
+                                {
+                                    numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer, dataLength);
+                                //    this.disconnected[sensor._ID] = 0;
+                                  //  this.AccumPackets[i] += numDecodedPackets;
+                                }
+                              //  this.AccumPackets[i + 6] += numDecodedPackets;
+                            }
+                            else
+                            {
+                                /*int dataLength = currentReceiver.Read();
+                                int numDecodedPackets = 0;
+                                if (dataLength > 0)
+                                {
+                                    numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer, dataLength);
+                                    this.disconnected[sensor._ID] = 0;
+                                    this.AccumPackets[i] += numDecodedPackets;
+                                }
+                                */
+
+                                int dataLength = ((RFCOMMReceiver)currentReceiver)._Tail - ((RFCOMMReceiver)currentReceiver)._Head;
+                                if (dataLength < 0)
+                                    dataLength = (((RFCOMMReceiver)currentReceiver).ReceiverBuffer.Length - ((RFCOMMReceiver)currentReceiver)._Head) + ((RFCOMMReceiver)currentReceiver)._Tail;
+                                if (dataLength > 0)
+                                {
+                                    int tail = ((RFCOMMReceiver)currentReceiver)._Tail;
+                                    int head = ((RFCOMMReceiver)currentReceiver)._Head;
+                                    numDecodedPackets = decoder.Decode(sensor._ID, ((RFCOMMReceiver)currentReceiver).ReceiverBuffer, head, tail, 12.0, ((RFCOMMReceiver)currentReceiver)._LastTimestamps);
+                                    ((RFCOMMReceiver)currentReceiver)._Head = tail;
+                        //            this.disconnected[sensor._ID] = 0;
+                          //          this.AccumPackets[i] += numDecodedPackets;
+                            //        this.AccumPackets[i + 6] += numDecodedPackets;
+                                }
+                            }
+
+                      //      this.wocketsController._Sensors[i].Save();
+                        }
+                    }
+
+                    UpdateGraph();
+
+                }
+                //Thrown when there is a Bluetooth failure                    
+                //TODO: Make sure no USB failure happening
+                catch (Exception ex)
+                {
+
+                    //Logger.Warn("Wocket " + sensor._ID + " has disconnected.");
+                    //this.disconnected[sensor._ID] = 1;
+                    if (this.bluetoothConnectors[currentReceiver._ID] == null)
+                    {
+                        this.bluetoothConnectors[currentReceiver._ID] = new BluetoothConnector(currentReceiver, this.wocketsController);
+                    }
+                    currentReceiver._Running = false;
+                }
+
+
+                Thread.Sleep(10);
+            }
+
+
+
+            #endregion Poll All Wockets and MITes and Decode Data
+        }
+
         public CalibratorForm(string storageDirectory, WocketsController wocketsController)
         {
             this.storageDirectory = storageDirectory;
@@ -283,7 +407,8 @@ namespace WocketsApplication.Calibrator
 
 
 
-
+            aPollingThread = new Thread(new ThreadStart(PollWockets));
+            aPollingThread.Start();
 
             #region Start Collecting Data
 
@@ -782,7 +907,7 @@ namespace WocketsApplication.Calibrator
 
 
 
-
+        
 
         #region Graphing functions
 
@@ -837,78 +962,13 @@ namespace WocketsApplication.Calibrator
 
 
         #endregion Graphing functions
-
+        
 
         #region Timer Methods
 
 
         private void readDataTimer_Tick(object sender, EventArgs e)
         {
-
-
-            #region Bluetooth Reconnection Code
-
-
-            //Start a reconnection thread
-            for (int i = 0; (i < this.wocketsController._Receivers.Count); i++)
-            {
-                if (this.wocketsController._Receivers[i]._Type == ReceiverTypes.RFCOMM)
-                {
-                    if ((this.wocketsController._Receivers[i]._Running == false) && (this.bluetoothConnectors[this.wocketsController._Receivers[i]._ID] == null))
-                    {
-                        if (this.bluetoothConnectors[this.wocketsController._Receivers[i]._ID] != null)
-                            this.bluetoothConnectors[this.wocketsController._Receivers[i]._ID].Cleanup();
-                        this.bluetoothConnectors[this.wocketsController._Receivers[i]._ID] = new BluetoothConnector(this.wocketsController._Receivers[i], this.wocketsController);
-                        this.bluetoothConnectors[this.wocketsController._Receivers[i]._ID].Reconnect();
-                    }
-                }
-
-            }
-
-
-            #endregion Bluetooth Reconnection Code
-
-            #region Poll All Wockets and MITes and Decode Data
-
-            Receiver currentReceiver = null;
-            try
-            {
-                //Poll each CONNECTED receiver channel with the right decoder
-                //foreach (Receiver receiver in this.sensors.Receivers)
-                //read then decode
-                for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
-                {
-                    Sensor sensor = this.wocketsController._Sensors[i];
-                    currentReceiver = this.wocketsController._Receivers[sensor._Receiver];
-                    if (currentReceiver._Running == true)
-                    {
-                        Decoder decoder = sensor._Decoder;
-                        int dataLength = currentReceiver.Read();
-                        int numDecodedPackets = 0;
-                        if (dataLength > 0)
-                            numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer, dataLength);
-                        //ranbelCounter += numDecodedPackets;
-                    }
-                }
-
-            }
-            //Thrown when there is a Bluetooth failure                    
-            //TODO: Make sure no USB failure happening
-            catch (Exception ex)
-            {
-
-                currentReceiver._Running = false;
-                this.bluetoothConnectors[currentReceiver._ID] = null;
-                return;
-            }
-
-
-
-
-
-            #endregion Poll All Wockets and MITes and Decode Data
-
-
 
             #region Calibration Code
   
@@ -921,18 +981,30 @@ namespace WocketsApplication.Calibrator
                 {
                     if (this.calibrationCounter == 0)
                         this.currentIndex = decoder._Head-1;
-
+                   
                     if (this.currentIndex == -1)
                         this.currentIndex = decoder._Data.Length - 1;
+ 
+                    if (!this.isTracking)
+                    {
+                        this.isTracking = true;
+                        this.startTime = DateTime.Now.Ticks;
+                     //   this.startTime = decoder._Data[currentIndex].UnixTimeStamp;
+                    }
 
-                    /*
-                    if (this.currentIndex == decoder._Data.Length-1)
-                        this.currentIndex = 0;
-                    */
                     for (int i = this.currentIndex; (i < decoder._Data.Length); i++)
                     {
                         if (this.calibrationCounter == CALIBRATION_SAMPLES)
+                        {   //
+                            if (this.calibrationDirection == 6)
+                            {
+                                this.isTracking = false;
+                                this.endTime = DateTime.Now.Ticks;
+                               // this.endTime = decoder._Data[i-1].UnixTimeStamp;
+                            }
+                            //
                             break;
+                        }
 
                         if ((decoder._Data[i].UnixTimeStamp >= this.time) && (decoder._Data[i].Type == SensorDataType.ACCEL))
                         {
@@ -945,6 +1017,7 @@ namespace WocketsApplication.Calibrator
                             this.calibrations[this.calibrationDirection][2] += (int)((AccelerationData)decoder._Data[i]).Z;
                             System.Windows.Forms.Label t = (System.Windows.Forms.Label)this.sensorLabels["calibration"];
 
+                            this.sampleCounter++;
                             this.calibrationCounter++;
                             t.Text = "X=" + ((int)(this.calibrations[this.calibrationDirection][0] / this.calibrationCounter)) +
                                      "  Y=" + ((int)(this.calibrations[this.calibrationDirection][1] / this.calibrationCounter)) +
@@ -970,6 +1043,7 @@ namespace WocketsApplication.Calibrator
                     this.calibrationCounter = 0;
                     if ( this.calibrationDirection == 7)
                     {
+                        
                         this.button2.Text = "Quit";
                         this.button2.Visible = true;
                     }
@@ -994,23 +1068,26 @@ namespace WocketsApplication.Calibrator
             }
             #endregion Calibration Code
 
+        }
 
-
-            // Graph accelerometer data for multiple recievers
-#if (PocketPC)
-
-            if ((this.tabControl1.SelectedIndex == 0) && (isPlotting))
+        delegate void UpdateGraphCallback();
+        public void UpdateGraph()
+        {
+            // InvokeRequired required compares the thread ID of the
+            // calling thread to the thread ID of the creating thread.
+            // If these threads are different, it returns true.
+            if (this.panel1.InvokeRequired)
             {
-
-                GraphAccelerometerValues();
+                UpdateGraphCallback d = new UpdateGraphCallback(UpdateGraph);
+                this.Invoke(d, new object[] { });
             }
-#endif
-            //Reset all decoders
-            for (int i = 0; (i < this.wocketsController._Decoders.Count); i++)
-                this.wocketsController._Decoders[i]._Size = 0;
-
-
-
+            else
+            {
+                if ((this.tabControl1.SelectedIndex == 0) && (isPlotting))
+                {
+                    GraphAccelerometerValues();
+                }
+            }
         }
 
 
