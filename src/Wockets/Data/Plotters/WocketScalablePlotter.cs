@@ -111,15 +111,25 @@ namespace Wockets.Data.Plotters
 
                 if (this.wocketsController._Receivers[receiverID]._Running)
                 {
-
+                    int currentHead = this.wocketsController._Sensors[i]._Decoder._Head;
 
                     //int decoderID = this.wocketsController._Sensors[i]._Decoder._ID;
                     //for (int j = this.plotFrom[decoderID]; (j < this.wocketsController._Decoders[decoderID]._Size); j++)
                     int tail = this.decoderTails[i];
                     //while(tail<=this.wocketsController._Sensors[i]._Decoder._Head)
                     AccelerationData data = ((AccelerationData)this.wocketsController._Sensors[i]._Decoder._Data[tail]);
-                    while ((data.UnixTimeStamp>0) && (data.UnixTimeStamp >= this.lastUnixTimestamps[i]))
+                    while ((tail != currentHead) && (data.UnixTimeStamp > 0) && (data.UnixTimeStamp >= this.lastUnixTimestamps[i]))
                     {
+
+                        if (tail % 3 != 0)
+                        {
+                            if (tail >= (this.wocketsController._Sensors[i]._Decoder._Data.Length - 1))
+                                tail = 0;
+                            else
+                                tail++;
+                            continue;
+                        }
+
                         //check the data comes from the sensor i if the decoder is used with multiple sensors
                         if (data.SensorID == this.wocketsController._Sensors[i]._ID)
                         {

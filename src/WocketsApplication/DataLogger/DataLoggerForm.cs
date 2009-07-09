@@ -136,6 +136,7 @@ namespace WocketsApplication.DataLogger
         private Thread aProgressThread = null;
 
         private Thread aPollingThread = null;
+        //private Thread aInternalPollingThread = null;
         private bool aPollingThreadQuit=false;
         private Thread aPlottingThread = null;
         private bool plottingThreadQuit=false;
@@ -463,8 +464,9 @@ namespace WocketsApplication.DataLogger
 
             //Initialize Plotting Thread
             //aPlottingThread = new Thread(new ThreadStart(PlotWockets));
-            //aSavingThread = new Thread(new ThreadStart(SaveWockets));
+            aSavingThread = new Thread(new ThreadStart(SaveWockets));
             aPollingThread = new Thread(new ThreadStart(PollWockets));
+            //aInternalPollingThread = new Thread(new ThreadStart(PollInternal));
 
             //this.bluetoothControllers = new BluetoothController[this.wocketsController._Receivers.Count];
             this.bluetoothConnectors = new BluetoothConnector[this.wocketsController._Receivers.Count];
@@ -594,7 +596,8 @@ namespace WocketsApplication.DataLogger
             //aPlottingThread.Start();
             //aSavingThread
             aPollingThread.Start();
-            //aSavingThread.Start();
+            //aInternalPollingThread.Start();
+            aSavingThread.Start();
 
             //Terminate the progress thread
             progressThreadQuit = true;
@@ -1582,7 +1585,46 @@ namespace WocketsApplication.DataLogger
         private int currentCalories = 0;
         private string previousActivity = "";
         private int extractedVectors = 0;
+        /*
+        private void PollInternal()
+        {
+            Receiver receiver = null;
+            Sensor sensor = null;
+            Decoder decoder = null;
+            int id = 0;
+            for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
+            {
+                sensor = this.wocketsController._Sensors[i];
+                receiver = this.wocketsController._Receivers[sensor._Receiver];
+                decoder = sensor._Decoder;
+                id = i;
+                if ((receiver._Running == true) && (receiver._Type == ReceiverTypes.HTCDiamond))
+                    break;                
+            }
+            while (true)
+            {
+                try
+                {
+                    int numDecodedPackets = 0;
+                    int dataLength = receiver.Read();
+                    if (dataLength > 0)
+                    {
+                        numDecodedPackets = decoder.Decode(sensor._ID, receiver._Buffer, dataLength);
+                        this.disconnected[sensor._ID] = 0;
+                        this.AccumPackets[id] += numDecodedPackets;
+                    }
+                    this.AccumPackets[id + 6] += numDecodedPackets;
+                }
+                catch (Exception e)
+                {
+                    Logger.Warn("Internal " + sensor._ID + " has disconnected " + e.Message);
+                    receiver.Initialize();
+                    receiver._Running = true;
+                }
 
+                Thread.Sleep(30);
+            }
+        }*/
         private void PollWockets()
         {
             #region Poll All Wockets and MITes and Decode Data
@@ -1643,6 +1685,7 @@ namespace WocketsApplication.DataLogger
                                 this.AccumPackets[i + 6] += numDecodedPackets;
                             }
                             else
+                            if (sensor._Class==SensorClasses.Wockets)
                             {
                                 /*int dataLength = currentReceiver.Read();
                                 int numDecodedPackets = 0;
@@ -1669,25 +1712,36 @@ namespace WocketsApplication.DataLogger
                                 }
                             }
 
-                            this.wocketsController._Sensors[i].Save();   
+                            //this.wocketsController._Sensors[i].Save();   
                         }
                     }
 
-                    UpdateGraph();
+                    if (isPlotting)
+                        UpdateGraph();
             
                 }
                 //Thrown when there is a Bluetooth failure                    
                 //TODO: Make sure no USB failure happening
                 catch (Exception ex)
                 {
-
-                    Logger.Warn("Wocket " + sensor._ID + " has disconnected.");
-                    this.disconnected[sensor._ID] = 1;
-                    if (this.bluetoothConnectors[currentReceiver._ID]==null)
+                    if (sensor._Class == SensorClasses.Wockets)
                     {
-                        this.bluetoothConnectors[currentReceiver._ID] = new BluetoothConnector(currentReceiver, this.wocketsController);
+
+
+                            Logger.Warn("Wocket " + sensor._ID + " has disconnected.");
+                        this.disconnected[sensor._ID] = 1;
+      
+                        if (this.bluetoothConnectors[currentReceiver._ID] == null)
+                        {
+                            this.bluetoothConnectors[currentReceiver._ID] = new BluetoothConnector(currentReceiver, this.wocketsController);
+                        }
+                        currentReceiver._Running = false;
                     }
-                    currentReceiver._Running = false;
+                    else if (sensor._Class==SensorClasses.HTCDiamondTouch)
+                    {
+                        currentReceiver.Initialize();
+                        currentReceiver._Running = true;
+                    }
                 }
 
 
@@ -1717,13 +1771,16 @@ namespace WocketsApplication.DataLogger
                 try
                 {
                     for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
-                        this.wocketsController._Sensors[i].Save();   
+                    {
+                        this.wocketsController._Sensors[i].Save();
+                        Thread.Sleep(50);
+                    }
                 }
                 catch (Exception ee)
                 {
                     Logger.Error(ee);
                 }
-                Thread.Sleep(3000);
+                
             }
         }
         private void readDataTimer_Tick(object sender, EventArgs e)

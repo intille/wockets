@@ -96,8 +96,14 @@ namespace Wockets.Decoders.Accelerometers
                             bufferHead++;
                         numDecodedPackets++;
 
+                        
+
+
                         this.packetPosition = 0;
                         this.headerSeen = false;
+
+                        //if (numDecodedPackets > 45)
+                        //    break;
                     }
                     else if (packetType == SensorDataType.BATTERYLEVEL)
                     {
