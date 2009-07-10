@@ -29,11 +29,17 @@ namespace Wockets.Data.Plotters
         int[] firstColumn;
         int[] decoderTails;
         double[] lastUnixTimestamps;
+        int skippedPoints = 0;
 
         public WocketsScalablePlotter(System.Windows.Forms.Panel aPanel, WocketsController wocketsController)
         {
 
             this.wocketsController = wocketsController;
+            if (this.wocketsController._Sensors.Count > 3)
+                skippedPoints = 3;
+            else if (this.wocketsController._Sensors.Count > 1)
+                skippedPoints = 2;
+            
             this.aPanel = aPanel;
             this.plotAreaSize = new Size(this.aPanel.Width, ((int)(this.aPanel.Height * 0.60)));
             graphSize = (int)Math.Floor((plotAreaSize.Height / ((double)this.wocketsController._Sensors.Count)));
@@ -121,13 +127,16 @@ namespace Wockets.Data.Plotters
                     while ((tail != currentHead) && (data.UnixTimeStamp > 0) && (data.UnixTimeStamp >= this.lastUnixTimestamps[i]))
                     {
 
-                        if (tail % 3 != 0)
+                        if (skippedPoints > 0)
                         {
-                            if (tail >= (this.wocketsController._Sensors[i]._Decoder._Data.Length - 1))
-                                tail = 0;
-                            else
-                                tail++;
-                            continue;
+                            if ((tail % skippedPoints) != 0)
+                            {
+                                if (tail >= (this.wocketsController._Sensors[i]._Decoder._Data.Length - 1))
+                                    tail = 0;
+                                else
+                                    tail++;
+                                continue;
+                            }
                         }
 
                         //check the data comes from the sensor i if the decoder is used with multiple sensors
