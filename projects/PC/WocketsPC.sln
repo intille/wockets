@@ -28,6 +28,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataViewer", "DataViewer.cs
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioAnnotation", "AudioAnnotation.csproj", "{7638C74A-D831-4E37-A542-CEA2229231CD}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "WocketsInstaller", "WocketsInstaller.vdproj", "{BBDFA967-A1E2-44D6-B1BE-73C1A24BF605}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -178,6 +180,12 @@ Global
 		{7638C74A-D831-4E37-A542-CEA2229231CD}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{7638C74A-D831-4E37-A542-CEA2229231CD}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{7638C74A-D831-4E37-A542-CEA2229231CD}.Release|Win32.ActiveCfg = Release|Any CPU
+		{BBDFA967-A1E2-44D6-B1BE-73C1A24BF605}.Debug|Any CPU.ActiveCfg = Debug
+		{BBDFA967-A1E2-44D6-B1BE-73C1A24BF605}.Debug|Mixed Platforms.ActiveCfg = Debug
+		{BBDFA967-A1E2-44D6-B1BE-73C1A24BF605}.Debug|Win32.ActiveCfg = Debug
+		{BBDFA967-A1E2-44D6-B1BE-73C1A24BF605}.Release|Any CPU.ActiveCfg = Release
+		{BBDFA967-A1E2-44D6-B1BE-73C1A24BF605}.Release|Mixed Platforms.ActiveCfg = Release
+		{BBDFA967-A1E2-44D6-B1BE-73C1A24BF605}.Release|Win32.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
