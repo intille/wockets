@@ -59,13 +59,6 @@ namespace WocketsApplication.Utils.Forms.FileBrowser
             m_dialog.Reset();
         }
 
-        public string SelectedFile
-        {
-            get
-            {
-                return m_dialog.SelectedFile;
-            }
-        }
         /// <summary>
         /// Gets or sets the path selected by the user.
         /// </summary>

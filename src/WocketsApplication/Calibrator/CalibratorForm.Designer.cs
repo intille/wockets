@@ -657,7 +657,7 @@ namespace WocketsApplication.Calibrator
 
         private System.Windows.Forms.MenuItem menuItem21;
         private System.Windows.Forms.MenuItem menuItem22;
-        private System.Windows.Forms.Panel panel1,panel2,panel3,panel4;
+        private System.Windows.Forms.Panel panel1,panel2;
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.Label pictureLabel;
 
