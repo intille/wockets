@@ -36,7 +36,6 @@ namespace WocketsApplication.DataLogger
 #if (PocketPC)
         private Chart pieChart;
         IntPtr token;
-        BitmapPlus bmp;
         GdiplusStartupInput input = new GdiplusStartupInput();
         GdiplusStartupOutput output;
 #endif
@@ -392,8 +391,6 @@ namespace WocketsApplication.DataLogger
             // 
             // tabPage2
             // 
-            this.panel2.Controls.Add(this.label5);
-
             this.panel2.Controls.Add(this.pictureBox1);
             this.panel2.Controls.Add(this.label3);
             this.panel2.Controls.Add(this.label2);
@@ -1074,7 +1071,6 @@ namespace WocketsApplication.DataLogger
         private System.Windows.Forms.MenuItem menuItem20;
         private System.Windows.Forms.Timer readDataTimer;
         private System.Windows.Forms.PictureBox pictureBox1;
-        private System.Windows.Forms.PictureBox pictureBox2;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label1;
@@ -1082,20 +1078,14 @@ namespace WocketsApplication.DataLogger
         private System.Windows.Forms.Button startStopButton;
         private System.Windows.Forms.Button oxyconButton;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.Label label16;
-        private System.Windows.Forms.Label label17;
         private System.Windows.Forms.Panel panel1, panel2, panel3, panel4, panel5;
         private System.Windows.Forms.Timer qualityTimer;
         private System.Windows.Forms.Timer HRTimer;
-        private System.Windows.Forms.Label trainingLabel;
         private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.Button pieChartClearButton;
         private System.Windows.Forms.MainMenu mainMenuTab2;
         private System.Windows.Forms.MenuItem menuItem1Tab2;
         private System.Windows.Forms.MenuItem menuItem2Tab2;

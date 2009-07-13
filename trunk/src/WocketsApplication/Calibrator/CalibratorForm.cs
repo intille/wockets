@@ -50,22 +50,6 @@ namespace WocketsApplication.Calibrator
         /// </summary>
         private bool isResized = false;
         /// <summary>
-        /// Set when the form needs to be redrawn
-        /// </summary>
-        private bool isNeedRedraw = false;
-        /// <summary>
-        /// The width of the main form - set dynamically based on screen size
-        /// </summary>
-        private int xDim = 240;
-        /// <summary>
-        /// The height of the main form - set dynamically based on screen size
-        /// </summary>
-        private int yDim = 320;
-        /// <summary>
-        /// The maximum number of plots on the screen, set dynamically based on the number of accelerometers in configuration files
-        /// </summary>
-        private int maxPlots = 3; // Changed from 6
-        /// <summary>
         /// True when form plots otherwise false
         /// </summary>
         private bool isPlotting = true;
@@ -73,10 +57,6 @@ namespace WocketsApplication.Calibrator
         /// Backbuffer for plotting the accelerometer data
         /// </summary>
         private Bitmap backBuffer = null;
-        /// <summary>
-        /// True when plotting full screen
-        /// </summary>
-        private bool isPlottingFullScreen = false;
         //TODO: change the name of the plotter to something reasonable since it is generic
         /// <summary>
         /// A plotter for accelerometer data
@@ -87,7 +67,6 @@ namespace WocketsApplication.Calibrator
         private SolidBrush aBrush = new SolidBrush(Color.White);
         private SolidBrush blueBrush = new SolidBrush(Color.LightBlue);
         private SolidBrush redBrush = new SolidBrush(Color.Red);
-        private int gapDistance = 4;
 
         #endregion Definition of Plotting and Graphing Variables
 
@@ -193,7 +172,6 @@ namespace WocketsApplication.Calibrator
         private bool isTracking = false;
 
         private Thread aPollingThread = null;
-        private bool aPollingThreadQuit = false;
 
         private void PollWockets()
         {

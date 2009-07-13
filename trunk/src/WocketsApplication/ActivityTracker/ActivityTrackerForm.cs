@@ -131,10 +131,6 @@ namespace WocketsApplication.ActivityTracker
         /// </summary>
         private bool progressThreadQuit = false;
         /// <summary>
-        /// Counter to update the number of samples
-        /// </summary>
-        private int printSamplingCount = 0;
-        /// <summary>
         /// An array list of the different buttons of the annotator
         /// </summary>
         private ArrayList categoryButtons;
@@ -1314,13 +1310,6 @@ namespace WocketsApplication.ActivityTracker
                     this.label3.Text = label;
 
                 }
-#if (PocketPC)
-                else if (control_id == ACTIVITY_TIMER)
-                {
-                    pieChart.SetTime(label);
-                    pieChart.Invalidate();
-                }
-#endif
             }
         }
 
@@ -1485,13 +1474,10 @@ namespace WocketsApplication.ActivityTracker
 #endif
         #endregion Builtin Accelerometr Polling Thread
 
-        private bool isCollectingData = false;
 
 
         // private TextWriter ttw = null;
         //double prevTS = 0;
-
-        private Thread plottingThread = null;
         private void readDataTimer_Tick(object sender, EventArgs e)
         {
 

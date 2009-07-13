@@ -25,7 +25,6 @@ namespace WocketsApplication.Utils.Forms.FileBrowser
 		private System.Windows.Forms.MenuItem mnuNew;
 		private string m_selectedpath;
         private FileListDialog fileListDialog;
-        private string m_selectedfile;
 
 	
 		private void InitializeComponent()
@@ -156,14 +155,6 @@ namespace WocketsApplication.Utils.Forms.FileBrowser
         }
 
 		#region Public Properties
-
-        public string SelectedFile
-        {
-            get
-            {
-                return this.m_selectedfile;
-            }
-        }
 		/// <summary>
 		/// Gets or sets the path selected by the user.
 		/// </summary>

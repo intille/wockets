@@ -15,7 +15,6 @@ namespace WocketsApplication.Feedback
 
         private bool vibrate = true;
 
-        private int secs = 0;
 
 
         public Vibrator()

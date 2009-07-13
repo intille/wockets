@@ -830,71 +830,9 @@ namespace WocketsApplication
         private System.Windows.Forms.Button calibratorButton;
         private System.Windows.Forms.Button FontSizeButton;
 
-
-        private System.Windows.Forms.MenuItem menuItem1;
-        private System.Windows.Forms.MenuItem menuItem2;
-        private System.Windows.Forms.MenuItem menuItem3;
-        private System.Windows.Forms.MenuItem menuItem4;
-        private System.Windows.Forms.MenuItem menuItem5;
-        private System.Windows.Forms.MenuItem menuItem6;
-        private System.Windows.Forms.MenuItem menuItem7;
-        private System.Windows.Forms.MenuItem menuItem8;
-        private System.Windows.Forms.MenuItem menuItem9;
-        private System.Windows.Forms.MenuItem menuItem10;
-        private System.Windows.Forms.MenuItem menuItem11;
-        private System.Windows.Forms.MenuItem menuItem12;
-        private System.Windows.Forms.MenuItem menuItem13;
-        private System.Windows.Forms.MenuItem menuItem14;
-        private System.Windows.Forms.MenuItem menuItem15;
-        private System.Windows.Forms.MenuItem menuItem16;
-        private System.Windows.Forms.MenuItem menuItem17;
-        private System.Windows.Forms.MenuItem menuItem18;
-        private System.Windows.Forms.MenuItem menuItem19;
-        private System.Windows.Forms.MenuItem menuItem20;
-        private System.Windows.Forms.Timer readDataTimer;
-        private System.Windows.Forms.PictureBox pictureBox1;
-        private System.Windows.Forms.PictureBox pictureBox2;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Button resetButton;
-        private System.Windows.Forms.Button startStopButton;
-        private System.Windows.Forms.Button oxyconButton;
-        private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.Label label8;
-        private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.Label label16;
-        private System.Windows.Forms.Label label17;
-        private System.Windows.Forms.MenuItem menuItem21;
-        private System.Windows.Forms.MenuItem menuItem22;
-        private System.Windows.Forms.Panel panel1, panel2, panel3, panel4, panel5;
-        private System.Windows.Forms.Timer qualityTimer;
-        private System.Windows.Forms.Timer HRTimer;
-        private System.Windows.Forms.Label trainingLabel;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.Button pieChartClearButton;
-        private System.Windows.Forms.MainMenu mainMenuTab2;
-        private System.Windows.Forms.MenuItem menuItem1Tab2;
-        private System.Windows.Forms.MenuItem menuItem2Tab2;
-        private System.Windows.Forms.MenuItem menuItem3Tab2;
-        private System.Windows.Forms.MenuItem menuItem4Tab2;
-        private System.Windows.Forms.MenuItem menuItem5Tab2;
-        private System.Windows.Forms.MenuItem menuItem6Tab2;
-        private System.Windows.Forms.MenuItem menuItem7Tab2;
-        private System.Windows.Forms.MenuItem menuItem8Tab2;
-
         #region PC and PocketPC Specific Widgets
 #if (PocketPC)
-        private System.Windows.Forms.TabControl tabControl1;
-        private System.Windows.Forms.TabPage tabPage1;
-        private System.Windows.Forms.TabPage tabPage2;
-        private System.Windows.Forms.TabPage tabPage3;
-        private System.Windows.Forms.TabPage tabPage4;
-        private System.Windows.Forms.TabPage tabPage5;
+
 
 #else
         private System.Windows.Forms.Form form1;

@@ -137,20 +137,12 @@ namespace WocketsApplication.DataLogger
 
         private Thread aPollingThread = null;
         //private Thread aInternalPollingThread = null;
-        private bool aPollingThreadQuit=false;
-        private Thread aPlottingThread = null;
-        private bool plottingThreadQuit=false;
         private Thread aSavingThread = null;
-        private bool savingThreadQuit=false;
 
         /// <summary>
         /// True if the progress thread should quit
         /// </summary>
         private bool progressThreadQuit = false;
-        /// <summary>
-        /// Counter to update the number of samples
-        /// </summary>
-        private int printSamplingCount = 0;
         /// <summary>
         /// An array list of the different buttons of the annotator
         /// </summary>
@@ -198,10 +190,6 @@ namespace WocketsApplication.DataLogger
         /// A constant that specifies how often to flush logging data
         /// </summary>
         private const int FLUSH_TIMER_MAX = 6000;
-        /// <summary>
-        /// Counter used to log status data when it reaches its max
-        /// </summary>
-        int flushTimer = 0;
 
         private Sound alert = new Sound(Constants.NEEDED_FILES_PATH + "sounds\\stop.wav");
         private int[] disconnected = new int[] { 0, 0, 0, 0, 0, 0 };
@@ -285,45 +273,11 @@ namespace WocketsApplication.DataLogger
         /// </summary>
         private Hashtable labelIndex;
         /// <summary>
-        /// Stores the arff file name where the extracted features will be stored
-        /// </summary>
-        private string arffFileName;
-        /// <summary>
-        /// Arff file Text writer
-        /// </summary>
-        private TextWriter tw;
-
-        /// <summary>
-        /// The time when training an activity started
-        /// </summary>
-        int startActivityTime;
-        /// <summary>
-        /// A counter for windows used in smoothening
-        /// </summary>
-        private int classificationCounter;
-        /// <summary>
         /// Stores counters for each label to be used during smoothening
         /// </summary>
         private int[] labelCounters;
 
         #endregion Definition of classification variables
-
-        #region Definition of different software modes
-
-
-        /// <summary>
-        /// True if the software is required to do real-time classification otherwise false
-        /// </summary>
-        private bool isClassifying;
-
-        #if (PocketPC)
-        private int vibrateTimer = 0;
-        private Vibrator vibrator = null;
-        private bool vibrateStatus = false;
-#endif
-
-        #endregion Definition of different software modes
-
 
         #region Definition of annotation objects
         /// <summary>
@@ -445,10 +399,6 @@ namespace WocketsApplication.DataLogger
 
         public void InitializeDataLogger(string storageDirectory, WocketsController wocketsController, Session annotatedSession, DTConfiguration classifierConfiguration)
         {
-            #if (PocketPC)
-            this.vibrator = new Vibrator();
-            #endif
-
             this.storageDirectory = storageDirectory;
             this.wocketsController = wocketsController;
             this.annotatedSession = annotatedSession;
@@ -616,7 +566,6 @@ namespace WocketsApplication.DataLogger
 
         public void InitializeActivityTracker(string storageDirectory, WocketsController wocketsController, Session annotatedSession, DTConfiguration classifierConfiguration)
         {
-            this.vibrator = new Vibrator();
             this.storageDirectory = storageDirectory;
             this.wocketsController = wocketsController;
             this.annotatedSession = annotatedSession;
@@ -710,8 +659,6 @@ namespace WocketsApplication.DataLogger
 
 
             #endregion Initialize GUI Components
-            isClassifying = true;
-
 
             #region Initialize Feature Extraction
 
@@ -786,8 +733,6 @@ namespace WocketsApplication.DataLogger
             }
 
             weka.core.Attribute ClassAttribute = new weka.core.Attribute("activity", fvClassVal);
-
-            isClassifying = true;
 
             #region Initialize Quality Tracking variables
             //InitializeQuality();
@@ -1366,11 +1311,9 @@ namespace WocketsApplication.DataLogger
         //close the ARFF training file and reset menus
         public void EndTraining()
         {
-            tw.Close();
             this.menuItem6Tab2.Enabled = false;
             this.menuItem5Tab2.Checked = false;
             this.menuItem5Tab2.Enabled = true;
-            this.trainingLabel.Visible = false;
 
             if (this.annotatedSession.OverlappingActivityLists.Count == 1) //if 1 category
             {
@@ -1574,16 +1517,10 @@ namespace WocketsApplication.DataLogger
 #endif
         #endregion Builtin Accelerometr Polling Thread
 
-        private bool isCollectingData = false;
         private bool isTraining = false;
         private TextWriter trainingTW = null;
         private TextWriter structureTW = null;
-        private int structureFileExamples = 0;
 
-        private Thread plottingThread = null;
-        private int totalCalories = 0;
-        private int currentCalories = 0;
-        private string previousActivity = "";
         private int extractedVectors = 0;
         /*
         private void PollInternal()
