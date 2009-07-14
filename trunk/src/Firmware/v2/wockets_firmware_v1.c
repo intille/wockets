@@ -143,15 +143,15 @@ int main()
 ISR(TIMER2_OVF_vect){
 
 		//reset timer
-		TCNT2=154;
+		TCNT2=170;
 		if (sleep==0){
 			 if (_rn41_is_connected()){
 				_atmega324p_yellow_led_off();
 				if (led_counter==1)
 					_atmega324p_green_led_on();
-				else if (led_counter==25)
+				else if (led_counter==10)
 					_atmega324p_green_led_off();
-				else if (led_counter==100)
+				else if (led_counter==600)
 					led_counter=0;	
 				sleep_counter=0;
 				sleep_counter2=0;
@@ -179,20 +179,24 @@ ISR(TIMER2_OVF_vect){
 					ack_timer=0;
 					//_delay_ms(10000);
 				}
-					
+					 
 					
 				adc_result[ADC1]=_atmega324p_a2dConvert10bit(ADC1);
 				adc_result[ADC2]=_atmega324p_a2dConvert10bit(ADC2);
 				adc_result[ADC3]=_atmega324p_a2dConvert10bit(ADC3);
-				TransmitFrame(encode(sensitivity,adc_result[ADC3], adc_result[ADC2], adc_result[ADC1]));
-		
+				
+				//tag if close to ack
+				if (ack==0xff)
+					TransmitFrame(encode(1,adc_result[ADC3], adc_result[ADC2], adc_result[ADC1]));
+				else  //otherwise dont tag
+					TransmitFrame(encode(0,adc_result[ADC3], adc_result[ADC2], adc_result[ADC1]));
 
 			}else{
 
 				_atmega324p_green_led_off();
 				if (led_counter==1)
 					_atmega324p_yellow_led_on();
-				else if (led_counter==25)
+				else if (led_counter==10)
 					_atmega324p_yellow_led_off();
 				else if (led_counter==600)
 					led_counter=0;                
@@ -204,7 +208,7 @@ ISR(TIMER2_OVF_vect){
 					sleep_counter2++;					
 
 				}
-				if (sleep_counter2>10)
+				if (sleep_counter2>30)
 				{
 					sleep=1;													
 					_atmega324p_yellow_led_off();
@@ -217,8 +221,6 @@ ISR(TIMER2_OVF_vect){
 				led_counter++;	
 
 		   	//	_delay_ms(10);
-		}else{
-			_delay_ms(10000);
 		}
 
 }
