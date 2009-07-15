@@ -112,9 +112,14 @@ namespace WocketsApplication.DataLogger
             this.readDataTimer = new System.Windows.Forms.Timer();
             this.panel1 = new Panel();
             this.panel2 = new Panel();
+            this.panel2.Visible = false;
             this.panel3 = new Panel();
+            this.panel3.Visible = false;
             this.panel4 = new Panel();
+            this.panel4.Visible = false;
             this.panel5 = new Panel();
+            this.panel5.Visible = false;
+            this.panelArray = new Panel[] { this.panel1, this.panel2, this.panel3, this.panel4, this.panel5 };
 
             this.SuspendLayout();
             // 
@@ -128,6 +133,7 @@ namespace WocketsApplication.DataLogger
             this.menuItem1.Text = "Menu";
             this.menuItem1.MenuItems.Add(this.menuItem12);
             this.menuItem1.MenuItems.Add(this.menuItem13);
+            this.menuItem1.MenuItems.Add(this.menuItem17);
             // 
             // menuItem2
             // 
@@ -187,7 +193,6 @@ namespace WocketsApplication.DataLogger
             // 
             // menuItem16
             // 
-            this.menuItem16.MenuItems.Add(this.menuItem17);
             this.menuItem16.MenuItems.Add(this.menuItem18);
             this.menuItem16.MenuItems.Add(this.menuItem19);
             this.menuItem16.MenuItems.Add(this.menuItem20);
@@ -196,8 +201,8 @@ namespace WocketsApplication.DataLogger
             // 
             // menuItem17
             // 
-            this.menuItem17.Text = "Beep On";
-            this.menuItem17.Enabled = false;
+            this.menuItem17.Text = "Views";
+            this.menuItem17.Enabled = true;
             // 
             // menuItem18
             // 
@@ -355,38 +360,39 @@ namespace WocketsApplication.DataLogger
 
             #region PC and PocketPC specific Widgets
 #if (PocketPC)
-            this.tabControl1 = new System.Windows.Forms.TabControl();
-            this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.tabPage3 = new System.Windows.Forms.TabPage();
-            this.tabPage4 = new System.Windows.Forms.TabPage();
-            this.tabPage5 = new System.Windows.Forms.TabPage();
-            this.tabControl1.SuspendLayout();
-            this.tabPage2.SuspendLayout();
-            this.tabPage3.SuspendLayout();
-            this.tabPage4.SuspendLayout();
-            this.tabPage5.SuspendLayout();
+           // this.tabControl1 = new System.Windows.Forms.TabControl();
+           // this.tabPage1 = new System.Windows.Forms.TabPage();
+           // this.tabPage2 = new System.Windows.Forms.TabPage();
+           // this.tabPage3 = new System.Windows.Forms.TabPage();
+           // this.tabPage4 = new System.Windows.Forms.TabPage();
+           // this.tabPage5 = new System.Windows.Forms.TabPage();
+            //this.tabControl1.SuspendLayout();
+           // this.tabPage2.SuspendLayout();
+          //  this.tabPage3.SuspendLayout();
+           // this.tabPage4.SuspendLayout();
+           // this.tabPage5.SuspendLayout();
 
 
             // tabControl1
             // 
-            this.tabControl1.Controls.Add(this.tabPage1);
-            this.tabControl1.Controls.Add(this.tabPage2);
-            this.tabControl1.Controls.Add(this.tabPage4);
-            this.tabControl1.Controls.Add(this.tabPage3);
-            this.tabControl1.Controls.Add(this.tabPage5);
-            this.tabControl1.Location = new System.Drawing.Point(0, 0);
-            this.tabControl1.Name = "tabControl1";
-            this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(240, 265);
-            this.tabControl1.TabIndex = 0;
+           // this.tabControl1.Controls.Add(this.tabPage1);
+           // this.tabControl1.Controls.Add(this.tabPage2);
+           // this.tabControl1.Controls.Add(this.tabPage4);
+           // this.tabControl1.Controls.Add(this.tabPage3);
+           // this.tabControl1.Controls.Add(this.tabPage5);
+           // this.tabControl1.Location = new System.Drawing.Point(0, 0);
+           // this.tabControl1.Name = "tabControl1";
+           // this.tabControl1.SelectedIndex = 0;
+           // this.tabControl1.Size = new System.Drawing.Size(240, 265);
+           // this.tabControl1.TabIndex = 0;
             // 
             // tabPage1
             // 
-            this.tabPage1.Location = this.panel1.Location = new System.Drawing.Point(0, 0);
-            this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Size = new System.Drawing.Size(240, 242);
-            this.tabPage1.Text = "Visualize";
+            /* this.tabPage1.Location = */
+            this.panel1.Location = new System.Drawing.Point(0, 0);
+            //this.tabPage1.Name = "tabPage1";
+           // this.tabPage1.Size = new System.Drawing.Size(240, 242);
+           // this.tabPage1.Text = "Visualize";
 
             // 
             // tabPage2
@@ -397,10 +403,10 @@ namespace WocketsApplication.DataLogger
             this.panel2.Controls.Add(this.label1);
             this.panel2.Controls.Add(this.resetButton);
             this.panel2.Controls.Add(this.startStopButton);
-            this.tabPage2.Location = new System.Drawing.Point(0, 0);
-            this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Size = new System.Drawing.Size(232, 239);
-            this.tabPage2.Text = "Annotate";
+            //this.tabPage2.Location = new System.Drawing.Point(0, 0);
+           // this.tabPage2.Name = "tabPage2";
+            //this.tabPage2.Size = new System.Drawing.Size(232, 239);
+            //this.tabPage2.Text = "Annotate";
             // 
             // tabPage3
             // 
@@ -436,41 +442,40 @@ namespace WocketsApplication.DataLogger
             pieChart.SetActivity("No Activity");
             pieChart.SetTime(0, 0, 0);
             pieChart.SetCalories(0, 0);
-            this.tabPage3.Controls.Add(pieChart);
+            this.panel3.Controls.Add(pieChart);
             //pieChartClearButton = new Button();
             //pieChartClearButton.Text = "Clear";
             //pieChartClearButton.Name = "pieChartButton";
             //pieChartClearButton.Size = new System.Drawing.Size(72, 20);
-            //pieChartClearButton.Location = new Point(0, 0);
-            //pieChartClearButton.Click += new System.EventHandler(this.pieChartClearButton_Click);
+           // pieChartClearButton.Location = new Point(0, 0);
+           // pieChartClearButton.Click += new System.EventHandler(this.pieChartClearButton_Click);
             //this.tabPage3.Controls.Add(pieChartClearButton);
 
 
-            this.tabPage3.Location = new System.Drawing.Point(0, 0);
-            this.tabPage3.Name = "tabPage3";
-            this.tabPage3.Size = new System.Drawing.Size(232, 239);
-            this.tabPage3.Text = "Summary";
+            //this.tabPage3.Location = new System.Drawing.Point(0, 0);
+            //this.tabPage3.Name = "tabPage3";
+            //this.tabPage3.Size = new System.Drawing.Size(232, 239);
+            //this.tabPage3.Text = "Summary";
             // tabPage4
             // 
-            //this.panel4.Controls.Add(this.label8);
-            //this.panel4.Controls.Add(this.label7);
-            //this.panel4.Controls.Add(this.label9);
-            this.tabPage4.Location = new System.Drawing.Point(0, 0);
-            this.tabPage4.Name = "tabPage4";
-            this.tabPage4.Size = new System.Drawing.Size(232, 239);
-            this.tabPage4.Text = "Activity";
+            this.panel4.Controls.Add(this.label8);
+            this.panel4.Controls.Add(this.label7);
+            this.panel4.Controls.Add(this.label9);
+           // this.tabPage4.Location = new System.Drawing.Point(0, 0);
+           // this.tabPage4.Name = "tabPage4";
+           // this.tabPage4.Size = new System.Drawing.Size(232, 239);
+           // this.tabPage4.Text = "Activity";
 
             //tabPage5
             //
 
-            this.tabPage5.Location = new System.Drawing.Point(0, 0);
-            this.tabPage5.Name = "tabPage5";
-            this.tabPage5.Size = new System.Drawing.Size(232, 239);
-            this.tabPage5.Text = "Status";
+           // this.tabPage5.Location = new System.Drawing.Point(0, 0);
+           // this.tabPage5.Name = "tabPage5";
+           // this.tabPage5.Size = new System.Drawing.Size(232, 239);
+           // this.tabPage5.Text = "Status";
             this.SampLabels = new Label[this.wocketsController._Sensors.Count];
 
             Label cur = new Label();
-            cur = new Label();
             cur.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular);
             cur.Text = "Samp/sec, #Disconnects, Time Disconnect";
             cur.Location = new Point(5, 16);
@@ -488,21 +493,37 @@ namespace WocketsApplication.DataLogger
                 cur.BringToFront();
             }
 
+            String[] viewnames = new String[] { "Visualize", "Annotate", "Summary", "Activity", "Status" };
+            MenuItem cur2;
+            for (int i = 0; i < 5; i++)
+            {
+                cur2 = new MenuItem();
+                if (i == 0) cur2.Checked = true;
+                cur2.Text = viewnames[i];
+                cur2.Click += new System.EventHandler(this.view_menu_Click);
+                this.viewsMenu[i] = cur2;
+                this.menuItem17.MenuItems.Add(cur2);
+            }
 
 
             //Add Panels to the tab pages
-            this.tabPage1.Controls.Add(this.panel1);
-            this.tabPage2.Controls.Add(this.panel2);
-            this.tabPage3.Controls.Add(this.panel3);
-            this.tabPage4.Controls.Add(this.panel4);
-            this.tabPage5.Controls.Add(this.panel5);
+            this.Controls.Add(this.panel1);
+            this.Controls.Add(this.panel2);
+            this.Controls.Add(this.panel3);
+            this.Controls.Add(this.panel4);
+            this.Controls.Add(this.panel5);
+           // this.tabPage1.Controls.Add(this.panel1);
+           // this.tabPage2.Controls.Add(this.panel2);
+           // this.tabPage3.Controls.Add(this.panel3);
+           // this.tabPage4.Controls.Add(this.panel4);
+           // this.tabPage5.Controls.Add(this.panel5);
 
-            this.Controls.Add(this.tabControl1);
-            this.tabControl1.ResumeLayout(false);
-            this.tabPage2.ResumeLayout(false);
-            this.tabPage3.ResumeLayout(false);
-            this.tabPage4.ResumeLayout(false);
-            this.tabPage5.ResumeLayout(false);
+            //this.Controls.Add(this.tabControl1);
+            //this.tabControl1.ResumeLayout(false);
+            //this.tabPage2.ResumeLayout(false);
+            //this.tabPage3.ResumeLayout(false);
+            //this.tabPage4.ResumeLayout(false);
+            //this.tabPage5.ResumeLayout(false);
             this.Menu = this.mainMenuPanel1;
 #else
 
@@ -619,10 +640,10 @@ namespace WocketsApplication.DataLogger
 
 #if (PocketPC)
             //Initialize Tab control dimensions
-            this.tabControl1.Width = this.ClientSize.Width;
-            this.tabControl1.Height = this.ClientSize.Height;
-            this.tabPage1.Width = this.panel1.Width = this.tabPage2.Width = this.panel2.Width = this.tabPage3.Width = this.panel3.Width = this.tabPage4.Width = this.panel4.Width = this.tabPage5.Width = this.panel5.Width =this.tabControl1.ClientSize.Width;//-Constants.SCREEN_LEFT_MARGIN-Constants.SCREEN_RIGHT_MARGIN;
-            this.tabPage1.Height = this.panel1.Height = this.tabPage2.Height = this.panel2.Height = this.tabPage3.Height = this.panel3.Height = this.tabPage4.Height = this.panel4.Height = this.tabPage5.Height = this.panel5.Height =this.tabControl1.ClientSize.Height;
+            //this.tabControl1.Width = this.ClientSize.Width;
+            //this.tabControl1.Height = this.ClientSize.Height;
+            this.panel1.Width = this.panel2.Width = this.panel3.Width = this.panel4.Width = this.panel5.Width =this.ClientSize.Width;//-Constants.SCREEN_LEFT_MARGIN-Constants.SCREEN_RIGHT_MARGIN;
+            this.panel1.Height = this.panel2.Height = this.panel3.Height = this.panel4.Height = this.panel5.Height =this.ClientSize.Height;
 #else
             this.form1.Width = this.form2.Width = this.form3.Width = this.form4.Width = this.form5.Width = this.ClientSize.Width;
             this.form1.Height = this.form2.Height = this.form3.Height = this.form4.Height = this.form5.Height = this.ClientSize.Height;
@@ -825,9 +846,8 @@ namespace WocketsApplication.DataLogger
             this.menuItem4Tab2.MenuItems.Add(this.menuItem8Tab2);
             this.menuItem7Tab2.Click += new EventHandler(menuItem7Tab2_Click);
             this.menuItem8Tab2.Click += new EventHandler(menuItem8Tab2_Click);
-
+            this.Menu = this.mainMenu1;
 #if (PocketPC)
-            this.tabControl1.SelectedIndexChanged += new EventHandler(tabControl1_Changed);
 #endif
 
             //if there is more than one category, manual training is the only option
@@ -845,7 +865,7 @@ namespace WocketsApplication.DataLogger
             //this.label5.Text = Constants.MANUAL_MODE_SESSION;
 
 #if (PocketPC)
-            this.ClientSize = new Size(this.tabControl1.Width, this.tabControl1.Height);
+            this.ClientSize = new Size(240, 265);
 #else
             this.form1.ClientSize = new Size(this.panel1.Width, this.panel1.Height);
             this.form2.ClientSize = new Size(this.panel2.Width, this.panel2.Height);
