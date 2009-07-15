@@ -114,6 +114,9 @@ namespace WocketsApplication.DataLogger
         private Hashtable sensorLabels;
         private Hashtable sensorStatus;
         private Hashtable sensorBattery;
+        private Panel[] panelArray;
+        private MenuItem[] viewsMenu= new MenuItem[5];
+        private int panelSwitch = 0;
         
         private Image[] batteryImg = new Image[] { (Image)new Bitmap(Constants.NETWORK_STATUS_DIRECTORY + "1.gif"), (Image)new Bitmap(Constants.NETWORK_STATUS_DIRECTORY + "2.gif"), (Image)new Bitmap(Constants.NETWORK_STATUS_DIRECTORY + "3.gif"), (Image)new Bitmap(Constants.NETWORK_STATUS_DIRECTORY + "4.gif"), (Image)new Bitmap(Constants.NETWORK_STATUS_DIRECTORY + "5.gif"), (Image)new Bitmap(Constants.NETWORK_STATUS_DIRECTORY + "6.gif") };
         private Label samplingLabel;
@@ -340,23 +343,19 @@ namespace WocketsApplication.DataLogger
 
             //load the activity and sensor configuration files
 
-     
 
-
-            //Initialize the timers
 
             InitializeTimers();
 
             //Initialize different GUI components
             InitializeInterface();
+            //Initialize the timers
+
+
 
 
 #if (PocketPC)
-            this.tabControl1.TabPages.RemoveAt(4);
-            this.tabControl1.TabPages.RemoveAt(3);
-            this.tabControl1.TabPages.RemoveAt(2);
-            this.tabControl1.TabPages.RemoveAt(0);
-            this.tabControl1.SelectedIndex = 0;
+
 #endif
 
         }
@@ -427,13 +426,13 @@ namespace WocketsApplication.DataLogger
             #region Initialize GUI Components
             //initialize the interface components
             InitializeComponent();
-            //Initialize GUI timers
             while (progressMessage != null) Thread.Sleep(50);
             progressMessage = "Initializing Timers ...";
             InitializeTimers();
             while (progressMessage != null) Thread.Sleep(50);
             progressMessage = " Completed\r\nInitializing GUI ...";
             InitializeInterface();
+            //Initialize GUI timers
             while (progressMessage != null) Thread.Sleep(50);
             progressMessage = " Completed\r\n";
             this.isPlotting = true;
@@ -455,10 +454,8 @@ namespace WocketsApplication.DataLogger
             //Remove classifier tabs
 #if (PocketPC)
 
-            this.tabControl1.TabPages.RemoveAt(3);
-            this.tabControl1.TabPages.RemoveAt(2);
-            this.tabControl1.TabPages.RemoveAt(1);
-            this.tabControl1.SelectedIndex = 0;
+            this.viewsMenu[2].Enabled = false;
+            this.viewsMenu[3].Enabled = false;
 #else
             this.ShowForms();
 #endif
@@ -647,11 +644,9 @@ namespace WocketsApplication.DataLogger
             progressMessage = " Completed\r\n";
 
             //Remove classifier tabs
+            this.viewsMenu[1].Enabled = false;
 #if (PocketPC)
 
-            this.tabControl1.TabPages.RemoveAt(4);
-            this.tabControl1.TabPages.RemoveAt(1);
-            this.tabControl1.SelectedIndex = 0;
             this.Text = "Activity Tracking";
 #else
             this.ShowForms();
@@ -910,10 +905,10 @@ namespace WocketsApplication.DataLogger
             if ((this.Width > Constants.FORM_MIN_WIDTH) && (this.Height > Constants.FORM_MIN_HEIGHT))
             {
 
-                this.tabControl1.Width = this.ClientSize.Width;
-                this.tabControl1.Height = this.ClientSize.Height;
-                this.tabPage1.Width = this.panel1.Width = this.tabPage2.Width = this.tabPage3.Width = this.tabPage4.Width = this.tabControl1.ClientSize.Width;
-                this.tabPage1.Height = this.panel1.Height = this.tabPage2.Height = this.tabPage3.Height = this.tabPage4.Height = this.tabControl1.ClientSize.Height;
+                //this.tabControl1.Width = this.ClientSize.Width;
+               // this.tabControl1.Height = this.ClientSize.Height;
+                this.panel1.Width = this.ClientSize.Width;
+                this.panel1.Height = this.ClientSize.Height;
 
 
                 //Intialize Labels 40% of the screen
@@ -975,8 +970,8 @@ namespace WocketsApplication.DataLogger
 
 
                 //Initialize Buttons
-                int button_width = this.tabPage2.ClientSize.Width - Constants.WIDGET_SPACING - Constants.WIDGET_SPACING;
-                int button_height = (this.tabPage2.ClientSize.Height - Constants.WIDGET_SPACING - Constants.WIDGET_SPACING - (this.annotatedSession.OverlappingActivityLists.Count * Constants.WIDGET_SPACING)) / (this.annotatedSession.OverlappingActivityLists.Count + 1);
+                int button_width = this.ClientSize.Width - Constants.WIDGET_SPACING - Constants.WIDGET_SPACING;
+                int button_height = (this.ClientSize.Height - Constants.WIDGET_SPACING - Constants.WIDGET_SPACING - (this.annotatedSession.OverlappingActivityLists.Count * Constants.WIDGET_SPACING)) / (this.annotatedSession.OverlappingActivityLists.Count + 1);
                 int button_x = Constants.WIDGET_SPACING;
                 int button_y = Constants.WIDGET_SPACING * 2;
 
@@ -1268,6 +1263,31 @@ namespace WocketsApplication.DataLogger
             this.isTraining = mi.Checked;
         }
 
+        private void view_menu_Click(object sender, EventArgs e)
+        {
+            if (!((MenuItem)sender).Checked)
+            {
+                for (int i = 0; i < 5; i++)
+                {
+                    if (this.viewsMenu[i].Checked)
+                    {
+                        this.viewsMenu[i].Checked = false;
+                        this.panelArray[i].Visible = false;
+                        ((MenuItem)sender).Checked = true;
+                        break;
+                    }
+                }
+                for (int i = 0; i < 5; i++)
+                {
+                    if (this.viewsMenu[i].Checked)
+                    {
+                        this.panelArray[i].Visible = true;
+                        break;
+                    }
+                }
+            }
+        }
+
         private void menuItem1_Click(object sender, EventArgs e)
         {
 #if (PocketPC)
@@ -1442,14 +1462,6 @@ namespace WocketsApplication.DataLogger
 #endif
 
 
-#if (PocketPC)
-        void tabControl1_Changed(object sender, EventArgs e)
-        {
-                this.Menu = this.mainMenu1;
-        }
-#endif
-
-
         #region Graphing functions
 
 
@@ -1486,7 +1498,7 @@ namespace WocketsApplication.DataLogger
         private void Panel1_Paint(object sender, PaintEventArgs e)
         {
 #if (PocketPC)
-            if (this.tabControl1.TabIndex == 0)
+            if (this.CurrentPanel == 0)
             {
 #endif
 
@@ -1694,7 +1706,7 @@ namespace WocketsApplication.DataLogger
         {
             while (true)
             {
-                if ((this.tabControl1.SelectedIndex == 0) && (isPlotting))                
+                if ((this.CurrentPanel == 0) && (isPlotting))                
                     GraphAccelerometerValues();                
 
                 Thread.Sleep(50);
@@ -1747,7 +1759,7 @@ namespace WocketsApplication.DataLogger
             }
 
             this.SRcounter++;
-            if (this.SRcounter > 600)//Update status interface every 5 minutes
+            if (this.SRcounter > 800)//Update status interface every 5 minutes
             {
                 String log="";
                 int disc;
@@ -2010,6 +2022,24 @@ namespace WocketsApplication.DataLogger
         }
 
 
+        private int CurrentPanel
+        {
+            set
+            {
+                if (value != this.panelSwitch)
+                {
+                    this.panelArray[this.panelSwitch].Visible = false;
+                    this.panelSwitch = value;
+                    this.panelArray[this.panelSwitch].Visible = true;
+                }
+            }
+
+            get
+            {
+                return this.panelSwitch;
+            }
+        }
+
         delegate void UpdateGraphCallback();
         public void UpdateGraph()
         {
@@ -2034,7 +2064,7 @@ namespace WocketsApplication.DataLogger
 
                 }
 
-                if ((this.tabControl1.SelectedIndex == 0) && (isPlotting))
+                if ((this.CurrentPanel == 0) && (isPlotting))
                 {
                     GraphAccelerometerValues();
                 }
