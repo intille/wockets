@@ -25,7 +25,7 @@ namespace WocketsApplication.DataLogger
         /// </summary>
         private System.ComponentModel.IContainer components = null;
         private System.Windows.Forms.MainMenu mainMenu1;
-
+        private System.Windows.Forms.MainMenu mainMenu2;
         private System.Windows.Forms.MainMenu mainMenuPanel1;
         private System.Windows.Forms.MenuItem menuItemQuitPanel1;
         private System.Windows.Forms.MenuItem menuItemPlottingPanel1;
@@ -79,7 +79,9 @@ namespace WocketsApplication.DataLogger
             this.menuItemOnPlottingPanel1.Click += new EventHandler(menuItemOnPlottingPanel1_Click);
             this.menuItemOnPlottingPanel1.Checked = true;
 
+            this.mainMenus = new Hashtable();
             this.mainMenu1 = new System.Windows.Forms.MainMenu();
+            this.mainMenu2 = new System.Windows.Forms.MainMenu();
             this.menuItem1 = new System.Windows.Forms.MenuItem();
             this.menuItem2 = new System.Windows.Forms.MenuItem();
             this.menuItem3 = new System.Windows.Forms.MenuItem();
@@ -101,8 +103,7 @@ namespace WocketsApplication.DataLogger
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
-            this.resetButton = new System.Windows.Forms.Button();
-            this.startStopButton = new System.Windows.Forms.Button();
+
             this.oxyconButton = new System.Windows.Forms.Button();
             this.label6 = new System.Windows.Forms.Label();
             //this.label16 = new System.Windows.Forms.Label();
@@ -127,6 +128,8 @@ namespace WocketsApplication.DataLogger
             // 
             this.mainMenu1.MenuItems.Add(this.menuItem1);
             this.mainMenu1.MenuItems.Add(this.menuItem2);
+         //   this.mainMenu2.MenuItems.Add(this.menuItem1);
+          //  this.mainMenu2.MenuItems.Add(this.menuItem14);
             // 
             // menuItem1
             // 
@@ -183,13 +186,14 @@ namespace WocketsApplication.DataLogger
             // 
             // menuItem14
             // 
-            this.menuItem14.Text = "Turn off";
-            this.menuItem14.Enabled = false;
+            this.menuItem14.Text = "Options";
+            //this.menuItem14.MenuItems.Add(this.menuItem15);
+
             // 
             // menuItem15
             // 
-            this.menuItem15.Text = "Turn on";
-            this.menuItem15.Enabled = false;
+            this.menuItem15.Text = "Start";
+            this.menuItem15.Click += new EventHandler(this.startStopButton_Click);
             // 
             // menuItem16
             // 
@@ -273,25 +277,9 @@ namespace WocketsApplication.DataLogger
             // 
             // resetButton
             // 
-            this.resetButton.BackColor = System.Drawing.Color.Yellow;
-            this.resetButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Regular);
-            this.resetButton.Location = new System.Drawing.Point(127, 182);
-            this.resetButton.Name = "resetButton";
-            this.resetButton.Size = new System.Drawing.Size(78, 57);
-            this.resetButton.TabIndex = 12;
-            this.resetButton.Text = "Reset";
-            this.resetButton.Click += new System.EventHandler(this.resetButton_Click);
             // 
             // startStopButton
             // 
-            this.startStopButton.BackColor = System.Drawing.Color.Green;
-            this.startStopButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Regular);
-            this.startStopButton.Location = new System.Drawing.Point(32, 182);
-            this.startStopButton.Name = "startStopButton";
-            this.startStopButton.Size = new System.Drawing.Size(78, 57);
-            this.startStopButton.TabIndex = 11;
-            this.startStopButton.Text = "Start";
-            this.startStopButton.Click += new System.EventHandler(this.startStopButton_Click);
 
             // 
             // Oxycon Button
@@ -401,8 +389,6 @@ namespace WocketsApplication.DataLogger
             this.panel2.Controls.Add(this.label3);
             this.panel2.Controls.Add(this.label2);
             this.panel2.Controls.Add(this.label1);
-            this.panel2.Controls.Add(this.resetButton);
-            this.panel2.Controls.Add(this.startStopButton);
             //this.tabPage2.Location = new System.Drawing.Point(0, 0);
            // this.tabPage2.Name = "tabPage2";
             //this.tabPage2.Size = new System.Drawing.Size(232, 239);
@@ -739,6 +725,7 @@ namespace WocketsApplication.DataLogger
             //Initialize Buttons
 
             this.categoryButtons = new ArrayList();
+            this.categoryDrops = new ArrayList();
             this.buttonIndex = new ArrayList();
             int button_width = this.panel2.ClientSize.Width - Constants.WIDGET_SPACING - Constants.WIDGET_SPACING;
             int button_height = (this.panel2.ClientSize.Height - Constants.WIDGET_SPACING - Constants.WIDGET_SPACING - (this.annotatedSession.OverlappingActivityLists.Count * Constants.WIDGET_SPACING)) / (this.annotatedSession.OverlappingActivityLists.Count + 1);
@@ -755,17 +742,23 @@ namespace WocketsApplication.DataLogger
                 
                 ActivityList category=this.annotatedSession.OverlappingActivityLists[0];
                 System.Windows.Forms.Button button = new System.Windows.Forms.Button();
-
+                System.Windows.Forms.ComboBox combo = new System.Windows.Forms.ComboBox();
                 button.Location = new System.Drawing.Point(button_x, button_y + button_id * delta_y);
+                combo.Location = new System.Drawing.Point(button_x, button_y + 37 + button_id * delta_y);
                 button.Name = button_id.ToString();
+                combo.Name = button_id.ToString();
                 //button.Font = buttonFont;
                 button.Size = new System.Drawing.Size(button_width, button_height);
+                combo.Size = new System.Drawing.Size(button_width, button_height);
                 //button.TabIndex = button_id;
                 button.Text = category[0]._Name;// ((AXML.Label)category.Labels[0]).Name;
+                foreach (Activity cat in category)
+                    combo.Items.Add(cat._Name);
+                combo.SelectedItem = combo.Items[0];
                 //button.UseVisualStyleBackColor = true;
-                button.Click += new System.EventHandler(this.button_Click);
                 this.categoryButtons.Add(button);
-                this.panel2.Controls.Add(button);
+                //this.panel2.Controls.Add(button);
+                this.panel2.Controls.Add(combo);
 
                 //check the longest label for this button
                 //foreach (AXML.Label label in category.Labels)
@@ -799,13 +792,6 @@ namespace WocketsApplication.DataLogger
             //this.Size = oldSize;
 
             button_width = (this.panel2.Size.Width - Constants.WIDGET_SPACING - Constants.WIDGET_SPACING - Constants.WIDGET_SPACING) / 2;
-            this.resetButton.Font = this.startStopButton.Font = buttonFont;
-            this.startStopButton.Size = new System.Drawing.Size(button_width, button_height);
-            this.resetButton.Size = new System.Drawing.Size(button_width, button_height);
-            this.startStopButton.Location = new System.Drawing.Point(Constants.WIDGET_SPACING, button_y + button_id * delta_y);
-            this.resetButton.Location = new System.Drawing.Point(this.startStopButton.Location.X + this.startStopButton.Size.Width + Constants.WIDGET_SPACING, button_y + button_id * delta_y);
-
-
 
             //Menu Tab 2
             this.mainMenuTab2 = new System.Windows.Forms.MainMenu();
@@ -860,8 +846,6 @@ namespace WocketsApplication.DataLogger
             }
             this.menuItem6Tab2.Enabled = false;
             this.menuItem8Tab2.Checked = true;
-            this.startStopButton.Enabled = true;
-            this.resetButton.Enabled = true;
             //this.label5.Text = Constants.MANUAL_MODE_SESSION;
 
 #if (PocketPC)
@@ -1094,8 +1078,6 @@ namespace WocketsApplication.DataLogger
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Button resetButton;
-        private System.Windows.Forms.Button startStopButton;
         private System.Windows.Forms.Button oxyconButton;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label6;
