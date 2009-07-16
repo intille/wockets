@@ -114,6 +114,7 @@ namespace WocketsApplication.DataLogger
         private Hashtable sensorLabels;
         private Hashtable sensorStatus;
         private Hashtable sensorBattery;
+        private Hashtable mainMenus;
         private Panel[] panelArray;
         private MenuItem[] viewsMenu= new MenuItem[5];
         private int panelSwitch = 0;
@@ -153,6 +154,7 @@ namespace WocketsApplication.DataLogger
         /// <summary>
         /// An array list that stores the current index for each button
         /// </summary>
+        private ArrayList categoryDrops;
         private ArrayList buttonIndex;
         /// <summary>
         /// A variable that stores the longest label on a category button for dynamic resizing of the buttons
@@ -995,12 +997,6 @@ namespace WocketsApplication.DataLogger
 
                 //adjust round buttons start/stop -reset
                 button_width = (this.Size.Width - Constants.WIDGET_SPACING - Constants.WIDGET_SPACING - Constants.WIDGET_SPACING) / 2;
-                this.startStopButton.Size = new System.Drawing.Size(button_width, button_height);
-                this.resetButton.Size = new System.Drawing.Size(button_width, button_height);
-                this.startStopButton.Location = new System.Drawing.Point(Constants.WIDGET_SPACING, button_y + button_id * delta_y);
-                this.resetButton.Location = new System.Drawing.Point(this.startStopButton.Location.X + this.startStopButton.Size.Width + Constants.WIDGET_SPACING, button_y + button_id * delta_y);
-                this.startStopButton.Font = buttonFont;
-                this.resetButton.Font = buttonFont;
 
                 //adjust the size of the plotter
                 //if (this.sensors.TotalReceivers>0)
@@ -1143,17 +1139,16 @@ namespace WocketsApplication.DataLogger
 
         private void startStopButton_Click(object sender, EventArgs e)
         {
-            Button button = (Button)sender;
+            MenuItem item = (MenuItem)sender;
             //button state is now start
-            if (button.BackColor == System.Drawing.Color.Green)
+            if (item.Text.Equals("Start"))
             {
                 // this.startSound.Play();
                 //Generator generator = new Generator();
                 //generator.InitializeSound(this.Handle.ToInt32());
                 //generator.CreateBuffer();
 
-                this.startStopButton.Text = "Stop";
-                this.startStopButton.BackColor = System.Drawing.Color.Red;
+                item.Text = "Stop";
                 this.overallTimer.reset();
                 this.overallTimer.start();
                 this.goodTimer.reset();
@@ -1169,22 +1164,21 @@ namespace WocketsApplication.DataLogger
                 this.currentRecord._StartUnix = ts.TotalSeconds;
 
                 //check all buttons values, store them and disable them
-                foreach (Button category_button in categoryButtons)
+                foreach (ComboBox combo in categoryDrops)
                 {
-                    int button_id = Convert.ToInt32(category_button.Name);
+                    int button_id = Convert.ToInt32(combo.Name);
                     ActivityList category = (ActivityList)this.annotatedSession.OverlappingActivityLists[button_id];
-                    string current_label = category[(int)this.buttonIndex[button_id]]._Name;
+                    string current_label = (string)combo.SelectedItem;
                     this.currentRecord.Activities.Add(new Activity(current_label, category._Name));
-                    category_button.Enabled = false;
+                    combo.Enabled = false;
                 }
 
             }
 
-            else if (button.BackColor == System.Drawing.Color.Red)
+            else if (item.Text.Equals("Stop"))
             {
                 // this.stopSound.Play();
-                this.startStopButton.Text = "Start";
-                this.startStopButton.BackColor = System.Drawing.Color.Green;
+                item.Text = "Start";
                 this.overallTimer.reset();
                 this.goodTimer.reset();
                 extractedVectors = 0;
@@ -1206,9 +1200,9 @@ namespace WocketsApplication.DataLogger
                 tw.WriteLine(this.annotatedSession.ToXML());
                 // close the stream
                 tw.Close();
+                foreach (ComboBox c in this.categoryDrops)
+                    c.Enabled = true;
 
-                foreach (Button category_button in categoryButtons)
-                    category_button.Enabled = true;
                 this.currentRecord = null;
             }
         }
@@ -1216,8 +1210,6 @@ namespace WocketsApplication.DataLogger
         private void resetButton_Click(object sender, EventArgs e)
         {
             //this.resetSound.Play();
-            this.startStopButton.Text = "Start";
-            this.startStopButton.BackColor = System.Drawing.Color.Green;
             //this.overallTimer.stop();
             this.overallTimer.reset();
             this.goodTimer.reset();
@@ -1272,11 +1264,23 @@ namespace WocketsApplication.DataLogger
                     if (this.viewsMenu[i].Checked)
                     {
                         this.viewsMenu[i].Checked = false;
+                        if (this.viewsMenu[i].Text.Equals("Annotate"))
+                        {
+                            this.mainMenu1.MenuItems.Remove(this.menuItem15);
+                            this.mainMenu1.MenuItems.Add(this.menuItem2);
+                        }
                         this.panelArray[i].Visible = false;
                         ((MenuItem)sender).Checked = true;
                         break;
                     }
                 }
+                if (((MenuItem)sender).Text.Equals("Annotate"))
+                {
+                    this.mainMenu1.MenuItems.Remove(this.menuItem2);
+                    this.mainMenu1.MenuItems.Add(this.menuItem15);
+                }
+
+
                 for (int i = 0; i < 5; i++)
                 {
                     if (this.viewsMenu[i].Checked)
@@ -1286,7 +1290,7 @@ namespace WocketsApplication.DataLogger
                     }
                 }
             }
-        }
+      }
 
         private void menuItem1_Click(object sender, EventArgs e)
         {
@@ -1343,8 +1347,6 @@ namespace WocketsApplication.DataLogger
                 else
                     this.menuItem8Tab2.Enabled = true;
             }
-            this.startStopButton.Enabled = false;
-            this.resetButton.Enabled = false;
             ((Button)this.categoryButtons[0]).Visible = true;
             ((Button)this.categoryButtons[0]).Enabled = true;
         }
@@ -1410,7 +1412,7 @@ namespace WocketsApplication.DataLogger
             else
             {
                 //set the sign + control the good/bad timer
-                if (isGood)
+                /*if (isGood)
                 {
                     if (this.startStopButton.BackColor == System.Drawing.Color.Red)
                         this.goodTimer.start();
@@ -1419,7 +1421,7 @@ namespace WocketsApplication.DataLogger
                 {
                     if (this.startStopButton.BackColor == System.Drawing.Color.Red)
                         this.goodTimer.stop();
-                }
+                }*/
             }
         }
 
