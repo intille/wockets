@@ -261,15 +261,8 @@ namespace WocketsApplication.Calibrator
                                             while ((decoder._Data[currentIndex].UnixTimeStamp >= this.time) && (decoder._Data[currentIndex].Type == SensorDataType.ACCEL) && (currentIndex != decoder._Head))
                                             {
                                                 if (this.calibrationCounter == CALIBRATION_SAMPLES)
-                                                {
-                                                    if (this.calibrationDirection == 6)
-                                                    {
-                                                        //this.isTracking = false;
-                                                        this.numOfSamples = this.sampleCounter;
-                                                        this.endTime = DateTime.Now;
-                                                    }
                                                     break;
-                                                }
+                                                
 
                                                 this.samples[this.calibrationCounter][0] = (int)((AccelerationData)decoder._Data[currentIndex]).X;
                                                 this.samples[this.calibrationCounter][1] = (int)((AccelerationData)decoder._Data[currentIndex]).Y;
@@ -280,12 +273,7 @@ namespace WocketsApplication.Calibrator
                                                 this.calibrations[this.calibrationDirection][2] += (int)((AccelerationData)decoder._Data[currentIndex]).Z;
                                                 
                                                 this.calibrationCounter++;
-                                                /*
-                                                System.Windows.Forms.Label t = (System.Windows.Forms.Label)this.sensorLabels["calibration"];
-                                                t.Text = "X=" + ((int)(this.calibrations[this.calibrationDirection][0] / this.calibrationCounter)) +
-                                                         "  Y=" + ((int)(this.calibrations[this.calibrationDirection][1] / this.calibrationCounter)) +
-                                                         "  Z=" + ((int)(this.calibrations[this.calibrationDirection][2] / this.calibrationCounter));
-                                                */
+
                                                 this.time = decoder._Data[currentIndex].UnixTimeStamp;
                                                 currentIndex++;
 
@@ -520,8 +508,7 @@ namespace WocketsApplication.Calibrator
                         progressMessage = "Failed to find" + ((RFCOMMReceiver)this.wocketsController._Receivers[i])._Address + " ...\r\n";
                         return false;
                     }
-                    //this.mitesDecoders[receiver.ID] = new MITesDecoder();
-                    //receiver.Status = SXML.Receiver.STATUS_CONNECTED;
+                    
                     this.wocketsController._Receivers[i]._Running = true;
                 }
 
@@ -585,11 +572,6 @@ namespace WocketsApplication.Calibrator
                 this.button1.Height = textBoxHeight;
          
                 Font textFont;
-                /* if (this.sensors.HasBuiltinSensors)
-                     textFont = this.button1.Font =
-                     GUIHelper.CalculateBestFitFont(this.button1.Parent.CreateGraphics(), Constants.MIN_FONT,
-                        Constants.MAX_FONT, this.button1.Size, "Diamond Touch:Still", this.button1.Font, (float)0.9, (float)0.9);
-                 else*/
 
                 textFont = this.button1.Font =
                 GUIHelper.CalculateBestFitFont(this.button1.Parent.CreateGraphics(), Constants.MIN_FONT,
@@ -634,13 +616,8 @@ namespace WocketsApplication.Calibrator
                 this.button2.Height = textBoxHeight / 2;
                 this.button2.Location = new Point((this.panel1.Width - this.button2.Width) / 2, t.Location.Y + t.Height +5);
 
-                //adjust the size of the plotter
-                //if (this.sensors.TotalReceivers>0)
-                //aWocketsPlotter = new WocketsScalablePlotter(this.panel1, WocketsScalablePlotter.DeviceTypes.IPAQ, maxPlots, this.wocketsController, new Size(this.panel1.Width, (int)(0.60 * this.panel1.Height)));
                 aWocketsPlotter = new WocketsScalablePlotter(this.panel1, this.wocketsController);
-                //else
-                //  aWocketsPlotter = new WocketsScalablePlotter(this.panel1, WocketsScalablePlotter.DeviceTypes.IPAQ, maxPlots, this.masterDecoder, new Size(this.panel1.Width, (int)(0.60 * this.panel1.Height)));
-                //SetFormPositions();
+                
                 this.isResized = true;
             }
         }
@@ -953,7 +930,6 @@ namespace WocketsApplication.Calibrator
                 {
                     g.FillRectangle(blueBrush, 0, 0, this.panel1.Width, ((int)(this.panel1.Height * 0.60)));
                 }
-                //this.panel1.Refresh();
             }
 
 
@@ -989,99 +965,6 @@ namespace WocketsApplication.Calibrator
         private void readDataTimer_Tick(object sender, EventArgs e)
         {
 
-
-            /*
-            #region Calibration Code
-  
-                //store sum of abs values of consecutive accelerometer readings                
-            if (isCalibrating)
-            { 
-                Decoder decoder = this.wocketsController._Decoders[0];
-
-                if (this.calibrationCounter < CALIBRATION_SAMPLES)
-                {
-                    if (this.calibrationCounter == 0)
-                        this.currentIndex = decoder._Head-1;
-                   
-                    if (this.currentIndex == -1)
-                        this.currentIndex = decoder._Data.Length - 1;
- 
-                   // for (int i = this.currentIndex; (i < decoder._Data.Length); i++)
-                    {
-                        if (this.calibrationCounter == CALIBRATION_SAMPLES)
-                        {   //
-                            if (this.calibrationDirection == 6)
-                            {
-                                this.isTracking = false;
-                                this.numOfSamples = this.sampleCounter;
-                                this.endTime = DateTime.Now;
-                            }
-                            //
-                            break;
-                        }
-
-                        if ((decoder._Data[i].UnixTimeStamp >= this.time) && (decoder._Data[i].Type == SensorDataType.ACCEL))
-                        {
-                            this.samples[this.calibrationCounter][0] = (int)((AccelerationData)decoder._Data[i]).X;
-                            this.samples[this.calibrationCounter][1] = (int)((AccelerationData)decoder._Data[i]).Y;
-                            this.samples[this.calibrationCounter][2] = (int)((AccelerationData)decoder._Data[i]).Z;
-
-                            this.calibrations[this.calibrationDirection][0] += (int)((AccelerationData)decoder._Data[i]).X;
-                            this.calibrations[this.calibrationDirection][1] += (int)((AccelerationData)decoder._Data[i]).Y;
-                            this.calibrations[this.calibrationDirection][2] += (int)((AccelerationData)decoder._Data[i]).Z;
-                            System.Windows.Forms.Label t = (System.Windows.Forms.Label)this.sensorLabels["calibration"];
-
-                         //   this.sampleCounter++;
-                            this.calibrationCounter++;
-                            t.Text = "X=" + ((int)(this.calibrations[this.calibrationDirection][0] / this.calibrationCounter)) +
-                                     "  Y=" + ((int)(this.calibrations[this.calibrationDirection][1] / this.calibrationCounter)) +
-                                     "  Z=" + ((int)(this.calibrations[this.calibrationDirection][2] / this.calibrationCounter));
-
-                            this.time = decoder._Data[i].UnixTimeStamp;
-                        }
-                        else
-                        {
-                            this.currentIndex = decoder._Head-1;
-                            break;
-                        }
-                    }
-                }
-
-                if (this.calibrationCounter >= CALIBRATION_SAMPLES)
-                {
-                    this.calibrations[this.calibrationDirection][0] = this.calibrations[this.calibrationDirection][0] / this.calibrationCounter;
-                    this.calibrations[this.calibrationDirection][1] = this.calibrations[this.calibrationDirection][1] / this.calibrationCounter;
-                    this.calibrations[this.calibrationDirection][2] = this.calibrations[this.calibrationDirection][2] / this.calibrationCounter;
-                    isCalibrating = false;
-                    this.calibrationDirection++;
-                    this.calibrationCounter = 0;
-                    if ( this.calibrationDirection == 7)
-                    {
-                        
-                        this.button2.Text = "Quit";
-                        this.button2.Visible = true;
-                    }
-                    else
-                    {
-
-                        if (calibrationDirection == 6)
-                            this.pictureLabel.Text = "Place the wocket flat on a table";
-                        else
-                            this.pictureLabel.Text = "Place the wocket as shown";
-
-                        if (calibrationDirection > 0)
-                            this.pictureLabel.Text += "\r\nX=" + ((int)this.calibrations[calibrationDirection - 1][0]) + "  Y=" + ((int)this.calibrations[calibrationDirection - 1][1]) + "  Z=" + ((int)this.calibrations[calibrationDirection - 1][2]);
-
-                        this.pictureBox1.Image = this.calibrationImages[calibrationDirection];
-                        this.panel2.Visible = true;
-                        this.panel1.Visible = false;
-                    }
-
-                  
-                }
-            }
-            #endregion Calibration Code
-*/
         }
        
         delegate void UpdateGraphCallback();
@@ -1120,7 +1003,8 @@ namespace WocketsApplication.Calibrator
                     this.currentIndex = -1;
                     if (this.calibrationDirection == 7)
                     {
-
+                        this.numOfSamples = this.sampleCounter;
+                        this.endTime = DateTime.Now;
                         this.button2.Text = "Quit";
                         this.button2.Visible = true;
                     }
