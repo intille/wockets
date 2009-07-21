@@ -15,7 +15,10 @@ namespace WocketsApplication
         {
 
             //Console.WriteLine("    new priority class: {0}", thisProc.PriorityClass);
-            Application.Run(new WocketsForm());
+            if (WocketsApplication.Utils.Platform.NativeMethods.GetPlatformType()=="PocketPC")
+                Application.Run(new WocketsForm());
+            else if (WocketsApplication.Utils.Platform.NativeMethods.GetPlatformType() == "SmartPhone")
+                Application.Run(new WocketsApplication.SmartPhone.WocketsFormSP());
         }
     }
 }
