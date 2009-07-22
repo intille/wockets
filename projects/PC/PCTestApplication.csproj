@@ -1,4 +1,4 @@
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -40,6 +40,10 @@
     <ProjectReference Include="..\PC\Wockets.csproj">
       <Project>{16986364-6B54-443E-B1F3-A6F17F0523B2}</Project>
       <Name>Wockets</Name>
+    </ProjectReference>
+    <ProjectReference Include="WocketsWeka.csproj">
+      <Project>{E5BB25A9-1913-4C1A-BBCF-51F2554D0C42}</Project>
+      <Name>WocketsWeka</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
