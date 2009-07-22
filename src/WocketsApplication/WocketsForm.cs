@@ -185,8 +185,8 @@ namespace WocketsApplication
             #region Load Data Logger GUI
 
             #region Initialize GUI Components
-            Calibrator.CalibratorForm calibratorForm = new WocketsApplication.Calibrator.CalibratorForm(this.storageDirectory, this.wocketsController);
-            calibratorForm.Show();
+            //Calibrator.CalibratorForm calibratorForm = new WocketsApplication.Calibrator.CalibratorForm(this.storageDirectory, this.wocketsController);
+            //calibratorForm.Show();
 
             #endregion Initialize GUI Components
 

@@ -22,6 +22,14 @@ namespace Wockets.Data.Annotation
             xml += "</" + ANNOTATIONLIST_ELEMENT + ">\n";
             return xml;
         }
+
+        public string ToCSV()
+        {
+            string csv = "";
+            for (int i = 0; (i < this.Count); i++)
+                csv += this[i].ToCSV()+"\n";           
+            return csv;
+        }
         public void FromXML(string xml)
         {
             XmlDocument dom = new XmlDocument();

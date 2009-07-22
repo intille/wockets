@@ -54,6 +54,8 @@ namespace Wockets.Data.Annotation
             xml += "<" + ACTIVITY_ELEMENT + " " + NAME_ATTRIBUTE + "=\"" + this.name + "\" />\n";
             return xml;
         }
+
+     
         public void FromXML(string xml)
         {
                      

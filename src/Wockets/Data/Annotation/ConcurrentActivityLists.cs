@@ -23,6 +23,19 @@ namespace Wockets.Data.Annotation
             xml += "</" + ConcurrentActivityList_ELEMENT + ">\n";
             return xml;
         }
+
+        public string ToCSV()
+        {
+            string csv = "";
+            for (int i = 0; (i < this.Count); i++)
+            {
+                csv += this[i]._Name;
+                if (i<this.Count-1)
+                    csv+=",";
+
+            }
+            return csv;
+        }
         public void FromXML(string xml)
         {
             XmlDocument dom = new XmlDocument();

@@ -54,6 +54,8 @@ namespace Wockets.Data.Classifiers.Utils
         private static double[][] data;
         private static double[][] interpolated_data;
         private static int[] y_index;
+        private static int[] tail;
+        private static double[] tailUnixtimestamp;
 
         private static int discardedLossRateWindows = 0;
         private static int discardedConsecutiveLossWindows = 0;
@@ -179,9 +181,17 @@ namespace Wockets.Data.Classifiers.Utils
                     interpolated_data[i][j] = 0;
             }
 
+            tail = new int[extractorSensorCount];
+            tailUnixtimestamp = new double[extractorSensorCount];
             //Initialize y index for each sensor
             for (int i = 0; (i < extractorSensorCount); i++)
+            {
                 y_index[i] = 0;
+                tail[i] = 0;
+                tailUnixtimestamp[i] = 0.0;
+            }
+
+           
 
 
         }
@@ -190,31 +200,29 @@ namespace Wockets.Data.Classifiers.Utils
         {
             double unixtimestamp = 0.0;
 
+          //  for (int i = 0; i < FeatureExtractor.wocketsController._Decoders.Count; i++)
+           //     for (int j=0;(j<FeatureExtractor.wocketsController._Decoders[i]._Size);j++)
+            
+
             for (int i = 0; i < FeatureExtractor.wocketsController._Decoders.Count; i++)
-                for (int j=0;(j<FeatureExtractor.wocketsController._Decoders[i]._Size);j++)
-
-            {
-          //      if ((aMITesDecoder.someMITesData[i].channel == MITesDecoder.MAX_CHANNEL) ||  //built in
-           //         ((aMITesDecoder.someMITesData[i].type != (int)MITesTypes.NOISE) &&
-            //         (aMITesDecoder.someMITesData[i].type == (int)MITesTypes.ACCEL)))
+            {            
+                AccelerationData datum = ((AccelerationData) FeatureExtractor.wocketsController._Decoders[i]._Data[tail[i]]); 
+                int currentHead=FeatureExtractor.wocketsController._Decoders[i]._Head;
+                while ((tail[i] != currentHead) && (datum.UnixTimeStamp > 0) && (datum.UnixTimeStamp >= tailUnixtimestamp[i]))
+               
                 {
-                    int  x = 0, y = 0, z = 0;
-                    //channel = (int)FeatureExtractor.wocketsController._Decoders[i]._Data[j].Channel;
-                    x = (int)((AccelerationData)FeatureExtractor.wocketsController._Decoders[i]._Data[j]).X;
-                    y = (int)((AccelerationData)FeatureExtractor.wocketsController._Decoders[i]._Data[j]).Y;
-                    z = (int)((AccelerationData)FeatureExtractor.wocketsController._Decoders[i]._Data[j]).Z;
-                    unixtimestamp = ((AccelerationData)FeatureExtractor.wocketsController._Decoders[i]._Data[j]).UnixTimeStamp;
+                    int  x = 0, y = 0, z = 0;                    
+                    x = (int)((AccelerationData)FeatureExtractor.wocketsController._Decoders[i]._Data[tail[i]]).X;
+                    y = (int)((AccelerationData)FeatureExtractor.wocketsController._Decoders[i]._Data[tail[i]]).Y;
+                    z = (int)((AccelerationData)FeatureExtractor.wocketsController._Decoders[i]._Data[tail[i]]).Z;
+                    unixtimestamp = ((AccelerationData)FeatureExtractor.wocketsController._Decoders[i]._Data[tail[i]]).UnixTimeStamp;
+                    tailUnixtimestamp[i] = unixtimestamp;
+                    if (tail[i] >= (FeatureExtractor.wocketsController._Decoders[i]._Data.Length - 1))
+                        tail[i] = 0;
+                    else
+                        tail[i]++;
 
-                    // skip channels that are not in the extractor expected
-                    // sensor channels
-                    //if (FeatureExtractor.sensorIndicies.Contains(channel) == false)
-                      //  continue;
-
-                    //int sensorIndex = (int)Extractor.sensorIndicies[channel];
                     int sensorIndex = i*4;
-                    //calculate the x index in the data array for this particular sensor
-                    //int adjusted_sensor_index = sensorIndex * 4; //base row for storing x,y,z,timestamp for this channel
-
                     // store the values in the current frame in the correct column based of the EXPECTED_WINDOW data array
                     // on the y_index for the sensor
                     FeatureExtractor.data[sensorIndex][FeatureExtractor.y_index[i]] = x;
@@ -226,7 +234,7 @@ namespace Wockets.Data.Classifiers.Utils
 
                     //increment the y_index for the sensor and wrap around if needed
                     FeatureExtractor.y_index[i] = (FeatureExtractor.y_index[i] + 1) % FeatureExtractor.EXPECTED_WINDOW_SIZES[i];
-
+                    datum = ((AccelerationData)FeatureExtractor.wocketsController._Decoders[i]._Data[tail[i]]); 
                 }
 
             }
@@ -337,6 +345,8 @@ namespace Wockets.Data.Classifiers.Utils
                         //signal value for the current sample and current axis.
                         yvals[distinct_data_points] = data[axes_index][sample_index];
 
+                        //Get the time of the new sample
+                        current_time = data[time_index][sample_index];
 
                         //Point to the previous sample in the current window
                         if (sample_index == 0)
@@ -344,10 +354,7 @@ namespace Wockets.Data.Classifiers.Utils
                         else
                             sample_index--;
 
-
-                        //Get the time of the new sample
-                        current_time = data[time_index][sample_index];
-
+                 
                         //Point to the next entry in the interpolation array
                         distinct_data_points++;
 

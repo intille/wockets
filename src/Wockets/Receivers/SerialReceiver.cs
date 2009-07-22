@@ -18,7 +18,7 @@ namespace Wockets.Receivers
         private bool useParity;
         private bool useStopbit;
 
-        public SerialReceiver()
+        public SerialReceiver(int bufferSize):base(bufferSize)
         {            
         }
         /*

@@ -114,7 +114,7 @@ namespace Wockets.Receivers
         #endregion Serialization Constants
 
         private const int MAXIMUM_SAMPLING_RATE = 20;
-        private const int BUFFER_SIZE = 16;
+        private const int BUFFER_SIZE = 200;
         private int bufferIndex;
         private double lastTS;
         private int sampleTimeSpace = 0;
@@ -199,7 +199,7 @@ namespace Wockets.Receivers
 #endif
 
         public HTCDiamondReceiver()
-            : base()
+            : base(BUFFER_SIZE)
         {
             this.bufferIndex = 0;
             this.type = ReceiverTypes.HTCDiamond;
@@ -207,6 +207,13 @@ namespace Wockets.Receivers
             this.sampleTimeSpace = 1000 / MAXIMUM_SAMPLING_RATE;
         }
 
+        public override int _Tail
+        {
+            get
+            {
+                return 0;
+            }
+        }
         public override bool Initialize()
         {
 #if (PocketPC)
@@ -231,7 +238,7 @@ namespace Wockets.Receivers
         /// Ideally the when the device is in a motionless state, the vector would be of length 9.8.
         /// However, the sensor is not extremely accurate, so this almost never the case.
         /// </returns>
-        public override int Read()
+        public  int Read()
         {
 #if (PocketPC)
             //Check for the 20Hz
@@ -288,7 +295,7 @@ namespace Wockets.Receivers
             return BUFFER_SIZE;
         }
 
-        public override void Write(byte[] data, int length)
+        public  void Write(byte[] data, int length)
         {
             throw new Exception("HTC Diamond Touch: writing to this data source is not implemented");
         }

@@ -198,7 +198,7 @@ namespace AXML
                                         //2008-06-17 14:03:42-07:00
                                         string p = @"^(\d+)-(\d+)-(\d+)\s+(\d+):(\d+):(\d+)";
                                         Match m = Regex.Match(jAttribute.Value, p);
-                                        if (m.Groups.Count == 7)
+                                        if ((m.Groups.Count == 7) || (m.Groups.Count == 6))
                                         {
                                             startMonth = Convert.ToInt32(m.Groups[2].Value);
                                             startDay =  Convert.ToInt32(m.Groups[3].Value);
@@ -217,7 +217,7 @@ namespace AXML
                                         //parse date
                                         string p = @"^(\d+)-(\d+)-(\d+)\s+(\d+):(\d+):(\d+)";
                                         Match m = Regex.Match(jAttribute.Value, p);
-                                        if (m.Groups.Count == 7)
+                                        if ((m.Groups.Count == 7) || (m.Groups.Count == 6)) 
                                         {
                                             endMonth = Convert.ToInt32(m.Groups[2].Value);
                                             endDay = Convert.ToInt32(m.Groups[3].Value);

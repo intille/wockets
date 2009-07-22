@@ -40,7 +40,7 @@ namespace Wockets.Decoders.Accelerometers
         }
          */
 
-        public override int Decode(int sourceSensor, byte[] data, int head, int tail,double samplespacing,double lasttimestamp)
+        public override int Decode(int sourceSensor, byte[] data, int head, int tail)
         {
             return 0;
         }
