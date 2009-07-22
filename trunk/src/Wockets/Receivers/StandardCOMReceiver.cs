@@ -25,7 +25,7 @@ namespace Wockets.Receivers
         private int portNumber;
         private SerialPortController spc;
 
-        public StandardCOMReceiver()
+        public StandardCOMReceiver():base(BUFFER_SIZE)
         {
             this.type = ReceiverTypes.StandardCOM;
         }
@@ -34,7 +34,15 @@ namespace Wockets.Receivers
         {
             this.portNumber = portNumber;
         }
-               */ 
+               */
+
+        public override int _Tail
+        {
+            get
+            {
+                return 0;
+            }
+        }
         public override bool Initialize()
         {
             bool isValid = true;
@@ -91,16 +99,7 @@ namespace Wockets.Receivers
             return isValid;
         }
 
-        public override int Read()
-        {
-            if (this._Running)
-                return spc.FillBytesBuffer(this._Buffer);            
-            return 0;
-        }
-        public override void Write(byte[] data,int length)
-        {
-            spc.SendData(data, length);
-        }
+
         public override bool Dispose()
         {
             try

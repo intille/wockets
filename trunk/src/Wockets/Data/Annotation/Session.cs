@@ -17,6 +17,11 @@ namespace Wockets.Data.Annotation
         private const string NOTES_ELEMENT="NOTES";
         private const string NAME_ATTRIBUTE = "NAME";
 
+        private const string ENDDATE_ATTRIBUTE = "ENDDATE";
+        private const string STARTTIME_ATTRIBUTE = "STARTTIME";
+        private const string ENDTIME_ATTRIBUTE = "ENDTIME";
+        private const string COLOR_ATTRIBUTE = "COLOR";
+
         private string subject;
         private string location;
         private string observer;
@@ -113,6 +118,17 @@ namespace Wockets.Data.Annotation
             xml += this.annotations.ToXML();
             xml += "</" + ANNOTATION_ELEMENT + ">\n";
             return xml;
+        }
+
+        public string ToCSV()
+        {
+            string csv = "";
+
+            csv += STARTTIME_ATTRIBUTE + "," + ENDTIME_ATTRIBUTE + "," + COLOR_ATTRIBUTE;
+            csv += this.OverlappingActivityLists.ToCSV();
+            csv += "\n";
+            csv += this.annotations.ToCSV();
+            return csv;
         }
         public void FromXML(string xml)
         {

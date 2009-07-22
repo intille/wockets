@@ -105,7 +105,7 @@ namespace Wockets.Decoders
         #endregion Access Properties
 
         public abstract int Decode(int sensorID,byte[] data, int length);
-        public abstract int Decode(int sensorID, byte[] data, int head,int tail,double samplespacing,double lasttimestamp);
+        public abstract int Decode(int sensorID, byte[] data, int head,int tail);
         //public abstract bool IsValid(SensorData data);
 
         //Serialization

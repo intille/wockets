@@ -527,8 +527,8 @@ namespace WocketsApplication.SmartPhone
                     sensor = this.wocketsController._Sensors[i];
                     sensor._Saving = true;
                     currentReceiver = this.wocketsController._Receivers[sensor._Receiver];
-                    if (currentReceiver._Running == true)
-                        currentReceiver.Read();
+                    //if (currentReceiver._Running == true)
+                      //  currentReceiver.Read();
                 }
                 catch (Exception e)
                 {
@@ -749,8 +749,8 @@ namespace WocketsApplication.SmartPhone
                 {
                     sensor = this.wocketsController._Sensors[i];
                     currentReceiver = this.wocketsController._Receivers[sensor._Receiver];
-                    if (currentReceiver._Running == true)
-                        currentReceiver.Read();
+                    //if (currentReceiver._Running == true)
+                      //  currentReceiver.Read();
                 }
             }
             catch (Exception e)
@@ -1587,7 +1587,7 @@ namespace WocketsApplication.SmartPhone
                             int numDecodedPackets = 0;
                             if (currentReceiver._Type == ReceiverTypes.HTCDiamond)
                             {
-                                int dataLength = currentReceiver.Read();
+                                int dataLength = ((Wockets.Receivers.HTCDiamondReceiver)currentReceiver).Read();
                                 if (dataLength > 0)
                                 {
                                     numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer, dataLength);
@@ -1611,12 +1611,12 @@ namespace WocketsApplication.SmartPhone
 
                                     int dataLength = ((RFCOMMReceiver)currentReceiver)._Tail - ((RFCOMMReceiver)currentReceiver)._Head;
                                     if (dataLength < 0)
-                                        dataLength = (((RFCOMMReceiver)currentReceiver).ReceiverBuffer.Length - ((RFCOMMReceiver)currentReceiver)._Head) + ((RFCOMMReceiver)currentReceiver)._Tail;
+                                        dataLength = currentReceiver._Buffer.Length - currentReceiver._Head + currentReceiver._Tail;
                                     if (dataLength > 0)
                                     {
-                                        int tail = ((RFCOMMReceiver)currentReceiver)._Tail;
-                                        int head = ((RFCOMMReceiver)currentReceiver)._Head;
-                                        numDecodedPackets = decoder.Decode(sensor._ID, ((RFCOMMReceiver)currentReceiver).ReceiverBuffer, head, tail, 12.0, ((RFCOMMReceiver)currentReceiver)._LastTimestamps);
+                                        int tail = currentReceiver._Tail;
+                                        int head = currentReceiver._Head;
+                                        numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer, head, tail);
                                         ((RFCOMMReceiver)currentReceiver)._Head = tail;
                                         this.disconnected[sensor._ID] = 0;
                                         this.AccumPackets[i] += numDecodedPackets;

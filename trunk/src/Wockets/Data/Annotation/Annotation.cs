@@ -218,6 +218,15 @@ namespace Wockets.Data.Annotation
             xml += "</" + ANNOTATION_ELEMENT + ">\n";
             return xml;
         }
+
+        public string ToCSV()
+        {
+            string csv = "";
+            csv += this.start_date + "," + this.end_date + ",";
+            for (int i = 0; (i < this.activities.Count); i++)
+                csv += "," + this.activities[i]._Name;            
+            return csv;
+        }
         public void FromXML(string xml)
         {
             XmlDocument dom = new XmlDocument();

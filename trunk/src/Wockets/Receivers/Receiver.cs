@@ -15,14 +15,17 @@ namespace Wockets.Receivers
         protected const string MAX_SR_ATTRIBUTE = "MaxSR";
         #endregion Serialization Constants
         private bool isRunning;
-        private byte[] buffer;
+        protected byte[] buffer;
+        protected int head;
         private int maximumSamplingRate;
         private int id;
         protected ReceiverTypes type;
 
-        public Receiver()
+        public Receiver(int bufferSize)
         {
             this.isRunning = false;
+            this.buffer= new byte[bufferSize];
+            this.head = 0;
         }
 
         /*
@@ -35,6 +38,17 @@ namespace Wockets.Receivers
         */
 
         #region Access Properties
+        public int _Head
+        {
+            get
+            {
+                return this.head;
+            }
+            set
+            {
+                this.head = value;
+            }
+        }
         public int _ID
         {
             get
@@ -99,9 +113,11 @@ namespace Wockets.Receivers
         }
         #endregion Access Properties
 
+        public abstract int _Tail
+        {
+            get;
+        }
         public abstract bool Initialize();
-        public abstract int Read();
-        public abstract void Write(byte[] data,int length);
         public abstract bool Dispose();
 
         //Serialization
