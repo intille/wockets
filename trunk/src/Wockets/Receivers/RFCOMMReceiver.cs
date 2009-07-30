@@ -12,6 +12,7 @@ using System.Threading;
 using Wockets.Utils;
 using System.Net;
 using Microsoft.Win32;
+using Wockets.Utils.network;
 using Wockets.Utils.network.Bluetooth;
 using Wockets.Utils.network.Bluetooth.Microsoft;
 using Wockets.Utils.network.Bluetooth.Widcomm;
@@ -44,7 +45,7 @@ namespace Wockets.Receivers
         //RFCOMM Specific Objects
 #if (PocketPC)
         //private BluetoothStream bluetoothStream;       
-        private static BluetoothStack BTStack=null;
+
         private BluetoothStream bluetoothStream;
 #endif
         private const int MAC_SIZE = 6;
@@ -59,15 +60,7 @@ namespace Wockets.Receivers
             this.type = ReceiverTypes.RFCOMM;
 
             //initialize the stack
-            if (BTStack == null)
-            {
-                if (BluetoothStack._Type == BluetoothStackTypes.Microsoft)
-                    BTStack = new MicrosoftBluetoothStack();
-                else if (BluetoothStack._Type == BluetoothStackTypes.Widcomm)
-                    BTStack = new WidcommBluetoothStack();
-                if (!BTStack.Initialize())
-                    throw new Exception("Bluetooth stack failed to initialize.");
-            }
+
         }
         public override int _Tail
         {
@@ -111,14 +104,91 @@ namespace Wockets.Receivers
                 this.sniffTime = value;
             }
         }
+
+        public override bool _Running
+        {
+            get
+            {              
+                /*
+                if (this.bluetoothStream._Status == BluetoothStatus.Disconnected)
+                    throw new Exception("Wocket " + this.address + " disconnected");
+                else if (this.bluetoothStream._Status == BluetoothStatus.Disposed)
+                {
+                    this.bluetoothStream._Status = BluetoothStatus.Reconnecting;
+                    reconnectionThread = new Thread(new ThreadStart(this.Reconnect));
+                    reconnectionThread.Start();                    
+                }
+                */
+               
+                return this.isRunning;
+            }
+            set
+            {
+                this.isRunning = value;
+            }
+        }
+
+        public override ReceiverStatus _Status
+        {
+            get
+            {
+                if ((this.status== ReceiverStatus.Connected) && (this.bluetoothStream._Status == BluetoothStatus.Disconnected))
+                {
+                    NetworkStacks._BluetoothStack.Disconnect(this.bluetoothStream._HexAddress);
+                    this.status = ReceiverStatus.Disconnected;
+                  //  throw new Exception("Wocket " + this.address + " disconnected");
+                }
+                else if (this.status == ReceiverStatus.Disconnected)
+                {
+                    this.status = ReceiverStatus.Reconnecting;
+                    reconnectionThread = new Thread(new ThreadStart(this.Reconnect));
+                    reconnectionThread.Start();
+                }
+                else if ((this.status == ReceiverStatus.Reconnecting) && (this.bluetoothStream !=null) && (this.bluetoothStream._Status == BluetoothStatus.Connected))
+                {
+                    this.status = ReceiverStatus.Connected;
+                    reconnectionThread.Join();
+                    reconnectionThread.Abort();
+                }
+                return this.status;
+            }
+            set
+            {
+                this.status = value;
+            }
+        }
         #endregion Access Properties
+
+
+   
+        private void Reconnect()
+        {
+            while (this._Status == ReceiverStatus.Reconnecting)
+            {
+                try
+                {
+                    if (this.Initialize())
+                    {
+                        //this._Status = ReceiverStatus.Connected;
+                        Wockets.Utils.Logger.Warn("Receiver " + this._ID + " has reconnected.");                    
+                    }
+                }
+                catch (Exception e)
+                {
+                }
+                Thread.Sleep(500);
+            }
+        }
 
         public override bool Initialize()
         {
 
             try
             {
-                bluetoothStream=BTStack.Connect(this._Buffer, this.address_bytes, this.pin);
+                this.bluetoothStream=NetworkStacks._BluetoothStack.Connect(this._Buffer, this.address_bytes, this.pin);
+                if (this.bluetoothStream == null)
+                    return false;
+                this.bluetoothStream._Status = BluetoothStatus.Connected;
                 return true;
             }
             catch (Exception e)
@@ -133,7 +203,10 @@ namespace Wockets.Receivers
             try
             {
 #if (PocketPC)
-                BTStack.Disconnect(this.address_bytes);
+                //this._Running = false;
+                this._Status = ReceiverStatus.Disconnected;
+                //NetworkStacks._BluetoothStack.Disconnect(this.address_bytes);
+                //this.bluetoothStream._Status = BluetoothStatus.Disposed;
 #endif
                 return true;
             }

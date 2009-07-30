@@ -43,6 +43,8 @@ namespace Wockets.Receivers
                 return 0;
             }
         }
+
+
         public override bool Initialize()
         {
             bool isValid = true;
@@ -94,7 +96,8 @@ namespace Wockets.Receivers
             if (isValid)
             {
                 this.spc = spc;
-                this._Running = true;
+                //this._Running = true;
+                this._Status = ReceiverStatus.Connected;
             }
             return isValid;
         }
@@ -105,7 +108,8 @@ namespace Wockets.Receivers
             try
             {
                 spc.PortClose();
-                this._Running = false;
+                //this._Running = false;
+                this._Status = ReceiverStatus.Disposed;
                 return true;
             }
             catch(Exception)

@@ -15,7 +15,7 @@
 
 typedef ULONGLONG BTH_ADDR;
 
-	class WidcommStackPPC : public CBtIf, public CSppClient
+	class WidcommStackPPC : public CBtIf, public CSppClient, public CRfCommPort
 		{
 		public:
 			 WidcommStackPPC();
@@ -23,9 +23,10 @@ typedef ULONGLONG BTH_ADDR;
 			virtual void OnDeviceResponded(BD_ADDR bda, DEV_CLASS devClass, BD_NAME bdName, BOOL bConnected);
 			virtual void OnInquiryComplete(BOOL bSuccess, short nResponses);
 			virtual void OnStackStatusChange(STACK_STATUS new_status);			
+			//virtual void OnDataReceived (void *p_data, short len);
 			void OnClientStateChange(BD_ADDR bda, DEV_CLASS dev_class, BD_NAME name, short com_port, SPP_STATE_CODE state);
 			
-			
+			//char data[4096];
 			BOOL InquiryEventComplete;
 			short bt_stack_status;
 			short comPort;

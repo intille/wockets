@@ -14,7 +14,7 @@ using weka.classifiers;
 using weka.classifiers.trees;
 using System.IO.Ports;
 using System.Text.RegularExpressions;
-
+using System.Diagnostics;
 
 
 using Wockets;
@@ -33,7 +33,7 @@ using Wockets.Data.Annotation;
 using Wockets.Data.Logger;
 using WocketsApplication.Utils;
 using WocketsApplication.Utils.Forms.Progress;
-
+using Wockets.Utils.network;
 #if (PocketPC)
 using WocketsApplication.Feedback;
 #endif
@@ -139,7 +139,7 @@ namespace WocketsApplication.DataLogger
         /// </summary>
         private Thread aProgressThread = null;
 
-        private Thread aPollingThread = null;
+        private Thread aPlottingThread = null;//aPollingThread = null;
         //private Thread aInternalPollingThread = null;
         private Thread aSavingThread = null;
 
@@ -414,13 +414,14 @@ namespace WocketsApplication.DataLogger
             aProgressThread.Start();
 
             //Initialize Plotting Thread
-            //aPlottingThread = new Thread(new ThreadStart(PlotWockets));
-            aSavingThread = new Thread(new ThreadStart(SaveWockets));
-            aPollingThread = new Thread(new ThreadStart(PollWockets));
+            aPlottingThread = new Thread(new ThreadStart(PlotWockets));
+            //aSavingThread = new Thread(new ThreadStart(SaveWockets));
+            //aPollingThread = new Thread(new ThreadStart(this.wocketsController.Poll));
+            //aPollingThread.Priority = ThreadPriority.Highest; 
             //aInternalPollingThread = new Thread(new ThreadStart(PollInternal));
 
             //this.bluetoothControllers = new BluetoothController[this.wocketsController._Receivers.Count];
-            this.bluetoothConnectors = new BluetoothConnector[this.wocketsController._Receivers.Count];
+           // this.bluetoothConnectors = new BluetoothConnector[this.wocketsController._Receivers.Count];
 
 
 
@@ -484,8 +485,9 @@ namespace WocketsApplication.DataLogger
             while (progressMessage != null) Thread.Sleep(50);
             progressMessage = "Initializing receivers ... searching " + this.wocketsController._Receivers.Count + " BT receivers\r\n";
 
+            this.wocketsController.Initialize();
             //Try to initialize all receivers 10 times then exit
-            int initializationAttempt = 0;
+            /*int initializationAttempt = 0;
             while (initializationAttempt <= 10)
             {
                 if (InitializeReceivers() == false)
@@ -512,8 +514,10 @@ namespace WocketsApplication.DataLogger
                 
                 Thread.Sleep(500);
             }
+             */
             #endregion Bluetooth reception channels initialization
 
+            /*
             #region Start Collecting Data
 
             Receiver currentReceiver = null;
@@ -539,14 +543,14 @@ namespace WocketsApplication.DataLogger
                 }
             }
 
+            */
 
 
-
-            //aPlottingThread.Start();
+            aPlottingThread.Start();
             //aSavingThread
-            aPollingThread.Start();
+            //aPollingThread.Start();
             //aInternalPollingThread.Start();
-            aSavingThread.Start();
+            //aSavingThread.Start();
 
             //Terminate the progress thread
             progressThreadQuit = true;
@@ -555,7 +559,7 @@ namespace WocketsApplication.DataLogger
             this.readDataTimer.Enabled = true;
             //this.qualityTimer.Enabled = true;
 
-            #endregion Start Collecting Data
+
 
         }
 
@@ -817,59 +821,8 @@ namespace WocketsApplication.DataLogger
                             progressMessage = "Failed to initialize HTC Diamond ...\r\n";
                         return false;
                     }
-                    //this.mitesDecoders[receiver.ID] = new MITesDecoder();
-                    //receiver.Status = SXML.Receiver.STATUS_CONNECTED;
-                    /*
-                    if (this.wocketsController._Receivers[i]._Type == ReceiverTypes.RFCOMM)
-                    {
-                        byte[] cmd = new byte[8];
-                        cmd[0] = (byte)36;
-                        cmd[1] = (byte)36;
-                        cmd[2] = (byte)36;
-                        //SW,0640 1 sec
-                                                   
-                        this.wocketsController._Receivers[i].Write(cmd,3);
-                        Thread.Sleep(1000);
-                        cmd[0] = (byte)'S';
-                        cmd[1] = (byte)'W';
-                        cmd[2] = (byte)',';
-                        cmd[3] = (byte)'0';
-                        cmd[4] = (byte)'0';
-                        cmd[5] = (byte)'0';
-                        cmd[6] = (byte)'0';
-                        cmd[7] = (byte)13;
-                        this.wocketsController._Receivers[i].Write(cmd, 8);
-                        Thread.Sleep(1000);
-                        cmd[0] = (byte)'S';
-                        cmd[1] = (byte)'Y';
-                        cmd[2] = (byte)',';
-                        cmd[3] = (byte)'0';
-                        cmd[4] = (byte)'0';
-                        cmd[5] = (byte)'0';
-                        cmd[6] = (byte)'4';
-                        cmd[7] = (byte)13;
-                        this.wocketsController._Receivers[i].Write(cmd, 8);
-                        Thread.Sleep(1000);
-                        cmd[0] = (byte)'-';
-                        cmd[1] = (byte)'-';
-                        cmd[2] = (byte)'-';
-                        cmd[3] = (byte)13;
-                        this.wocketsController._Receivers[i].Write(cmd, 4);
-                        this.wocketsController._Receivers[i].Read();
-                        if ((this.wocketsController._Receivers[i]._Buffer[0] == 'E') &&
-                            (this.wocketsController._Receivers[i]._Buffer[1] == 'N') &&
-                            (this.wocketsController._Receivers[i]._Buffer[2] == 'D'))
-                        {
-                            cmd[0] = (byte)'-';
-                            cmd[1] = (byte)'-';
-                            cmd[2] = (byte)'-';
-
-                            //this.wocketsController._Receivers[i].Write(cmd, 4);
-                            //this.wocketsController._Receivers[i].Read();
-                        }
-                    }
-                     */
-                    this.wocketsController._Receivers[i]._Running = true;
+     
+                    //this.wocketsController._Receivers[i]._Running = true;
                 }
 
             }
@@ -1576,145 +1529,27 @@ namespace WocketsApplication.DataLogger
                 Thread.Sleep(30);
             }
         }*/
-        private void PollWockets()
-        {
-            #region Poll All Wockets and MITes and Decode Data
 
-            Receiver currentReceiver = null;
-            Sensor sensor = null;
-            while (true)
-            {
+   
 
-                #region Bluetooth Reconnection Code
-#if (PocketPC)
+        [DllImport("coredll.dll", SetLastError = true)]
+        public static extern int CeGetThreadQuantum(IntPtr handle);
 
-                for (int i = 0; (i < this.wocketsController._Receivers.Count); i++)
-                {
-                    if (this.wocketsController._Receivers[i]._Type == ReceiverTypes.RFCOMM)
-                    {
-                        if ((this.bluetoothConnectors[this.wocketsController._Receivers[i]._ID] != null) &&
-                            (!this.bluetoothConnectors[this.wocketsController._Receivers[i]._ID].Reconnecting) &&
-                            (this.wocketsController._Receivers[i]._Running == false))
-                        {
-                            this.bluetoothConnectors[this.wocketsController._Receivers[i]._ID].Reconnect();
-                        }
-                        if ((this.bluetoothConnectors[this.wocketsController._Receivers[i]._ID] != null) &&
-                        (this.bluetoothConnectors[this.wocketsController._Receivers[i]._ID].Reconnecting) &&
-                        (this.wocketsController._Receivers[i]._Running == true))
-                         {
-                            this.bluetoothConnectors[this.wocketsController._Receivers[i]._ID].Cleanup();
-                         }
+        [DllImport("coredll.dll", SetLastError = true)]
+        public static extern int CeSetThreadQuantum(IntPtr handle,ushort dw);
 
-                    }
-
-                }
-
-
-#endif
-
-                #endregion Bluetooth Reconnection Code
-
-                try 
-                {
-                    for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
-                    {
-                        sensor = this.wocketsController._Sensors[i];
-                        currentReceiver = this.wocketsController._Receivers[sensor._Receiver];
-                        if (currentReceiver._Running == true)
-                        {
-                            Decoder decoder = sensor._Decoder;
-                            int numDecodedPackets = 0;
-                            if (currentReceiver._Type == ReceiverTypes.HTCDiamond) 
-                            {
-                                int dataLength = ((Wockets.Receivers.HTCDiamondReceiver)currentReceiver).Read();
-                                if (dataLength > 0)
-                                {
-                                    numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer, dataLength);
-                                    this.disconnected[sensor._ID] = 0;
-                                    this.AccumPackets[i] += numDecodedPackets;
-                                }
-                                this.AccumPackets[i + 6] += numDecodedPackets;
-                            }
-                            else
-                            if (sensor._Class==SensorClasses.Wockets)
-                            {
-                                /*int dataLength = currentReceiver.Read();
-                                int numDecodedPackets = 0;
-                                if (dataLength > 0)
-                                {
-                                    numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer, dataLength);
-                                    this.disconnected[sensor._ID] = 0;
-                                    this.AccumPackets[i] += numDecodedPackets;
-                                }
-                                */
-
-                                int dataLength = currentReceiver._Tail - currentReceiver._Head;
-                                if (dataLength < 0)
-                                    dataLength = currentReceiver._Buffer.Length - currentReceiver._Head + currentReceiver._Tail;
-                                if (dataLength > 0)
-                                {
-                                    int tail = currentReceiver._Tail;
-                                    int head = currentReceiver._Head;
-                                    numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer, head, tail);
-                                    ((RFCOMMReceiver)currentReceiver)._Head = tail;                                   
-                                    this.disconnected[sensor._ID] = 0;
-                                    this.AccumPackets[i] += numDecodedPackets;
-                                    this.AccumPackets[i+6] += numDecodedPackets;
-                                }
-                            }
-
-                            //this.wocketsController._Sensors[i].Save();   
-                        }
-                    }
-
-                    if (isPlotting)
-                        UpdateGraph();
-            
-                }
-                //Thrown when there is a Bluetooth failure                    
-                //TODO: Make sure no USB failure happening
-                catch (Exception ex)
-                {
-                    if (sensor._Class == SensorClasses.Wockets)
-                    {
-
-
-                            Logger.Warn("Wocket " + sensor._ID + " has disconnected.");
-                        this.disconnected[sensor._ID] = 1;
-      
-                        if (this.bluetoothConnectors[currentReceiver._ID] == null)
-                        {
-                            this.bluetoothConnectors[currentReceiver._ID] = new BluetoothConnector(currentReceiver, this.wocketsController);
-                        }
-                        currentReceiver._Running = false;
-                    }
-                    else if (sensor._Class==SensorClasses.HTCDiamondTouch)
-                    {
-                        currentReceiver.Initialize();
-                        currentReceiver._Running = true;
-                    }
-                }
-
-
-                Thread.Sleep(10);
-            }
-
-
-       
-            #endregion Poll All Wockets and MITes and Decode Data
-        }
 
         private void PlotWockets()
         {
             while (true)
             {
-                if ((this.CurrentPanel == 0) && (isPlotting))                
-                    GraphAccelerometerValues();                
-
+                if (isPlotting)
+                    UpdateGraph();
+                    //GraphAccelerometerValues();                
                 Thread.Sleep(50);
             }
         }
-
+        /*
         private void SaveWockets()
         {
             while (true)
@@ -1734,8 +1569,10 @@ namespace WocketsApplication.DataLogger
                 
             }
         }
+         */
         private void readDataTimer_Tick(object sender, EventArgs e)
         {
+            /*
             int zeroes = 0;
             for (int i = 0; i < 6; i++)
             {
@@ -1788,22 +1625,11 @@ namespace WocketsApplication.DataLogger
                 this.SRcounter = 0;
                 this.LastTime = now;
             }
-
+            */
             if (isQuitting)
             {
-                for (int i = 0; (i < this.wocketsController._Receivers.Count); i++)
-                {
-
-                    if (this.wocketsController._Receivers[i]._Type == ReceiverTypes.RFCOMM)
-                    {
-                        Thread.Sleep(100);
-                        //this.bluetoothControllers[i].cleanup();
-                        this.wocketsController._Receivers[i].Dispose();
-                        Thread.Sleep(1000);
-                    }
-
-                    Thread.Sleep(100);
-                }
+                this.wocketsController.Dispose();
+   
 
 
                 if (trainingTW != null)
@@ -1819,11 +1645,9 @@ namespace WocketsApplication.DataLogger
                     structureTW = null;
                 }
 
-                for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
-                    this.wocketsController._Sensors[i].Dispose();
                 Logger.Close();
- 
                 FeatureExtractor.Cleanup();
+                
 
 #if (PocketPC)
 
@@ -2059,14 +1883,14 @@ namespace WocketsApplication.DataLogger
                 for (int i = 0; i < this.wocketsController._Sensors.Count; i++)
                 {
                     String key = "W" + this.wocketsController._Receivers[i]._ID;
-                    if (this.wocketsController._Receivers[i]._Running)
+                    if (this.wocketsController._Receivers[i]._Status== ReceiverStatus.Connected)
                         ((PictureBox)this.sensorStatus[key]).Image = (Image)this.connectedWocketImage;
                     else
                         ((PictureBox)this.sensorStatus[key]).Image = (Image)this.disconnectedWocketImage;
 
                 }
 
-                if ((this.CurrentPanel == 0) && (isPlotting))
+                if  (isPlotting)
                 {
                     GraphAccelerometerValues();
                 }

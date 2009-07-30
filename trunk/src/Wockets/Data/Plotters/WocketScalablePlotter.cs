@@ -115,7 +115,7 @@ namespace Wockets.Data.Plotters
             {
                 int receiverID = this.wocketsController._Sensors[i]._Receiver;
 
-                if (this.wocketsController._Receivers[receiverID]._Running)
+                if (this.wocketsController._Receivers[receiverID]._Status== Wockets.Receivers.ReceiverStatus.Connected)
                 {
                     int currentHead = this.wocketsController._Sensors[i]._Decoder._Head;
 
@@ -147,6 +147,7 @@ namespace Wockets.Data.Plotters
 
                             if (this.currentColumns[i] >= this.plotAreaSize.Width - 1)
                             {
+                                g.FillRectangle(blueBrush, 0, 0, this.plotAreaSize.Width + 10, this.plotAreaSize.Height);
                                 requiresFullRedraw = true;
                                 this.currentColumns[i] = 0;
                             }
@@ -206,24 +207,21 @@ namespace Wockets.Data.Plotters
 
             if (requiresFullRedraw)
             {
-                this.aPanel.Width = this.aPanel.Width;
-                
-                g.FillRectangle(blueBrush, 0, 0, this.plotAreaSize.Width + 10, this.plotAreaSize.Height);
-
-
+                aPanel.Invalidate();
+                requiresFullRedraw = false;
+                this.aPanel.Width = this.aPanel.Width;                                
                 for (int k = 0; (k < this.wocketsController._Sensors.Count); k++)
                 {
                     this.currentColumns[k] = 0;
                     lastColumn[k] = 0;
                     firstColumn[k] = 999999;
                 }
-                aPanel.Invalidate();
-                requiresFullRedraw = false;
+          
             }
             else
                 for (int k = 0; (k < this.wocketsController._Sensors.Count); k++)
                 {
-                    aPanel.Invalidate(new System.Drawing.Rectangle(firstColumn[k], 0, lastColumn[k] - firstColumn[k], plotAreaSize.Height));
+                    aPanel.Invalidate(new System.Drawing.Rectangle(firstColumn[k], 0, lastColumn[k] - firstColumn[k], plotAreaSize.Height));   
                     firstColumn[k] = lastColumn[k];
                 }
 

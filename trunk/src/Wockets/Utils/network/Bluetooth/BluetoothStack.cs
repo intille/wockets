@@ -49,21 +49,25 @@ namespace Wockets.Utils.network.Bluetooth
                 return type;
             }
         }
-        public abstract BluetoothStatus Status
+        public abstract BluetoothStatus _Status
         {
             get;
         }
 
-        public virtual bool Disconnect(byte[] address)
+        public virtual bool Disconnect(string address)
         {
-            long disconnectAddress = BitConverter.ToInt64(address,0);
+            //string hex = "";
+            //for (int i = 0; i < address.Length; i++)
+              //  hex += address[i].ToString("X2");         
+
             foreach (BluetoothStream b in this.bluetoothStreams)
-                if (BitConverter.ToInt64(b._Address,0) == disconnectAddress)
+                if (b._HexAddress == address)
                 {
                     this.bluetoothStreams.Remove(b);
-                    b.Close();
+                    b.Close();                    
                     return true;
                 }
+            
             return false;
         }
 

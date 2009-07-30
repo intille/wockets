@@ -18,8 +18,8 @@ WMAPI BOOL __stdcall SetAutoReconnect(void* wdStack);
 WMAPI short __stdcall GetStackStatus(void* wdStack);
 
 WMAPI BOOL __stdcall IsStackServerUp(void* wdStack);
-WMAPI BOOL __stdcall IsDeviceReady(void* wdStack);
-
+WMAPI BOOL __stdcall IsDeviceReady(void* wdStack);    
+WMAPI int __stdcall Bond(void* wdStack,ULONGLONG p_bda,wchar_t* pin);
 //Spp
 WMAPI int __stdcall SppCreateConnection(void* wdStack, UINT8 scn, ULONGLONG p_bda);
 WMAPI int __stdcall SppRemoveConnection(void* wdStack);

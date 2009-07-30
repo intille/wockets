@@ -25,13 +25,15 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
         {
             try
             {
+                //cleanup any resources if a previous connection existed
+                //this.Disconnect(address);
                 MicrosoftBluetoothStream btStream = new MicrosoftBluetoothStream(buffer,address,pin);
                 if (btStream.Open())
                 {
                     this.bluetoothStreams.Add(btStream);
                     return btStream;
                 }
-                else
+                else                    
                     return null;
             }
             catch (Exception e)
@@ -40,7 +42,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
             }            
         }
 
-        public override BluetoothStatus Status
+        public override BluetoothStatus _Status
         {
             get
             {

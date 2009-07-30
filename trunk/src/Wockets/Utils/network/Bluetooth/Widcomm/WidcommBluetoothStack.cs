@@ -45,6 +45,9 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
         internal static extern int SppComPort(IntPtr wdStack);
 
         [DllImport(widcommDLL, SetLastError = false, CharSet = CharSet.Unicode)]
+        internal static extern int Bond(IntPtr wdStack, long pbda,string pin);
+
+        [DllImport(widcommDLL, SetLastError = false, CharSet = CharSet.Unicode)]
         internal static extern int SppCreateConnection(IntPtr wdStack, byte scn, long pbda);
 
         [DllImport(widcommDLL, SetLastError = false, CharSet = CharSet.Unicode)]
@@ -67,7 +70,14 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
         }
 
 
-        public override BluetoothStatus Status
+        public IntPtr _Reference
+        {
+            get
+            {
+                return this.wdStack;
+            }
+        }
+        public override BluetoothStatus _Status
         {
             get
             {
@@ -83,7 +93,7 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
             }
         }
         public override bool Initialize()
-        {
+        {           
             //create Widcomm stack object
             this.wdStack = WidcommAPI.CreateWidcommStack();
             //set the stack to auto reconnect = true
@@ -99,8 +109,11 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
             try
             {
                 WidcommBluetoothStream bluetoothStream = new WidcommBluetoothStream(buffer, address, pin);
-                this.bluetoothStreams.Add(bluetoothStream);
-                return bluetoothStream;
+                if (bluetoothStream.Open())
+                {
+                    this.bluetoothStreams.Add(bluetoothStream);
+                    return bluetoothStream;
+                }
             }
             catch (Exception e)
             {
