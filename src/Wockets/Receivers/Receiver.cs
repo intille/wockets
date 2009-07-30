@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Wockets.Utils;
+using System.Threading;
 
 namespace Wockets.Receivers
 {
@@ -14,18 +15,22 @@ namespace Wockets.Receivers
         protected const string BUFFERSIZE_ATTRIBUTE = "BufferSize";
         protected const string MAX_SR_ATTRIBUTE = "MaxSR";
         #endregion Serialization Constants
-        private bool isRunning;
+        protected bool isRunning;
+        private bool isReconnecting;
         protected byte[] buffer;
         protected int head;
         private int maximumSamplingRate;
         private int id;
         protected ReceiverTypes type;
+        protected Thread reconnectionThread=null;
 
         public Receiver(int bufferSize)
         {
-            this.isRunning = false;
+            //this.isRunning = false;
+            //this.isReconnecting = false;
             this.buffer= new byte[bufferSize];
             this.head = 0;
+            this.status = ReceiverStatus.Disconnected;
         }
 
         /*
@@ -88,7 +93,7 @@ namespace Wockets.Receivers
             }
         }
         
-        public bool _Running
+        public virtual bool _Running
         {
             get
             {
@@ -100,6 +105,18 @@ namespace Wockets.Receivers
             }
         }
 
+        protected ReceiverStatus status;
+        public virtual ReceiverStatus _Status
+        {
+            get
+            {
+                return this.status;
+            }
+            set
+            {
+                this.status = value;
+            }
+        }
         public int _MaximumSamplingRate
         {
             get
@@ -119,6 +136,7 @@ namespace Wockets.Receivers
         }
         public abstract bool Initialize();
         public abstract bool Dispose();
+
 
         //Serialization
         public abstract string ToXML();

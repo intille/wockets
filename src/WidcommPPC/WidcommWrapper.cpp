@@ -106,6 +106,27 @@ WMAPI int __stdcall SppRemoveConnection(void* wdStack)
   return 0;
 }
 
+WMAPI int __stdcall Bond(void* wdStack,ULONGLONG p_bda,wchar_t* pin)
+{
+	WidcommStackPPC* pwdStack = (WidcommStackPPC*)wdStack;
+		ULONGLONG address = (ULONGLONG)p_bda;
+
+	BD_ADDR bda;
+
+  bda[0] = ( address        & 0xff);
+	bda[1] = ((address >>  8) & 0xff);
+	bda[2] = ((address >> 16) & 0xff);
+  bda[3] = ((address >> 24) & 0xff);
+	bda[4] = ((address >> 32) & 0xff);
+	bda[5] = ((address >> 40) & 0xff);
+
+	WCHAR pp[4];
+	pp[3]='4';
+	pp[2]='3';
+	pp[1]='2';
+	pp[0]='1';
+	return pwdStack->Bond(bda,pp);
+}
 WMAPI int __stdcall SppCreateConnection(void* wdStack, UINT8 scn, ULONGLONG p_bda)
 {
 
@@ -122,8 +143,9 @@ WMAPI int __stdcall SppCreateConnection(void* wdStack, UINT8 scn, ULONGLONG p_bd
 	bda[4] = ((address >> 32) & 0xff);
 	bda[5] = ((address >> 40) & 0xff);
 
-  static TCHAR m_serviceNameForServer[BT_MAX_SERVICE_NAME_LEN + 1] = L"Bluetooth Serial Port";
-  static TCHAR m_serviceNameForServerOld[BT_MAX_SERVICE_NAME_LEN + 1] = L"Generic Serial";
+	//pwdStack->OpenClient(
+  //static TCHAR m_serviceNameForServer[BT_MAX_SERVICE_NAME_LEN + 1] = L"Bluetooth Serial Port";
+  static TCHAR m_serviceNameForServerOld[BT_MAX_SERVICE_NAME_LEN + 1] = L"SPP";
   
   TCHAR        m_serviceName[BT_MAX_SERVICE_NAME_LEN + 1];
 

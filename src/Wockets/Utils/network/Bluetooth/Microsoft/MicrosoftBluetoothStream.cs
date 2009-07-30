@@ -17,34 +17,16 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
         private Socket socket;
         private NetworkStream nstream;
         private BluetoothAddress btAddress;
-        private Thread processingThread;
-        private bool disposed = false;
-        private const int MAX_DISCONNECTION_COUNTER = 200;
-        private int disconnectionCounter = 0;
 
-        public MicrosoftBluetoothStream(byte[] buffer, byte[] address, string pin): base(buffer)
+
+        public MicrosoftBluetoothStream(byte[] buffer, byte[] address, string pin): base(buffer,address,pin)
         {
             try
-            {
-                client = new BluetoothClient();
-                if (BitConverter.IsLittleEndian)
-                {
-                    //reverse address depending on the architecture
-                    for (int i = 0; i < address.Length; i++)
-                        this.address[this.address.Length - 1 - i] = address[i];
-                }
-                else
-                {
-                    for (int i = 0; i < address.Length; i++)
-                        this.address[i] = address[i];
-                }
-
+            {   
                 btAddress = new BluetoothAddress(this.address);
-                if (pin != null)
-                {
-                    this.pin = pin;
+                if (this.pin != null)                                   
                     BluetoothSecurity.SetPin(btAddress, this.pin);
-                }
+                
             }
             catch (Exception e)
             {
@@ -56,10 +38,11 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
         public override bool Open()
         {
             try
-            {
+            {                                
+                client = new BluetoothClient();    
                 if (processingThread != null)
                     processingThread.Abort();
-
+                //client.SetPin(this.pin);
                 client.Connect(btAddress, BluetoothService.SerialPort);
                 socket = client.Client;               
                 socket.Blocking = true;
@@ -68,12 +51,13 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                 //start the processing thread
                 processingThread = new Thread(new ThreadStart(Process));
                 processingThread.Start();
-
+                this.status = BluetoothStatus.Connected;      
             }
             catch (Exception e)
             {
+                
                 this.errorMessage = "MicrosoftBluetoothStream failed at opening a connection to " + btAddress.ToString();
-                this.status = BluetoothStatus.Error;
+                this.status = BluetoothStatus.Disconnected;
                 return false;
             }
             return true;
@@ -85,7 +69,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
             sendByte[0] = 0xff;
 
 
-            while (this.status == BluetoothStatus.Up)
+            while (this.status == BluetoothStatus.Connected)
             {
                 int bytesReceived = 0;
 
@@ -97,7 +81,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                         if (socket.Send(sendByte, 1, SocketFlags.None) <= 0)
                         {
                             this.errorMessage = "MicrosoftBluetoothStream failed at Process(). Cannot send bytes to " + btAddress.ToString();
-                            this.status = BluetoothStatus.Error;
+                            this.status = BluetoothStatus.Disconnected;
                         }
                         sendTimer = 0;
                         Thread.Sleep(50);
@@ -128,8 +112,8 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                         disconnectionCounter++;
                         if (disconnectionCounter > MAX_DISCONNECTION_COUNTER)
                         {
-                            this.errorMessage = "MicrosoftBluetoothStream failed at Process(). Disconnection timeout to " + btAddress.ToString();
-                            this.status = BluetoothStatus.Error;
+                            this.errorMessage = "MicrosoftBluetoothStream failed at Process(). Disconnection timeout to " + this._HexAddress;
+                            this.status = BluetoothStatus.Disconnected;
                         }
 
                     }
@@ -139,7 +123,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                 catch (Exception e)
                 {
                     this.errorMessage = "MicrosoftBluetoothStream failed at Process(). " + e.Message + " to " + btAddress.ToString();
-                    this.status = BluetoothStatus.Error;
+                    this.status = BluetoothStatus.Disconnected;
 
                 }
 
@@ -153,9 +137,33 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
             processingThread.Join();
             if (processingThread != null)
                 processingThread.Abort();
-            nstream.Close();
-            socket.Close();
-            client.Close();
+            try
+            {
+                nstream.Close();
+            }
+            catch (Exception)
+            {
+            }
+            try
+            {
+                socket.Close();
+            }           
+            catch (Exception)
+            {
+            }
+            try
+            {
+                client.Close();
+            }
+            catch (Exception)
+            {
+            }
+            processingThread = null;
+            nstream = null;
+            socket = null;
+            client = null;
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
             return true;
         }
     }

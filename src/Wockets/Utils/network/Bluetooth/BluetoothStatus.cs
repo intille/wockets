@@ -9,6 +9,10 @@ namespace Wockets.Utils.network.Bluetooth
         Up,
         Down,
         Error,
+        Reconnecting,
+        Disconnected,
+        Connected,
+        Disposed,
         Unloaded
     }
 }
