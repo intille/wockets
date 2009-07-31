@@ -17,7 +17,9 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
         private Socket socket;
         private NetworkStream nstream;
         private BluetoothAddress btAddress;
-
+        private static int timeout = 3000;
+        private static int timeoutMultiplier = 1;
+        private static int connectionFailures = 0;
 
         public MicrosoftBluetoothStream(byte[] buffer, byte[] address, string pin): base(buffer,address,pin)
         {
@@ -45,7 +47,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                 //client.SetPin(this.pin);
                 client.Connect(btAddress, BluetoothService.SerialPort);
                 //client.Connect(btAddress, BluetoothService.SerialPort, 10);
-                //client.Connect(btAddress, BluetoothService.SerialPort, 3000);
+                client.Connect(btAddress, BluetoothService.SerialPort, timeout * timeoutMultiplier);
                 socket = client.Client;               
                 socket.Blocking = true;
                 nstream = client.GetStream();
@@ -61,6 +63,14 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                 
                 this.errorMessage = "MicrosoftBluetoothStream failed at opening a connection to " + btAddress.ToString();
                 this.status = BluetoothStatus.Disconnected;
+                Thread.Sleep(500);
+                connectionFailures++;
+                if (connectionFailures == 3)
+                {
+                    if (timeoutMultiplier <= 3)
+                        timeoutMultiplier++;
+                    connectionFailures=0;
+                }
                 return false;
             }
             return true;
