@@ -23,6 +23,10 @@ namespace Wockets.Receivers
         private int id;
         protected ReceiverTypes type;
         protected Thread reconnectionThread=null;
+        protected int disconTime=0;
+        protected long lastTime;
+        protected int ndisc = 0;
+        protected int disconCount=0;
 
         public Receiver(int bufferSize)
         {
@@ -104,6 +108,47 @@ namespace Wockets.Receivers
                 this.isRunning = value;
             }
         }
+
+        public int NumDisconnect
+        {
+            get
+            {
+                return this.ndisc;
+            }
+            set
+            {
+                this.ndisc = value;
+            }
+        }
+
+        public int TimeDisconnect
+        {
+            get
+            {
+                if (this.disconTime > 0)
+                    return this.disconTime;
+                else
+                    return 0;
+            }
+            set
+            {
+                this.disconTime = value;
+            }
+        }
+
+        public int Disconnected
+        {
+            get
+            {
+                return this.disconCount;
+            }
+
+            set
+            {
+                this.disconCount = value;
+            }
+        }
+
 
         protected ReceiverStatus status;
         public virtual ReceiverStatus _Status

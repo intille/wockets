@@ -308,7 +308,6 @@ namespace WocketsApplication.SmartPhone
 
         void cFormListbox_SelectedIndexChanged(object sender, System.EventArgs e)
         {
-            selectedWocketController = this.cFormListbox.SelectedIndices[0];
             if (this.cFormNextButton.Enabled == false)
                 this.cFormNextButton.Enabled = true;
         }
@@ -322,6 +321,7 @@ namespace WocketsApplication.SmartPhone
 
         void cFormNextButton_Click(object sender, System.EventArgs e)
         {
+            selectedWocketController = this.cFormListbox.SelectedIndices[0];
             try
             {
                 InitializeCalibrator();
@@ -539,7 +539,6 @@ namespace WocketsApplication.SmartPhone
 
         void aFormListbox_SelectedIndexChanged(object sender, System.EventArgs e)
         {
-            this.selectedActivityProtocol = this.aFormListbox.SelectedIndices[0];
             if (this.aFormNextButton.Enabled == false)
                 this.aFormNextButton.Enabled = true;
         }
@@ -565,6 +564,7 @@ namespace WocketsApplication.SmartPhone
 
         void aFormNextButton_Click(object sender, System.EventArgs e)
         {
+            this.selectedActivityProtocol = this.aFormListbox.SelectedIndices[0];
             string longest_label = "";
             if (this.sForm == null)
             {
@@ -666,7 +666,6 @@ namespace WocketsApplication.SmartPhone
 
         void sFormListbox_SelectedIndexChanged(object sender, System.EventArgs e)
         {
-            selectedWocketController = this.sFormListbox.SelectedIndices[0];
             if (this.sFormNextButton.Enabled == false)
                 this.sFormNextButton.Enabled = true;
         }
@@ -766,6 +765,7 @@ namespace WocketsApplication.SmartPhone
         void sFormNextButton_Click(object sender, System.EventArgs e)
         {
             //initialize the path as an empty string
+            this.selectedWocketController = this.sFormListbox.SelectedIndices[0];
             string firstCard = "";
 
             System.IO.DirectoryInfo di = new System.IO.DirectoryInfo("\\");

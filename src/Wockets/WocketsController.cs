@@ -229,8 +229,12 @@ namespace Wockets
                             if (currentReceiver._Type == ReceiverTypes.HTCDiamond)
                             {
                                 int dataLength = ((Wockets.Receivers.HTCDiamondReceiver)currentReceiver).Read();
-                                if (dataLength > 0)                                
-                                    numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer, dataLength);                                
+                                if (dataLength > 0)
+                                {
+                                    numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer, dataLength);
+                                    sensor.Packets += numDecodedPackets;
+                                }
+                                
                             }
                             else
                                 if (sensor._Class == SensorClasses.Wockets)
@@ -245,10 +249,9 @@ namespace Wockets
                                         int head = currentReceiver._Head;
                                         numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer, head, tail);
                                         ((RFCOMMReceiver)currentReceiver)._Head = tail;
+                                        sensor.Packets += numDecodedPackets;
                                     }
-                                }
-
-                            
+                                }                     
                         }
                     }
 //                    if (isPlotting)
@@ -259,12 +262,12 @@ namespace Wockets
                 //TODO: Make sure no USB failure happening
                 catch (Exception ex)
                 {
+
                    // if (sensor._Class == SensorClasses.Wockets)
                     //{
 
+                    Logger.Warn("Wocket " + sensor._ID + " has disconnected.");
 
-                        Logger.Warn("Wocket " + sensor._ID + " has disconnected.");
-                        //this.disconnected[sensor._ID] = 1;
 
                         //if (this.bluetoothConnectors[currentReceiver._ID] == null)
                         //{
