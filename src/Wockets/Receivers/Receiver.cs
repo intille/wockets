@@ -136,6 +136,7 @@ namespace Wockets.Receivers
         }
         public abstract bool Initialize();
         public abstract bool Dispose();
+        public abstract void Update();
 
 
         //Serialization

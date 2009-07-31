@@ -297,7 +297,9 @@ namespace Wockets.Receivers
 #endif
             return BUFFER_SIZE;
         }
-
+        public override void Update()
+        {
+        }
         public  void Write(byte[] data, int length)
         {
             throw new Exception("HTC Diamond Touch: writing to this data source is not implemented");
