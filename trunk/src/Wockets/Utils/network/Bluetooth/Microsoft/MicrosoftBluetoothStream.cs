@@ -44,14 +44,17 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                     processingThread.Abort();
                 //client.SetPin(this.pin);
                 client.Connect(btAddress, BluetoothService.SerialPort);
+                //client.Connect(btAddress, BluetoothService.SerialPort, 10);
+                //client.Connect(btAddress, BluetoothService.SerialPort, 3000);
                 socket = client.Client;               
                 socket.Blocking = true;
                 nstream = client.GetStream();
 
                 //start the processing thread
+                this.status = BluetoothStatus.Connected;      
                 processingThread = new Thread(new ThreadStart(Process));
                 processingThread.Start();
-                this.status = BluetoothStatus.Connected;      
+                
             }
             catch (Exception e)
             {
@@ -114,6 +117,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                         {
                             this.errorMessage = "MicrosoftBluetoothStream failed at Process(). Disconnection timeout to " + this._HexAddress;
                             this.status = BluetoothStatus.Disconnected;
+                            return;
                         }
 
                     }
@@ -124,7 +128,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                 {
                     this.errorMessage = "MicrosoftBluetoothStream failed at Process(). " + e.Message + " to " + btAddress.ToString();
                     this.status = BluetoothStatus.Disconnected;
-
+                    return;
                 }
 
             }
@@ -132,8 +136,8 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
         }
         public override bool Close()
         {
-            if (this.status!=BluetoothStatus.Down)
-                this.status = BluetoothStatus.Down;
+            if (this.status!=BluetoothStatus.Disconnected)
+                this.status = BluetoothStatus.Disconnected;
             processingThread.Join();
             if (processingThread != null)
                 processingThread.Abort();

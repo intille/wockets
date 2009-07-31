@@ -128,28 +128,41 @@ namespace Wockets.Receivers
             }
         }
 
-        public override ReceiverStatus _Status
+        public override void Update()
         {
-            get
+            lock (this)
             {
-                if ((this.status== ReceiverStatus.Connected) && (this.bluetoothStream._Status == BluetoothStatus.Disconnected))
+                if ((this.bluetoothStream != null) && (this.bluetoothStream._Status == BluetoothStatus.Disconnected))
                 {
                     NetworkStacks._BluetoothStack.Disconnect(this.bluetoothStream._HexAddress);
-                    this.status = ReceiverStatus.Disconnected;
-                  //  throw new Exception("Wocket " + this.address + " disconnected");
+                    this.bluetoothStream = null;
                 }
-                else if (this.status == ReceiverStatus.Disconnected)
+
+                if ((this.bluetoothStream == null) && (this.status != ReceiverStatus.Reconnecting))
                 {
                     this.status = ReceiverStatus.Reconnecting;
                     reconnectionThread = new Thread(new ThreadStart(this.Reconnect));
                     reconnectionThread.Start();
                 }
-                else if ((this.status == ReceiverStatus.Reconnecting) && (this.bluetoothStream !=null) && (this.bluetoothStream._Status == BluetoothStatus.Connected))
+
+                if ((this.status != ReceiverStatus.Connected) && (this.bluetoothStream != null) && (this.bluetoothStream._Status == BluetoothStatus.Connected))
                 {
+                    if (this.status == ReceiverStatus.Reconnecting)
+                    {
+                        reconnectionThread.Join();
+                        reconnectionThread.Abort();
+                        reconnectionThread = null;
+                    }
                     this.status = ReceiverStatus.Connected;
-                    reconnectionThread.Join();
-                    reconnectionThread.Abort();
                 }
+            }
+        }
+
+        public override ReceiverStatus _Status
+        {
+            get
+            {
+                                
                 return this.status;
             }
             set
@@ -160,16 +173,19 @@ namespace Wockets.Receivers
         #endregion Access Properties
 
 
-   
+        [DllImport("coredll.dll", SetLastError = true)]
+        public static extern int CeSetThreadQuantum(IntPtr handle,short msec);
+
         private void Reconnect()
         {
-            while (this._Status == ReceiverStatus.Reconnecting)
+            //CeSetThreadQuantum(new IntPtr(reconnectionThread.ManagedThreadId), 20);
+            while ((this.bluetoothStream==null)|| (this.bluetoothStream._Status!= BluetoothStatus.Connected))//(this._Status == ReceiverStatus.Reconnecting)
             {
                 try
                 {
                     if (this.Initialize())
                     {
-                        //this._Status = ReceiverStatus.Connected;
+                        //this.status = ReceiverStatus.Connected;
                         Wockets.Utils.Logger.Warn("Receiver " + this._ID + " has reconnected.");                    
                     }
                 }
@@ -187,8 +203,7 @@ namespace Wockets.Receivers
             {
                 this.bluetoothStream=NetworkStacks._BluetoothStack.Connect(this._Buffer, this.address_bytes, this.pin);
                 if (this.bluetoothStream == null)
-                    return false;
-                this.bluetoothStream._Status = BluetoothStatus.Connected;
+                    return false;       
                 return true;
             }
             catch (Exception e)

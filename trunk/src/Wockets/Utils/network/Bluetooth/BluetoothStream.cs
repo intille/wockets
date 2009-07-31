@@ -38,7 +38,7 @@ namespace Wockets.Utils.network.Bluetooth
             this.pin = pin;
             this.buffer = buffer;
             this.tail = 0;
-            this.status = BluetoothStatus.Unloaded;
+            this.status = BluetoothStatus.Disconnected;
         }
 
         public int _Tail

@@ -220,6 +220,8 @@ namespace Wockets
                     {
                         sensor = this._Sensors[i];
                         currentReceiver = this._Receivers[sensor._Receiver];
+                        currentReceiver.Update();               
+
                         if (currentReceiver._Status == ReceiverStatus.Connected)
                         {
                             Decoder decoder = sensor._Decoder;

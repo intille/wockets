@@ -102,7 +102,9 @@ namespace Wockets.Receivers
             return isValid;
         }
 
-
+        public override void Update()
+        {
+        }
         public override bool Dispose()
         {
             try

@@ -80,7 +80,6 @@ namespace InTheHand.Net.Sockets
         internal BluetoothClient(Socket acceptedSocket)
         {
             this.Client = acceptedSocket;
-            active = true;
             m_optionHelper = new SocketOptionHelper(this.Client);
         }
 
@@ -359,24 +358,6 @@ namespace InTheHand.Net.Sockets
         #endregion
 
 
-        #region Active
-        private bool active = false;
-
-        /// <summary>
-        /// Gets or set a value that indicates whether a connection has been made.
-        /// </summary>
-        protected bool Active
-        {
-            get
-            {
-                return active;
-            }
-            set
-            {
-                active = value;
-            }
-        }
-        #endregion
 
         #region Available
         /// <summary>
@@ -417,24 +398,38 @@ namespace InTheHand.Net.Sockets
 
         #region Connect
 
-        private bool IsConnectionSuccessful = false;
+ 
         private Exception socketexception;
         private ManualResetEvent TimeoutObject = new ManualResetEvent(false);
 
 
         public void CallBackMethod(IAsyncResult asyncresult)
         {
-            BluetoothClient btclient = asyncresult.AsyncState as BluetoothClient;
-            btclient.EndConnect(asyncresult);
+            //BluetoothClient btclient = asyncresult.AsyncState as BluetoothClient;
+            //btclient.EndConnect(asyncresult);
+            TimeoutObject.Set();
+            Socket s = (Socket)asyncresult.AsyncState;
+            if (s.Connected)
+                s.EndConnect(asyncresult);
+     
         }
 
 
-        public void Connect(BluetoothEndPoint remoteEP, int timeoutMSec)
+        public void Connect(BluetoothAddress address, Guid service, int timeoutMSec)
         {
+   
+            if (address == null)
+            {
+                throw new ArgumentNullException("address");
+            }
+            if (service == Guid.Empty)
+            {
+                throw new ArgumentNullException("service");
+            }
+            BluetoothEndPoint remoteEP = new BluetoothEndPoint(address, service);
+
             TimeoutObject.Reset();
             socketexception = null;
-
-
             if (cleanedUp)
             {
                 throw new ObjectDisposedException(base.GetType().FullName);
@@ -444,18 +439,12 @@ namespace InTheHand.Net.Sockets
                 throw new ArgumentNullException("remoteEP");
             }
             clientSocket.BeginConnect(remoteEP, new AsyncCallback(CallBackMethod), clientSocket);
-
             if (TimeoutObject.WaitOne(timeoutMSec, false))
             {
-                if (IsConnectionSuccessful)
-                {
-                    active = true;
-                    return;
-                }
-                else
-                {
-                    throw socketexception;
-                }
+                if (clientSocket.Connected)                
+                    return;                
+                else                
+                    throw new Exception("Connection failed");                
             }
             else
             {
@@ -494,9 +483,12 @@ namespace InTheHand.Net.Sockets
             //BitConverter.ToInt32(ttt, 0);
             // clientSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, 200);
 
-            Thread.Sleep(500);   
-            clientSocket.Connect(remoteEP);
-   
+            //Thread.Sleep(500); 
+
+            clientSocket.Close();
+            clientSocket = new Socket(AddressFamily32.Bluetooth, SocketType.Stream, BluetoothProtocolType.RFComm);
+                clientSocket.Connect(remoteEP);
+            
             //int t = (int)clientSocket.GetSocketOption(BluetoothSocketOptionLevel.RFComm, BluetoothSocketOptionName.GetReceiveBuffer); //BitConverter.ToInt32(ttt, 0);
 
             //int t = (int)clientSocket.GetSocketOption(BluetoothSocketOptionLevel.RFComm, BluetoothSocketOptionName.GetReceiveBuffer); //BitConverter.ToInt32(ttt, 0);
@@ -507,7 +499,7 @@ namespace InTheHand.Net.Sockets
             //allDone.WaitOne();
             //clientSocket.
             //if (clientSocket.Connected)
-            active = true;
+
 
             /*
             ushort sniff_mode_max = 0xffff;
@@ -598,7 +590,6 @@ namespace InTheHand.Net.Sockets
         public void EndConnect(IAsyncResult asyncResult)
         {
             this.Client.EndConnect(asyncResult);
-            this.active = true;
         }
         #endregion
 
