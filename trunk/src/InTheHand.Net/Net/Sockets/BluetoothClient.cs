@@ -409,9 +409,9 @@ namespace InTheHand.Net.Sockets
             //btclient.EndConnect(asyncresult);
             TimeoutObject.Set();
             Socket s = (Socket)asyncresult.AsyncState;
-            if (s.Connected)
+            if (!s.Connected)            
                 s.EndConnect(asyncresult);
-     
+                         
         }
 
 
