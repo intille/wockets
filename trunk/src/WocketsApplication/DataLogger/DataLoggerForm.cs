@@ -175,10 +175,6 @@ namespace WocketsApplication.DataLogger
 
         #region Sampling Rate and Activity Count Components
         /// <summary>
-        /// An array for accumulating received packets to calculate sample rate.
-        /// </summary>
-        private int[] AccumPackets= new int[12];
-        /// <summary>
         /// Last time of rate calculation
         /// </summary>
         private int SRcounter=0;
@@ -197,7 +193,6 @@ namespace WocketsApplication.DataLogger
         private const int FLUSH_TIMER_MAX = 6000;
 
         private Sound alert = new Sound(Constants.NEEDED_FILES_PATH + "sounds\\stop.wav");
-        private int[] disconnected = new int[] { 0, 0, 0, 0, 0, 0 };
         private bool play_sound = false;
 
         #endregion Definition of Logging Variables and Flags
@@ -1572,14 +1567,14 @@ namespace WocketsApplication.DataLogger
          */
         private void readDataTimer_Tick(object sender, EventArgs e)
         {
-            /*
+            
             int zeroes = 0;
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < this.wocketsController._Sensors.Count; i++)
             {
-                if (this.disconnected[i] != 0)
+                if (this.wocketsController._Receivers[i].Disconnected != 0)
                 {
-                    this.disconnected[i]++;
-                    if (this.disconnected[i] >= 3600 && !this.play_sound)
+                    this.wocketsController._Receivers[i].Disconnected += 1;
+                    if (this.wocketsController._Receivers[i].Disconnected >= 3600 && !this.play_sound)
                     {
                         this.play_sound = true;
                         alert.LoopPlay();
@@ -1598,7 +1593,7 @@ namespace WocketsApplication.DataLogger
             }
 
             this.SRcounter++;
-            if (this.SRcounter > 800)//Update status interface every 5 minutes
+            if (this.SRcounter > 1600)//Update status interface every 5 minutes
             {
                 String log="";
                 int disc;
@@ -1607,30 +1602,26 @@ namespace WocketsApplication.DataLogger
                 long now = DateTime.Now.Ticks;
                 for (int i = 0; i < this.wocketsController._Sensors.Count; i++)
                 {
-                    if (this.bluetoothConnectors[this.wocketsController._Sensors[i]._ID] == null) disc = time = 0;
-                    else
-                    {
-                        disc = this.bluetoothConnectors[this.wocketsController._Sensors[i]._ID].Disconnections;
-                        time = this.bluetoothConnectors[this.wocketsController._Sensors[i]._ID].TimeDisconnected;
-                        this.bluetoothConnectors[this.wocketsController._Sensors[i]._ID].TimeDisconnected = 0;
-                        this.bluetoothConnectors[this.wocketsController._Sensors[i]._ID].Disconnections = 0;
-                    }
-                    report = "Sensor " + this.wocketsController._Sensors[i]._ID + ": " + this.AccumPackets[i] / ((now - this.LastTime) / 10000000) + ", " + disc + ", " + time + " sec. --rcving " + (this.AccumPackets[i+6]*100) / (((now - this.FirstTime)*87) / 10000000)+"%"; 
+                    disc = this.wocketsController._Receivers[i].NumDisconnect;
+                    time = this.wocketsController._Receivers[i].TimeDisconnect;
+                    this.wocketsController._Receivers[i].NumDisconnect = 0;
+                    this.wocketsController._Receivers[i].TimeDisconnect = 0;
+                    report = "Sensor " + this.wocketsController._Sensors[i]._ID + ": " + this.wocketsController._Sensors[i].Packets / ((now - this.LastTime) / 10000000) + ", " + disc + ", " + time; 
                     this.SampLabels[i].Text = report;
                     log += report + "\n";
-                    this.AccumPackets[i] = 0;
+                    this.wocketsController._Sensors[i].Packets = 0;
                 }
 
                 Logger.Warn(log);
                 this.SRcounter = 0;
                 this.LastTime = now;
             }
-            */
+            
             if (isQuitting)
             {
                 this.wocketsController.Dispose();
-   
 
+                this.alert.Stop();
 
                 if (trainingTW != null)
                 {

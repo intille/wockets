@@ -37,6 +37,10 @@ namespace Wockets.Sensors
         private int sr;
         private int actSR;
         private bool saving;
+        private int disconnected = 0;
+        private int ndisc = 0;
+        private int tdisc = 0;
+        private int packets = 0;
 
         public Sensor(SensorTypes type,SensorClasses classname)
         {
@@ -58,6 +62,18 @@ namespace Wockets.Sensors
         public int CompareTo(object sensor)
         {
             return this.id.CompareTo(((Sensor)sensor)._ID);
+        }
+
+        public int Packets
+        {
+            get
+            {
+                return this.packets;
+            }
+            set
+            {
+                this.packets = value;
+            }
         }
 
         public bool _Saving

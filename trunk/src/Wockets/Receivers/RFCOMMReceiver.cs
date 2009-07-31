@@ -136,6 +136,9 @@ namespace Wockets.Receivers
                 {
                     NetworkStacks._BluetoothStack.Disconnect(this.bluetoothStream._HexAddress);
                     this.bluetoothStream = null;
+                    this.ndisc += 1;
+                    this.disconCount = 1;
+                    this.lastTime = DateTime.Now.Ticks;
                 }
 
                 if ((this.bluetoothStream == null) && (this.status != ReceiverStatus.Reconnecting))
@@ -154,6 +157,9 @@ namespace Wockets.Receivers
                         reconnectionThread = null;
                     }
                     this.status = ReceiverStatus.Connected;
+                    this.disconCount = 0;
+                    if (this.lastTime!=0)
+                        this.disconTime += (int)((DateTime.Now.Ticks - this.lastTime) / 10000000);
                 }
             }
         }

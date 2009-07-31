@@ -52,5 +52,10 @@ namespace WocketsApplication.Feedback
             if (m_fileName != null)
                 WCE_PlaySound(m_fileName, IntPtr.Zero, (int)(Flags.SND_ASYNC | Flags.SND_FILENAME | Flags.SND_LOOP));
         }
+
+        public void Stop()
+        {
+            WCE_PlaySound(null, IntPtr.Zero, (int)(Flags.SND_ASYNC));
+        }
     }
 }
