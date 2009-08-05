@@ -90,7 +90,7 @@ namespace InTheHand.Net.Bluetooth
 		public static extern int BthGetBasebandConnections(int cConnections, byte[] pConnections, ref int pcConnectionsReturned);
 
 		[DllImport("btdrt.dll", SetLastError=true)]
-		public static extern int BthGetBasebandHandles(int cHandles, ref ushort pHandles, ref int pcHandlesReturned);
+		public static extern int BthGetBasebandHandles(int cHandles, ushort[] pHandles, ref int pcHandlesReturned);
 
 		[DllImport("btdrt.dll", SetLastError=true)]
         public static extern int BthGetCurrentMode(byte[] pba, ref byte pmode);

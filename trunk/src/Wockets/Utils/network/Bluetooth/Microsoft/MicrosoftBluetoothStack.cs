@@ -13,6 +13,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
         public MicrosoftBluetoothStack()
         {
             BluetoothRadio.PrimaryRadio.Mode = RadioMode.PowerOff;
+            BluetoothRadio.PrimaryRadio.Mode = RadioMode.Connectable;
         }
 
         public override bool Initialize()
@@ -46,6 +47,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
         {
             get
             {
+                
                 if (BluetoothRadio.PrimaryRadio.Mode == RadioMode.Connectable)
                     this.status = BluetoothStatus.Up;
                 else if (BluetoothRadio.PrimaryRadio.Mode == RadioMode.PowerOff)

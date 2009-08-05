@@ -40,14 +40,14 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
         public override bool Open()
         {
             try
-            {                                
-                client = new BluetoothClient();    
+            {   
+
+                    
+                client = new BluetoothClient();                
                 if (processingThread != null)
                     processingThread.Abort();
-                //client.SetPin(this.pin);
                 client.Connect(btAddress, BluetoothService.SerialPort);
-                //client.Connect(btAddress, BluetoothService.SerialPort, 10);
-                client.Connect(btAddress, BluetoothService.SerialPort, timeout * timeoutMultiplier);
+    
                 socket = client.Client;               
                 socket.Blocking = true;
                 nstream = client.GetStream();
@@ -151,33 +151,25 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
             processingThread.Join();
             if (processingThread != null)
                 processingThread.Abort();
+
             try
             {
+                client.Close();
+                socket.Close();
                 nstream.Close();
             }
             catch (Exception)
             {
             }
-            try
-            {
-                socket.Close();
-            }           
-            catch (Exception)
-            {
-            }
-            try
-            {
-                client.Close();
-            }
-            catch (Exception)
-            {
-            }
+
             processingThread = null;
             nstream = null;
             socket = null;
-            client = null;
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
+            client = null; 
+            //GC.Collect();
+            //GC.WaitForPendingFinalizers();
+            //Thread.Sleep(10000);
+           
             return true;
         }
     }
