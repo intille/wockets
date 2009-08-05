@@ -225,15 +225,18 @@ void _atmega324p_disable_JTAG(void)
 }
 
 
-unsigned char ReceiveByte( void )
+unsigned char ReceiveByte(unsigned char *data)
   {
   	int count=0;
    while ( !(UCSR0A &  (1<<RXC0)) )
    {
-   		if (count++==1) return 0;
+   		if (count++==1) return 1; //timed out
    			_delay_ms(1);
    }     /*  Wait for incoming data   */
-   return UDR0;/* Return the   data */
+
+   *data=UDR0;
+
+   return 0;/* Return success*/
   }
 
 
