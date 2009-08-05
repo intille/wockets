@@ -50,7 +50,8 @@ namespace Wockets.Data
         GET_CONFIGURATION_TIME,
         SET_CONFIGURATION_TIME,
         GET_BAUD_RATE,
-        SET_BAUD_RATE
+        SET_BAUD_RATE,
+        ALIVE
 
     }
 }

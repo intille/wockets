@@ -34,7 +34,8 @@ namespace Wockets.Data.Commands
             new byte[] { (byte)0xb6 }, 
             new byte[] { (byte)'G', (byte)'T', (byte)13}, 
             new byte[] {}, 
-            new byte[] { (byte)0xb9 } };
+            new byte[] { (byte)0xb9 },
+            new byte[] { (byte)0xbb }};
 
         private static CommandTypes[] cmd_types ={
             CommandTypes.ENTER_CMD_MODE,
@@ -65,7 +66,8 @@ namespace Wockets.Data.Commands
             CommandTypes.GET_CONFIGURATION_TIME, 
             CommandTypes.SET_CONFIGURATION_TIME, 
             CommandTypes.GET_BAUD_RATE, 
-            CommandTypes.SET_BAUD_RATE };
+            CommandTypes.SET_BAUD_RATE,
+            CommandTypes.ALIVE};
 
         private RFCOMMCommand(int i)
         {
@@ -345,6 +347,10 @@ namespace Wockets.Data.Commands
             return new RFCOMMCommand(27);
         }
 
+        public static RFCOMMCommand Alive()
+        {
+            return new RFCOMMCommand(28);
+        }
 
 
         public enum LED
