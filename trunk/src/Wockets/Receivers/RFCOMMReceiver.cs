@@ -54,6 +54,7 @@ namespace Wockets.Receivers
         private string pin;
         private int sniffTime = 0;
         private bool sniffMode;
+        private int aliveTimer = 0;
 
         public RFCOMMReceiver():base(BUFFER_SIZE)
         {
@@ -139,6 +140,7 @@ namespace Wockets.Receivers
                     this.ndisc += 1;
                     this.disconCount = 1;
                     this.lastTime = DateTime.Now.Ticks;
+                    Logger.Warn("Sensor " + this._ID + " has disconnected.");
                 }
 
                 if ((this.bluetoothStream == null) && (this.status != ReceiverStatus.Reconnecting))
@@ -157,10 +159,18 @@ namespace Wockets.Receivers
                         reconnectionThread = null;
                     }
                     this.status = ReceiverStatus.Connected;
+                    Logger.Warn("Sensor " + this._ID + " has connected.");
                     this.disconCount = 0;
                     if (this.lastTime!=0)
                         this.disconTime += (int)((DateTime.Now.Ticks - this.lastTime) / 10000000);
                 }
+
+                if (aliveTimer >= 100)
+                {
+                    this.Send(Data.Commands.RFCOMMCommand.Alive());
+                    aliveTimer = 0;
+                }
+                aliveTimer++;
             }
         }
 
@@ -181,6 +191,11 @@ namespace Wockets.Receivers
 
         [DllImport("coredll.dll", SetLastError = true)]
         public static extern int CeSetThreadQuantum(IntPtr handle,short msec);
+
+        public void Send(Data.Commands.RFCOMMCommand cmd)
+        {
+            this.bluetoothStream.Send(cmd.CMD);
+        }
 
         private void Reconnect()
         {

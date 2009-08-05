@@ -77,10 +77,6 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
         }
         public override void Process()
         {
-            int sendTimer = 0;
-            byte[] sendByte = new byte[1];
-            sendByte[0] = 0xff;
-
 
             while (this.status == BluetoothStatus.Connected)
             {
@@ -88,18 +84,19 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
 
                 try
                 {
-
-                    if (sendTimer > 200)
+                    if (this.toSend.Count != 0)
                     {
-                        if (socket.Send(sendByte, 1, SocketFlags.None) <= 0)
+
+                        foreach (byte[] msg in this.toSend)
                         {
-                            this.errorMessage = "MicrosoftBluetoothStream failed at Process(). Cannot send bytes to " + btAddress.ToString();
-                            this.status = BluetoothStatus.Disconnected;
+                            if (socket.Send(msg, msg.Length, SocketFlags.None)<=0)
+                            {
+                                this.errorMessage = "MicrosoftBluetoothStream failed at Process(). Cannot send bytes to " + btAddress.ToString();
+                                this.status = BluetoothStatus.Disconnected;
+                            }
                         }
-                        sendTimer = 0;
-                        Thread.Sleep(50);
+                        this.toSend.Clear();
                     }
-                    sendTimer++;
 
                     int availableBytes = socket.Available;
                     if (availableBytes > 0)

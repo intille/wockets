@@ -15,6 +15,8 @@ namespace Wockets.Decoders
         private const string TYPE_ATTRIBUTE = "type";
         #endregion Serialization Constants
 
+        private Response.ResponseHandler handler;
+
         public DecoderList()
         {
         }

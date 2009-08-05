@@ -25,7 +25,10 @@ namespace Wockets.Decoders
         private int index;
         private static int IDCounter = 0;
         protected DecoderTypes type;
-        protected int head = 0;  
+        protected int head = 0;
+        protected int delIndex = 0;
+        protected Response.ResponseHandler[] delegates= new Response.ResponseHandler[20];
+        protected bool[] subscribed = new bool[] { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false };
 
         public Decoder()
         {
@@ -104,9 +107,25 @@ namespace Wockets.Decoders
         }
         #endregion Access Properties
 
+        protected void FireEvent(Response.ResponseArgs e)
+        {
+            if (this.subscribed[(int)e._Response.Type])
+                this.delegates[(int)e._Response.Type](this, e);
+        }
+
+        public void Subscribe(SensorDataType type, Response.ResponseHandler handler)
+        {
+            this.subscribed[(int)type] = true;
+            this.delegates[(int)type] = handler;
+        }
+
+        public void Unsubscribe(SensorDataType type, Response.ResponseHandler handler)
+        {
+            this.subscribed[(int)type] = false;
+        }
+
         public abstract int Decode(int sensorID,byte[] data, int length);
         public abstract int Decode(int sensorID, byte[] data, int head,int tail);
-        //public abstract bool IsValid(SensorData data);
 
         //Serialization
         public abstract string ToXML();

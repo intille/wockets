@@ -19,6 +19,7 @@ namespace Wockets.Utils.network.Bluetooth
         protected int disconnectionCounter = 0;
         protected Thread processingThread;
         protected Thread reconnectionThread;
+        protected List<byte[]> toSend = new List<byte[]>();
 
         public BluetoothStream(byte[] buffer,byte[] address,string pin)
         {
@@ -72,6 +73,11 @@ namespace Wockets.Utils.network.Bluetooth
             {
                 return this.address;
             }
+        }
+
+        public void Send(byte[] msg)
+        {
+            this.toSend.Add(msg);
         }
 
         public string _HexAddress

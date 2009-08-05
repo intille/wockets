@@ -8,7 +8,7 @@ namespace Wockets.Data.Commands
     {
         private int batterylevel;
 
-        public BatteryResponse():base(3,SensorDataType.BATTERYLEVEL,(byte)0)
+        public BatteryResponse(int id):base(3,SensorDataType.BATTERYLEVEL,(byte)id)
         {
         }
 

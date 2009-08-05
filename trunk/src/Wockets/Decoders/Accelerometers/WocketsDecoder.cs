@@ -108,11 +108,13 @@ namespace Wockets.Decoders.Accelerometers
                     else if (packetType == SensorDataType.BATTERYLEVEL)
                     {
 
-                        BatteryResponse br = new BatteryResponse();
+                        BatteryResponse br = new BatteryResponse(this._ID);
                         for (int i = 0; (i < bytesToRead); i++)
                             br.RawBytes[i] = this.packet[i];
                         br.BatteryLevel = (((int)this.packet[1]) << 3) | ((this.packet[2] >> 4) & 0x07);
-                        this._Response[0] = br;
+                        Response.ResponseArgs e = new Response.ResponseArgs();
+                        e._Response = br;
+                        FireEvent(e);
 
                     }
                 }
@@ -210,11 +212,11 @@ namespace Wockets.Decoders.Accelerometers
                         else if (packetType == SensorDataType.BATTERYLEVEL)
                         {
                             
-                            BatteryResponse br = new BatteryResponse();
+                          /*  BatteryResponse br = new BatteryResponse();
                             for (int i = 0; (i < bytesToRead); i++)
                                 br.RawBytes[i] = this.packet[i];
                             br.BatteryLevel = (((int)this.packet[1]) << 3) | ((this.packet[2] >> 4) & 0x07);
-                            this._Response[0] = br;
+                            this._Response[0] = br;*/
                         
                        }
                     }
