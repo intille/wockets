@@ -44,6 +44,7 @@ namespace InTheHand.Net.Sockets
             try
             {
                 this.Client = new Socket(AddressFamily32.Bluetooth, SocketType.Stream, BluetoothProtocolType.RFComm);
+                
 
 
                 //byte[] ttt = BitConverter.GetBytes(5000);
@@ -483,11 +484,14 @@ namespace InTheHand.Net.Sockets
             //BitConverter.ToInt32(ttt, 0);
             // clientSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, 200);
 
-            //Thread.Sleep(500); 
-
-            clientSocket.Close();
-            clientSocket = new Socket(AddressFamily32.Bluetooth, SocketType.Stream, BluetoothProtocolType.RFComm);
+       
+  
+                //clientSocket
+            
                 clientSocket.Connect(remoteEP);
+            
+            //clientSocket.
+  
             
             //int t = (int)clientSocket.GetSocketOption(BluetoothSocketOptionLevel.RFComm, BluetoothSocketOptionName.GetReceiveBuffer); //BitConverter.ToInt32(ttt, 0);
 
@@ -890,6 +894,7 @@ namespace InTheHand.Net.Sockets
                 }
 
                 cleanedUp = true;
+         
             }
         }
 
