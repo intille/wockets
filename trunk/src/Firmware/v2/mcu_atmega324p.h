@@ -37,7 +37,7 @@ void _atmega324p_set_prescalar_adc(unsigned char prescalar);
 void _atmega324p_set_reference_adc();
 void _atmega324p_set_channel_adc(unsigned char channel);
 unsigned short  _atmega324p_a2dConvert10bit(unsigned char ch);
-unsigned char ReceiveByte( void );
+unsigned char ReceiveByte(unsigned char *data);
 void TransmitByte( unsigned char data );
 
 
