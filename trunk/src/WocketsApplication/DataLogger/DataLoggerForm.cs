@@ -116,7 +116,9 @@ namespace WocketsApplication.DataLogger
         private Hashtable sensorBattery;
         private Hashtable mainMenus;
         private Panel[] panelArray;
-        private MenuItem[] viewsMenu= new MenuItem[5];
+        private Panel[] annotatePanelArray;
+        private MenuItem[] viewsMenu = new MenuItem[5];
+        private MenuItem[] annotateViewsMenu = new MenuItem[2];
         private int panelSwitch = 0;
         
         private Image[] batteryImg = new Image[] { (Image)new Bitmap(Constants.NETWORK_STATUS_DIRECTORY + "1.gif"), (Image)new Bitmap(Constants.NETWORK_STATUS_DIRECTORY + "2.gif"), (Image)new Bitmap(Constants.NETWORK_STATUS_DIRECTORY + "3.gif"), (Image)new Bitmap(Constants.NETWORK_STATUS_DIRECTORY + "4.gif"), (Image)new Bitmap(Constants.NETWORK_STATUS_DIRECTORY + "5.gif"), (Image)new Bitmap(Constants.NETWORK_STATUS_DIRECTORY + "6.gif") };
@@ -1087,6 +1089,34 @@ namespace WocketsApplication.DataLogger
             this.buttonIndex[button_id] = nextIndex;
         }
 
+        ArrayList selectedButtons = new ArrayList();
+        char[] delimiter ={ '_' };
+
+        private void activityButton_Click(object sender, EventArgs e)
+        {
+            Button button = (Button)sender;
+            int i = 0;
+            Boolean same = false;
+
+            while (i < selectedButtons.Count)
+            {
+                System.Windows.Forms.Button but = (System.Windows.Forms.Button)selectedButtons[i];
+                if ((but.Name.Split(delimiter)[0]).Equals(button.Name.Split(delimiter)[0]))
+                {
+                    if (but.Equals(button))
+                        same = true;
+                    but.BackColor = this.defaultColor;
+                    selectedButtons.RemoveAt(i);
+                }
+                i += 1;
+            }
+
+            if (!same)
+            {
+                button.BackColor = clickColor;
+                selectedButtons.Add(button);
+            }
+        }
 
 
         private void startStopButton_Click(object sender, EventArgs e)
@@ -1116,13 +1146,25 @@ namespace WocketsApplication.DataLogger
                 this.currentRecord._StartUnix = ts.TotalSeconds;
 
                 //check all buttons values, store them and disable them
-                foreach (ComboBox combo in categoryDrops)
+                if (this.panel2.Visible)
                 {
-                    int button_id = Convert.ToInt32(combo.Name);
-                    ActivityList category = (ActivityList)this.annotatedSession.OverlappingActivityLists[button_id];
-                    string current_label = (string)combo.SelectedItem;
-                    this.currentRecord.Activities.Add(new Activity(current_label, category._Name));
-                    combo.Enabled = false;
+                    foreach (ComboBox combo in categoryDrops)
+                    {
+                        int button_id = Convert.ToInt32(combo.Name);
+                        ActivityList category = (ActivityList)this.annotatedSession.OverlappingActivityLists[button_id];
+                        string current_label = (string)combo.SelectedItem;
+                        this.currentRecord.Activities.Add(new Activity(current_label, category._Name));
+                        combo.Enabled = false;
+                    }
+                }
+                else if (this.panel6.Visible)
+                {
+                    for (int i = 0; i < selectedButtons.Count; i++)
+                    {
+                        System.Windows.Forms.Button but = (System.Windows.Forms.Button)selectedButtons[i];
+                        this.currentRecord.Activities.Add(new Activity(but.Name.Split(delimiter)[1], but.Name.Split(delimiter)[0]));
+                    }
+                    this.panel6.Enabled = false;
                 }
 
             }
@@ -1152,8 +1194,14 @@ namespace WocketsApplication.DataLogger
                 tw.WriteLine(this.annotatedSession.ToXML());
                 // close the stream
                 tw.Close();
+                
                 foreach (ComboBox c in this.categoryDrops)
                     c.Enabled = true;
+                
+
+
+                if (this.panel6.Visible)
+                    this.panel6.Enabled = true;
 
                 this.currentRecord = null;
             }
@@ -1211,38 +1259,87 @@ namespace WocketsApplication.DataLogger
         {
             if (!((MenuItem)sender).Checked)
             {
-                for (int i = 0; i < 5; i++)
+                if (this.mainMenu1.MenuItems.Contains(this.menuItem15))
+                {
+                    this.mainMenu1.MenuItems.Remove(this.menuItem15);
+                    this.mainMenu1.MenuItems.Add(this.menuItem2);
+                }
+
+                for (int i = 0; i < viewsMenu.Length; i++)
                 {
                     if (this.viewsMenu[i].Checked)
                     {
                         this.viewsMenu[i].Checked = false;
-                        if (this.viewsMenu[i].Text.Equals("Annotate"))
-                        {
-                            this.mainMenu1.MenuItems.Remove(this.menuItem15);
-                            this.mainMenu1.MenuItems.Add(this.menuItem2);
-                        }
                         this.panelArray[i].Visible = false;
-                        ((MenuItem)sender).Checked = true;
+
                         break;
                     }
-                }
-                if (((MenuItem)sender).Text.Equals("Annotate"))
-                {
-                    this.mainMenu1.MenuItems.Remove(this.menuItem2);
-                    this.mainMenu1.MenuItems.Add(this.menuItem15);
-                }
 
-
-                for (int i = 0; i < 5; i++)
+                }
+                ((MenuItem)sender).Checked = true;
+                for (int i = 0; i < viewsMenu.Length; i++)
                 {
-                    if (this.viewsMenu[i].Checked)
+                    if (this.viewsMenu[i].Checked && !this.viewsMenu[i].Text.Equals("Annotate"))
                     {
                         this.panelArray[i].Visible = true;
+                        for (int j = 0; j < annotateViewsMenu.Length; j++)
+                        {
+                            annotateViewsMenu[j].Checked = false;
+                            annotatePanelArray[j].Visible = false;
+                        }
                         break;
                     }
                 }
             }
-      }
+        }
+
+        private void annotate_menu_Click(object sender, EventArgs e)
+        {
+            // Determines if click was from within Annotate menu or from outside
+            if (this.mainMenu1.MenuItems.Contains(this.menuItem2))
+            {
+                this.mainMenu1.MenuItems.Remove(this.menuItem2);
+                this.mainMenu1.MenuItems.Add(this.menuItem15);
+            }
+
+            if (!((MenuItem)sender).Checked)
+            {
+                for (int i = 0; i < annotateViewsMenu.Length; i++)
+                {
+                    if (this.annotateViewsMenu[i].Checked)
+                    {
+                        this.annotatePanelArray[i].Visible = false;
+                        this.annotateViewsMenu[i].Checked = false;
+                        break;
+                    }
+                }
+                String excp = "";
+                ((MenuItem)sender).Checked = true;
+
+                for (int i = 0; i < viewsMenu.Length; i++)
+                {
+                    if (this.viewsMenu[i].Checked)
+                        this.viewsMenu[i].Checked = false;
+                    if (this.panelArray[i].Visible)
+                        this.panelArray[i].Visible = false;
+                }
+                /*       try
+                       {
+                           this.viewsMenu[2].Checked = true;
+                       }
+                       catch (Exception ex) { excp = ex.ToString(); }
+                 */
+                for (int i = 0; i < annotateViewsMenu.Length; i++)
+                {
+                    if (this.annotateViewsMenu[i].Checked)
+                    {
+                        this.annotatePanelArray[i].Visible = true;
+                        break;
+                    }
+                }
+            }
+        }
+
 
         private void menuItem1_Click(object sender, EventArgs e)
         {
@@ -1308,7 +1405,7 @@ namespace WocketsApplication.DataLogger
             // InvokeRequired required compares the thread ID of the
             // calling thread to the thread ID of the creating thread.
             // If these threads are different, it returns true.
-            if (this.label1.InvokeRequired)
+            if (this.label1.InvokeRequired || this.label1b.InvokeRequired)
             {
                 SetTextCallback d = new SetTextCallback(SetText);
                 this.Invoke(d, new object[] { label, control_id });
@@ -1321,6 +1418,9 @@ namespace WocketsApplication.DataLogger
                 {
                     this.label3.Text = label;
                     this.label1.Text = extractedVectors.ToString();
+
+                    this.label3b.Text = label;
+                    this.label1b.Text = extractedVectors.ToString();
 
                 }
 #if (PocketPC)
