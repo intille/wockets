@@ -100,9 +100,14 @@ namespace WocketsApplication.DataLogger
             //this.label5 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.pictureBox1b = new System.Windows.Forms.PictureBox();
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
+
+            this.label3b = new System.Windows.Forms.Label();
+            this.label2b = new System.Windows.Forms.Label();
+            this.label1b = new System.Windows.Forms.Label();
 
             this.oxyconButton = new System.Windows.Forms.Button();
             this.label6 = new System.Windows.Forms.Label();
@@ -120,8 +125,15 @@ namespace WocketsApplication.DataLogger
             this.panel4.Visible = false;
             this.panel5 = new Panel();
             this.panel5.Visible = false;
-            this.panelArray = new Panel[] { this.panel1, this.panel2, this.panel3, this.panel4, this.panel5 };
-
+            this.panel6 = new Panel();
+            this.panel6.Visible = false;
+            this.blank = new Panel();
+            this.blank.Visible = false;
+            this.panelArray = new Panel[] { this.panel1, blank, this.panel3, this.panel4, this.panel5 };
+            this.annotatePanelArray = new Panel[] { this.panel2, this.panel6 };
+            this.defaultColor = Color.SkyBlue;
+            this.panelColor = Color.White;
+            this.clickColor = Color.DodgerBlue;
             this.SuspendLayout();
             // 
             // mainMenu1
@@ -249,6 +261,12 @@ namespace WocketsApplication.DataLogger
             this.pictureBox1.Location = new System.Drawing.Point(209, -1);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(26, 20);
+
+            this.pictureBox1b.Location = new System.Drawing.Point(200, -1);
+            this.pictureBox1b.Name = "pictureBox1b";
+            this.pictureBox1b.Size = new System.Drawing.Size(26, 20);
+
+
             // 
             // label3
             // 
@@ -257,6 +275,13 @@ namespace WocketsApplication.DataLogger
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(50, 13);
             this.label3.Text = "0:00:00";
+
+            this.label3b.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold);
+            this.label3b.Location = new System.Drawing.Point(53, 2);
+            this.label3b.Name = "label3b";
+            this.label3b.Size = new System.Drawing.Size(50, 13);
+            this.label3b.Text = "0:00:00";  
+
             // 
             // label2
             // 
@@ -265,6 +290,13 @@ namespace WocketsApplication.DataLogger
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(13, 13);
             this.label2.Text = "/";
+
+            this.label2b.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold);
+            this.label2b.Location = new System.Drawing.Point(45, 2);
+            this.label2b.Name = "label2b";
+            this.label2b.Size = new System.Drawing.Size(13, 13);
+            this.label2b.Text = "/";
+
             // 
             // label1
             // 
@@ -274,6 +306,14 @@ namespace WocketsApplication.DataLogger
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(50, 13);
             this.label1.Text = "0:00:00";
+
+            this.label1b.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold);
+            this.label1b.ForeColor = System.Drawing.Color.Green;
+            this.label1b.Location = new System.Drawing.Point(2, 2);
+            this.label1b.Name = "label1b";
+            this.label1b.Size = new System.Drawing.Size(50, 13);
+            this.label1b.Text = "0:00:00";
+
             // 
             // resetButton
             // 
@@ -319,7 +359,8 @@ namespace WocketsApplication.DataLogger
             this.panel3.Location = new System.Drawing.Point(0, 0);
             this.panel4.Location = new System.Drawing.Point(0, 0);
             this.panel5.Location = new System.Drawing.Point(0, 0);
-
+            this.panel6.Location = new System.Drawing.Point(0, 0);
+            this.panel6.BackColor = panelColor;
 
 
             
@@ -385,6 +426,12 @@ namespace WocketsApplication.DataLogger
             // 
             // tabPage2
             // 
+
+            this.panel6.Controls.Add(this.pictureBox1b);
+            this.panel6.Controls.Add(this.label3b);
+            this.panel6.Controls.Add(this.label2b);
+            this.panel6.Controls.Add(this.label1b);
+
             this.panel2.Controls.Add(this.pictureBox1);
             this.panel2.Controls.Add(this.label3);
             this.panel2.Controls.Add(this.label2);
@@ -481,11 +528,27 @@ namespace WocketsApplication.DataLogger
 
             String[] viewnames = new String[] { "Visualize", "Annotate", "Summary", "Activity", "Status" };
             MenuItem cur2;
-            for (int i = 0; i < 5; i++)
+
+            String[] annotateNames = new String[] { "Text View", "Graphical View" };
+            MenuItem cur2b;
+
+            for (int i = 0; i < viewnames.Length; i++)
             {
                 cur2 = new MenuItem();
                 if (i == 0) cur2.Checked = true;
                 cur2.Text = viewnames[i];
+                if (i == 1)
+                {
+                    for (int j = 0; j < annotateNames.Length; j++)
+                    {
+                        cur2b = new MenuItem();
+                        cur2b.Text = annotateNames[j];
+                        cur2b.Click += new System.EventHandler(this.annotate_menu_Click);
+                        cur2.MenuItems.Add(cur2b);
+                        this.annotateViewsMenu[j] = cur2b;
+                    }
+                }
+
                 cur2.Click += new System.EventHandler(this.view_menu_Click);
                 this.viewsMenu[i] = cur2;
                 this.menuItem17.MenuItems.Add(cur2);
@@ -493,11 +556,14 @@ namespace WocketsApplication.DataLogger
 
 
             //Add Panels to the tab pages
+            this.Controls.Add(this.blank);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.panel3);
             this.Controls.Add(this.panel4);
             this.Controls.Add(this.panel5);
+            this.Controls.Add(this.panel6);
+
            // this.tabPage1.Controls.Add(this.panel1);
            // this.tabPage2.Controls.Add(this.panel2);
            // this.tabPage3.Controls.Add(this.panel3);
@@ -628,8 +694,8 @@ namespace WocketsApplication.DataLogger
             //Initialize Tab control dimensions
             //this.tabControl1.Width = this.ClientSize.Width;
             //this.tabControl1.Height = this.ClientSize.Height;
-            this.panel1.Width = this.panel2.Width = this.panel3.Width = this.panel4.Width = this.panel5.Width =this.ClientSize.Width;//-Constants.SCREEN_LEFT_MARGIN-Constants.SCREEN_RIGHT_MARGIN;
-            this.panel1.Height = this.panel2.Height = this.panel3.Height = this.panel4.Height = this.panel5.Height =this.ClientSize.Height;
+            this.panel1.Width = this.panel2.Width = this.panel3.Width = this.panel4.Width = this.panel5.Width = this.panel6.Width = this.ClientSize.Width;//-Constants.SCREEN_LEFT_MARGIN-Constants.SCREEN_RIGHT_MARGIN;
+            this.panel1.Height = this.panel2.Height = this.panel3.Height = this.panel4.Height = this.panel5.Height = this.panel6.Height = this.ClientSize.Height;
 #else
             this.form1.Width = this.form2.Width = this.form3.Width = this.form4.Width = this.form5.Width = this.ClientSize.Width;
             this.form1.Height = this.form2.Height = this.form3.Height = this.form4.Height = this.form5.Height = this.ClientSize.Height;
@@ -722,6 +788,86 @@ namespace WocketsApplication.DataLogger
 
 
 
+            #region graphical Annotation
+
+            this.panel6.AutoScroll = true;
+            ArrayList activityButtons = new ArrayList();
+            int max_buttons_per_row = 4;
+            int act_button_width = 0;
+            int act_button_height = 0;
+            int numberOfButtons = 0;
+            float fontSize = 7F;
+            int act_button_x = 0;
+            int act_button_y = 37;
+            int marginHeight = 20;
+
+            int screenWidth = this.panel6.Width;
+            int scrollbarWidth = 28;
+
+            for (int i = 0; (i < this.annotatedSession.OverlappingActivityLists.Count); i++)
+            {
+                Activity[] acts = this.annotatedSession.OverlappingActivityLists[i].ToArray();
+                System.Windows.Forms.Button[] buttons = new System.Windows.Forms.Button[acts.Length];
+
+                for (int j = 0; j < buttons.Length; j++)
+                {
+                    buttons[j] = new System.Windows.Forms.Button();
+                    MakeButtonMultiline(buttons[j]);
+                    buttons[j].Name = this.annotatedSession.OverlappingActivityLists[i]._Name + "_" + acts[j]._Name;
+                    buttons[j].Text = truncateText(acts[j]._Name);
+                    buttons[j].Click += new EventHandler(this.activityButton_Click);
+                    buttons[j].Font = new System.Drawing.Font("Microsoft Sans Serif", fontSize, System.Drawing.FontStyle.Regular);
+                    buttons[j].BackColor = this.defaultColor;
+                    numberOfButtons += 1;
+                }
+                activityButtons.Add(buttons);
+            }
+
+            if (numberOfButtons < max_buttons_per_row)
+                act_button_width = act_button_height = screenWidth / numberOfButtons;
+            else
+            {
+                screenWidth -= scrollbarWidth;
+                act_button_width = act_button_height = screenWidth / max_buttons_per_row;
+            }
+
+
+            for (int i = 0; i < activityButtons.Count; i++)
+            {
+                System.Windows.Forms.Button[] activityList = (System.Windows.Forms.Button[])activityButtons[i];
+                int buttonsOnRow = 0;
+                for (int j = 0; j < activityList.Length; j++)
+                {
+                    if (j == 0)
+                    {
+                        this.selectedButtons.Add(activityList[j]);
+                        activityList[j].BackColor = clickColor;
+                    }
+                    activityList[j].Visible = true;
+                    activityList[j].Width = act_button_width;
+                    activityList[j].Height = act_button_height;
+                    activityList[j].Location = new System.Drawing.Point(act_button_x, act_button_y);
+                    this.panel6.Controls.Add(activityList[j]);
+                    buttonsOnRow += 1;
+
+                    if (buttonsOnRow == max_buttons_per_row)
+                    {
+                        act_button_x = 0;
+                        act_button_y += act_button_height;
+                        buttonsOnRow = 0;
+                    }
+                    else
+                        act_button_x += act_button_width;
+                }
+                act_button_x = 0;
+                act_button_y += act_button_height + marginHeight;
+            }
+
+
+            #endregion graphical Annotation
+
+
+
             //Initialize Buttons
 
             this.categoryButtons = new ArrayList();
@@ -757,6 +903,7 @@ namespace WocketsApplication.DataLogger
                 combo.SelectedItem = combo.Items[0];
                 //button.UseVisualStyleBackColor = true;
                 this.categoryButtons.Add(button);
+                this.categoryDrops.Add(combo);
                 //this.panel2.Controls.Add(button);
                 this.panel2.Controls.Add(combo);
 
@@ -899,6 +1046,67 @@ namespace WocketsApplication.DataLogger
 
         }
 
+        private const int BS_MULTILINE = 0x00002000;
+        private const int GWL_STYLE = -16;
+
+        [System.Runtime.InteropServices.DllImport("coredll")]
+        private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+
+        [System.Runtime.InteropServices.DllImport("coredll")]
+        private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
+
+        public static void MakeButtonMultiline(Button b)
+        {
+            IntPtr hwnd = b.Handle;
+            int currentStyle = GetWindowLong(hwnd, GWL_STYLE);
+            int newStyle = SetWindowLong(hwnd, GWL_STYLE, currentStyle | BS_MULTILINE);
+        }
+
+        private String truncateText(String text)
+        {
+           
+            int maxChars = 10;
+
+            if (text.Length <= maxChars)
+                return text;
+
+            char[] delimiter ={ ' ', '-', '/' };
+            String[] tokens = text.Split(delimiter);
+
+            if (tokens.Length == 1)
+                return text;
+
+            String final = "";
+            String currentLine = "";
+
+
+            foreach (String part in tokens)
+            {
+                String temp = part;
+                if (temp.StartsWith("(") && temp.EndsWith(")")) temp = temp.Substring(1, temp.Length - 2);
+                else if (temp.StartsWith("(")) temp = temp.Remove(0, 1);
+                else if (temp.EndsWith(")")) temp = temp.Substring(0, temp.Length - 1);
+
+                /*  if (temp.Equals("and")) temp = "&";
+                  else*/
+                if (temp.Equals("with")) temp = "w/";
+                else if (temp.Equals("without")) temp = "w/o";
+                else if (temp.Equals("morning")) temp = "AM";
+                else if (temp.Equals("night")) temp = "PM";
+                else if (temp.Equals("a")) temp = "";
+
+                if ((currentLine.Length + temp.Length) >= maxChars)
+                {
+                    final += currentLine + " \n";
+                    currentLine = "";
+                }
+
+                currentLine += temp + " ";
+            }
+            final += currentLine;
+
+            return final;
+        }
 
 
         private void InitializeQualityInterface()
@@ -1074,17 +1282,17 @@ namespace WocketsApplication.DataLogger
         private System.Windows.Forms.MenuItem menuItem19;
         private System.Windows.Forms.MenuItem menuItem20;
         private System.Windows.Forms.Timer readDataTimer;
-        private System.Windows.Forms.PictureBox pictureBox1;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.PictureBox pictureBox1, pictureBox1b;
+        private System.Windows.Forms.Label label3, label3b;
+        private System.Windows.Forms.Label label2, label2b;
+        private System.Windows.Forms.Label label1, label1b;
         private System.Windows.Forms.Button oxyconButton;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.Panel panel1, panel2, panel3, panel4, panel5;
+        private System.Windows.Forms.Panel blank, panel1, panel2, panel3, panel4, panel5, panel6;
         private System.Windows.Forms.Timer qualityTimer;
         private System.Windows.Forms.Timer HRTimer;
         private System.Windows.Forms.Button button1;
@@ -1097,6 +1305,7 @@ namespace WocketsApplication.DataLogger
         private System.Windows.Forms.MenuItem menuItem6Tab2;
         private System.Windows.Forms.MenuItem menuItem7Tab2;
         private System.Windows.Forms.MenuItem menuItem8Tab2;
+        private Color defaultColor, panelColor, clickColor;
 
         #region PC and PocketPC Specific Widgets
 #if (PocketPC)
