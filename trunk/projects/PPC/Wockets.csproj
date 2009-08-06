@@ -297,11 +297,14 @@
     <Compile Include="..\..\src\Wockets\Utils\network\Bluetooth\Widcomm\WidcommBluetoothStream.cs">
       <Link>Utils\network\Bluetooth\Widcomm\WidcommBluetoothStream.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Receivers\ReceiverStatus.cs" >
+    <Compile Include="..\..\src\Wockets\Receivers\ReceiverStatus.cs">
       <Link>Receivers\ReceiverStatus.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Utils\network\NetworkStacks.cs" >
+    <Compile Include="..\..\src\Wockets\Utils\network\NetworkStacks.cs">
       <Link>Utils\network\NetworkStacks.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Decoders\Response.cs">
+      <Link>Decoders\Response.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
