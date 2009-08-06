@@ -483,6 +483,10 @@ namespace WocketsApplication.SmartPhone
             progressMessage = "Initializing receivers ... searching " + this.wocketsController._Receivers.Count + " BT receivers\r\n";
 
             this.wocketsController.Initialize();
+            foreach (Decoder d in this.wocketsController._Decoders)
+            {
+                d.Subscribe(SensorDataType.BATTERYLEVEL, new Response.ResponseHandler(this.BatteryCallback));
+            }
 
             //Try to initialize all receivers 10 times then exit
             /*int initializationAttempt = 0;
@@ -1578,6 +1582,11 @@ namespace WocketsApplication.SmartPhone
                 Logger.Warn(log);
                 this.SRcounter = 0;
                 this.LastTime = now;
+                foreach (Receiver r in this.wocketsController._Receivers)
+                {
+                    RFCOMMReceiver rf = (RFCOMMReceiver)r;
+                    rf.Send(Wockets.Data.Commands.RFCOMMCommand.GetBT());
+                }
             }
 
             if (isQuitting)
@@ -1865,5 +1874,21 @@ namespace WocketsApplication.SmartPhone
             }
         }
         #endregion Timer Methods
+
+        delegate void UpdateBatteryCallback(object sender, Wockets.Decoders.Response.ResponseArgs e);
+
+        private void BatteryCallback(object sender, Wockets.Decoders.Response.ResponseArgs e)
+        {
+            if (this.panel1.InvokeRequired)
+            {
+                UpdateBatteryCallback d = new UpdateBatteryCallback(BatteryCallback);
+                this.Invoke(d, new object[] { sender, e });
+            }
+            else
+            {
+                Wockets.Data.Commands.BatteryResponse br = (Wockets.Data.Commands.BatteryResponse)e._Response;
+                ((PictureBox)this.sensorBattery["W" + br.SensorID]).Image = this.batteryImg[(5 * 1024 - 5 * br.BatteryLevel) / 1024];
+            }
+        }
     }
 }
