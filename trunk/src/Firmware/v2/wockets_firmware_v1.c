@@ -31,11 +31,19 @@ unsigned int disconnection_counter=0;
 unsigned char battery;
 
 unsigned char aByte=0;
+unsigned char opcode=0;
+unsigned char command_counter=0;
+unsigned char command_length=0;
+unsigned char command_timer=0;
+unsigned char processed_counter=0;
+
 unsigned int alive_timer=0;
 unsigned char response=0;
-unsigned char opcode=0;
-int command_counter=0;
 int receive_counter=0;
+unsigned char aCommand[MAX_COMMAND_SIZE];
+unsigned short word=0;
+unsigned short charge=0;
+unsigned int address=0;
 
 void TransmitFrame(WOCKETS_UNCOMPRESSED_FRAME f){
 	
@@ -82,15 +90,60 @@ ISR(TIMER2_OVF_vect){
 				sleep_counter=0;
 				sleep_counter2=0;
 
+
 		
-				/* Receive and process any commands */
+				/* Receive commands */
 				if (ReceiveByte(&aByte)==0)
+				{				
+					aCommand[command_counter++]=aByte;
+					if (command_counter==1)
+					{
+						opcode=aByte&0x1f;
+
+						//Depending on the opcode set the expected command length
+						switch (opcode)
+						{
+								case (unsigned char)GET_BATTERY_LEVEL:
+								case (unsigned char)GET_PACKET_COUNT:
+								case (unsigned char)GET_SENSOR_SENSITIVITY:
+								case (unsigned char)GET_CALIBRATION_VALUES:
+								case (unsigned char)GET_SAMPLING_RATE:
+								case (unsigned char)GET_ALIVE_TIMER:
+								case (unsigned char)GET_POWER_DOWN_TIMER:
+								case (unsigned char)RESET_WOCKET:
+								case (unsigned char)GET_BAUD_RATE:
+								case (unsigned char)ALIVE:
+									command_length=1;
+									break;
+								case (unsigned char)SET_LED:
+								case (unsigned char)SET_SENSOR_SENSITIVITY:		
+								case (unsigned char)SET_SAMPLING_RATE:
+								case (unsigned char)SET_ALIVE_TIMER:
+								case (unsigned char)SET_POWER_DOWN_TIMER:
+								case (unsigned char)SET_BAUD_RATE:						
+									command_length=2;
+									break;
+								case (unsigned char)SET_CALIBRATION_VALUES:
+									command_length=10;
+									break;								
+
+						}
+						command_timer=0;
+					}
+
+				}
+
+				if (command_counter>0)
+					command_timer++;
+
+				//if command timer started and command fully received
+				if ((command_timer>0) && (command_length==command_counter))
 				{
-					opcode=aByte&0x1f;
 					switch (opcode)
 					{
 						case (unsigned char)ALIVE:							
-							alive_timer=0;							
+							alive_timer=0;
+							processed_counter=command_counter;							
 							break;
 					    case (unsigned char) GET_BATTERY_LEVEL:
 							adc_result[ADC4]=_atmega324p_a2dConvert10bit(ADC4);
@@ -100,49 +153,128 @@ ISR(TIMER2_OVF_vect){
 							TransmitByte(response);							
 							response=(adc_result[ADC4] & 0x07)<<4;
 							TransmitByte(response);
+							processed_counter=command_counter;
 							break;
-						case (unsigned char) SET_CALIBRATION_VALUES:
-							/*command_counter=0;
-							receive_counter=0;
-							buffer[command_counter]=aByte;							
-							while (receive_counter<100){
-								if (ReceiveByte(&aByte)==0){
-									buffer[command_counter]=aByte;	
-									command_counter++;
-									if (command_counter==10){
-										//save calibration data in non-volatile memoery
-										break;
+						case (unsigned char) SET_CALIBRATION_VALUES:							
+							//if eeprom is ready
+							if (eeprom_is_ready()){
+								//read the charge if needed
+								if (charge==0)
+									charge=_atmega324p_a2dConvert10bit(ADC4);								
+								if (charge>350)
+								{								
+									if (processed_counter==0){											
+										word=(((unsigned short)(aCommand[1]&0x7f))<<3) | (((unsigned short)(aCommand[2]&0x70))>>4);
+										address=X1G_ADDRESS;	
+										processed_counter=2;																		
+									}else if (processed_counter==2){											
+										word=(((unsigned short)(aCommand[2]&0x0f))<<6) | (((unsigned short)(aCommand[3]&0x7e))>>1);
+										address=X1NG_ADDRESS;	
+										processed_counter=3;		
+									}else if (processed_counter==3){											
+										word=(((unsigned short)(aCommand[3]&0x01))<<9) | (((unsigned short)(aCommand[4]&0x7f))<<2)  | (((unsigned short)(aCommand[5]&0x60))>>5);
+										address=Y1G_ADDRESS;	
+										processed_counter=5;		
+									}else if (processed_counter==5){											
+										word=(((unsigned short)(aCommand[5]&0x1f))<<5) | (((unsigned short)(aCommand[6]&0x7c))>>2);
+										address=Y1NG_ADDRESS;	
+										processed_counter=6;		
+									}else if (processed_counter==6){											
+										word=(((unsigned short)(aCommand[6]&0x03))<<8) | (((unsigned short)(aCommand[7]&0x7f))<<1) | (((unsigned short)(aCommand[8]&0x40))>>6);
+										address=Z1G_ADDRESS;	
+										processed_counter=7;		
+									}else if (processed_counter==7){											
+										word=(((unsigned short)(aCommand[8]&0x3f))<<4) | (((unsigned short)(aCommand[9]&0x78))>>3);
+										address=Z1NG_ADDRESS;	
+										processed_counter=command_counter;		
 									}
+									cli();							
+									eeprom_write_word((uint16_t *)address,word);
+									sei();																	
 								}
-								receive_counter++;								
-							}*/
+							}
+							//enable global interrupts
 							break;
 						case (unsigned char) GET_CALIBRATION_VALUES:	
 						
-							//write one word each iteration
-							while (!eeprom_is_ready());
-							eeprom_write_word((uint16_t *)0x0,25);
-							
-							/*eeprom_write_word((uint16_t *)0x2,25);
-							eeprom_write_word((uint16_t *)0x4,25);
-							eeprom_write_word((uint16_t *)0x6,25);
-							eeprom_write_word((uint16_t *)0x8,25);
-							eeprom_write_word((uint16_t *)0x10,25);
-						
-/*							response=RESPONSE_HEADER | CALIBRATION_VALUES_RESPONSE;							
-							TransmitByte(response);							
-							response=;
-							TransmitByte(response);							
-							response=(adc_result[ADC4] & 0x07)<<4;
-							TransmitByte(response);
-							*/
+								if (eeprom_is_ready()){
+								//read the charge if needed
+								if (charge==0)
+								{
+									charge=_atmega324p_a2dConvert10bit(ADC4);
+									address=X1G_ADDRESS;
+									aCommand[0]=0xc4;
+								}
+								if (charge>350)
+								{	
+									cli();							
+									word=eeprom_read_word((uint16_t *)address);
+									sei();															
+									if (address==X1G_ADDRESS){
+										aCommand[1]= ((word>>3)&0x7f);									
+										aCommand[2]= ((word<<4)&0x70);
+										address=X1NG_ADDRESS;
+									}else if (address==X1NG_ADDRESS){
+										aCommand[2]|= ((word>>6)&0x0f);
+										aCommand[3] =((word<<1)&0x7e);
+										address=Y1G_ADDRESS;
+									}else if (address==Y1G_ADDRESS){
+										aCommand[3]|= ((word>>9) &0x01);
+										aCommand[4] = ((word>>2) & 0x7f);
+										aCommand[5] = ((word<<5) & 0x60);
+										address=Y1NG_ADDRESS;
+									}else if (address==Y1NG_ADDRESS){
+										aCommand[5]|= ((word>>5) & 0x1f);
+										aCommand[6] = ((word<<2) & 0x7c);
+										address=Z1G_ADDRESS;
+									}else if (address==Z1G_ADDRESS){
+										aCommand[6] |= ((word>>8) & 0x03);
+										aCommand[7] =((word>>1) & 0x7f);
+										aCommand[8] = ((word<<6) & 0x40);
+										address=Z1NG_ADDRESS;
+									}else if (address==Z1NG_ADDRESS){
+										aCommand[8] |= ((word>>4) & 0x3f);
+										aCommand[9] = ((word<<3) & 0x78);
+										processed_counter=command_counter;
+										for (i=0;(i<10);i++)
+											TransmitByte(aCommand[i]);																		
+									}
+																																							
+																							
+								}
+							}
 							break;					
 						default:	
 							break;
 
-					}    
-																			
+					}
+					if (processed_counter==command_counter){
+						command_length=0;
+						command_counter=0;
+						command_timer=0;
+						processed_counter=0;
+						charge=0;
+						address=0;
+					}
+				} //if command timed out
+				else if (command_timer==MAX_COMMAND_TIMER)
+				{
+							
+					command_length=0;
+					command_counter=0;
+					command_timer=0;
+					processed_counter=0;
+					charge=0;
+					address=0;
 				}
+					
+					    
+				
+				
+				
+				
+																			
+				
 
           
 				alive_timer++;					

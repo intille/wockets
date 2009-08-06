@@ -93,6 +93,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                             {
                                 this.errorMessage = "MicrosoftBluetoothStream failed at Process(). Cannot send bytes to " + btAddress.ToString();
                                 this.status = BluetoothStatus.Disconnected;
+                                return;
                             }
                         }
                         this.toSend.Clear();

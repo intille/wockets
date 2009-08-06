@@ -1,4 +1,18 @@
+#define MAX_COMMAND_TIMER 255
 #define MAX_COMMAND_SIZE 10
+
+/* EEPROM Locations */
+
+#define X1G_ADDRESS 0x00
+#define X1NG_ADDRESS 0x02
+#define Y1G_ADDRESS 0x04
+#define Y1NG_ADDRESS 0x06
+#define Z1G_ADDRESS 0x08
+#define Z1NG_ADDRESS 0x10
+
+
+
+
 
 #define HEADER_PACKET 0x80
 
