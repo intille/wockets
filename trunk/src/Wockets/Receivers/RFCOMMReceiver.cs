@@ -164,13 +164,15 @@ namespace Wockets.Receivers
                     if (this.lastTime!=0)
                         this.disconTime += (int)((DateTime.Now.Ticks - this.lastTime) / 10000000);
                 }
-
-                if (aliveTimer >= 100)
+                if ((this.bluetoothStream != null) && (this.status == ReceiverStatus.Connected))
                 {
-                    this.Send(Data.Commands.RFCOMMCommand.Alive());
-                    aliveTimer = 0;
+                    if (aliveTimer >= 100)
+                    {
+                        this.Send(Data.Commands.RFCOMMCommand.Alive());
+                        aliveTimer = 0;
+                    }
+                    aliveTimer++;
                 }
-                aliveTimer++;
             }
         }
 
