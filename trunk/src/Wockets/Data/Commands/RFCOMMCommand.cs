@@ -331,7 +331,7 @@ namespace Wockets.Data.Commands
         public static RFCOMMCommand SetCFT(short time)
         {
             char[] chs = time.ToString().ToCharArray();
-            byte[] bytes = new byte[3 + chs.Length];
+            byte[] bytes = new byte[4 + chs.Length];
             bytes[0] = (byte)'S';
             bytes[1] = (byte)'T';
             bytes[2] = (byte)',';
@@ -339,6 +339,7 @@ namespace Wockets.Data.Commands
             {
                 bytes[i+3] = (byte)chs[i];
             }
+            bytes[bytes.Length] = (byte)13;
             return new RFCOMMCommand(bytes,cmd_types[26]);
         }
 

@@ -11,5 +11,6 @@ namespace Wockets.Data
         /// Mobile Sensor accelerometer data. 
         /// </summary>
         ACCEL,
+        CALIBRATION
     }
 }

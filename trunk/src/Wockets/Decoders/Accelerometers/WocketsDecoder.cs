@@ -23,7 +23,7 @@ namespace Wockets.Decoders.Accelerometers
         private double lastTimestamp;
 
         public WocketsDecoder()
-            : base(BUFFER_SIZE,WocketsAccelerationData.NUM_RAW_BYTES)
+            : base(BUFFER_SIZE, (WocketsAccelerationData.NUM_RAW_BYTES > Wockets.Data.Responses.Response.MAX_RAW_BYTES) ? WocketsAccelerationData.NUM_RAW_BYTES : Wockets.Data.Responses.Response.MAX_RAW_BYTES)
         {
             for (int i = 0; (i < this._Data.Length); i++)
                 this._Data[i] = new WocketsAccelerationData();
@@ -55,14 +55,25 @@ namespace Wockets.Decoders.Accelerometers
                     }
                     else if (headerByte == 2)
                     {
-                        bytesToRead = 3;
-                        packetType = SensorDataType.BATTERYLEVEL;
+                        if ((byte)data[rawDataIndex] == 0xc0)
+                        {
+                            bytesToRead = 3;
+                            packetType = SensorDataType.BATTERYLEVEL;
+                        }
+                        else if ((byte)data[rawDataIndex] == 0xc4)
+                        {
+                            bytesToRead = 10;
+                            byte[] test = new byte[10];
+                            for (int i = 0; i < 10; i++)
+                                test[i] = (byte)data[rawDataIndex + i];
+                            packetType = SensorDataType.CALIBRATION;
+                        }
                     }
                 }
 
                 if ((this.headerSeen == true) && (this.packetPosition < bytesToRead))
                     this.packet[this.packetPosition] = data[rawDataIndex];
-
+                    
                 this.packetPosition++;
                 rawDataIndex=(rawDataIndex+1)%data.Length;
 
@@ -115,6 +126,11 @@ namespace Wockets.Decoders.Accelerometers
                         Response.ResponseArgs e = new Response.ResponseArgs();
                         e._Response = br;
                         FireEvent(e);
+
+                    }
+                    else if (packetType == SensorDataType.CALIBRATION)
+                    {
+                        byte[] test = this.packet;
 
                     }
                 }

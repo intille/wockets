@@ -219,7 +219,7 @@ namespace Wockets
                     for (int i = 0; (i < this._Sensors.Count); i++)
                     {
                         sensor = this._Sensors[i];
-                        currentReceiver = this._Receivers[sensor._Receiver];
+                        currentReceiver = sensor._Receiver;
                         currentReceiver.Update();               
 
                         if (currentReceiver._Status == ReceiverStatus.Connected)
@@ -326,6 +326,8 @@ namespace Wockets
                         //the decoder references for the sensor have to be updated correctly
                         for (int i = 0; (i < this.sensors.Count); i++)
                             this.sensors[i]._Decoder = this.decoders[this.sensors[i]._Decoder._ID];
+                        for (int i = 0; (i < this.sensors.Count); i++)
+                            this.sensors[i]._Receiver = this.receivers[this.sensors[i]._Receiver._ID];
                     }
                 }
             }

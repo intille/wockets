@@ -8,6 +8,9 @@ namespace Wockets.Sensors.Accelerometers
 {
     public sealed class Wocket: Accelerometer
     {
+
+        private int config_time = 60;
+
         public Wocket():base(SensorClasses.Wockets)
         {
         }
@@ -41,6 +44,25 @@ namespace Wockets.Sensors.Accelerometers
         {
             return base.ToXML("");
         }
+
+        public int _Config_Timer
+        {
+            get
+            {
+                return this.config_time;
+            }
+            set
+            {
+                if (value < 30) this.config_time = 30;
+                else if (value > 255) this.config_time = 255;
+                else this.config_time = value;
+                RFCOMMReceiver rf = ((RFCOMMReceiver)this._Receiver);
+                rf.Send(Wockets.Data.Commands.RFCOMMCommand.EnterCMD());
+                rf.Send(Wockets.Data.Commands.RFCOMMCommand.SetCFT((short)this.config_time));
+                rf.Send(Wockets.Data.Commands.RFCOMMCommand.Reset());
+            }
+        }
+
     }
 
 
