@@ -753,7 +753,7 @@ namespace WocketsApplication.SmartPhone
                 for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
                 {
                     sensor = this.wocketsController._Sensors[i];
-                    currentReceiver = this.wocketsController._Receivers[sensor._Receiver];
+                    currentReceiver = sensor._Receiver;
                     //if (currentReceiver._Running == true)
                       //  currentReceiver.Read();
                 }

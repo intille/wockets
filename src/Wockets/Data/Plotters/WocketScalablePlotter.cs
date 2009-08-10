@@ -113,7 +113,7 @@ namespace Wockets.Data.Plotters
             int lastColumnDrawn = 0;
             for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
             {
-                int receiverID = this.wocketsController._Sensors[i]._Receiver;
+                int receiverID = this.wocketsController._Sensors[i]._Receiver._ID;
 
                 if (this.wocketsController._Receivers[receiverID]._Status== Wockets.Receivers.ReceiverStatus.Connected)
                 {

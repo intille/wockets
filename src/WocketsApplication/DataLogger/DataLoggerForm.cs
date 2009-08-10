@@ -754,7 +754,7 @@ namespace WocketsApplication.DataLogger
                 for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
                 {
                     sensor = this.wocketsController._Sensors[i];
-                    currentReceiver = this.wocketsController._Receivers[sensor._Receiver];
+                    currentReceiver = sensor._Receiver;
  //                   if (currentReceiver._Running == true)
  //                       currentReceiver.Read();
                 }
@@ -1697,6 +1697,15 @@ namespace WocketsApplication.DataLogger
             }
 
             this.SRcounter++;
+            if (this.SRcounter == 800)
+            {
+                foreach (Sensor s in this.wocketsController._Sensors)
+                {
+                    Wockets.Sensors.Accelerometers.Wocket w = (Wockets.Sensors.Accelerometers.Wocket)s;
+                    w._Config_Timer = 255;
+                    //rf.Send(Wockets.Data.Commands.RFCOMMCommand.SetCAL(1,2,3,4,5,6));
+                }
+            }
             if (this.SRcounter > 1600)//Update status interface every 5 minutes
             {
                 String log="";
@@ -1719,11 +1728,11 @@ namespace WocketsApplication.DataLogger
                 Logger.Warn(log);
                 this.SRcounter = 0;
                 this.LastTime = now;
-                foreach (Receiver r in this.wocketsController._Receivers)
-                {
-                    RFCOMMReceiver rf = (RFCOMMReceiver)r;
-                    rf.Send(Wockets.Data.Commands.RFCOMMCommand.GetBT());
-                }
+                //foreach (Receiver r in this.wocketsController._Receivers)
+                //{
+                //    RFCOMMReceiver rf = (RFCOMMReceiver)r;
+                //    rf.Send(Wockets.Data.Commands.RFCOMMCommand.GetBT());
+                //}
             }
             
             if (isQuitting)

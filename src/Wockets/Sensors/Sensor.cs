@@ -27,7 +27,7 @@ namespace Wockets.Sensors
         #endregion Serialization Constants
 
         private Decoder decoder;
-        private int receiver;
+        private Receiver receiver;
         private SensorClasses classname;
         private SensorTypes type;
         private string rootStorageDirectory;
@@ -35,7 +35,6 @@ namespace Wockets.Sensors
         private string description;
         private int id;
         private int sr;
-        private int actSR;
         private bool saving;
         private int disconnected = 0;
         private int ndisc = 0;
@@ -99,15 +98,6 @@ namespace Wockets.Sensors
             }
         }
 
-        public void setSR(int i)
-        {
-            this.actSR = i;
-        }
-
-        public int getSR()
-        {
-            return this.actSR;
-        }
         /*
         public int _Channel
         {
@@ -206,7 +196,7 @@ namespace Wockets.Sensors
             }
         }
 
-        public int _Receiver
+        public Receiver _Receiver
         {
             get
             {
@@ -282,7 +272,10 @@ namespace Wockets.Sensors
                         /*else if ((jNode.Name == CHANNEL_ELEMENT) && (jAttribute.Name == ID_ATTRIBUTE))
                             this._Channel = Convert.ToInt32(jAttribute.Value);*/
                         else if ((jNode.Name == Receiver.RECEIVER_ELEMENT) && (jAttribute.Name == ID_ATTRIBUTE))
-                            this._Receiver = Convert.ToInt32(jAttribute.Value);
+                        {
+                            this._Receiver = new Receivers.GenericReceiver();
+                            this._Receiver._ID = Convert.ToInt32(jAttribute.Value);
+                        }
                         else if ((jNode.Name == Decoder.DECODER_ELEMENT) && (jAttribute.Name == ID_ATTRIBUTE))
                         {
                             this._Decoder = new Decoders.Accelerometers.GenericDecoder();

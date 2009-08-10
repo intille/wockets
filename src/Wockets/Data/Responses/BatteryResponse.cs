@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Wockets.Data.Commands
 {
-    public sealed class BatteryResponse : SensorData
+    public sealed class BatteryResponse : Responses.Response
     {
         private int batterylevel;
 
