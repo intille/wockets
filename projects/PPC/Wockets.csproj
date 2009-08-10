@@ -261,8 +261,8 @@
     <Compile Include="..\..\src\Wockets\Utils\FileWriter.cs">
       <Link>Utils\FileWriter.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\BatteryResponse.cs">
-      <Link>Data\Commands\BatteryResponse.cs</Link>
+    <Compile Include="..\..\src\Wockets\Data\Responses\BatteryResponse.cs">
+      <Link>Data\Responses\BatteryResponse.cs</Link>
     </Compile>
     <Compile Include="..\..\src\Wockets\Utils\Barrier.cs">
       <Link>Utils\Barrier.cs</Link>
@@ -305,6 +305,12 @@
     </Compile>
     <Compile Include="..\..\src\Wockets\Decoders\Response.cs">
       <Link>Decoders\Response.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\Response.cs">
+      <Link>Data\Responses\Response.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Receivers\GenericReceiver.cs">
+	<Link>Receivers\GenericReceiver.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
