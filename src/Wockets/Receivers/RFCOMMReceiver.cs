@@ -193,7 +193,11 @@ namespace Wockets.Receivers
 
         public void Send(Data.Commands.RFCOMMCommand cmd)
         {
-            this.bluetoothStream.Send(cmd.CMD);
+            lock (this)
+            {
+                if ((this.bluetoothStream != null) &&  (this.status == ReceiverStatus.Connected))
+                    this.bluetoothStream.Send(cmd.CMD);
+            }
         }
 
         private void Reconnect()

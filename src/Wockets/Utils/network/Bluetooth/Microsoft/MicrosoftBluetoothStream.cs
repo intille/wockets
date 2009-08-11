@@ -91,22 +91,29 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                         {
                             for (int k = 0; (k < msg.Length); k++)
                             {
-                                if (socket.Send(msg,k,1, SocketFlags.None) !=1)
+                                try
                                 {
-                                    this.errorMessage = "MicrosoftBluetoothStream failed at Process(). Cannot send bytes to " + btAddress.ToString();
-                                    this.status = BluetoothStatus.Disconnected;
-                                    return;
+                                    if (socket.Send(msg, k, 1, SocketFlags.None) != 1)
+                                    {
+                                        this.errorMessage = "MicrosoftBluetoothStream failed at Process(). Cannot send bytes to " + btAddress.ToString();
+                                        this.status = BluetoothStatus.Disconnected;
+                                        return;
+                                    }
                                 }
-                                Thread.Sleep(30);
+                                catch (Exception e)
+                                {
+                                }
+
+                                Thread.Sleep(5);
                             }
-                           
+
                         }
                         this.toSend.Clear();
                     }
 
                     int availableBytes = socket.Available;
                     if (availableBytes > 0)
-                    {        
+                    {
                         bytesReceived = 0;
                         //if we will pass the end of buffer receive till the end then receive the rest
                         if ((tail + availableBytes) > this.buffer.Length)
@@ -136,6 +143,9 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                     }
 
 
+                }
+                catch (InvalidOperationException)
+                {
                 }
                 catch (Exception e)
                 {

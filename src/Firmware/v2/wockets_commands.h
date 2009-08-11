@@ -1,5 +1,6 @@
 #define MAX_COMMAND_TIMER 255
 #define MAX_COMMAND_RESPONSE_SIZE 10
+#define COMMAND_PREFIX 0b101
 
 /* EEPROM Locations */
 
