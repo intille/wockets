@@ -117,7 +117,7 @@ namespace WocketsApplication.DataLogger
         private Hashtable mainMenus;
         private Panel[] panelArray;
         private Panel[] annotatePanelArray;
-        private MenuItem[] viewsMenu = new MenuItem[5];
+        private MenuItem[] viewsMenu = new MenuItem[6];
         private MenuItem[] annotateViewsMenu = new MenuItem[2];
         private int panelSwitch = 0;
         
@@ -1732,10 +1732,11 @@ namespace WocketsApplication.DataLogger
                 foreach (Receiver r in this.wocketsController._Receivers)
                 {
                     RFCOMMReceiver rf = (RFCOMMReceiver)r;
-                    //rf.Send(Wockets.Data.Commands.RFCOMMCommand.GetBT());
-                    rf.Send(Wockets.Data.Commands.RFCOMMCommand.SetCAL(3, 5, 6, 8, 9, 11));
+                    rf.Send(Wockets.Data.Commands.RFCOMMCommand.GetBT());
+                    //rf.Send(Wockets.Data.Commands.RFCOMMCommand.SetCAL(3, 5, 6, 8, 9, 11));
                   //  rf.Send(Wockets.Data.Commands.RFCOMMCommand.GetCAL());
                 }
+                updateCommand("Sent Battery Request");
             }
             
             if (isQuitting)
@@ -1958,6 +1959,12 @@ namespace WocketsApplication.DataLogger
   
 
         }
+        private void updateCommand(string s)
+        {
+            this.CommandBox.Text += s+"\r\n";
+            this.CommandBox.SelectionStart = this.CommandBox.Text.Length;
+            this.CommandBox.ScrollToCaret();
+        }
 
 
         private int CurrentPanel
@@ -2023,6 +2030,7 @@ namespace WocketsApplication.DataLogger
             {
                 Wockets.Data.Commands.BatteryResponse br = (Wockets.Data.Commands.BatteryResponse)e._Response;
                 ((PictureBox)this.sensorBattery["W" + br.SensorID]).Image = this.batteryImg[(5*1024-5*br.BatteryLevel)/1024];
+                updateCommand("Received Battery Response: "+br.BatteryLevel);
             }
         }
 

@@ -127,14 +127,29 @@ namespace WocketsApplication.DataLogger
             this.panel5.Visible = false;
             this.panel6 = new Panel();
             this.panel6.Visible = false;
+            this.panel7 = new Panel();
+            this.CommandBox = new System.Windows.Forms.TextBox();
             this.blank = new Panel();
             this.blank.Visible = false;
-            this.panelArray = new Panel[] { this.panel1, blank, this.panel3, this.panel4, this.panel5 };
+            this.panelArray = new Panel[] { this.panel1, blank, this.panel3, this.panel4, this.panel5, panel7 };
             this.annotatePanelArray = new Panel[] { this.panel2, this.panel6 };
             this.defaultColor = Color.SkyBlue;
             this.panelColor = Color.White;
             this.clickColor = Color.DodgerBlue;
             this.SuspendLayout();
+            //
+            //Commands Panel
+            //
+            this.CommandBox.Multiline = true;
+            this.CommandBox.Location = new System.Drawing.Point(this.panel7.Location.X + 10, this.panel7.Location.Y + 10);
+            this.CommandBox.Size = new System.Drawing.Size(this.ClientSize.Width - 260, this.ClientSize.Height - 350);
+            this.CommandBox.Text = "Commands Dialogue:\r\n";
+            this.panel7.Controls.Add(this.CommandBox);
+
+
+
+
+
             // 
             // mainMenu1
             // 
@@ -360,6 +375,7 @@ namespace WocketsApplication.DataLogger
             this.panel4.Location = new System.Drawing.Point(0, 0);
             this.panel5.Location = new System.Drawing.Point(0, 0);
             this.panel6.Location = new System.Drawing.Point(0, 0);
+            this.panel7.Location = new System.Drawing.Point(0, 0);
             this.panel6.BackColor = panelColor;
 
 
@@ -526,7 +542,7 @@ namespace WocketsApplication.DataLogger
                 cur.BringToFront();
             }
 
-            String[] viewnames = new String[] { "Visualize", "Annotate", "Summary", "Activity", "Status" };
+            String[] viewnames = new String[] { "Visualize", "Annotate", "Summary", "Activity", "Status", "Commands" };
             MenuItem cur2;
 
             String[] annotateNames = new String[] { "Text View", "Graphical View" };
@@ -563,6 +579,7 @@ namespace WocketsApplication.DataLogger
             this.Controls.Add(this.panel4);
             this.Controls.Add(this.panel5);
             this.Controls.Add(this.panel6);
+            this.Controls.Add(this.panel7);
 
            // this.tabPage1.Controls.Add(this.panel1);
            // this.tabPage2.Controls.Add(this.panel2);
@@ -694,8 +711,8 @@ namespace WocketsApplication.DataLogger
             //Initialize Tab control dimensions
             //this.tabControl1.Width = this.ClientSize.Width;
             //this.tabControl1.Height = this.ClientSize.Height;
-            this.panel1.Width = this.panel2.Width = this.panel3.Width = this.panel4.Width = this.panel5.Width = this.panel6.Width = this.ClientSize.Width;//-Constants.SCREEN_LEFT_MARGIN-Constants.SCREEN_RIGHT_MARGIN;
-            this.panel1.Height = this.panel2.Height = this.panel3.Height = this.panel4.Height = this.panel5.Height = this.panel6.Height = this.ClientSize.Height;
+            this.panel1.Width = this.panel2.Width = this.panel3.Width = this.panel4.Width = this.panel5.Width = this.panel6.Width = this.panel7.Width = this.ClientSize.Width;//-Constants.SCREEN_LEFT_MARGIN-Constants.SCREEN_RIGHT_MARGIN;
+            this.panel1.Height = this.panel2.Height = this.panel3.Height = this.panel4.Height = this.panel5.Height = this.panel6.Height = this.panel7.Height = this.ClientSize.Height;
 #else
             this.form1.Width = this.form2.Width = this.form3.Width = this.form4.Width = this.form5.Width = this.ClientSize.Width;
             this.form1.Height = this.form2.Height = this.form3.Height = this.form4.Height = this.form5.Height = this.ClientSize.Height;
@@ -1292,7 +1309,8 @@ namespace WocketsApplication.DataLogger
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.Panel blank, panel1, panel2, panel3, panel4, panel5, panel6;
+        private System.Windows.Forms.Panel blank, panel1, panel2, panel3, panel4, panel5, panel6, panel7;
+        private System.Windows.Forms.TextBox CommandBox;
         private System.Windows.Forms.Timer qualityTimer;
         private System.Windows.Forms.Timer HRTimer;
         private System.Windows.Forms.Button button1;
