@@ -262,7 +262,7 @@ void _atmega324p_power_down()
 //char buffer[8];
 //unsigned short adc_result;
 unsigned long delta;
-void _atmega324p_init(){
+void _atmega324p_init(unsigned int baud){
 
 	//disable JTAG interface	
 	_atmega324p_disable_JTAG();
@@ -270,7 +270,7 @@ void _atmega324p_init(){
 //	r=0;
 
 	//initialize UART0, connected to the RX of the BT
-	_atmega324p_init_uart0( (unsigned int)12);
+	_atmega324p_init_uart0(baud);
 
 	//set the BT
 	_rn41_init();

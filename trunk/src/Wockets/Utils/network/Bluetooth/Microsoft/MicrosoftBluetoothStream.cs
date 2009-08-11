@@ -84,34 +84,37 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
 
                 try
                 {
-                    if (this.toSend.Count != 0)
-                    {
 
-                        foreach (byte[] msg in this.toSend)
+                    lock (this.toSend)
+                    {
+                        if (this.toSend.Count != 0)
                         {
-                            for (int k = 0; (k < msg.Length); k++)
+                            foreach (byte[] msg in this.toSend)
                             {
-                                try
+                                for (int k = 0; (k < msg.Length); k++)
                                 {
+
                                     if (socket.Send(msg, k, 1, SocketFlags.None) != 1)
                                     {
                                         this.errorMessage = "MicrosoftBluetoothStream failed at Process(). Cannot send bytes to " + btAddress.ToString();
                                         this.status = BluetoothStatus.Disconnected;
                                         return;
                                     }
-                                }
-                                catch (Exception e)
-                                {
+
+
+                                    Thread.Sleep(5);
                                 }
 
-                                Thread.Sleep(5);
                             }
-
+                            this.toSend.Clear();
                         }
-                        this.toSend.Clear();
+
                     }
 
+
                     int availableBytes = socket.Available;
+
+
                     if (availableBytes > 0)
                     {
                         bytesReceived = 0;
@@ -122,9 +125,12 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                             availableBytes -= bytesReceived;
                             tail = (tail + bytesReceived) % this.buffer.Length;
                         }
-                        bytesReceived += socket.Receive(this.buffer, tail, availableBytes, SocketFlags.None);
+                        if (availableBytes > 0)
+                            bytesReceived += socket.Receive(this.buffer, tail, availableBytes, SocketFlags.None);
                         tail = (tail + bytesReceived) % this.buffer.Length;
                     }
+
+
 
                     Thread.Sleep(30);
 
@@ -142,11 +148,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
 
                     }
 
-
-                }
-                catch (InvalidOperationException)
-                {
-                }
+                }             
                 catch (Exception e)
                 {
                     this.errorMessage = "MicrosoftBluetoothStream failed at Process(). " + e.Message + " to " + btAddress.ToString();

@@ -60,7 +60,23 @@ void TransmitFrame(WOCKETS_UNCOMPRESSED_FRAME f){
 
 int main()
 {
-	_atmega324p_init();
+	word=eeprom_read_word((uint16_t *)((uint16_t)BAUD_RATE_ADDRESS));
+	if (word==BAUD_9600)
+		word=ATMEGA324P_BAUD_9600;
+	else if (word==BAUD_19200)
+		word=ATMEGA324P_BAUD_19200;
+	else if (word==BAUD_28800)
+		word=ATMEGA324P_BAUD_28800;
+	else if (word==BAUD_38400)
+		word=ATMEGA324P_BAUD_38400;
+	else if (word==BAUD_57600)
+		word=ATMEGA324P_BAUD_57600;
+	else
+	{
+		word=ATMEGA324P_BAUD_38400;
+		eeprom_write_word((uint16_t *)BAUD_RATE_ADDRESS,BAUD_38400);
+	}	
+	_atmega324p_init(word);
 	
 	led_counter=1;
 	_rn41_on();
@@ -174,6 +190,23 @@ ISR(TIMER2_OVF_vect){
 							aBuffer[2]=m_BATTERY_LEVEL_BYTE2(word);
 							processed_counter=command_counter;
 							response_length=3;										
+							break;
+						case (unsigned char) SET_BAUD_RATE:
+							if (_atmega324p_a2dConvert10bit(ADC4)<350)
+								break;
+							else if (eeprom_is_ready())
+							{
+								word=m_BAUD_RATE_BYTE2_TO_BR(aBuffer[1]);
+								eeprom_write_word((uint16_t *)BAUD_RATE_ADDRESS,word);
+								processed_counter=command_counter;
+							}
+							break;
+						case (unsigned char) GET_BAUD_RATE:
+							word=eeprom_read_word((uint16_t *)((uint16_t)BAUD_RATE_ADDRESS));
+							aBuffer[0]=m_BAUD_RATE_BYTE0;
+							aBuffer[1]=m_BAUD_RATE_BYTE1(word);				
+							processed_counter=command_counter;
+							response_length=2;										
 							break;
 						case (unsigned char) SET_CALIBRATION_VALUES:									
 							if (eeprom_is_ready())
@@ -290,7 +323,7 @@ ISR(TIMER2_OVF_vect){
 						
 					}
 				} //if command timed out
-				else if (command_timer>=20000)
+				else if (command_timer>=MAX_COMMAND_TIMER)
 				{
 							
 					command_length=0;

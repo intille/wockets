@@ -10,6 +10,7 @@
 #define Y1NG_ADDRESS 0x06
 #define Z1G_ADDRESS 0x08
 #define Z1NG_ADDRESS 0x0A
+#define BAUD_RATE_ADDRESS 0x0C
 
 
 
@@ -73,6 +74,27 @@
 #define m_BATTERY_LEVEL_BYTE0			RESPONSE_HEADER(BATTERY_LEVEL_RESPONSE)
 #define m_BATTERY_LEVEL_BYTE1(level)		(level>>3)
 #define m_BATTERY_LEVEL_BYTE2(level)		((level & 0x07)<<4)
+
+/* Baud Rate Macros */
+
+#define BAUD_1200 	0b0000
+#define BAUD_2400 	0b0001
+#define BAUD_4800 	0b0010
+#define BAUD_9600 	0b0011
+#define BAUD_19200 	0b0100
+#define BAUD_28800	0b0101
+#define BAUD_38400 	0b0110
+#define BAUD_57600	0b0111
+#define BAUD_115200	0b1000
+#define BAUD_230000	0b1001
+#define BAUD_460000	0b1010
+#define BAUD_921000	0b1011
+
+
+#define m_BAUD_RATE_BYTE2_TO_BR(aByte)	(((unsigned short)(aByte&0x78))>>3) 
+
+#define m_BAUD_RATE_BYTE0			RESPONSE_HEADER(BAUD_RATE_RESPONSE)
+#define m_BAUD_RATE_BYTE1(baud)		((baud<<3)&0x78)
 										
 /* Calibration Macros */
 
