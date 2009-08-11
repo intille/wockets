@@ -183,6 +183,7 @@ namespace Wockets.Data.Commands
             cmd[7] = (byte)(0x7f & z >> 1);
             cmd[8] = (byte)((0x40 & z << 6) | (0x3f & zn >> 4));
             cmd[9] = (byte)(0x78 & zn << 3);
+            //cmd = new byte[] { 0xa9 };
             return new RFCOMMCommand(cmd, cmd_types[11]);
         }
 

@@ -89,12 +89,17 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
 
                         foreach (byte[] msg in this.toSend)
                         {
-                            if (socket.Send(msg, msg.Length, SocketFlags.None)<=0)
+                            for (int k = 0; (k < msg.Length); k++)
                             {
-                                this.errorMessage = "MicrosoftBluetoothStream failed at Process(). Cannot send bytes to " + btAddress.ToString();
-                                this.status = BluetoothStatus.Disconnected;
-                                return;
+                                if (socket.Send(msg,k,1, SocketFlags.None) !=1)
+                                {
+                                    this.errorMessage = "MicrosoftBluetoothStream failed at Process(). Cannot send bytes to " + btAddress.ToString();
+                                    this.status = BluetoothStatus.Disconnected;
+                                    return;
+                                }
+                                Thread.Sleep(30);
                             }
+                           
                         }
                         this.toSend.Clear();
                     }

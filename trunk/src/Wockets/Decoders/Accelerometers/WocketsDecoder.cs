@@ -55,19 +55,20 @@ namespace Wockets.Decoders.Accelerometers
                     }
                     else if (headerByte == 2)
                     {
-                        if ((byte)data[rawDataIndex] == 0xc0)
+
+                        int opcode = (((byte)data[rawDataIndex]) & 0x1f);
+                        if (opcode == 0)
                         {
                             bytesToRead = 3;
                             packetType = SensorDataType.BATTERYLEVEL;
                         }
-                        else if ((byte)data[rawDataIndex] == 0xc4)
+                        else if (opcode == 0x04)
                         {
                             bytesToRead = 10;
-                            byte[] test = new byte[10];
-                            for (int i = 0; i < 10; i++)
-                                test[i] = (byte)data[rawDataIndex + i];
-                            packetType = SensorDataType.CALIBRATION;
+                            packetType = SensorDataType.CALIBRATION_VALUES;
                         }
+
+
                     }
                 }
 
@@ -128,11 +129,14 @@ namespace Wockets.Decoders.Accelerometers
                         FireEvent(e);
 
                     }
-                    else if (packetType == SensorDataType.CALIBRATION)
+                    else if (packetType == SensorDataType.CALIBRATION_VALUES)
                     {
-                        byte[] test = this.packet;
-
+                        byte[] bb = new byte[10];
+                        for (int i = 0; (i < bytesToRead); i++)
+                            bb[i] = this.packet[i];
+                        
                     }
+
                 }
 
             }
