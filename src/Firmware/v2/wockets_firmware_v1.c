@@ -14,7 +14,7 @@
 
 
 unsigned short adc_result[5];
-unsigned char buffer[MAX_COMMAND_SIZE];
+//unsigned char buffer[MAX_COMMAND_SIZE];
 unsigned char i;
 unsigned char r;
 unsigned char j;
@@ -34,16 +34,16 @@ unsigned char aByte=0;
 unsigned char opcode=0;
 unsigned char command_counter=0;
 unsigned char command_length=0;
-unsigned char command_timer=0;
+unsigned int command_timer=0;
 unsigned char processed_counter=0;
 
 unsigned int alive_timer=0;
 unsigned char response=0;
 int receive_counter=0;
-unsigned char aCommand[MAX_COMMAND_SIZE];
+unsigned char aBuffer[MAX_COMMAND_RESPONSE_SIZE];
 unsigned short word=0;
-unsigned short charge=0;
-unsigned int address=0;
+unsigned short address=0xffff;
+unsigned char response_length=0;
 
 void TransmitFrame(WOCKETS_UNCOMPRESSED_FRAME f){
 	
@@ -66,6 +66,20 @@ int main()
 	_rn41_on();
 	_mma7260qt_wakeup();
 	
+	/*cli();							
+	eeprom_write_word((uint16_t *)0x80 ,31);
+	sei();
+
+
+	cli();							
+	word=eeprom_read_word((uint16_t *)((uint16_t)0x80));
+	sei();
+
+	cli();							
+	eeprom_write_word((uint16_t *)0x00 ,word+1);
+	sei();*/
+
+
     for(;;)  {            /* Forever */
 	 sleep_enable();	
 	}  
@@ -92,15 +106,16 @@ ISR(TIMER2_OVF_vect){
 
 
 		
-				/* Receive commands */
-				if (ReceiveByte(&aByte)==0)
+				/* 	Receive a byte on each timer interrupt only if no command is being received or
+					if a command has been received in full */
+				if ( ((command_counter==0)||(command_counter<command_length))  && (ReceiveByte(&aByte)==0) )
 				{				
-					aCommand[command_counter++]=aByte;
-					if (command_counter==1)
-					{
-						opcode=aByte&0x1f;
+					aBuffer[command_counter++]=aByte;
 
-						//Depending on the opcode set the expected command length
+					//for the first byte set the opcode and set the commands length and reset timer
+					if ((aByte>>5)==COMMAND_PREFIX)
+					{
+						opcode=aByte&0x1f;						
 						switch (opcode)
 						{
 								case (unsigned char)GET_BATTERY_LEVEL:
@@ -124,157 +139,161 @@ ISR(TIMER2_OVF_vect){
 									command_length=2;
 									break;
 								case (unsigned char)SET_CALIBRATION_VALUES:
-									command_length=10;
+									command_length=10;								
 									break;								
 
 						}
 						command_timer=0;
+						processed_counter=0;
+						address=0xff;
 					}
+
+					/*if (command_counter>3)
+					{
+						TransmitByte(0xC0);	
+						TransmitByte(command_counter);
+						TransmitByte(command_timer);
+
+					}*/
 
 				}
 
+				// increment timer as long as the command is still being received
 				if (command_counter>0)
 					command_timer++;
 
-				//if command timer started and command fully received
-				if ((command_timer>0) && (command_length==command_counter))
-				{
+				//if all command is received, start processing it
+				if ((command_counter>0) && (command_counter==command_length))
+				{					
 					switch (opcode)
 					{
+						//reset alive timer if it is alive
 						case (unsigned char)ALIVE:							
 							alive_timer=0;
 							processed_counter=command_counter;							
 							break;
-					    case (unsigned char) GET_BATTERY_LEVEL:
-							adc_result[ADC4]=_atmega324p_a2dConvert10bit(ADC4);
-							response=RESPONSE_HEADER | BATTERY_LEVEL_RESPONSE ;							
-							TransmitByte(response);							
-							response=(adc_result[ADC4]>>3);
-							TransmitByte(response);							
-							response=(adc_result[ADC4] & 0x07)<<4;
-							TransmitByte(response);
+						//setup battery buffer
+					    case (unsigned char) GET_BATTERY_LEVEL:		
+							word=_atmega324p_a2dConvert10bit(ADC4);
+							aBuffer[0]=m_BATTERY_LEVEL_BYTE0;
+							aBuffer[1]=m_BATTERY_LEVEL_BYTE1(word);
+							aBuffer[2]=m_BATTERY_LEVEL_BYTE2(word);
 							processed_counter=command_counter;
+							response_length=3;										
 							break;
-						case (unsigned char) SET_CALIBRATION_VALUES:							
-							//if eeprom is ready
-							if (eeprom_is_ready()){
-								//read the charge if needed
-								if (charge==0)
-									charge=_atmega324p_a2dConvert10bit(ADC4);								
-								if (charge>350)
-								{								
-									if (processed_counter==0){											
-										word=(((unsigned short)(aCommand[1]&0x7f))<<3) | (((unsigned short)(aCommand[2]&0x70))>>4);
-										address=X1G_ADDRESS;	
-										processed_counter=2;																		
-									}else if (processed_counter==2){											
-										word=(((unsigned short)(aCommand[2]&0x0f))<<6) | (((unsigned short)(aCommand[3]&0x7e))>>1);
-										address=X1NG_ADDRESS;	
-										processed_counter=3;		
-									}else if (processed_counter==3){											
-										word=(((unsigned short)(aCommand[3]&0x01))<<9) | (((unsigned short)(aCommand[4]&0x7f))<<2)  | (((unsigned short)(aCommand[5]&0x60))>>5);
-										address=Y1G_ADDRESS;	
-										processed_counter=5;		
-									}else if (processed_counter==5){											
-										word=(((unsigned short)(aCommand[5]&0x1f))<<5) | (((unsigned short)(aCommand[6]&0x7c))>>2);
-										address=Y1NG_ADDRESS;	
-										processed_counter=6;		
-									}else if (processed_counter==6){											
-										word=(((unsigned short)(aCommand[6]&0x03))<<8) | (((unsigned short)(aCommand[7]&0x7f))<<1) | (((unsigned short)(aCommand[8]&0x40))>>6);
-										address=Z1G_ADDRESS;	
-										processed_counter=7;		
-									}else if (processed_counter==7){											
-										word=(((unsigned short)(aCommand[8]&0x3f))<<4) | (((unsigned short)(aCommand[9]&0x78))>>3);
-										address=Z1NG_ADDRESS;	
-										processed_counter=command_counter;		
-									}
-									cli();							
-									eeprom_write_word((uint16_t *)address,word);
-									sei();																	
+						case (unsigned char) SET_CALIBRATION_VALUES:									
+							if (eeprom_is_ready())
+							{
+								//do nothing if battery is low
+								if (_atmega324p_a2dConvert10bit(ADC4)<350)
+									break;
+								else if (address==X1G_ADDRESS){
+									word=m_CALIBRATION_BYTE2_TO_XN1G(aBuffer[2]) | m_CALIBRATION_BYTE3_TO_XN1G(aBuffer[3]);
+									address=X1NG_ADDRESS;
+								}else if (address==X1NG_ADDRESS){
+									word=m_CALIBRATION_BYTE3_TO_Y1G(aBuffer[3])|m_CALIBRATION_BYTE4_TO_Y1G(aBuffer[4])|m_CALIBRATION_BYTE5_TO_Y1G(aBuffer[5]);
+									address=Y1G_ADDRESS;
+								}else if (address==Y1G_ADDRESS){
+									word=m_CALIBRATION_BYTE5_TO_YN1G(aBuffer[5])|m_CALIBRATION_BYTE6_TO_YN1G(aBuffer[6]);//(((unsigned short)(aBuffer[5]&0x1f))<<5) | (((unsigned short)(aBuffer[6]&0x7c))>>2);
+									address=Y1NG_ADDRESS;
+								}else if (address==Y1NG_ADDRESS){																		
+									word= m_CALIBRATION_BYTE6_TO_Z1G(aBuffer[6]) | m_CALIBRATION_BYTE7_TO_Z1G(aBuffer[7]) | m_CALIBRATION_BYTE8_TO_Z1G(aBuffer[8]) ;//(((unsigned short)(aBuffer[6]&0x03))<<8) | (((unsigned short)(aBuffer[7]&0x7f))<<1) | (((unsigned short)(aBuffer[8]&0x40))>>6);
+									address=Z1G_ADDRESS;
+								}else if (address==Z1G_ADDRESS){
+									word= m_CALIBRATION_BYTE8_TO_ZN1G(aBuffer[8]) |m_CALIBRATION_BYTE9_TO_ZN1G(aBuffer[9]);
+									address=Z1NG_ADDRESS;
+									processed_counter=command_counter;
+								}else
+								{
+									word=m_CALIBRATION_BYTE1_TO_X1G(aBuffer[1])| m_CALIBRATION_BYTE2_TO_X1G(aBuffer[2]);																		
+									address=X1G_ADDRESS;
 								}
-							}
+								
+								eeprom_write_word((uint16_t *)address,word);											
+																				
+							}															
 							//enable global interrupts
 							break;
 						case (unsigned char) GET_CALIBRATION_VALUES:	
-						
-								if (eeprom_is_ready()){
-								//read the charge if needed
-								if (charge==0)
+												
+							if (eeprom_is_ready())
+							{								
+								//do nothing if battery is low
+								if (_atmega324p_a2dConvert10bit(ADC4)<350)
+									break;
+								else if (address==X1G_ADDRESS){
+									aBuffer[1]= m_CALIBRATION_X1G_TO_BYTE1(word);									
+									aBuffer[2]= m_CALIBRATION_X1G_TO_BYTE2(word);
+									address=X1NG_ADDRESS;
+								}else if (address==X1NG_ADDRESS){
+									aBuffer[2]|= m_CALIBRATION_XN1G_TO_BYTE2(word);
+									aBuffer[3] =m_CALIBRATION_XN1G_TO_BYTE3(word);
+									address=Y1G_ADDRESS;
+								}else if (address==Y1G_ADDRESS){
+									aBuffer[3]|= m_CALIBRATION_Y1G_TO_BYTE3(word);
+									aBuffer[4] = m_CALIBRATION_Y1G_TO_BYTE4(word);
+									aBuffer[5] =  m_CALIBRATION_Y1G_TO_BYTE5(word);
+									address=Y1NG_ADDRESS;
+								}else if (address==Y1NG_ADDRESS){
+									aBuffer[5]|= m_CALIBRATION_YN1G_TO_BYTE5(word);
+									aBuffer[6] = m_CALIBRATION_YN1G_TO_BYTE6(word);
+									address=Z1G_ADDRESS;
+								}else if (address==Z1G_ADDRESS){
+									aBuffer[6] |= m_CALIBRATION_Z1G_TO_BYTE6(word);
+									aBuffer[7] = m_CALIBRATION_Z1G_TO_BYTE7(word);
+									aBuffer[8] = m_CALIBRATION_Z1G_TO_BYTE8(word);
+									address=Z1NG_ADDRESS;
+								}else if (address==Z1NG_ADDRESS){
+									aBuffer[8] |= m_CALIBRATION_ZN1G_TO_BYTE8(word);
+									aBuffer[9] = m_CALIBRATION_ZN1G_TO_BYTE9(word);
+									processed_counter=command_counter;
+									response_length=10;
+																											
+								}else
 								{
-									charge=_atmega324p_a2dConvert10bit(ADC4);
+									aBuffer[0]=m_CALIBRATION_BYTE0;	
 									address=X1G_ADDRESS;
-									aCommand[0]=0xc4;
 								}
-								if (charge>350)
-								{	
-									cli();							
-									word=eeprom_read_word((uint16_t *)address);
-									sei();															
-									if (address==X1G_ADDRESS){
-										aCommand[1]= ((word>>3)&0x7f);									
-										aCommand[2]= ((word<<4)&0x70);
-										address=X1NG_ADDRESS;
-									}else if (address==X1NG_ADDRESS){
-										aCommand[2]|= ((word>>6)&0x0f);
-										aCommand[3] =((word<<1)&0x7e);
-										address=Y1G_ADDRESS;
-									}else if (address==Y1G_ADDRESS){
-										aCommand[3]|= ((word>>9) &0x01);
-										aCommand[4] = ((word>>2) & 0x7f);
-										aCommand[5] = ((word<<5) & 0x60);
-										address=Y1NG_ADDRESS;
-									}else if (address==Y1NG_ADDRESS){
-										aCommand[5]|= ((word>>5) & 0x1f);
-										aCommand[6] = ((word<<2) & 0x7c);
-										address=Z1G_ADDRESS;
-									}else if (address==Z1G_ADDRESS){
-										aCommand[6] |= ((word>>8) & 0x03);
-										aCommand[7] =((word>>1) & 0x7f);
-										aCommand[8] = ((word<<6) & 0x40);
-										address=Z1NG_ADDRESS;
-									}else if (address==Z1NG_ADDRESS){
-										aCommand[8] |= ((word>>4) & 0x3f);
-										aCommand[9] = ((word<<3) & 0x78);
-										processed_counter=command_counter;
-										for (i=0;(i<10);i++)
-											TransmitByte(aCommand[i]);																		
-									}
-																																							
-																							
-								}
-							}
+														
+								word=eeprom_read_word((uint16_t *)((uint16_t)address));
+							
+							}							
 							break;					
 						default:	
 							break;
 
 					}
-					if (processed_counter==command_counter){
+
+					if (processed_counter==command_counter){					
+							
+				
+						for (i=0;(i<response_length);i++)											
+							TransmitByte(aBuffer[i]);										
+												
 						command_length=0;
 						command_counter=0;
 						command_timer=0;
-						processed_counter=0;
-						charge=0;
-						address=0;
+						processed_counter=0;						
+						address=0xffff;
+						response_length=0;
+						
 					}
 				} //if command timed out
-				else if (command_timer==MAX_COMMAND_TIMER)
+				else if (command_timer>=20000)
 				{
 							
 					command_length=0;
 					command_counter=0;
 					command_timer=0;
-					processed_counter=0;
-					charge=0;
-					address=0;
+					processed_counter=0;				
+					address=0xffff;
+					response_length=0;
 				}
 					
 					    
 				
 				
-				
-				
-																			
-				
+																													
 
           
 				alive_timer++;					
