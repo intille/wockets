@@ -1669,6 +1669,8 @@ namespace WocketsApplication.DataLogger
             }
         }
          */
+
+       short last = 689;
         private void readDataTimer_Tick(object sender, EventArgs e)
         {
             
@@ -1732,9 +1734,15 @@ namespace WocketsApplication.DataLogger
                 foreach (Receiver r in this.wocketsController._Receivers)
                 {
                     RFCOMMReceiver rf = (RFCOMMReceiver)r;
+
+                    //rf.Send(Wockets.Data.Commands.RFCOMMCommand.GetBT());
+                    rf.Send(Wockets.Data.Commands.RFCOMMCommand.SetCAL(3, 6, 10, 8, last++, 266));
+                    rf.Send(Wockets.Data.Commands.RFCOMMCommand.GetCAL());
+
                     rf.Send(Wockets.Data.Commands.RFCOMMCommand.GetBT());
                     //rf.Send(Wockets.Data.Commands.RFCOMMCommand.SetCAL(3, 5, 6, 8, 9, 11));
                   //  rf.Send(Wockets.Data.Commands.RFCOMMCommand.GetCAL());
+
                 }
                 updateCommand("Sent Battery Request");
             }
