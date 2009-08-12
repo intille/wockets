@@ -43,6 +43,15 @@ namespace Wockets.Decoders.Accelerometers
 
             while (rawDataIndex !=tail)
             {
+                if (this.cmd && data[rawDataIndex] == ((byte)'C'))
+                {
+                    if (rawDataIndex + 1 != tail && data[rawDataIndex + 1] == ((byte)'M'))
+                    {
+                        if (rawDataIndex + 2 != tail && data[rawDataIndex + 2] == ((byte)'D'))
+                            this.cmd = false;
+                    }
+                }
+
                 if ((data[rawDataIndex] & 0x80) != 0) //grab the next 6 bytes
                 {
                     this.packetPosition = 0;

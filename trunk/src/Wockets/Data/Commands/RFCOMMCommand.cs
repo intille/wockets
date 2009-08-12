@@ -340,7 +340,7 @@ namespace Wockets.Data.Commands
             {
                 bytes[i+3] = (byte)chs[i];
             }
-            bytes[bytes.Length] = (byte)13;
+            bytes[bytes.Length-1] = (byte)13;
             return new RFCOMMCommand(bytes,cmd_types[26]);
         }
 
