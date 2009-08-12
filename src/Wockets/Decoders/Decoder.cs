@@ -29,6 +29,8 @@ namespace Wockets.Decoders
         protected int delIndex = 0;
         protected Response.ResponseHandler[] delegates= new Response.ResponseHandler[20];
         protected bool[] subscribed = new bool[] { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false };
+        protected bool cmd = false;
+
 
         public Decoder()
         {
@@ -122,6 +124,18 @@ namespace Wockets.Decoders
         public void Unsubscribe(SensorDataType type, Response.ResponseHandler handler)
         {
             this.subscribed[(int)type] = false;
+        }
+
+        public bool cmdMode
+        {
+            get
+            {
+                return this.cmd;
+            }
+            set
+            {
+                this.cmd = value;
+            }
         }
 
         public abstract int Decode(int sensorID,byte[] data, int length);

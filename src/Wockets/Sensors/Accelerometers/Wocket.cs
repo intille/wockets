@@ -45,6 +45,23 @@ namespace Wockets.Sensors.Accelerometers
             return base.ToXML("");
         }
 
+        public bool Command()
+        {
+            RFCOMMReceiver rf= (RFCOMMReceiver)this._Receiver;
+            this._Decoder.cmdMode = true;
+            for(int i=0;i<3;i++)
+            {
+                rf.Send(Data.Commands.RFCOMMCommand.EnterCMD());
+            }
+            for (int i = 0; i < 100; i++)
+            {
+                if (!this._Decoder.cmdMode) return true;
+                System.Threading.Thread.Sleep(50);
+            }
+            return false;
+
+        }
+
         public int _Config_Timer
         {
             get
@@ -57,7 +74,7 @@ namespace Wockets.Sensors.Accelerometers
                 else if (value > 255) this.config_time = 255;
                 else this.config_time = value;
                 RFCOMMReceiver rf = ((RFCOMMReceiver)this._Receiver);
-                rf.Send(Wockets.Data.Commands.RFCOMMCommand.EnterCMD());
+                rf.Send(Wockets.Data.Commands.RFCOMMCommand.SetCFT((short)this.config_time));
                 rf.Send(Wockets.Data.Commands.RFCOMMCommand.SetCFT((short)this.config_time));
                 rf.Send(Wockets.Data.Commands.RFCOMMCommand.Reset());
             }

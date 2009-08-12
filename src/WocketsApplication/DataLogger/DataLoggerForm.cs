@@ -1731,20 +1731,15 @@ namespace WocketsApplication.DataLogger
                 this.SRcounter = 0;
                 this.LastTime = now;
 
-                foreach (Receiver r in this.wocketsController._Receivers)
+                foreach (Sensor s in this.wocketsController._Sensors)
                 {
-                    RFCOMMReceiver rf = (RFCOMMReceiver)r;
-
-                    //rf.Send(Wockets.Data.Commands.RFCOMMCommand.GetBT());
-                    rf.Send(Wockets.Data.Commands.RFCOMMCommand.SetCAL(3, 6, 10, 8, last++, 266));
-                    rf.Send(Wockets.Data.Commands.RFCOMMCommand.GetCAL());
-
-                    rf.Send(Wockets.Data.Commands.RFCOMMCommand.GetBT());
-                    //rf.Send(Wockets.Data.Commands.RFCOMMCommand.SetCAL(3, 5, 6, 8, 9, 11));
-                  //  rf.Send(Wockets.Data.Commands.RFCOMMCommand.GetCAL());
-
+                    /*Wockets.Sensors.Accelerometers.Wocket w = (Wockets.Sensors.Accelerometers.Wocket)s;
+                    if (w.Command())
+                    {
+                        w._Config_Timer = 255;
+                    }*/
                 }
-                updateCommand("Sent Battery Request");
+                //updateCommand("Sent CMD Request");
             }
             
             if (isQuitting)

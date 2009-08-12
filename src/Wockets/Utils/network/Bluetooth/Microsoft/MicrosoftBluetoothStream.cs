@@ -102,7 +102,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                                     }
 
 
-                                    Thread.Sleep(5);
+                                    Thread.Sleep(20);
                                 }
 
                             }
