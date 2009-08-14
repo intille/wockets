@@ -1087,17 +1087,24 @@ namespace WocketsApplication.DataLogger
             int nextIndex = ((int)this.buttonIndex[button_id] + 1) % category.Count;
             button.Text = category[nextIndex]._Name;
             this.buttonIndex[button_id] = nextIndex;
+            if (isAnnotating)
+            {
+                stopAnnotation();
+                startAnnotation();
+            }
         }
 
         ArrayList selectedButtons = new ArrayList();
         char[] delimiter ={ '_' };
+        Sound click = new Sound(Constants.NEEDED_FILES_PATH + "sounds\\start.wav");
+        bool isAnnotating = false;
 
         private void activityButton_Click(object sender, EventArgs e)
         {
             Button button = (Button)sender;
             int i = 0;
             Boolean same = false;
-
+            click.Play();
             while (i < selectedButtons.Count)
             {
                 System.Windows.Forms.Button but = (System.Windows.Forms.Button)selectedButtons[i];
@@ -1107,6 +1114,12 @@ namespace WocketsApplication.DataLogger
                         same = true;
                     but.BackColor = this.defaultColor;
                     selectedButtons.RemoveAt(i);
+                    if (isAnnotating)
+                    {
+                        stopAnnotation();
+                        startAnnotation();
+                    }
+                    break;
                 }
                 i += 1;
             }
@@ -1115,9 +1128,58 @@ namespace WocketsApplication.DataLogger
             {
                 button.BackColor = clickColor;
                 selectedButtons.Add(button);
+                if (isAnnotating)
+                {
+                    stopAnnotation();
+                    startAnnotation();
+                }
             }
         }
 
+
+        ArrayList records = new ArrayList();
+
+        private void startAnnotation()
+        {
+            this.currentRecord = new Annotation();
+            this.currentRecord._StartDate = DateTime.Now.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ssK");
+            this.currentRecord._StartHour = DateTime.Now.Hour;
+            this.currentRecord._StartMinute = DateTime.Now.Minute;
+            this.currentRecord._StartSecond = DateTime.Now.Second;
+            TimeSpan ts = (DateTime.Now - new DateTime(1970, 1, 1, 0, 0, 0));
+            this.currentRecord._StartUnix = ts.TotalSeconds;
+
+            //check all buttons values, store them and disable them
+            if (this.panel2.Visible)
+            {
+                foreach (ComboBox combo in categoryDrops)
+                {
+                    int button_id = Convert.ToInt32(combo.Name);
+                    ActivityList category = (ActivityList)this.annotatedSession.OverlappingActivityLists[button_id];
+                    string current_label = (string)combo.SelectedItem;
+                    this.currentRecord.Activities.Add(new Activity(current_label, category._Name));
+                }
+            }
+            else if (this.panel6.Visible)
+            {
+                for (int i = 0; i < selectedButtons.Count; i++)
+                {
+                    System.Windows.Forms.Button but = (System.Windows.Forms.Button)selectedButtons[i];
+                    this.currentRecord.Activities.Add(new Activity(but.Name.Split(delimiter)[1], but.Name.Split(delimiter)[0]));
+                }
+            }
+        }
+
+        private void stopAnnotation()
+        {
+            this.currentRecord._EndDate = DateTime.Now.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ssK");
+            this.currentRecord._EndHour = DateTime.Now.Hour;
+            this.currentRecord._EndMinute = DateTime.Now.Minute;
+            this.currentRecord._EndSecond = DateTime.Now.Second;
+            TimeSpan ts = (DateTime.Now - new DateTime(1970, 1, 1, 0, 0, 0));
+            this.currentRecord._EndUnix = ts.TotalSeconds;
+            this.annotatedSession.Annotations.Add(this.currentRecord);
+        }
 
         private void startStopButton_Click(object sender, EventArgs e)
         {
@@ -1125,17 +1187,14 @@ namespace WocketsApplication.DataLogger
             //button state is now start
             if (item.Text.Equals("Start"))
             {
-                // this.startSound.Play();
-                //Generator generator = new Generator();
-                //generator.InitializeSound(this.Handle.ToInt32());
-                //generator.CreateBuffer();
-
+                isAnnotating = true;
                 item.Text = "Stop";
                 this.overallTimer.reset();
                 this.overallTimer.start();
                 this.goodTimer.reset();
                 this.goodTimer.start();
-
+                startAnnotation();
+                /*
                 //store the current state of the categories
                 this.currentRecord = new Annotation();
                 this.currentRecord._StartDate = DateTime.Now.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ssK");
@@ -1154,7 +1213,7 @@ namespace WocketsApplication.DataLogger
                         ActivityList category = (ActivityList)this.annotatedSession.OverlappingActivityLists[button_id];
                         string current_label = (string)combo.SelectedItem;
                         this.currentRecord.Activities.Add(new Activity(current_label, category._Name));
-                        combo.Enabled = false;
+                    //    combo.Enabled = false;
                     }
                 }
                 else if (this.panel6.Visible)
@@ -1164,19 +1223,21 @@ namespace WocketsApplication.DataLogger
                         System.Windows.Forms.Button but = (System.Windows.Forms.Button)selectedButtons[i];
                         this.currentRecord.Activities.Add(new Activity(but.Name.Split(delimiter)[1], but.Name.Split(delimiter)[0]));
                     }
-                    this.panel6.Enabled = false;
+              //      this.panel6.Enabled = false;
                 }
-
+                */
             }
 
             else if (item.Text.Equals("Stop"))
             {
                 // this.stopSound.Play();
+                isAnnotating = false;
                 item.Text = "Start";
                 this.overallTimer.reset();
                 this.goodTimer.reset();
                 extractedVectors = 0;
 
+                /*
                 //store the current state of the categories
                 this.currentRecord._EndDate = DateTime.Now.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ssK");
                 this.currentRecord._EndHour = DateTime.Now.Hour;
@@ -1185,7 +1246,9 @@ namespace WocketsApplication.DataLogger
                 TimeSpan ts = (DateTime.Now - new DateTime(1970, 1, 1, 0, 0, 0));
                 this.currentRecord._EndUnix = ts.TotalSeconds;
                 this.annotatedSession.Annotations.Add(this.currentRecord);
+                */
 
+                stopAnnotation();
                 //each time an activity is stopped, rewrite the file on disk, need to backup file to avoid corruption
                 //this.annotation.ToXMLFile();
                 //this.annotation.ToCSVFile();

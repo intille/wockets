@@ -487,11 +487,11 @@ namespace WocketsApplication.DataLogger
             this.aList.Activities.Add(asummary);
 
    
-            pieChart.Data = aList.toPercentHashtable();
+        /*    pieChart.Data = aList.toPercentHashtable();
             pieChart.SetActivity("No Activity");
             pieChart.SetTime(0, 0, 0);
             pieChart.SetCalories(0, 0);
-            this.panel3.Controls.Add(pieChart);
+            this.panel3.Controls.Add(pieChart); */
             //pieChartClearButton = new Button();
             //pieChartClearButton.Text = "Clear";
             //pieChartClearButton.Name = "pieChartButton";
@@ -819,6 +819,7 @@ namespace WocketsApplication.DataLogger
             int marginHeight = 20;
 
             int screenWidth = this.panel6.Width;
+            int screenHeight = this.panel6.Height;
             int scrollbarWidth = 28;
 
             for (int i = 0; (i < this.annotatedSession.OverlappingActivityLists.Count); i++)
@@ -833,21 +834,40 @@ namespace WocketsApplication.DataLogger
                     buttons[j].Name = this.annotatedSession.OverlappingActivityLists[i]._Name + "_" + acts[j]._Name;
                     buttons[j].Text = truncateText(acts[j]._Name);
                     buttons[j].Click += new EventHandler(this.activityButton_Click);
-                    buttons[j].Font = new System.Drawing.Font("Microsoft Sans Serif", fontSize, System.Drawing.FontStyle.Regular);
+              //      buttons[j].Font = new System.Drawing.Font("Microsoft Sans Serif", fontSize, System.Drawing.FontStyle.Regular);
                     buttons[j].BackColor = this.defaultColor;
                     numberOfButtons += 1;
                 }
                 activityButtons.Add(buttons);
             }
 
-            if (numberOfButtons < max_buttons_per_row)
-                act_button_width = act_button_height = screenWidth / numberOfButtons;
-            else
+            if (numberOfButtons > 12)
             {
                 screenWidth -= scrollbarWidth;
                 act_button_width = act_button_height = screenWidth / max_buttons_per_row;
             }
-
+            else if ((numberOfButtons <= 12) && (numberOfButtons > 8))
+            {
+                act_button_width = screenWidth / max_buttons_per_row;
+                act_button_height = act_button_width+(act_button_width / 3);
+            }
+            else if ((numberOfButtons <= 8) && (numberOfButtons > 3))
+            {
+                int dBlockSize = (screenWidth-2) / max_buttons_per_row;
+                max_buttons_per_row = 2;
+                act_button_width = dBlockSize * 2;
+                int s = (int)Math.Ceiling(numberOfButtons / 2.0);
+                act_button_height =  ((dBlockSize * 4) + 22) / s;
+                fontSize = 12F;
+            }
+            else
+            {
+                int dBlockSize = screenWidth / max_buttons_per_row;
+                max_buttons_per_row = 1;
+                act_button_width = screenWidth-2;
+                act_button_height = (dBlockSize*4) / numberOfButtons;
+                fontSize = 14F;
+            }
 
             for (int i = 0; i < activityButtons.Count; i++)
             {
@@ -864,6 +884,7 @@ namespace WocketsApplication.DataLogger
                     activityList[j].Width = act_button_width;
                     activityList[j].Height = act_button_height;
                     activityList[j].Location = new System.Drawing.Point(act_button_x, act_button_y);
+                    activityList[j].Font = new System.Drawing.Font("Microsoft Sans Serif", fontSize, System.Drawing.FontStyle.Regular);
                     this.panel6.Controls.Add(activityList[j]);
                     buttonsOnRow += 1;
 
