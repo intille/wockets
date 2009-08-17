@@ -1582,11 +1582,11 @@ namespace WocketsApplication.SmartPhone
                 Logger.Warn(log);
                 this.SRcounter = 0;
                 this.LastTime = now;
-                foreach (Receiver r in this.wocketsController._Receivers)
+                /*foreach (Receiver r in this.wocketsController._Receivers)
                 {
                     RFCOMMReceiver rf = (RFCOMMReceiver)r;
                     rf.Send(Wockets.Data.Commands.RFCOMMCommand.GetBT());
-                }
+                }*/
             }
 
             if (isQuitting)

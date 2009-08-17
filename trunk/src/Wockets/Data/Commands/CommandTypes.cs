@@ -27,9 +27,21 @@ namespace Wockets.Data
         /// Instruct the radio to reset itself. 
         /// </summary>
         RESET,
-        SET_LED,
-        GET_BATTERY,
+
+
+        SET_LED,               
+        GET_BT,
         GET_PC,
+        GET_SM,
+        SET_SM,
+        BT_RST,
+        GET_SEN,
+
+
+
+
+
+
         GET_SENSITIVITY,
         SET_SENSITIVITY,
         GET_CALIBRATION,
@@ -46,12 +58,14 @@ namespace Wockets.Data
         SET_ALIVE_TIME,
         GET_POWERDOWN_TIME,
         SET_POWERDOWN_TIME,
-        RESET_WOCKET,
+        RST_WK,
         GET_CONFIGURATION_TIME,
         SET_CONFIGURATION_TIME,
         GET_BAUD_RATE,
         SET_BAUD_RATE,
-        ALIVE
+        ALIVE,
+        GET_BATTERY, 
+        RESET_WOCKET
 
     }
 }

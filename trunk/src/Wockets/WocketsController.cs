@@ -120,6 +120,7 @@ namespace Wockets
                 try
                 {
                     this._Receivers[i].Initialize();
+                    
                 }
                 catch (Exception e)
                 {
@@ -129,11 +130,11 @@ namespace Wockets
 
             polling = true;
             saving = true;
-            aSavingThread = new Thread(new ThreadStart(Save));
+            //aSavingThread = new Thread(new ThreadStart(Save));
             aPollingThread = new Thread(new ThreadStart(Poll));
             aPollingThread.Priority = ThreadPriority.Highest;
             aPollingThread.Start();            
-            aSavingThread.Start();
+            //aSavingThread.Start();
          
         }
 

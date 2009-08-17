@@ -144,7 +144,7 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
                 }
             }
         }
-        public override bool Close()
+        public  bool Close()
         {
             try
             {

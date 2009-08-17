@@ -49,10 +49,10 @@ namespace Wockets.Sensors.Accelerometers
         {
             RFCOMMReceiver rf= (RFCOMMReceiver)this._Receiver;
             this._Decoder.cmdMode = true;
-            for(int i=0;i<3;i++)
+            /*for(int i=0;i<3;i++)
             {
                 rf.Send(Data.Commands.RFCOMMCommand.EnterCMD());
-            }
+            }*/
             for (int i = 0; i < 100; i++)
             {
                 if (!this._Decoder.cmdMode) return true;
@@ -73,10 +73,11 @@ namespace Wockets.Sensors.Accelerometers
                 if (value < 30) this.config_time = 30;
                 else if (value > 255) this.config_time = 255;
                 else this.config_time = value;
-                RFCOMMReceiver rf = ((RFCOMMReceiver)this._Receiver);
+                /*RFCOMMReceiver rf = ((RFCOMMReceiver)this._Receiver);
                 rf.Send(Wockets.Data.Commands.RFCOMMCommand.SetCFT((short)this.config_time));
                 rf.Send(Wockets.Data.Commands.RFCOMMCommand.SetCFT((short)this.config_time));
                 rf.Send(Wockets.Data.Commands.RFCOMMCommand.Reset());
+                 */
             }
         }
 

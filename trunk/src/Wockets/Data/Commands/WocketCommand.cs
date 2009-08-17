@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Wockets.Data.Commands
 {
-    public class RFCOMMCommand : ReceiverCommand
+    public class RFCOMMCommand : Command
     {
         private static byte[][] commands = new byte[][] { 
             new byte[] { (byte)36, (byte)36, (byte)36 },

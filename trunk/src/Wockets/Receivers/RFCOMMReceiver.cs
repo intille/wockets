@@ -38,22 +38,25 @@ namespace Wockets.Receivers
         private const bool USE_PARITY = false;
         private const bool USE_STOP_BIT = true;
         private const int BAUD_RATE = 57600;
-        private const int BUFFER_SIZE = 4096;
+        private const int BUFFER_SIZE = 8000;
         private const int PORT_NUMBER = 9;
         private const int MAXIMUM_SAMPLING_RATE = 70;
 
         //RFCOMM Specific Objects
+#if (PocketPC)
+        //private BluetoothStream bluetoothStream;       
 
         private BluetoothStream bluetoothStream;
+#endif
         private const int MAC_SIZE = 6;
         private string address;
         private byte[] address_bytes;
         private string pin;
         private int sniffTime = 0;
         private bool sniffMode;
-        private int aliveTimer = 0;
 
-        public RFCOMMReceiver():base(BUFFER_SIZE)
+        public RFCOMMReceiver()
+            : base(BUFFER_SIZE)
         {
             this.type = ReceiverTypes.RFCOMM;
 
@@ -106,7 +109,7 @@ namespace Wockets.Receivers
         public override bool _Running
         {
             get
-            {              
+            {
                 /*
                 if (this.bluetoothStream._Status == BluetoothStatus.Disconnected)
                     throw new Exception("Wocket " + this.address + " disconnected");
@@ -117,7 +120,7 @@ namespace Wockets.Receivers
                     reconnectionThread.Start();                    
                 }
                 */
-               
+
                 return this.isRunning;
             }
             set
@@ -125,21 +128,24 @@ namespace Wockets.Receivers
                 this.isRunning = value;
             }
         }
-
+   
+        
         public override void Update()
         {
             lock (this)
             {
                 if ((this.bluetoothStream != null) && (this.bluetoothStream._Status == BluetoothStatus.Disconnected))
                 {
-                    NetworkStacks._BluetoothStack.Disconnect(this.bluetoothStream._HexAddress);
-                    this.bluetoothStream = null;
-                    this.ndisc += 1;
-                    this.disconCount = 1;
-                    this.lastTime = DateTime.Now.Ticks;
-                    Logger.Warn("Sensor " + this._ID + " has disconnected.");
+                    //this.bluetoothStream.Close();
+                    //this.bluetoothStream.Dispose();
+               //     disposedStream = this.bluetoothStream;
+                  
+                    this.bluetoothStream = null;                    
+                    this.status = ReceiverStatus.Disconnected;                    
                 }
 
+                //ideas - delay reconnection
+                // ideas - create a bluetooth reconnector
                 if ((this.bluetoothStream == null) && (this.status != ReceiverStatus.Reconnecting))
                 {
                     this.status = ReceiverStatus.Reconnecting;
@@ -156,19 +162,6 @@ namespace Wockets.Receivers
                         reconnectionThread = null;
                     }
                     this.status = ReceiverStatus.Connected;
-                    Logger.Warn("Sensor " + this._ID + " has connected.");
-                    this.disconCount = 0;
-                    if (this.lastTime!=0)
-                        this.disconTime += (int)((DateTime.Now.Ticks - this.lastTime) / 10000000);
-                }
-                if ((this.bluetoothStream != null) && (this.status == ReceiverStatus.Connected))
-                {
-                    if (aliveTimer >= 100)
-                    {
-                        this.Send(Data.Commands.RFCOMMCommand.Alive());
-                        aliveTimer = 0;
-                    }
-                    aliveTimer++;
                 }
             }
         }
@@ -177,7 +170,7 @@ namespace Wockets.Receivers
         {
             get
             {
-                                
+
                 return this.status;
             }
             set
@@ -189,28 +182,24 @@ namespace Wockets.Receivers
 
 
         [DllImport("coredll.dll", SetLastError = true)]
-        public static extern int CeSetThreadQuantum(IntPtr handle,short msec);
-
-        public void Send(Data.Commands.RFCOMMCommand cmd)
-        {
-            lock (this)
-            {
-                if ((this.bluetoothStream != null) &&  (this.status == ReceiverStatus.Connected))
-                    this.bluetoothStream.Send(cmd.CMD);
-            }
-        }
+        public static extern int CeSetThreadQuantum(IntPtr handle, short msec);
 
         private void Reconnect()
         {
+           // if (disposedStream != null)
+             //   disposedStream.Dispose();
+            //Before attempting to reconnect, wait 10 seconds for the Bluetooth to cleanup the previous stream
+            Thread.Sleep(10000);
+            
             //CeSetThreadQuantum(new IntPtr(reconnectionThread.ManagedThreadId), 20);
-            while ((this.bluetoothStream==null)|| (this.bluetoothStream._Status!= BluetoothStatus.Connected))//(this._Status == ReceiverStatus.Reconnecting)
+            while ((this.bluetoothStream == null) || (this.bluetoothStream._Status != BluetoothStatus.Connected))//(this._Status == ReceiverStatus.Reconnecting)
             {
                 try
                 {
                     if (this.Initialize())
                     {
                         //this.status = ReceiverStatus.Connected;
-                        Wockets.Utils.Logger.Warn("Receiver " + this._ID + " has reconnected.");                    
+                        Wockets.Utils.Logger.Warn("Receiver " + this._ID + " has reconnected.");
                     }
                 }
                 catch (Exception e)
@@ -222,12 +211,12 @@ namespace Wockets.Receivers
 
         public override bool Initialize()
         {
-
+            
             try
             {
-                this.bluetoothStream=NetworkStacks._BluetoothStack.Connect(this._Buffer, this.address_bytes, this.pin);
+                this.bluetoothStream = NetworkStacks._BluetoothStack.Connect(this._Buffer,this.address, this.address_bytes, this.pin);
                 if (this.bluetoothStream == null)
-                    return false;       
+                    return false;
                 return true;
             }
             catch (Exception e)

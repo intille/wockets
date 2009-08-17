@@ -10,25 +10,18 @@ namespace Wockets.Utils.network.Bluetooth
     {
         protected BluetoothStatus status;
         private static BluetoothStackTypes type;
-        protected BluetoothStreamList bluetoothStreams;
+        //protected BluetoothStreamList bluetoothStreams;
+        protected Hashtable bluetoothStreams;
 
         public BluetoothStack()
         {
             this.status = BluetoothStatus.Down;
-            this.bluetoothStreams = new BluetoothStreamList();
+            //this.bluetoothStreams = new BluetoothStreamList();
+            this.bluetoothStreams = new Hashtable();
+            
         }
 
-        public BluetoothStreamList _Streams
-        {
-            get
-            {
-                return this.bluetoothStreams;
-            }
-            set
-            {
-                this.bluetoothStreams = value;
-            }
-        }
+
         public static BluetoothStackTypes _Type
         {
             get
@@ -54,26 +47,10 @@ namespace Wockets.Utils.network.Bluetooth
             get;
         }
 
-        public virtual bool Disconnect(string address)
-        {
-            //string hex = "";
-            //for (int i = 0; i < address.Length; i++)
-              //  hex += address[i].ToString("X2");         
-
-            foreach (BluetoothStream b in this.bluetoothStreams)
-                if (b._HexAddress == address)
-                {
-                    this.bluetoothStreams.Remove(b);
-                    b.Close();                    
-                    return true;
-                }
-            
-            return false;
-        }
 
         public abstract bool Initialize();
         public abstract Hashtable Search();
-        public abstract BluetoothStream Connect(byte[] buffer, byte[] address, string pin);
+        public abstract BluetoothStream Connect(byte[] buffer,string addr, byte[] address, string pin);
         public abstract void Dispose();
     }
 }

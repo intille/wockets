@@ -410,7 +410,7 @@ namespace InTheHand.Net.Sockets
             //btclient.EndConnect(asyncresult);
             TimeoutObject.Set();
             Socket s = (Socket)asyncresult.AsyncState;
-            if (!s.Connected)            
+            if (s.Connected)            
                 s.EndConnect(asyncresult);
                          
         }
@@ -724,7 +724,7 @@ namespace InTheHand.Net.Sockets
         {
             get
             {
-                byte[] link = clientSocket.GetSocketOption(BluetoothSocketOptionLevel.RFComm, BluetoothSocketOptionName.GetLink, 32);
+                byte[] link = clientSocket.GetSocketOption(BluetoothSocketOptionLevel.RFComm,  BluetoothSocketOptionName.GetLink, 32);
 
                 byte[] bytes = new byte[16];
                 Buffer.BlockCopy(link, 16, bytes, 0, 16);
