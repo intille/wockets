@@ -4,12 +4,12 @@ using System.Text;
 
 namespace Wockets.Data.Commands
 {
-    public abstract class ReceiverCommand
+    public abstract class Command
     {
         protected CommandTypes type;
         protected byte[] cmd;
 
-        public byte[] CMD
+        public byte[] _Bytes
         {
             get
             {
@@ -17,11 +17,11 @@ namespace Wockets.Data.Commands
             }
         }
 
-        public CommandTypes Type
+        public CommandTypes _Type
         {
             get
             {
-            return this.type;
+                return this.type;
             }
         }
     }

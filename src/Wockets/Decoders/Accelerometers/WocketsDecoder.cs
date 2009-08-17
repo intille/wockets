@@ -140,35 +140,7 @@ namespace Wockets.Decoders.Accelerometers
                     }
                     else if (packetType == SensorDataType.CALIBRATION_VALUES)
                     {
-    
-                        /*
-                         * #define m_CALIBRATION_BYTE1_TO_X1G(aByte)  (((unsigned short)(aByte&0x7f))<<3) 
-                        #define m_CALIBRATION_BYTE2_TO_X1G(aByte)  (((unsigned short)(aByte&0x70))>>4)
-
-
-                        #define m_CALIBRATION_BYTE2_TO_XN1G(aByte)  (((unsigned short)(aByte&0x0f))<<6)
-                        #define m_CALIBRATION_BYTE3_TO_XN1G(aByte)  (((unsigned short)(aByte&0x7e))>>1)
-
-
-
-                        #define m_CALIBRATION_BYTE3_TO_Y1G(aByte)  (((unsigned short)(aByte&0x01))<<9) 
-                        #define m_CALIBRATION_BYTE4_TO_Y1G(aByte)  (((unsigned short)(aByte&0x7f))<<2)
-                        #define m_CALIBRATION_BYTE5_TO_Y1G(aByte)  (((unsigned short)(aByte&0x60))>>5)
-
-
-
-                        #define m_CALIBRATION_BYTE5_TO_YN1G(aByte)  (((unsigned short)(aByte&0x1f))<<5)
-                        #define m_CALIBRATION_BYTE6_TO_YN1G(aByte)  (((unsigned short)(aByte&0x7c))>>2)
-
-
-                        #define m_CALIBRATION_BYTE6_TO_Z1G(aByte)  (((unsigned short)(aByte&0x03))<<8) 
-                        #define m_CALIBRATION_BYTE7_TO_Z1G(aByte)  (((unsigned short)(aByte&0x7f))<<1)
-                        #define m_CALIBRATION_BYTE8_TO_Z1G(aByte)  (((unsigned short)(aByte&0x40))>>6)
-
-
-                        #define m_CALIBRATION_BYTE8_TO_ZN1G(aByte)  (((unsigned short)(aByte&0x3f))<<4)
-                        #define m_CALIBRATION_BYTE9_TO_ZN1G(aByte)  (((unsigned short)(aByte&0x78))>>3)
-                         * */
+         
                         int x1g = ((this.packet[1] & 0x7f) << 3)| ((this.packet[2]&0x70)>>4);
                         int x1ng= ((this.packet[2]&0x0f)<<6) |((this.packet[3]&0x7e)>>1);
                         int y1g=((this.packet[3]&0x01)<<9) |((this.packet[4]&0x7f)<<2)|((this.packet[5]&0x60)>>5);

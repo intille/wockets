@@ -16,26 +16,29 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
             BluetoothRadio.PrimaryRadio.Mode = RadioMode.Connectable;
         }
 
+       
         public override bool Initialize()
         {
             BluetoothRadio.PrimaryRadio.Mode = RadioMode.Connectable;
             return true;
         }
 
-        public override BluetoothStream Connect(byte[] buffer,byte[] address, string pin)
+        //There is a memory leak here
+        public override BluetoothStream Connect(byte[] buffer,string addr,byte[] address, string pin)
         {
             try
             {
+
                 //cleanup any resources if a previous connection existed
-                //this.Disconnect(address);
-                MicrosoftBluetoothStream btStream = new MicrosoftBluetoothStream(buffer,address,pin);
-                if (btStream.Open())
+                //this.Disconnect(address);               
+                MicrosoftBluetoothStream btStream = new MicrosoftBluetoothStream(buffer, address, pin);
+                lock (this)
                 {
-                    this.bluetoothStreams.Add(btStream);
-                    return btStream;
+                    if (!btStream.Open())
+                        btStream = null;
                 }
-                else                    
-                    return null;
+                
+                return btStream;
             }
             catch (Exception e)
             {

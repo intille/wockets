@@ -46,7 +46,7 @@ namespace Wockets.Sensors
             this.classname = classname;
             this.type = type;
             this.sr = 0;
-            this.saving = false;
+            this.saving = true;
         }
         /*
         public Sensor(int id, SensorClasses classname, SensorTypes type, string location, string description)
