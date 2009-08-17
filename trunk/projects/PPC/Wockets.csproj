@@ -1,4 +1,4 @@
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -219,9 +219,6 @@
     <Compile Include="..\..\src\Wockets\WocketsControllerList.cs">
       <Link>WocketsControllerList.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Receivers\Radio_CMD.cs">
-      <Link>Receivers\Radio_CMD.cs</Link>
-    </Compile>
     <Compile Include="..\..\src\Wockets\Data\Summary\Activity.cs">
       <Link>Data\Summary\Activity.cs</Link>
     </Compile>
@@ -237,10 +234,10 @@
     <Compile Include="..\..\src\Wockets\Data\Commands\CommandTypes.cs">
       <Link>Data\Commands\CommandTypes.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\ReceiverCommand.cs">
+    <Compile Include="..\..\src\Wockets\Data\Commands\Command.cs">
       <Link>Data\Commands\ReceiverCommand.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\RFCOMMCommand.cs">
+    <Compile Include="..\..\src\Wockets\Data\Commands\WocketCommand.cs">
       <Link>Data\Commands\RFCOMMCommand.cs</Link>
     </Compile>
     <Compile Include="..\..\src\Wockets\Utils\Logger.cs">
@@ -310,8 +307,19 @@
       <Link>Data\Responses\Response.cs</Link>
     </Compile>
     <Compile Include="..\..\src\Wockets\Receivers\GenericReceiver.cs">
-	<Link>Receivers\GenericReceiver.cs</Link>
+      <Link>Receivers\GenericReceiver.cs</Link>
     </Compile>
+    <Compile Include="Data\Commands\BT_RST.cs" />
+    <Compile Include="Data\Commands\EnterCommandMode.cs" />
+    <Compile Include="Data\Commands\ExitCommandMode.cs" />
+    <Compile Include="Data\Commands\GET_BT.cs" />
+    <Compile Include="Data\Commands\GET_PC.cs" />
+    <Compile Include="Data\Commands\GET_SEN.cs" />
+    <Compile Include="Data\Commands\GET_SM.cs" />
+    <Compile Include="Data\Commands\LEDTypes.cs" />
+    <Compile Include="Data\Commands\RST_WK.cs" />
+    <Compile Include="Data\Commands\SET_LED.cs" />
+    <Compile Include="Data\Commands\SET_SM.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="InTheHand.Net.csproj">
