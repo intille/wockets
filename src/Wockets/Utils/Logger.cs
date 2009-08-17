@@ -32,7 +32,7 @@ namespace Wockets.Utils
         {
             lock (wLock)
             {
-                w.WriteLine(DateTime.Now + " WARNING: " + msg);
+                w.WriteLine("WARNING: "+WocketsTimer.GetUnixTime()+ ","+DateTime.Now+","+ msg);
                 w.Flush();
             }
         }
@@ -41,7 +41,7 @@ namespace Wockets.Utils
         {
             lock (dLock)
             {
-                d.WriteLine(DateTime.Now + " DEBUG: " + msg);
+                d.WriteLine("DEBUG: " + WocketsTimer.GetUnixTime() + "," + DateTime.Now + "," + msg);                
                 d.Flush();
             }
         }

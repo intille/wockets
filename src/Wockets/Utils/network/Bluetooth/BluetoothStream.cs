@@ -15,18 +15,20 @@ namespace Wockets.Utils.network.Bluetooth
         protected string errorMessage;
         protected byte[] buffer;
         protected int tail;
+
         protected const int MAX_DISCONNECTION_COUNTER = 200;
         protected int disconnectionCounter = 0;
         protected Thread processingThread;
         protected Thread reconnectionThread;
         private bool disposed = false;
-        protected List<byte[]> toSend = new List<byte[]>();
+        //protected List<byte[]> toSend = new List<byte[]>();
+        protected CircularBuffer sbuffer;
         //private bool disposed = false;
         protected static object mylock;
 
+      
 
-
-        public BluetoothStream(byte[] buffer,byte[] address,string pin)
+        public BluetoothStream(byte[] buffer,CircularBuffer sbuffer,byte[] address,string pin)
         {       
             this.address = new byte[MAC_SIZE];
             if (BitConverter.IsLittleEndian)
@@ -43,7 +45,7 @@ namespace Wockets.Utils.network.Bluetooth
             }
             this.pin = pin;
             this.buffer = buffer;
-            this.tail = 0;
+            this.sbuffer = sbuffer;
             this.status = BluetoothStatus.Disconnected;
             mylock = new object();
         }
@@ -108,8 +110,7 @@ namespace Wockets.Utils.network.Bluetooth
 
             }
         }
-   
-        
+
 
         public int _Tail
         {
@@ -144,13 +145,13 @@ namespace Wockets.Utils.network.Bluetooth
             }
         }
 
-        public void Send(byte[] msg)
+        /*public void Send(byte[] msg)
         {
             lock (this.toSend)
             {
                 this.toSend.Add(msg);
             }
-        }
+        }*/
 
         public string _HexAddress
         {

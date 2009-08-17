@@ -21,9 +21,11 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
         //private static object mylock= new object();
         private bool disposed = false;
 
-        public MicrosoftBluetoothStream(byte[] buffer, byte[] address, string pin)
-            : base(buffer, address, pin)
+
+        public MicrosoftBluetoothStream(byte[] buffer, CircularBuffer sbuffer, byte[] address, string pin)
+            : base(buffer,sbuffer, address, pin)
         {
+
             try
             {
                 btAddress = new BluetoothAddress(this.address);
@@ -98,7 +100,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                 try
                 {
 
-                    if (sendTimer > 200)
+                   /* if (sendTimer > 200)
                     {
 
                         if (socket.Send(sendByte, 1, SocketFlags.None) <= 0)
@@ -110,6 +112,31 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                         Thread.Sleep(50);
                     }
                     sendTimer++;
+                    */
+                    lock (this.sbuffer)
+                    {
+                        int counter = 0;
+                        while (this.sbuffer._Tail != this.sbuffer._Head)
+                        {
+                            if (socket.Send(this.sbuffer._Bytes, this.sbuffer._Head, 1, SocketFlags.None) != 1)
+                            {
+                                this.errorMessage = "MicrosoftBluetoothStream failed at Process(). Cannot send bytes to " + btAddress.ToString();
+                                this.status = BluetoothStatus.Disconnected;
+                                return;
+                            }
+
+                            if (this.sbuffer._Head >= (this.sbuffer._Bytes.Length - 1))
+                                this.sbuffer._Head = 0;
+                            else
+                                this.sbuffer._Head++;
+
+                            Thread.Sleep(20);
+                            counter++;
+                            if (counter == 10)
+                                break;
+                        }                        
+                    }
+
 
            
                     int availableBytes = socket.Available;

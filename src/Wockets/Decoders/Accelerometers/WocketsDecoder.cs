@@ -7,6 +7,7 @@ using Wockets.Data;
 using Wockets.Data.Accelerometers;
 using Wockets.Data.Commands;
 using Wockets.Utils;
+using Wockets.Exceptions;
 
 namespace Wockets.Decoders.Accelerometers
 {
@@ -21,6 +22,8 @@ namespace Wockets.Decoders.Accelerometers
         private int bytesToRead = 0;
         private SensorDataType packetType;
         private double lastTimestamp;
+        private int burstyCounter = 0;
+        private int bursts = 0;
 
         public WocketsDecoder()
             : base(BUFFER_SIZE, (WocketsAccelerationData.NUM_RAW_BYTES > Wockets.Data.Responses.Response.MAX_RAW_BYTES) ? WocketsAccelerationData.NUM_RAW_BYTES : Wockets.Data.Responses.Response.MAX_RAW_BYTES)
@@ -117,14 +120,24 @@ namespace Wockets.Decoders.Accelerometers
                             bufferHead++;
                         numDecodedPackets++;
 
-                        
-
-
                         this.packetPosition = 0;
                         this.headerSeen = false;
 
-                        //if (numDecodedPackets > 45)
-                        //    break;
+                        
+                        burstyCounter++;                                                
+                        if ((lastTimestamp!=0) && ((datum.UnixTimeStamp - lastTimestamp) > 3000))
+                            bursts++;
+                        if (burstyCounter >= 1800)
+                        {
+                            if (bursts >= 5)
+                                throw new BurstyException("Bursty data detected");
+                            else if (burstyCounter >= 5000)
+                            {
+                                burstyCounter = 0;
+                                bursts = 0;
+                            }
+                        }
+                        lastTimestamp = datum.UnixTimeStamp;
                     }
                     else if (packetType == SensorDataType.BATTERYLEVEL)
                     {
@@ -133,6 +146,7 @@ namespace Wockets.Decoders.Accelerometers
                         for (int i = 0; (i < bytesToRead); i++)
                             br.RawBytes[i] = this.packet[i];
                         br.BatteryLevel = (((int)this.packet[1]) << 3) | ((this.packet[2] >> 4) & 0x07);
+                        Logger.Warn("BT," + br.SensorID + "," + br.BatteryLevel);
                         Response.ResponseArgs e = new Response.ResponseArgs();
                         e._Response = br;
                         FireEvent(e);
@@ -140,13 +154,13 @@ namespace Wockets.Decoders.Accelerometers
                     }
                     else if (packetType == SensorDataType.CALIBRATION_VALUES)
                     {
-         
-                        int x1g = ((this.packet[1] & 0x7f) << 3)| ((this.packet[2]&0x70)>>4);
-                        int x1ng= ((this.packet[2]&0x0f)<<6) |((this.packet[3]&0x7e)>>1);
-                        int y1g=((this.packet[3]&0x01)<<9) |((this.packet[4]&0x7f)<<2)|((this.packet[5]&0x60)>>5);
-                        int y1ng=((this.packet[5]&0x1f)<<5)|((this.packet[6]&0x7c)>>2);
-                        int z1g=((this.packet[6]&0x03)<<8) | ((this.packet[7]&0x7f)<<1) |((this.packet[8]&0x40)>>6);
-                        int z1ng= ((this.packet[8]&0x3f)<<4) | ((this.packet[9]&0x78)>>3);                        
+
+                        int x1g = ((this.packet[1] & 0x7f) << 3) | ((this.packet[2] & 0x70) >> 4);
+                        int x1ng = ((this.packet[2] & 0x0f) << 6) | ((this.packet[3] & 0x7e) >> 1);
+                        int y1g = ((this.packet[3] & 0x01) << 9) | ((this.packet[4] & 0x7f) << 2) | ((this.packet[5] & 0x60) >> 5);
+                        int y1ng = ((this.packet[5] & 0x1f) << 5) | ((this.packet[6] & 0x7c) >> 2);
+                        int z1g = ((this.packet[6] & 0x03) << 8) | ((this.packet[7] & 0x7f) << 1) | ((this.packet[8] & 0x40) >> 6);
+                        int z1ng = ((this.packet[8] & 0x3f) << 4) | ((this.packet[9] & 0x78) >> 3);
                     }
 
                 }

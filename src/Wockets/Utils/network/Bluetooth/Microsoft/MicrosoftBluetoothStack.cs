@@ -24,14 +24,14 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
         }
 
         //There is a memory leak here
-        public override BluetoothStream Connect(byte[] buffer,string addr,byte[] address, string pin)
+        public override BluetoothStream Connect(byte[] buffer,CircularBuffer sbuffer,byte[] address, string pin)
         {
             try
             {
 
                 //cleanup any resources if a previous connection existed
                 //this.Disconnect(address);               
-                MicrosoftBluetoothStream btStream = new MicrosoftBluetoothStream(buffer, address, pin);
+                MicrosoftBluetoothStream btStream = new MicrosoftBluetoothStream(buffer,sbuffer, address, pin);
                 lock (this)
                 {
                     if (!btStream.Open())
