@@ -15,8 +15,8 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
         private SerialPort spp=null;
         private IntPtr wdStack;
         private static int x = 0;
-        public WidcommBluetoothStream(byte[] buffer, byte[] address, string pin)
-            : base(buffer,address,pin)
+        public WidcommBluetoothStream(byte[] buffer,CircularBuffer sbuffer, byte[] address, string pin)
+            : base(buffer,sbuffer,address,pin)
         {
             //this.wdStack = WidcommAPI.CreateWidcommStack();
             //WidcommAPI.SetAutoReconnect(this.wdStack);  

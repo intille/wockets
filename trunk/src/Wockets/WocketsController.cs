@@ -6,7 +6,9 @@ using Wockets.Receivers;
 using Wockets.Decoders;
 using Wockets.Sensors;
 using Wockets.Utils;
+using Wockets.Data.Commands;
 using Wockets.Utils.network;
+using Wockets.Exceptions;
 using System.Threading;
 
 namespace Wockets
@@ -130,11 +132,11 @@ namespace Wockets
 
             polling = true;
             saving = true;
-            //aSavingThread = new Thread(new ThreadStart(Save));
+            aSavingThread = new Thread(new ThreadStart(Save));
             aPollingThread = new Thread(new ThreadStart(Poll));
             aPollingThread.Priority = ThreadPriority.Highest;
             aPollingThread.Start();            
-            //aSavingThread.Start();
+            aSavingThread.Start();
          
         }
 
@@ -196,7 +198,14 @@ namespace Wockets
             //int quantum= CeGetThreadQuantum(new IntPtr(aPollingThread.ManagedThreadId));
 
             Receiver currentReceiver = null;
-            Sensor sensor = null;
+            Sensor sensor = null;            
+
+            int[] batteryPoll=new int[this._Sensors.Count];
+            int[] alive=new int[this._Sensors.Count];
+
+            GET_BT GET_BT_CMD = new GET_BT();
+            ALIVE ALIVE_CMD = new ALIVE();
+
             while (polling)
             {
 
@@ -221,7 +230,7 @@ namespace Wockets
                     {
                         sensor = this._Sensors[i];
                         currentReceiver = sensor._Receiver;
-                        currentReceiver.Update();               
+                        currentReceiver.Update();
 
                         if (currentReceiver._Status == ReceiverStatus.Connected)
                         {
@@ -235,12 +244,64 @@ namespace Wockets
                                     numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer, dataLength);
                                     sensor.Packets += numDecodedPackets;
                                 }
-                                
+
                             }
                             else
                                 if (sensor._Class == SensorClasses.Wockets)
                                 {
-                                    
+
+                                    CircularBuffer sendBuffer = ((RFCOMMReceiver)currentReceiver)._SBuffer;
+                              
+                                    #region Write Data
+                                    #region Battery Query
+                                    batteryPoll[i] -= 1;
+                                    if (batteryPoll[i] <= 0)
+                                    {
+
+
+                                        lock (sendBuffer)
+                                        {
+
+                                            int availableBytes = GET_BT_CMD._Bytes.Length;
+                                            //only insert if the send buffer won't overflow
+                                            if ((sendBuffer._Tail + availableBytes) > sendBuffer._Bytes.Length)
+                                            {
+                                                Buffer.BlockCopy(GET_BT_CMD._Bytes, 0, sendBuffer._Bytes, sendBuffer._Tail, sendBuffer._Bytes.Length - sendBuffer._Tail);
+                                                availableBytes -= sendBuffer._Bytes.Length - sendBuffer._Tail;
+                                                sendBuffer._Tail = 0;
+                                            }
+                                            Buffer.BlockCopy(GET_BT_CMD._Bytes, GET_BT_CMD._Bytes.Length - availableBytes, sendBuffer._Bytes, sendBuffer._Tail, availableBytes);
+                                            sendBuffer._Tail += availableBytes;
+                                        }
+                           
+                                        batteryPoll[i] = 6000 + i * 200;
+                                    }
+                                    #endregion Battery Query
+
+                                    #region Alive 
+                                    alive[i] -= 1;
+                                    if (alive[i] <= 0)
+                                    {            
+                                        lock (sendBuffer)
+                                        {
+             
+                                            int availableBytes=ALIVE_CMD._Bytes.Length;
+                                            //only insert if the send buffer won't overflow
+                                            if ((sendBuffer._Tail + availableBytes) > sendBuffer._Bytes.Length)
+                                            {
+                                                Buffer.BlockCopy(ALIVE_CMD._Bytes, 0, sendBuffer._Bytes, sendBuffer._Tail, sendBuffer._Bytes.Length - sendBuffer._Tail);
+                                                availableBytes -= sendBuffer._Bytes.Length - sendBuffer._Tail;
+                                                sendBuffer._Tail = 0;
+                                            }
+                                            Buffer.BlockCopy(ALIVE_CMD._Bytes, ALIVE_CMD._Bytes.Length - availableBytes, sendBuffer._Bytes, sendBuffer._Tail, availableBytes);
+                                            sendBuffer._Tail += availableBytes;
+                                        }
+                                        alive[i] = 200 + i * 10;
+                                    }
+                                    #endregion Alive
+                                    #endregion Write Data
+
+                                    #region Read Data
                                     int dataLength = currentReceiver._Tail - currentReceiver._Head;
                                     if (dataLength < 0)
                                         dataLength = currentReceiver._Buffer.Length - currentReceiver._Head + currentReceiver._Tail;
@@ -252,36 +313,21 @@ namespace Wockets
                                         ((RFCOMMReceiver)currentReceiver)._Head = tail;
                                         sensor.Packets += numDecodedPackets;
                                     }
-                                }                     
+                                    #endregion Read Data
+                                }
                         }
                     }
-//                    if (isPlotting)
-  //                      UpdateGraph();
 
                 }
-                //Thrown when there is a Bluetooth failure                    
-                //TODO: Make sure no USB failure happening
+                catch (BurstyException be)
+                {
+                    Logger.Warn("Bursty Data," + sensor._ID + "," + be.Message);
+                    currentReceiver.Dispose();
+                }
                 catch (Exception ex)
                 {
-
-                   // if (sensor._Class == SensorClasses.Wockets)
-                    //{
-
-                    Logger.Warn("Wocket " + sensor._ID + " has disconnected.");
-
-
-                        //if (this.bluetoothConnectors[currentReceiver._ID] == null)
-                        //{
-                         //   this.bluetoothConnectors[currentReceiver._ID] = new BluetoothConnector(currentReceiver, this);
-                        //}
-                        
-                        currentReceiver.Dispose();
-                    //}
-                   // else if (sensor._Class == SensorClasses.HTCDiamondTouch)
-                    //{
-                      //  currentReceiver.Initialize();
-                       // currentReceiver._Running = true;
-                    //}
+                    Logger.Warn("Disconnection," + sensor._ID+","+ex.Message);
+                    currentReceiver.Dispose();
                 }
 
 

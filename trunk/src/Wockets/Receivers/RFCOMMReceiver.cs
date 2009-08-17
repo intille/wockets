@@ -39,6 +39,7 @@ namespace Wockets.Receivers
         private const bool USE_STOP_BIT = true;
         private const int BAUD_RATE = 57600;
         private const int BUFFER_SIZE = 8000;
+        private const int SEND_BUFFER_SIZE = 256;
         private const int PORT_NUMBER = 9;
         private const int MAXIMUM_SAMPLING_RATE = 70;
 
@@ -54,14 +55,33 @@ namespace Wockets.Receivers
         private string pin;
         private int sniffTime = 0;
         private bool sniffMode;
+        protected CircularBuffer sbuffer;
+
 
         public RFCOMMReceiver()
             : base(BUFFER_SIZE)
         {
             this.type = ReceiverTypes.RFCOMM;
+            this.sbuffer = new CircularBuffer(SEND_BUFFER_SIZE);
+        
 
             //initialize the stack
 
+        }
+
+   
+
+        public CircularBuffer _SBuffer
+        {
+            get
+            {
+                return this.sbuffer;
+            }
+
+            set
+            {
+                this.sbuffer = value;
+            }
         }
         public override int _Tail
         {
@@ -139,9 +159,10 @@ namespace Wockets.Receivers
                     //this.bluetoothStream.Close();
                     //this.bluetoothStream.Dispose();
                //     disposedStream = this.bluetoothStream;
-                  
+                    
                     this.bluetoothStream = null;                    
-                    this.status = ReceiverStatus.Disconnected;                    
+                    this.status = ReceiverStatus.Disconnected;
+                    this.sbuffer._Head = 0;//ignore all pending send bytes
                 }
 
                 //ideas - delay reconnection
@@ -213,8 +234,8 @@ namespace Wockets.Receivers
         {
             
             try
-            {
-                this.bluetoothStream = NetworkStacks._BluetoothStack.Connect(this._Buffer,this.address, this.address_bytes, this.pin);
+            {               
+                this.bluetoothStream = NetworkStacks._BluetoothStack.Connect(this._Buffer, this._SBuffer , this.address_bytes, this.pin);
                 if (this.bluetoothStream == null)
                     return false;
                 return true;
@@ -232,7 +253,8 @@ namespace Wockets.Receivers
             {
 #if (PocketPC)
                 //this._Running = false;
-                this._Status = ReceiverStatus.Disconnected;
+                //this._Status = ReceiverStatus.Disconnected;
+                this.bluetoothStream._Status = BluetoothStatus.Disconnected;
                 //NetworkStacks._BluetoothStack.Disconnect(this.address_bytes);
                 //this.bluetoothStream._Status = BluetoothStatus.Disposed;
 #endif

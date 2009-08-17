@@ -50,7 +50,7 @@ namespace Wockets.Utils.network.Bluetooth
 
         public abstract bool Initialize();
         public abstract Hashtable Search();
-        public abstract BluetoothStream Connect(byte[] buffer,string addr, byte[] address, string pin);
+        public abstract BluetoothStream Connect(byte[] buffer,CircularBuffer sbuffer, byte[] address, string pin);
         public abstract void Dispose();
     }
 }

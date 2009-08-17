@@ -2093,6 +2093,7 @@ namespace WocketsApplication.DataLogger
             {
                 Wockets.Data.Commands.BatteryResponse br = (Wockets.Data.Commands.BatteryResponse)e._Response;
                 ((PictureBox)this.sensorBattery["W" + br.SensorID]).Image = this.batteryImg[(5*1024-5*br.BatteryLevel)/1024];
+                
                 updateCommand("Received Battery Response: "+br.BatteryLevel);
             }
         }

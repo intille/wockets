@@ -114,7 +114,8 @@ namespace Wockets.Receivers
         #endregion Serialization Constants
 
         private const int MAXIMUM_SAMPLING_RATE = 20;
-        private const int BUFFER_SIZE = 200;
+        private const int BUFFER_SIZE = 16;
+        private const int SEND_BUFFER_SIZE = 0;
         private int bufferIndex;
         private double lastTS;
         private int sampleTimeSpace = 0;
@@ -224,6 +225,7 @@ namespace Wockets.Receivers
             SetEvent(hEvent);
             CloseHandle(hEvent);
             myOrientationState.Changed += new ChangeEventHandler(myOrientationState_Changed);
+            this.status = ReceiverStatus.Connected;
 #endif
             return true;
         }

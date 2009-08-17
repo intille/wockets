@@ -33,7 +33,10 @@ namespace Wockets.Receivers
             //this.isRunning = false;
             //this.isReconnecting = false;
             this.buffer= new byte[bufferSize];
+
+
             this.head = 0;
+
             this.status = ReceiverStatus.Disconnected;
         }
 
@@ -58,6 +61,7 @@ namespace Wockets.Receivers
                 this.head = value;
             }
         }
+
         public int _ID
         {
             get
@@ -85,6 +89,7 @@ namespace Wockets.Receivers
         }
 
 
+    
         public byte[] _Buffer
         {
             get

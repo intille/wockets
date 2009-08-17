@@ -19,13 +19,15 @@ namespace Wockets.Receivers
         private const bool USE_STOP_BIT = true;
         private const int BAUD_RATE=57600;
         private const int BUFFER_SIZE = 4096;
+        private const int SEND_BUFFER_SIZE = 256;
         private const int MAXIMUM_SAMPLING_RATE = 180;
 
         //Standard COM Specific Objects
         private int portNumber;
         private SerialPortController spc;
 
-        public StandardCOMReceiver():base(BUFFER_SIZE)
+        public StandardCOMReceiver()
+            : base(BUFFER_SIZE)
         {
             this.type = ReceiverTypes.StandardCOM;
         }

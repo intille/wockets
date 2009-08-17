@@ -104,11 +104,11 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
 
         }
 
-        public override BluetoothStream Connect(byte[] buffer,string addr, byte[] address, string pin)
+        public override BluetoothStream Connect(byte[] buffer,CircularBuffer sbuffer, byte[] address, string pin)
         {
             try
             {
-                WidcommBluetoothStream bluetoothStream = new WidcommBluetoothStream(buffer, address, pin);
+                WidcommBluetoothStream bluetoothStream = new WidcommBluetoothStream(buffer,sbuffer, address, pin);
                 if (bluetoothStream.Open())
                 {
                     //this.bluetoothStreams.Add(bluetoothStream);
