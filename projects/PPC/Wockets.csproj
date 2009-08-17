@@ -1,4 +1,4 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -309,17 +309,20 @@
     <Compile Include="..\..\src\Wockets\Receivers\GenericReceiver.cs">
       <Link>Receivers\GenericReceiver.cs</Link>
     </Compile>
-    <Compile Include="Data\Commands\BT_RST.cs" />
-    <Compile Include="Data\Commands\EnterCommandMode.cs" />
-    <Compile Include="Data\Commands\ExitCommandMode.cs" />
-    <Compile Include="Data\Commands\GET_BT.cs" />
-    <Compile Include="Data\Commands\GET_PC.cs" />
-    <Compile Include="Data\Commands\GET_SEN.cs" />
-    <Compile Include="Data\Commands\GET_SM.cs" />
-    <Compile Include="Data\Commands\LEDTypes.cs" />
-    <Compile Include="Data\Commands\RST_WK.cs" />
-    <Compile Include="Data\Commands\SET_LED.cs" />
-    <Compile Include="Data\Commands\SET_SM.cs" />
+    <Compile Include="..\..\src\Wockets\Data\Commands\ALIVE.cs" />
+    <Compile Include="..\..\src\Wockets\Data\Commands\BT_RST.cs" />
+    <Compile Include="..\..\src\Wockets\Data\Commands\EnterCommandMode.cs" />
+    <Compile Include="..\..\src\Wockets\Data\Commands\ExitCommandMode.cs" />
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_BT.cs" />
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_PC.cs" />
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_SEN.cs" />
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_SM.cs" />
+    <Compile Include="..\..\src\Wockets\Data\Commands\LEDTypes.cs" />
+    <Compile Include="..\..\src\Wockets\Data\Commands\RST_WK.cs" />
+    <Compile Include="..\..\src\Wockets\Data\Commands\SET_LED.cs" />
+    <Compile Include="..\..\src\Wockets\Data\Commands\SET_SM.cs" />
+    <Compile Include="..\..\src\Wockets\Exceptions\BurstyException.cs" />
+    <Compile Include="..\..\src\Wockets\Utils\CircularBuffer.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="InTheHand.Net.csproj">

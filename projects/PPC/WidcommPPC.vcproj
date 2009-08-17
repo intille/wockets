@@ -318,7 +318,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalOptions=" /subsystem:windowsce,4.20 /machine:ARM /ARMPADCODE"
+				AdditionalOptions=" /subsystem:windowsce,5.01"
 				OutputFile="$(OutDir)/WidcommPPC.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\bin\NeededFiles\sdks\Widcomm\Lib\ArmRel"
