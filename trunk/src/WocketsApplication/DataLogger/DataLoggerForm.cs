@@ -483,10 +483,10 @@ namespace WocketsApplication.DataLogger
             progressMessage = "Initializing receivers ... searching " + this.wocketsController._Receivers.Count + " BT receivers\r\n";
 
             this.wocketsController.Initialize();
-            foreach (Decoder d in this.wocketsController._Decoders)
+            /*foreach (Decoder d in this.wocketsController._Decoders)
             {
                 d.Subscribe(SensorDataType.BATTERYLEVEL, new Response.ResponseHandler(this.BatteryCallback));
-            }
+            }*/
             //Try to initialize all receivers 10 times then exit
             /*int initializationAttempt = 0;
             while (initializationAttempt <= 10)
@@ -1762,15 +1762,7 @@ namespace WocketsApplication.DataLogger
             }
 
             this.SRcounter++;
-           /* if (this.SRcounter == 800)
-            {
-                foreach (Sensor s in this.wocketsController._Sensors)
-                {
-                    Wockets.Sensors.Accelerometers.Wocket w = (Wockets.Sensors.Accelerometers.Wocket)s;
-                    w._Config_Timer = 255;
-                    //rf.Send(Wockets.Data.Commands.RFCOMMCommand.SetCAL(1,2,3,4,5,6));
-                }
-            }*/
+
             if (this.SRcounter > 1600)//Update status interface every 5 minutes
             {
                 String log="";
@@ -1793,16 +1785,21 @@ namespace WocketsApplication.DataLogger
                 Logger.Warn(log);
                 this.SRcounter = 0;
                 this.LastTime = now;
-
+                
+                /*
                 foreach (Sensor s in this.wocketsController._Sensors)
                 {
-                    /*Wockets.Sensors.Accelerometers.Wocket w = (Wockets.Sensors.Accelerometers.Wocket)s;
+                    Wockets.Sensors.Accelerometers.Wocket w = (Wockets.Sensors.Accelerometers.Wocket)s;
                     if (w.Command())
                     {
                         w._Config_Timer = 255;
-                    }*/
+                    }
                 }
+
+                updateCommand("Sent Battery Request");*/
+
                 //updateCommand("Sent CMD Request");
+
             }
             
             if (isQuitting)
