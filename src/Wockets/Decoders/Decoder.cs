@@ -146,3 +146,4 @@ namespace Wockets.Decoders
         public abstract void FromXML(string xml);
     }
 }
+
