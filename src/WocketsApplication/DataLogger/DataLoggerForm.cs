@@ -1733,7 +1733,6 @@ namespace WocketsApplication.DataLogger
         }
          */
 
-       short last = 689;
         private void readDataTimer_Tick(object sender, EventArgs e)
         {
             
