@@ -182,9 +182,6 @@
     <Compile Include="..\..\src\Wockets\WocketsControllerList.cs">
       <Link>WocketsControllerList.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Receivers\Radio_CMD.cs">
-      <Link>Receivers\Radio_CMD.cs</Link>
-    </Compile>
     <Compile Include="..\..\src\Wockets\Data\Summary\Activity.cs">
       <Link>Data\Summary\Activity.cs</Link>
     </Compile>
@@ -227,17 +224,8 @@
     <Compile Include="..\..\src\Wockets\Sensors\Accelerometers\HTCDiamondTouch.cs">
       <Link>Sensors\Accelerometers\HTCDiamondTouch.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\BatteryResponse.cs">
-      <Link>Data\Commands\BatteryResponse.cs</Link>
-    </Compile>
     <Compile Include="..\..\src\Wockets\Data\Commands\CommandTypes.cs">
       <Link>Data\Commands\CommandTypes.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\ReceiverCommand.cs">
-      <Link>Data\Commands\ReceiverCommand.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\RFCOMMCommand.cs">
-      <Link>Data\Commands\RFCOMMCommand.cs</Link>
     </Compile>
     <Compile Include="..\..\src\Wockets\Utils\Barrier.cs">
       <Link>Utils\Barrier.cs</Link>
@@ -278,9 +266,67 @@
     <Compile Include="..\..\src\Wockets\Receivers\ReceiverStatus.cs">
       <Link>Receivers\ReceiverStatus.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Decoders\Response.cs" >
+    <Compile Include="..\..\src\Wockets\Decoders\Response.cs">
       <Link>Decoders\Response.cs</Link>
     </Compile>
+    <Compile Include="..\..\src\Wockets\Receivers\GenericReceiver.cs">
+      <Link>Receivers\GenericReceiver.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\ALIVE.cs">
+      <Link>Data\Commands\ALIVE.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\BT_RST.cs">
+      <Link>Data\Commands\BT_RST.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\EnterCommandMode.cs">
+      <Link>Data\Commands\EnterCommandMode.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\ExitCommandMode.cs">
+      <Link>Data\Commands\ExitCommandMode.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_BT.cs">
+      <Link>Data\Commands\GET_BT.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_PC.cs">
+      <Link>Data\Commands\GET_PC.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_SEN.cs">
+      <Link>Data\Commands\GET_SEN.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_SM.cs">
+      <Link>Data\Commands\GET_SM.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\LEDTypes.cs">
+      <Link>Data\Commands\LEDTypes.cs"</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\RST_WK.cs">
+      <Link>Data\Commands\RST_WK.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\SET_LED.cs">
+      <Link>Data\Commands\SET_LED.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\SET_SM.cs">
+      <Link>Data\Commands\SET_SM.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Exceptions\BurstyException.cs">
+      <Link>Exceptions\BurstyException.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\CircularBuffer.cs">
+      <Link>Utils\CircularBuffer.cs</Link>
+    </Compile>
+        <Compile Include="..\..\src\Wockets\Data\Commands\Command.cs">
+          <Link>Data\Commands\ReceiverCommand.cs</Link>
+        </Compile>
+        <Compile Include="..\..\src\Wockets\Data\Commands\WocketCommand.cs">
+          <Link>Data\Commands\RFCOMMCommand.cs</Link>
+    </Compile>
+        <Compile Include="..\..\src\Wockets\Data\Responses\BatteryResponse.cs">
+          <Link>Data\Responses\BatteryResponse.cs</Link>
+    </Compile>
+        <Compile Include="..\..\src\Wockets\Data\Responses\Response.cs">
+          <Link>Data\Responses\Response.cs</Link>
+    </Compile>
+    
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="InTheHand.Net.csproj">
