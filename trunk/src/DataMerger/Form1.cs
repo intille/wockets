@@ -39,7 +39,7 @@ namespace DataMerger
                 //Check if all the files that we are looking for exist
                 try
                 {
-                    string[] file = Directory.GetDirectories(this.textBox1.Text);
+                    /*string[] file = Directory.GetDirectories(this.textBox1.Text);
                     foreach (string directory in file)
                         if (directory.Contains("phone"))
                         {
@@ -55,128 +55,182 @@ namespace DataMerger
                                 this.progressForm.AppendLog("Phone Annotation .....................Copied\r\n");
                             }
                         }
+                     */
 
-                    this.progressForm.AppendLog("Older MITes CSVs .....................Deleting\r\n");
-                    file = Directory.GetFileSystemEntries(this.textBox1.Text, "*MITes*.csv");
+                    this.progressForm.AppendLog("Older Merged MITes CSVs .....................Deleting\r\n");
+                   string[] file = Directory.GetFileSystemEntries(this.textBox1.Text +"\\"+MERGED_SUBDIRECTORY, "*MITes*.csv");
                     foreach (string filename in file)
                         File.Delete(filename);
 
-                    //File.Copy("SensorData.xml", this.textBox1.Text + "\\SensorData.xml",true);
-                    //this.progressForm.AppendLog("SensorData Locations .....................Fixing\r\n");
+                    this.progressForm.AppendLog("Older Merged Wockets CSVs .....................Deleting\r\n");
+                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*Wocket*.csv");
+                    foreach (string filename in file)
+                        File.Delete(filename);
 
+                    this.progressForm.AppendLog("Older Merged Actigraph CSVs .....................Deleting\r\n");
+                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*Actigraph*.csv");
+                    foreach (string filename in file)
+                        File.Delete(filename);
+
+
+                    this.progressForm.AppendLog("Older Merged Sensewear CSVs .....................Deleting\r\n");
+                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*Sensewear*.csv");
+                    foreach (string filename in file)
+                        File.Delete(filename);
+
+                    this.progressForm.AppendLog("Older Merged Zephyr CSVs .....................Deleting\r\n");
+                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*Zephyr*.csv");
+                    foreach (string filename in file)
+                        File.Delete(filename);
+
+                    this.progressForm.AppendLog("Older Merged Oxycon CSVs .....................Deleting\r\n");
+                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*Oxycon*.csv");
+                    foreach (string filename in file)
+                        File.Delete(filename);
+
+                    this.progressForm.AppendLog("Older Merged Omron CSVs .....................Deleting\r\n");
+                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*Omron*.csv");
+                    foreach (string filename in file)
+                        File.Delete(filename);
+
+                    this.progressForm.AppendLog("Older Merged Columbia CSVs .....................Deleting\r\n");
+                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*columbia*.csv");
+                    foreach (string filename in file)
+                        File.Delete(filename);
+
+                    this.progressForm.AppendLog("Older Merged GPS CSVs .....................Deleting\r\n");
+                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*gps*.csv");
+                    foreach (string filename in file)
+                        File.Delete(filename);
+
+                    this.progressForm.AppendLog("Older Merged RTI CSVs .....................Deleting\r\n");
+                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*rti*.csv");
+                    foreach (string filename in file)
+                        File.Delete(filename);
+
+                
                     //annotation files   
-                    if (File.Exists(this.textBox1.Text + "\\AnnotationIntervals.xml"))
+                    if (File.Exists(this.textBox1.Text+"\\"+ MERGED_SUBDIRECTORY + "\\AnnotationIntervals.xml"))
                         this.progressForm.AppendLog("Annotation File .....................Found\r\n");
-                    //else
-                    //    throw new Exception("Annotation File ....................Not Found\r\n");
+                    else
+                        this.progressForm.AppendLog("Annotation File ..................... Not Found\r\n");
 
-                    if (File.Exists(this.textBox1.Text + "\\ActivityLabelsRealtime.xml"))
+
+                    if (File.Exists(this.textBox1.Text + "\\" + WOCKETS_SUBDIRECTORY + "\\ActivityLabelsRealtime.xml"))
                         this.progressForm.AppendLog("Activity Labels File .....................Found\r\n");
-                   // else
-                    //    throw new Exception("Activity Labels File ....................Not Found");
-
-                    //sensewear
-                    file = Directory.GetFileSystemEntries(this.textBox1.Text, "*-sensewear*.csv");
+                    else
+                        this.progressForm.AppendLog("Activity Labels File .....................Not Found\r\n");
+           
+                    //Sensewear
+                    file = Directory.GetFileSystemEntries(this.textBox1.Text+"\\"+ OTHER_SUBDIRECTORY, "*-sensewear*.csv");
                     if (file.Length == 1)
                         this.progressForm.AppendLog("Sensewear File .....................Found\r\n");
                     else if (file.Length == 0)
-                        this.progressForm.AppendLog("Sensewear File ..................... Not Found\r\n");
-                    //else
-                     //   throw new Exception("Sensewear naming problem. Too many sensewear files.");
+                        this.progressForm.AppendLog("Sensewear File ..................... Not Found\r\n");         
 
 
                     //actigraph
-                    file = Directory.GetFileSystemEntries(this.textBox1.Text, "*-actigraph*.csv");
+                    file = Directory.GetFileSystemEntries(this.textBox1.Text+"\\"+OTHER_SUBDIRECTORY, "*-actigraph*.csv");
                     if (file.Length == 1)
                         this.progressForm.AppendLog("1 Actigraph File .....................Found\r\n");
                     else if (file.Length == 2)
                         this.progressForm.AppendLog("2 Actigraph Files .....................Found\r\n");
                     else if (file.Length == 0)
                         this.progressForm.AppendLog("Actigraph File ..................... Not Found\r\n");
-                    //else
-                    //    throw new Exception("Actigraph naming problem. Too many actigraph files.");
+
 
                     //oxycon
-                    if (File.Exists(this.textBox1.Text + "\\OxyconSyncronizationTime.txt"))
+                    if (File.Exists(this.textBox1.Text+"\\"+ OTHER_SUBDIRECTORY + "\\OxyconSyncronizationTime.txt"))
                     {
                         this.progressForm.AppendLog("Oxycon Synchronization File .....................Found\r\n");
-                        file = Directory.GetFileSystemEntries(this.textBox1.Text, "*-oxycon.dat");
+                        file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-oxycon.dat");
                         if (file.Length == 1)
                             this.progressForm.AppendLog("Oxycon PC File .....................Found\r\n");
                         else if (file.Length == 0)
                             this.progressForm.AppendLog("Oxycon PC File .....................Not Found\r\n");
-                       // else
-                        //    throw new Exception("Oxycon PC naming problem. Too many Oxycon PC files.");
 
-                        file = Directory.GetFileSystemEntries(this.textBox1.Text, "*-flashcard.dat");
+
+                        file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-flashcard.dat");
                         if (file.Length == 1)
                             this.progressForm.AppendLog("Oxycon Flash File .....................Found\r\n");
                         else if (file.Length == 0)
                         {
-                            file = Directory.GetFileSystemEntries(this.textBox1.Text, "*-flash.dat");
+                            file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-flash.dat");
                             if (file.Length == 1)
                             {
                                 this.progressForm.AppendLog("Oxycon Flash.dat wrong name .....................Renaming\r\n");
                                 File.Copy(file[0], file[0].Replace("-flash.dat", "-flashcard.dat"));
                             }
                             else
-                                this.progressForm.AppendLog("Oxycon Flash file not found.... manual inspection needed");
+                                this.progressForm.AppendLog("Oxycon Flash file not found.... manual inspection needed\r\n");
                         }
-                        //else
-                           // throw new Exception("Oxycon Flash naming problem. Too many Oxycon Flash files.");
-
                     }
                     else
-                        this.progressForm.AppendLog("Oxycon Synchronization File ....................Not Found");
+                        this.progressForm.AppendLog("Oxycon Synchronization File ....................Not Found\r\n");
 
 
                     //omron
 
-                    file = Directory.GetFileSystemEntries(this.textBox1.Text, "*-omron.csv");
+                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-omron.csv");
                     if (file.Length == 1)
                         this.progressForm.AppendLog("Omron File .....................Found\r\n");
                     else if (file.Length == 0)
                         this.progressForm.AppendLog("Omron File ..................... Not Found\r\n");
-                   // else
-                   //     throw new Exception("Omron naming problem. Too many Omron files.");
 
                     //zephyr
 
-                    file = Directory.GetFileSystemEntries(this.textBox1.Text, "*-zephyr*.csv");
+                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-zephyr*.csv");
                     if (file.Length == 1)
                         this.progressForm.AppendLog("Zephyr File .....................Found\r\n");
                     else if (file.Length == 0)
                         this.progressForm.AppendLog("Zephyr File ..................... Not Found\r\n");
-                   // else
-                       // throw new Exception("Zephyr naming problem. Too many Omron files.");
+
+                    //Columbia
+
+                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-columbia*.csv");
+                    if (file.Length == 1)
+                        this.progressForm.AppendLog("Columbia File .....................Found\r\n");
+                    else if (file.Length == 0)
+                        this.progressForm.AppendLog("Columbia File ..................... Not Found\r\n");
+
+
+                    //GPS
+
+                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-gps*.csv");
+                    if (file.Length == 1)
+                        this.progressForm.AppendLog("GPS File .....................Found\r\n");
+                    else if (file.Length == 0)
+                        this.progressForm.AppendLog("GPS File ..................... Not Found\r\n");
+
+
+                    //RTI
+
+                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-rti*.csv");
+                    if (file.Length == 1)
+                        this.progressForm.AppendLog("RTI File .....................Found\r\n");
+                    else if (file.Length == 0)
+                        this.progressForm.AppendLog("RTI File ..................... Not Found\r\n");
 
                     //MITes
 
                     //configuration files
-                    if (File.Exists(this.textBox1.Text + "\\Configuration.xml"))
+                    if (File.Exists(this.textBox1.Text + "\\" + MITES_SUBDIRECTORY + "\\Configuration.xml"))
                         this.progressForm.AppendLog("Configuration.xml File .....................Found\r\n");
-                   // else
-                    //    throw new Exception("Configuration.xml File ....................Not Found");
 
-                    if (File.Exists(this.textBox1.Text + "\\SensorData.xml"))
+                    if (File.Exists(this.textBox1.Text + "\\" + MITES_SUBDIRECTORY + "\\SensorData.xml"))
                         this.progressForm.AppendLog("SensorData.xml File .....................Found\r\n");
-                   // else
-                   //     throw new Exception("SensorData.xml File ....................Not Found");
 
-                    if (File.Exists(this.textBox1.Text + "\\SensorData.xml"))
+                    if (File.Exists(this.textBox1.Text + "\\" + MITES_SUBDIRECTORY + "\\SensorData.xml"))
                         this.progressForm.AppendLog("SensorData.xml File .....................Found\r\n");
-                  //  else
-                    //    throw new Exception("SensorData.xml File ....................Not Found");
 
-                    if (Directory.Exists(this.textBox1.Text + "\\data\\raw\\PLFormat"))
+                    if (Directory.Exists(this.textBox1.Text + "\\" + MITES_SUBDIRECTORY + "\\data\\raw\\PLFormat"))
                         this.progressForm.AppendLog("PLFormat Data Directory .....................Found\r\n");
                     else //Attempt to Fix
                     {
                         this.progressForm.AppendLog("Non PLFormat Data Directory .....................Fixing\r\n");
-                        if (Directory.Exists(this.textBox1.Text + "\\data\\raw"))
+                        if (Directory.Exists(this.textBox1.Text + "\\" + MITES_SUBDIRECTORY + "\\data\\raw"))
                         {
-                            file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\data\\raw", "*.PLFormat");
-                            //MITesAccelBytes.2008-6-12-13-42-12-671
+                            file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MITES_SUBDIRECTORY + "\\data\\raw", "*.PLFormat");                    
                             if (file.Length == 1)
                             {
 
@@ -186,12 +240,12 @@ namespace DataMerger
                                 string date = times[0] + "-" + Convert.ToInt32(times[1]).ToString("00") + "-" + Convert.ToInt32(times[2]).ToString("00");
                                 string hour = Convert.ToInt32(times[3]).ToString();
 
-                                Directory.CreateDirectory(this.textBox1.Text + "\\data\\raw\\PLFormat\\" + date);
-                                Directory.CreateDirectory(this.textBox1.Text + "\\data\\raw\\PLFormat\\" + date + "\\" + hour);
-                                File.Copy(file[0], this.textBox1.Text + "\\data\\raw\\PLFormat\\" + date + "\\" + hour + "\\" + file[0].Substring(file[0].IndexOf("MITesAccelBytes.")));
+                                Directory.CreateDirectory(this.textBox1.Text + "\\" + MITES_SUBDIRECTORY + "\\data\\raw\\PLFormat\\" + date);
+                                Directory.CreateDirectory(this.textBox1.Text + "\\" + MITES_SUBDIRECTORY + "\\data\\raw\\PLFormat\\" + date + "\\" + hour);
+                                File.Copy(file[0], this.textBox1.Text + "\\" + MITES_SUBDIRECTORY + "\\data\\raw\\PLFormat\\" + date + "\\" + hour + "\\" + file[0].Substring(file[0].IndexOf("MITesAccelBytes.")));
                             }
                             else
-                                throw new Exception("Old Format: More than 1 file ....................manual fix needed");
+                                throw new Exception("Old Format: More than 1 file ....................manual fix needed\r\n");
                         }
                     }
 
@@ -264,6 +318,14 @@ namespace DataMerger
         }
 
 
+
+        //directories
+
+        public static string MITES_SUBDIRECTORY = "mites";
+        public static string WOCKETS_SUBDIRECTORY = "wockets";
+        public static string OTHER_SUBDIRECTORY = "other";
+        public static string MERGED_SUBDIRECTORY = "merged";
+
         public static string CSVProgress = "";
         public static void toCSV(string aDataDirectory, string masterDirectory, int maxControllers, string[] filter)
         {
@@ -296,7 +358,7 @@ namespace DataMerger
             double[] RMY = null;
             double[] RMZ = null;
             int[] RMSize = null;
- 
+
 
 
             //Size of the moving average
@@ -304,8 +366,8 @@ namespace DataMerger
 
 
             //CSV files that store data                    
-            TextWriter[] activityCountCSVs=null; //old activity count files
-            TextWriter[] aucCSVs=null; //AUC files
+            TextWriter[] activityCountCSVs = null; //old activity count files
+            TextWriter[] aucCSVs = null; //AUC files
             TextWriter[] vmagCSVs = null; //AUC files
             TextWriter[] rmCSVs = null; //Running mean files
             TextWriter[] samplingCSVs = null; //Sample Rate CSV       
@@ -393,6 +455,37 @@ namespace DataMerger
             DateTime prevSensewearTime = new DateTime();
             double sensewearUnixTime = 0;
 
+            //Columbia
+            TextWriter columbiaCSV = null;
+            TextReader columbiaReader = null;
+            double columbiaX = 0;
+            double columbiaY = 0;
+            double columbiaZ = 0;
+            double columbiaFlow = 0;
+            int columbiaValve = 0;
+            double columbiaUnixTime = 0;
+            DateTime columbiaTime = new DateTime();
+            Hashtable columbiaData = new Hashtable();
+
+            //GPS
+            TextWriter gpsCSV = null;
+            TextReader gpsReader = null;
+            double gpsLatitude = 0;
+            double gpsLongitude = 0;
+            double gpsSpeed = 0;
+            double gpsAltitude = 0;
+            double gpsUnixTime = 0;
+            DateTime gpsTime = new DateTime();
+            Hashtable gpsData = new Hashtable();
+
+            //RTI
+            TextWriter rtiCSV = null;
+            TextReader rtiReader = null;
+
+
+
+
+
 
 
             int sumHR = 0;
@@ -413,6 +506,8 @@ namespace DataMerger
             string zephyr_csv_header = "UnixTimeStamp,TimeStamp,ZephyrHeart Rate Data,ZephyrECG - Amplitude Data,ZephyrECG - Noise Data,ZephyrRES - Breathing Wave Amplitude (V) Data,ZephyrRES - Respiration Rate Data,ZephyrTEM - Skin Temperature Data,ZephyrBAT - Battery Voltage (V) Data,ZephyrPOS - Posture Data,ZephyrACC - Activity Data,ZephyrACC - Peak Acceleration (g) Data,ZephyrACC - Vertical Acc Minimum (g) Data,ZephyrACC - Vertical Acc Peak (g) Data,ZephyrACC - Lateral Acc Minimum (g) Data,ZephyrACC - Lateral Acc Peak (g) Data,ZephyrACC - Sagittal Acc Minimum (g) Data,ZephyrACC - Sagittal Acc Peak (g)";
             string oxycon_csv_header = "UnixTimeStamp,TimeStamp,OxyconHR,OxyconBF,OxyconVE,OxyconVO2,OxyconVO2kg,OxyconMET,OxyconEE,OxyconRER";
             string omron_csv_header = "UnixTimeStamp,TimeStamp,Steps";
+            string columbia_csv_header = "UnixTimeStamp,TimeStamp,ColumbiaX,ColumbiaY,ColumbiaZ,ColumbiaFlow,ColumbiaValve";
+            string gps_csv_header = "UnixTimeStamp,TimeStamp,GPSLatitude,GPSLongitude,GPSSpeed,GPSAltitude";
             string master_csv_header = "UnixTimeStamp,TimeStamp";
 
             //files found
@@ -421,16 +516,135 @@ namespace DataMerger
             bool zephyrFound = false;
             bool oxyconFound = false;
             bool omronFound = false;
+            bool columbiaFound = false;
+            bool gpsFound = false;
+            bool rtiFound = false;
 
 
 
 
 
+            #region Read Columbia data
+            string[] file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*-columbia*.csv");
+
+            string columbia_line = "";
+            try
+            {
+                if (file.Length == 1)
+                {
+                    if (CSVProgress == "")
+                        CSVProgress = "Processing Columbia Data";
+                    columbiaReader = new StreamReader(file[0]);
+
+                    //skip first 25 lines
+                    for (int k=0;(k<25);k++)
+                        columbia_line = columbiaReader.ReadLine();
+
+
+                    while ((columbia_line = columbiaReader.ReadLine()) != null)
+                    {
+                        tokens = columbia_line.Split(',');
+                        if (tokens.Length == 14)
+                        {
+                            
+                            string[] dateTokens = tokens[1].Split('/');
+                            string[] timeTokens = tokens[2].Split(':');
+                            columbiaTime = new DateTime(Convert.ToInt32("20"+dateTokens[2]), Convert.ToInt32(dateTokens[0]), Convert.ToInt32(dateTokens[1]), Convert.ToInt32(timeTokens[0]), Convert.ToInt32(timeTokens[1]), Convert.ToInt32(timeTokens[2]));
+                            columbiaUnixTime = UnixTime.GetUnixTime(columbiaTime);
+                            string columbiaKey = columbiaTime.Year + "-" + columbiaTime.Month + "-" + columbiaTime.Day + "-" + columbiaTime.Hour + "-" + columbiaTime.Minute + "-" + columbiaTime.Second;
+                            string columbiaLine = "";
+
+                            if (tokens[3].Length > 0)
+                                columbiaLine += Convert.ToDouble(tokens[3]);
+                            columbiaLine += ",";
+                            if (tokens[4].Length > 0)
+                                columbiaLine += Convert.ToDouble(tokens[4]);
+                            columbiaLine += ",";
+                            if (tokens[5].Length > 0)
+                                columbiaLine += Convert.ToDouble(tokens[5]);
+                            columbiaLine += ",";
+                            if (tokens[6].Length > 0)
+                                columbiaLine += Convert.ToDouble(tokens[6]);
+                            columbiaLine += ",";
+                            if (tokens[7].Length > 0)
+                                columbiaLine += Convert.ToInt32(tokens[7]);
+
+                            if (columbiaData.Contains(columbiaKey) == false)
+                                columbiaData.Add(columbiaKey, columbiaLine);
+                        }
+                    }
+
+                    columbiaFound = true;
+                }
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Columbia: Parsing failed " + e.Message);
+            }
+            #endregion Read Columbia data
+
+
+
+            #region Read GPS data
+            file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*-gps*.csv");
+
+            string gps_line = "";
+            try
+            {
+                if (file.Length == 1)
+                {
+                    if (CSVProgress == "")
+                        CSVProgress = "Processing GPS Data";
+                    gpsReader = new StreamReader(file[0]);
+
+                    //skip first line
+                    gps_line = gpsReader.ReadLine();
+
+
+                    while ((gps_line = gpsReader.ReadLine()) != null)
+                    {
+                        tokens = gps_line.Split(',');
+                        if (tokens.Length == 7)
+                        {
+
+                            string[] dateTokens = tokens[1].Split('-');
+                            string[] timeTokens = tokens[2].Split(':');
+                            gpsTime = new DateTime(Convert.ToInt32(dateTokens[0]), Convert.ToInt32(dateTokens[1]), Convert.ToInt32(dateTokens[2]), Convert.ToInt32(timeTokens[0]), Convert.ToInt32(timeTokens[1]), Convert.ToInt32(timeTokens[2]));
+                            gpsUnixTime = UnixTime.GetUnixTime(gpsTime);
+                            string gpsKey = gpsTime.Year + "-" + gpsTime.Month + "-" + gpsTime.Day + "-" + gpsTime.Hour + "-" + gpsTime.Minute + "-" + gpsTime.Second;
+                            string gpsLine = "";
+
+                            if (tokens[3].Length > 0)
+                                gpsLine += Convert.ToDouble(tokens[3]);
+                            gpsLine += ",";
+                            if (tokens[4].Length > 0)
+                                gpsLine += Convert.ToDouble(tokens[4]);
+                            gpsLine += ",";
+                            if (tokens[5].Length > 0)
+                                gpsLine += Convert.ToDouble(tokens[5]);
+                            gpsLine += ",";
+                            if (tokens[6].Length > 0)
+                                gpsLine += Convert.ToDouble(tokens[6]);
+                            gpsLine += ",";
+
+                            if (gpsData.Contains(gpsKey) == false)
+                                gpsData.Add(gpsKey, gpsLine);
+                        }
+                    }
+
+                    gpsFound = true;
+                }
+            }
+            catch (Exception e)
+            {
+                throw new Exception("GPS: Parsing failed " + e.Message);
+            }
+            #endregion Read GPS data
 
 
 
             #region Read Omron data
-            string[] file = Directory.GetFileSystemEntries(aDataDirectory, "*-omron.csv");
+            file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*-omron.csv");
             string omron_line = "";
             try
             {
@@ -461,7 +675,7 @@ namespace DataMerger
             #endregion Read Omron data
 
             #region Read Actigraph data
-            file = Directory.GetFileSystemEntries(aDataDirectory, "*-actigraph*.csv");
+            file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*-actigraph*.csv");
             actigraphCSV = new TextWriter[file.Length];
             actigraphData = new Hashtable[file.Length];
 
@@ -519,7 +733,7 @@ namespace DataMerger
             #endregion Read Actigraph data
 
             #region Read Zephyr data
-            file = Directory.GetFileSystemEntries(aDataDirectory, "*-zephyr*.csv");
+            file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*-zephyr*.csv");
 
             string zephyr_line = "";
             try
@@ -609,14 +823,14 @@ namespace DataMerger
 
             #region Read Oxycon data
 
-            if (File.Exists(aDataDirectory + "\\OxyconSyncronizationTime.txt"))
+            if (File.Exists(aDataDirectory + "\\" + OTHER_SUBDIRECTORY + "\\OxyconSyncronizationTime.txt"))
             {
 
-                file = Directory.GetFileSystemEntries(aDataDirectory, "*-flashcard*");
+                file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*-flashcard*");
                 if (file.Length == 1)
                 {
 
-                    TextReader oxyconOriginTR = new StreamReader(aDataDirectory + "\\OxyconSyncronizationTime.txt");
+                    TextReader oxyconOriginTR = new StreamReader(aDataDirectory + "\\" + OTHER_SUBDIRECTORY + "\\OxyconSyncronizationTime.txt");
                     string originOxycon = oxyconOriginTR.ReadLine();
                     DateTime oxyconOriginTime = new DateTime();
                     try
@@ -633,7 +847,7 @@ namespace DataMerger
 
                     //Synchronize Both files to find a matching point and pick the time stamps
                     int oxyconAdjustment = 0;
-                    file = Directory.GetFileSystemEntries(aDataDirectory, "*-oxycon.dat");
+                    file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*-oxycon.dat");
                     string oxycon_line = "";
                     Hashtable oxyconData1 = new Hashtable();
                     int checkCount = 0;
@@ -704,7 +918,7 @@ namespace DataMerger
 
 
                     //find first 3 matching lines with the same differnece in time
-                    file = Directory.GetFileSystemEntries(aDataDirectory, "*-flashcard.dat");
+                    file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*-flashcard.dat");
                     try
                     {
                         if (file.Length == 1)
@@ -790,7 +1004,7 @@ namespace DataMerger
 
 
                     //Load Oxycon data
-                    file = Directory.GetFileSystemEntries(aDataDirectory, "*-flashcard.dat");
+                    file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*-flashcard.dat");
                     try
                     {
                         if (file.Length == 1)
@@ -822,7 +1036,7 @@ namespace DataMerger
                                     else //3 tokens can either include minutes or hours can be mins:secs:00 or hrs:mins:secs
                                     {
 
-                                         //OXYCON BUG: The oxycon output files are very buggy
+                                        //OXYCON BUG: The oxycon output files are very buggy
                                         // sometimes they report min:sec:00 and sometimes hr:min:sec
 
                                         if (Convert.ToDouble(timeTokens[0]) >= 24) //this is min:sec:00
@@ -886,12 +1100,12 @@ namespace DataMerger
                     {
                         throw new Exception("Oxycon Flash: Parsing failed 2 " + e.Message);
                     }
-                
+
                 }
                 else if (file.Length == 2) //sometimes 2 oxycon sessions were recorded
                 {
 
-                    TextReader oxyconOriginTR = new StreamReader(aDataDirectory + "\\OxyconSyncronizationTime.txt");
+                    TextReader oxyconOriginTR = new StreamReader(aDataDirectory + "\\" + OTHER_SUBDIRECTORY + "\\OxyconSyncronizationTime.txt");
                     string originOxycon = oxyconOriginTR.ReadLine();
                     DateTime oxyconOriginTime = new DateTime();
                     try
@@ -908,7 +1122,7 @@ namespace DataMerger
 
                     string oxycon_line = "";
                     //Load Oxycon data
-                    file = Directory.GetFileSystemEntries(aDataDirectory, "*-flashcard.1.dat");
+                    file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*-flashcard.1.dat");
                     try
                     {
                         if (file.Length == 1)
@@ -1027,7 +1241,7 @@ namespace DataMerger
 
 
                     //Load Oxycon data
-                    file = Directory.GetFileSystemEntries(aDataDirectory, "*-flashcard.2.dat");
+                    file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*-flashcard.2.dat");
                     try
                     {
                         if (file.Length == 1)
@@ -1127,7 +1341,7 @@ namespace DataMerger
             #endregion Read Oxycon data
 
             #region Read Sensewear data
-            file = Directory.GetFileSystemEntries(aDataDirectory, "*-sensewear*.csv");
+            file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*-sensewear*.csv");
             string sensewear_line = "";
             Hashtable SSR = new Hashtable();
             Hashtable STrans = new Hashtable();
@@ -1196,18 +1410,22 @@ namespace DataMerger
             #region Setup master and other sensor files
             try
             {
-                masterCSV = new StreamWriter(aDataDirectory + "\\MITesSummaryData.csv");
-                hrCSV = new StreamWriter(aDataDirectory + "\\HeartRate_MITes.csv");
+                masterCSV = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\MITesSummaryData.csv");
+                hrCSV = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\HeartRate_MITes.csv");
                 for (int i = 0; (i < actigraphCSV.Length); i++)
-                    actigraphCSV[i] = new StreamWriter(aDataDirectory + "\\Actigraph" + (i + 1) + ".csv");
+                    actigraphCSV[i] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Actigraph" + (i + 1) + ".csv");
                 if (sensewearFound)
-                    sensewearCSV = new StreamWriter(aDataDirectory + "\\Sensewear.csv");
+                    sensewearCSV = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Sensewear.csv");
                 if (zephyrFound)
-                    zephyrCSV = new StreamWriter(aDataDirectory + "\\Zephyr.csv");
+                    zephyrCSV = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Zephyr.csv");
                 if (oxyconFound)
-                    oxyconCSV = new StreamWriter(aDataDirectory + "\\Oxycon.csv");
+                    oxyconCSV = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Oxycon.csv");
                 if (omronFound)
-                    omronCSV = new StreamWriter(aDataDirectory + "\\Omron.csv");
+                    omronCSV = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Omron.csv");
+                if (columbiaFound)
+                    columbiaCSV = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Columbia.csv");
+                if (gpsFound)
+                    gpsCSV= new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\GPS.csv");
             }
             catch (Exception e)
             {
@@ -1217,18 +1435,18 @@ namespace DataMerger
             #endregion Setup master and other sensor files
 
             #region Load Annotation
-            AXML.Annotation aannotation = null;         
+            AXML.Annotation aannotation = null;
             try
             {
-                if (File.Exists(aDataDirectory + "\\AnnotationIntervals.xml"))
+                if (File.Exists(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\AnnotationIntervals.xml"))
                 {
-                    AXML.Reader reader = new AXML.Reader(masterDirectory, aDataDirectory, "AnnotationIntervals.xml");
+                    AXML.Reader reader = new AXML.Reader(masterDirectory, aDataDirectory + "\\" + MERGED_SUBDIRECTORY, "AnnotationIntervals.xml");
                     aannotation = reader.parse();
                     aannotation.RemoveData(filter);
                     aannotation.DataDirectory = aDataDirectory;
                 }
 
-            }     
+            }
             catch (Exception e)
             {
                 throw new Exception("MITes Configuration Files: Parsing failed " + e.Message);
@@ -1243,17 +1461,17 @@ namespace DataMerger
 
             #region Setup MITes Data
 
-            MITesDecoder aMITesDecoder=null;
+            MITesDecoder aMITesDecoder = null;
             MITesHRAnalyzer aMITesHRAnalyzer = null;
             MITesLoggerReader aMITesLoggerReader = null;
             SXML.SensorAnnotation sannotation = null;
 
-            if (Directory.Exists(aDataDirectory + "\\data\\"))
+            if (Directory.Exists(aDataDirectory + "\\" + MITES_SUBDIRECTORY + "\\data\\"))
             {
-   
+
                 try
                 {
-                    SXML.Reader sreader = new SXML.Reader(masterDirectory, aDataDirectory);
+                    SXML.Reader sreader = new SXML.Reader(masterDirectory, aDataDirectory + "\\" + MITES_SUBDIRECTORY);
                     sannotation = sreader.parse(maxControllers);
                 }
                 catch (Exception e)
@@ -1293,17 +1511,17 @@ namespace DataMerger
                     string location = sensor.Location.Replace(' ', '-');
                     if (sensor_id > 0) //exclude HR
                     {
-                        activityCountCSVs[sensor_id] = new StreamWriter(aDataDirectory + "\\MITes_" + sensor_id.ToString("00") + "_SAD_" + location + ".csv");
+                        activityCountCSVs[sensor_id] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\MITes_" + sensor_id.ToString("00") + "_SAD_" + location + ".csv");
                         activityCountCSVs[sensor_id].WriteLine(csv_line1);
-                        rmCSVs[sensor_id] = new StreamWriter(aDataDirectory + "\\MITes_" + sensor_id.ToString("00") + "_RM_" + location + ".csv");
+                        rmCSVs[sensor_id] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\MITes_" + sensor_id.ToString("00") + "_RM_" + location + ".csv");
                         rmCSVs[sensor_id].WriteLine(csv_line1);
-                        aucCSVs[sensor_id] = new StreamWriter(aDataDirectory + "\\MITes_" + sensor_id.ToString("00") + "_AUC_" + location + ".csv");
+                        aucCSVs[sensor_id] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\MITes_" + sensor_id.ToString("00") + "_AUC_" + location + ".csv");
                         aucCSVs[sensor_id].WriteLine(csv_line1);
-                        vmagCSVs[sensor_id] = new StreamWriter(aDataDirectory + "\\MITes_" + sensor_id.ToString("00") + "_VMAG_" + location + ".csv");
+                        vmagCSVs[sensor_id] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\MITes_" + sensor_id.ToString("00") + "_VMAG_" + location + ".csv");
                         vmagCSVs[sensor_id].WriteLine(csv_line6);
-                        averagedRaw[sensor_id] = new StreamWriter(aDataDirectory + "\\MITes_" + sensor_id.ToString("00") + "_1s-RawMean_" + location + ".csv");
+                        averagedRaw[sensor_id] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\MITes_" + sensor_id.ToString("00") + "_1s-RawMean_" + location + ".csv");
                         averagedRaw[sensor_id].WriteLine(csv_line1);
-                        samplingCSVs[sensor_id] = new StreamWriter(aDataDirectory + "\\MITes_" + sensor_id.ToString("00") + "_SampleRate_" + location + ".csv");
+                        samplingCSVs[sensor_id] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\MITes_" + sensor_id.ToString("00") + "_SampleRate_" + location + ".csv");
                         samplingCSVs[sensor_id].WriteLine(csv_line2);
                         master_csv_header += ",MITes" + sensor_id.ToString("00") + "_SR," + "MITes" + sensor_id.ToString("00") + "_AVRaw_X," +
                             "MITes" + sensor_id.ToString("00") + "_AVRaw_Y," + "MITes" + sensor_id.ToString("00") + "_AVRaw_Z," + "MITes" + sensor_id.ToString("00") + "_SAD_X," +
@@ -1312,10 +1530,11 @@ namespace DataMerger
                             "MITes" + sensor_id.ToString("00") + "_RM_X," + "MITes" + sensor_id.ToString("00") + "_RM_Y," + "MITes" + sensor_id.ToString("00") + "_RM_Z," +
                             "MITes" + sensor_id.ToString("00") + "_RM_SIZE," + "MITes" + sensor_id.ToString("00") + "_VMAG";
 
-                    }
+                    }else
+                        master_csv_header += ",HR";
                 }
 
-                master_csv_header += ",HR,";
+                
 
 
 
@@ -1346,7 +1565,7 @@ namespace DataMerger
 
                 aMITesDecoder = new MITesDecoder();
                 aMITesHRAnalyzer = new MITesHRAnalyzer(aMITesDecoder);
-                aMITesLoggerReader = new MITesLoggerReader(aMITesDecoder, aDataDirectory);
+                aMITesLoggerReader = new MITesLoggerReader(aMITesDecoder, aDataDirectory + "\\" + MITES_SUBDIRECTORY);
             }
 
             #endregion Setup MITes Data
@@ -1358,9 +1577,9 @@ namespace DataMerger
             AXML.AnnotatedRecord annotatedRecord = null;
             if (aannotation != null)
             {
-            
+
                 annotatedRecord = ((AXML.AnnotatedRecord)aannotation.Data[activityIndex]);
-            
+
                 for (int j = 0; (j < annotatedRecord.Labels.Count); j++)
                 {
                     if (j == annotatedRecord.Labels.Count - 1)
@@ -1374,18 +1593,18 @@ namespace DataMerger
 
             #region Setup Wockets Data
             int[] lastDecodedIndex = null;
-            WocketsController wcontroller=null;
+            WocketsController wcontroller = null;
             double[] wunixtimestamp = null;
-            
-            if (Directory.Exists(aDataDirectory + "\\wockets\\"))
+
+            if (Directory.Exists(aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY))
             {
                 wcontroller = new WocketsController("", "", "");
-                wcontroller.FromXML(aDataDirectory + "\\wockets\\SensorData.xml");
+                wcontroller.FromXML(aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY + "\\SensorData.xml");
                 wunixtimestamp = new double[wcontroller._Sensors.Count];
-                
+
                 for (int i = 0; (i < wcontroller._Sensors.Count); i++)
                 {
-                    wcontroller._Sensors[i]._RootStorageDirectory = aDataDirectory + "\\wockets\\data\\raw\\PLFormat\\";
+                    wcontroller._Sensors[i]._RootStorageDirectory = aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY + "\\data\\raw\\PLFormat\\";
                     wunixtimestamp[i] = 0.0;
                 }
 
@@ -1402,17 +1621,17 @@ namespace DataMerger
                     int sensor_id = wcontroller._Sensors[i]._ID;
                     string location = wcontroller._Sensors[i]._Location.Replace(' ', '-');
                     lastDecodedIndex[i] = 0;
-                    wactivityCountCSVs[sensor_id] = new StreamWriter(aDataDirectory + "\\Wocket_" + sensor_id.ToString("00") + "_SAD_" + location + ".csv");
+                    wactivityCountCSVs[sensor_id] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Wocket_" + sensor_id.ToString("00") + "_SAD_" + location + ".csv");
                     wactivityCountCSVs[sensor_id].WriteLine(csv_line1);
-                    wrmCSVs[sensor_id] = new StreamWriter(aDataDirectory + "\\Wocket_" + sensor_id.ToString("00") + "_RM_" + location + ".csv");
+                    wrmCSVs[sensor_id] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Wocket_" + sensor_id.ToString("00") + "_RM_" + location + ".csv");
                     wrmCSVs[sensor_id].WriteLine(csv_line1);
-                    waucCSVs[sensor_id] = new StreamWriter(aDataDirectory + "\\Wocket_" + sensor_id.ToString("00") + "_AUC_" + location + ".csv");
+                    waucCSVs[sensor_id] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Wocket_" + sensor_id.ToString("00") + "_AUC_" + location + ".csv");
                     waucCSVs[sensor_id].WriteLine(csv_line1);
-                    wvmagCSVs[sensor_id] = new StreamWriter(aDataDirectory + "\\Wocket_" + sensor_id.ToString("00") + "_VMAG_" + location + ".csv");
+                    wvmagCSVs[sensor_id] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Wocket_" + sensor_id.ToString("00") + "_VMAG_" + location + ".csv");
                     wvmagCSVs[sensor_id].WriteLine(csv_line6);
-                    waveragedRaw[sensor_id] = new StreamWriter(aDataDirectory + "\\Wocket_" + sensor_id.ToString("00") + "_1s-RawMean_" + location + ".csv");
+                    waveragedRaw[sensor_id] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Wocket_" + sensor_id.ToString("00") + "_1s-RawMean_" + location + ".csv");
                     waveragedRaw[sensor_id].WriteLine(csv_line1);
-                    wsamplingCSVs[sensor_id] = new StreamWriter(aDataDirectory + "\\Wocket_" + sensor_id.ToString("00") + "_SampleRate_" + location + ".csv");
+                    wsamplingCSVs[sensor_id] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Wocket_" + sensor_id.ToString("00") + "_SampleRate_" + location + ".csv");
                     wsamplingCSVs[sensor_id].WriteLine(csv_line2);
                     master_csv_header += ",Wocket" + sensor_id.ToString("00") + "_SR," + "Wocket" + sensor_id.ToString("00") + "_AVRaw_X," +
                         "Wocket" + sensor_id.ToString("00") + "_AVRaw_Y," + "Wocket" + sensor_id.ToString("00") + "_AVRaw_Z," + "Wocket" + sensor_id.ToString("00") + "_SAD_X," +
@@ -1437,7 +1656,7 @@ namespace DataMerger
                 wprevZ = new int[wcontroller._Sensors.Count];
                 wacCounters = new int[wcontroller._Sensors.Count];
 
-     
+
 
 
 
@@ -1475,13 +1694,15 @@ namespace DataMerger
 
             for (int i = 0; (i < actigraphData.Length); i++)
             {
-                master_csv_header += "Actigraph" + (i + 1) + ",";
+                master_csv_header += ",Actigraph" + (i + 1);
                 actigraphCSV[i].WriteLine(actigraph_csv_header);
             }
-            master_csv_header += "SensewearSR,Sensewear_AVTranAcc,Senserwear_AVLongAcc,Sensewear_AVForAcc";
+            master_csv_header += ",SensewearSR,Sensewear_AVTranAcc,Senserwear_AVLongAcc,Sensewear_AVForAcc";
             master_csv_header += ",ZephyrHeart Rate Data,ZephyrECG - Amplitude Data,ZephyrECG - Noise Data,ZephyrRES - Breathing Wave Amplitude (V) Data,ZephyrRES - Respiration Rate Data,ZephyrTEM - Skin Temperature Data,ZephyrBAT - Battery Voltage (V) Data,ZephyrPOS - Posture Data,ZephyrACC - Activity Data,ZephyrACC - Peak Acceleration (g) Data,ZephyrACC - Vertical Acc Minimum (g) Data,ZephyrACC - Vertical Acc Peak (g) Data,ZephyrACC - Lateral Acc Minimum (g) Data,ZephyrACC - Lateral Acc Peak (g) Data,ZephyrACC - Sagittal Acc Minimum (g) Data,ZephyrACC - Sagittal Acc Peak (g)";
             master_csv_header += ",OxyconHR,OxyconBF,OxyconVE,OxyconVO2,OxyconVO2kg,OxyconMET,OxyconEE,OxyconRER";//OxyconRER,Oxyconttot,Oxycontex";
             master_csv_header += ",OmronSteps";
+            master_csv_header += ",ColumbiaX,ColumbiaY,ColumbiaZ,ColumbiaFlow,ColumbiaValve";
+            master_csv_header += ",GPSLatitude,GPSLongitude,GPSSpeed,GPSAltitude";
             masterCSV.WriteLine(master_csv_header);
             hrCSV.WriteLine(hr_csv_header);
             if ((sensewearCSV != null) && (sensewearFound))
@@ -1492,6 +1713,10 @@ namespace DataMerger
                 oxyconCSV.WriteLine(oxycon_csv_header);
             if ((omronCSV != null) && (omronFound))
                 omronCSV.WriteLine(omron_csv_header);
+            if ((columbiaCSV != null) && (columbiaFound))
+                columbiaCSV.WriteLine(columbia_csv_header);
+            if ((gpsCSV != null) && (gpsFound))
+                gpsCSV.WriteLine(gps_csv_header);
 
 
 
@@ -1500,29 +1725,30 @@ namespace DataMerger
 
 
 
-                int year=0;
-                    int month=0;
-                    int day=0;    
-                int startyear=0;
-                int startmonth=0;
-                int startday=0;
-                int starthr=25;
-                int startmin=0;
-                int startsec=0;
+            int year = 0;
 
-                int endyear=0;
-                int endmonth=0;
-                int endday=0;
-                int endhr=-1;
-                int endmin=59;
-                int endsec=59;
+            int month = 0;
+            int day = 0;
+            int startyear = 0;
+            int startmonth = 0;
+            int startday = 0;
+            int starthr = 25;
+            int startmin = 0;
+            int startsec = 0;
+
+            int endyear = 0;
+            int endmonth = 0;
+            int endday = 0;
+            int endhr = -1;
+            int endmin = 59;
+            int endsec = 59;
 
 
-                
+
             //check mites start and end times
             if (aMITesDecoder != null)
             {
-                string rawDirectory = aDataDirectory + "\\data\\raw\\PLFormat";
+                string rawDirectory = aDataDirectory + "\\" + MITES_SUBDIRECTORY + "\\data\\raw\\PLFormat";
 
 
                 if (Directory.Exists(rawDirectory) == false)
@@ -1531,26 +1757,26 @@ namespace DataMerger
                 string[] subdirectories = Directory.GetDirectories(rawDirectory);
                 foreach (string subdirectory in subdirectories)
                 {
-                    string[] datetokens=subdirectory.Split('\\');
-                    datetokens=datetokens[datetokens.Length-1].Split('-');
-                    year=Convert.ToInt32(datetokens[0]);
-                    month=Convert.ToInt32(datetokens[1]);
-                    day=Convert.ToInt32(datetokens[2]);
+                    string[] datetokens = subdirectory.Split('\\');
+                    datetokens = datetokens[datetokens.Length - 1].Split('-');
+                    year = Convert.ToInt32(datetokens[0]);
+                    month = Convert.ToInt32(datetokens[1]);
+                    day = Convert.ToInt32(datetokens[2]);
 
-                    if ((startyear==0)|| (year<startyear))
-                        startyear=year;
-                    if ((endyear==0)|| (year>endyear))
-                        endyear=year;
+                    if ((startyear == 0) || (year < startyear))
+                        startyear = year;
+                    if ((endyear == 0) || (year > endyear))
+                        endyear = year;
 
-                    if ((startmonth==0)|| (month<startmonth))
-                        startmonth=month;
-                    if ((endmonth==0)|| (month>endmonth))
-                        endmonth=month;
+                    if ((startmonth == 0) || (month < startmonth))
+                        startmonth = month;
+                    if ((endmonth == 0) || (month > endmonth))
+                        endmonth = month;
 
-                    if ((startday==0)|| (day<startday))
-                        startday=day;
-                    if ((endday==0)|| (day>endday))
-                        endday=day;
+                    if ((startday == 0) || (day < startday))
+                        startday = day;
+                    if ((endday == 0) || (day > endday))
+                        endday = day;
 
 
                     for (int i = 0; i < 30; i++)
@@ -1563,7 +1789,7 @@ namespace DataMerger
                             if (hr > endhr)
                                 endhr = hr;
                         }
-                        
+
                     }
                 }
             }
@@ -1571,7 +1797,7 @@ namespace DataMerger
             //check wockets start and end times
             if (wcontroller != null)
             {
-                string rawDirectory = aDataDirectory + "\\wockets\\data\\raw\\PLFormat";
+                string rawDirectory = aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY + "\\data\\raw\\PLFormat";
 
 
                 if (Directory.Exists(rawDirectory) == false)
@@ -1659,9 +1885,9 @@ namespace DataMerger
             DateTime currentDateTime = startDateTime;
 
 
-            DateTime origin = new DateTime(1970, 1, 1, 0, 0, 0, 0);        ;
+            DateTime origin = new DateTime(1970, 1, 1, 0, 0, 0, 0); ;
             TimeSpan diff;
-            string timestamp ="";
+            string timestamp = "";
             double currentUnixTime = 0;
 
             #region Initialize CSV lines
@@ -1674,6 +1900,9 @@ namespace DataMerger
             string zephyr_csv_line = "";
             string oxycon_csv_line = "";
             string omron_csv_line = "";
+            string columbia_csv_line = "";
+            string gps_csv_line = "";
+            string rti_csv_line = "";
             #endregion Initialize CSV lines
 
             while (((TimeSpan)endDateTime.Subtract(currentDateTime)).TotalSeconds >= 0)
@@ -1692,13 +1921,17 @@ namespace DataMerger
                 zephyr_csv_line = timestamp;
                 oxycon_csv_line = timestamp;
                 omron_csv_line = timestamp;
+                columbia_csv_line = timestamp;
+                gps_csv_line = timestamp;
+                rti_csv_line = timestamp;
+               
                 master_csv_line += "," + current_activity;
                 #endregion Setup prefix of CSV lines
 
 
 
                 if (CSVProgress == "")
-                    CSVProgress = "Synchronizing " +  currentDateTime.ToLongDateString() + " " +  currentDateTime.ToLongTimeString();
+                    CSVProgress = "Synchronizing " + currentDateTime.ToLongDateString() + " " + currentDateTime.ToLongTimeString();
 
                 if (aannotation != null)
                 {
@@ -1789,9 +2022,9 @@ namespace DataMerger
                     foreach (SXML.Sensor sensor in sannotation.Sensors)
                     {
                         channel = Convert.ToInt32(sensor.ID);
-             
 
-                       
+
+
                         int headPtr = head[channel] - 1;
                         if (headPtr < 0)
                             headPtr = 499;
@@ -1972,9 +2205,9 @@ namespace DataMerger
                         }
                         else
                         {
-      
-                            hrCount=0;
-                           sumHR=0;
+
+                            hrCount = 0;
+                            sumHR = 0;
                             while ((timeData[0, headPtr] > 0) && (headPtr != head[0]))
                             {
                                 if (((timeData[0, headPtr] - currentUnixTime) >= 0) && ((timeData[0, headPtr] - currentUnixTime) <= 1000))
@@ -1990,12 +2223,12 @@ namespace DataMerger
                             if (hrCount > 0)
                             {
                                 hrCSV.WriteLine(hr_csv_line + "," + (int)(sumHR / hrCount));
-                                master_csv_line = master_csv_line + "," + (int)(sumHR / hrCount) + ",";
+                                master_csv_line = master_csv_line + "," + (int)(sumHR / hrCount);
                             }
                             else
                             {
                                 hrCSV.WriteLine(hr_csv_line + ",");
-                                master_csv_line = master_csv_line + ",,";
+                                master_csv_line = master_csv_line + ",";
                             }
                         }
 
@@ -2022,12 +2255,8 @@ namespace DataMerger
 
                     #region Append MITes Statistics
 
-                    
-                    
-
-
                     #region Write CSV line for MITes HR
-    
+
                     #endregion Write CSV line for MITes HR
 
 
@@ -2037,13 +2266,13 @@ namespace DataMerger
 
 
                 //if there is Wockets data
-                if ( wcontroller != null)
+                if (wcontroller != null)
                 {
 
                     #region Load Wockets data if needed
                     for (int i = 0; (i < wcontroller._Sensors.Count); i++)
                     {
-                     
+
                         //always have at least 5 seconds worth of data for the MITes
                         while (((wunixtimestamp[i] - currentUnixTime) <= MEAN_SIZE) && (wcontroller._Sensors[i].Load()))
                         {
@@ -2075,7 +2304,7 @@ namespace DataMerger
                         double wrunningMeanY = 0;
                         double wrunningMeanZ = 0;
                         int wnumMeanPts = 0;
-                  
+
                         int wheadPtr = whead[wcontroller._Sensors[i]._ID] - 1;
                         if (wheadPtr < 0)
                             wheadPtr = 499;
@@ -2083,7 +2312,7 @@ namespace DataMerger
                         //compute running means
 
 
-                        while ((wtimeData[wcontroller._Sensors[i]._ID, wheadPtr] > 0) && (wheadPtr != whead[wcontroller._Sensors[i]._ID]) && (wnumMeanPts <= 499))                        
+                        while ((wtimeData[wcontroller._Sensors[i]._ID, wheadPtr] > 0) && (wheadPtr != whead[wcontroller._Sensors[i]._ID]) && (wnumMeanPts <= 499))
                         {
                             wrunningMeanX += wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr];
                             wrunningMeanY += wrawData[wcontroller._Sensors[i]._ID, 1, wheadPtr];
@@ -2111,7 +2340,7 @@ namespace DataMerger
 
 
 
-                        while ((wtimeData[wcontroller._Sensors[i]._ID, wheadPtr] > 0) && (wheadPtr!=whead[wcontroller._Sensors[i]._ID]) )
+                        while ((wtimeData[wcontroller._Sensors[i]._ID, wheadPtr] > 0) && (wheadPtr != whead[wcontroller._Sensors[i]._ID]))
                         {
 
                             if (((wtimeData[wcontroller._Sensors[i]._ID, wheadPtr] - currentUnixTime) >= 0) && ((wtimeData[wcontroller._Sensors[i]._ID, wheadPtr] - currentUnixTime) <= 1000))
@@ -2264,13 +2493,6 @@ namespace DataMerger
 
                     #endregion Calculate Statistics
 
-            
-
-        
-
-
-    
-
                 }
 
 
@@ -2286,10 +2508,11 @@ namespace DataMerger
                     {
 
                         actigraphCSV[i].WriteLine(actigraph_csv_line[i] + "," + actigraphData[i][key]);
-                        master_csv_line = master_csv_line + actigraphData[i][key] + ",";
+                        master_csv_line = master_csv_line + "," + actigraphData[i][key];
                     }
                 }
                 #endregion Write CSV lines for Actigraphs
+
                 #region Write CSV line for Sensewear
                 if ((sensewearFound) && (sensewearCSV != null))
                 {
@@ -2297,17 +2520,17 @@ namespace DataMerger
                     {
                         sensewearCSV.WriteLine(sensewear_csv_line + "," + (int)SSR[key] + "," + (double)STrans[key] +
                             "," + (double)SLong[key] + "," + (double)SAcc[key]);
-                        master_csv_line = master_csv_line + (int)SSR[key] + "," + (double)STrans[key] +
+                        master_csv_line = master_csv_line +","+ (int)SSR[key] + "," + (double)STrans[key] +
                             "," + (double)SLong[key] + "," + (double)SAcc[key];
                     }
                     else
                     {
                         sensewearCSV.WriteLine(sensewear_csv_line + ",,,,");
-                        master_csv_line = master_csv_line + ",,,";
+                        master_csv_line = master_csv_line + ",,,,";
                     }
                 }
                 else
-                    master_csv_line = master_csv_line + ",,,";
+                    master_csv_line = master_csv_line + ",,,,";
                 #endregion Write CSV line for Sensewear
 
                 #region Write CSV line for Zephyr
@@ -2367,6 +2590,45 @@ namespace DataMerger
                     master_csv_line = master_csv_line + ",";
                 #endregion Write CSV line for Omron
 
+
+                #region Write CSV line for Columbia
+                if ((columbiaFound) && (columbiaCSV != null))
+                {
+                    if (columbiaData.ContainsKey(key))
+                    {
+                        columbiaCSV.WriteLine(columbia_csv_line + "," + ((string)columbiaData[key]));
+                        master_csv_line = master_csv_line + "," + ((string)columbiaData[key]);
+                    }
+                    else
+                    {
+                        columbiaCSV.WriteLine(columbia_csv_line + ",,,,,");
+                        master_csv_line = master_csv_line + ",,,,,";
+                    }
+                }
+                else
+                    master_csv_line = master_csv_line + ",,,,,";
+                #endregion Write CSV line for Columbia
+
+
+                #region Write CSV line for GPS
+                if ((gpsFound) && (gpsCSV != null))
+                {
+                    if (gpsData.ContainsKey(key))
+                    {
+                        gpsCSV.WriteLine(gps_csv_line + "," + ((string)gpsData[key]));
+                        master_csv_line = master_csv_line + "," + ((string)gpsData[key]);
+                    }
+                    else
+                    {
+                        gpsCSV.WriteLine(gps_csv_line + ",,,,");
+                        master_csv_line = master_csv_line + ",,,,";
+                    }
+                }
+                else
+                    master_csv_line = master_csv_line + ",,,,";
+                #endregion Write CSV line for GPS
+
+
                 #region Write master CSV line
                 masterCSV.WriteLine(master_csv_line);
                 #endregion Write master CSV line
@@ -2375,10 +2637,7 @@ namespace DataMerger
                 hrCount = 0;
                 sumHR = 0;
 
-
-                
-                
-                currentDateTime=currentDateTime.AddSeconds(1.0);
+                currentDateTime = currentDateTime.AddSeconds(1.0);
             }
 
 
@@ -2429,7 +2688,7 @@ namespace DataMerger
                 }
             }
 
-            masterCSV.Flush();   
+            masterCSV.Flush();
             masterCSV.Close();
             for (int i = 0; (i < actigraphCSV.Length); i++)
                 actigraphCSV[i].Close();
@@ -2442,660 +2701,15 @@ namespace DataMerger
             if (omronCSV != null)
                 omronCSV.Close();
 
+            if (columbiaCSV != null)
+                columbiaCSV.Close();
+            if (gpsCSV != null)
+                gpsCSV.Close();
+            if (rtiCSV != null)
+                rtiCSV.Close();
             #endregion Close all files
 
-            //Initialize MITes Decoders + configuration
-
-
-            /*
-            MITesDecoder aMITesDecoder = new MITesDecoder();
-            MITesHRAnalyzer aMITesHRAnalyzer = new MITesHRAnalyzer(aMITesDecoder);
-            MITesLoggerReader aMITesLoggerReader = new MITesLoggerReader(aMITesDecoder, aDataDirectory);
-            bool isData = aMITesLoggerReader.GetSensorData(10);
-            do
-            {
-
-                channel = aMITesDecoder.GetSomeMITesData()[0].channel;
-                x = aMITesDecoder.GetSomeMITesData()[0].x;
-                y = aMITesDecoder.GetSomeMITesData()[0].y;
-                z = aMITesDecoder.GetSomeMITesData()[0].z; 
-                unixtimestamp = aMITesDecoder.GetSomeMITesData()[0].unixTimeStamp;
-
-                rawData[channel, 0, head[channel]] = x;
-                rawData[channel, 1, head[channel]] = y;
-                rawData[channel, 2, head[channel]] = z;
-                timeData[channel, head[channel]] = (long)unixtimestamp;
-
-
-                DateTime mitesTime = new DateTime();
-                UnixTime.GetDateTime((long)unixtimestamp, out mitesTime);
-
-
-                if (CSVProgress == "")
-                    CSVProgress = "Synchronizing " + mitesTime.ToLongDateString() + " " + mitesTime.ToLongTimeString();
-
-                //Heart Rate Data
-                int hr = aMITesHRAnalyzer.UpdateOffline();
-                if (hr > 0)
-                {
-                    sumHR += hr;
-                    hrCount++;
-                }
-
-                double lastTimeStamp = unixtimestamp;
-                if (unixtimestamp > annotatedRecord.EndUnix)
-                {
-                    current_activity = "";
-                    for (int j = 0; (j < annotatedRecord.Labels.Count); j++)
-                    {
-                        if (j == annotatedRecord.Labels.Count - 1)
-                            current_activity += "";
-                        else
-                            current_activity += ",";
-                    }
-                    if (activityIndex < aannotation.Data.Count - 1)
-                    {
-                        activityIndex++;
-                        annotatedRecord = ((AXML.AnnotatedRecord)aannotation.Data[activityIndex]);
-                    }
-                }
-
-
-                if ((lastTimeStamp >= annotatedRecord.StartUnix) &&
-                     (lastTimeStamp <= annotatedRecord.EndUnix))
-                {
-
-                    current_activity = "";
-                    for (int j = 0; (j < annotatedRecord.Labels.Count); j++)
-                    {
-                        if (j == annotatedRecord.Labels.Count - 1)
-                            current_activity += ((AXML.Label)annotatedRecord.Labels[j]).Name;
-                        else
-                            current_activity += ((AXML.Label)annotatedRecord.Labels[j]).Name + ",";
-                    }
-
-                    current_activity = current_activity.Replace("none", "").Replace('-', '_').Replace(':', '_').Replace('%', '_').Replace('/', '_');
-                    current_activity = Regex.Replace(current_activity, "[_]+", "_");
-                    current_activity = Regex.Replace(current_activity, "^[_]+", "");
-                    current_activity = Regex.Replace(current_activity, "[_]+$", "");
-                }
-
-
-                //Calculate Running Means
-                double runningMeanX = 0;
-                double runningMeanY = 0;
-                double runningMeanZ = 0;
-                int numMeanPts = 0;
-                int headPtr = head[channel];
-
-                while ((timeData[channel, headPtr] > 0) && ((unixtimestamp - timeData[channel, headPtr]) <= MEAN_SIZE) && (numMeanPts <= 499))
-                {
-                    runningMeanX += rawData[channel, 0, headPtr];
-                    runningMeanY += rawData[channel, 1, headPtr];
-                    runningMeanZ += rawData[channel, 2, headPtr];
-                    numMeanPts++;
-                    headPtr--;
-                    if (headPtr < 0)
-                        headPtr = 499;
-                }
-
-                runningMeanX = runningMeanX / numMeanPts;
-                runningMeanY = runningMeanY / numMeanPts;
-                runningMeanZ = runningMeanZ / numMeanPts;
-                RMX[channel] += runningMeanX;
-                RMY[channel] += runningMeanY;
-                RMZ[channel] += runningMeanZ;
-                RMSize[channel] += numMeanPts;
-                RMCount[channel] = RMCount[channel] + 1;
-
-
-                //Calculate MITes Raw Values
-                if (channel <= sannotation.MaximumSensorID) //if junk comes ignore it
-                {
-                    if ((prevX[channel] > 0) && (prevY[channel] > 0) && (prevZ[channel] > 0) && (x > 0) && (y > 0) && (z > 0))
-                    {
-                        averageX[channel] = averageX[channel] + Math.Abs(prevX[channel] - x);
-                        averageRawX[channel] = averageRawX[channel] + x;
-                        averageY[channel] = averageY[channel] + Math.Abs(prevY[channel] - y);
-                        averageRawY[channel] = averageRawY[channel] + y;
-                        averageZ[channel] = averageZ[channel] + Math.Abs(prevZ[channel] - z);
-                        averageRawZ[channel] = averageRawZ[channel] + z;
-                        acCounters[channel] = acCounters[channel] + 1;
-                    }
-
-                    prevX[channel] = x;
-                    prevY[channel] = y;
-                    prevZ[channel] = z;
-
-
-                    //current data item
-                    headPtr = head[channel];
-                    int prevHead = headPtr - 1;
-                    if (prevHead < 0)
-                        prevHead = 499;
-
-                    //trapezoid
-                    //double a2=rawData[channel, 0, headPtr];
-                    //double a1=rawData[channel, 0, prevHead];
-                    //a2 = a2 - runningMeanX;
-                    //a1 = a1 - runningMeanX;
-
-                    double t2 = timeData[channel, headPtr];
-                    double t1 = timeData[channel, prevHead];
-                    if ((t2 > 0) & (t1 > 0))
-                    {
-
-                        AUC[channel, 0] = AUC[channel, 0] + (int)Math.Abs((x - runningMeanX));
-                        AUC[channel, 1] = AUC[channel, 1] + (int)Math.Abs((y - runningMeanY));
-                        AUC[channel, 2] = AUC[channel, 2] + (int)Math.Abs((z - runningMeanZ));
-                        VMAG[channel] = VMAG[channel] + Math.Sqrt(Math.Pow((double)(x - runningMeanX), 2.0) + Math.Pow((double)(y - runningMeanY), 2.0) + Math.Pow((double)(z - runningMeanZ), 2.0));
-                    }
-                }
-
-
-
-                head[channel] = (head[channel] + 1) % 500;
-
-
-                #region Store data every second
-
-                if (previousUnixTime < 0)
-                    previousUnixTime = unixtimestamp;
-                else if ((unixtimestamp - previousUnixTime) >= 1000) //output data
-                {
-                    #region Initialize CSV lines
-                    string master_csv_line = "";
-                    string hr_csv_line = "";
-                    string[] actigraph_csv_line = new string[actigraphData.Length];
-                    for (int i = 0; (i < actigraphData.Length); i++)
-                        actigraph_csv_line[i] = "";
-                    string sensewear_csv_line = "";
-                    string zephyr_csv_line = "";
-                    string oxycon_csv_line = "";
-                    string omron_csv_line = "";
-                    #endregion Initialize CSV lines
-
-                    DateTime origin = new DateTime(1970, 1, 1, 0, 0, 0, 0);
-                    DateTime now = new DateTime();
-                    string timeKey = "";
-                    TimeSpan diff;
-                    string timestamp = "";
-
-                    //Check for missing MITes data
-                    while ((unixtimestamp - previousUnixTime) >= 2000)
-                    {
-
-                        UnixTime.GetDateTime((long)(previousUnixTime + 1000), out now);
-                        timeKey = now.Year + "-" + now.Month + "-" + now.Day + "-" + now.Hour + "-" + now.Minute + "-" + now.Second;
-                        diff = now.Subtract(origin);
-                        timestamp = diff.TotalMilliseconds + "," + now.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ssK");
-                        previousUnixTime = previousUnixTime + 1000;
-
-                        if (CSVProgress == "")
-                            CSVProgress = "Synchronizing " + now.ToLongDateString() + " " + now.ToLongTimeString();
-
-                        #region Update current activity
-                        if (previousUnixTime > annotatedRecord.EndUnix)
-                        {
-                            current_activity = "";
-                            for (int j = 0; (j < annotatedRecord.Labels.Count); j++)
-                            {
-                                if (j == annotatedRecord.Labels.Count - 1)
-                                    current_activity += "";
-                                else
-                                    current_activity += ",";
-                            }
-                            if (activityIndex < aannotation.Data.Count - 1)
-                            {
-                                activityIndex++;
-                                annotatedRecord = ((AXML.AnnotatedRecord)aannotation.Data[activityIndex]);
-                            }
-                        }
-
-                        if ((previousUnixTime >= annotatedRecord.StartUnix) &&
-                             (previousUnixTime <= annotatedRecord.EndUnix))
-                        {
-                            current_activity = "";
-                            for (int j = 0; (j < annotatedRecord.Labels.Count); j++)
-                            {
-                                if (j == annotatedRecord.Labels.Count - 1)
-                                    current_activity += ((AXML.Label)annotatedRecord.Labels[j]).Name;
-                                else
-                                    current_activity += ((AXML.Label)annotatedRecord.Labels[j]).Name + ",";
-                            }
-                            current_activity = current_activity.Replace("none", "").Replace('-', '_').Replace(':', '_').Replace('%', '_').Replace('/', '_');
-                            current_activity = Regex.Replace(current_activity, "[_]+", "_");
-                            current_activity = Regex.Replace(current_activity, "^[_]+", "");
-                            current_activity = Regex.Replace(current_activity, "[_]+$", "");
-                        }
-                        #endregion Update current activity
-
-
-                        //Set the time stamp
-                        master_csv_line = timestamp;
-                        hr_csv_line = timestamp;
-                        for (int i = 0; (i < actigraphData.Length); i++)
-                            actigraph_csv_line[i] = timestamp;
-                        sensewear_csv_line = timestamp;
-                        zephyr_csv_line = timestamp;
-                        oxycon_csv_line = timestamp;
-                        omron_csv_line = timestamp;
-                        master_csv_line += "," + current_activity;
-
-                        //attempt to write everything except MITes
-                        foreach (SXML.Sensor sensor in sannotation.Sensors)
-                        {
-                            csv_line1 = timestamp;
-                            csv_line2 = timestamp;
-                            csv_line3 = timestamp;
-                            csv_line4 = timestamp;
-                            csv_line5 = timestamp;
-                            csv_line6 = timestamp;
-
-                            int sensor_id = Convert.ToInt32(sensor.ID);
-                            if (sensor_id > 0) //No HR
-                            {
-                                csv_line1 += ",,,,";
-                                csv_line3 += ",,,,";
-                                csv_line2 += ",0";
-                                csv_line4 += ",,,,";
-                                csv_line5 += ",,,,,";
-                                csv_line6 += ",";
-                                master_csv_line += ",0,,,,,,,,,,,,,,,";
-
-                                activityCountCSVs[sensor_id].WriteLine(csv_line1);
-                                samplingCSVs[sensor_id].WriteLine(csv_line2);
-                                averagedRaw[sensor_id].WriteLine(csv_line3);
-                                rmCSVs[sensor_id].WriteLine(csv_line4);
-                                aucCSVs[sensor_id].WriteLine(csv_line5);
-                                aucCSVs[sensor_id].WriteLine(csv_line6);
-                            }
-                            else
-                                hrCSV.WriteLine(hr_csv_line + ",");
-
-
-
-                            averageX[sensor_id] = 0;
-                            averageY[sensor_id] = 0;
-                            averageZ[sensor_id] = 0;
-                            averageRawX[sensor_id] = 0;
-                            averageRawY[sensor_id] = 0;
-                            averageRawZ[sensor_id] = 0;
-                            prevX[sensor_id] = 0;
-                            prevY[sensor_id] = 0;
-                            prevY[sensor_id] = 0;
-                            acCounters[sensor_id] = 0;
-                            RMX[sensor_id] = 0;
-                            RMY[sensor_id] = 0;
-                            RMZ[sensor_id] = 0;
-                            RMSize[sensor_id] = 0;
-                            RMCount[sensor_id] = 0;
-                            VMAG[sensor_id] = 0;
-                            for (int j = 0; (j < 3); j++)
-                                AUC[sensor_id, j] = 0;
-                        }
-                        master_csv_line = master_csv_line + ",,";
-
-                        #region Write CSV lines for Actigraphs
-                        for (int i = 0; (i < actigraphData.Length); i++)
-                        {
-                            if (actigraphData[i].ContainsKey(timeKey) == false)
-                            {
-                                actigraphCSV[i].WriteLine(actigraph_csv_line[i] + ",");
-                                master_csv_line = master_csv_line + ",";
-                            }
-                            else
-                            {
-
-                                actigraphCSV[i].WriteLine(actigraph_csv_line[i] + "," + actigraphData[i][timeKey]);
-                                master_csv_line = master_csv_line + actigraphData[i][timeKey] + ",";
-                            }
-                        }
-                        #endregion Write CSV lines for Actigraphs
-
-                        #region Write CSV line for Sensewear
-                        if ((sensewearFound) && (sensewearCSV != null))
-                        {
-                            if (SSR.ContainsKey(timeKey))
-                            {
-                                sensewearCSV.WriteLine(sensewear_csv_line + "," + (int)SSR[timeKey] + "," + (double)STrans[timeKey] +
-                                    "," + (double)SLong[timeKey] + "," + (double)SAcc[timeKey]);
-                                master_csv_line = master_csv_line + (int)SSR[timeKey] + "," + (double)STrans[timeKey] +
-                                    "," + (double)SLong[timeKey] + "," + (double)SAcc[timeKey];
-                            }
-                            else
-                            {
-                                sensewearCSV.WriteLine(sensewear_csv_line + ",,,,");
-                                master_csv_line = master_csv_line + ",,,";
-                            }
-                        }
-                        else
-                            master_csv_line = master_csv_line + ",,,";
-                        #endregion Write CSV line for Sensewear
-
-                        #region Write CSV line for Zephyr
-                        if ((zephyrFound) && (zephyrCSV != null))
-                        {
-                            if (zephyrData.ContainsKey(timeKey))
-                            {
-                                zephyrCSV.WriteLine(zephyr_csv_line + "," + ((string)zephyrData[timeKey]));
-                                master_csv_line = master_csv_line + "," + ((string)zephyrData[timeKey]);
-                            }
-                            else
-                            {
-                                zephyrCSV.WriteLine(zephyr_csv_line + ",,,,,,,,,,,,,,,,");
-                                master_csv_line = master_csv_line + ",,,,,,,,,,,,,,,,";
-                            }
-                        }
-                        else
-                            master_csv_line = master_csv_line + ",,,,,,,,,,,,,,,,";
-                        #endregion Write CSV line for Zephyr
-
-                        #region Write CSV line for Oxycon
-                        if ((oxyconFound) && (oxyconCSV != null))
-                        {
-                            if (oxyconData.ContainsKey(timeKey))
-                            {
-                                oxyconCSV.WriteLine(oxycon_csv_line + "," + ((string)oxyconData[timeKey]));
-                                master_csv_line = master_csv_line + "," + ((string)oxyconData[timeKey]);
-                            }
-                            else
-                            {
-                                oxyconCSV.WriteLine(zephyr_csv_line + ",,,,,,,,");
-                                master_csv_line = master_csv_line + ",,,,,,,,";
-                            }
-                        }
-                        else
-                            master_csv_line = master_csv_line + ",,,,,,,,";
-                        #endregion Write CSV line for Oxycon
-
-                        #region Write CSV line for Omron
-                        if ((omronFound) && (omronCSV != null))
-                        {
-                            if (omronData.Contains(timeKey))
-                            {
-                                omronCSV.WriteLine(omron_csv_line + "," + ((int)omronData[timeKey]));
-                                master_csv_line = master_csv_line + "," + ((int)omronData[timeKey]);
-                            }
-                            else
-                            {
-                                omronCSV.WriteLine(omron_csv_line + ",");
-                                master_csv_line = master_csv_line + ",";
-                            }
-                        }
-                        else
-                            master_csv_line = master_csv_line + ",";
-                        #endregion Write CSV line for Omron
-
-                        #region Write master CSV line
-                        masterCSV.WriteLine(master_csv_line);
-                        #endregion Write master CSV line
-
-                        hrCount = 0;
-                        sumHR = 0;
-                    }
-
-
-                    UnixTime.GetDateTime((long)unixtimestamp, out now);
-                    timeKey = now.Year + "-" + now.Month + "-" + now.Day + "-" + now.Hour + "-" + now.Minute + "-" + now.Second;
-                    diff = now.Subtract(origin);
-                    timestamp = diff.TotalMilliseconds + "," + now.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ssK");
-                    previousUnixTime = unixtimestamp;
-
-                    #region Set CSV lines timestamp
-                    master_csv_line = timestamp;
-                    hr_csv_line = timestamp;
-                    for (int i = 0; (i < actigraphData.Length); i++)
-                        actigraph_csv_line[i] = timestamp;
-                    sensewear_csv_line = timestamp;
-                    zephyr_csv_line = timestamp;
-                    oxycon_csv_line = timestamp;
-                    omron_csv_line = timestamp;
-                    master_csv_line += "," + current_activity;
-                    #endregion Set CSV lines timestamp
-
-                    #region Write CSV line for MITes
-                    foreach (SXML.Sensor sensor in sannotation.Sensors)
-                    {
-                        csv_line1 = timestamp;
-                        csv_line2 = timestamp;
-                        csv_line3 = timestamp;
-                        csv_line4 = timestamp;
-                        csv_line5 = timestamp;
-                        csv_line6 = timestamp;
-
-                        int sensor_id = Convert.ToInt32(sensor.ID);
-
-
-                        if (sensor_id > 0) //No HR
-                        {
-                            if (acCounters[sensor_id] > 0)
-                            {
-                                csv_line2 += "," + acCounters[sensor_id];
-
-                                csv_line1 += "," + ((double)(averageX[sensor_id] / (double)acCounters[sensor_id])).ToString("00.00") + ",";
-                                csv_line1 += ((double)(averageY[sensor_id] / (double)acCounters[sensor_id])).ToString("00.00") + ",";
-                                csv_line1 += ((double)(averageZ[sensor_id] / (double)acCounters[sensor_id])).ToString("00.00");
-
-                                csv_line3 += "," + ((int)(averageRawX[sensor_id] / acCounters[sensor_id])) + ",";
-                                csv_line3 += ((int)(averageRawY[sensor_id] / acCounters[sensor_id])) + ",";
-                                csv_line3 += ((int)(averageRawZ[sensor_id] / acCounters[sensor_id]));
-
-                                csv_line4 += "," + ((double)(RMX[sensor_id] / RMCount[sensor_id])).ToString("00.00") + ",";
-                                csv_line4 += ((double)(RMY[sensor_id] / RMCount[sensor_id])).ToString("00.00") + ",";
-                                csv_line4 += ((double)(RMZ[sensor_id] / RMCount[sensor_id])).ToString("00.00");
-
-                                csv_line5 += "," + ((double)AUC[sensor_id, 0]).ToString("00.00") + ",";
-                                csv_line5 += ((double)AUC[sensor_id, 1]).ToString("00.00") + ",";
-                                csv_line5 += ((double)AUC[sensor_id, 2]).ToString("00.00") + ",";
-                                csv_line5 += ((double)(AUC[sensor_id, 0] + AUC[sensor_id, 1] + AUC[sensor_id, 2])).ToString("00.00");
-
-                                csv_line6 += "," + ((double)(VMAG[sensor_id] / (double)acCounters[sensor_id])).ToString("00.00");
-
-                                master_csv_line += "," + acCounters[sensor_id];
-                                master_csv_line += "," + ((int)(averageRawX[sensor_id] / acCounters[sensor_id])) + ",";
-                                master_csv_line += ((int)(averageRawY[sensor_id] / acCounters[sensor_id])) + ",";
-                                master_csv_line += ((int)(averageRawZ[sensor_id] / acCounters[sensor_id]));
-                                master_csv_line += "," + ((double)(averageX[sensor_id] / (double)acCounters[sensor_id])).ToString("00.00") + ",";
-                                master_csv_line += ((double)(averageY[sensor_id] / (double)acCounters[sensor_id])).ToString("00.00") + ",";
-                                master_csv_line += ((double)(averageZ[sensor_id] / (double)acCounters[sensor_id])).ToString("00.00") + ",";
-
-                                master_csv_line += ((double)AUC[sensor_id, 0]).ToString("00.00") + ",";
-                                master_csv_line += ((double)AUC[sensor_id, 1]).ToString("00.00") + ",";
-                                master_csv_line += ((double)AUC[sensor_id, 2]).ToString("00.00") + ",";
-                                master_csv_line += ((double)(AUC[sensor_id, 0] + AUC[sensor_id, 1] + AUC[sensor_id, 2])).ToString("00.00") + ",";
-
-                                master_csv_line += ((double)(RMX[sensor_id] / RMCount[sensor_id])).ToString("00.00") + ",";
-                                master_csv_line += ((double)(RMY[sensor_id] / RMCount[sensor_id])).ToString("00.00") + ",";
-                                master_csv_line += ((double)(RMZ[sensor_id] / RMCount[sensor_id])).ToString("00.00") + ",";
-                                master_csv_line += ((double)(RMSize[sensor_id] / RMCount[sensor_id])).ToString("00.00") + ",";
-                                master_csv_line += ((double)(VMAG[sensor_id] / (double)acCounters[sensor_id])).ToString("00.00");
-
-
-                            }
-                            else
-                            {
-                                csv_line1 += ",,,,";
-                                csv_line3 += ",,,,";
-                                csv_line2 += ",0";
-                                csv_line4 += ",,,,";
-                                csv_line5 += ",,,,,";
-                                csv_line6 += ",";
-                                master_csv_line += ",0,,,,,,,,,,,,,,,";
-                            }
-
-                            //Store data in CSV files
-                            activityCountCSVs[sensor_id].WriteLine(csv_line1);
-                            samplingCSVs[sensor_id].WriteLine(csv_line2);
-                            averagedRaw[sensor_id].WriteLine(csv_line3);
-                            rmCSVs[sensor_id].WriteLine(csv_line4);
-                            aucCSVs[sensor_id].WriteLine(csv_line5);
-                            vmagCSVs[sensor_id].WriteLine(csv_line6);
-
-                        }
-
-                        averageX[sensor_id] = 0;
-                        averageY[sensor_id] = 0;
-                        averageZ[sensor_id] = 0;
-                        averageRawX[sensor_id] = 0;
-                        averageRawY[sensor_id] = 0;
-                        averageRawZ[sensor_id] = 0;
-                        prevX[sensor_id] = 0;
-                        prevY[sensor_id] = 0;
-                        prevY[sensor_id] = 0;
-                        acCounters[sensor_id] = 0;
-                        RMX[sensor_id] = 0;
-                        RMY[sensor_id] = 0;
-                        RMZ[sensor_id] = 0;
-                        RMSize[sensor_id] = 0;
-                        RMCount[sensor_id] = 0;
-                        VMAG[sensor_id] = 0;
-                        for (int j = 0; (j < 3); j++)
-                            AUC[sensor_id, j] = 0;
-
-               
-     }
-                    #endregion Write CSV line for MITes
-
-                    #region Write CSV line for MITes HR
-                    if (hrCount > 0)
-                    {
-                        hrCSV.WriteLine(hr_csv_line + "," + (int)(sumHR / hrCount));
-                        master_csv_line = master_csv_line + "," + (int)(sumHR / hrCount) + ",";
-                    }
-                    else
-                    {
-                        hrCSV.WriteLine(hr_csv_line + ",");
-                        master_csv_line = master_csv_line + ",,";
-                    }
-                    #endregion Write CSV line for MITes HR
-
-                    #region Write CSV lines for Actigraphs
-                    for (int i = 0; (i < actigraphData.Length); i++)
-                    {
-                        if (actigraphData[i].ContainsKey(timeKey) == false)
-                        {
-                            actigraphCSV[i].WriteLine(actigraph_csv_line[i] + ",");
-                            master_csv_line = master_csv_line + ",";
-                        }
-                        else
-                        {
-
-                            actigraphCSV[i].WriteLine(actigraph_csv_line[i] + "," + actigraphData[i][timeKey]);
-                            master_csv_line = master_csv_line + actigraphData[i][timeKey] + ",";
-                        }
-                    }
-                    #endregion Write CSV lines for Actigraphs
-
-                    #region Write CSV line for Sensewear
-                    if ((sensewearFound) && (sensewearCSV != null))
-                    {
-                        if (SSR.ContainsKey(timeKey))
-                        {
-                            sensewearCSV.WriteLine(sensewear_csv_line + "," + (int)SSR[timeKey] + "," + (double)STrans[timeKey] +
-                                "," + (double)SLong[timeKey] + "," + (double)SAcc[timeKey]);
-                            master_csv_line = master_csv_line + (int)SSR[timeKey] + "," + (double)STrans[timeKey] +
-                                "," + (double)SLong[timeKey] + "," + (double)SAcc[timeKey];
-                        }
-                        else
-                        {
-                            sensewearCSV.WriteLine(sensewear_csv_line + ",,,,");
-                            master_csv_line = master_csv_line + ",,,";
-                        }
-                    }
-                    else
-                        master_csv_line = master_csv_line + ",,,";
-                    #endregion Write CSV line for Sensewear
-
-                    #region Write CSV line for Zephyr
-                    if ((zephyrFound) && (zephyrCSV != null))
-                    {
-                        if (zephyrData.ContainsKey(timeKey))
-                        {
-                            zephyrCSV.WriteLine(zephyr_csv_line + "," + ((string)zephyrData[timeKey]));
-                            master_csv_line = master_csv_line + "," + ((string)zephyrData[timeKey]);
-                        }
-                        else
-                        {
-                            zephyrCSV.WriteLine(zephyr_csv_line + ",,,,,,,,,,,,,,,,");
-                            master_csv_line = master_csv_line + ",,,,,,,,,,,,,,,,";
-                        }
-                    }
-                    else
-                        master_csv_line = master_csv_line + ",,,,,,,,,,,,,,,,";
-                    #endregion Write CSV line for Zephyr
-
-                    #region Write CSV line for Oxycon
-                    if ((oxyconFound) && (oxyconCSV != null))
-                    {
-                        if (oxyconData.ContainsKey(timeKey))
-                        {
-                            oxyconCSV.WriteLine(oxycon_csv_line + "," + ((string)oxyconData[timeKey]));
-                            master_csv_line = master_csv_line + "," + ((string)oxyconData[timeKey]);
-
-
-
-                        }
-                        else
-                        {
-                            oxyconCSV.WriteLine(zephyr_csv_line + ",,,,,,,,");
-                            master_csv_line = master_csv_line + ",,,,,,,,";
-                        }
-                    }
-                    else
-                        master_csv_line = master_csv_line + ",,,,,,,,";
-                    #endregion Write CSV line for Oxycon
-
-                    #region Write CSV line for Omron
-                    if ((omronFound) && (omronCSV != null))
-                    {
-                        if (omronData.Contains(timeKey))
-                        {
-                            omronCSV.WriteLine(omron_csv_line + "," + ((int)omronData[timeKey]));
-                            master_csv_line = master_csv_line + "," + ((int)omronData[timeKey]);
-                        }
-                        else
-                        {
-                            omronCSV.WriteLine(omron_csv_line + ",");
-                            master_csv_line = master_csv_line + ",";
-                        }
-                    }
-                    else
-                        master_csv_line = master_csv_line + ",";
-                    #endregion Write CSV line for Omron
-
-                    #region Write master CSV line
-                    masterCSV.WriteLine(master_csv_line);
-                    #endregion Write master CSV line
-
-                    hrCount = 0;
-                    sumHR = 0;
-                }
-
-                #endregion Store data every second
-
-
-            } while (isData = aMITesLoggerReader.GetSensorData(10));
-            //tww.Flush();
-            //tww.Close();
-            //Completed Synchronizing - Flush and close files
-
-          */
 
         }
-
-
-
-
-
-
-
-
-
-
-
-        
-
-
     }
 }

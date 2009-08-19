@@ -44,11 +44,10 @@ namespace Wockets.Receivers
         private const int MAXIMUM_SAMPLING_RATE = 70;
 
         //RFCOMM Specific Objects
-#if (PocketPC)
+
         //private BluetoothStream bluetoothStream;       
 
         private BluetoothStream bluetoothStream;
-#endif
         private const int MAC_SIZE = 6;
         private string address;
         private byte[] address_bytes;

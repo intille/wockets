@@ -644,7 +644,172 @@ namespace NESPDataViewer
 
 
 
+        #region Columbia Graph
+        private void CreateColumbiaGraph(GraphPane gp, string filePath)
+        {
+            #region ACCELERATION X Y Z
+            string[] accel = FileReadWrite.ReadLinesFromFile(filePath);
 
+            PointPairList listX = new PointPairList();
+            PointPairList listY = new PointPairList();
+            PointPairList listZ = new PointPairList();
+
+            for (int i = 1; i < accel.Length; i++)
+            {
+                try
+                {
+                    string[] split = accel[i].Split(',');
+                    if ((split.Length > 6) && (split[1].Length > 0) && (split[2].Length > 0))
+                    {
+                        DateTime dt = DateTime.Parse(split[1]);
+
+                        double x = (double)new XDate(dt);
+                        double value = Convert.ToDouble(split[2]);
+                        string label = String.Format("X-axis,\n{0} {1}", dt.ToLongTimeString(), value);
+
+                        if (_isUsingLabels) listX.Add(x, value, label);
+                        else listX.Add(x, value);
+
+                        value = Convert.ToDouble(split[3]);
+                        label = String.Format("Y-axis,\n{0} {1}", dt.ToLongTimeString(), value);
+                        if (_isUsingLabels) listY.Add(x, value, label);
+                        else listY.Add(x, value);
+
+                        value = Convert.ToDouble(split[4]);
+                        label = label = String.Format("Z-axis,\n{0} {1}", dt.ToLongTimeString(), value);
+                        if (_isUsingLabels) listZ.Add(x, value, label);
+                        else listZ.Add(x, value);
+                    }
+                }
+                catch { }
+            }
+            #endregion
+
+
+            
+            LineItem pointsCurveX = gp.AddCurve("Columbia X", listX, Color.LightBlue, SymbolType.Circle);
+            LineItem pointsCurveY = gp.AddCurve("Columbia Y", listY, Color.Blue, SymbolType.Circle);
+            LineItem pointsCurveZ = gp.AddCurve("Columbia Z", listZ, Color.DarkBlue, SymbolType.Circle);
+            pointsCurveX.Symbol.Fill = new Fill(Color.LightBlue);
+            pointsCurveY.Symbol.Fill = new Fill(Color.Blue);
+            pointsCurveZ.Symbol.Fill = new Fill(Color.DarkBlue);
+            if (!_isAdaptingPointSize)
+            {
+                pointsCurveX.Symbol.Size = 1F;
+                pointsCurveY.Symbol.Size = 1F;
+                pointsCurveZ.Symbol.Size = 1F;
+            }
+            _alLinesWithSymbols.Add(pointsCurveX);
+            _alLinesWithSymbols.Add(pointsCurveY);
+            _alLinesWithSymbols.Add(pointsCurveZ);
+
+            pointsCurveX.Line.IsVisible = false;
+            pointsCurveY.Line.IsVisible = false;
+            pointsCurveZ.Line.IsVisible = false;
+
+
+            //paneOrders.Add("Columbia " + channel + " " + location, paneOrder);
+            WidenDatesIfNeeded(listX);
+        }
+
+        #endregion Columbia Graph
+
+
+
+        #region GPS Graph
+        private void CreateGPSDeviceGraph(GraphPane gp, string filePath)
+        {
+            string[] values = FileReadWrite.ReadLinesFromFile(filePath);
+
+            PointPairList listSpeed = new PointPairList();
+            PointPairList listAltitude = new PointPairList();
+  
+
+            //for each row, add values to PointPairLists
+            for (int i = 0; i < values.Length; i++)
+            {
+                try
+                {
+                    //expecting values in format: UnixTimeStamp,TimeStamp,OxyconHR,OxyconBF,OxyconVE,OxyconVO2kg,OxyconRER
+                    string[] split = values[i].Split(',');
+
+                    if (split.Length > 4) //TimeStamp + at least one data value
+                    {
+                        #region TIMESTAMP - X VALUE
+                        DateTime dt = ConvertUNIXDatTime(Convert.ToDouble(split[0]));//UnixTimeStamp, Column 1/A
+                        //DateTime dt = DateTime.Parse(split[1]);//TimeStamp, Column 2/B
+                        double x = (double)new XDate(dt);//x value is numeric representation of TimeStamp
+                        #endregion
+
+                        #region DATA VALUE - Y VALUE
+                        double y = 0; string label = "";
+
+                        #region GPSSpeed
+                        if ((split.Length > 3) && (split[3].Length > 0))
+                        {
+                            y = Convert.ToDouble(split[3]);//Column 3/C
+                            if (_isUsingLabels)
+                            {
+                                label = String.Format("GPS Speed\n{0} {1}", dt.ToLongTimeString(), y);
+                                listSpeed.Add(x, y, label);
+                            }
+                            else listSpeed.Add(x, y);
+                        }
+                        #endregion
+
+                        #region GPSAltitude
+                        if ((split.Length > 4) && (split[4].Length > 0))
+                        {
+                            y = Convert.ToDouble(split[4]);//Column 4/D
+                            if (_isUsingLabels)
+                            {
+                                label = String.Format("GPS Altitude\n{0} {1}", dt.ToLongTimeString(), y);
+                                listAltitude.Add(x, y, label);
+                            }
+                            else listAltitude.Add(x, y);
+                        }
+                        #endregion                       
+
+                        #endregion
+
+                    }
+
+                }
+                catch { }
+            }
+
+            #region SET DISPLAY PROPERTIES FOR LINES
+            LineItem pointsCurve;
+
+            #region ON Y-AXIS
+            #region Speed
+            pointsCurve = gp.AddCurve("GPS Speed", listSpeed, Color.Red, SymbolType.Circle);
+            pointsCurve.Symbol.Fill = new Fill(Color.Red);
+            if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
+            pointsCurve.Line.IsVisible = false;
+            pointsCurve.Tag = "Speed";
+            _alLinesWithSymbols.Add(pointsCurve);
+            #endregion
+
+            #region Altitude
+            pointsCurve = gp.AddCurve("GPS Altitude", listAltitude, Color.GreenYellow, SymbolType.Square);
+            pointsCurve.Symbol.Fill = new Fill(Color.GreenYellow);
+            if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
+            pointsCurve.Line.IsVisible = false;
+            pointsCurve.Tag = "Altitude";
+            _alLinesWithSymbols.Add(pointsCurve);
+            #endregion
+
+ 
+
+            #endregion ON Y-AXIS
+
+            #endregion SET DISPLAY PROPERTIES FOR LINES
+            //if time-dates for lines include dates not previously graphed, widen range
+            WidenDatesIfNeeded(listSpeed); 
+        }
+
+        #endregion GPS Graph
 
         #region Actigraph
         Hashtable lineSegments = new Hashtable();
@@ -1622,6 +1787,32 @@ namespace NESPDataViewer
                 paneOrdering++;
             }
             #endregion Zephyr
+            #region Columbia
+            string columbiaFile = Path.Combine(path,"Columbia.csv");
+                  
+            if (File.Exists(columbiaFile))
+            {
+                string title = "Columbia";
+                GraphPane ePane = AddPane(title, "Columbia");
+                CreateColumbiaGraph(ePane, columbiaFile);
+                paneOrders.Add(title, paneOrdering);
+                paneOrdering++;
+            }      
+            #endregion
+
+
+            #region GPS
+            string gpsFile = Path.Combine(path, "GPS.csv");
+
+            if (File.Exists(gpsFile))
+            {
+                string title = "GPS";
+                GraphPane ePane = AddPane(title, "GPS");
+                CreateGPSDeviceGraph(ePane, columbiaFile);
+                paneOrders.Add(title, paneOrdering);
+                paneOrdering++;
+            }
+            #endregion
 
             #region Actigraphs
             string[] file = Directory.GetFileSystemEntries(path, "*-actigraph*.csv");
