@@ -311,6 +311,8 @@ namespace WocketsApplication.SmartPhone
                 InitializeDataLogger(storageDirectory, wocketsController, annotatedSession, classifierConfiguration);
             else if (mode == 3)
                 InitializeActivityTracker(storageDirectory, wocketsController, annotatedSession, classifierConfiguration);
+            else if (mode == 4)
+                InitializeExergame(storageDirectory, wocketsController, annotatedSession, classifierConfiguration);
 
 
         }
@@ -897,7 +899,182 @@ namespace WocketsApplication.SmartPhone
 
         #endregion Initialization Methods
 
+        #region Exergame Constructor
 
+        public void InitializeExergame(string storageDirectory, WocketsController wocketsController, Session annotatedSession, DTConfiguration classifierConfiguration)
+        {
+
+
+            this.storageDirectory = storageDirectory;
+            this.wocketsController = wocketsController;
+            this.annotatedSession = annotatedSession;
+            this.classifierConfiguration = classifierConfiguration;
+
+            //Initialize high resolution unix timer
+            WocketsTimer.InitializeTime();
+
+            //Initialize and start GUI progress thread
+            progressMessage = null;
+            aProgressThread = new Thread(new ThreadStart(ProgressThread));
+            aProgressThread.Start();
+
+            aPlottingThread = new Thread(new ThreadStart(PlotWockets));
+            //Initialize Plotting Thread
+            //aPlottingThread = new Thread(new ThreadStart(PlotWockets));
+            //Thread aSavingThread = new Thread(new ThreadStart(SaveWockets));
+            //Thread aPollingThread = new Thread(new ThreadStart(PollForGame));
+            //Thread aGamingThread = new Thread(new ThreadStart(PlayExergame));
+            //aInternalPollingThread = new Thread(new ThreadStart(PollInternal));
+
+            //this.bluetoothControllers = new BluetoothController[this.wocketsController._Receivers.Count];
+            //this.bluetoothConnectors = new BluetoothConnector[this.wocketsController._Receivers.Count];
+
+
+
+            #region Initialize GUI Components
+            //initialize the interface components
+            InitializeComponent();
+            while (progressMessage != null) Thread.Sleep(50);
+            progressMessage = "Initializing Timers ...";
+            InitializeTimers();
+            while (progressMessage != null) Thread.Sleep(50);
+            progressMessage = " Completed\r\nInitializing GUI ...";
+            InitializeInterface();
+            //Initialize GUI timers
+            while (progressMessage != null) Thread.Sleep(50);
+            progressMessage = " Completed\r\n";
+            this.isPlotting = true;
+
+            //SetFormPositions();            
+            aWocketsPlotter = new WocketsScalablePlotter(this.panel1, this.wocketsController);
+
+            //Override the resize event
+            this.Resize += new EventHandler(OnResize);
+
+
+            //Initialize the quality interface
+            while (progressMessage != null) Thread.Sleep(50);
+            progressMessage = "Initializing MITes Quality GUI ...";
+            InitializeQualityInterface();
+            while (progressMessage != null) Thread.Sleep(50);
+            progressMessage = " Completed\r\n";
+
+            //Remove classifier tabs
+#if (PocketPC)
+
+            this.viewsMenu[2].Enabled = false;
+            this.viewsMenu[3].Enabled = false;
+#else
+            this.ShowForms();
+#endif
+
+
+            #endregion Initialize GUI Components
+
+            #region Initialize Feature Extraction
+            FeatureExtractor.Initialize(this.wocketsController, this.classifierConfiguration, this.annotatedSession.OverlappingActivityLists[0]);
+            #endregion Initialize Feature Extraction
+
+            #region Initialize Quality Tracking variables
+            //InitializeQuality();
+            #endregion Initialize Quality Tracking variables
+
+            #region Initialize Logging
+            //InitializeLogging(this.storageDirectory);
+            #endregion Initialize Logging
+
+
+
+            #region Bluetooth reception channels initialization
+            //Initialize and search for wockets connections
+            while (progressMessage != null) Thread.Sleep(50);
+            progressMessage = "Initializing receivers ... searching " + this.wocketsController._Receivers.Count + " BT receivers\r\n";
+
+
+
+            //this.wocketsController.InitializeExergame(storageDirectory, annotatedSession, this.currentRecord);
+            this.wocketsController.Initialize();
+
+            //Try to initialize all receivers 10 times then exit
+            /*t initializationAttempt = 0;
+            while (initializationAttempt <= 10)
+            {
+                if (InitializeReceivers() == false)
+                {
+                    initializationAttempt++;
+
+                    if (initializationAttempt == 10)
+                    {
+                        MessageBox.Show("Exiting: Some receivers in your configuration were not initialized.");
+                        Application.Exit();
+                        System.Diagnostics.Process.GetCurrentProcess().Kill();
+                    }
+                    else
+                    {
+                        while (progressMessage != null) Thread.Sleep(50);
+                        progressMessage = "Failed to initialize some receivers. Retrying (" + initializationAttempt + ")...\r\n";
+                    }
+
+                }
+                else
+                    break;
+
+                //we noticed that without the delay the BT stack might fail to connect to all of them. Spacing them out is a good idea
+
+                Thread.Sleep(500);
+            }
+             */
+            #endregion Bluetooth reception channels initialization
+
+            #region Start Collecting Data
+            /*
+            Receiver currentReceiver = null;
+            Sensor sensor = null;
+
+            //Cleanup receiver buffers as they are out of sync due to BT connection delays
+            //set them to saving mode
+            for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
+            {
+                try
+                {
+                    sensor = this.wocketsController._Sensors[i];
+                    sensor._Saving = true;
+                    currentReceiver = this.wocketsController._Receivers[sensor._Receiver];
+                    //if (currentReceiver._Running == true)
+                    //  currentReceiver.Read();
+                }
+                catch (Exception e)
+                {
+                    ((PictureBox)this.sensorStatus["W" + sensor._ID]).Image = disconnectedWocketImage;
+                    this.bluetoothConnectors[currentReceiver._ID] = new BluetoothConnector(currentReceiver, this.wocketsController);
+                    currentReceiver._Running = false;
+                }
+            }
+
+            */
+
+
+            aPlottingThread.Start();
+            //aSavingThread
+            //aPollingThread.Start();
+            //aInternalPollingThread.Start();
+            //aGamingThread.Start();
+            //aSavingThread.Start();
+
+            //Terminate the progress thread
+            progressThreadQuit = true;
+
+            //Enable all timer functions
+            this.readDataTimer.Enabled = true;
+            //this.qualityTimer.Enabled = true;
+
+            #endregion Start Collecting Data
+
+            this.wocketsController._annotatedSession = this.annotatedSession;
+            this.wocketsController._storageDirectory = this.storageDirectory;
+        }
+        
+        #endregion Exergame Constrcutor
 
 
 
@@ -1112,75 +1289,87 @@ namespace WocketsApplication.SmartPhone
 
         }
 
-
-
         private void startStopButton_Click(object sender, EventArgs e)
         {
-            MenuItem item = (MenuItem)sender;
-            //button state is now start
-            if (item.Text.Equals("Start"))
+           lock (WocketsController.MyLock)
             {
-                // this.startSound.Play();
-                //Generator generator = new Generator();
-                //generator.InitializeSound(this.Handle.ToInt32());
-                //generator.CreateBuffer();
-
-                item.Text = "Stop";
-                this.overallTimer.reset();
-                this.overallTimer.start();
-                this.goodTimer.reset();
-                this.goodTimer.start();
-
-                //store the current state of the categories
-                this.currentRecord = new Annotation();
-                this.currentRecord._StartDate = DateTime.Now.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ssK");
-                this.currentRecord._StartHour = DateTime.Now.Hour;
-                this.currentRecord._StartMinute = DateTime.Now.Minute;
-                this.currentRecord._StartSecond = DateTime.Now.Second;
-                TimeSpan ts = (DateTime.Now - new DateTime(1970, 1, 1, 0, 0, 0));
-                this.currentRecord._StartUnix = ts.TotalSeconds;
-
-                //check all buttons values, store them and disable them
-                foreach (ComboBox combo in categoryDrops)
+                MenuItem item = (MenuItem)sender;
+                //button state is now start
+                if (item.Text.Equals("Start"))
                 {
-                    int button_id = Convert.ToInt32(combo.Name);
-                    ActivityList category = (ActivityList)this.annotatedSession.OverlappingActivityLists[button_id];
-                    string current_label = (string)combo.SelectedItem;
-                    this.currentRecord.Activities.Add(new Activity(current_label, category._Name));
-                    combo.Enabled = false;
+                    // this.startSound.Play();
+                    //Generator generator = new Generator();
+                    //generator.InitializeSound(this.Handle.ToInt32());
+                    //generator.CreateBuffer();
+
+                    item.Text = "Stop";
+                    this.overallTimer.reset();
+                    this.overallTimer.start();
+                    this.goodTimer.reset();
+                    this.goodTimer.start();
+
+                    //store the current state of the categories
+                    this.currentRecord = new Annotation();
+                    this.currentRecord._StartDate = DateTime.Now.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ssK");
+                    this.currentRecord._StartHour = DateTime.Now.Hour;
+                    this.currentRecord._StartMinute = DateTime.Now.Minute;
+                    this.currentRecord._StartSecond = DateTime.Now.Second;
+                    TimeSpan ts = (DateTime.Now - new DateTime(1970, 1, 1, 0, 0, 0));
+                    this.currentRecord._StartUnix = ts.TotalSeconds;
+
+                    //check all buttons values, store them and disable them
+                    foreach (ComboBox combo in categoryDrops)
+                    {
+                        int button_id = Convert.ToInt32(combo.Name);
+                        ActivityList category = (ActivityList)this.annotatedSession.OverlappingActivityLists[button_id];
+                        string current_label = (string)combo.SelectedItem;
+                        this.currentRecord.Activities.Add(new Activity(current_label, category._Name));
+                        combo.Enabled = false;
+                    }
+                    this.wocketsController._currentRecord = this.currentRecord;
                 }
 
-            }
+                else if (item.Text.Equals("Stop"))
+                {
+                    // this.stopSound.Play();
+                    item.Text = "Start";
+                    this.overallTimer.reset();
+                    this.goodTimer.reset();
+                    extractedVectors = 0;
 
-            else if (item.Text.Equals("Stop"))
-            {
-                // this.stopSound.Play();
-                item.Text = "Start";
-                this.overallTimer.reset();
-                this.goodTimer.reset();
-                extractedVectors = 0;
+                    //store the current state of the categories
+                    this.currentRecord._EndDate = DateTime.Now.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ssK");
+                    this.currentRecord._EndHour = DateTime.Now.Hour;
+                    this.currentRecord._EndMinute = DateTime.Now.Minute;
+                    this.currentRecord._EndSecond = DateTime.Now.Second;
+                    TimeSpan ts = (DateTime.Now - new DateTime(1970, 1, 1, 0, 0, 0));
+                    this.currentRecord._EndUnix = ts.TotalSeconds;
+                    this.annotatedSession.Annotations.Add(this.currentRecord);
 
-                //store the current state of the categories
-                this.currentRecord._EndDate = DateTime.Now.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ssK");
-                this.currentRecord._EndHour = DateTime.Now.Hour;
-                this.currentRecord._EndMinute = DateTime.Now.Minute;
-                this.currentRecord._EndSecond = DateTime.Now.Second;
-                TimeSpan ts = (DateTime.Now - new DateTime(1970, 1, 1, 0, 0, 0));
-                this.currentRecord._EndUnix = ts.TotalSeconds;
-                this.annotatedSession.Annotations.Add(this.currentRecord);
+                    //each time an activity is stopped, rewrite the file on disk, need to backup file to avoid corruption
+                    //this.annotation.ToXMLFile();
+                    //this.annotation.ToCSVFile();
+                    TextWriter tw = new StreamWriter(this.storageDirectory + "\\AnnotationIntervals.xml");
+                    // write a line of text to the file
+                    tw.WriteLine(this.annotatedSession.ToXML());
+                    // close the stream
+                    tw.Close();
 
-                //each time an activity is stopped, rewrite the file on disk, need to backup file to avoid corruption
-                //this.annotation.ToXMLFile();
-                //this.annotation.ToCSVFile();
-                TextWriter tw = new StreamWriter(this.storageDirectory + "\\AnnotationIntervals.xml");
-                // write a line of text to the file
-                tw.WriteLine(this.annotatedSession.ToXML());
-                // close the stream
-                tw.Close();
-                foreach (ComboBox c in this.categoryDrops)
-                    c.Enabled = true;
+                    ComboBox combo = (ComboBox)this.categoryDrops[0];
+                    this.categoryDrops.Clear();
+                    combo.SelectedItem = combo.Items[0];
+                    this.panel2.Controls.Add(combo);
+                    this.panel2.Focus();
+                    this.panel2.Visible = true;
+                    this.categoryDrops.Add(combo);
+                    combo.Enabled = true;
+                    combo.Visible = true;
+                    combo.Focus();
 
-                this.currentRecord = null;
+                    this.currentRecord = null;
+                    this.wocketsController._currentRecord = this.currentRecord;
+                }
+                this.wocketsController._annotatedSession = this.annotatedSession;
             }
         }
 
@@ -1221,6 +1410,53 @@ namespace WocketsApplication.SmartPhone
             MenuItem mi = (MenuItem)sender;
             mi.Checked = !(mi.Checked);
             this.isTraining = mi.Checked;
+            this.wocketsController.Training = this.isTraining;
+        }
+
+        private void classifying_Click(object sender, EventArgs e)
+        {
+            MenuItem mi = (MenuItem)sender;
+            mi.Checked = !(mi.Checked);
+
+            classifier = new J48();
+            if (!File.Exists(this.storageDirectory + "\\model.xml"))
+            {
+                string[] arffFiles = Directory.GetFileSystemEntries(this.storageDirectory, "output*.arff");
+                if (arffFiles.Length != 1)
+                    throw new Exception("Multiple Arff Files in Directory");
+                instances = new Instances(new StreamReader(arffFiles[0]));
+                instances.Class = instances.attribute(FeatureExtractor.ArffAttributeLabels.Length);
+                classifier.buildClassifier(instances);
+                TextWriter tc = new StreamWriter(this.storageDirectory + "\\model.xml");
+                classifier.toXML(tc);
+                tc.Flush();
+                tc.Close();
+            }
+            else
+            {
+                instances = new Instances(new StreamReader(this.storageDirectory + "\\structure.arff"));
+                instances.Class = instances.attribute(FeatureExtractor.ArffAttributeLabels.Length);
+                classifier.buildClassifier(this.storageDirectory + "\\model.xml", instances);
+            }
+
+            fvWekaAttributes = new FastVector(FeatureExtractor.ArffAttributeLabels.Length + 1);
+            for (int i = 0; (i < FeatureExtractor.ArffAttributeLabels.Length); i++)
+                fvWekaAttributes.addElement(new weka.core.Attribute(FeatureExtractor.ArffAttributeLabels[i]));
+
+            this.isClassifying = mi.Checked;
+            this.wocketsController._Classifying = this.isClassifying;
+            this.wocketsController._instances = this.instances;
+            this.wocketsController._classifier = this.classifier;
+        }
+
+        private void gaming_Click(object sender, EventArgs e)
+        {
+            MenuItem mi = (MenuItem)sender;
+            mi.Checked = !(mi.Checked);
+            this.isGaming = mi.Checked;
+            Thread aGamingThread = new Thread(new ThreadStart(this.wocketsController.escape.PlayExergame));
+            this.wocketsController.escape.isGaming = this.isGaming;
+            aGamingThread.Start();
         }
 
         private void view_menu_Click(object sender, EventArgs e)
@@ -1334,7 +1570,7 @@ namespace WocketsApplication.SmartPhone
                 if (control_id == OVERALL_TIMER)
                 {
                     this.label3.Text = label;
-                    this.label1.Text = extractedVectors.ToString();
+                    this.label1.Text = this.wocketsController.extractedVectors.ToString();
 
                 }
 #if (PocketPC)
@@ -1498,6 +1734,8 @@ namespace WocketsApplication.SmartPhone
         #endregion Builtin Accelerometr Polling Thread
 
         private bool isTraining = false;
+        private bool isClassifying = false;
+        private bool isGaming = false;
         private TextWriter trainingTW = null;
         private TextWriter structureTW = null;
 
@@ -1591,37 +1829,10 @@ namespace WocketsApplication.SmartPhone
 
             if (isQuitting)
             {
-                for (int i = 0; (i < this.wocketsController._Receivers.Count); i++)
-                {
-
-                    if (this.wocketsController._Receivers[i]._Type == ReceiverTypes.RFCOMM)
-                    {
-                        Thread.Sleep(100);
-                        //this.bluetoothControllers[i].cleanup();
-                        this.wocketsController._Receivers[i].Dispose();
-                        Thread.Sleep(1000);
-                    }
-
-                    Thread.Sleep(100);
-                }
-
                 this.alert.Stop();
 
-                if (trainingTW != null)
-                {
-                    trainingTW.Flush();
-                    trainingTW.Close();
-                    trainingTW = null;
-                }
-                if (structureTW != null)
-                {
-                    structureTW.Flush();
-                    structureTW.Close();
-                    structureTW = null;
-                }
+                this.wocketsController.Dispose();
 
-                for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
-                    this.wocketsController._Sensors[i].Dispose();
                 Logger.Close();
 
                 FeatureExtractor.Cleanup();

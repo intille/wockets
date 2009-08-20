@@ -1,15 +1,25 @@
 using System;
-using System.Collections.Generic;
-using System.Xml;
 using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Xml;
+using System.Threading;
+
+using Wockets;
 using Wockets.Receivers;
 using Wockets.Decoders;
 using Wockets.Sensors;
 using Wockets.Utils;
-using Wockets.Data.Commands;
 using Wockets.Utils.network;
+using Wockets.Data.Commands;
+using Wockets.Data.Annotation;
+using Wockets.Data.Classifiers.Utils;
 using Wockets.Exceptions;
-using System.Threading;
+using WocketsWeka;
+using weka.classifiers;
+using Wockets.Applications.Games.Escape;
+using weka;
+using weka.core;
 
 namespace Wockets
 {
@@ -23,13 +33,34 @@ namespace Wockets
         private ReceiverList receivers;
         private SensorList sensors;
 
+        private int count = 0;
+        public int extractedVectors = 0;
+        private int structureFileExamples = 0;
         private string description;
         private string filename;
         private string name;
         private Thread aPollingThread;
         private Thread aSavingThread;
+        private Thread aGamingThread;
         private bool polling = false;
         private bool saving = false;
+        private bool gaming = true;
+        private bool isTraining = false;
+        private bool isClassifying = false;
+        private TextWriter trainingTW = null;
+        private TextWriter structureTW = null;
+        private Instances instances;
+        private WocketsController wocketsController; 
+        private Classifier classifier;
+        private string storageDirectory;
+        private Session annotatedSession;
+        public Escape escape = new Escape();
+        /// <summary>
+        /// Stores the current record that is being annotated
+        /// </summary>
+        //private AnnotatedRecord currentRecord;
+        public Annotation currentRecord;
+
 
         public WocketsController(string name,string filename,string description)
         {
@@ -137,6 +168,8 @@ namespace Wockets
             aPollingThread.Priority = ThreadPriority.Highest;
             aPollingThread.Start();            
             aSavingThread.Start();
+
+            
          
         }
 
@@ -153,6 +186,18 @@ namespace Wockets
             {
                 aSavingThread.Join();
                 aSavingThread.Abort();
+            }
+            if (trainingTW != null)
+            {
+                trainingTW.Flush();
+                trainingTW.Close();
+                trainingTW = null;
+            }
+            if (structureTW != null)
+            {
+                structureTW.Flush();
+                structureTW.Close();
+                structureTW = null;
             }
             for (int i = 0; (i < this._Receivers.Count); i++)
             {
@@ -190,7 +235,90 @@ namespace Wockets
             }
         }
 
-  
+        public bool Training
+        {
+            get
+            {
+                return this.isTraining;
+            }
+            set
+            {
+                this.isTraining = value;
+            }
+        }
+        public bool _Classifying
+        {
+            get
+            {
+                return this.isClassifying;
+            }
+            set
+            {
+                this.isClassifying = value;
+            }
+        }
+        public Annotation _currentRecord
+        {
+            get
+            {
+                return this.currentRecord;
+            }
+            set
+            {
+                this.currentRecord = value;
+            }
+        }
+
+        public Session _annotatedSession
+        {
+            get 
+            {
+                return this.annotatedSession;
+            }
+            set 
+            {
+                this.annotatedSession = value;
+            }
+        }
+
+        public string _storageDirectory
+        {
+            get
+            {
+                return this.storageDirectory;
+            }
+            set
+            {
+                this.storageDirectory = value;
+            }
+        }
+
+        public Instances _instances
+        {
+            get
+            {
+                return this.instances;
+            }
+            set
+            {
+                this.instances = value;
+            }
+        }
+
+        public Classifier _classifier
+        {
+            get
+            {
+                return this.classifier;
+            }
+            set
+            {
+                this.classifier = value;
+            }
+        }
+
+        public static object MyLock = new object();
+        
         private void Poll()
         {
             #region Poll All Wockets and MITes and Decode Data
@@ -314,6 +442,94 @@ namespace Wockets
                                         sensor.Packets += numDecodedPackets;
                                     }
                                     #endregion Read Data
+                                    
+                                    #region Training
+
+                                    if (Training)
+                                    {
+                                        //create arff file
+                                        if (trainingTW == null)
+                                        {
+                                            string arffFileName = this._storageDirectory+ "\\output" + DateTime.Now.ToString().Replace('/', '_').Replace(':', '_').Replace(' ', '_') + ".arff";                   
+                                            trainingTW = new StreamWriter(arffFileName);                    
+                                            trainingTW.WriteLine("@RELATION wockets");
+                                            string arffHeader = FeatureExtractor.GetArffHeader();
+                                            arffHeader += "\n@ATTRIBUTE activity {";
+                                            int j = 0;
+                                            for (j = 0; (j < ((this._annotatedSession.OverlappingActivityLists[0]).Count - 1)); j++)
+                                                arffHeader+=this._annotatedSession.OverlappingActivityLists[0][j]._Name.Replace(' ', '_') + ",";
+                                            arffHeader+=this._annotatedSession.OverlappingActivityLists[0][j]._Name.Replace(' ', '_') + "}\n";
+                                            arffHeader+="\n@DATA\n\n";
+                                            
+                                            
+                                            
+                                            trainingTW.WriteLine(arffHeader);
+                                            string structureArffFile = this._storageDirectory + "\\structure.arff";
+                                            structureTW = new StreamWriter(structureArffFile);
+                                            structureTW.WriteLine("@RELATION wockets");
+                                            structureTW.WriteLine(arffHeader);
+
+                                        }
+                                        string current_activity = "unknown";
+                                        lock (MyLock)
+                                        {
+                                            if (this._currentRecord != null)
+                                            {
+                                                double lastTimeStamp = FeatureExtractor.StoreWocketsWindow();
+                                                if (FeatureExtractor.GenerateFeatureVector(lastTimeStamp))
+                                                {
+                                                    current_activity = this._currentRecord.Activities._CurrentActivity;
+                                                    string arffSample = FeatureExtractor.toString() + "," + current_activity;
+                                                    trainingTW.WriteLine(arffSample);
+                                                    if (count < 5)
+                                                    {
+                                                        count++;
+                                                        structureTW.WriteLine(arffSample);
+                                                    }
+                                                    extractedVectors++;
+                                                    if (structureFileExamples < 10)
+                                                    {
+                                                        structureTW.WriteLine(arffSample);
+                                                        structureFileExamples++;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        
+                                    }
+                                    else
+                                    {
+                                        if (trainingTW != null)
+                                        {
+                                            structureTW.Flush();
+                                            structureTW.Close();                  
+                                            structureTW = null;
+                                            trainingTW.Flush();
+                                            trainingTW.Close();
+                                            trainingTW = null;
+                                        }
+                                    }
+                                    #endregion Training
+
+                                    #region Classifying
+
+                                    if (this._Classifying)
+                                    {
+                                        double lastTimeStamp = FeatureExtractor.StoreWocketsWindow();//WocketsTimer.LastTimeStamp;//WocketsTimer.FeatureExtractor.StoreMITesWindow();
+                                        if (FeatureExtractor.GenerateFeatureVector(lastTimeStamp))
+                                        {
+                                            Instance newinstance = new Instance(this._instances.numAttributes());
+                                            newinstance.Dataset = this._instances;
+                                            for (int j = 0; (j < FeatureExtractor.Features.Length); j++)
+                                                newinstance.setValue(this._instances.attribute(j), FeatureExtractor.Features[j]);
+                                            double predicted = classifier.classifyInstance(newinstance);
+                                            string predicted_activity = newinstance.dataset().classAttribute().value_Renamed((int)predicted);
+                                            this.escape._Move = predicted_activity;
+                                        }
+                                    }
+
+                                    #endregion Classifying
+
                                 }
                         }
                     }

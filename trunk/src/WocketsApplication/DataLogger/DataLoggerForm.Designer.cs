@@ -97,6 +97,8 @@ namespace WocketsApplication.DataLogger
             this.menuItem18 = new System.Windows.Forms.MenuItem();
             this.menuItem19 = new System.Windows.Forms.MenuItem();
             this.menuItem20 = new System.Windows.Forms.MenuItem();
+            this.menuItem21 = new System.Windows.Forms.MenuItem();
+            this.menuItem22 = new System.Windows.Forms.MenuItem();
             //this.label5 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
@@ -171,6 +173,8 @@ namespace WocketsApplication.DataLogger
             this.menuItem2.MenuItems.Add(this.menuItem10);
             this.menuItem2.MenuItems.Add(this.menuItem11);
             this.menuItem2.MenuItems.Add(this.menuItem8);
+            this.menuItem2.MenuItems.Add(this.menuItem21);
+            this.menuItem2.MenuItems.Add(this.menuItem22);
             this.menuItem2.Text = "Options";
             // 
             // menuItem3
@@ -249,6 +253,18 @@ namespace WocketsApplication.DataLogger
             // 
             this.menuItem20.Text = "Compute Off";
             this.menuItem20.Enabled = false;
+            // 
+            // menuItem21
+            // 
+            this.menuItem21.Click += new System.EventHandler(this.classifying_Click);
+            this.menuItem21.Text = "Classifying";
+            this.menuItem21.Enabled = true;
+            // 
+            // menuItem22
+            // 
+            this.menuItem22.Click += new System.EventHandler(this.gaming_Click);
+            this.menuItem22.Text = "Gaming";
+            this.menuItem22.Enabled = true;
 
 
             //prepare common PC and Pocket PC widgets
@@ -988,6 +1004,8 @@ namespace WocketsApplication.DataLogger
             this.menuItem6Tab2 = new System.Windows.Forms.MenuItem();
             this.menuItem7Tab2 = new System.Windows.Forms.MenuItem();
             this.menuItem8Tab2 = new System.Windows.Forms.MenuItem();
+            this.menuItem21Tab2 = new System.Windows.Forms.MenuItem();
+            this.menuItem22Tab2 = new System.Windows.Forms.MenuItem();
 
 
             this.menuItem1Tab2.Text = "Quit";
@@ -998,6 +1016,8 @@ namespace WocketsApplication.DataLogger
             this.mainMenuTab2.MenuItems.Add(this.menuItem2Tab2);
             this.menuItem3Tab2.Text = "Session";
             this.menuItem4Tab2.Text = "Training";
+            this.menuItem21Tab2.Text = "Classifying";
+            this.menuItem22Tab2.Text = "Gaming";
 
             this.menuItem2Tab2.MenuItems.Add(this.menuItem3Tab2);
             this.menuItem2Tab2.MenuItems.Add(this.menuItem4Tab2);
@@ -1319,6 +1339,8 @@ namespace WocketsApplication.DataLogger
         private System.Windows.Forms.MenuItem menuItem18;
         private System.Windows.Forms.MenuItem menuItem19;
         private System.Windows.Forms.MenuItem menuItem20;
+        private System.Windows.Forms.MenuItem menuItem21;
+        private System.Windows.Forms.MenuItem menuItem22;
         private System.Windows.Forms.Timer readDataTimer;
         private System.Windows.Forms.PictureBox pictureBox1, pictureBox1b;
         private System.Windows.Forms.Label label3, label3b;
@@ -1344,6 +1366,8 @@ namespace WocketsApplication.DataLogger
         private System.Windows.Forms.MenuItem menuItem6Tab2;
         private System.Windows.Forms.MenuItem menuItem7Tab2;
         private System.Windows.Forms.MenuItem menuItem8Tab2;
+        private System.Windows.Forms.MenuItem menuItem21Tab2;
+        private System.Windows.Forms.MenuItem menuItem22Tab2;
         private Color defaultColor, panelColor, clickColor;
 
         #region PC and PocketPC Specific Widgets
