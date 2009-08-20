@@ -384,7 +384,119 @@ namespace WocketsApplication.SmartPhone
             #endregion Load Data Logger GUI
 
         }
+       
+        private void InitializeExergame()
+        {
+            progressMessage = null;
+            aProgressThread = new Thread(new ThreadStart(ProgressThread));
+            aProgressThread.Start();
+            progressMessage = "Initializing wocket controller\r\n";
+            this.wocketsController = this.wocketsControllers[this.selectedWocketController];
+            this.annotatedSession = new Session();
 
+            #region Copy configuration files
+            progressMessage = "Configuration files... ";
+            //copy activity protocol
+            if (File.Exists(Constants.ACTIVITY_PROTOCOLS_DIRECTORY + this.aProtocols[this.selectedActivityProtocol]._FileName))
+                File.Copy(Constants.ACTIVITY_PROTOCOLS_DIRECTORY + this.aProtocols[this.selectedActivityProtocol]._FileName,
+                       this.storageDirectory + "\\ActivityLabelsRealtime.xml");
+            else
+                throw new Exception("Error: Activity protocol file not found");
+
+            //copy sensor file
+
+            if (File.Exists(Constants.SENSOR_CONFIGURATIONS_DIRECTORY + this.wocketsController._FileName))
+                File.Copy(Constants.SENSOR_CONFIGURATIONS_DIRECTORY + this.wocketsController._FileName,
+                    this.storageDirectory + "\\SensorData.xml");
+            else
+                throw new Exception("Error: Sensor configuration file not found");
+
+            //copy configuration file
+            if (File.Exists(Constants.MASTER_DIRECTORY + "\\Configuration.xml"))
+                File.Copy(Constants.MASTER_DIRECTORY + "\\Configuration.xml",
+                    this.storageDirectory + "\\Configuration.xml");
+            else
+                throw new Exception("Error: Configuration file not found");
+
+            //Copy activity summary file
+            if (File.Exists(Constants.MASTER_DIRECTORY + "\\ActivitySummary.xml"))
+                File.Copy(Constants.MASTER_DIRECTORY + "\\ActivitySummary.xml",
+                    this.storageDirectory + "\\ActivitySummary.xml");
+            else
+                throw new Exception("Error: Activity summary file not found");
+
+            #endregion Copy configuration files
+
+            while (progressMessage != null) Thread.Sleep(50);
+            progressMessage = " Copied\r\nSensor Configuration ...";
+
+            #region Loading Wockets Configuration (sensors, decoders and receivers)
+            //Load the sensor configuration
+            try
+            {
+                this.wocketsController.FromXML(this.storageDirectory + "\\SensorData.xml");
+
+                //setup where each sensors has to store its data
+                for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
+                    this.wocketsController._Sensors[i]._RootStorageDirectory = this.storageDirectory + "\\data\\raw\\PLFormat\\";
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("Error: Failed to load sensor data. " + e.Message);
+            }
+            #endregion Loading Wockets Configuration (sensors, decoders and receivers)
+
+            while (progressMessage != null) Thread.Sleep(50);
+            progressMessage = " Loaded\r\nSession Annotations ...";
+
+
+            #region Load Activity Annotations
+            try
+            {
+                annotatedSession.FromXML(this.storageDirectory + "\\ActivityLabelsRealtime.xml");
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("Error: Failed to load annotation data. " + e.Message);
+            }
+            while (progressMessage != null) Thread.Sleep(50);
+            progressMessage = " Loaded\r\nClassifier Configuration ...";
+
+
+            #endregion Load Activity Annotations
+
+            #region Load Feature Extractor
+            try
+            {
+                classifierConfiguration = new DTConfiguration();
+                classifierConfiguration.FromXML(this.storageDirectory + "\\Configuration.xml");
+                FeatureExtractor.Initialize(this.wocketsController, this.classifierConfiguration, this.annotatedSession.OverlappingActivityLists[0]);
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("Error: Failed to load classifier configuration. " + e.Message);
+            }
+            while (progressMessage != null) Thread.Sleep(50);
+            progressMessage = " Loaded\r\n";
+
+            #endregion Load Feature Extractor
+
+
+            progressThreadQuit = true;
+
+            #region Load Exergame GUI
+
+            #region Initialize GUI Components
+            SmartPhone.DataLoggerFormSP ExergameForm = new WocketsApplication.SmartPhone.DataLoggerFormSP(this.storageDirectory, this.wocketsController, this.annotatedSession, this.classifierConfiguration, 4);
+            ExergameForm.Show();
+
+            #endregion Initialize GUI Components
+
+
+            #endregion Load Exergame GUI
+
+        }
+        
 
         private WocketsControllerList wocketsControllers;
         private WocketsController wocketsController;

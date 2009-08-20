@@ -25,6 +25,8 @@ Project("{B900F1C2-3D47-4FEC-85B3-04AAF18C3634}") = "WocketsInstaller", "Wockets
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WidcommPPC", "WidcommPPC.vcproj", "{251840C4-D1DC-497D-A98B-D7B8D0658404}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{98CD6BEF-57A3-4A42-9E28-2FC8F91F663C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -205,7 +207,6 @@ Global
 		{228F8F79-1CD1-47AD-8D53-7DD413C9C9D5}.Debug|Mixed Platforms.ActiveCfg = Debug
 		{228F8F79-1CD1-47AD-8D53-7DD413C9C9D5}.Debug|Pocket PC 2003 (ARMV4).ActiveCfg = Debug
 		{228F8F79-1CD1-47AD-8D53-7DD413C9C9D5}.Debug|Windows Mobile 5.0 Pocket PC SDK (ARMV4I).ActiveCfg = Debug
-		{228F8F79-1CD1-47AD-8D53-7DD413C9C9D5}.Debug|Windows Mobile 5.0 Pocket PC SDK (ARMV4I).Build.0 = Debug
 		{228F8F79-1CD1-47AD-8D53-7DD413C9C9D5}.Debug|Windows Mobile 5.0 Pocket PC SDK (ARMV4I).Deploy.0 = Debug
 		{228F8F79-1CD1-47AD-8D53-7DD413C9C9D5}.Release|Any CPU.ActiveCfg = Release
 		{228F8F79-1CD1-47AD-8D53-7DD413C9C9D5}.Release|Mixed Platforms.ActiveCfg = Release

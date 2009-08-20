@@ -1,4 +1,4 @@
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -309,48 +309,53 @@
     <Compile Include="..\..\src\Wockets\Receivers\GenericReceiver.cs">
       <Link>Receivers\GenericReceiver.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\ALIVE.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Commands\ALIVE.cs">
       <Link>Data\Commands\ALIVE.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\BT_RST.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Commands\BT_RST.cs">
       <Link>Data\Commands\BT_RST.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\EnterCommandMode.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Commands\EnterCommandMode.cs">
       <Link>Data\Commands\EnterCommandMode.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\ExitCommandMode.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Commands\ExitCommandMode.cs">
       <Link>Data\Commands\ExitCommandMode.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\GET_BT.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_BT.cs">
       <Link>Data\Commands\GET_BT.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\GET_PC.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_PC.cs">
       <Link>Data\Commands\GET_PC.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\GET_SEN.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_SEN.cs">
       <Link>Data\Commands\GET_SEN.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\GET_SM.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_SM.cs">
       <Link>Data\Commands\GET_SM.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\LEDTypes.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Commands\LEDTypes.cs">
       <Link>Data\Commands\LEDTypes.cs"</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\RST_WK.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Commands\RST_WK.cs">
       <Link>Data\Commands\RST_WK.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\SET_LED.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Commands\SET_LED.cs">
       <Link>Data\Commands\SET_LED.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\SET_SM.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Commands\SET_SM.cs">
       <Link>Data\Commands\SET_SM.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Exceptions\BurstyException.cs" >
+    <Compile Include="..\..\src\Wockets\Exceptions\BurstyException.cs">
       <Link>Exceptions\BurstyException.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Utils\CircularBuffer.cs" >
+    <Compile Include="..\..\src\Wockets\Utils\CircularBuffer.cs">
       <Link>Utils\CircularBuffer.cs</Link>
     </Compile>
+    <Compile Include="Applications\Games\Escape\Actions.cs" />
+    <Compile Include="Applications\Games\Escape\Audio.cs" />
+    <Compile Include="Applications\Games\Escape\Escape.cs" />
+    <Compile Include="Applications\Games\Escape\Player.cs" />
+    <Compile Include="Applications\Games\Escape\Sounds.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="InTheHand.Net.csproj">
