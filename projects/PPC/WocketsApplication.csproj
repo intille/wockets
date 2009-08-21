@@ -68,14 +68,6 @@
       <Link>DataLogger\DataLoggerForm.Designer.cs</Link>
       <DependentUpon>DataLoggerForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="..\..\src\WocketsApplication\SmartPhone\DataLoggerFormSP.cs">
-      <Link>SmartPhone\DataLoggerFormSP.cs</Link>
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="..\..\src\WocketsApplication\SmartPhone\DataLoggerFormSP.Designer.cs">
-      <Link>SmartPhone\DataLoggerFormSP.Designer.cs</Link>
-      <DependentUpon>DataLoggerFormSP.cs</DependentUpon>
-    </Compile>
     <Compile Include="..\..\src\WocketsApplication\Feedback\Vibrator.cs">
       <Link>Feedback\Vibrator.cs</Link>
     </Compile>
@@ -197,13 +189,11 @@
       <Link>WocketsForm.Designer.cs</Link>
       <DependentUpon>WocketsForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="..\..\src\WocketsApplication\SmartPhone\WocketsFormSP.cs">
-      <Link>SmartPhone\WocketsFormSP.cs</Link>
+    <Compile Include="Calibrator\CalibratorForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="..\..\src\WocketsApplication\SmartPhone\WocketsFormSP.Designer.cs">
-      <Link>SmartPhone\WocketsFormSP.Designer.cs</Link>
-      <DependentUpon>WocketsFormSP.cs</DependentUpon>
+    <Compile Include="Calibrator\CalibratorForm.Designer.cs">
+      <DependentUpon>CalibratorForm.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -314,7 +304,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="ActivityTracker\" />
-    <Folder Include="Calibrator\" />
+    <Folder Include="SmartPhone\" />
   </ItemGroup>
   <Import Condition="'$(TargetFrameworkVersion)' == 'v1.0'" Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.v1.targets" />
   <Import Condition="'$(TargetFrameworkVersion)' == 'v2.0'" Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />
