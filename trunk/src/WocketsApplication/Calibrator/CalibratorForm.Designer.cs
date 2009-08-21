@@ -31,9 +31,7 @@ namespace WocketsApplication.Calibrator
             base.Dispose(disposing);
         }
 
-#if (PocketPC)
-        //   ActivityList aList;
-#endif
+
         //Intialize different interface components
         private void InitializeInterface()
         {
@@ -176,13 +174,7 @@ namespace WocketsApplication.Calibrator
 
             //prepare common PC and Pocket PC widgets
 
-            // 
-            // label5
-            // 
-            //this.label5.Location = new System.Drawing.Point(106, 1);
-            //this.label5.Name = "label5";
-            //this.label5.Size = new System.Drawing.Size(81, 14);
-            //this.label5.Text = "stopped";
+
             // 
             // label4
             // 
@@ -251,12 +243,7 @@ namespace WocketsApplication.Calibrator
 
 
 
-            // 
-            // readDataTimer
-            // 
-            this.readDataTimer.Enabled = false;
-            this.readDataTimer.Interval = 10;
-            this.readDataTimer.Tick += new System.EventHandler(this.readDataTimer_Tick);
+
             // 
             // Wockets Calibration Form
             // 
@@ -497,11 +484,7 @@ namespace WocketsApplication.Calibrator
             this.button2 = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
             this.SuspendLayout();
-            // 
-            // readDataTimer
-            // 
-            this.readDataTimer.Interval = 10;
-            this.readDataTimer.Tick += new System.EventHandler(this.readDataTimer_Tick);
+
 
             // 
             // button1
@@ -554,28 +537,26 @@ namespace WocketsApplication.Calibrator
             this.panel1.Visible = true;
             this.panel2.Visible = false;
             for (int i = 0; (i < 3); i++)
-                this.calibrations[this.calibrationDirection][i] = 0.0;
-            this.calibrationCounter = 0;
-
-
-            this.isCalibrating = true;
+                this.wocketsController._Calibrations[this.wocketsController._CalibrationDirection][i] = 0.0;
+            this.wocketsController._CalibrationCounter = 0;
+            this.wocketsController.IsCalibrating = true;
         }
       
         
         void button2_Click(object sender, EventArgs e)
         {
-            if (this.calibrationDirection == 7)
+            if (this.wocketsController._CalibrationDirection == 7)
             {
 
                 //Store calibration data
-                ((Wockets.Sensors.Accelerometers.Accelerometer)this.wocketsController._Sensors[0])._X1G = this.calibrations[0][0];
-                ((Wockets.Sensors.Accelerometers.Accelerometer)this.wocketsController._Sensors[0])._XN1G = this.calibrations[2][0];
+                ((Wockets.Sensors.Accelerometers.Accelerometer)this.wocketsController._Sensors[0])._X1G = this.wocketsController._Calibrations[0][0];
+                ((Wockets.Sensors.Accelerometers.Accelerometer)this.wocketsController._Sensors[0])._XN1G = this.wocketsController._Calibrations[2][0];
 
-                ((Wockets.Sensors.Accelerometers.Accelerometer)this.wocketsController._Sensors[0])._Y1G = this.calibrations[3][1];
-                ((Wockets.Sensors.Accelerometers.Accelerometer)this.wocketsController._Sensors[0])._YN1G = this.calibrations[1][1];
+                ((Wockets.Sensors.Accelerometers.Accelerometer)this.wocketsController._Sensors[0])._Y1G = this.wocketsController._Calibrations[3][1];
+                ((Wockets.Sensors.Accelerometers.Accelerometer)this.wocketsController._Sensors[0])._YN1G = this.wocketsController._Calibrations[1][1];
 
-                ((Wockets.Sensors.Accelerometers.Accelerometer)this.wocketsController._Sensors[0])._Z1G = this.calibrations[4][2];
-                ((Wockets.Sensors.Accelerometers.Accelerometer)this.wocketsController._Sensors[0])._ZN1G = this.calibrations[5][2];
+                ((Wockets.Sensors.Accelerometers.Accelerometer)this.wocketsController._Sensors[0])._Z1G = this.wocketsController._Calibrations[4][2];
+                ((Wockets.Sensors.Accelerometers.Accelerometer)this.wocketsController._Sensors[0])._ZN1G = this.wocketsController._Calibrations[5][2];
 
 
                 
@@ -585,9 +566,9 @@ namespace WocketsApplication.Calibrator
                 ((Wockets.Sensors.Accelerometers.Accelerometer)this.wocketsController._Sensors[0])._ZSTD = 0;
                 for (int i = 0; (i < CALIBRATION_SAMPLES); i++)
                 {
-                    ((Wockets.Sensors.Accelerometers.Accelerometer)this.wocketsController._Sensors[0])._XSTD += Math.Pow(this.samples[i][0] - this.calibrations[6][0], 2.0);
-                    ((Wockets.Sensors.Accelerometers.Accelerometer)this.wocketsController._Sensors[0])._YSTD += Math.Pow(this.samples[i][1] - this.calibrations[6][1], 2.0);
-                    ((Wockets.Sensors.Accelerometers.Accelerometer)this.wocketsController._Sensors[0])._ZSTD += Math.Pow(this.samples[i][2] - this.calibrations[6][2], 2.0);
+                    ((Wockets.Sensors.Accelerometers.Accelerometer)this.wocketsController._Sensors[0])._XSTD += Math.Pow(this.wocketsController._Samples[i][0] - this.wocketsController._Calibrations[6][0], 2.0);
+                    ((Wockets.Sensors.Accelerometers.Accelerometer)this.wocketsController._Sensors[0])._YSTD += Math.Pow(this.wocketsController._Samples[i][1] - this.wocketsController._Calibrations[6][1], 2.0);
+                    ((Wockets.Sensors.Accelerometers.Accelerometer)this.wocketsController._Sensors[0])._ZSTD += Math.Pow(this.wocketsController._Samples[i][2] - this.wocketsController._Calibrations[6][2], 2.0);
                 }
 
                 ((Wockets.Sensors.Accelerometers.Accelerometer)this.wocketsController._Sensors[0])._XSTD = Math.Sqrt(((Wockets.Sensors.Accelerometers.Accelerometer)this.wocketsController._Sensors[0])._XSTD) / (CALIBRATION_SAMPLES-1);
@@ -607,9 +588,9 @@ namespace WocketsApplication.Calibrator
             else
             {
                 this.button2.Visible = false;
-                this.pictureBox1.Image = this.calibrationImages[calibrationDirection];
+                this.pictureBox1.Image = this.calibrationImages[this.wocketsController._CalibrationDirection];
 
-                if (calibrationDirection == 6)
+                if (this.wocketsController._CalibrationDirection == 6)
                     this.pictureLabel.Text = "Place the wocket flat on a table";
                 else
                     this.pictureLabel.Text = "Place the wocket as shown";
