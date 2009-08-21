@@ -269,13 +269,7 @@ namespace WocketsApplication.DataLogger
 
             //prepare common PC and Pocket PC widgets
 
-            // 
-            // label5
-            // 
-            //this.label5.Location = new System.Drawing.Point(106, 1);
-            //this.label5.Name = "label5";
-            //this.label5.Size = new System.Drawing.Size(81, 14);
-            //this.label5.Text = "stopped";
+
             // 
             // label4
             // 
@@ -1086,21 +1080,8 @@ namespace WocketsApplication.DataLogger
         private bool isQuitting = false;
         void menuItemQuitPanel1_Click(object sender, EventArgs e)
         {
-#if (PocketPC)
-            //if (MessageBox.Show("Are you sure you want to Quit MITes Software?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
-#else
-            if (MessageBox.Show("Are you sure you want to Quit MITes Software?", "Confirm", MessageBoxButtons.YesNo) == DialogResult.Yes)
-#endif
-           // {
+
                isQuitting = true;
-              /* while(this.readDataTimer.Enabled)
-                   Thread.Sleep(50);*/
-                //this.readDataTimer.Enabled = false;
-                //this.qualityTimer.Enabled = false;
-            //}
-
-
-
 
         }
 
@@ -1178,9 +1159,7 @@ namespace WocketsApplication.DataLogger
 
             label_height = 0;
 
-            //if (this.sensors.IsHR)
-              //  label_height = (this.panel4.ClientSize.Height - Constants.SCREEN_TOP_MARGIN - Constants.SCREEN_BOTTOM_MARGIN - ((this.sensors.Sensors.Count) * Constants.WIDGET_SPACING)) / (this.sensors.Sensors.Count);
-            //else
+
             label_height = (this.panel4.ClientSize.Height - Constants.WIDGET_SPACING - Constants.WIDGET_SPACING - ((this.wocketsController._Sensors.Count) * Constants.WIDGET_SPACING)) / (this.wocketsController._Sensors.Count + 1);
 
 
@@ -1241,43 +1220,7 @@ namespace WocketsApplication.DataLogger
 
                 counter++;
             }
-            //#if (PocketPC)
-            //            foreach (Sensor sensor in this.sensors.BuiltinSensors)
-            //            {
 
-            //                    System.Windows.Forms.Label label = new System.Windows.Forms.Label();
-            //                    //label.AutoSize = true;
-            //                    label.Size = new Size(label_width, label_height);
-            //                    label.Location = new System.Drawing.Point(Constants.SCREEN_LEFT_MARGIN, Constants.SCREEN_TOP_MARGIN + (counter * (label_height + Constants.WIDGET_SPACING)));
-            //                    label.Name = sensor.Type;
-            //                    label.Text = sensor.Type;
-            //                    label.Font = textFont;
-            //                    this.builtInlabels[sensor.Type] = label;
-            //                    this.panel4.Controls.Add(label);
-
-            //                    System.Windows.Forms.Label label2 = new System.Windows.Forms.Label();
-            //                    //label2.AutoSize = true;
-            //                    label2.Size = new Size(label_width, label_height);
-            //                    label2.Location = new System.Drawing.Point(Constants.SCREEN_LEFT_MARGIN + label_width + Constants.WIDGET_SPACING, Constants.SCREEN_TOP_MARGIN + (counter * (label_height + Constants.WIDGET_SPACING)));
-            //                    label2.Name = "E(SR) " +sensor.Type;
-            //                    label2.Text = "unknown"; //rate.ToString("00.00") + "%";
-            //                    label2.Font = textFont;
-            //                    this.panel4.Controls.Add(label2);
-            //                    this.builtInExpectedLabels[sensor.Type] = label2;
-
-            //                    System.Windows.Forms.Label label3 = new System.Windows.Forms.Label();
-            //                    //label2.AutoSize = true;
-            //                    label3.Size = new Size(label_width, label_height);
-            //                    label3.Location = new System.Drawing.Point(Constants.SCREEN_LEFT_MARGIN + label_width + Constants.WIDGET_SPACING + label_width + Constants.WIDGET_SPACING, Constants.SCREEN_TOP_MARGIN + (counter * (label_height + Constants.WIDGET_SPACING)));
-            //                    label2.Name = "Samples " + sensor.Type;
-            //                    label3.Text = "unknown"; //rate.ToString("00.00") + "%";
-            //                    label3.Font = textFont;
-            //                    this.panel4.Controls.Add(label3);
-            //                    this.builtInSamplesPerSecond[sensor.Type] = label3;
-            //                counter++;
-            //            }
-
-            //#endif
         }
 
         #region Windows Form Designer generated code

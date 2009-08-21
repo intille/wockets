@@ -12,12 +12,14 @@ using Wockets.Sensors;
 using Wockets.Utils;
 using Wockets.Utils.network;
 using Wockets.Data.Commands;
+using Wockets.Data.Accelerometers;
+
 using Wockets.Data.Annotation;
 using Wockets.Data.Classifiers.Utils;
 using Wockets.Exceptions;
 using WocketsWeka;
 using weka.classifiers;
-using Wockets.Applications.Games.Escape;
+//using Wockets.Applications.Games.Escape;
 using weka;
 using weka.core;
 
@@ -54,13 +56,79 @@ namespace Wockets
         private Classifier classifier;
         private string storageDirectory;
         private Session annotatedSession;
-        public Escape escape = new Escape();
+        //public Escape escape = new Escape();
         /// <summary>
         /// Stores the current record that is being annotated
         /// </summary>
         //private AnnotatedRecord currentRecord;
         public Annotation currentRecord;
 
+        private int calibrationDirection = 0;
+        private double[][] calibrations;
+        private bool isCalibrating = false;
+        private int calibrationCounter = 0;
+        private const int CALIBRATION_SAMPLES = 1200;
+        private int[][] samples;
+        private int currentIndex = -1;
+        private double time = 0;
+
+        public bool IsCalibrating
+        {
+            get
+            {              
+                return this.isCalibrating;
+            }
+            set 
+            {
+                if (value)
+                    this.time = WocketsTimer.GetUnixTime();
+                this.isCalibrating = value;
+            }
+        }
+
+        public int[][] _Samples
+        {
+            get
+            {
+                return this.samples;
+            }
+
+            set
+            {
+                this.samples = value;
+            }
+        }
+        public double[][] _Calibrations
+        {
+            get
+            {
+                return this.calibrations;
+            }   
+        }
+
+        public int _CalibrationDirection
+        {
+            get
+            {
+                return this.calibrationDirection;
+            }
+            set
+            {
+                this.calibrationDirection = value;
+            }
+        }
+
+        public int _CalibrationCounter
+        {
+            get
+            {
+                return this.calibrationCounter;
+            }
+            set
+            {
+                this.calibrationCounter = value;
+            }
+        }
 
         public WocketsController(string name,string filename,string description)
         {
@@ -70,6 +138,20 @@ namespace Wockets
             this.name =name;
             this.filename =filename;
             this.description = description;
+
+
+            this.calibrations = new double[7][];
+            //this.calibrationImages = new Image[7];
+
+
+            for (int i = 0; (i < 7); i++)
+            {
+               // this.calibrationImages[i] = (Image)new Bitmap(Constants.CALIBRATIONS_DIRECTORY + "calibration" + (i + 1) + ".gif");
+                this.calibrations[i] = new double[3];
+            }
+            this.samples = new int[CALIBRATION_SAMPLES][];
+            for (int i = 0; (i < CALIBRATION_SAMPLES); i++)
+                this.samples[i] = new int[3];
         }
 
         public string _Name
@@ -442,6 +524,52 @@ namespace Wockets
                                         sensor.Packets += numDecodedPackets;
                                     }
                                     #endregion Read Data
+
+
+
+                                    #region Calibration Code
+
+                                    //store sum of abs values of consecutive accelerometer readings                
+                                    if ((numDecodedPackets > 0) && (isCalibrating))
+                                    {
+                                        if (this.calibrationCounter < CALIBRATION_SAMPLES)
+                                        {
+                                            //currentIndex = 0;
+                                            if (this.currentIndex == -1)
+                                                this.currentIndex = decoder._Head;
+
+                                            while ((decoder._Data[currentIndex].UnixTimeStamp >= this.time) && (decoder._Data[currentIndex].Type== Wockets.Data.SensorDataType.ACCEL) && (currentIndex != decoder._Head))
+                                            {
+                                                if (this.calibrationCounter == CALIBRATION_SAMPLES)
+                                                {
+                                                    this.isCalibrating = false;
+                                                    break;
+                                                }
+
+
+                                                this.samples[this.calibrationCounter][0] = (int)((AccelerationData)decoder._Data[currentIndex]).X;
+                                                this.samples[this.calibrationCounter][1] = (int)((AccelerationData)decoder._Data[currentIndex]).Y;
+                                                this.samples[this.calibrationCounter][2] = (int)((AccelerationData)decoder._Data[currentIndex]).Z;
+
+                                                this.calibrations[this.calibrationDirection][0] += (int)((AccelerationData)decoder._Data[currentIndex]).X;
+                                                this.calibrations[this.calibrationDirection][1] += (int)((AccelerationData)decoder._Data[currentIndex]).Y;
+                                                this.calibrations[this.calibrationDirection][2] += (int)((AccelerationData)decoder._Data[currentIndex]).Z;
+
+                                                this.calibrationCounter++;
+
+                                                this.time = decoder._Data[currentIndex].UnixTimeStamp;
+                                                currentIndex++;
+
+                                                if (currentIndex == decoder._Data.Length)
+                                                    currentIndex = 0;
+                                            }
+                                        }
+
+                                    }
+
+                                    #endregion Calibration Code
+
+
                                     
                                     #region Training
 
@@ -524,7 +652,7 @@ namespace Wockets
                                                 newinstance.setValue(this._instances.attribute(j), FeatureExtractor.Features[j]);
                                             double predicted = classifier.classifyInstance(newinstance);
                                             string predicted_activity = newinstance.dataset().classAttribute().value_Renamed((int)predicted);
-                                            this.escape._Move = predicted_activity;
+                                            //this.escape._Move = predicted_activity;
                                         }
                                     }
 

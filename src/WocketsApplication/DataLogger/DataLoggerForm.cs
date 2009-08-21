@@ -141,9 +141,7 @@ namespace WocketsApplication.DataLogger
         /// </summary>
         private Thread aProgressThread = null;
 
-        private Thread aPlottingThread = null;//aPollingThread = null;
-        //private Thread aInternalPollingThread = null;
-        private Thread aSavingThread = null;
+        private Thread aPlottingThread = null;
 
         /// <summary>
         /// True if the progress thread should quit
@@ -414,15 +412,6 @@ namespace WocketsApplication.DataLogger
 
             //Initialize Plotting Thread
             aPlottingThread = new Thread(new ThreadStart(PlotWockets));
-            //aSavingThread = new Thread(new ThreadStart(SaveWockets));
-            //aPollingThread = new Thread(new ThreadStart(this.wocketsController.Poll));
-            //aPollingThread.Priority = ThreadPriority.Highest; 
-            //aInternalPollingThread = new Thread(new ThreadStart(PollInternal));
-
-            //this.bluetoothControllers = new BluetoothController[this.wocketsController._Receivers.Count];
-           // this.bluetoothConnectors = new BluetoothConnector[this.wocketsController._Receivers.Count];
-
-
 
 
             #region Initialize GUI Components
@@ -469,99 +458,22 @@ namespace WocketsApplication.DataLogger
             FeatureExtractor.Initialize(this.wocketsController, this.classifierConfiguration, this.annotatedSession.OverlappingActivityLists[0]);
             #endregion Initialize Feature Extraction
 
-            #region Initialize Quality Tracking variables
-            //InitializeQuality();
-            #endregion Initialize Quality Tracking variables
-
-            #region Initialize Logging
-            //InitializeLogging(this.storageDirectory);
-            #endregion Initialize Logging
-
-
-
             #region Bluetooth reception channels initialization
             //Initialize and search for wockets connections
             while (progressMessage != null) Thread.Sleep(50);
-            progressMessage = "Initializing receivers ... searching " + this.wocketsController._Receivers.Count + " BT receivers\r\n";
+            progressMessage = "Initializing receivers ... searching " + this.wocketsController._Receivers.Count + " receivers\r\n";            
 
             this.wocketsController.Initialize();
-            /*foreach (Decoder d in this.wocketsController._Decoders)
-            {
-                d.Subscribe(SensorDataType.BATTERYLEVEL, new Response.ResponseHandler(this.BatteryCallback));
-            }*/
-            //Try to initialize all receivers 10 times then exit
-            /*int initializationAttempt = 0;
-            while (initializationAttempt <= 10)
-            {
-                if (InitializeReceivers() == false)
-                {
-                    initializationAttempt++;
 
-                    if (initializationAttempt == 10)
-                    {
-                        MessageBox.Show("Exiting: Some receivers in your configuration were not initialized.");
-                        Application.Exit();
-                        System.Diagnostics.Process.GetCurrentProcess().Kill();
-                    }
-                    else
-                    {
-                        while (progressMessage != null) Thread.Sleep(50);
-                        progressMessage = "Failed to initialize some receivers. Retrying (" + initializationAttempt + ")...\r\n";
-                    }
-
-                }
-                else
-                    break;
-
-                //we noticed that without the delay the BT stack might fail to connect to all of them. Spacing them out is a good idea
-                
-                Thread.Sleep(500);
-            }
-             */
             #endregion Bluetooth reception channels initialization
 
-            /*
-            #region Start Collecting Data
-
-            Receiver currentReceiver = null;
-            Sensor sensor = null;
-         
-                //Cleanup receiver buffers as they are out of sync due to BT connection delays
-                //set them to saving mode
-            for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
-            {
-                try
-                {
-                    sensor = this.wocketsController._Sensors[i];
-                    sensor._Saving = true;
-                    currentReceiver = this.wocketsController._Receivers[sensor._Receiver];
-//                    if (currentReceiver._Running == true)
- //                       currentReceiver.Read();
-                }
-                catch (Exception e)
-                {
-                    ((PictureBox)this.sensorStatus["W" + sensor._ID]).Image = disconnectedWocketImage;
-                    this.bluetoothConnectors[currentReceiver._ID] = new BluetoothConnector(currentReceiver, this.wocketsController);
-                    currentReceiver._Running = false;
-                }
-            }
-
-            */
-
-
             aPlottingThread.Start();
-            //aSavingThread
-            //aPollingThread.Start();
-            //aInternalPollingThread.Start();
-            //aSavingThread.Start();
 
             //Terminate the progress thread
             progressThreadQuit = true;
 
             //Enable all timer functions
             this.readDataTimer.Enabled = true;
-            //this.qualityTimer.Enabled = true;
-
 
 
         }
@@ -1018,8 +930,7 @@ namespace WocketsApplication.DataLogger
             if ((this.Width > Constants.FORM_MIN_WIDTH) && (this.Height > Constants.FORM_MIN_HEIGHT))
             {
 
-                //this.tabControl1.Width = this.ClientSize.Width;
-               // this.tabControl1.Height = this.ClientSize.Height;
+
                 this.panel1.Width = this.ClientSize.Width;
                 this.panel1.Height = this.ClientSize.Height;
 
@@ -1044,7 +955,7 @@ namespace WocketsApplication.DataLogger
                    Constants.MAX_FONT, this.button1.Size, "textBoxAC11", this.button1.Font, (float)0.9, (float)0.9);
 
                 System.Windows.Forms.Label t;
-                //foreach (Sensor sensor in this.sensors.Sensors)
+
                 for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
                 {
 
@@ -1109,13 +1020,9 @@ namespace WocketsApplication.DataLogger
                 //adjust round buttons start/stop -reset
                 button_width = (this.Size.Width - Constants.WIDGET_SPACING - Constants.WIDGET_SPACING - Constants.WIDGET_SPACING) / 2;
 
-                //adjust the size of the plotter
-                //if (this.sensors.TotalReceivers>0)
-                //aWocketsPlotter = new WocketsScalablePlotter(this.panel1, WocketsScalablePlotter.DeviceTypes.IPAQ, maxPlots,this.wocketsController, new Size(this.panel1.Width, (int)(0.60 * this.panel1.Height)));
+
                 aWocketsPlotter = new WocketsScalablePlotter(this.panel1, this.wocketsController);
-                //else
-                //  aWocketsPlotter = new WocketsScalablePlotter(this.panel1, WocketsScalablePlotter.DeviceTypes.IPAQ, maxPlots, this.masterDecoder, new Size(this.panel1.Width, (int)(0.60 * this.panel1.Height)));
-                //SetFormPositions();
+
                 this.isResized = true;
             }
         }
@@ -1520,12 +1427,12 @@ namespace WocketsApplication.DataLogger
 
         private void gaming_Click(object sender, EventArgs e)
         {
-            MenuItem mi = (MenuItem)sender;
+            /*MenuItem mi = (MenuItem)sender;
             mi.Checked = !(mi.Checked);
             this.isGaming = mi.Checked;
             Thread aGamingThread = new Thread(new ThreadStart(this.wocketsController.escape.PlayExergame));
             this.wocketsController.escape.isGaming = this.isGaming;
-            aGamingThread.Start();
+            aGamingThread.Start();*/
         }
 
         private void view_menu_Click(object sender, EventArgs e)
@@ -1825,17 +1732,17 @@ namespace WocketsApplication.DataLogger
 
         private void Panel1_Paint(object sender, PaintEventArgs e)
         {
-#if (PocketPC)
+
             if (this.CurrentPanel == 0)
             {
-#endif
+
 
                 if (backBuffer != null)
                     e.Graphics.DrawImage(backBuffer, 0, 0);
 
-#if (PocketPC)
+
             }
-#endif
+
         }
 
 
@@ -1864,47 +1771,6 @@ namespace WocketsApplication.DataLogger
         private TextWriter structureTW = null;
 
         private int extractedVectors = 0;
-        /*
-        private void PollInternal()
-        {
-            Receiver receiver = null;
-            Sensor sensor = null;
-            Decoder decoder = null;
-            int id = 0;
-            for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
-            {
-                sensor = this.wocketsController._Sensors[i];
-                receiver = this.wocketsController._Receivers[sensor._Receiver];
-                decoder = sensor._Decoder;
-                id = i;
-                if ((receiver._Running == true) && (receiver._Type == ReceiverTypes.HTCDiamond))
-                    break;                
-            }
-            while (true)
-            {
-                try
-                {
-                    int numDecodedPackets = 0;
-                    int dataLength = receiver.Read();
-                    if (dataLength > 0)
-                    {
-                        numDecodedPackets = decoder.Decode(sensor._ID, receiver._Buffer, dataLength);
-                        this.disconnected[sensor._ID] = 0;
-                        this.AccumPackets[id] += numDecodedPackets;
-                    }
-                    this.AccumPackets[id + 6] += numDecodedPackets;
-                }
-                catch (Exception e)
-                {
-                    Logger.Warn("Internal " + sensor._ID + " has disconnected " + e.Message);
-                    receiver.Initialize();
-                    receiver._Running = true;
-                }
-
-                Thread.Sleep(30);
-            }
-        }*/
-
    
 
         [DllImport("coredll.dll", SetLastError = true)]
@@ -1924,27 +1790,7 @@ namespace WocketsApplication.DataLogger
                 Thread.Sleep(50);
             }
         }
-        /*
-        private void SaveWockets()
-        {
-            while (true)
-            {
-                try
-                {
-                    for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
-                    {
-                        this.wocketsController._Sensors[i].Save();
-                        Thread.Sleep(50);
-                    }
-                }
-                catch (Exception ee)
-                {
-                    Logger.Error(ee);
-                }
-                
-            }
-        }
-         */
+
 
         private void readDataTimer_Tick(object sender, EventArgs e)
         {
@@ -1998,19 +1844,6 @@ namespace WocketsApplication.DataLogger
                 this.SRcounter = 0;
                 this.LastTime = now;
                 
-                /*
-                foreach (Sensor s in this.wocketsController._Sensors)
-                {
-                    Wockets.Sensors.Accelerometers.Wocket w = (Wockets.Sensors.Accelerometers.Wocket)s;
-                    if (w.Command())
-                    {
-                        w._Config_Timer = 255;
-                    }
-                }
-
-                updateCommand("Sent Battery Request");*/
-
-                //updateCommand("Sent CMD Request");
 
             }
             
@@ -2033,193 +1866,7 @@ namespace WocketsApplication.DataLogger
 #else
                 Environment.Exit(0);
 #endif
-            }
-
-            /* 
-         * 
-         for (int i = 0; i < this.wocketsController._Sensors.Count; i++)
-         {
-             String key="W" + this.wocketsController._Sensors[i]._ID;
-             ((PictureBox)this.sensorStatus[key]).Image = (Image)this.sensorStat[key];
-
-         }
-
-        
-         if ((this.tabControl1.SelectedIndex == 0) && (isPlotting))
-         {
-             GraphAccelerometerValues();
-         }
-         */
-            /*
-
-            #region Classifying activities
-
-#if (PocketPC)
-            if (isClassifying == true)
-            {
-                double lastTimeStamp = FeatureExtractor.StoreWocketsWindow();//WocketsTimer.LastTimeStamp;//WocketsTimer.FeatureExtractor.StoreMITesWindow();
-                if (FeatureExtractor.GenerateFeatureVector(lastTimeStamp))
-                {
-                    Instance newinstance = new Instance(instances.numAttributes());
-                    newinstance.Dataset = instances;
-                    for (int i = 0; (i < FeatureExtractor.Features.Length); i++)
-                        newinstance.setValue(instances.attribute(i), FeatureExtractor.Features[i]);
-                    double predicted = classifier.classifyInstance(newinstance);
-                    string predicted_activity = newinstance.dataset().classAttribute().value_Renamed((int)predicted);
-
-                    int currentIndex = (int)labelIndex[predicted_activity];
-                    labelCounters[currentIndex] = (int)labelCounters[currentIndex] + 1;
-                    classificationCounter++;
-
-                    if (classificationCounter == this.classifierConfiguration._SmoothWindows)
-                    {
-                        classificationCounter = 0;
-                        int mostCount = 0;
-                        string mostActivity = "";
-                        Color indicate;
-                        int level;
-                        for (int j = 0; (j < labelCounters.Length); j++)
-                        {
-                            level=240-240*labelCounters[j]/this.classifierConfiguration._SmoothWindows;
-                            indicate = Color.FromArgb(level, level, level);
-                            this.ActGUIlabels[j].ForeColor = indicate;
-                            this.ActGUIlabels[j].Invalidate();
-                            if (labelCounters[j] > mostCount)
-                            {
-                                mostActivity = activityLabels[j];
-                                mostCount = labelCounters[j];
-                            }
-                            labelCounters[j] = 0;
-                        }
-
-    
-                        pieChart.SetActivity(mostActivity);
-                        if (this.aList.getEmptyPercent() == 1)
-                            this.aList.reset();
-                        else
-                            this.aList.increment(mostActivity);
-
-                        if (previousActivity != mostActivity)
-                        {
-                            this.activityTimer.stop();
-                            this.activityTimer.reset();
-                            currentCalories = 0;
-                        }
-                        else
-                        {
-                            if (this.activityTimer.isRunning() == false)
-                                this.activityTimer.start();
-                        }
-
-                        if (mostActivity == "standing")
-                        {
-                            currentCalories += 1;
-                            totalCalories += 1;
-                        }
-                        else if (mostActivity == "walking")
-                        {
-                            currentCalories += 2;
-                            totalCalories += 2;
-                        }
-                        else if (mostActivity == "brisk-walking")
-                        {
-                            currentCalories += 4;
-                            totalCalories += 4;
-                        }
-                        else
-                        {
-                            currentCalories += 1;
-                            totalCalories += 1;
-                        }
-                   
-                        pieChart.SetCalories(totalCalories, currentCalories);
-                        pieChart.Data = this.aList.toPercentHashtable();
-                        pieChart.Invalidate();
-                        previousActivity = mostActivity;
-                        
-                    }
-                }
-            }
-
-#endif
-
-
-            #endregion Classifying activities
-
-            #region Training
-
-            if (isTraining)
-            {
-                //create arff file
-                if (trainingTW == null)
-                {
-                    string arffFileName = this.storageDirectory+ "\\output" + DateTime.Now.ToString().Replace('/', '_').Replace(':', '_').Replace(' ', '_') + ".arff";                   
-                    trainingTW = new StreamWriter(arffFileName);                    
-                    trainingTW.WriteLine("@RELATION wockets");
-                    string arffHeader = FeatureExtractor.GetArffHeader();
-                    arffHeader += "\n@ATTRIBUTE activity {";
-                    int i = 0;
-                    for (i = 0; (i < ((this.annotatedSession.OverlappingActivityLists[0]).Count - 1)); i++)
-                        arffHeader+=this.annotatedSession.OverlappingActivityLists[0][i]._Name.Replace(' ', '_') + ",";
-                    arffHeader+=this.annotatedSession.OverlappingActivityLists[0][i]._Name.Replace(' ', '_') + "}\n";
-                    arffHeader+="\n@DATA\n\n";
-                    
-                    
-                    
-                    trainingTW.WriteLine(arffHeader);
-                    string structureArffFile = this.storageDirectory + "\\structure.arff";
-                    structureTW = new StreamWriter(structureArffFile);
-                    structureTW.WriteLine("@RELATION wockets");
-                    structureTW.WriteLine(arffHeader);
-
-                }
-                string current_activity = "unknown";
-                if (this.currentRecord != null)
-                {
-                    double lastTimeStamp = FeatureExtractor.StoreWocketsWindow();
-                    if (FeatureExtractor.GenerateFeatureVector(lastTimeStamp))
-                    {
-                        current_activity = this.currentRecord.Activities._CurrentActivity;
-                        string arffSample = FeatureExtractor.toString() + "," + current_activity;
-                        trainingTW.WriteLine(arffSample);
-                        extractedVectors++;
-                        if (structureFileExamples < 10)
-                        {
-                            structureTW.WriteLine(arffSample);
-                            structureFileExamples++;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                if (trainingTW != null)
-                {
-                    structureTW.Flush();
-                    structureTW.Close();                  
-                    structureTW = null;
-                    trainingTW.Flush();
-                    trainingTW.Close();
-                    trainingTW = null;
-                }
-            }
-            #endregion Training
-            #region CollectingData
-
-
-           
-            #endregion CollectingData
-
-            
-            #region Store the sensor data
-
-            for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)            
-                this.wocketsController._Sensors[i].Save();            
-            #endregion Store the sensor data
-*/
-            
-
-  
+            }             
 
         }
         private void updateCommand(string s)
