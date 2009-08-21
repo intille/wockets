@@ -1451,12 +1451,13 @@ namespace WocketsApplication.SmartPhone
 
         private void gaming_Click(object sender, EventArgs e)
         {
-            MenuItem mi = (MenuItem)sender;
+            /*MenuItem mi = (MenuItem)sender;
             mi.Checked = !(mi.Checked);
             this.isGaming = mi.Checked;
             Thread aGamingThread = new Thread(new ThreadStart(this.wocketsController.escape.PlayExergame));
             this.wocketsController.escape.isGaming = this.isGaming;
             aGamingThread.Start();
+             */
         }
 
         private void view_menu_Click(object sender, EventArgs e)
