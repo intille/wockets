@@ -369,7 +369,7 @@
     <ProjectReference Include="WocketsWeka.csproj">
       <Project>{637F0352-A172-4CD3-8C6B-C318CC92C14B}</Project>
       <Name>WocketsWeka</Name>
-    </ProjectReference>
+    </ProjectReference> 
   </ItemGroup>
   <Import Condition="'$(TargetFrameworkVersion)' == 'v1.0'" Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.v1.targets" />
   <Import Condition="'$(TargetFrameworkVersion)' == 'v2.0'" Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />
