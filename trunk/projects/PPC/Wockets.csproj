@@ -1,4 +1,4 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+ <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -351,11 +351,6 @@
     <Compile Include="..\..\src\Wockets\Utils\CircularBuffer.cs">
       <Link>Utils\CircularBuffer.cs</Link>
     </Compile>
-    <Compile Include="Applications\Games\Escape\Actions.cs" />
-    <Compile Include="Applications\Games\Escape\Audio.cs" />
-    <Compile Include="Applications\Games\Escape\Escape.cs" />
-    <Compile Include="Applications\Games\Escape\Player.cs" />
-    <Compile Include="Applications\Games\Escape\Sounds.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="InTheHand.Net.csproj">
