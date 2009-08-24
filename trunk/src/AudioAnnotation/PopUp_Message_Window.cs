@@ -105,7 +105,8 @@ namespace AudioAnnotation
                 return ((AssemblyCompanyAttribute)attributes[0]).Company;
             }
         }
-        #endregion
+        
+ #endregion
 
         
 
