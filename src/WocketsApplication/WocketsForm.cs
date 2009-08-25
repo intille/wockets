@@ -75,7 +75,7 @@ namespace WocketsApplication
 
             progressForm.Close();
             aProgressThread.Abort();
-  
+
         }
 
         private void InitializeActivityTracker()
@@ -146,7 +146,7 @@ namespace WocketsApplication
             #region Load Data Logger GUI
 
             #region Initialize GUI Components
-            DataLogger.DataLoggerForm dataLoggerForm = new WocketsApplication.DataLogger.DataLoggerForm(this.storageDirectory, this.wocketsController, this.annotatedSession, this.classifierConfiguration,3);
+            DataLogger.DataLoggerForm dataLoggerForm = new WocketsApplication.DataLogger.DataLoggerForm(this.storageDirectory, this.wocketsController, this.annotatedSession, this.classifierConfiguration, 3);
             dataLoggerForm.Show();
             //ActivityTracker.ActivityTrackerForm activityTrackerForm = new WocketsApplication.ActivityTracker.ActivityTrackerForm(this.storageDirectory, this.wocketsController, this.annotatedSession, this.classifierConfiguration,3);
             //activityTrackerForm.Show();
@@ -185,8 +185,8 @@ namespace WocketsApplication
             #region Load Data Logger GUI
 
             #region Initialize GUI Components
-            Calibrator.CalibratorForm calibratorForm = new WocketsApplication.Calibrator.CalibratorForm(this.storageDirectory, this.wocketsController);
-            calibratorForm.Show();
+            //Calibrator.CalibratorForm calibratorForm = new WocketsApplication.Calibrator.CalibratorForm(this.storageDirectory, this.wocketsController);
+            //calibratorForm.Show();
 
             #endregion Initialize GUI Components
 
@@ -201,6 +201,7 @@ namespace WocketsApplication
             progressMessage = "Initializing wocket controller\r\n";
             this.wocketsController = this.wocketsControllers[this.selectedWocketController];
             this.annotatedSession = new Session();
+
 
             #region Copy configuration files
             progressMessage = "Configuration files... ";
@@ -232,7 +233,7 @@ namespace WocketsApplication
                     this.storageDirectory + "\\ActivitySummary.xml");
             else
                 throw new Exception("Error: Activity summary file not found");
-        
+
             #endregion Copy configuration files
 
             while (progressMessage != null) Thread.Sleep(50);
@@ -278,12 +279,12 @@ namespace WocketsApplication
             {
                 classifierConfiguration = new DTConfiguration();
                 classifierConfiguration.FromXML(this.storageDirectory + "\\Configuration.xml");
-                FeatureExtractor.Initialize(this.wocketsController,this.classifierConfiguration,this.annotatedSession.OverlappingActivityLists[0]);                   
+                FeatureExtractor.Initialize(this.wocketsController, this.classifierConfiguration, this.annotatedSession.OverlappingActivityLists[0]);
             }
             catch (Exception e)
             {
                 MessageBox.Show("Error: Failed to load classifier configuration. " + e.Message);
-            }        
+            }
             while (progressMessage != null) Thread.Sleep(50);
             progressMessage = " Loaded\r\n";
 
@@ -295,7 +296,7 @@ namespace WocketsApplication
             #region Load Data Logger GUI
 
             #region Initialize GUI Components
-            DataLogger.DataLoggerForm dataLoggerForm = new WocketsApplication.DataLogger.DataLoggerForm(this.storageDirectory,this.wocketsController, this.annotatedSession, this.classifierConfiguration,2);
+            DataLogger.DataLoggerForm dataLoggerForm = new  DataLogger.DataLoggerForm(this.storageDirectory, this.wocketsController, this.annotatedSession, this.classifierConfiguration, 2);
             dataLoggerForm.Show();
 
             #endregion Initialize GUI Components
@@ -304,14 +305,15 @@ namespace WocketsApplication
             #endregion Load Data Logger GUI
 
         }
-        
+
+
         private void InitializeAnnotator()
         {
             progressMessage = null;
             aProgressThread = new Thread(new ThreadStart(ProgressThread));
             aProgressThread.Start();
             progressMessage = "Initializing wocket controller\r\n";
-            this.wocketsController = new WocketsController("", "", ""); 
+            this.wocketsController = new WocketsController("", "", "");
             this.annotatedSession = new Session();
             this.storageDirectory = "\\Wockets";
 
@@ -383,7 +385,7 @@ namespace WocketsApplication
             #endregion Load Data Logger GUI
 
         }
-
+       
         private void InitializeExergame()
         {
             progressMessage = null;
@@ -401,6 +403,7 @@ namespace WocketsApplication
                        this.storageDirectory + "\\ActivityLabelsRealtime.xml");
             else
                 throw new Exception("Error: Activity protocol file not found");
+
 
             //copy sensor file
 
@@ -483,25 +486,26 @@ namespace WocketsApplication
 
             progressThreadQuit = true;
 
-            #region Load Data Logger GUI
+            #region Load Exergame GUI
 
             #region Initialize GUI Components
-            DataLogger.DataLoggerForm exergameForm = new WocketsApplication.DataLogger.DataLoggerForm(this.storageDirectory, this.wocketsController, this.annotatedSession, this.classifierConfiguration, 4);
-            exergameForm.Show();
+            DataLogger.DataLoggerForm ExergameForm = new DataLogger.DataLoggerForm(this.storageDirectory, this.wocketsController, this.annotatedSession, this.classifierConfiguration, 4);
+            ExergameForm.Show();
 
             #endregion Initialize GUI Components
 
 
-            #endregion Load Data Logger GUI
+            #endregion Load Exergame GUI
 
         }
-        
+       
+
         private WocketsControllerList wocketsControllers;
         private WocketsController wocketsController;
         private int selectedWocketController;
         private AnnotationProtocolList aProtocols;
         private int selectedActivityProtocol;
-        private string storageDirectory;
+        private string storageDirectory="";
         private Session annotatedSession;
         private DTConfiguration classifierConfiguration;
         /// <summary>

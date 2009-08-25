@@ -124,7 +124,7 @@ namespace Wockets.Decoders.Accelerometers
                         this.headerSeen = false;
 
                         
-                        burstyCounter++;                                                
+                        /*burstyCounter++;                                                
                         if ((lastTimestamp!=0) && ((datum.UnixTimeStamp - lastTimestamp) > 3000))
                             bursts++;
                         if (burstyCounter >= 1800)
@@ -136,7 +136,7 @@ namespace Wockets.Decoders.Accelerometers
                                 burstyCounter = 0;
                                 bursts = 0;
                             }
-                        }
+                        }*/
                         lastTimestamp = datum.UnixTimeStamp;
                     }
                     else if (packetType == SensorDataType.BATTERYLEVEL)

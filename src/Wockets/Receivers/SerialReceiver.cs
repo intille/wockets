@@ -88,6 +88,8 @@ namespace Wockets.Receivers
         {
             return this._PortNumber.CompareTo(((SerialReceiver)receiver)._PortNumber);
         }
+
+        public abstract void Write(byte[] data);
      
     }
 }

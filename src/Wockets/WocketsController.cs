@@ -460,30 +460,14 @@ namespace Wockets
                                 if (sensor._Class == SensorClasses.Wockets)
                                 {
 
-                                    CircularBuffer sendBuffer = ((RFCOMMReceiver)currentReceiver)._SBuffer;
+                                    //CircularBuffer sendBuffer = ((RFCOMMReceiver)currentReceiver)._SBuffer;
                               
                                     #region Write Data
                                     #region Battery Query
                                     batteryPoll[i] -= 1;
                                     if (batteryPoll[i] <= 0)
                                     {
-
-
-                                        lock (sendBuffer)
-                                        {
-
-                                            int availableBytes = GET_BT_CMD._Bytes.Length;
-                                            //only insert if the send buffer won't overflow
-                                            if ((sendBuffer._Tail + availableBytes) > sendBuffer._Bytes.Length)
-                                            {
-                                                Buffer.BlockCopy(GET_BT_CMD._Bytes, 0, sendBuffer._Bytes, sendBuffer._Tail, sendBuffer._Bytes.Length - sendBuffer._Tail);
-                                                availableBytes -= sendBuffer._Bytes.Length - sendBuffer._Tail;
-                                                sendBuffer._Tail = 0;
-                                            }
-                                            Buffer.BlockCopy(GET_BT_CMD._Bytes, GET_BT_CMD._Bytes.Length - availableBytes, sendBuffer._Bytes, sendBuffer._Tail, availableBytes);
-                                            sendBuffer._Tail += availableBytes;
-                                        }
-                           
+                                        ((SerialReceiver)currentReceiver).Write(GET_BT_CMD._Bytes);                           
                                         batteryPoll[i] = 6000 + i * 200;
                                     }
                                     #endregion Battery Query
@@ -492,23 +476,13 @@ namespace Wockets
                                     alive[i] -= 1;
                                     if (alive[i] <= 0)
                                     {            
-                                        lock (sendBuffer)
-                                        {
-             
-                                            int availableBytes=ALIVE_CMD._Bytes.Length;
-                                            //only insert if the send buffer won't overflow
-                                            if ((sendBuffer._Tail + availableBytes) > sendBuffer._Bytes.Length)
-                                            {
-                                                Buffer.BlockCopy(ALIVE_CMD._Bytes, 0, sendBuffer._Bytes, sendBuffer._Tail, sendBuffer._Bytes.Length - sendBuffer._Tail);
-                                                availableBytes -= sendBuffer._Bytes.Length - sendBuffer._Tail;
-                                                sendBuffer._Tail = 0;
-                                            }
-                                            Buffer.BlockCopy(ALIVE_CMD._Bytes, ALIVE_CMD._Bytes.Length - availableBytes, sendBuffer._Bytes, sendBuffer._Tail, availableBytes);
-                                            sendBuffer._Tail += availableBytes;
-                                        }
+                                        ((SerialReceiver)currentReceiver).Write(ALIVE_CMD._Bytes);  
                                         alive[i] = 200 + i * 10;
                                     }
                                     #endregion Alive
+
+
+                      
                                     #endregion Write Data
 
                                     #region Read Data

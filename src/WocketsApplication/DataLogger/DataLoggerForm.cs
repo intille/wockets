@@ -34,9 +34,8 @@ using Wockets.Data.Logger;
 using WocketsApplication.Utils;
 using WocketsApplication.Utils.Forms.Progress;
 using Wockets.Utils.network;
-#if (PocketPC)
 using WocketsApplication.Feedback;
-#endif
+
 
 
 namespace WocketsApplication.DataLogger
@@ -45,18 +44,16 @@ namespace WocketsApplication.DataLogger
     {
         #region Declarations of Objects
 
-        #region Definition of Plotting and Graphing Variables
+        #region Definition of Plotting and Graphing Variables       
+
+        #region Plotting Objects
 
         private bool isResized = false;
-
         private bool isPlotting = false;
         private Bitmap backBuffer = null;
         private WocketsScalablePlotter aWocketsPlotter;
-        private Pen aPen = new Pen(Color.Wheat);
-        private SolidBrush aBrush = new SolidBrush(Color.White);
-        private SolidBrush blueBrush = new SolidBrush(Color.LightBlue);
-        private SolidBrush redBrush = new SolidBrush(Color.Red);
 
+        #endregion Plotting Objects
 
         #endregion Definition of Plotting and Graphing Variables
 
@@ -95,16 +92,7 @@ namespace WocketsApplication.DataLogger
         /// <param name="label">Text for the label</param>
         /// <param name="control_id">Control ID for the label</param>
         delegate void SetTextCallback(string label, int control_id);
-        /// <summary>
-        /// Delegate that sets the graphics for the signal strength from other threads
-        /// </summary>
-        /// <param name="isGood">True if signal is good otherwise false</param>
-        delegate void SetSignalCallback(bool isGood);
-        /// <summary>
-        /// Delegate that sets an error label from different threads (e.g. used to display bluetooth disconnection)
-        /// </summary>
-        /// <param name="label"></param>
-        delegate void SetErrorCallback(string label);
+
         #endregion GUI Delegates
 
         #region Definition of GUI Components
@@ -114,24 +102,15 @@ namespace WocketsApplication.DataLogger
         private Hashtable sensorLabels;
         private Hashtable sensorStatus;
         private Hashtable sensorBattery;
-        private Hashtable mainMenus;
-        private Panel[] panelArray;
+
+        //private Panel[] panels;
         private Panel[] annotatePanelArray;
         private MenuItem[] viewsMenu = new MenuItem[6];
         private MenuItem[] annotateViewsMenu = new MenuItem[2];
-        private int panelSwitch = 0;
+
         
         private Image[] batteryImg = new Image[] { (Image)new Bitmap(Constants.NETWORK_STATUS_DIRECTORY + "1.gif"), (Image)new Bitmap(Constants.NETWORK_STATUS_DIRECTORY + "2.gif"), (Image)new Bitmap(Constants.NETWORK_STATUS_DIRECTORY + "3.gif"), (Image)new Bitmap(Constants.NETWORK_STATUS_DIRECTORY + "4.gif"), (Image)new Bitmap(Constants.NETWORK_STATUS_DIRECTORY + "5.gif"), (Image)new Bitmap(Constants.NETWORK_STATUS_DIRECTORY + "6.gif") };
-        private Label samplingLabel;
-        private System.Windows.Forms.Label[] labels;
-        /// <summary>
-        /// Expected sampling rate labels
-        /// </summary>
-        private System.Windows.Forms.Label[] expectedLabels;
-        /// <summary>
-        /// Samples per second labels
-        /// </summary>
-        private System.Windows.Forms.Label[] samplesPerSecond;
+
         /// <summary>
         /// The message to be displayed by the progress thread
         /// </summary>
@@ -150,7 +129,7 @@ namespace WocketsApplication.DataLogger
         /// <summary>
         /// An array list of the different buttons of the annotator
         /// </summary>
-        private ArrayList categoryButtons;
+        //private ArrayList categoryButtons;
         /// <summary>
         /// An array list that stores the current index for each button
         /// </summary>
@@ -160,12 +139,6 @@ namespace WocketsApplication.DataLogger
         /// A variable that stores the longest label on a category button for dynamic resizing of the buttons
         /// </summary>
         private string longest_label = "";
-        private int label_width;
-        private int label_height;
-        private Font textFont;
-
-        [DllImport("coredll.dll")]
-        static extern int ShowWindow(IntPtr hWnd, int nCmdShow);
         const int SW_MINIMIZED = 6;
 
         private Label[] ActGUIlabels;
@@ -186,69 +159,10 @@ namespace WocketsApplication.DataLogger
         
         #endregion Sampling Rate and Activity Count Components
 
-        #region Definition of Logging Variables and Flags
-        /// <summary>
-        /// A constant that specifies how often to flush logging data
-        /// </summary>
-        private const int FLUSH_TIMER_MAX = 6000;
-
         private Sound alert = new Sound(Constants.NEEDED_FILES_PATH + "sounds\\stop.wav");
         private bool play_sound = false;
 
-        #endregion Definition of Logging Variables and Flags
 
-        #region Wockets and MITes Variables
-
-        #region Definitions of general configuration variables
-
-
-
-        /// Directory where the collected data will be stored
-        /// </summary>
-        private string dataDirectory;
-        //TODO: move it to configuration file
-        /// <summary>
-        /// Defines the buffer size for different controllers - expanded for wockets
-        /// </summary>
-        private const int BYTES_BUFFER_SIZE = 4096; //2048      
-
-        #endregion Definitions of general configuration variables
-
-        #region Definition of controllers for different reception channels
-        //TODO: Define a single interface for ReceiverController and extend it to use USB,Bluetooth or DiamondTouch
-        //  private MITesReceiverController[] mitesControllers;
-#if (PocketPC)
-        //private BluetoothController[] bluetoothControllers;
-        private BluetoothConnector[] bluetoothConnectors;
-
-#endif
-        #endregion Definition of controllers for different reception channels
-
-
-
-        #region Definition of performance objects and counters
-
-
-
-        #endregion Definition of performance objects and counters
-
-        #region Definition of logging functions
-        //private MITesLoggerPLFormat aPLFormatLogger;
-        //private PLFormatLogger aPLFormatLogger;
-        //private MITesActivityLogger aMITesActivityLogger;
-        #endregion Definition of logging functions
-
-        #region Definition of built-in sensors polling threads   (Pocket PC Only)
-#if (PocketPC)
-        /// <summary>
-        /// Counter for the next polling time for the built-in accelerometer
-        /// </summary>
-        private int pollingTime = Environment.TickCount;
-  
-#endif
-        #endregion Definition of built-in sensors polling threads   (Pocket PC Only)
-
-        #endregion Wockets and MITes Variables
 
         #region Definition of classification variables
 
@@ -288,13 +202,14 @@ namespace WocketsApplication.DataLogger
 
         #endregion Definition of annotation objects
 
-#if (PocketPC)
         [DllImport("coredll.dll")]
         public static extern int PlaySound(
             string szSound,
             IntPtr hModule,
             int flags);
-#endif
+
+        [DllImport("coredll.dll")]
+        static extern int ShowWindow(IntPtr hWnd, int nCmdShow);
 
         #endregion Declarations of Objects
 
@@ -328,34 +243,13 @@ namespace WocketsApplication.DataLogger
             this.classifierConfiguration = classifierConfiguration;
 
             //Initialize the UNIX QueryPerformanceCounter
-            WocketsTimer.InitializeTime();
-
-    
-
+            WocketsTimer.InitializeTime();  
             //initialize the interface components
             InitializeComponent();
-
-            //Initialize where the data will be stored and where the configuration
-            //files exist
-            this.dataDirectory = "\\Wockets";
-
-
-            //load the activity and sensor configuration files
-
-
-
             InitializeTimers();
-
             //Initialize different GUI components
             InitializeInterface();
-            //Initialize the timers
 
-
-
-
-#if (PocketPC)
-
-#endif
 
         }
 
@@ -373,12 +267,7 @@ namespace WocketsApplication.DataLogger
             progressForm.Show();
             while (progressThreadQuit == false)
             {
-#if (PocketPC)
                 Thread.Sleep(5);
-#else
-                Thread.Sleep(20);
-#endif
-
                 if (progressMessage != null)
                 {
                     progressForm.UpdateProgressBar(progressMessage);
@@ -386,10 +275,7 @@ namespace WocketsApplication.DataLogger
                 }
                 else
                     progressForm.UpdateProgressBar();
-
-
             }
-
             progressForm.Close();
             aProgressThread.Abort();
 
@@ -429,27 +315,11 @@ namespace WocketsApplication.DataLogger
             this.isPlotting = true;
 
             //SetFormPositions();            
-            aWocketsPlotter = new WocketsScalablePlotter(this.panel1, this.wocketsController);
+            aWocketsPlotter = new WocketsScalablePlotter(((Panel)this.panels[VISUALIZE_PANEL]), this.wocketsController);
 
             //Override the resize event
             this.Resize += new EventHandler(OnResize);
 
-
-            //Initialize the quality interface
-            while (progressMessage != null) Thread.Sleep(50);
-            progressMessage = "Initializing MITes Quality GUI ...";
-            InitializeQualityInterface();
-            while (progressMessage != null) Thread.Sleep(50);
-            progressMessage = " Completed\r\n";
-
-            //Remove classifier tabs
-#if (PocketPC)
-
-            this.viewsMenu[2].Enabled = false;
-            this.viewsMenu[3].Enabled = false;
-#else
-            this.ShowForms();
-#endif
 
 
             #endregion Initialize GUI Components
@@ -497,45 +367,6 @@ namespace WocketsApplication.DataLogger
             aProgressThread = new Thread(new ThreadStart(ProgressThread));
             aProgressThread.Start();
 
-            //this.bluetoothControllers = new BluetoothController[this.wocketsController._Receivers.Count];
-            this.bluetoothConnectors = new BluetoothConnector[this.wocketsController._Receivers.Count];
-            for (int i = 0; i < this.wocketsController._Receivers.Count; i++)
-            {
-                this.bluetoothConnectors[i] = null;
-            }
-
-            #region Bluetooth reception channels initialization
-            //Initialize and search for wockets connections
-            while (progressMessage != null) Thread.Sleep(50);
-            progressMessage = "Initializing Bluetooth receivers ... searching " + this.wocketsController._Receivers.Count + " BT receivers\r\n";
-
-            //Try to initialize all Bluetooth receivers 10 times then exit
-            int initializationAttempt = 0;
-            while (initializationAttempt <= 10)
-            {
-                if (InitializeReceivers() == false)
-                {
-                    initializationAttempt++;
-
-                    if (initializationAttempt == 10)
-                    {
-                        MessageBox.Show("Exiting: Some Bluetooth receivers in your configuration were not initialized.");
-                        Application.Exit();
-                        System.Diagnostics.Process.GetCurrentProcess().Kill();
-                    }
-                    else
-                    {
-                        while (progressMessage != null) Thread.Sleep(50);
-                        progressMessage = "Failed to initialize all BT connections. Retrying (" + initializationAttempt + ")...\r\n";
-                    }
-
-                }
-                else
-                    break;
-                Thread.Sleep(2000);
-            }
-            #endregion Bluetooth reception channels initialization
-
 
             #region Initialize GUI Components
             //initialize the interface components
@@ -551,18 +382,11 @@ namespace WocketsApplication.DataLogger
             progressMessage = " Completed\r\n";
             this.isPlotting = true;
 
-            //SetFormPositions();            
-            aWocketsPlotter = new WocketsScalablePlotter(this.panel1, this.wocketsController);
+         
+            aWocketsPlotter = new WocketsScalablePlotter(((Panel)this.panels[VISUALIZE_PANEL]), this.wocketsController);
 
             this.Resize += new EventHandler(OnResize);
 
-
-            //Initialize the quality interface
-            while (progressMessage != null) Thread.Sleep(50);
-            progressMessage = "Initializing MITes Quality GUI ...";
-            InitializeQualityInterface();
-            while (progressMessage != null) Thread.Sleep(50);
-            progressMessage = " Completed\r\n";
 
             //Remove classifier tabs
             this.viewsMenu[1].Enabled = false;
@@ -634,7 +458,7 @@ namespace WocketsApplication.DataLogger
             cur.Text = "Best Guess:";
             cur.Location = new Point(16, 16);
             cur.Size = new Size(400, 50);
-            this.panel4.Controls.Add(cur);
+            ((Panel)this.panels[CLASSIFIER_LABEL_PANEL]).Controls.Add(cur);
             Color blank = Color.FromArgb(240, 240, 240);
             for (int i = 0; i < activityLabels.Length; i++)
             {
@@ -645,40 +469,14 @@ namespace WocketsApplication.DataLogger
                 cur.Size= new Size(400,50);
                 cur.ForeColor = blank;
                 this.ActGUIlabels[i] = cur;
-                this.panel4.Controls.Add(cur);
+                ((Panel)this.panels[CLASSIFIER_LABEL_PANEL]).Controls.Add(cur);
             }
 
             weka.core.Attribute ClassAttribute = new weka.core.Attribute("activity", fvClassVal);
 
-            #region Initialize Quality Tracking variables
-            //InitializeQuality();
-            #endregion Initialize Quality Tracking variables
-
-            #region Initialize Logging
-            //InitializeLogging(this.storageDirectory);
-            #endregion Initialize Logging
 
             #region Start Collecting Data
 
-            Receiver currentReceiver = null;
-            Sensor sensor = null;
-            try
-            {
-                //Cleanup receiver buffers as they are out of sync due to BT connection delays
-                for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
-                {
-                    sensor = this.wocketsController._Sensors[i];
-                    currentReceiver = sensor._Receiver;
- //                   if (currentReceiver._Running == true)
- //                       currentReceiver.Read();
-                }
-            }
-            catch (Exception e)
-            {
-                ((PictureBox)this.sensorStatus["W" + sensor._ID]).Image = disconnectedWocketImage;
-                this.bluetoothConnectors[currentReceiver._ID] = new BluetoothConnector(currentReceiver, this.wocketsController);
-                currentReceiver._Running = false;
-            }
 
             //Terminate the progress thread
             progressThreadQuit = true;
@@ -702,62 +500,6 @@ namespace WocketsApplication.DataLogger
             this.activityTimer = new ATimer(this, ACTIVITY_TIMER);
 
         }
-
-
-
-#if (PocketPC)
-        //Initialize Bluetooth receiver channels includes wockets, sparkfun, Bluetooth enabled MITes
-        private bool InitializeReceivers()
-        {
-            //Initialize all defined reception channels Bluetooth
-            //foreach (Receiver receiver in this.sensors.Receivers)
-            for (int i = 0; (i < this.wocketsController._Receivers.Count); i++)
-            {
-                //If reception channel is of type Bluetooth and is not already initialized
-                if (this.wocketsController._Receivers[i]._Running == false)
-                {
-                    //Create a Bluetooth controller
-                    while (progressMessage != null) Thread.Sleep(50);
-                    if (this.wocketsController._Receivers[i]._Type == ReceiverTypes.RFCOMM)
-                        progressMessage = "Initializing Bluetooth for " + ((RFCOMMReceiver)this.wocketsController._Receivers[i])._Address + " ...\r\n";
-                    else if (this.wocketsController._Receivers[i]._Type == ReceiverTypes.HTCDiamond)
-                        progressMessage = "Initializing HTC Diamond ...\r\n";
-                    //this.bluetoothControllers[this.wocketsController._Receivers[i]._ID] = new BluetoothController();
-                    try
-                    {
-                        this.wocketsController._Receivers[i].Initialize();
-                    }
-                    catch (Exception e)
-                    {
-                        while (progressMessage != null) Thread.Sleep(50);
-                        if (this.wocketsController._Receivers[i]._Type == ReceiverTypes.RFCOMM)
-                            progressMessage = "Failed to find" + ((RFCOMMReceiver)this.wocketsController._Receivers[i])._Address + " ...\r\n";
-                        else if (this.wocketsController._Receivers[i]._Type == ReceiverTypes.HTCDiamond)
-                            progressMessage = "Failed to initialize HTC Diamond ...\r\n";
-                        return false;
-                    }
-     
-                    //this.wocketsController._Receivers[i]._Running = true;
-                }
-
-            }
-
-            return true;
-        }
-
-#endif
-
-
-
-
-
-        //Initialize objects for logging and storing wockets and MITes data
-        /*private void InitializeLogging(string dataDirectory)
-        {
-
-            aPLFormatLogger = new PLFormatLogger(this.wocketsController,
-                                                         dataDirectory + "\\data\\raw\\PLFormat\\");
-        }*/
     
         #endregion Initialization Methods
 
@@ -806,24 +548,25 @@ namespace WocketsApplication.DataLogger
             this.isPlotting = true;
 
             //SetFormPositions();            
-            aWocketsPlotter = new WocketsScalablePlotter(this.panel1, this.wocketsController);
+            aWocketsPlotter = new WocketsScalablePlotter(((Panel)this.panels[VISUALIZE_PANEL]), this.wocketsController);
 
             //Override the resize event
             this.Resize += new EventHandler(OnResize);
 
 
             //Initialize the quality interface
-            while (progressMessage != null) Thread.Sleep(50);
+           /* while (progressMessage != null) Thread.Sleep(50);
             progressMessage = "Initializing MITes Quality GUI ...";
             InitializeQualityInterface();
             while (progressMessage != null) Thread.Sleep(50);
             progressMessage = " Completed\r\n";
+            */
 
             //Remove classifier tabs
 #if (PocketPC)
 
-            this.viewsMenu[2].Enabled = false;
-            this.viewsMenu[3].Enabled = false;
+            //this.viewsMenu[2].Enabled = false;
+            //this.viewsMenu[3].Enabled = false;
 #else
             this.ShowForms();
 #endif
@@ -868,33 +611,7 @@ namespace WocketsApplication.DataLogger
              */
             #endregion Bluetooth reception channels initialization
 
-            /*
-            #region Start Collecting Data
 
-            Receiver currentReceiver = null;
-            Sensor sensor = null;
-         
-                //Cleanup receiver buffers as they are out of sync due to BT connection delays
-                //set them to saving mode
-            for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
-            {
-                try
-                {
-                    sensor = this.wocketsController._Sensors[i];
-                    sensor._Saving = true;
-                    currentReceiver = this.wocketsController._Receivers[sensor._Receiver];
-//                    if (currentReceiver._Running == true)
- //                       currentReceiver.Read();
-                }
-                catch (Exception e)
-                {
-                    ((PictureBox)this.sensorStatus["W" + sensor._ID]).Image = disconnectedWocketImage;
-                    this.bluetoothConnectors[currentReceiver._ID] = new BluetoothConnector(currentReceiver, this.wocketsController);
-                    currentReceiver._Running = false;
-                }
-            }
-
-            */
 
 
             aPlottingThread.Start();
@@ -908,9 +625,7 @@ namespace WocketsApplication.DataLogger
 
             //Enable all timer functions
             this.readDataTimer.Enabled = true;
-            //this.qualityTimer.Enabled = true;
-
-
+    
             this.wocketsController._annotatedSession = this.annotatedSession;
             this.wocketsController._storageDirectory = this.storageDirectory;
 
@@ -931,16 +646,16 @@ namespace WocketsApplication.DataLogger
             {
 
 
-                this.panel1.Width = this.ClientSize.Width;
-                this.panel1.Height = this.ClientSize.Height;
+                ((Panel)this.panels[VISUALIZE_PANEL]).Width = this.ClientSize.Width;
+                ((Panel)this.panels[VISUALIZE_PANEL]).Height = this.ClientSize.Height;
 
 
                 //Intialize Labels 40% of the screen
 
                 int num_rows = (int)((this.wocketsController._Sensors.Count + 2) / 2); //additional row for HR and total sampling rate
-                int textBoxHeight = ((int)(0.40 * this.panel1.ClientSize.Height) - ((this.wocketsController._Sensors.Count - 1) * Constants.WIDGET_SPACING)) / num_rows;
-                int textBoxWidth = ((this.panel1.ClientSize.Width - (3 * Constants.WIDGET_SPACING)) / 3);
-                int currentTextY = (int)(this.panel1.ClientSize.Height * 0.60);
+                int textBoxHeight = ((int)(0.40 * ((Panel)this.panels[VISUALIZE_PANEL]).ClientSize.Height) - ((this.wocketsController._Sensors.Count - 1) * Constants.WIDGET_SPACING)) / num_rows;
+                int textBoxWidth = ((((Panel)this.panels[VISUALIZE_PANEL]).ClientSize.Width - (3 * Constants.WIDGET_SPACING)) / 3);
+                int currentTextY = (int)(((Panel)this.panels[VISUALIZE_PANEL]).ClientSize.Height * 0.60);
                 int leftTextX = Constants.WIDGET_SPACING + 32;
                 int rightTextX = ((Constants.WIDGET_SPACING + 32) * 2) + textBoxWidth;
                 int currentTextX = Constants.WIDGET_SPACING + 32;
@@ -949,21 +664,19 @@ namespace WocketsApplication.DataLogger
 
                 Font textFont;
 
-
                 textFont = this.button1.Font =
                 GUIHelper.CalculateBestFitFont(this.button1.Parent.CreateGraphics(), Constants.MIN_FONT,
                    Constants.MAX_FONT, this.button1.Size, "textBoxAC11", this.button1.Font, (float)0.9, (float)0.9);
-
                 System.Windows.Forms.Label t;
 
                 for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
                 {
 
                     string labelKey = "";
-                 
-                    labelKey = "W" + this.wocketsController._Sensors[i]._ID;                       
-                    PictureBox p= (PictureBox)this.sensorStatus[labelKey];                       
-                    p.Location = new System.Drawing.Point(currentTextX-33, currentTextY);
+
+                    labelKey = "W" + this.wocketsController._Sensors[i]._ID;
+                    PictureBox p = (PictureBox)this.sensorStatus[labelKey];
+                    p.Location = new System.Drawing.Point(currentTextX - 33, currentTextY);
                     t = (System.Windows.Forms.Label)this.sensorLabels[labelKey];
                     t.Font = textFont;
                     t.Size = new System.Drawing.Size(textBoxWidth, textBoxHeight);
@@ -977,51 +690,7 @@ namespace WocketsApplication.DataLogger
                     }
                 }
 
-
-
-
-                t = (System.Windows.Forms.Label)this.sensorLabels["SampRate"];
-                t.Font = textFont;
-                t.Size = new System.Drawing.Size(textBoxWidth, textBoxHeight);
-                t.Location = new System.Drawing.Point(currentTextX, currentTextY);
-                if (currentTextX == leftTextX)
-                    currentTextX = rightTextX;
-                else
-                {
-                    currentTextX = leftTextX;
-                    currentTextY += (textBoxHeight + Constants.WIDGET_SPACING);
-                }
-
-
-                //Initialize Buttons
-                int button_width = this.ClientSize.Width - Constants.WIDGET_SPACING - Constants.WIDGET_SPACING;
-                int button_height = (this.ClientSize.Height - Constants.WIDGET_SPACING - Constants.WIDGET_SPACING - (this.annotatedSession.OverlappingActivityLists.Count * Constants.WIDGET_SPACING)) / (this.annotatedSession.OverlappingActivityLists.Count + 1);
-                int button_x = Constants.WIDGET_SPACING;
-                int button_y = Constants.WIDGET_SPACING * 2;
-
-                int delta_y = button_height + Constants.WIDGET_SPACING;
-                int button_id = 0;
-
-
-                this.button1.Width = button_width;
-                this.button1.Height = button_height;
-                Font buttonFont = this.button1.Font =
-                    GUIHelper.CalculateBestFitFont(this.button1.Parent.CreateGraphics(), Constants.MIN_FONT,
-                       Constants.MAX_FONT, this.button1.Size, longest_label, this.button1.Font, (float)0.9, (float)0.9);
-
-                foreach (System.Windows.Forms.Button button in categoryButtons)
-                {
-                    button.Location = new System.Drawing.Point(button_x, button_y + button_id * delta_y);
-                    button.Font = buttonFont;
-                    button.Size = new System.Drawing.Size(button_width, button_height);
-                    button_id++;
-                }
-
-                //adjust round buttons start/stop -reset
-                button_width = (this.Size.Width - Constants.WIDGET_SPACING - Constants.WIDGET_SPACING - Constants.WIDGET_SPACING) / 2;
-
-
-                aWocketsPlotter = new WocketsScalablePlotter(this.panel1, this.wocketsController);
+                aWocketsPlotter = new WocketsScalablePlotter(((Panel)this.panels[VISUALIZE_PANEL]), this.wocketsController);
 
                 this.isResized = true;
             }
@@ -1030,117 +699,6 @@ namespace WocketsApplication.DataLogger
         #endregion Resize Event Handlers
 
         #region Click Event Handlers
-
-        //Click end training
-        void menuItem6Tab2_Click(object sender, EventArgs e)
-        {
-            EndTraining();
-            this.overallTimer.reset();
-            this.goodTimer.reset();
-        }
-
-        //Start a training session
-        void menuItem5Tab2_Click(object sender, EventArgs e)
-        {
-            /*
-            this.arffFileName = this.dataDirectory + "\\output" + DateTime.Now.ToString().Replace('/', '_').Replace(':', '_').Replace(' ', '_') + ".arff";
-            tw = new StreamWriter(arffFileName);
-            if (AutoTraining == true)
-            {
-                int i = 0;
-                tw.WriteLine("@RELATION wockets");
-                tw.WriteLine(FeatureExtractor.GetArffHeader());
-                tw.Write("@ATTRIBUTE activity {");
-                for (i = 0; (i < ((this.annotatedSession.OverlappingActivityLists[0]).Count - 1)); i++)
-                    tw.WriteLine(this.annotatedSession.OverlappingActivityLists[0][i]._Name.Replace(' ', '_') + ",");
-                tw.WriteLine(this.annotatedSession.OverlappingActivityLists[0][i]._Name.Replace(' ', '_') + "}");
-                tw.WriteLine("\n@DATA\n\n");
-
-            }
-
-            this.menuItem5Tab2.Checked = true;
-            this.menuItem5Tab2.Enabled = false;
-
-            if (this.menuItem8Tab2.Checked == true) // manual, you can end it
-                this.menuItem6Tab2.Enabled = true;
-
-            //cannot change the traing mode if a session started
-            this.menuItem8Tab2.Enabled = false;
-            this.menuItem7Tab2.Enabled = false;
-
-            //enable stop/start and reset buttons
-            this.startStopButton.Enabled = true;
-            this.resetButton.Enabled = true;
-            if (AutoTraining == true)
-            {
-                this.startStopButton.Enabled = false;
-                this.resetButton.Enabled = false;
-                ((Button)this.categoryButtons[0]).Enabled = false;
-                ((Button)this.categoryButtons[0]).Visible = false;
-
-                //temporary label for auto training
-
-                if (this.trainingLabel == null)
-                {
-
-                    this.trainingLabel = new System.Windows.Forms.Label();
-                    this.trainingLabel.Location = new Point(((Button)this.categoryButtons[0]).Location.X, ((Button)this.categoryButtons[0]).Location.Y);
-                    this.trainingLabel.Size = new Size(((Button)this.categoryButtons[0]).Size.Width, ((Button)this.categoryButtons[0]).Size.Height);
-                    this.trainingLabel.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold);
-                    this.panel2.Controls.Add(trainingLabel);
-                }
-
-                this.trainingLabel.Visible = true;
-
-                //this.autoTrainingIndex = 0;
-                this.startActivityTime = Environment.TickCount + this.classifierConfiguration._TrainingWaitTime * 1000;
-            }
-
-            this.overallTimer.start();
-
-            */
-        }
-
-        //Select manual mode session
-        void menuItem8Tab2_Click(object sender, EventArgs e)
-        {
-            if (this.annotatedSession.OverlappingActivityLists.Count == 1)
-            {
-                this.menuItem8Tab2.Checked = true;
-                this.menuItem8Tab2.Enabled = false;
-                this.menuItem7Tab2.Checked = false;
-                this.menuItem7Tab2.Enabled = true;
-            }
-        }
-
-        //select auto mode session
-        void menuItem7Tab2_Click(object sender, EventArgs e)
-        {
-            if (this.annotatedSession.OverlappingActivityLists.Count == 1)
-            {
-                this.menuItem7Tab2.Checked = true;
-                this.menuItem7Tab2.Enabled = false;
-                this.menuItem8Tab2.Checked = false;
-                this.menuItem8Tab2.Enabled = true;
-            }
-        }
-
-        private void oxycon_Click(object sender, EventArgs e)
-        {
-            DateTime now = DateTime.Now;
-            DateTime origin = new DateTime(1970, 1, 1, 0, 0, 0, 0);
-            TimeSpan diff = now.Subtract(origin);
-            string timestamp = diff.TotalMilliseconds + "," + now.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ssK");
-            TextWriter tw = new StreamWriter(this.dataDirectory + "\\OxyconSyncronizationTime.txt");
-            tw.WriteLine(timestamp);
-            tw.Close();
-            this.oxyconButton.Enabled = false;
-        }
-        private void button2_Click(object sender, EventArgs e)
-        {
-
-
-        }
 
 
         private void button_Click(object sender, EventArgs e)
@@ -1178,11 +736,11 @@ namespace WocketsApplication.DataLogger
                         same = true;
                     but.BackColor = this.defaultColor;
                     selectedButtons.RemoveAt(i);
-                    if (isAnnotating)
-                    {
+                   // if (isAnnotating)
+                    //{
                         stopAnnotation();
                         startAnnotation();
-                    }
+                    //}
                     break;
                 }
                 i += 1;
@@ -1192,11 +750,11 @@ namespace WocketsApplication.DataLogger
             {
                 button.BackColor = clickColor;
                 selectedButtons.Add(button);
-                if (isAnnotating)
-                {
+                //if (isAnnotating)
+                //{
                     stopAnnotation();
                     startAnnotation();
-                }
+                //}
             }
         }
 
@@ -1214,7 +772,7 @@ namespace WocketsApplication.DataLogger
             this.currentRecord._StartUnix = ts.TotalSeconds;
 
             //check all buttons values, store them and disable them
-            if (this.panel2.Visible)
+            if (((Panel)this.panels[ANNOTATE_LIST_PANEL]).Visible)
             {
                 foreach (ComboBox combo in categoryDrops)
                 {
@@ -1224,7 +782,7 @@ namespace WocketsApplication.DataLogger
                     this.currentRecord.Activities.Add(new Activity(current_label, category._Name));
                 }
             }
-            else if (this.panel6.Visible)
+            else if (((Panel)this.panels[BUTTON_ANNOTATION_PANEL]).Visible)
             {
                 for (int i = 0; i < selectedButtons.Count; i++)
                 {
@@ -1253,85 +811,30 @@ namespace WocketsApplication.DataLogger
                 //button state is now start
                 if (item.Text.Equals("Start"))
                 {
-                    isAnnotating = true;
                     item.Text = "Stop";
                     this.overallTimer.reset();
                     this.overallTimer.start();
-                    this.goodTimer.reset();
-                    this.goodTimer.start();
+                    foreach (ComboBox c in this.categoryDrops)
+                        c.Enabled = false;
                     startAnnotation();
-
-                    //store the current state of the categories
-                    this.currentRecord = new Annotation();
-                    this.currentRecord._StartDate = DateTime.Now.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ssK");
-                    this.currentRecord._StartHour = DateTime.Now.Hour;
-                    this.currentRecord._StartMinute = DateTime.Now.Minute;
-                    this.currentRecord._StartSecond = DateTime.Now.Second;
-                    TimeSpan ts = (DateTime.Now - new DateTime(1970, 1, 1, 0, 0, 0));
-                    this.currentRecord._StartUnix = ts.TotalSeconds;
-
-                    //check all buttons values, store them and disable them
-                    if (this.panel2.Visible)
-                    {
-                        foreach (ComboBox combo in categoryDrops)
-                        {
-                            int button_id = Convert.ToInt32(combo.Name);
-                            ActivityList category = (ActivityList)this.annotatedSession.OverlappingActivityLists[button_id];
-                            string current_label = (string)combo.SelectedItem;
-                            this.currentRecord.Activities.Add(new Activity(current_label, category._Name));
-                            //    combo.Enabled = false;
-                        }
-                    }
-                    else if (this.panel6.Visible)
-                    {
-                        for (int i = 0; i < selectedButtons.Count; i++)
-                        {
-                            System.Windows.Forms.Button but = (System.Windows.Forms.Button)selectedButtons[i];
-                            this.currentRecord.Activities.Add(new Activity(but.Name.Split(delimiter)[1], but.Name.Split(delimiter)[0]));
-                        }
-                        //      this.panel6.Enabled = false;
-                    }
 
                     this.wocketsController._currentRecord = this.currentRecord;
                 }
 
                 else if (item.Text.Equals("Stop"))
                 {
-                    // this.stopSound.Play();
-                    isAnnotating = false;
+
                     item.Text = "Start";
                     this.overallTimer.reset();
-                    this.goodTimer.reset();
                     extractedVectors = 0;
-
-
-                    //store the current state of the categories
-                    this.currentRecord._EndDate = DateTime.Now.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ssK");
-                    this.currentRecord._EndHour = DateTime.Now.Hour;
-                    this.currentRecord._EndMinute = DateTime.Now.Minute;
-                    this.currentRecord._EndSecond = DateTime.Now.Second;
-                    TimeSpan ts = (DateTime.Now - new DateTime(1970, 1, 1, 0, 0, 0));
-                    this.currentRecord._EndUnix = ts.TotalSeconds;
-                    this.annotatedSession.Annotations.Add(this.currentRecord);
-
-
                     stopAnnotation();
-                    //each time an activity is stopped, rewrite the file on disk, need to backup file to avoid corruption
-                    //this.annotation.ToXMLFile();
-                    //this.annotation.ToCSVFile();
                     TextWriter tw = new StreamWriter(this.storageDirectory + "\\AnnotationIntervals.xml");
                     // write a line of text to the file
                     tw.WriteLine(this.annotatedSession.ToXML());
                     // close the stream
                     tw.Close();
-
                     foreach (ComboBox c in this.categoryDrops)
                         c.Enabled = true;
-
-
-
-                    if (this.panel6.Visible)
-                        this.panel6.Enabled = true;
 
                     this.currentRecord = null;
                     this.wocketsController._currentRecord = this.currentRecord;
@@ -1340,24 +843,8 @@ namespace WocketsApplication.DataLogger
             }
         }
 
-        private void resetButton_Click(object sender, EventArgs e)
-        {
-            //this.resetSound.Play();
-            //this.overallTimer.stop();
-            this.overallTimer.reset();
-            this.goodTimer.reset();
 
-            foreach (Button category_button in categoryButtons)
-            {
-                int button_id = Convert.ToInt32(category_button.Name);
-                ActivityList category = (ActivityList)this.annotatedSession.OverlappingActivityLists[button_id];
-                this.buttonIndex[button_id] = 0;
-                category_button.Text = category[0]._Name;
-                category_button.Enabled = true;
-            }
-        }
-
-        private void menuItem13_Click(object sender, EventArgs e)
+        private void minimize_Click(object sender, EventArgs e)
         {
             ShowWindow(this.Handle, SW_MINIMIZED);
         }
@@ -1372,7 +859,7 @@ namespace WocketsApplication.DataLogger
         private void saving_Click(object sender, EventArgs e)
         {
             MenuItem mi = (MenuItem)sender;
-            mi.Checked = !(mi.Checked);
+            mi.Checked = !(mi.Checked);            
         }
 
         private void powersaver_Click(object sender, EventArgs e)
@@ -1436,9 +923,47 @@ namespace WocketsApplication.DataLogger
         }
 
         private void view_menu_Click(object sender, EventArgs e)
-        {
+        {            
+            //Uncheck all checked items and make them invisible if different from sender
+           
+            foreach (MenuItem i in this.views.Values)
+                if (i.Text != ((MenuItem)sender).Text)
+                {
+                    ((Panel)this.panels[i.Text]).Visible = false;
+                    i.Checked = false;
+                }
+
+            //Set the visibility of the selected panel
+            ((Panel)this.panels[((MenuItem)sender).Text]).Visible = ((MenuItem)sender).Checked = !((MenuItem)sender).Checked;
+
+            //Remove panel specific menus
+            if (this.mainMenu1.MenuItems.Contains(this.menuItem15))
+                this.mainMenu1.MenuItems.Remove(this.menuItem15);
+            if (this.mainMenu1.MenuItems.Contains(this.menuItem16))
+                this.mainMenu1.MenuItems.Remove(this.menuItem16);
+
+            //If unchecked, display the empty panel
             if (!((MenuItem)sender).Checked)
+                ((Panel)this.panels[EMPTY_PANEL]).Visible = true;            
+            else //otherwise activate the menus/options for the appropriate panel
             {
+                ((Panel)this.panels[EMPTY_PANEL]).Visible = false;
+                switch (((MenuItem)sender).Text)
+                {
+                    case VISUALIZE_PANEL:
+                        this.isPlotting = ((MenuItem)sender).Checked;
+                        this.mainMenu1.MenuItems.Add(this.menuItem15);     
+                        break;
+                    case ANNOTATE_LIST_PANEL:                                
+                        this.mainMenu1.MenuItems.Add(this.menuItem16);                        
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+        }
+                /*
                 if (this.mainMenu1.MenuItems.Contains(this.menuItem15))
                 {
                     this.mainMenu1.MenuItems.Remove(this.menuItem15);
@@ -1470,8 +995,8 @@ namespace WocketsApplication.DataLogger
                         break;
                     }
                 }
-            }
-        }
+                 */
+      
 
         private void annotate_menu_Click(object sender, EventArgs e)
         {
@@ -1496,13 +1021,13 @@ namespace WocketsApplication.DataLogger
                 String excp = "";
                 ((MenuItem)sender).Checked = true;
 
-                for (int i = 0; i < viewsMenu.Length; i++)
+              /*  for (int i = 0; i < viewsMenu.Length; i++)
                 {
                     if (this.viewsMenu[i].Checked)
                         this.viewsMenu[i].Checked = false;
-                    if (this.panelArray[i].Visible)
-                        this.panelArray[i].Visible = false;
-                }
+                    if (this.panels[i].Visible)
+                        this.panels[i].Visible = false;
+                }*/
                 /*       try
                        {
                            this.viewsMenu[2].Checked = true;
@@ -1521,26 +1046,10 @@ namespace WocketsApplication.DataLogger
         }
 
 
-        private void menuItem1_Click(object sender, EventArgs e)
+        private void quit_Click(object sender, EventArgs e)
         {
-#if (PocketPC)
             if (MessageBox.Show("Are you sure you want to Quit MITes Software?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
-#else
-            if (MessageBox.Show("Are you sure you want to Quit MITes Software?", "Confirm", MessageBoxButtons.YesNo) == DialogResult.Yes)
-#endif
-            {
                 isQuitting = true;
-
-            }
-
-
-
-        }
-
-
-        private void menuItem22_Click(object sender, EventArgs e)
-        {
-
         }
 
         private void menuItem11_Click(object sender, EventArgs e)
@@ -1561,24 +1070,6 @@ namespace WocketsApplication.DataLogger
 
         #region Helper Methods
 
-        //close the ARFF training file and reset menus
-        public void EndTraining()
-        {
-            this.menuItem6Tab2.Enabled = false;
-            this.menuItem5Tab2.Checked = false;
-            this.menuItem5Tab2.Enabled = true;
-
-            if (this.annotatedSession.OverlappingActivityLists.Count == 1) //if 1 category
-            {
-                //enable whatever was not chosen to allow the user to switch the training mode
-                if (this.menuItem8Tab2.Checked)
-                    this.menuItem7Tab2.Enabled = true;
-                else
-                    this.menuItem8Tab2.Enabled = true;
-            }
-            ((Button)this.categoryButtons[0]).Visible = true;
-            ((Button)this.categoryButtons[0]).Enabled = true;
-        }
 
         public void SetText(string label, int control_id)
         {
@@ -1615,94 +1106,12 @@ namespace WocketsApplication.DataLogger
         }
 
 
-        public void SetErrorLabel(string label)
-        {
-            // InvokeRequired required compares the thread ID of the
-            // calling thread to the thread ID of the creating thread.
-            // If these threads are different, it returns true.
-            if (((System.Windows.Forms.Label)this.sensorLabels["ErrorLabel"]).InvokeRequired)
-            {
-                SetErrorCallback d = new SetErrorCallback(SetErrorLabel);
-                this.Invoke(d, new object[] { label });
-            }
-            else
-            {
-                ((System.Windows.Forms.Label)this.sensorLabels["ErrorLabel"]).Text = label;
-                ((System.Windows.Forms.Label)this.sensorLabels["ErrorLabel"]).Refresh();
-            }
-        }
-
-        public void SetSignalSign(bool isGood)
-        {
-            // InvokeRequired required compares the thread ID of the
-            // calling thread to the thread ID of the creating thread.
-            // If these threads are different, it returns true.
-            if (this.pictureBox1.InvokeRequired)
-            {
-                SetSignalCallback d = new SetSignalCallback(SetSignalSign);
-                this.Invoke(d, new object[] { isGood });
-            }
-            else
-            {
-                //set the sign + control the good/bad timer
-                /*if (isGood)
-                {
-                    if (this.startStopButton.BackColor == System.Drawing.Color.Red)
-                        this.goodTimer.start();
-                }
-                else
-                {
-                    if (this.startStopButton.BackColor == System.Drawing.Color.Red)
-                        this.goodTimer.stop();
-                }*/
-            }
-        }
-
-
 
 
         #endregion Helper Methods
 
 
-
-
-
-
-#if (!PocketPC)
-        void form_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            if (isQuitting == false)
-                e.Cancel = true;
-        }
-
-#endif
-
-
-
-#if (PocketPC)
-#else
-        public void ShowForms()
-        {
-            this.form1.Show();
-            this.form2.Show();
-            this.form3.Show();
-            this.form4.Show();
-            //this.form5.Show();
-            this.form1.DesktopLocation = this.form1.Location = new Point(Constants.WIDGET_SPACING, Constants.WIDGET_SPACING);
-            this.form3.DesktopLocation = this.form3.Location = new Point(Constants.WIDGET_SPACING, Constants.WIDGET_SPACING + Constants.WIDGET_SPACING + this.form1.Height);
-            this.form2.DesktopLocation = this.form2.Location = new Point(Constants.WIDGET_SPACING + Constants.WIDGET_SPACING + this.form1.Width, Constants.WIDGET_SPACING);
-            this.form4.DesktopLocation = this.form4.Location = new Point(Constants.WIDGET_SPACING + Constants.WIDGET_SPACING + this.form1.Width, Constants.WIDGET_SPACING + Constants.WIDGET_SPACING + this.form2.Height);
-
-        }
-#endif
-
-
         #region Graphing functions
-
-
-    
-
-
 
 
         /// <summary>
@@ -1718,7 +1127,7 @@ namespace WocketsApplication.DataLogger
         {
             if ((backBuffer == null) || (isResized))
             {
-                backBuffer = new Bitmap(this.panel1.Width, (int)(this.panel1.Height*0.60));
+                backBuffer = new Bitmap(((Panel)this.panels[VISUALIZE_PANEL]).Width, (int)(((Panel)this.panels[VISUALIZE_PANEL]).Height*0.60));
                 isResized = false;                    
             }
             using (Graphics g = Graphics.FromImage(backBuffer))
@@ -1733,7 +1142,8 @@ namespace WocketsApplication.DataLogger
         private void Panel1_Paint(object sender, PaintEventArgs e)
         {
 
-            if (this.CurrentPanel == 0)
+            //if (this.CurrentPanel == 0)
+            if (((Panel)this.panels[VISUALIZE_PANEL]).Visible)
             {
 
 
@@ -1877,23 +1287,6 @@ namespace WocketsApplication.DataLogger
         }
 
 
-        private int CurrentPanel
-        {
-            set
-            {
-                if (value != this.panelSwitch)
-                {
-                    this.panelArray[this.panelSwitch].Visible = false;
-                    this.panelSwitch = value;
-                    this.panelArray[this.panelSwitch].Visible = true;
-                }
-            }
-
-            get
-            {
-                return this.panelSwitch;
-            }
-        }
 
         delegate void UpdateGraphCallback();
         public void UpdateGraph()
@@ -1901,7 +1294,7 @@ namespace WocketsApplication.DataLogger
             // InvokeRequired required compares the thread ID of the
             // calling thread to the thread ID of the creating thread.
             // If these threads are different, it returns true.
-            if (this.panel1.InvokeRequired)
+            if (((Panel)this.panels[VISUALIZE_PANEL]).InvokeRequired)
             {
                 UpdateGraphCallback d = new UpdateGraphCallback(UpdateGraph);
                 this.Invoke(d, new object[] { });
@@ -1931,7 +1324,7 @@ namespace WocketsApplication.DataLogger
 
         private void BatteryCallback(object sender, Wockets.Decoders.Response.ResponseArgs e)
         {
-            if (this.panel1.InvokeRequired)
+            if (((Panel)this.panels[VISUALIZE_PANEL]).InvokeRequired)
             {
                 UpdateBatteryCallback d = new UpdateBatteryCallback(BatteryCallback);
                 this.Invoke(d, new object[] {sender, e});
@@ -1939,8 +1332,7 @@ namespace WocketsApplication.DataLogger
             else
             {
                 Wockets.Data.Commands.BatteryResponse br = (Wockets.Data.Commands.BatteryResponse)e._Response;
-                ((PictureBox)this.sensorBattery["W" + br.SensorID]).Image = this.batteryImg[(5*1024-5*br.BatteryLevel)/1024];
-                
+                ((PictureBox)this.sensorBattery["W" + br.SensorID]).Image = this.batteryImg[(5*1024-5*br.BatteryLevel)/1024];                
                 updateCommand("Received Battery Response: "+br.BatteryLevel);
             }
         }
