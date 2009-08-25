@@ -246,6 +246,24 @@ namespace Wockets.Receivers
         }
 
 
+        public override void Write(byte[] data)
+        {
+            lock (this.sbuffer)
+            {
+
+                int availableBytes = data.Length;
+                //only insert if the send buffer won't overflow
+                if ((this.sbuffer._Tail + availableBytes) > this.sbuffer._Bytes.Length)
+                {
+                    Buffer.BlockCopy(data, 0, this.sbuffer._Bytes, this.sbuffer._Tail, this.sbuffer._Bytes.Length - this.sbuffer._Tail);
+                    availableBytes -= this.sbuffer._Bytes.Length - this.sbuffer._Tail;
+                    this.sbuffer._Tail = 0;
+                }
+                Buffer.BlockCopy(data, data.Length - availableBytes, this.sbuffer._Bytes, this.sbuffer._Tail, availableBytes);
+                this.sbuffer._Tail += availableBytes;
+            }
+        }
+
         public override bool Dispose()
         {
             try

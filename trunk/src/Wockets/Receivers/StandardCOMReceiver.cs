@@ -107,6 +107,8 @@ namespace Wockets.Receivers
         public override void Update()
         {
         }
+
+        
         public override bool Dispose()
         {
             try
@@ -120,6 +122,10 @@ namespace Wockets.Receivers
             {
                 return false;
             }
+        }
+
+        public override void Write(byte[] data)
+        {    
         }
     
         //Optimization

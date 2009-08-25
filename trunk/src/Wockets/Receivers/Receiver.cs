@@ -184,7 +184,7 @@ namespace Wockets.Receivers
         {
             get;
         }
-        public abstract bool Initialize();
+        public abstract bool Initialize();        
         public abstract bool Dispose();
         public abstract void Update();
 
