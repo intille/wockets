@@ -5,7 +5,7 @@ using System.Threading;
 
 namespace Wockets.Utils.network.Bluetooth
 {
-    public abstract class BluetoothStream : IDisposable
+    public abstract class BluetoothStream //: IDisposable
     {
         private const int MAC_SIZE = 6;
         protected byte[] address=null;
@@ -16,7 +16,7 @@ namespace Wockets.Utils.network.Bluetooth
         protected byte[] buffer;
         protected int tail;
 
-        protected const int MAX_DISCONNECTION_COUNTER = 200;
+        protected const int MAX_DISCONNECTION_COUNTER = 400;
         protected int disconnectionCounter = 0;
         protected Thread processingThread;
         protected Thread reconnectionThread;
@@ -64,6 +64,7 @@ namespace Wockets.Utils.network.Bluetooth
             Dispose(false);
         }*/
 
+        /*
         // Implement IDisposable.
         // Do not make this method virtual.
         // A derived class should not be able to override this method.
@@ -110,8 +111,20 @@ namespace Wockets.Utils.network.Bluetooth
 
             }
         }
+        */
 
 
+        public byte[] _Buffer
+        {
+            get
+            {
+                return this.buffer;
+            }
+            set
+            {
+                this.buffer=value;
+            }
+        }
         public int _Tail
         {
             get

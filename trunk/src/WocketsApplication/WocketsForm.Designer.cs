@@ -742,11 +742,23 @@ namespace WocketsApplication
                 //check to see if this is a temporary storage card (e.g. SD card)
                 if ((fsi[x].Attributes & System.IO.FileAttributes.Temporary) == System.IO.FileAttributes.Temporary)
                 {
-                    //if so, return the path
                     firstCard = fsi[x].FullName;
+                    try
+                    {
+                        Directory.CreateDirectory(firstCard+"\\writable");
+                        Directory.Delete(firstCard + "\\writable");
+                    }
+                    catch (Exception)
+                    {
+                        firstCard = "";
+                        continue;
+                    }
+                    //if so, return the path
+                  
                     break;
                 }
             }
+
             string name = firstCard + "\\Wockets\\Session" + DateTime.Now.Month + "-" + DateTime.Now.Day + "-" + DateTime.Now.Hour + "-" + DateTime.Now.Minute + "-" + DateTime.Now.Second;
             Directory.CreateDirectory(name);
             this.storageDirectory = name;

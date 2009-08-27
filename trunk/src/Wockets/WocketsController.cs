@@ -486,6 +486,19 @@ namespace Wockets
                                     #endregion Write Data
 
                                     #region Read Data
+
+                                    int dataLength = ((RFCOMMReceiver)currentReceiver).bluetoothStream._Tail - currentReceiver._Head;
+                                    if (dataLength < 0)
+                                        dataLength = ((RFCOMMReceiver)currentReceiver).bluetoothStream._Buffer.Length - currentReceiver._Head + ((RFCOMMReceiver)currentReceiver).bluetoothStream._Tail;
+                                    if (dataLength > 0)
+                                    {
+                                        int tail = ((RFCOMMReceiver)currentReceiver).bluetoothStream._Tail;
+                                        int head = currentReceiver._Head;
+                                        numDecodedPackets = decoder.Decode(sensor._ID, ((RFCOMMReceiver)currentReceiver).bluetoothStream._Buffer, head, tail);
+                                        ((RFCOMMReceiver)currentReceiver)._Head = tail;
+                                        sensor.Packets += numDecodedPackets;
+                                    }
+                                    /*
                                     int dataLength = currentReceiver._Tail - currentReceiver._Head;
                                     if (dataLength < 0)
                                         dataLength = currentReceiver._Buffer.Length - currentReceiver._Head + currentReceiver._Tail;
@@ -496,7 +509,7 @@ namespace Wockets
                                         numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer, head, tail);
                                         ((RFCOMMReceiver)currentReceiver)._Head = tail;
                                         sensor.Packets += numDecodedPackets;
-                                    }
+                                    }*/
                                     #endregion Read Data
 
 

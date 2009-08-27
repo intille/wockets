@@ -47,7 +47,7 @@ namespace Wockets.Receivers
 
         //private BluetoothStream bluetoothStream;       
 
-        private BluetoothStream bluetoothStream;
+        public BluetoothStream bluetoothStream;
         private const int MAC_SIZE = 6;
         private string address;
         private byte[] address_bytes;
@@ -219,7 +219,7 @@ namespace Wockets.Receivers
                     if (this.Initialize())
                     {
                         //this.status = ReceiverStatus.Connected;
-                        Wockets.Utils.Logger.Warn("Receiver " + this._ID + " has reconnected.");
+                        Wockets.Utils.Logger.Warn(" R " + this._Address);
                     }
                 }
                 catch (Exception e)
@@ -227,6 +227,7 @@ namespace Wockets.Receivers
                 }
                 Thread.Sleep(500);
             }
+            //this._Buffer = this.bluetoothStream._Buffer;
         }
 
         public override bool Initialize()
@@ -237,6 +238,7 @@ namespace Wockets.Receivers
                 this.bluetoothStream = NetworkStacks._BluetoothStack.Connect(this._Buffer, this._SBuffer , this.address_bytes, this.pin);
                 if (this.bluetoothStream == null)
                     return false;
+                
                 return true;
             }
             catch (Exception e)
