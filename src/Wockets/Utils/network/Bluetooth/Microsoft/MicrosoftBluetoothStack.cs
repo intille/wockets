@@ -31,14 +31,15 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
 
                 //cleanup any resources if a previous connection existed
                 //this.Disconnect(address);               
-                MicrosoftBluetoothStream btStream = new MicrosoftBluetoothStream(buffer,sbuffer, address, pin);
+                //MicrosoftBluetoothStream btStream = new MicrosoftBluetoothStream(buffer,sbuffer, address, pin);
                 lock (this)
                 {
-                    if (!btStream.Open())
-                        btStream = null;
+                    //if (!btStream.Open())
+                      //  btStream = null;
+                    return MicrosoftBluetoothStream.OpenStatic(buffer, sbuffer, address, pin);
                 }
                 
-                return btStream;
+               // return btStream;
             }
             catch (Exception e)
             {

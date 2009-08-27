@@ -198,7 +198,7 @@ namespace WocketsApplication.DataLogger
         /// Stores the current record that is being annotated
         /// </summary>
         //private AnnotatedRecord currentRecord;
-        private Annotation currentRecord;
+        private Annotation currentRecord=null;
 
         #endregion Definition of annotation objects
 
@@ -724,10 +724,32 @@ namespace WocketsApplication.DataLogger
         private void activityButton_Click(object sender, EventArgs e)
         {
             Button button = (Button)sender;
-            int i = 0;
-            Boolean same = false;
-            click.Play();
-            while (i < selectedButtons.Count)
+            //int i = 0;
+            //Boolean same = false;
+            if (button.BackColor == clickColor)
+            {
+                button.BackColor = this.defaultColor;
+                selectedButtons.Remove(button);
+            }
+            else
+            {
+                button.BackColor = clickColor;
+                selectedButtons.Add(button);
+            }
+
+            if (this.currentRecord != null)
+            {
+                stopAnnotation();
+
+                TextWriter tw = new StreamWriter(this.storageDirectory + "\\AnnotationIntervals.xml");                
+                tw.WriteLine(this.annotatedSession.ToXML());                
+                tw.Close();
+            }
+            if (selectedButtons.Count > 0)
+                startAnnotation();  
+
+
+            /*while (i < selectedButtons.Count)
             {
                 System.Windows.Forms.Button but = (System.Windows.Forms.Button)selectedButtons[i];
                 if ((but.Name.Split(delimiter)[0]).Equals(button.Name.Split(delimiter)[0]))
@@ -735,18 +757,16 @@ namespace WocketsApplication.DataLogger
                     if (but.Equals(button))
                         same = true;
                     but.BackColor = this.defaultColor;
-                    selectedButtons.RemoveAt(i);
-                   // if (isAnnotating)
-                    //{
-                        stopAnnotation();
-                        startAnnotation();
-                    //}
+                    selectedButtons.RemoveAt(i);                               
                     break;
                 }
                 i += 1;
             }
+             */
 
-            if (!same)
+
+
+            /*if (!same)
             {
                 button.BackColor = clickColor;
                 selectedButtons.Add(button);
@@ -755,7 +775,7 @@ namespace WocketsApplication.DataLogger
                     stopAnnotation();
                     startAnnotation();
                 //}
-            }
+            }*/
         }
 
 
@@ -801,6 +821,7 @@ namespace WocketsApplication.DataLogger
             TimeSpan ts = (DateTime.Now - new DateTime(1970, 1, 1, 0, 0, 0));
             this.currentRecord._EndUnix = ts.TotalSeconds;
             this.annotatedSession.Annotations.Add(this.currentRecord);
+            this.currentRecord = null;
         }
 
         private void startStopButton_Click(object sender, EventArgs e)
@@ -817,13 +838,11 @@ namespace WocketsApplication.DataLogger
                     foreach (ComboBox c in this.categoryDrops)
                         c.Enabled = false;
                     startAnnotation();
-
                     this.wocketsController._currentRecord = this.currentRecord;
                 }
 
                 else if (item.Text.Equals("Stop"))
                 {
-
                     item.Text = "Start";
                     this.overallTimer.reset();
                     extractedVectors = 0;
@@ -834,11 +853,9 @@ namespace WocketsApplication.DataLogger
                     // close the stream
                     tw.Close();
                     foreach (ComboBox c in this.categoryDrops)
-                        c.Enabled = true;
-
-                    this.currentRecord = null;
-                    this.wocketsController._currentRecord = this.currentRecord;
+                        c.Enabled = true;                   
                 }
+                this.wocketsController._currentRecord = this.currentRecord;
                 this.wocketsController._annotatedSession = this.annotatedSession;
             }
         }
