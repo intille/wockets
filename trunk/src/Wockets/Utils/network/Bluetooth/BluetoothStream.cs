@@ -189,7 +189,7 @@ namespace Wockets.Utils.network.Bluetooth
                 return this.pin;
             }
         }
-        public abstract bool Open();
+        //public abstract static BluetoothStream Open();
         public abstract void Process();
         //public abstract bool Close();
     }
