@@ -22,7 +22,7 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
             //WidcommAPI.SetAutoReconnect(this.wdStack);  
         }
 
-        public override bool Open()
+        public bool Open()
         {
             try
             {
