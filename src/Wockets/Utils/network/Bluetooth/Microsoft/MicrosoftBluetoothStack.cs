@@ -36,7 +36,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                 {
                     //if (!btStream.Open())
                       //  btStream = null;
-                    return MicrosoftBluetoothStream.Open(buffer, sbuffer, address, pin);
+                    return MicrosoftBluetoothStream.Open(buffer, null, address, pin);
                 }
                 
                // return btStream;
