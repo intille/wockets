@@ -174,7 +174,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                 try
                 {
 
-                    if (sendTimer > 2000)
+                    if (sendTimer > 500)
                     {
 
                         socket.Send(sendByte, 1, SocketFlags.None); 
@@ -186,7 +186,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                     if (socket.Available > 0)
                         bytesReceived = socket.Receive(singleReadBuffer, LOCAL_BUFFER_SIZE, SocketFlags.None);                    
 
-                    Thread.Sleep(10);
+                    Thread.Sleep(30);
 
 
                     if (bytesReceived > 0)                       

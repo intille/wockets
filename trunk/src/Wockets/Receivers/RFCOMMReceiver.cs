@@ -234,7 +234,7 @@ namespace Wockets.Receivers
         {
             
             try
-            {               
+            {                
                 this.bluetoothStream = NetworkStacks._BluetoothStack.Connect(this._Buffer, this._SBuffer , this.address_bytes, this.pin);
                 if (this.bluetoothStream == null)
                     return false;
