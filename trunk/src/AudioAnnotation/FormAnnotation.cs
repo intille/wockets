@@ -21,16 +21,12 @@ namespace AudioAnnotation
 
         #region  Declare variables
 
+
         private DirectoryInfo folder;
         private FileInfo[] files = null;
         private FileInfo[] files_wav = null;
-
         private FileInfo file_session = null;
-
         private System.Media.SoundPlayer myPlayer;
-
-
-
 
 
         private struct COLUMN_INDEX
@@ -173,14 +169,11 @@ namespace AudioAnnotation
         }
 
 
-
         private string StartDate = "";
         private string EndDate = "";
 
-
         private int is_busy = 0;
         private int nrows = 0;
-
 
         //string tlabel = " ";
         string next_tlabel = " ";
@@ -194,10 +187,12 @@ namespace AudioAnnotation
         DataGridViewComboBoxCell cellComboBox = null;
 
         private BindingList<string> list_category_name = new BindingList<string>();
-        private BindingList<string> list_category_1 = new BindingList<string>();
-        private BindingList<string> list_category_2 = new BindingList<string>();
+        private BindingList<string> list_category_1    = new BindingList<string>();
+        private BindingList<string> list_category_2    = new BindingList<string>();
 
-        private BindingList<string> LabelsList = new BindingList<string>();
+        private BindingList<string> LabelsList_1 = new BindingList<string>();
+        private BindingList<string> LabelsList_2 = new BindingList<string>();
+
 
         private TextWriter tw;
         private TextReader tr;
@@ -214,6 +209,9 @@ namespace AudioAnnotation
         private bool is_data_grid_loaded = false;
 
         private Session XmlSession = null;
+        
+
+
         private BindingList<ActivityList> CActivityList = null;
 
 
@@ -3602,17 +3600,19 @@ namespace AudioAnnotation
         }
 
 
+
+        //----------------------------------------------------------------------------
+        // This function read the label values
+        // It verifies that all the labels match
+        // If the labels are correct, save the records to the appropiate xml format
+        //----------------------------------------------------------------------------
         private void GenerateActivityLabels()
         {
-            // read the values
-            // check all the labels match
-            // when ok, fill the records
 
             try
             {
 
                 bool incorrect = false;
-
                 incorrect = CheckLabelsList();
 
 
@@ -3626,23 +3626,21 @@ namespace AudioAnnotation
                     else
                     { label_play.Text = "There was a problem generating the Xml annotation file. Please save your session and try again."; }
 
-
-
                 }
                 else
                 {
                     label_play.Text = "There are label mismatches. Please check the fields highlighted in yellow. After corrections, click the 'Generate Xml' button.";
-
                 }
 
-                LabelsList.Clear();
-
+                LabelsList_1.Clear();
+                LabelsList_2.Clear();
             }
             catch
             {
                 label_play.Text = "Problems generating the Xml annotation file.";
             }
         }
+
 
         private bool CheckLabelsList()
         {
@@ -3667,7 +3665,9 @@ namespace AudioAnnotation
 
             TextWriter txw = new StreamWriter(DataSessionDir + "Data_Session.txt");
             txw.WriteLine(StartDate + ";" + EndDate + ";");
-            LabelsList.Clear();
+
+            LabelsList_1.Clear();
+            LabelsList_2.Clear();
 
             // check that both columns labels are correct
             // If not, send the appropriate message to correct them
@@ -3722,7 +3722,11 @@ namespace AudioAnnotation
 
 
                             txw.WriteLine(record_string);
-                            LabelsList.Add(record_string);
+
+                            if ( _category == 0 )
+                            { LabelsList_1.Add(record_string); }
+                            else if (  _category == 1  )
+                            { LabelsList_2.Add(record_string); }
 
 
                             prev_cellStyle = dataGridView1.Rows[start_row].Cells[CINDEX.category_label].Style;
@@ -3780,7 +3784,14 @@ namespace AudioAnnotation
                                             label_start + ";" + label_end + ";" + list_category_name[_category] + ";" + _category.ToString();
 
                             txw.WriteLine(record_string);
-                            LabelsList.Add(record_string);
+
+
+                            if (_category == 0)
+                            { LabelsList_1.Add(record_string); }
+                            else if (_category == 1)
+                            { LabelsList_2.Add(record_string); }
+
+
 
                             //update variables
                             if ((end_row + 1) < nrows)
@@ -3824,86 +3835,173 @@ namespace AudioAnnotation
         }
 
 
+
         //ArrayList records = new ArrayList();
         Annotation currentRecord;
 
         private bool LoadLabelsListToXml()
         {
+            TextWriter intervals_file_xml = null;
+            TextWriter intervals_file_csv = null;
+
+            TextWriter intervals_file_xml_1 = null;
+            TextWriter intervals_file_csv_1 = null;
+
+            TextWriter intervals_file_xml_2 = null;
+            TextWriter intervals_file_csv_2 = null; 
+
+            Session XmlSession_1 = null;
+            Session XmlSession_2 = null;
+
 
             try
             {
-
-                // backup first
-                if (File.Exists(DataSessionDir + "AnnotationIntervals.xml"))
-                { File.Delete(DataSessionDir + "AnnotationIntervals.xml"); }
-
-                if (File.Exists(DataSessionDir + "AnnotationIntervals.csv"))
-                { File.Delete(DataSessionDir + "AnnotationIntervals.csv"); }
-
-                TextWriter intervals_file_xml = new StreamWriter(DataSessionDir + "AnnotationIntervals.xml");
-                TextWriter intervals_file_csv = new StreamWriter(DataSessionDir + "AnnotationIntervals.csv");
-
                 string readline;
                 DateTime start_time, end_time;
                 TimeSpan ts;
                 string category, current_label;
 
 
+                #region generate an annotation file for each category
 
-                for (int i = 0; i < LabelsList.Count; i++)
+
+                // ----------backup and create output files ------------------
+
+                // Annotation Intervals Files
+                if (File.Exists(DataSessionDir + "AnnotationIntervals.xml"))
+                { File.Delete(DataSessionDir + "AnnotationIntervals.xml"); }
+
+                if (File.Exists(DataSessionDir + "AnnotationIntervals.csv"))
+                { File.Delete(DataSessionDir + "AnnotationIntervals.csv"); }
+
+                intervals_file_xml = new StreamWriter(DataSessionDir + "AnnotationIntervals.xml");
+                intervals_file_csv = new StreamWriter(DataSessionDir + "AnnotationIntervals.csv");
+
+
+                // Annotation Intervals Files, category 1
+                if (File.Exists(DataSessionDir + "AnnotationIntervals_cat_1.xml"))
+                { File.Delete(DataSessionDir + "AnnotationIntervals_cat_1.xml"); }
+
+                if (File.Exists(DataSessionDir + "AnnotationIntervals_cat_1.csv"))
+                { File.Delete(DataSessionDir + "AnnotationIntervals_cat_1.csv"); }
+
+
+                intervals_file_xml_1 = new StreamWriter(DataSessionDir + "AnnotationIntervals_cat_1.xml");
+                intervals_file_csv_1 = new StreamWriter(DataSessionDir + "AnnotationIntervals_cat_1.csv");
+
+
+                // Annotation Intervals Files, category 2
+                if (File.Exists(DataSessionDir + "AnnotationIntervals_cat_2.xml"))
+                { File.Delete(DataSessionDir + "AnnotationIntervals_cat_2.xml"); }
+
+                if (File.Exists(DataSessionDir + "AnnotationIntervals_cat_2.csv"))
+                { File.Delete(DataSessionDir + "AnnotationIntervals_cat_2.csv"); }
+
+
+                intervals_file_xml_2 = new StreamWriter(DataSessionDir + "AnnotationIntervals_cat_2.xml");
+                intervals_file_csv_2 = new StreamWriter(DataSessionDir + "AnnotationIntervals_cat_2.csv");
+
+
+                // ----------initialize sessions ------------------
+                XmlSession_1 = new Session();
+                XmlSession_1 = XmlSession.copy();
+
+                XmlSession_2 = new Session();
+                XmlSession_2 = XmlSession.copy();
+
+
+                // ---------- Load labels to sessions 1 and 2------------------
+
+                int count = 0;
+
+                for (int c = 1; c <= 2; c++)
                 {
+                       
+                    if( c == 1)
+                    {   count = LabelsList_1.Count; }
+                    else
+                    {   count = LabelsList_2.Count; }
 
-                    readline = LabelsList[i];
-                    string[] tokens = readline.Split(';');
 
-                    if (tokens[0].CompareTo("ok") == 0)
+                    for (int i = 0; i < count ; i++)
                     {
-                        currentRecord = new Annotation();
-
-                        //Start Time
-                        start_time = DateTime.Parse(StartDate + " " + tokens[3]);
-
-
-                        currentRecord._StartDate = start_time.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ssK");
-                        currentRecord._StartHour = start_time.Hour;
-                        currentRecord._StartMinute = start_time.Minute;
-                        currentRecord._StartSecond = start_time.Second;
-                        ts = (start_time - new DateTime(1970, 1, 1, 0, 0, 0));
-                        currentRecord._StartUnix = ts.TotalSeconds;
-
-                        //Stop Time
-                        end_time = DateTime.Parse(EndDate + " " + tokens[4]);
-
-                        currentRecord._EndDate = end_time.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ssK");
-                        currentRecord._EndHour = end_time.Hour;
-                        currentRecord._EndMinute = end_time.Minute;
-                        currentRecord._EndSecond = end_time.Second;
-                        ts = (end_time - new DateTime(1970, 1, 1, 0, 0, 0));
-                        currentRecord._EndUnix = ts.TotalSeconds;
+                        if (c == 1)
+                        { readline = LabelsList_1[i]; }
+                        else
+                        { readline = LabelsList_2[i]; }
 
 
-                        // Label
-                        //ActivityList category = (ActivityList)XmlSession.OverlappingActivityLists[0];
-                        //string current_label = list_category_1[i];
+                        string[] tokens = readline.Split(';');
 
-                        category = tokens[6];
-                        current_label = tokens[5];
-                        currentRecord.Activities.Add(new Activity(current_label, category));
-                        //currentRecord.Activities.Add(new Activity(current_label, category));
+                        if (tokens[0].CompareTo("ok") == 0)
+                        {
+                            currentRecord = new Annotation();
+
+                            //Start Time
+                            start_time = DateTime.Parse(StartDate + " " + tokens[3]);
+                            
+                            currentRecord._StartDate = start_time.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ssK");
+                            currentRecord._StartHour = start_time.Hour;
+                            currentRecord._StartMinute = start_time.Minute;
+                            currentRecord._StartSecond = start_time.Second;
+                            ts = (start_time - new DateTime(1970, 1, 1, 0, 0, 0));
+                            currentRecord._StartUnix = ts.TotalSeconds;
+
+                            //Stop Time
+                            end_time = DateTime.Parse(EndDate + " " + tokens[4]);
+
+                            currentRecord._EndDate = end_time.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ssK");
+                            currentRecord._EndHour = end_time.Hour;
+                            currentRecord._EndMinute = end_time.Minute;
+                            currentRecord._EndSecond = end_time.Second;
+                            ts = (end_time - new DateTime(1970, 1, 1, 0, 0, 0));
+                            currentRecord._EndUnix = ts.TotalSeconds;
 
 
-                        // Save record to session
-                        XmlSession.Annotations.Add(currentRecord);
+                            // Labels
+                            category = tokens[6];
+                            current_label = tokens[5];
+                            currentRecord.Activities.Add(new Activity(current_label, category));
+                           
+
+                            // Save record to the correspondent session
+                            if (c == 1)
+                            {  XmlSession_1.Annotations.Add(currentRecord); }
+                            else
+                            {  XmlSession_2.Annotations.Add(currentRecord); }
+
+                        }
+
                     }
-
                 }
 
-                // Save to Xml file
-                intervals_file_xml.WriteLine(XmlSession.ToXML());
-                intervals_file_csv.WriteLine(XmlSession.ToCSV());
 
+                // Save session 1 to file
+                intervals_file_xml_1.WriteLine(XmlSession_1.ToXML());
+                intervals_file_csv_1.WriteLine(XmlSession_1.ToCSV());
+
+                // Save session 2 to file
+                intervals_file_xml_2.WriteLine(XmlSession_2.ToXML());
+                intervals_file_csv_2.WriteLine(XmlSession_2.ToCSV());
 
                 // Close the Xml file
+                intervals_file_xml_1.Flush();
+                intervals_file_xml_1.Close();
+
+                intervals_file_csv_2.Flush();
+                intervals_file_csv_2.Close();
+
+
+                #endregion
+
+
+                //set the DataDirectory
+                //XmlSession._DataDirectory = DataSessionDir;
+                Session XmlSessionOutput = XmlSession_1.Merge(XmlSession_2);
+
+                intervals_file_xml.WriteLine(XmlSessionOutput.ToXML());
+                intervals_file_csv.WriteLine(XmlSessionOutput.ToCSV());
+
                 intervals_file_xml.Flush();
                 intervals_file_xml.Close();
 
@@ -3914,12 +4012,57 @@ namespace AudioAnnotation
             }
             catch
             {
+                if (intervals_file_xml != null)
+                {
+                    intervals_file_xml.Flush();
+                    intervals_file_xml.Close();
+
+                }
+
+                if (intervals_file_csv != null)
+                {
+                    intervals_file_csv.Flush();
+                    intervals_file_csv.Close();
+                }
+
+
+                if (intervals_file_xml_1 != null)
+                {
+                    intervals_file_xml_1.Flush();
+                    intervals_file_xml_1.Close();
+
+                }
+
+                if (intervals_file_csv_1 != null)
+                {
+                    intervals_file_csv_1.Flush();
+                    intervals_file_csv_1.Close();
+                }
+
+                if (intervals_file_xml_2 != null)
+                {
+                    intervals_file_xml_2.Flush();
+                    intervals_file_xml_2.Close();
+
+                }
+
+                if (intervals_file_csv_2 != null)
+                {
+                    intervals_file_csv_2.Flush();
+                    intervals_file_csv_2.Close();
+                }
+
+
                 return false;
             }
 
         }
 
 
+        private void SynchronizeLabels()
+        { 
+             
+        }
 
 
         #endregion
