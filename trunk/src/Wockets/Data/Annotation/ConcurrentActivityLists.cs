@@ -36,6 +36,7 @@ namespace Wockets.Data.Annotation
             }
             return csv;
         }
+        
         public void FromXML(string xml)
         {
             XmlDocument dom = new XmlDocument();

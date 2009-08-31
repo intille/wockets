@@ -227,6 +227,8 @@ namespace Wockets.Data.Annotation
                 csv += "," + this.activities[i]._Name;            
             return csv;
         }
+        
+        
         public void FromXML(string xml)
         {
             XmlDocument dom = new XmlDocument();
@@ -335,5 +337,35 @@ namespace Wockets.Data.Annotation
                 }               
             }
         }
+
+
+        public Annotation copy()
+        {
+            Annotation ann = new Annotation();
+
+            foreach (Activity act in activities)
+            {
+                ann.activities.Add(act);
+            }
+
+            ann._StartHour= start_hour;
+            ann._StartMinute = start_minute;
+            ann._StartSecond = start_second;
+            ann._StartMillisecond = start_millisecond;
+            ann._StartUnix = start_unix;
+            ann._StartDate = start_date;
+            
+            ann._EndDate = end_date;
+            ann._EndHour = end_hour;
+            ann._EndMinute = end_minute;
+            ann._EndSecond = end_second;
+            ann._EndMillisecond = end_millisecond;
+            ann._EndUnix = end_unix;
+            
+
+            return ann;
+        }
+    
+    
     }
 }
