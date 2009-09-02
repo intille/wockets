@@ -104,7 +104,7 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
 
         }
 
-        public override BluetoothStream Connect(byte[] buffer,CircularBuffer sbuffer, byte[] address, string pin)
+        public override BluetoothStream Connect(CircularBuffer buffer,CircularBuffer sbuffer, byte[] address, string pin)
         {
             try
             {

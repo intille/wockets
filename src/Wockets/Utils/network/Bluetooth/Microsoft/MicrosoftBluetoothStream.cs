@@ -20,7 +20,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
         private bool disposed = false;
 
 
-        public MicrosoftBluetoothStream(byte[] buffer, CircularBuffer sbuffer, byte[] address, string pin)
+        public MicrosoftBluetoothStream(CircularBuffer buffer, CircularBuffer sbuffer, byte[] address, string pin)
             : base(buffer,sbuffer, address, pin)
         {
 
@@ -65,9 +65,9 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
             nstream = null;
         }
         
-        public static BluetoothStream Open(byte[] buffer, CircularBuffer sbuffer, byte[] address, string pin)
+        public static BluetoothStream Open(CircularBuffer buffer,CircularBuffer sbuffer, byte[] address, string pin)
         {
-            MicrosoftBluetoothStream btStream = new MicrosoftBluetoothStream(buffer, null, address, pin);
+            MicrosoftBluetoothStream btStream = new MicrosoftBluetoothStream(buffer,sbuffer, address, pin);
 
             try
             {
@@ -76,10 +76,6 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                 {
                     btStream.client = new BluetoothClient(); 
                     BluetoothRadio.PrimaryRadio.Mode = RadioMode.Connectable;
-                    //BluetoothAddress bt_addr = new BluetoothAddress(address);
-                    if (pin != null)
-                        BluetoothSecurity.SetPin(btStream.btAddress, pin);
-
 
                     btStream.client.Connect(btStream.btAddress, BluetoothService.SerialPort);
                     btStream.socket = btStream.client.Client;
@@ -148,23 +144,24 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
 
      
         //this is the buffer used to read asynchonously from the socket. When
-        //the asynchronous read returns, this is copied into the localBuffer.  
-        private const int DEFAULT_BUFFER_SIZE = 8000;
+        //the asynchronous read returns, this is copied into the localBuffer.   
         private const int LOCAL_BUFFER_SIZE = 2048;
+        private const int DEFAULT_BUFFER_SIZE = 4096;
 
         //private int tail = 0;
         public override void Process()
         {
 
             int sendTimer = 0;
-            byte[] sendByte = new byte[1];
-            sendByte[0] = 0xbb;
+            byte[] sendByte = new byte[1];            
             
-            this.buffer = new byte[DEFAULT_BUFFER_SIZE];
+            //this.buffer = new byte[DEFAULT_BUFFER_SIZE];
+            //this.sbuffer = new CircularBuffer(256);
+           // this.sbuffer[0] = 0xbb;
             this.status = BluetoothStatus.Connected;
             byte[] singleReadBuffer = new byte[LOCAL_BUFFER_SIZE];
 
-            while (this._Status == BluetoothStatus.Connected)
+            while (this.status== BluetoothStatus.Connected)
             {
             
 
@@ -173,20 +170,47 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
 
                 try
                 {
-
-                    if (sendTimer > 500)
+                    lock (this.sbuffer)
                     {
+                        int counter = 0;
+                        while (this.sbuffer._Tail != this.sbuffer._Head)
+                        {
+                            sendByte[0] = this.sbuffer._Bytes[this.sbuffer._Head];
+                            if (socket.Send(sendByte, 1, SocketFlags.None) != 1)
+                            {
+                                this.errorMessage = "MicrosoftBluetoothStream failed at Process(). Cannot send bytes to " + btAddress.ToString();
+                                this.status = BluetoothStatus.Disconnected;
+                                return;
+                            }
 
+                            if (this.sbuffer._Head >= (this.sbuffer._Bytes.Length - 1))
+                                this.sbuffer._Head = 0;
+                            else
+                                this.sbuffer._Head++;
+
+                            Thread.Sleep(20);
+                            counter++;
+                            if (counter == 10)
+                                break;
+                        }
+                    }
+
+
+/*
+                    if (sendTimer > 2000)
+                    {
+                       
                         socket.Send(sendByte, 1, SocketFlags.None); 
                         sendTimer = 0;
 
                     }
-                    sendTimer++;
+                    sendTimer++;*/
+                    
 
                     if (socket.Available > 0)
                         bytesReceived = socket.Receive(singleReadBuffer, LOCAL_BUFFER_SIZE, SocketFlags.None);                    
 
-                    Thread.Sleep(30);
+                    Thread.Sleep(10);
 
 
                     if (bytesReceived > 0)                       
@@ -196,7 +220,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                         disconnectionCounter++;
                         if (disconnectionCounter > MAX_DISCONNECTION_COUNTER)
                         {
-                            this._Status = BluetoothStatus.Disconnected;
+                            this.status= BluetoothStatus.Disconnected;
                           
                         }
                     }
@@ -206,8 +230,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                 }
                 catch (Exception e)
                 {
-
-                    this._Status = BluetoothStatus.Disconnected;
+                    this.status = BluetoothStatus.Disconnected;
                 }
 
 
@@ -215,13 +238,19 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                 int ii;
                 for (ii = 0; ii < bytesReceived; ii++)
                 {
-                    this.buffer[tail++] = singleReadBuffer[ii];
-                    tail %= DEFAULT_BUFFER_SIZE;
+                    this.buffer._Bytes[this.buffer._Tail++] = singleReadBuffer[ii];
+                    this.buffer._Tail %= this.buffer._Bytes.Length;
                 }
 
             }
 
-
+            try
+            {
+                client.Close();
+            }
+            catch (Exception)
+            {
+            }
         }
 
 

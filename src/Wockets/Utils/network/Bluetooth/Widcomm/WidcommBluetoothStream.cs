@@ -15,7 +15,7 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
         private SerialPort spp=null;
         private IntPtr wdStack;
         private static int x = 0;
-        public WidcommBluetoothStream(byte[] buffer,CircularBuffer sbuffer, byte[] address, string pin)
+        public WidcommBluetoothStream(CircularBuffer buffer,CircularBuffer sbuffer, byte[] address, string pin)
             : base(buffer,sbuffer,address,pin)
         {
             //this.wdStack = WidcommAPI.CreateWidcommStack();
@@ -113,14 +113,14 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
                     {
                         bytesReceived = 0;
                         //if we will pass the end of buffer receive till the end then receive the rest
-                        if ((tail + availableBytes) > this.buffer.Length)
+                        if ((tail + availableBytes) > this.buffer._Bytes.Length)
                         {
-                            bytesReceived = spp.Read(this.buffer,tail, this.buffer.Length - tail);
+                            bytesReceived = spp.Read(this.buffer._Bytes, tail, this.buffer._Bytes.Length - tail);
                             availableBytes -= bytesReceived;
-                            tail = (tail + bytesReceived) % this.buffer.Length;
+                            tail = (tail + bytesReceived) % this.buffer._Bytes.Length;
                         }
-                        bytesReceived += spp.Read(this.buffer, tail, availableBytes);
-                        tail = (tail + bytesReceived) % this.buffer.Length;
+                        bytesReceived += spp.Read(this.buffer._Bytes, tail, availableBytes);
+                        tail = (tail + bytesReceived) % this.buffer._Bytes.Length;
                     }
 
                     Thread.Sleep(30);

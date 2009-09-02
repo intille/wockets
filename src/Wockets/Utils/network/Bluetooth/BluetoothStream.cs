@@ -13,10 +13,10 @@ namespace Wockets.Utils.network.Bluetooth
         protected string pin;
         protected BluetoothStatus status;
         protected string errorMessage;
-        protected byte[] buffer;
+        protected CircularBuffer buffer;
         protected int tail;
 
-        protected const int MAX_DISCONNECTION_COUNTER = 400;
+        protected const int MAX_DISCONNECTION_COUNTER = 1500;
         protected int disconnectionCounter = 0;
         protected Thread processingThread;
         protected Thread reconnectionThread;
@@ -28,7 +28,7 @@ namespace Wockets.Utils.network.Bluetooth
 
       
 
-        public BluetoothStream(byte[] buffer,CircularBuffer sbuffer,byte[] address,string pin)
+        public BluetoothStream(CircularBuffer buffer,CircularBuffer sbuffer,byte[] address,string pin)
         {       
             this.address = new byte[MAC_SIZE];
             if (BitConverter.IsLittleEndian)
@@ -113,7 +113,18 @@ namespace Wockets.Utils.network.Bluetooth
         }
         */
 
-
+       /* public byte[] _SBuffer
+        {
+            get
+            {
+                return this.sbuffer;
+            }
+            set
+            {
+                this.sbuffer = value;
+            }
+        }*/
+        /*
         public byte[] _Buffer
         {
             get
@@ -124,7 +135,7 @@ namespace Wockets.Utils.network.Bluetooth
             {
                 this.buffer=value;
             }
-        }
+        }*/
         public int _Tail
         {
             get
