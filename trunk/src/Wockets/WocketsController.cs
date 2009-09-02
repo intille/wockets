@@ -235,6 +235,8 @@ namespace Wockets
                 try
                 {
                     this._Receivers[i].Initialize();
+                    //this._Receivers[i].
+                    //Thread.Sleep(2000);
                     
                 }
                 catch (Exception e)
@@ -451,7 +453,7 @@ namespace Wockets
                                 int dataLength = ((Wockets.Receivers.HTCDiamondReceiver)currentReceiver).Read();
                                 if (dataLength > 0)
                                 {
-                                    numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer, dataLength);
+                                    numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer._Bytes, dataLength);
                                     sensor.Packets += numDecodedPackets;
                                 }
 
@@ -467,7 +469,7 @@ namespace Wockets
                                     batteryPoll[i] -= 1;
                                     if (batteryPoll[i] <= 0)
                                     {
-                                        ((SerialReceiver)currentReceiver).Write(GET_BT_CMD._Bytes);                           
+                                        ((SerialReceiver)currentReceiver).Write(GET_BT_CMD._Bytes);
                                         batteryPoll[i] = 6000 + i * 200;
                                     }
                                     #endregion Battery Query
@@ -476,8 +478,8 @@ namespace Wockets
                                     alive[i] -= 1;
                                     if (alive[i] <= 0)
                                     {            
-                                        ((SerialReceiver)currentReceiver).Write(ALIVE_CMD._Bytes);  
-                                        alive[i] = 200 + i * 10;
+                                        ((SerialReceiver)currentReceiver).Write(ALIVE_CMD._Bytes);
+                                        alive[i] = 2000;// + i * 10;
                                     }
                                     #endregion Alive
 
@@ -487,15 +489,15 @@ namespace Wockets
 
                                     #region Read Data
 
-                                    int dataLength = ((RFCOMMReceiver)currentReceiver).bluetoothStream._Tail - currentReceiver._Head;
+                                    int dataLength = currentReceiver._Buffer._Tail - currentReceiver._Buffer._Head; //((RFCOMMReceiver)currentReceiver).bluetoothStream._Tail - currentReceiver._Head;
                                     if (dataLength < 0)
-                                        dataLength = ((RFCOMMReceiver)currentReceiver).bluetoothStream._Buffer.Length - currentReceiver._Head + ((RFCOMMReceiver)currentReceiver).bluetoothStream._Tail;
+                                        dataLength = currentReceiver._Buffer._Bytes.Length - currentReceiver._Buffer._Head + currentReceiver._Buffer._Tail;//((RFCOMMReceiver)currentReceiver).bluetoothStream._Buffer.Length - currentReceiver._Head + ((RFCOMMReceiver)currentReceiver).bluetoothStream._Tail;
                                     if (dataLength > 0)
                                     {
-                                        int tail = ((RFCOMMReceiver)currentReceiver).bluetoothStream._Tail;
-                                        int head = currentReceiver._Head;
-                                        numDecodedPackets = decoder.Decode(sensor._ID, ((RFCOMMReceiver)currentReceiver).bluetoothStream._Buffer, head, tail);
-                                        ((RFCOMMReceiver)currentReceiver)._Head = tail;
+                                        int tail = currentReceiver._Buffer._Tail;//((RFCOMMReceiver)currentReceiver).bluetoothStream._Tail;
+                                        int head = currentReceiver._Buffer._Head;//currentReceiver._Head;
+                                        numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer._Bytes, head, tail); //((RFCOMMReceiver)currentReceiver).bluetoothStream._Buffer, head, tail);
+                                        currentReceiver._Buffer._Head = tail;//((RFCOMMReceiver)currentReceiver)._Head = tail;
                                         sensor.Packets += numDecodedPackets;
                                     }
                                     /*

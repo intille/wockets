@@ -23,8 +23,8 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
             return true;
         }
 
-        //There is a memory leak here
-        public override BluetoothStream Connect(byte[] buffer,CircularBuffer sbuffer,byte[] address, string pin)
+
+        public override BluetoothStream Connect(CircularBuffer buffer,CircularBuffer sbuffer,byte[] address, string pin)
         {
             try
             {
@@ -36,7 +36,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                 {
                     //if (!btStream.Open())
                       //  btStream = null;
-                    return MicrosoftBluetoothStream.Open(buffer, null, address, pin);
+                    return MicrosoftBluetoothStream.Open(buffer,sbuffer, address, pin);
                 }
                 
                // return btStream;

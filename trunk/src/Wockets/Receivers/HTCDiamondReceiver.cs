@@ -255,47 +255,47 @@ namespace Wockets.Receivers
             HTCGSensorData data;
             HTCSensorGetDataOutput(myHandle, out data);
 
-            this._Buffer[this.bufferIndex++] = 0xff;
-            this.bufferIndex = this.bufferIndex % this._Buffer.Length;
+            this._Buffer._Bytes[this.bufferIndex++] = 0xff;
+            this.bufferIndex = this.bufferIndex % this._Buffer._Bytes.Length;
 
             byte[] bytes = BitConverter.GetBytes(data.TiltX);
             for (int i = 0; (i < bytes.Length); i++)
             {
-                this._Buffer[this.bufferIndex++] = bytes[i];
-                this.bufferIndex = this.bufferIndex % this._Buffer.Length;
+                this._Buffer._Bytes[this.bufferIndex++] = bytes[i];
+                this.bufferIndex = this.bufferIndex % this._Buffer._Bytes.Length;
             }
 
             bytes = BitConverter.GetBytes(data.TiltY);
             for (int i = 0; (i < bytes.Length); i++)
             {
-                this._Buffer[this.bufferIndex++] = bytes[i];
-                this.bufferIndex = this.bufferIndex % this._Buffer.Length;
+                this._Buffer._Bytes[this.bufferIndex++] = bytes[i];
+                this.bufferIndex = this.bufferIndex % this._Buffer._Bytes.Length;
             }
 
             bytes = BitConverter.GetBytes(data.TiltZ);
             for (int i = 0; (i < bytes.Length); i++)
             {
-                this._Buffer[this.bufferIndex++] = bytes[i];
-                this.bufferIndex = this.bufferIndex % this._Buffer.Length;
+                this._Buffer._Bytes[this.bufferIndex++] = bytes[i];
+                this.bufferIndex = this.bufferIndex % this._Buffer._Bytes.Length;
             }
 
             bytes = BitConverter.GetBytes(data.AngleX);
             for (int i = 0; (i < bytes.Length); i++)
             {
-                this._Buffer[this.bufferIndex++] = bytes[i];
-                this.bufferIndex = this.bufferIndex % this._Buffer.Length;
+                this._Buffer._Bytes[this.bufferIndex++] = bytes[i];
+                this.bufferIndex = this.bufferIndex % this._Buffer._Bytes.Length;
             }
 
             bytes = BitConverter.GetBytes(data.AngleY);
             for (int i = 0; (i < bytes.Length); i++)
             {
-                this._Buffer[this.bufferIndex++] = bytes[i];
-                this.bufferIndex = this.bufferIndex % this._Buffer.Length;
+                this._Buffer._Bytes[this.bufferIndex++] = bytes[i];
+                this.bufferIndex = this.bufferIndex % this._Buffer._Bytes.Length;
             }
 
 
-            this._Buffer[this.bufferIndex++] = 0xff;
-            this.bufferIndex = this.bufferIndex % this._Buffer.Length;
+            this._Buffer._Bytes[this.bufferIndex++] = 0xff;
+            this.bufferIndex = this.bufferIndex % this._Buffer._Bytes.Length;
 #endif
             return BUFFER_SIZE;
         }
@@ -338,7 +338,7 @@ namespace Wockets.Receivers
             string xml = "<" + HTCDiamondReceiver.RECEIVER_ELEMENT + " ";
             xml += HTCDiamondReceiver.ID_ATTRIBUTE + "=\"" + this._ID + "\" ";
             xml += HTCDiamondReceiver.TYPE_ATTRIBUTE + "=\"" + HTCDiamondReceiver.HTC_TYPE + "\" ";
-            xml += HTCDiamondReceiver.BUFFERSIZE_ATTRIBUTE + "=\"" + this._Buffer.Length + "\" ";
+            xml += HTCDiamondReceiver.BUFFERSIZE_ATTRIBUTE + "=\"" + this._Buffer._Bytes.Length + "\" ";
             xml += HTCDiamondReceiver.MAX_SR_ATTRIBUTE + "=\"" + this._MaximumSamplingRate + "\" ";
             xml += "/>";
             return xml;
@@ -356,7 +356,7 @@ namespace Wockets.Receivers
                     if ((xAttribute.Name == HTCDiamondReceiver.TYPE_ATTRIBUTE) && (xAttribute.Value != HTCDiamondReceiver.HTC_TYPE))
                         throw new Exception("XML Parsing error - HTCDiamond receiver parsing a receiver of a different type " + xAttribute.Value);
                     else if (xAttribute.Name == HTCDiamondReceiver.BUFFERSIZE_ATTRIBUTE)
-                        this._Buffer = new byte[Convert.ToInt32(xAttribute.Value)];
+                        this._Buffer = new CircularBuffer(Convert.ToInt32(xAttribute.Value));//new byte[Convert.ToInt32(xAttribute.Value)];
                     else if (xAttribute.Name == HTCDiamondReceiver.MAX_SR_ATTRIBUTE)
                         this._MaximumSamplingRate = Convert.ToInt32(xAttribute.Value);
                     else if (xAttribute.Name == HTCDiamondReceiver.ID_ATTRIBUTE)

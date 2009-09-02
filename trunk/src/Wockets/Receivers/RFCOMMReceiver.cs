@@ -54,14 +54,14 @@ namespace Wockets.Receivers
         private string pin;
         private int sniffTime = 0;
         private bool sniffMode;
-        protected CircularBuffer sbuffer;
+        public CircularBuffer _SBuffer;
 
 
         public RFCOMMReceiver()
             : base(BUFFER_SIZE)
         {
             this.type = ReceiverTypes.RFCOMM;
-            this.sbuffer = new CircularBuffer(SEND_BUFFER_SIZE);
+            this._SBuffer = new CircularBuffer(SEND_BUFFER_SIZE);
         
 
             //initialize the stack
@@ -70,18 +70,7 @@ namespace Wockets.Receivers
 
    
 
-        public CircularBuffer _SBuffer
-        {
-            get
-            {
-                return this.sbuffer;
-            }
 
-            set
-            {
-                this.sbuffer = value;
-            }
-        }
         public override int _Tail
         {
             get
@@ -161,7 +150,7 @@ namespace Wockets.Receivers
                     
                     this.bluetoothStream = null;                    
                     this.status = ReceiverStatus.Disconnected;
-                    this.sbuffer._Head = 0;//ignore all pending send bytes
+                    this._SBuffer._Head = 0;//ignore all pending send bytes
                 }
 
                 //ideas - delay reconnection
@@ -235,7 +224,7 @@ namespace Wockets.Receivers
             
             try
             {                
-                this.bluetoothStream = NetworkStacks._BluetoothStack.Connect(this._Buffer, this._SBuffer , this.address_bytes, this.pin);
+                this.bluetoothStream = NetworkStacks._BluetoothStack.Connect(this._Buffer,this._SBuffer , this.address_bytes, this.pin);              
                 if (this.bluetoothStream == null)
                     return false;
                 
@@ -250,20 +239,21 @@ namespace Wockets.Receivers
 
         public override void Write(byte[] data)
         {
-            lock (this.sbuffer)
+            lock (this._SBuffer)
             {
 
                 int availableBytes = data.Length;
                 //only insert if the send buffer won't overflow
-                if ((this.sbuffer._Tail + availableBytes) > this.sbuffer._Bytes.Length)
+                if ((this._SBuffer._Tail + availableBytes) > this._SBuffer._Bytes.Length)
                 {
-                    Buffer.BlockCopy(data, 0, this.sbuffer._Bytes, this.sbuffer._Tail, this.sbuffer._Bytes.Length - this.sbuffer._Tail);
-                    availableBytes -= this.sbuffer._Bytes.Length - this.sbuffer._Tail;
-                    this.sbuffer._Tail = 0;
+                    Buffer.BlockCopy(data, 0, this._SBuffer._Bytes, this._SBuffer._Tail, this._SBuffer._Bytes.Length - this._SBuffer._Tail);
+                    availableBytes -= this._SBuffer._Bytes.Length - this._SBuffer._Tail;
+                    this._SBuffer._Tail = 0;
                 }
-                Buffer.BlockCopy(data, data.Length - availableBytes, this.sbuffer._Bytes, this.sbuffer._Tail, availableBytes);
-                this.sbuffer._Tail += availableBytes;
+                Buffer.BlockCopy(data, data.Length - availableBytes, this._SBuffer._Bytes, this._SBuffer._Tail, availableBytes);
+                this._SBuffer._Tail += availableBytes;
             }
+            
         }
 
         public override bool Dispose()
@@ -298,7 +288,7 @@ namespace Wockets.Receivers
             xml += RFCOMMReceiver.PARITY_ATTRIBUTE + "=\"" + this._Parity + "\" ";
             xml += RFCOMMReceiver.STOPBIT_ATTRIBUTE + "=\"" + this._StopBit + "\" ";
             xml += RFCOMMReceiver.BAUD_RATE_ATTRIBUTE + "=\"" + this._BaudRate + "\" ";
-            xml += RFCOMMReceiver.BUFFERSIZE_ATTRIBUTE + "=\"" + this._Buffer.Length + "\" ";
+            xml += RFCOMMReceiver.BUFFERSIZE_ATTRIBUTE + "=\"" + this._Buffer._Bytes.Length + "\" ";
             xml += RFCOMMReceiver.MAX_SR_ATTRIBUTE + "=\"" + this._MaximumSamplingRate + "\" ";
             xml += "/>";
             return xml;
@@ -346,7 +336,7 @@ namespace Wockets.Receivers
                     else if (xAttribute.Name == RFCOMMReceiver.BAUD_RATE_ATTRIBUTE)
                         this._BaudRate = Convert.ToInt32(xAttribute.Value);
                     else if (xAttribute.Name == RFCOMMReceiver.BUFFERSIZE_ATTRIBUTE)
-                        this._Buffer = new byte[Convert.ToInt32(xAttribute.Value)];
+                        this._Buffer = new CircularBuffer(Convert.ToInt32(xAttribute.Value));//new byte[Convert.ToInt32(xAttribute.Value)];
                     else if (xAttribute.Name == RFCOMMReceiver.MAX_SR_ATTRIBUTE)
                         this._MaximumSamplingRate = Convert.ToInt32(xAttribute.Value);
                     else if (xAttribute.Name == RFCOMMReceiver.ID_ATTRIBUTE)

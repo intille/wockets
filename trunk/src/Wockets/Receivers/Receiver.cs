@@ -17,7 +17,8 @@ namespace Wockets.Receivers
         #endregion Serialization Constants
         protected bool isRunning;
         private bool isReconnecting;
-        protected byte[] buffer;
+        //public byte[] _Buffer;
+        public CircularBuffer _Buffer;
         protected int head;
         private int maximumSamplingRate;
         private int id;
@@ -32,7 +33,8 @@ namespace Wockets.Receivers
         {
             //this.isRunning = false;
             //this.isReconnecting = false;
-            this.buffer= new byte[bufferSize];
+            //this._Buffer= new byte[bufferSize];
+            this._Buffer = new CircularBuffer(bufferSize);
 
 
             this.head = 0;
@@ -90,7 +92,7 @@ namespace Wockets.Receivers
 
 
     
-        public byte[] _Buffer
+        /*public byte[] _Buffer
         {
             get
             {
@@ -100,7 +102,7 @@ namespace Wockets.Receivers
             {
                 this.buffer = value;
             }
-        }
+        }*/
         
         public virtual bool _Running
         {

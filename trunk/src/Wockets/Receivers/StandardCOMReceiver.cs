@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Xml;
 using System.Threading;
+using Wockets.Utils;
 using HousenCS.SerialIO;
 
 
@@ -142,7 +143,7 @@ namespace Wockets.Receivers
             xml += StandardCOMReceiver.PARITY_ATTRIBUTE + "=\"" + this._Parity + "\" ";
             xml += StandardCOMReceiver.STOPBIT_ATTRIBUTE + "=\"" + this._StopBit + "\" ";
             xml += StandardCOMReceiver.BAUD_RATE_ATTRIBUTE + "=\"" + this._BaudRate + "\" ";
-            xml += StandardCOMReceiver.BUFFERSIZE_ATTRIBUTE + "=\"" + this._Buffer.Length + "\" ";
+            xml += StandardCOMReceiver.BUFFERSIZE_ATTRIBUTE + "=\"" + this._Buffer._Bytes.Length + "\" ";
             xml += StandardCOMReceiver.MAX_SR_ATTRIBUTE + "=\"" + this._MaximumSamplingRate + "\" ";
             xml += "/>";
             return xml;
@@ -159,8 +160,8 @@ namespace Wockets.Receivers
                 foreach (XmlAttribute xAttribute in xNode.Attributes)
                 {
 
-                    if ( (xAttribute.Name == StandardCOMReceiver.TYPE_ATTRIBUTE) && (xAttribute.Value != StandardCOMReceiver.StandardCOM_TYPE))
-                        throw new Exception("XML Parsing error - Standard COM receiver parsing a receiver of a different type " + xAttribute.Value);  
+                    if ((xAttribute.Name == StandardCOMReceiver.TYPE_ATTRIBUTE) && (xAttribute.Value != StandardCOMReceiver.StandardCOM_TYPE))
+                        throw new Exception("XML Parsing error - Standard COM receiver parsing a receiver of a different type " + xAttribute.Value);
                     else if (xAttribute.Name == StandardCOMReceiver.PORT_NUMBER_ATTRIBUTE)
                         this._PortNumber = Convert.ToInt32(xAttribute.Value);
                     else if (xAttribute.Name == StandardCOMReceiver.PARITY_ATTRIBUTE)
@@ -180,7 +181,7 @@ namespace Wockets.Receivers
                     else if (xAttribute.Name == StandardCOMReceiver.BAUD_RATE_ATTRIBUTE)
                         this._BaudRate = Convert.ToInt32(xAttribute.Value);
                     else if (xAttribute.Name == StandardCOMReceiver.BUFFERSIZE_ATTRIBUTE)
-                        this._Buffer = new byte[Convert.ToInt32(xAttribute.Value)];
+                        this._Buffer = new CircularBuffer(Convert.ToInt32(xAttribute.Value));//new byte[Convert.ToInt32(xAttribute.Value)];
                     else if (xAttribute.Name == StandardCOMReceiver.MAX_SR_ATTRIBUTE)
                         this._MaximumSamplingRate = Convert.ToInt32(xAttribute.Value);
                     else if (xAttribute.Name == StandardCOMReceiver.ID_ATTRIBUTE)
