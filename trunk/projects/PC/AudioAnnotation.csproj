@@ -1,4 +1,4 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -85,25 +85,39 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\delete-48x48.png" />
+    <EmbeddedResource Include="..\..\bin\NeededFiles\Resources\delete-48x48.png" >
+    	<Link>Resources\delete-48x48.png</Link>
+    </EmbeddedResource> 
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\plus-48x48.png" />
+    <EmbeddedResource Include="..\..\bin\NeededFiles\Resources\plus-48x48.png" >
+    	<Link>Resources\plus-48x48.png</Link>
+    </EmbeddedResource> 
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\right-48x48.png" />
+    <EmbeddedResource Include="..\..\bin\NeededFiles\Resources\right-48x48.png" >
+    	<Link>Resources\right-48x48.png</Link>
+    </EmbeddedResource> 
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\left-48x48.png" />
+    <EmbeddedResource Include="..\..\bin\NeededFiles\Resources\left-48x48.png" >
+    	<Link>Resources\left-48x48.png</Link>
+    </EmbeddedResource> 
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\save-48x48.png" />
+    <EmbeddedResource Include="..\..\bin\NeededFiles\Resources\save-48x48.png" >
+    	<Link>Resources\save-48x48.png</Link>
+    </EmbeddedResource> 
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\gear-48x48.png" />
+    <EmbeddedResource Include="..\..\bin\NeededFiles\Resources\gear-48x48.png" >
+    	<Link>Resources\gear-48x48.png</Link>
+    </EmbeddedResource> 
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\stop-48x48.png" />
+    <EmbeddedResource Include="..\..\bin\NeededFiles\Resources\stop-48x48.png" >
+    	<Link>Resources\stop-48x48.png</Link>
+    </EmbeddedResource> 
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
