@@ -118,13 +118,13 @@
         "Entry"
         {
         "MsmKey" = "8:_B49030E92C1DB406BBF655350FEDA7B2"
-        "OwnerKey" = "8:_2486622300301817E2AC6D467480305D"
+        "OwnerKey" = "8:_EFA90F55CE954302B21CA4E3228159D3"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_B49030E92C1DB406BBF655350FEDA7B2"
-        "OwnerKey" = "8:_EFA90F55CE954302B21CA4E3228159D3"
+        "OwnerKey" = "8:_2486622300301817E2AC6D467480305D"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -166,6 +166,12 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_EFA90F55CE954302B21CA4E3228159D3"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_3CA163360074F48DA7215C36D49F255B"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -185,12 +191,6 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_3C838046F804BEA0A6535AE10C42D47A"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_EFA90F55CE954302B21CA4E3228159D3"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -487,7 +487,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:Wockets, Version=1.0.3518.26346, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:Wockets, Version=1.0.3530.19752, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
                     "_443D03C4AF01A6C0ED094FF894878C90"
@@ -631,7 +631,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:WocketsWeka, Version=1.0.3518.26343, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:WocketsWeka, Version=1.0.3530.19749, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
                     "_DC9800A12B811F099B248827C5A89E59"
@@ -724,14 +724,14 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:WocketsInstaller"
-        "ProductCode" = "8:{51A696D1-4FB2-4FFD-B835-DF7D3CFA148C}"
-        "PackageCode" = "8:{23C75436-A3BB-405A-8EE8-5B11DF50F4AC}"
+        "ProductCode" = "8:{9B1FB50C-1CFA-4D5B-8261-10B0A53C6B67}"
+        "PackageCode" = "8:{711B29CF-CBA5-4808-BE8A-5F7296FF3EA1}"
         "UpgradeCode" = "8:{C469586D-4266-4E79-8F41-3937F5A8F09F}"
         "RestartWWWService" = "11:FALSE"
-        "RemovePreviousVersions" = "11:FALSE"
+        "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:1.1.0"
+        "ProductVersion" = "8:1.4.0"
         "Manufacturer" = "8:MIT"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
