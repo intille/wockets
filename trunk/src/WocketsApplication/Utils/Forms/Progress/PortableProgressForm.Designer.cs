@@ -66,14 +66,14 @@ namespace WocketsApplication.Utils.Forms.Progress
             this.progressBar.ForegroundPicture = PortableProgressBar.vista_foreground;
             this.progressBar.ForegroundTrailingSize = 12;
             this.progressBar.Location = new System.Drawing.Point(9, 45);
-            this.progressBar.Marquee = Bornander.UI.BornanderProgressBar.BornanderProgressBar.MarqueeStyle.Wave;
+            this.progressBar.Marquee = Bornander.UI.BornanderProgressBar.BornanderProgressBar.MarqueeStyle.BlockWrap;
             this.progressBar.MarqueeWidth = 40;
             this.progressBar.Maximum = 100;
             this.progressBar.Minimum = 0;
             this.progressBar.Name = "progressBar";
-            this.progressBar.OverlayDrawMethod = Bornander.UI.BornanderProgressBar.BornanderProgressBar.DrawMethod.Stretch;
-            this.progressBar.OverlayLeadingSize = 12;
-            this.progressBar.OverlayPicture = PortableProgressBar.vista_overlay;
+            //this.progressBar.OverlayDrawMethod = Bornander.UI.BornanderProgressBar.BornanderProgressBar.DrawMethod.Stretch;
+            //this.progressBar.OverlayLeadingSize = 12;
+            //this.progressBar.OverlayPicture = PortableProgressBar.vista_overlay;
 
             this.progressBar.OverlayTrailingSize = 12;
             this.progressBar.Size = new System.Drawing.Size(widgetWidth, 21);
@@ -94,7 +94,7 @@ namespace WocketsApplication.Utils.Forms.Progress
             this.progressBar.Location = new System.Drawing.Point(Constants.WIDGET_SPACING, Constants.WIDGET_SPACING + (int)(this.Height / 5));
 
             this.progressLabel.Text = "Please wait ...";
-            this.progressLabel.Size = new System.Drawing.Size(this.Width, (int)(this.Height / 5));
+            this.progressLabel.Size = new System.Drawing.Size(this.Width, (int)(this.Height / 6));
             this.progressLabel.Location = new System.Drawing.Point(Constants.WIDGET_SPACING, Constants.WIDGET_SPACING);
             this.progressLabel.Font = GUIHelper.CalculateBestFitFont(this.progressLabel.Parent.CreateGraphics(), Constants.MIN_FONT,
                    Constants.MAX_FONT, this.progressLabel.Size, this.progressLabel.Text, this.progressLabel.Font, (float)0.9, (float)0.9);
@@ -107,6 +107,7 @@ namespace WocketsApplication.Utils.Forms.Progress
             this.progressText.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold);
 
             this.Controls.Add(this.progressText);
+
             this.Width = System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width;
             this.Height = System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height;
             if ((this.Width > Constants.MAX_FORM_WIDTH) || (this.Height > Constants.MAX_FORM_HEIGHT))

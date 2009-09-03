@@ -14,6 +14,7 @@ using Wockets.Data.Annotation;
 using weka.core;
 using weka.classifiers;
 using weka.classifiers.trees;
+using WocketsWeka.Utils;
 
 namespace PCTestApplication
 {
@@ -22,13 +23,13 @@ namespace PCTestApplication
         static void Main(string[] args)
         {
 
-            string storage = @"C:\Users\albinali\Desktop\Session8-20-18-51-12\";
+            string storage = @"C:\Users\albinali\Desktop\Session9-2-0-18-31\wockets\";
             WocketsController wc = new WocketsController("", "", "");
             wc.FromXML(storage+"SensorData.xml");
             int[] lostSeconds = new int[wc._Sensors.Count];
             double[] prevUnix = new double[wc._Sensors.Count];
-
-            for (int i = 0; (i < wc._Sensors.Count); i++)
+            int i=0;
+            for ( i= 0; (i < wc._Sensors.Count); i++)
             {
                 double firstT = 0, lastT = 0;
                 int count = 0;
@@ -65,11 +66,229 @@ namespace PCTestApplication
                 double sr = count;
                 double timer = (lastT - firstT) / 1000.0;
                 sr = sr / timer;
-                tw.WriteLine("SR: " + sr);
-                tw.WriteLine("lost " + lostSeconds[i]);
+                //tw.WriteLine("SR: " + sr);
+                //tw.WriteLine("lost " + lostSeconds[i]);
                 tw.Flush();
                 tw.Close();
             }
+    
+
+            TextReader[] trs = new StreamReader[wc._Sensors.Count];
+            Hashtable[] sensordata = new Hashtable[wc._Sensors.Count];
+            string[] sensorlines = new string[wc._Sensors.Count];
+            double[] lastTS=new double[wc._Sensors.Count];
+            bool[] processed=new bool[wc._Sensors.Count];
+            bool[] done=new bool[wc._Sensors.Count];
+            int[] indexes=new int[wc._Sensors.Count];
+            CubicSpline[][] csplines = new CubicSpline[wc._Sensors.Count][];
+
+            i=0;
+            long currentTS=9999999999999999;
+            
+            for (i = 0; (i < wc._Sensors.Count); i++)
+            {
+                trs[i] = new StreamReader(storage + "sensor" + i + ".csv");
+                sensordata[i] = new Hashtable();
+                processed[i]=true;
+                done[i]=false;
+                
+                sensorlines[i]=trs[i].ReadLine();
+                string[] tokens=sensorlines[i].Split(',');                
+                lastTS[i]=Convert.ToDouble(tokens[0])/1000.0;  
+                indexes[i]=0;
+                if (lastTS[i] < currentTS)
+                    currentTS= (long)lastTS[i];
+
+            }
+            
+            bool Alldone=true;
+            bool AllProcessed = false;
+            TextWriter merged = new StreamWriter(storage + "merged.csv");
+            do
+            {
+
+                for (i = 0; (i < wc._Sensors.Count); i++)
+                {
+                    if ((done[i]==false) && (processed[i]))
+                    {
+                        sensorlines[i] = trs[i].ReadLine();
+                        if (sensorlines[i] == null)
+                            done[i] = true;
+                    }
+
+
+                    if (done[i] == false)
+                    {
+                        string[] tokens = sensorlines[i].Split(',');
+                        long ts = (long)(Convert.ToDouble(tokens[0]) / 1000.0);
+                        if (currentTS != ts)
+                        {
+                            if (processed[i] == true)
+                            {
+                                //stop reading
+                                processed[i] = false;
+
+                                //correct timestamps                             
+                                int count = sensordata[i].Count;
+                                double delta = 1000.0 / count;
+                                for (int j=0;(j<indexes[i]);j++)
+                                {
+                                    string vals = (string)sensordata[i][j];
+                                    sensordata[i].Remove(j);
+                                    long ctime=(long)((currentTS * 1000.0) + j * delta);
+                                    sensordata[i].Add(ctime, vals);
+                                }
+                            }
+
+                        }
+                        else
+                        {
+                            sensordata[i].Add(indexes[i], tokens[1] + "," + tokens[2] + "," + tokens[3]);
+                            indexes[i] = indexes[i] + 1;
+                        }
+                    }
+                }
+
+                AllProcessed = false;
+                Alldone = true;
+                for (i = 0; (i < wc._Sensors.Count); i++)
+                {
+                    if (done[i] == false)
+                        Alldone = false;
+                    if ((done[i]==false) && (processed[i] == true))
+                        AllProcessed = true;
+                }
+
+                if (AllProcessed==false)
+                {
+                    //go by milliseconds
+                 
+                    double start_time = currentTS * 1000.0;
+
+                    double[][] xs = new double[wc._Sensors.Count][];
+                    double[][] ys1 = new double[wc._Sensors.Count][];
+                    double[][] ys2 = new double[wc._Sensors.Count][];
+                    double[][] ys3 = new double[wc._Sensors.Count][];
+                    int[] ccounter=new int[wc._Sensors.Count];
+
+                    for (int j=0;(j<wc._Sensors.Count);j++)
+                    {
+                        xs[j] = new double[sensordata[j].Count];
+                        ys1[j] = new double[sensordata[j].Count];
+                        ys2[j] = new double[sensordata[j].Count];
+                        ys3[j] = new double[sensordata[j].Count];
+                        //ccounter[j]=new int[sensordata[j].Count];
+                        for (int k = 0; (k < sensordata[j].Count); k++)
+                        {
+                            xs[j][k] = 0;
+                            ys1[j][k] = 0;
+                            ys2[j][k] = 0;
+                            ys3[j][k] = 0;
+                            ccounter[j] = 0;
+                        }
+                    }
+                    for (int t = 0; (t < 1000); t++)                    
+                    {                       
+                        long currentTT=((long)(start_time+t));
+                        string output = currentTT.ToString();
+                        bool found = false;                                                
+                        for (int j = 0; (j < wc._Sensors.Count); j++)
+                        {                            
+                            if (sensordata[j].ContainsKey(currentTT))
+                            {
+                                string[] tokens2=((string)sensordata[j][currentTT]).Split(',');
+                                xs[j][ccounter[j]] = currentTT - (long)start_time;
+                                ys1[j][ccounter[j]] = (double)Convert.ToInt32(tokens2[0]);
+                                ys2[j][ccounter[j]] = (double)Convert.ToInt32(tokens2[1]);
+                                ys3[j][ccounter[j]] = (double)Convert.ToInt32(tokens2[2]);
+                                ccounter[j] = ccounter[j] + 1;
+                            }
+                            
+                            /*if (sensordata[j].ContainsKey(currentTT))
+                            {
+                                output += "," + (string)sensordata[j][currentTT];
+                               found = true;
+                            }
+                            else
+                                output += ",,,";
+                             */
+                        }
+                        //if (found)
+                        //merged.WriteLine(output);
+                    }
+                    
+                    for (int j = 0; (j < wc._Sensors.Count); j++)
+                    {
+                        csplines[j] = new CubicSpline[3];
+                        if (xs[j].Length > 10)
+                        {
+                            csplines[j][0] = new CubicSpline(xs[j], ys1[j]);
+                            csplines[j][1] = new CubicSpline(xs[j], ys2[j]);
+                            csplines[j][2] = new CubicSpline(xs[j], ys3[j]);
+                        }
+                    }
+
+                    for (int t = 0; (t < 1000); )
+                    {
+                        long currentTT = ((long)(start_time + t));
+                        string output = currentTT.ToString();
+//                        bool found = false;
+
+                        for (int j = 0; (j < wc._Sensors.Count); j++)
+                        {
+                            //if (sensordata[j].ContainsKey(currentTT))
+                            //{
+
+                            if (csplines[j][0] != null)
+                            {
+                                double xx = csplines[j][0].interpolate(t);
+                                double yy=csplines[j][1].interpolate(t);
+                                double zz=csplines[j][2].interpolate(t);
+                                output += "," + xx +","+yy+","+zz;
+                            }else
+                                output += ",,,";
+
+ //                               found = true;
+                            //}
+     //                       else
+   //                             output += ",,,";
+                        }
+
+                        merged.WriteLine(output);
+                        t += 11;
+                    }
+                    
+
+                    Console.WriteLine("Processing " + currentTS);
+                    currentTS += 1;
+                    for (i = 0; (i < wc._Sensors.Count); i++)
+                    {
+                        if (done[i] == false)
+                        {
+                            sensordata[i] = new Hashtable();
+                            processed[i] = true;
+                            indexes[i] = 0;
+                            //add last read data point
+                            string[] tokens = sensorlines[i].Split(',');
+                            long ts = (long)(Convert.ToDouble(tokens[0]) / 1000.0);
+                            if (currentTS == ts)
+                            {
+                                sensordata[i].Add(indexes[i], tokens[1] + "," + tokens[2] + "," + tokens[3]);
+                                indexes[i] = indexes[i] + 1;
+                            }
+                        }
+
+                    }
+                    AllProcessed = true;
+                   
+                }
+                
+            } while (Alldone == false);
+
+            merged.Close();
+                
+
+            
 
             /*
             Classifier classifier;
@@ -302,6 +521,6 @@ namespace PCTestApplication
              *  * 
              * */
         }
-            
+
     }
 }

@@ -390,12 +390,8 @@ namespace WocketsApplication.DataLogger
 
             //Remove classifier tabs
             this.viewsMenu[1].Enabled = false;
-#if (PocketPC)
-
             this.Text = "Activity Tracking";
-#else
-            this.ShowForms();
-#endif
+
 
 
             #endregion Initialize GUI Components
@@ -747,35 +743,6 @@ namespace WocketsApplication.DataLogger
             }
             if (selectedButtons.Count > 0)
                 startAnnotation();  
-
-
-            /*while (i < selectedButtons.Count)
-            {
-                System.Windows.Forms.Button but = (System.Windows.Forms.Button)selectedButtons[i];
-                if ((but.Name.Split(delimiter)[0]).Equals(button.Name.Split(delimiter)[0]))
-                {
-                    if (but.Equals(button))
-                        same = true;
-                    but.BackColor = this.defaultColor;
-                    selectedButtons.RemoveAt(i);                               
-                    break;
-                }
-                i += 1;
-            }
-             */
-
-
-
-            /*if (!same)
-            {
-                button.BackColor = clickColor;
-                selectedButtons.Add(button);
-                //if (isAnnotating)
-                //{
-                    stopAnnotation();
-                    startAnnotation();
-                //}
-            }*/
         }
 
 
@@ -980,39 +947,6 @@ namespace WocketsApplication.DataLogger
             }
 
         }
-                /*
-                if (this.mainMenu1.MenuItems.Contains(this.menuItem15))
-                {
-                    this.mainMenu1.MenuItems.Remove(this.menuItem15);
-                    this.mainMenu1.MenuItems.Add(this.menuItem2);
-                }
-
-                for (int i = 0; i < viewsMenu.Length; i++)
-                {
-                    if (this.viewsMenu[i].Checked)
-                    {
-                        this.viewsMenu[i].Checked = false;
-                        this.panelArray[i].Visible = false;
-
-                        break;
-                    }
-
-                }
-                ((MenuItem)sender).Checked = true;
-                for (int i = 0; i < viewsMenu.Length; i++)
-                {
-                    if (this.viewsMenu[i].Checked && !this.viewsMenu[i].Text.Equals("Annotate"))
-                    {
-                        this.panelArray[i].Visible = true;
-                        for (int j = 0; j < annotateViewsMenu.Length; j++)
-                        {
-                            annotateViewsMenu[j].Checked = false;
-                            annotatePanelArray[j].Visible = false;
-                        }
-                        break;
-                    }
-                }
-                 */
       
 
         private void annotate_menu_Click(object sender, EventArgs e)
@@ -1038,19 +972,7 @@ namespace WocketsApplication.DataLogger
                 String excp = "";
                 ((MenuItem)sender).Checked = true;
 
-              /*  for (int i = 0; i < viewsMenu.Length; i++)
-                {
-                    if (this.viewsMenu[i].Checked)
-                        this.viewsMenu[i].Checked = false;
-                    if (this.panels[i].Visible)
-                        this.panels[i].Visible = false;
-                }*/
-                /*       try
-                       {
-                           this.viewsMenu[2].Checked = true;
-                       }
-                       catch (Exception ex) { excp = ex.ToString(); }
-                 */
+
                 for (int i = 0; i < annotateViewsMenu.Length; i++)
                 {
                     if (this.annotateViewsMenu[i].Checked)
@@ -1100,13 +1022,11 @@ namespace WocketsApplication.DataLogger
             }
             else
             {
-                //if (control_id == GOOD_TIMER)
-                 //   this.label1.Text = label;
+
                 if (control_id == OVERALL_TIMER)
                 {
                     this.label3.Text = label;
                     this.label1.Text = this.wocketsController.extractedVectors.ToString();
-                    //this.label1.Text = extractedVectors.ToString();
 
                     this.label3b.Text = label;
                     this.label1b.Text = extractedVectors.ToString();
@@ -1213,7 +1133,7 @@ namespace WocketsApplication.DataLogger
             {
                 if (isPlotting)
                     UpdateGraph();
-                    //GraphAccelerometerValues();                
+            
                 Thread.Sleep(50);
             }
         }
@@ -1284,15 +1204,9 @@ namespace WocketsApplication.DataLogger
 
                 FeatureExtractor.Cleanup();
                 
-
-#if (PocketPC)
-
                 Application.Exit();
                 System.Diagnostics.Process.GetCurrentProcess().Kill();
 
-#else
-                Environment.Exit(0);
-#endif
             }             
 
         }
