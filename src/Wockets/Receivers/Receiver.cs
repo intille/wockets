@@ -182,10 +182,7 @@ namespace Wockets.Receivers
         }
         #endregion Access Properties
 
-        public abstract int _Tail
-        {
-            get;
-        }
+
         public abstract bool Initialize();        
         public abstract bool Dispose();
         public abstract void Update();

@@ -113,14 +113,14 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
                     {
                         bytesReceived = 0;
                         //if we will pass the end of buffer receive till the end then receive the rest
-                        if ((tail + availableBytes) > this.buffer._Bytes.Length)
+                        /*if ((tail + availableBytes) > this.buffer._Bytes.Length)
                         {
                             bytesReceived = spp.Read(this.buffer._Bytes, tail, this.buffer._Bytes.Length - tail);
                             availableBytes -= bytesReceived;
                             tail = (tail + bytesReceived) % this.buffer._Bytes.Length;
                         }
                         bytesReceived += spp.Read(this.buffer._Bytes, tail, availableBytes);
-                        tail = (tail + bytesReceived) % this.buffer._Bytes.Length;
+                        tail = (tail + bytesReceived) % this.buffer._Bytes.Length;*/
                     }
 
                     Thread.Sleep(30);

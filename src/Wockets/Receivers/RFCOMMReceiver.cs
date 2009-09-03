@@ -6,7 +6,7 @@ using System.Xml;
 using System.IO;
 using System.Net.Sockets;
 using System.IO.Ports;
-using HousenCS.SerialIO;
+//using HousenCS.SerialIO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Wockets.Utils;
@@ -17,12 +17,14 @@ using Wockets.Utils.network.Bluetooth;
 using Wockets.Utils.network.Bluetooth.Microsoft;
 using Wockets.Utils.network.Bluetooth.Widcomm;
 
+/*
 #if (PocketPC)
 using InTheHand.Net;
 using InTheHand.Net.Sockets;
 using InTheHand.Net.Bluetooth;
 using InTheHand.Net.Ports;
 #endif
+*/
 
 namespace Wockets.Receivers
 {
@@ -61,23 +63,12 @@ namespace Wockets.Receivers
             : base(BUFFER_SIZE)
         {
             this.type = ReceiverTypes.RFCOMM;
-            this._SBuffer = new CircularBuffer(SEND_BUFFER_SIZE);
-        
-
-            //initialize the stack
-
+            this._SBuffer = new CircularBuffer(SEND_BUFFER_SIZE);        
         }
 
    
 
 
-        public override int _Tail
-        {
-            get
-            {
-                return this.bluetoothStream._Tail;
-            }
-        }
         #region Access Properties
         public byte[] _AddressBytes
         {
@@ -118,17 +109,6 @@ namespace Wockets.Receivers
         {
             get
             {
-                /*
-                if (this.bluetoothStream._Status == BluetoothStatus.Disconnected)
-                    throw new Exception("Wocket " + this.address + " disconnected");
-                else if (this.bluetoothStream._Status == BluetoothStatus.Disposed)
-                {
-                    this.bluetoothStream._Status = BluetoothStatus.Reconnecting;
-                    reconnectionThread = new Thread(new ThreadStart(this.Reconnect));
-                    reconnectionThread.Start();                    
-                }
-                */
-
                 return this.isRunning;
             }
             set
@@ -144,9 +124,6 @@ namespace Wockets.Receivers
             {
                 if ((this.bluetoothStream != null) && (this.bluetoothStream._Status == BluetoothStatus.Disconnected))
                 {
-                    //this.bluetoothStream.Close();
-                    //this.bluetoothStream.Dispose();
-               //     disposedStream = this.bluetoothStream;
                     
                     this.bluetoothStream = null;                    
                     this.status = ReceiverStatus.Disconnected;
@@ -190,33 +167,32 @@ namespace Wockets.Receivers
         #endregion Access Properties
 
 
-        [DllImport("coredll.dll", SetLastError = true)]
-        public static extern int CeSetThreadQuantum(IntPtr handle, short msec);
 
         private void Reconnect()
         {
-           // if (disposedStream != null)
-             //   disposedStream.Dispose();
-            //Before attempting to reconnect, wait 10 seconds for the Bluetooth to cleanup the previous stream
+            Random random = new Random();
+            int backoff = random.Next(1000);
+            int reconnections = 0;
             Thread.Sleep(10000);
-            
-            //CeSetThreadQuantum(new IntPtr(reconnectionThread.ManagedThreadId), 20);
-            while ((this.bluetoothStream == null) || (this.bluetoothStream._Status != BluetoothStatus.Connected))//(this._Status == ReceiverStatus.Reconnecting)
+                 
+            //battery drained situation
+            while ((this.bluetoothStream == null) || (this.bluetoothStream._Status != BluetoothStatus.Connected))
             {
-                try
+                Thread.Sleep(backoff);
+                if (this.Initialize())
+                    Wockets.Utils.Logger.Warn(" R " + this._Address);
+                else
                 {
-                    if (this.Initialize())
-                    {
-                        //this.status = ReceiverStatus.Connected;
-                        Wockets.Utils.Logger.Warn(" R " + this._Address);
-                    }
+                    if (reconnections == 5) //after 20 attempts
+                        backoff = 1000 + random.Next(10000);
+                    else if (reconnections == 30)
+                        backoff = 10000 + random.Next(20000);
+                    else if (reconnections == 100)
+                        backoff = 60000 + random.Next(10000);
                 }
-                catch (Exception e)
-                {
-                }
-                Thread.Sleep(500);
+
+                reconnections++;
             }
-            //this._Buffer = this.bluetoothStream._Buffer;
         }
 
         public override bool Initialize()
@@ -260,13 +236,8 @@ namespace Wockets.Receivers
         {
             try
             {
-#if (PocketPC)
-                //this._Running = false;
-                //this._Status = ReceiverStatus.Disconnected;
+
                 this.bluetoothStream._Status = BluetoothStatus.Disconnected;
-                //NetworkStacks._BluetoothStack.Disconnect(this.address_bytes);
-                //this.bluetoothStream._Status = BluetoothStatus.Disposed;
-#endif
                 return true;
             }
             catch (Exception)

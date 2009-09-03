@@ -10,13 +10,11 @@ namespace Wockets.Utils.network.Bluetooth
     {
         protected BluetoothStatus status;
         private static BluetoothStackTypes type;
-        //protected BluetoothStreamList bluetoothStreams;
         protected Hashtable bluetoothStreams;
 
         public BluetoothStack()
         {
             this.status = BluetoothStatus.Down;
-            //this.bluetoothStreams = new BluetoothStreamList();
             this.bluetoothStreams = new Hashtable();
             
         }

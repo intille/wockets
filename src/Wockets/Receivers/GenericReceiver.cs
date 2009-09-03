@@ -42,12 +42,6 @@ namespace Wockets.Receivers
             return 0;
         }
 
-        public override int _Tail
-        {
-            get
-            {
-                return 0;
-            }
-        }
+ 
     }
 }

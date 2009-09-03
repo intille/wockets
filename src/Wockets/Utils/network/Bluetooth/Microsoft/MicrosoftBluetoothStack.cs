@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Collections;
-using InTheHand.Net.Bluetooth;
+using System.Runtime.InteropServices;
 using Wockets.Utils.network.Bluetooth;
 
 namespace Wockets.Utils.network.Bluetooth.Microsoft
@@ -10,16 +10,65 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
     public class MicrosoftBluetoothStack : BluetoothStack
     {
 
+        public enum RadioMode
+        {
+            /// <summary>
+            /// Bluetooth is disabled on the device.
+            /// </summary>
+            PowerOff,
+            /// <summary>
+            /// Bluetooth is connectable but your device cannot be discovered by other devices.
+            /// </summary>
+            Connectable,
+            /// <summary>
+            /// Bluetooth is activated and fully discoverable.
+            /// </summary>
+            Discoverable,
+        }
+
+        [DllImport("BthUtil.dll", SetLastError = true)]
+        public static extern int BthSetMode(RadioMode dwMode);
+
+        [DllImport("BthUtil.dll", SetLastError = true)]
+        public static extern int BthGetMode(out RadioMode dwMode);
+
+        public RadioMode Mode
+        {
+            get
+            {
+
+				RadioMode val;
+				int result = BthGetMode(out val);
+				if(result!=0)
+				{
+					throw new System.ComponentModel.Win32Exception(result, "Error getting BluetoothRadio mode");
+				}
+				return val;
+
+            }
+            set
+            {
+
+				int result = BthSetMode(value);
+				if(result!=0)
+				{
+					throw new System.ComponentModel.Win32Exception(result, "Error setting BluetoothRadio mode");
+				}
+
+            }
+        }
+
+
         public MicrosoftBluetoothStack()
         {
-            BluetoothRadio.PrimaryRadio.Mode = RadioMode.PowerOff;
-            BluetoothRadio.PrimaryRadio.Mode = RadioMode.Connectable;
+            this.Mode= RadioMode.PowerOff;
+            this.Mode = RadioMode.Connectable;
         }
 
        
         public override bool Initialize()
         {
-            BluetoothRadio.PrimaryRadio.Mode = RadioMode.Connectable;
+            this.Mode = RadioMode.Connectable;
             return true;
         }
 
@@ -28,18 +77,10 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
         {
             try
             {
-
-                //cleanup any resources if a previous connection existed
-                //this.Disconnect(address);               
-                //MicrosoftBluetoothStream btStream = new MicrosoftBluetoothStream(buffer,sbuffer, address, pin);
                 lock (this)
                 {
-                    //if (!btStream.Open())
-                      //  btStream = null;
                     return MicrosoftBluetoothStream.Open(buffer,sbuffer, address, pin);
-                }
-                
-               // return btStream;
+                }                               
             }
             catch (Exception e)
             {
@@ -52,9 +93,9 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
             get
             {
                 
-                if (BluetoothRadio.PrimaryRadio.Mode == RadioMode.Connectable)
+                if (this.Mode == RadioMode.Connectable)
                     this.status = BluetoothStatus.Up;
-                else if (BluetoothRadio.PrimaryRadio.Mode == RadioMode.PowerOff)
+                else if (this.Mode == RadioMode.PowerOff)
                     this.status = BluetoothStatus.Down;
                 else
                     this.status = BluetoothStatus.Error;
@@ -68,7 +109,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
         }
         public override void Dispose()
         {
-            BluetoothRadio.PrimaryRadio.Mode = RadioMode.PowerOff;
+            this.Mode = RadioMode.PowerOff;
         }
 
 

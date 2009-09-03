@@ -4,7 +4,8 @@ using System.Text;
 using System.Xml;
 using System.Threading;
 using Wockets.Utils;
-using HousenCS.SerialIO;
+using System.IO.Ports;
+//using HousenCS.SerialIO;
 
 
 namespace Wockets.Receivers
@@ -25,57 +26,46 @@ namespace Wockets.Receivers
 
         //Standard COM Specific Objects
         private int portNumber;
-        private SerialPortController spc;
+        private SerialPort spc;
 
         public StandardCOMReceiver()
             : base(BUFFER_SIZE)
         {
             this.type = ReceiverTypes.StandardCOM;
         }
-        /*
-        public StandardCOMReceiver(int portNumber):base(BUFFER_SIZE,portNumber,BAUD_RATE,USE_PARITY,USE_STOP_BIT,MAXIMUM_SAMPLING_RATE)
-        {
-            this.portNumber = portNumber;
-        }
-               */
 
-        public override int _Tail
-        {
-            get
-            {
-                return 0;
-            }
-        }
+
+ 
 
 
         public override bool Initialize()
         {
             bool isValid = true;
 
-            SerialPortController spc = new SerialPortController(SerialPortController.USE_THREADS,false,BUFFER_SIZE);
+            SerialPort spc = new SerialPort();
             Thread.Sleep(1000);
-            spc.SetBaudRate(BAUD_RATE);
-            if (spc.SetPort(this.portNumber))
-            {
-                if (this._Parity)
-                    spc.SetParity(1);
-                else
-                    spc.SetParity(0);
-                if (this._StopBit)
-                    spc.SetStopBits(1);
-                else
-                    spc.SetStopBits(0);
-                try
-                {
-                    spc.PortOpen();
-                }
-                catch (Exception)
-                {
-                    isValid = false;
-                }
-            }
+            spc.BaudRate=BAUD_RATE;
+            spc.PortName = "COM" + this.portNumber;
+            if (this._Parity)
+                spc.Parity = Parity.Odd;
             else
+                spc.Parity = Parity.None;
+
+            if (this._StopBit)
+                spc.StopBits = StopBits.One;
+            else
+                spc.StopBits = StopBits.None;
+
+            try
+            {
+                spc.Open();
+            }
+            catch (Exception)
+            {
                 isValid = false;
+            }
+
+        
 
             if (isValid)
             {
@@ -85,7 +75,7 @@ namespace Wockets.Receivers
                 // Loop for 1 second and wait for a DD 
                 while ((Environment.TickCount - startTime) < 1000)
                 {
-                    int j = spc.FillBytesBuffer(someData);
+                    int j = spc.Read(someData,0,someData.Length);
                     //Console.WriteLine ("Data: " + someData.Length);
                     if (j > 1)
                         for (int i = 0; i < j - 1; i++)
@@ -114,7 +104,7 @@ namespace Wockets.Receivers
         {
             try
             {
-                spc.PortClose();
+                spc.Close();
                 //this._Running = false;
                 this._Status = ReceiverStatus.Disposed;
                 return true;

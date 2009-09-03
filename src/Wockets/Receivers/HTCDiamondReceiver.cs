@@ -208,13 +208,7 @@ namespace Wockets.Receivers
             this.sampleTimeSpace = 1000 / MAXIMUM_SAMPLING_RATE;
         }
 
-        public override int _Tail
-        {
-            get
-            {
-                return 0;
-            }
-        }
+
 
 
  
