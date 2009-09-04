@@ -11,6 +11,18 @@ namespace Wockets.Applications.Games.Escape
 {
     public class Escape
     {
+        public Escape()
+        {
+
+        }
+
+#if (PocketPC)
+        // public static string NEEDED_FILES_PATH = "\\Program Files\\MITesPhoneInstaller\\NeededFiles\\"; //fullpath required for pocketpc
+        public static string NEEDED_FILES_PATH = "\\Program Files\\wockets\\NeededFiles\\";
+#else 
+        public static string NEEDED_FILES_PATH = "..\\NeededFiles\\"; //relative to bin
+#endif
+
         public string Move;
         public static Player User = new Player();
         public string _Move
@@ -30,7 +42,7 @@ namespace Wockets.Applications.Games.Escape
                 #region Variables.
 
                 Actions Action = new Actions();
-                Sounds Sound = new Sounds();
+                Sounds Sound = new Sounds(NEEDED_FILES_PATH);
 
                 int WrongCount = 0, Count = 0, RandomNumber = 0;
                 bool GameOver = false;

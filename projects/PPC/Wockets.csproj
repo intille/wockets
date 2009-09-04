@@ -44,6 +44,7 @@
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="Microsoft.WindowsMobile, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\bin\bin\NeededFiles\dlls\Microsoft.WindowsMobile.dll</HintPath>
@@ -52,12 +53,24 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\bin\bin\NeededFiles\dlls\Microsoft.WindowsMobile.Status.dll</HintPath>
     </Reference>
-    <Reference Include="mscorlib" />
-    <Reference Include="System" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
+    <Reference Include="mscorlib">
+      <HintPath>..\..\..\..\..\..\..\..\..\..\Program Files (x86)\Microsoft Visual Studio 8\SmartDevices\SDK\CompactFramework\2.0\v2.0\WindowsCE\mscorlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System">
+      <HintPath>..\..\..\..\..\..\..\..\..\..\Program Files (x86)\Microsoft Visual Studio 8\SmartDevices\SDK\CompactFramework\2.0\v2.0\WindowsCE\System.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Data">
+      <HintPath>..\..\..\..\..\..\..\..\..\..\Program Files (x86)\Microsoft Visual Studio 8\SmartDevices\SDK\CompactFramework\2.0\v2.0\WindowsCE\System.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Drawing">
+      <HintPath>..\..\..\..\..\..\..\..\..\..\Program Files (x86)\Microsoft Visual Studio 8\SmartDevices\SDK\CompactFramework\2.0\v2.0\WindowsCE\System.Drawing.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Windows.Forms">
+      <HintPath>..\..\..\..\..\..\..\..\..\..\Program Files (x86)\Microsoft Visual Studio 8\SmartDevices\SDK\CompactFramework\2.0\v2.0\WindowsCE\System.Windows.Forms.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml">
+      <HintPath>..\..\..\..\..\..\..\..\..\..\Program Files (x86)\Microsoft Visual Studio 8\SmartDevices\SDK\CompactFramework\2.0\v2.0\WindowsCE\System.Xml.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\src\Wockets\Data\Accelerometers\AccelerationData.cs">
@@ -351,24 +364,14 @@
     <Compile Include="..\..\src\Wockets\Utils\CircularBuffer.cs">
       <Link>Utils\CircularBuffer.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Applications\Games\Escape\Actions.cs">
-      <Link>Applications\Games\Escape\Actions.cs</Link>
+    <Compile Include="..\..\src\Wockets\Utils\network\Bluetooth\Microsoft\MicrosoftBluetoothEndpoint.cs">
+      <Link>Utils\network\Bluetooth\Microsoft\MicrosoftBluetoothEndpoint.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Applications\Games\Escape\Audio.cs">
-      <Link>Applications\Games\Escape\Audio.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Applications\Games\Escape\Escape.cs">
-      <Link>Applications\Games\Escape\Escape.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Applications\Games\Escape\Player.cs">
-      <Link>Applications\Games\Escape\Player.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Applications\Games\Escape\Sounds.cs">
-      <Link>Applications\Games\Escape\Sounds.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Utils\network\Bluetooth\Microsoft\MicrosoftBluetoothEndpoint.cs" >
-      <Link>Utils\network\Bluetooth\Microsoft\MicrosoftBluetoothEndpoint.cs</Link> 
-    </Compile>
+    <Compile Include="Applications\Games\Escape\Actions.cs" />
+    <Compile Include="Applications\Games\Escape\Audio.cs" />
+    <Compile Include="Applications\Games\Escape\Escape.cs" />
+    <Compile Include="Applications\Games\Escape\Player.cs" />
+    <Compile Include="Applications\Games\Escape\Sounds.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="WocketsWeka.csproj">
