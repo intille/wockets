@@ -48,13 +48,17 @@
     <Reference Include="mscorlib" />
     <Reference Include="OpenNETCF.WindowsCE, Version=2.0.0.0, Culture=neutral, PublicKeyToken=e60dbea84bb431b7, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\bin\PPC\OpenNETCF.WindowsCE.dll</HintPath>
+      <HintPath>..\..\bin\bin\NeededFiles\dlls\OpenNETCF.WindowsCE.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="Wockets, Version=1.0.3531.26879, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>obj\Debug\Wockets.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\src\WocketsApplication\Constants.cs">
@@ -214,10 +218,6 @@
     <ProjectReference Include="WocketsWeka.csproj">
       <Project>{637F0352-A172-4CD3-8C6B-C318CC92C14B}</Project>
       <Name>WocketsWeka</Name>
-    </ProjectReference>
-    <ProjectReference Include="Wockets.csproj">
-      <Project>{5D98635F-251B-464F-9132-AF594E8D482B}</Project>
-      <Name>Wockets</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

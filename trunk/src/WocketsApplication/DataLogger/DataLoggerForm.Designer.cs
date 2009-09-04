@@ -114,6 +114,9 @@ namespace WocketsApplication.DataLogger
             this.menuItem20 = new System.Windows.Forms.MenuItem();
             this.menuItem21 = new System.Windows.Forms.MenuItem();
             this.menuItem22 = new System.Windows.Forms.MenuItem();
+            this.menuItem23 = new System.Windows.Forms.MenuItem();
+            this.menuItem24 = new System.Windows.Forms.MenuItem();
+            this.menuItem25 = new System.Windows.Forms.MenuItem();
             
 
             this.label3 = new System.Windows.Forms.Label();
@@ -270,6 +273,24 @@ namespace WocketsApplication.DataLogger
             this.menuItem12.Enabled = true;
             this.menuItem12.Click += new System.EventHandler(this.plotting_Click);            
             this.menuItem12.Checked = true;
+
+            this.menuItem10.MenuItems.Add(this.menuItem23);
+            this.menuItem23.Text = "Train";
+            this.menuItem23.Enabled = true;
+            this.menuItem23.Click += new EventHandler(this.training_Click);
+            this.menuItem23.Checked = false;
+
+            this.menuItem10.MenuItems.Add(this.menuItem24);
+            this.menuItem24.Text = "Classify";
+            this.menuItem24.Enabled = true;
+            this.menuItem24.Click += new System.EventHandler(this.classifying_Click);
+            this.menuItem24.Checked = false;
+
+            this.menuItem10.MenuItems.Add(this.menuItem25);
+            this.menuItem25.Text = "Play Escape";
+            this.menuItem25.Enabled = true;
+            this.menuItem25.Click += new System.EventHandler(this.gaming_Click);
+            this.menuItem25.Checked = false;
 
             //Minimize
             this.menuItem1.MenuItems.Add(this.menuItem13);
@@ -629,16 +650,30 @@ namespace WocketsApplication.DataLogger
             int leftTextX = Constants.WIDGET_SPACING+32;
             int rightTextX = ((Constants.WIDGET_SPACING+32) * 2) + textBoxWidth;
             int currentTextX = Constants.WIDGET_SPACING+32;
-            
 
-            this.button1.Enabled = false;
-            this.button1.Visible = false;
-            this.button1.Width = textBoxWidth;
-            this.button1.Height = textBoxHeight;
-            Font textFont = this.button1.Font =
-                GUIHelper.CalculateBestFitFont(this.button1.Parent.CreateGraphics(), Constants.MIN_FONT,
-                   Constants.MAX_FONT, this.button1.Size, "textBoxAC11", this.button1.Font, (float)0.9, (float)0.9);
-
+            Font textFont;
+            if (isPocketPC)
+            {
+                this.button1.Enabled = false;
+                this.button1.Visible = false;
+                this.button1.Width = textBoxWidth;
+                this.button1.Height = textBoxHeight;
+                textFont = this.button1.Font =
+                    GUIHelper.CalculateBestFitFont(this.button1.Parent.CreateGraphics(), Constants.MIN_FONT,
+                       Constants.MAX_FONT, this.button1.Size, "textBoxAC11", this.button1.Font, (float)0.9, (float)0.9);
+            }
+            else
+            {
+                this.label111.Enabled = false;
+                this.label111.Visible = false;
+                this.label111.Width = textBoxWidth;
+                this.label111.Height = textBoxHeight;
+                System.Windows.Forms.Form form = new System.Windows.Forms.Form();
+                form.Size = label111.Size;
+                textFont = this.label111.Font =
+                    GUIHelper.CalculateBestFitFont(form.CreateGraphics(), Constants.MIN_FONT,
+                       Constants.MAX_FONT, this.label111.Size, "textBoxAC11", this.label111.Font, (float)0.9, (float)0.9);
+            }
             connectedWocketImage = (Image)new Bitmap(Constants.NETWORK_STATUS_DIRECTORY + "connected.gif");
             disconnectedWocketImage = (Image)new Bitmap(Constants.NETWORK_STATUS_DIRECTORY + "disconnected.gif");
 
@@ -696,20 +731,40 @@ namespace WocketsApplication.DataLogger
             for (int i = 0; (i < this.annotatedSession.OverlappingActivityLists.Count); i++)
             {
                 Activity[] acts = this.annotatedSession.OverlappingActivityLists[i].ToArray();
-                System.Windows.Forms.Button[] buttons = new System.Windows.Forms.Button[acts.Length];
-
-                for (int j = 0; j < buttons.Length; j++)
+                if (isPocketPC)
                 {
-                    buttons[j] = new System.Windows.Forms.Button();
-                    MakeButtonMultiline(buttons[j]);
-                    buttons[j].Name = this.annotatedSession.OverlappingActivityLists[i]._Name + "_" + acts[j]._Name;
-                    buttons[j].Text = truncateText(acts[j]._Name);
-                    buttons[j].Click += new EventHandler(this.activityButton_Click);
-              //      buttons[j].Font = new System.Drawing.Font("Microsoft Sans Serif", fontSize, System.Drawing.FontStyle.Regular);
-                    buttons[j].BackColor = this.defaultColor;
-                    numberOfButtons += 1;
+                    System.Windows.Forms.Button[] buttons = new System.Windows.Forms.Button[acts.Length];
+
+                    for (int j = 0; j < buttons.Length; j++)
+                    {
+                        buttons[j] = new System.Windows.Forms.Button();
+                        MakeButtonMultiline(buttons[j]);
+                        buttons[j].Name = this.annotatedSession.OverlappingActivityLists[i]._Name + "_" + acts[j]._Name;
+                        buttons[j].Text = truncateText(acts[j]._Name);
+                        buttons[j].Click += new EventHandler(this.activityButton_Click);
+                        //      buttons[j].Font = new System.Drawing.Font("Microsoft Sans Serif", fontSize, System.Drawing.FontStyle.Regular);
+                        buttons[j].BackColor = this.defaultColor;
+                        numberOfButtons += 1;
+                    }
+                    activityButtons.Add(buttons);
                 }
-                activityButtons.Add(buttons);
+                else
+                {
+                    System.Windows.Forms.Label[] labels = new System.Windows.Forms.Label[acts.Length];
+                    for (int j = 0; j < labels.Length; j++)
+                    {
+                        labels[j] = new System.Windows.Forms.Label();
+                        MakeLabelMultiline(labels[j]);
+                        labels[j].Name = this.annotatedSession.OverlappingActivityLists[i]._Name + "_" + acts[j]._Name;
+                        labels[j].Text = truncateText(acts[j]._Name);
+                        labels[j].Click += new EventHandler(this.activityButton_Click);
+                        //      labels[j].Font = new System.Drawing.Font("Microsoft Sans Serif", fontSize, System.Drawing.FontStyle.Regular);
+                        labels[j].BackColor = this.defaultColor;
+                        numberOfButtons += 1;
+                    }
+                    activityButtons.Add(labels);
+                }
+
             }
 
             if (numberOfButtons > 12)
@@ -740,7 +795,9 @@ namespace WocketsApplication.DataLogger
                 fontSize = 14F;
             }
 
-            for (int i = 0; i < activityButtons.Count; i++)
+            if(isPocketPC)
+            {
+                for (int i = 0; i < activityButtons.Count; i++)
             {
                 System.Windows.Forms.Button[] activityList = (System.Windows.Forms.Button[])activityButtons[i];
                 int buttonsOnRow = 0;
@@ -771,10 +828,45 @@ namespace WocketsApplication.DataLogger
                 act_button_x = 0;
                 act_button_y += act_button_height + marginHeight;
             }
+            }
+            else
+            {
+                for (int i = 0; i < activityButtons.Count; i++)
+                {
+                    System.Windows.Forms.Label[] activityList = (System.Windows.Forms.Label[])activityButtons[i];
+                    int buttonsOnRow = 0;
+                    for (int j = 0; j < activityList.Length; j++)
+                    {
+                        /*if (j == 0)
+                        {
+                            this.selectedButtons.Add(activityList[j]);
+                            activityList[j].BackColor = clickColor;
+                        }*/
+                        activityList[j].Visible = true;
+                        activityList[j].Width = act_button_width;
+                        activityList[j].Height = act_button_height;
+                        activityList[j].Location = new System.Drawing.Point(act_button_x, act_button_y);
+                        activityList[j].Font = new System.Drawing.Font("Microsoft Sans Serif", fontSize, System.Drawing.FontStyle.Regular);
+                        ((Panel)this.panels[BUTTON_ANNOTATION_PANEL]).Controls.Add(activityList[j]);
+                        buttonsOnRow += 1;
+
+                        if (buttonsOnRow == max_buttons_per_row)
+                        {
+                            act_button_x = 0;
+                            act_button_y += act_button_height;
+                            buttonsOnRow = 0;
+                        }
+                        else
+                            act_button_x += act_button_width;
+                    }
+                    act_button_x = 0;
+                    act_button_y += act_button_height + marginHeight;
+                }
+            }
+
 
 
             #endregion graphical Annotation
-
 
 
             //Initialize Buttons
@@ -789,36 +881,71 @@ namespace WocketsApplication.DataLogger
             int button_id = 0;
 
 
-
-            for (int i=0;(i<this.annotatedSession.OverlappingActivityLists.Count);i++)
+            if (isPocketPC)
             {
-                
-                ActivityList category=this.annotatedSession.OverlappingActivityLists[0];
-                System.Windows.Forms.Button button = new System.Windows.Forms.Button();
-                System.Windows.Forms.ComboBox combo = new System.Windows.Forms.ComboBox();
-                button.Location = new System.Drawing.Point(button_x, button_y + button_id * delta_y);
-                combo.Location = new System.Drawing.Point(button_x, button_y + 37 + button_id * delta_y);
-                button.Name = button_id.ToString();
-                combo.Name = button_id.ToString();
-                button.Size = new System.Drawing.Size(button_width, button_height);
-                combo.Size = new System.Drawing.Size(button_width, button_height);
-                button.Text = category[0]._Name;
-                foreach (Activity cat in category)
-                    combo.Items.Add(cat._Name);
-                combo.SelectedItem = combo.Items[0];
-                this.categoryDrops.Add(combo);
-                ((Panel)this.panels[ANNOTATE_LIST_PANEL]).Controls.Add(combo);
-
-                //check the longest label for this button
-                for (int j=0;(j<category.Count);j++)
+                for (int i = 0; (i < this.annotatedSession.OverlappingActivityLists.Count); i++)
                 {
-                    string newlabel = category[j]._Name;//label.Name;
 
-                    if (newlabel.Length > longest_label.Length)
-                        longest_label = newlabel;
+                    ActivityList category = this.annotatedSession.OverlappingActivityLists[0];
+                    System.Windows.Forms.Button button = new System.Windows.Forms.Button();
+                    System.Windows.Forms.ComboBox combo = new System.Windows.Forms.ComboBox();
+                    button.Location = new System.Drawing.Point(button_x, button_y + button_id * delta_y);
+                    combo.Location = new System.Drawing.Point(button_x, button_y + 37 + button_id * delta_y);
+                    button.Name = button_id.ToString();
+                    combo.Name = button_id.ToString();
+                    button.Size = new System.Drawing.Size(button_width, button_height);
+                    combo.Size = new System.Drawing.Size(button_width, button_height);
+                    button.Text = category[0]._Name;
+                    foreach (Activity cat in category)
+                        combo.Items.Add(cat._Name);
+                    combo.SelectedItem = combo.Items[0];
+                    this.categoryDrops.Add(combo);
+                    ((Panel)this.panels[ANNOTATE_LIST_PANEL]).Controls.Add(combo);
+
+                    //check the longest label for this button
+                    for (int j = 0; (j < category.Count); j++)
+                    {
+                        string newlabel = category[j]._Name;//label.Name;
+
+                        if (newlabel.Length > longest_label.Length)
+                            longest_label = newlabel;
+                    }
+                    this.buttonIndex.Add(0);
+                    button_id++;
                 }
-                this.buttonIndex.Add(0);
-                button_id++;
+            }
+            else
+            {
+                for (int i = 0; (i < this.annotatedSession.OverlappingActivityLists.Count); i++)
+                {
+
+                    ActivityList category = this.annotatedSession.OverlappingActivityLists[0];
+                    System.Windows.Forms.Label label = new System.Windows.Forms.Label();
+                    System.Windows.Forms.ComboBox combo = new System.Windows.Forms.ComboBox();
+                    label.Location = new System.Drawing.Point(button_x, button_y + button_id * delta_y);
+                    combo.Location = new System.Drawing.Point(button_x, button_y + 37 + button_id * delta_y);
+                    label.Name = button_id.ToString();
+                    combo.Name = button_id.ToString();
+                    label.Size = new System.Drawing.Size(button_width, button_height);
+                    combo.Size = new System.Drawing.Size(button_width, button_height);
+                    label.Text = category[0]._Name;
+                    foreach (Activity cat in category)
+                        combo.Items.Add(cat._Name);
+                    combo.SelectedItem = combo.Items[0];
+                    this.categoryDrops.Add(combo);
+                    ((Panel)this.panels[ANNOTATE_LIST_PANEL]).Controls.Add(combo);
+
+                    //check the longest label for this button
+                    for (int j = 0; (j < category.Count); j++)
+                    {
+                        string newlabel = category[j]._Name;//label.Name;
+
+                        if (newlabel.Length > longest_label.Length)
+                            longest_label = newlabel;
+                    }
+                    this.buttonIndex.Add(0);
+                    button_id++;
+                }
             }
 
             if (longest_label.Length < 5)
@@ -867,6 +994,13 @@ namespace WocketsApplication.DataLogger
         private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
 
         public static void MakeButtonMultiline(Button b)
+        {
+            IntPtr hwnd = b.Handle;
+            int currentStyle = GetWindowLong(hwnd, GWL_STYLE);
+            int newStyle = SetWindowLong(hwnd, GWL_STYLE, currentStyle | BS_MULTILINE);
+        }
+
+        public static void MakeLabelMultiline(Label b)
         {
             IntPtr hwnd = b.Handle;
             int currentStyle = GetWindowLong(hwnd, GWL_STYLE);
@@ -930,17 +1064,37 @@ namespace WocketsApplication.DataLogger
             this.mainMenu1 = new System.Windows.Forms.MainMenu();
             this.readDataTimer = new System.Windows.Forms.Timer();
             this.qualityTimer = new System.Windows.Forms.Timer();
-            this.button1 = new System.Windows.Forms.Button();
+            if (isPocketPC)
+                this.button1 = new System.Windows.Forms.Button();
+            else
+                this.label111 = new System.Windows.Forms.Label();
             this.SuspendLayout();
 
-            // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(17, 80);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(72, 20);
-            this.button1.TabIndex = 0;
-            this.button1.Text = "button1";
+
+            if (isPocketPC)
+            {            
+                // 
+                // button1
+                // 
+                this.button1.Location = new System.Drawing.Point(17, 80);
+                this.button1.Name = "button1";
+                this.button1.Size = new System.Drawing.Size(72, 20);
+                this.button1.TabIndex = 0;
+                this.button1.Text = "button1";
+            }
+            else
+            {
+                // 
+                // label111
+                // 
+                this.label111.Location = new System.Drawing.Point(17, 80);
+                this.label111.Name = "label111";
+                this.label111.Size = new System.Drawing.Size(72, 20);
+                this.label111.TabIndex = 0;
+                this.label111.Text = "label111";
+            }
+
+
             // 
             // WocketsForm
             // 
@@ -983,6 +1137,9 @@ namespace WocketsApplication.DataLogger
         private System.Windows.Forms.MenuItem menuItem20;
         private System.Windows.Forms.MenuItem menuItem21;
         private System.Windows.Forms.MenuItem menuItem22;
+        private System.Windows.Forms.MenuItem menuItem23;
+        private System.Windows.Forms.MenuItem menuItem24;
+        private System.Windows.Forms.MenuItem menuItem25;
         private System.Windows.Forms.Timer readDataTimer;
         private System.Windows.Forms.Label label3, label3b;
         private System.Windows.Forms.Label label2, label2b;
@@ -993,8 +1150,11 @@ namespace WocketsApplication.DataLogger
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.TextBox CommandBox;
         private System.Windows.Forms.Timer qualityTimer;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Label label111;
 
+#if (PocketPC)
+        private System.Windows.Forms.Button button1;
+#endif
 
         private Color defaultColor, panelColor, clickColor;
 
