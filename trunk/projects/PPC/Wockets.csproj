@@ -1,4 +1,4 @@
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -46,11 +46,11 @@
   <ItemGroup>
     <Reference Include="Microsoft.WindowsMobile, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\bin\NeededFiles\dlls\Microsoft.WindowsMobile.dll</HintPath>
+      <HintPath>..\..\bin\bin\NeededFiles\dlls\Microsoft.WindowsMobile.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.WindowsMobile.Status, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\bin\NeededFiles\dlls\Microsoft.WindowsMobile.Status.dll</HintPath>
+      <HintPath>..\..\bin\bin\NeededFiles\dlls\Microsoft.WindowsMobile.Status.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="System" />
@@ -350,6 +350,21 @@
     </Compile>
     <Compile Include="..\..\src\Wockets\Utils\CircularBuffer.cs">
       <Link>Utils\CircularBuffer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Applications\Games\Escape\Actions.cs">
+      <Link>Applications\Games\Escape\Actions.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Applications\Games\Escape\Audio.cs">
+      <Link>Applications\Games\Escape\Audio.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Applications\Games\Escape\Escape.cs">
+      <Link>Applications\Games\Escape\Escape.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Applications\Games\Escape\Player.cs">
+      <Link>Applications\Games\Escape\Player.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Applications\Games\Escape\Sounds.cs">
+      <Link>Applications\Games\Escape\Sounds.cs</Link>
     </Compile>
     <Compile Include="..\..\src\Wockets\Utils\network\Bluetooth\Microsoft\MicrosoftBluetoothEndpoint.cs" >
       <Link>Utils\network\Bluetooth\Microsoft\MicrosoftBluetoothEndpoint.cs</Link> 
