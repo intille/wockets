@@ -7,14 +7,21 @@ namespace Wockets.Applications.Games.Escape
 {
     public class Sounds
     {
+        static string NEEDED_FILES_PATH;
+
+        public Sounds(string Path)
+        {
+            NEEDED_FILES_PATH = Path;
+        }
+
         // Instantiate Sounds
         //static string link = "Program Files\\Game v1\\";
-        static string link = "GameSounds\\";
-        static string link2 = "GameSounds\\Actions\\";
-        static string link3 = "GameSounds\\Commands\\";
-        static string link4 = "GameSounds\\Connectors\\";
-        static string link5 = "GameSounds\\Letters\\";
-        static string link6 = "GameSounds\\Numbers\\";
+        static string link = "\\Program Files\\wockets\\NeededFiles\\sounds\\GameSounds\\";
+        static string link2 = NEEDED_FILES_PATH + "sounds\\GameSounds\\Actions\\";
+        static string link3 = NEEDED_FILES_PATH + "sounds\\GameSounds\\Commands\\";
+        static string link4 = NEEDED_FILES_PATH + "sounds\\GameSounds\\Connectors\\";
+        static string link5 = NEEDED_FILES_PATH + "sounds\\GameSounds\\Letters\\";
+        static string link6 = NEEDED_FILES_PATH + "sounds\\GameSounds\\Numbers\\";
 
         #region Actions.
         public Audio JumpingJacks = new Audio(link2 + "JumpingJacks.wav");
