@@ -19,7 +19,7 @@ using Wockets.Data.Classifiers.Utils;
 using Wockets.Exceptions;
 using WocketsWeka;
 using weka.classifiers;
-//using Wockets.Applications.Games.Escape;
+using Wockets.Applications.Games.Escape;
 using weka;
 using weka.core;
 
@@ -56,7 +56,7 @@ namespace Wockets
         private Classifier classifier;
         private string storageDirectory;
         private Session annotatedSession;
-        //public Escape escape = new Escape();
+        public Escape escape = new Escape();
         /// <summary>
         /// Stores the current record that is being annotated
         /// </summary>
@@ -641,7 +641,7 @@ namespace Wockets
                                                 newinstance.setValue(this._instances.attribute(j), FeatureExtractor.Features[j]);
                                             double predicted = classifier.classifyInstance(newinstance);
                                             string predicted_activity = newinstance.dataset().classAttribute().value_Renamed((int)predicted);
-                                            //this.escape._Move = predicted_activity;
+                                            this.escape._Move = predicted_activity;
                                         }
                                     }
 

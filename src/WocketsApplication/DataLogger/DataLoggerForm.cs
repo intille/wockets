@@ -213,8 +213,13 @@ namespace WocketsApplication.DataLogger
 
         #endregion Declarations of Objects
 
+        public bool isPocketPC = false;
+
         public DataLoggerForm(string storageDirectory, WocketsController wocketsController, Session annotatedSession, DTConfiguration classifierConfiguration, int mode)
         {
+            if (WocketsApplication.Utils.Platform.NativeMethods.GetPlatformType() == "PocketPC")
+                isPocketPC = true;
+
             Logger.InitLogger(storageDirectory);
             this.LastTime = this.FirstTime = DateTime.Now.Ticks;
             if (mode == 1)
@@ -655,14 +660,35 @@ namespace WocketsApplication.DataLogger
                 int leftTextX = Constants.WIDGET_SPACING + 32;
                 int rightTextX = ((Constants.WIDGET_SPACING + 32) * 2) + textBoxWidth;
                 int currentTextX = Constants.WIDGET_SPACING + 32;
-                this.button1.Width = textBoxWidth;
-                this.button1.Height = textBoxHeight;
+                if (isPocketPC)
+                {
+                    this.button1.Width = textBoxWidth;
+                    this.button1.Height = textBoxHeight;
+                }
+                else
+                {
+                    this.label1.Width = textBoxWidth;
+                    this.label1.Height = textBoxHeight;
+                }
 
                 Font textFont;
 
-                textFont = this.button1.Font =
-                GUIHelper.CalculateBestFitFont(this.button1.Parent.CreateGraphics(), Constants.MIN_FONT,
-                   Constants.MAX_FONT, this.button1.Size, "textBoxAC11", this.button1.Font, (float)0.9, (float)0.9);
+                if (isPocketPC)
+                {
+                    textFont = this.button1.Font =
+                        GUIHelper.CalculateBestFitFont(this.button1.Parent.CreateGraphics(), Constants.MIN_FONT,
+                        Constants.MAX_FONT, this.button1.Size, "textBoxAC11", this.button1.Font, (float)0.9, (float)0.9);
+                }
+                else
+                {
+                    System.Windows.Forms.Form form = new System.Windows.Forms.Form();
+                    form.Size = label1.Size;
+                    textFont = this.label1.Font =
+                        GUIHelper.CalculateBestFitFont(form.CreateGraphics(), Constants.MIN_FONT,
+                        Constants.MAX_FONT, this.label1.Size, "textBoxAC11", this.label1.Font, (float)0.9, (float)0.9);
+                
+                }
+                
                 System.Windows.Forms.Label t;
 
                 for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
@@ -791,8 +817,10 @@ namespace WocketsApplication.DataLogger
             this.currentRecord = null;
         }
 
+        /*
         private void startStopButton_Click(object sender, EventArgs e)
         {
+            
             lock (WocketsController.MyLock)
             {
                 MenuItem item = (MenuItem)sender;
@@ -827,7 +855,88 @@ namespace WocketsApplication.DataLogger
             }
         }
 
+        */
 
+        private void startStopButton_Click(object sender, EventArgs e)
+        {
+            lock (WocketsController.MyLock)
+            {
+                MenuItem item = (MenuItem)sender;
+                //button state is now start
+                if (item.Text.Equals("Start"))
+                {
+                    // this.startSound.Play();
+                    //Generator generator = new Generator();
+                    //generator.InitializeSound(this.Handle.ToInt32());
+                    //generator.CreateBuffer();
+
+                    item.Text = "Stop";
+                    this.overallTimer.reset();
+                    this.overallTimer.start();
+                    this.goodTimer.reset();
+                    this.goodTimer.start();
+
+                    //store the current state of the categories
+                    this.currentRecord = new Annotation();
+                    this.currentRecord._StartDate = DateTime.Now.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ssK");
+                    this.currentRecord._StartHour = DateTime.Now.Hour;
+                    this.currentRecord._StartMinute = DateTime.Now.Minute;
+                    this.currentRecord._StartSecond = DateTime.Now.Second;
+                    TimeSpan ts = (DateTime.Now - new DateTime(1970, 1, 1, 0, 0, 0));
+                    this.currentRecord._StartUnix = ts.TotalSeconds;
+
+                    //check all buttons values, store them and disable them
+                    foreach (ComboBox combo in categoryDrops)
+                    {
+                        int button_id = Convert.ToInt32(combo.Name);
+                        ActivityList category = (ActivityList)this.annotatedSession.OverlappingActivityLists[button_id];
+                        string current_label = (string)combo.SelectedItem;
+                        this.currentRecord.Activities.Add(new Activity(current_label, category._Name));
+                        combo.Enabled = false;
+                    }
+                    this.wocketsController._currentRecord = this.currentRecord;
+                }
+
+                else if (item.Text.Equals("Stop"))
+                {
+                    // this.stopSound.Play();
+                    item.Text = "Start";
+                    this.overallTimer.reset();
+                    this.goodTimer.reset();
+                    extractedVectors = 0;
+
+                    //store the current state of the categories
+                    this.currentRecord._EndDate = DateTime.Now.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ssK");
+                    this.currentRecord._EndHour = DateTime.Now.Hour;
+                    this.currentRecord._EndMinute = DateTime.Now.Minute;
+                    this.currentRecord._EndSecond = DateTime.Now.Second;
+                    TimeSpan ts = (DateTime.Now - new DateTime(1970, 1, 1, 0, 0, 0));
+                    this.currentRecord._EndUnix = ts.TotalSeconds;
+                    this.annotatedSession.Annotations.Add(this.currentRecord);
+
+                    //each time an activity is stopped, rewrite the file on disk, need to backup file to avoid corruption
+                    //this.annotation.ToXMLFile();
+                    //this.annotation.ToCSVFile();
+                    TextWriter tw = new StreamWriter(this.storageDirectory + "\\AnnotationIntervals.xml");
+                    // write a line of text to the file
+                    tw.WriteLine(this.annotatedSession.ToXML());
+                    // close the stream
+                    tw.Close();
+
+                    ComboBox combo = (ComboBox)this.categoryDrops[0];
+                    this.categoryDrops.Clear();
+                    combo.SelectedItem = combo.Items[0];
+                    this.categoryDrops.Add(combo);
+                    combo.Enabled = true;
+                    combo.Visible = true;
+                    combo.Focus();
+
+                    this.currentRecord = null;
+                    this.wocketsController._currentRecord = this.currentRecord;
+                }
+                this.wocketsController._annotatedSession = this.annotatedSession;
+            }
+        }
         private void minimize_Click(object sender, EventArgs e)
         {
             ShowWindow(this.Handle, SW_MINIMIZED);
@@ -898,12 +1007,12 @@ namespace WocketsApplication.DataLogger
 
         private void gaming_Click(object sender, EventArgs e)
         {
-            /*MenuItem mi = (MenuItem)sender;
+            MenuItem mi = (MenuItem)sender;
             mi.Checked = !(mi.Checked);
             this.isGaming = mi.Checked;
             Thread aGamingThread = new Thread(new ThreadStart(this.wocketsController.escape.PlayExergame));
             this.wocketsController.escape.isGaming = this.isGaming;
-            aGamingThread.Start();*/
+            aGamingThread.Start();
         }
 
         private void view_menu_Click(object sender, EventArgs e)
