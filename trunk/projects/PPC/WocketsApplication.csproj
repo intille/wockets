@@ -1,4 +1,4 @@
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -190,11 +190,11 @@
       <DependentUpon>WocketsForm.cs</DependentUpon>
     </Compile>
     <Compile Include="..\..\src\WocketsApplication\Calibrator\CalibratorForm.cs">
-    	<Link>Calibrator\CalibratorForm.cs</Link>
+      <Link>Calibrator\CalibratorForm.cs</Link>
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="..\..\src\WocketsApplication\Calibrator\CalibratorForm.Designer.cs">
-    <Link>Calibrator\CalibratorForm.Designer.cs</Link>
+      <Link>Calibrator\CalibratorForm.Designer.cs</Link>
       <DependentUpon>CalibratorForm.cs</DependentUpon>
     </Compile>
   </ItemGroup>
@@ -210,10 +210,6 @@
     <ProjectReference Include="..\PPC\OpenNETCF.GDIPlus.csproj">
       <Project>{90C9ADE0-EF58-449F-B13F-256BEA8F5FD7}</Project>
       <Name>OpenNETCF.GDIPlus</Name>
-    </ProjectReference>
-    <ProjectReference Include="InTheHand.Net.csproj">
-      <Project>{4FA89FA9-C44E-4886-BB0B-A9AFB6DA1E08}</Project>
-      <Name>InTheHand.Net</Name>
     </ProjectReference>
     <ProjectReference Include="WocketsWeka.csproj">
       <Project>{637F0352-A172-4CD3-8C6B-C318CC92C14B}</Project>
@@ -306,7 +302,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="ActivityTracker\" />
-    <Folder Include="SmartPhone\" />
   </ItemGroup>
   <Import Condition="'$(TargetFrameworkVersion)' == 'v1.0'" Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.v1.targets" />
   <Import Condition="'$(TargetFrameworkVersion)' == 'v2.0'" Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />

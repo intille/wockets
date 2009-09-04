@@ -1,4 +1,4 @@
- <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -351,20 +351,15 @@
     <Compile Include="..\..\src\Wockets\Utils\CircularBuffer.cs">
       <Link>Utils\CircularBuffer.cs</Link>
     </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\network\Bluetooth\Microsoft\MicrosoftBluetoothEndpoint.cs" >
+      <Link>Utils\network\Bluetooth\Microsoft\MicrosoftBluetoothEndpoint.cs</Link> 
+    </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="InTheHand.Net.csproj">
-      <Project>{4FA89FA9-C44E-4886-BB0B-A9AFB6DA1E08}</Project>
-      <Name>InTheHand.Net</Name>
-    </ProjectReference>
-    <ProjectReference Include="SerialIO.csproj">
-      <Project>{B1EB0DB9-052D-4C09-9C30-93363EC3EB46}</Project>
-      <Name>SerialIO</Name>
-    </ProjectReference>
     <ProjectReference Include="WocketsWeka.csproj">
       <Project>{637F0352-A172-4CD3-8C6B-C318CC92C14B}</Project>
       <Name>WocketsWeka</Name>
-    </ProjectReference> 
+    </ProjectReference>
   </ItemGroup>
   <Import Condition="'$(TargetFrameworkVersion)' == 'v1.0'" Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.v1.targets" />
   <Import Condition="'$(TargetFrameworkVersion)' == 'v2.0'" Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />
