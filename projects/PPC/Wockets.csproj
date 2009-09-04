@@ -367,11 +367,21 @@
     <Compile Include="..\..\src\Wockets\Utils\network\Bluetooth\Microsoft\MicrosoftBluetoothEndpoint.cs">
       <Link>Utils\network\Bluetooth\Microsoft\MicrosoftBluetoothEndpoint.cs</Link>
     </Compile>
-    <Compile Include="Applications\Games\Escape\Actions.cs" />
-    <Compile Include="Applications\Games\Escape\Audio.cs" />
-    <Compile Include="Applications\Games\Escape\Escape.cs" />
-    <Compile Include="Applications\Games\Escape\Player.cs" />
-    <Compile Include="Applications\Games\Escape\Sounds.cs" />
+    <Compile Include="..\..\src\Wockets\Applications\Games\Escape\Actions.cs">
+      <Link>Applications\Games\Escape\Actions.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Applications\Games\Escape\Audio.cs">
+      <Link>Applications\Games\Escape\Audio.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Applications\Games\Escape\Escape.cs">
+      <Link>Applications\Games\Escape\Escape.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Applications\Games\Escape\Player.cs">
+      <Link>Applications\Games\Escape\Player.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Applications\Games\Escape\Sounds.cs">
+      <Link>Applications\Games\Escape\Sounds.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="WocketsWeka.csproj">
