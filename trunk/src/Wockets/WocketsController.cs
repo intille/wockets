@@ -307,8 +307,8 @@ namespace Wockets
                 {
                     for (int i = 0; (i < this._Sensors.Count); i++)
                     {
-                        this._Sensors[i].Save();
-                        Thread.Sleep(50);
+                        Thread.Sleep(1000);
+                        this._Sensors[i].Save();                        
                     }
                 }
                 catch (Exception ee)
@@ -496,7 +496,7 @@ namespace Wockets
                                     {
                                         int tail = currentReceiver._Buffer._Tail;//((RFCOMMReceiver)currentReceiver).bluetoothStream._Tail;
                                         int head = currentReceiver._Buffer._Head;//currentReceiver._Head;
-                                        numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer._Bytes, head, tail); //((RFCOMMReceiver)currentReceiver).bluetoothStream._Buffer, head, tail);
+                                        numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer); //((RFCOMMReceiver)currentReceiver).bluetoothStream._Buffer, head, tail);
                                         currentReceiver._Buffer._Head = tail;//((RFCOMMReceiver)currentReceiver)._Head = tail;
                                         sensor.Packets += numDecodedPackets;
                                     }
