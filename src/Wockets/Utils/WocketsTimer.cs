@@ -107,6 +107,7 @@ namespace Wockets.Utils
             QueryPerformanceCounter(out refCount);
             referenceCounter = (double)refCount;
             initialized = true;
+
             //TimeStamp = WocketsTimer.GetUnixTime();
             //timerThread = new Thread(new ThreadStart(TimerThread));
             //timerThread.Priority = ThreadPriority.Highest;

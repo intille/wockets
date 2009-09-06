@@ -285,6 +285,7 @@ namespace Wockets.Sensors.Accelerometers
             }
         }
 
+       
         private int lastHead = 0;
         public override void Save()
         {
@@ -303,22 +304,17 @@ namespace Wockets.Sensors.Accelerometers
                     flushTimer = 0;
                 }
 
-                //only save when 1/2 of the buffer is full
-                //if (Math.Abs(tail - currentHead) < (this._Decoder._Data.Length / 2))
-                    //return;
 
                 if (((tail <= currentHead) && ((currentHead - tail) < (this._Decoder._Data.Length / 2))) ||
                     ((tail>currentHead) && ((this._Decoder._Data.Length -tail +currentHead)<(this._Decoder._Data.Length / 2))))
                     return;
 
-                //if (((lastHead<tail) && (currentHead>tail)) || 
-                //((lastHead<tail) && (lastHead>currentHead) && (currentHead<tail)))
-                 //   throw new Exception("Overflow");
+                
+
 
                 DetermineFilePath();
                 AccelerationData data = ((AccelerationData)this._Decoder._Data[tail]);               
-               // for (int i = 0; (i < this._Decoder._Size); i++)
-                //while(tail<this._Decoder._Head)
+
                 while ((tail != currentHead) && (data.UnixTimeStamp > 0) && (data.UnixTimeStamp >= this.tailUnixTimestamp))
                 {
                     aUnixTime = data.UnixTimeStamp;
@@ -355,8 +351,7 @@ namespace Wockets.Sensors.Accelerometers
                         tail++;
                     data = ((AccelerationData)this._Decoder._Data[tail]);
 
-                  //  if ((tail != currentHead) && (data.UnixTimeStamp > 0) && (!(data.UnixTimeStamp >= this.tailUnixTimestamp)))
-                    //    tail = tail; 
+
                 }
 
                 lastHead = currentHead;

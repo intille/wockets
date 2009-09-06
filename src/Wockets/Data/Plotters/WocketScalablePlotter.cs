@@ -8,6 +8,11 @@ using System.Windows.Forms;
 
 namespace Wockets.Data.Plotters
 {
+    public enum PlottingMode
+    {
+        Normal,
+        Delayed
+    }
 
     public class WocketsScalablePlotter
     {
@@ -24,12 +29,13 @@ namespace Wockets.Data.Plotters
         int[][] previousVals;
         double[] previousTimes;
         double[] scaleFactors;
-        int[] plotFrom;
         int[] lastColumn;
         int[] firstColumn;
         int[] decoderTails;
         double[] lastUnixTimestamps;
+        int[] pointsToPlot;
         int skippedPoints = 0;
+        private PlottingMode mode;
 
         public WocketsScalablePlotter(System.Windows.Forms.Panel aPanel, WocketsController wocketsController)
         {
@@ -45,21 +51,22 @@ namespace Wockets.Data.Plotters
             graphSize = (int)Math.Floor((plotAreaSize.Height / ((double)this.wocketsController._Sensors.Count)));
   
             scaleFactors = new double[this.wocketsController._Sensors.Count];
-            currentColumns = new int[this.wocketsController._Sensors.Count];
-            plotFrom = new int[this.wocketsController._Sensors.Count];
+            currentColumns = new int[this.wocketsController._Sensors.Count];     
             firstColumn= new int[this.wocketsController._Sensors.Count];
             lastColumn = new int[this.wocketsController._Sensors.Count];
             decoderTails = new int[this.wocketsController._Sensors.Count];
             lastUnixTimestamps = new double[this.wocketsController._Sensors.Count];
+            this.pointsToPlot = new int[this.wocketsController._Sensors.Count];
+            this.mode = PlottingMode.Normal;
 
             for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
             {
                 this.currentColumns[i] = 0;
-                this.plotFrom[i] = 0;
                 this.firstColumn[i] = 999999;
                 this.lastColumn[i] = 0;
                 this.decoderTails[i] = 0;
                 this.lastUnixTimestamps[i] = 0;
+                this.pointsToPlot[i] = 0;
                 double range = ((Accelerometer)this.wocketsController._Sensors[i])._Max - ((Accelerometer)this.wocketsController._Sensors[i])._Min;
                 scaleFactors[i] = graphSize / range;
             }
@@ -97,23 +104,29 @@ namespace Wockets.Data.Plotters
 
         private bool requiresFullRedraw = true;
 
-        public int[] PlotFrom
+
+        public PlottingMode _Mode
         {
             get
             {
-                return this.plotFrom;
+                return this.mode;
             }
             set
             {
-                this.plotFrom = value;
+                this.mode = value;
             }
         }
+
+ 
+
         public void Draw(Graphics g)
         {
             int lastColumnDrawn = 0;
+       
             for (int i = 0; (i < this.wocketsController._Sensors.Count); i++)
             {
                 int receiverID = this.wocketsController._Sensors[i]._Receiver._ID;
+                int plottedPoints = 0;
 
                 if (this.wocketsController._Receivers[receiverID]._Status== Wockets.Receivers.ReceiverStatus.Connected)
                 {
@@ -124,9 +137,27 @@ namespace Wockets.Data.Plotters
                     int tail = this.decoderTails[i];
                     //while(tail<=this.wocketsController._Sensors[i]._Decoder._Head)
                     AccelerationData data = ((AccelerationData)this.wocketsController._Sensors[i]._Decoder._Data[tail]);
+
+                    if (this.mode == PlottingMode.Delayed) //wait until 3 seconds are there then plot 5 pts max
+                    {
+                        int counter = 0;
+                        if ((tail < currentHead) && (currentHead < (this.wocketsController._Sensors[i]._Decoder._Data.Length - 1)))
+                            counter = currentHead - tail;
+                        else
+                            counter = (this.wocketsController._Sensors[i]._Decoder._Data.Length - 1) - tail + currentHead;
+
+                        if (counter > 360)
+                            pointsToPlot[i] = 20;
+                        else if (counter > 180)
+                            pointsToPlot[i] = 10;
+                        else
+                            pointsToPlot[i] = 5;
+
+                    }
                     while ((tail != currentHead) && (data.UnixTimeStamp > 0) && (data.UnixTimeStamp >= this.lastUnixTimestamps[i]))
                     {
 
+      
                         if (skippedPoints > 0)
                         {
                             if ((tail % skippedPoints) != 0)
@@ -197,7 +228,11 @@ namespace Wockets.Data.Plotters
                             tail = 0;
                         else
                             tail++;
+                        
                         data = ((AccelerationData)this.wocketsController._Sensors[i]._Decoder._Data[tail]);
+                        plottedPoints++;
+                        if  ((this.mode == PlottingMode.Delayed) && (plottedPoints == pointsToPlot[i]))
+                            break;
                     }
                     this.decoderTails[i] = tail;
                 }

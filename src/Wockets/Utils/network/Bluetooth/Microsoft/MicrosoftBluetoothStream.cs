@@ -106,13 +106,11 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
             byte[] sendByte = new byte[1];                        
             this.status = BluetoothStatus.Connected;
             byte[] singleReadBuffer = new byte[LOCAL_BUFFER_SIZE];
+            double timestamp = 0.0;
 
             while (this.status== BluetoothStatus.Connected)
-            {
-            
-
+            {            
                 int bytesReceived = 0;
-
 
                 try
                 {
@@ -141,10 +139,10 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                         }
                     }
 
-                    if (socket.Available > 0)
-                        bytesReceived = socket.Receive(singleReadBuffer, LOCAL_BUFFER_SIZE, SocketFlags.None);                    
-
-                    Thread.Sleep(10);
+                    //if (socket.Available > 0)                        
+                    bytesReceived = socket.Receive(singleReadBuffer, LOCAL_BUFFER_SIZE, SocketFlags.None);
+                    timestamp = WocketsTimer.GetUnixTime();
+                    //Thread.Sleep(10);
 
 
                     if (bytesReceived > 0)                       
@@ -172,6 +170,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                 int ii;
                 for (ii = 0; ii < bytesReceived; ii++)
                 {
+                    this.buffer._Timestamp[this.buffer._Tail] = timestamp;
                     this.buffer._Bytes[this.buffer._Tail++] = singleReadBuffer[ii];
                     this.buffer._Tail %= this.buffer._Bytes.Length;
                 }

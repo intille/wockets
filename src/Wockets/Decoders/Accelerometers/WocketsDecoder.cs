@@ -19,6 +19,7 @@ namespace Wockets.Decoders.Accelerometers
 
         private const int BUFFER_SIZE = 1200; 
         private bool headerSeen;
+        private double timestamp = 0;
         private int bytesToRead = 0;
         private SensorDataType packetType;
         private double lastTimestamp;
@@ -36,30 +37,33 @@ namespace Wockets.Decoders.Accelerometers
         }
 
 
-        public override int Decode(int sourceSensor, byte[] data, int head, int tail)
+        
+
+        public override int Decode(int sourceSensor, CircularBuffer data)
         {
 
-            int rawDataIndex = head;
+            int rawDataIndex = data._Head;
             int numDecodedPackets = 0;
             int bufferHead = this.head;
+            
 
-
-            while (rawDataIndex !=tail)
+            while (rawDataIndex !=data._Tail)
             {
-                if (this.cmd && data[rawDataIndex] == ((byte)'C'))
+                if (this.cmd && data._Bytes[rawDataIndex] == ((byte)'C'))
                 {
-                    if (rawDataIndex + 1 != tail && data[rawDataIndex + 1] == ((byte)'M'))
+                    if (rawDataIndex + 1 != data._Tail && data._Bytes[rawDataIndex + 1] == ((byte)'M'))
                     {
-                        if (rawDataIndex + 2 != tail && data[rawDataIndex + 2] == ((byte)'D'))
+                        if (rawDataIndex + 2 != data._Tail && data._Bytes[rawDataIndex + 2] == ((byte)'D'))
                             this.cmd = false;
                     }
                 }
 
-                if ((data[rawDataIndex] & 0x80) != 0) //grab the next 6 bytes
+                if ((data._Bytes[rawDataIndex] & 0x80) != 0) //grab the next 6 bytes
                 {
                     this.packetPosition = 0;
                     this.headerSeen = true;
-                    int headerByte = ((byte)(((byte)data[rawDataIndex]) << 1)) >> 6;
+                    int headerByte = ((byte)(((byte)data._Bytes[rawDataIndex]) << 1)) >> 6;
+                    this.timestamp = data._Timestamp[rawDataIndex];
                     if (headerByte == 0)
                     {
                         bytesToRead = WocketsAccelerationData.NUM_RAW_BYTES;
@@ -68,7 +72,7 @@ namespace Wockets.Decoders.Accelerometers
                     else if (headerByte == 2)
                     {
 
-                        int opcode = (((byte)data[rawDataIndex]) & 0x1f);
+                        int opcode = (((byte)data._Bytes[rawDataIndex]) & 0x1f);
                         if (opcode == 0)
                         {
                             bytesToRead = 3;
@@ -85,10 +89,10 @@ namespace Wockets.Decoders.Accelerometers
                 }
 
                 if ((this.headerSeen == true) && (this.packetPosition < bytesToRead))
-                    this.packet[this.packetPosition] = data[rawDataIndex];
+                    this.packet[this.packetPosition] = data._Bytes[rawDataIndex];
                     
                 this.packetPosition++;
-                rawDataIndex=(rawDataIndex+1)%data.Length;
+                rawDataIndex=(rawDataIndex+1)%data._Bytes.Length;
 
 
                 if ((this.packetPosition == bytesToRead)) //a full packet was received
@@ -98,7 +102,7 @@ namespace Wockets.Decoders.Accelerometers
 
                         WocketsAccelerationData datum = ((WocketsAccelerationData)this._Data[bufferHead]);
                         datum.Reset();
-                        datum.UnixTimeStamp = WocketsTimer.GetUnixTime();
+                        datum.UnixTimeStamp = this.timestamp;//WocketsTimer.GetUnixTime();
                         //copy raw bytes
                         for (int i = 0; (i < bytesToRead); i++)
                             datum.RawBytes[i] = this.packet[i];
