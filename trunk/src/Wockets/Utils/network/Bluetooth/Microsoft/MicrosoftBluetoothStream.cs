@@ -143,7 +143,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                     bytesReceived = socket.Receive(singleReadBuffer, LOCAL_BUFFER_SIZE, SocketFlags.None);
                     timestamp = WocketsTimer.GetUnixTime();
                     //Thread.Sleep(10);
-
+                    //Logger.Warn("Bytes " + bytesReceived);
 
                     if (bytesReceived > 0)                       
                         disconnectionCounter = 0;                    

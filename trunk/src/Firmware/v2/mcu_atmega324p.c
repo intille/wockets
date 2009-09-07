@@ -31,7 +31,7 @@ void _atmega324p_init_uart0(unsigned int baud){
 	UBRR0H = (unsigned char)(baud>>8);
 	UBRR0L = (unsigned char)baud;
 	/* Enable receiver and transmitter */
-	UCSR0B = (1<<TXEN0)|(1<<RXEN0);
+	UCSR0B = (1<<TXEN0);//|(1<<RXEN0);
 	/* Set frame format: 8data, 2stop bit */
 	//UCSR0C = (1<<USBS0)|(3<<UCSZ00);  //change 1 to 0 and &
 	UCSR0C = (3<<UCSZ00);  //change 1 to 0 and &
@@ -42,7 +42,7 @@ void _atmega324p_init_uart1(unsigned int baud){
 	UBRR1H = (unsigned char)(baud>>8);
 	UBRR1L = (unsigned char)baud;
 	/* Enable receiver and transmitter */
-	UCSR1B = (1<<TXEN1)|(1<<RXEN1);
+	UCSR1B = (1<<RXEN1);
 	/* Set frame format: 8data, 2stop bit */
 	UCSR1C =(3<<UCSZ10);  //change 1 to 0 and &
 }
@@ -228,13 +228,13 @@ void _atmega324p_disable_JTAG(void)
 unsigned char ReceiveByte(unsigned char *data)
   {
   	int count=0;
-   while ( !(UCSR0A &  (1<<RXC0)) )
+   while ( !(UCSR1A &  (1<<RXC1)) )
    {
    		if (count++==1) return 1; //timed out
    			_delay_ms(1);
    }     /*  Wait for incoming data   */
 
-   *data=UDR0;
+   *data=UDR1;
 
    return 0;/* Return success*/
   }
@@ -246,6 +246,7 @@ void TransmitByte( unsigned char data )
   UCSR0A=UCSR0A & 0xdf;
   
   UDR0 =  data;  /* Start transmission   */
+  while ( !(UCSR0A & (1<<TXC0)) );        /*  Wait to Transmit - This is needed to avoid getting into power save mode before transmission */
    
 }
 
@@ -270,7 +271,10 @@ void _atmega324p_init(unsigned int baud){
 //	r=0;
 
 	//initialize UART0, connected to the RX of the BT
+	//using UART0 for TX and UART1 for RX - this change is needed in conjunction with power save
+	//to avoid overwriting the RX buffer by TX data
 	_atmega324p_init_uart0(baud);
+	_atmega324p_init_uart1(baud);
 
 	//set the BT
 	_rn41_init();
@@ -284,7 +288,7 @@ void _atmega324p_init(unsigned int baud){
 
 	//power save mode
 
-	SMCR |=((1<<SM0)|(1<<SM1) | (1<<SE));
+	//SMCR |=((1<<SM0)|(1<<SM1) | (1<<SE));
 
 	//timer setup timer/counter2
 
@@ -297,73 +301,4 @@ void _atmega324p_init(unsigned int baud){
 }
 
 
-
-ISR(ADC_vect){
-	/*  i=0;
-	  r++;
-
-	  	if (r==10){
-	  
-	    if (_mma7260qt_is_asleep()){
-			TransmitByte('W');			
-	    	_mma7260qt_wakeup();
-		}else{
-			
-			TransmitByte('S');
-			_mma7260qt_sleep();
-		}
-
-		if (!_rn41_is_discoverable()){
-			TransmitByte('X');	
-		}
-		if (_rn41_is_connected()){
-			TransmitByte('C');
-		}
-			r=0;	
-		}
-		  	
-
-		PORTB=1;
-        _delay_ms(1000);
-		PORTB=0;
-		_delay_ms(1000);
-
-
-		 adc_result=((ADCL)|((ADCH)<<8));
-
-		 */
-// Dynamic Acceleration test
-
-/*		 if (adc_result> previous_adc_result) {
-		 difference = adc_result - previous_adc_result;}
-		 else {
-		 difference = previous_adc_result - adc_result;}
-	     previous_adc_result = adc_result;
-
-
-		 delta = delta + difference;
-
-		 for(i=0;(i<6);i++)
-		 	buffer[i]=0;
-		 itoa(delta,buffer,10);
-		 for(i=0;(i<6);i++)		 	
-		 	TransmitByte(buffer[i]); 
-*/
-
-
- 		 //Static acceleration test
-
-	/*	 for(i=0;(i<4);i++)
-		 	buffer[i]=0;
-		 itoa(adc_result,buffer,10);
-		 for(i=0;(i<4);i++)		 	
-		 	TransmitByte(buffer[i]);
-			
-
-         TransmitByte(',');
-		  delta=0;
- 	 
-	 _delay_ms(100);
-	 */
-}
 
