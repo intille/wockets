@@ -466,12 +466,12 @@ namespace Wockets
                               
                                     #region Write Data
                                     #region Battery Query
-                                    batteryPoll[i] -= 1;
+                                    /*batteryPoll[i] -= 1;
                                     if (batteryPoll[i] <= 0)
                                     {
                                         ((SerialReceiver)currentReceiver).Write(GET_BT_CMD._Bytes);
                                         batteryPoll[i] = 6000 + i * 200;
-                                    }
+                                    }*/
                                     #endregion Battery Query
 
                                     #region Alive 
