@@ -42,7 +42,44 @@ namespace Wockets.Decoders.Accelerometers
 
         public override int Decode(int sourceSensor, CircularBuffer data)
         {
-            return 0;
+            int rawDataIndex = data._Head;
+            int numDecodedPackets = 0;
+            while (rawDataIndex != data._Tail)
+            {
+                int firstByte = rawDataIndex;
+                int lastByte = (rawDataIndex + HTCDiamondTouchAccelerationData.NUM_RAW_BYTES - 1) % data._Bytes.Length;
+
+                if (((data._Bytes[firstByte] & 0xff) != 0) && ((data._Bytes[lastByte] & 0xff) != 0))
+                {
+                    HTCDiamondTouchAccelerationData datum = ((HTCDiamondTouchAccelerationData)this._Data[this.head]);
+                    datum.Reset();
+                    //copy raw bytes
+                    for (int i = 0; (i < HTCDiamondTouchAccelerationData.NUM_RAW_BYTES); i++)
+                    {
+                        datum.RawBytes[i] = data._Bytes[rawDataIndex];
+                        rawDataIndex = (rawDataIndex + 1) % data._Bytes.Length;
+                    }
+
+                    datum.Type = SensorDataType.ACCEL;
+                    datum.SensorID = (byte)sourceSensor;
+                    datum.X = (short)(BitConverter.ToInt16(datum.RawBytes, 1) + 1024);
+                    datum.Y = (short)(BitConverter.ToInt16(datum.RawBytes, 3) + 1024);
+                    datum.Z = (short)(BitConverter.ToInt16(datum.RawBytes, 5) + 1024);
+                    datum.UnixTimeStamp = WocketsTimer.GetUnixTime();
+
+                    if (this.head >= (BUFFER_SIZE - 1))
+                        this.head = 0;
+                    else
+                        this.head++;
+
+                    numDecodedPackets++;
+                    data._Head = (data._Head + HTCDiamondTouchAccelerationData.NUM_RAW_BYTES) % data._Bytes.Length;
+                }
+                else
+                    break;
+            }
+
+            return numDecodedPackets;
         }
         public override int Decode(int sensorID, byte[] data, int length)
         {

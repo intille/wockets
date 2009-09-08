@@ -1010,8 +1010,8 @@ namespace WocketsApplication.DataLogger
             MenuItem mi = (MenuItem)sender;
             mi.Checked = !(mi.Checked);
             this.isGaming = mi.Checked;
-            Thread aGamingThread = new Thread(new ThreadStart(this.wocketsController.escape.PlayExergame));
-            this.wocketsController.escape.isGaming = this.isGaming;
+            Thread aGamingThread = new Thread(new ThreadStart(this.wocketsController._Escape.PlayExergame));
+            this.wocketsController._Escape.isGaming = this.isGaming;
             aGamingThread.Start();
         }
 
