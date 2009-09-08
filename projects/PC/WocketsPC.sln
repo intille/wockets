@@ -10,8 +10,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WocketsWeka", "WocketsWeka.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wockets", "Wockets.csproj", "{16986364-6B54-443E-B1F3-A6F17F0523B2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InTheHand.Net", "InTheHand.Net.csproj", "{70906624-6807-42D7-8278-15262204ED1A}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PCTestApplication", "PCTestApplication.csproj", "{8A3531F2-8F49-4410-A4B5-77639817429F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataMerger", "DataMerger.csproj", "{13A2AF07-A286-468D-9F31-AD1AC957DFF5}"
@@ -92,16 +90,6 @@ Global
 		{16986364-6B54-443E-B1F3-A6F17F0523B2}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{16986364-6B54-443E-B1F3-A6F17F0523B2}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{16986364-6B54-443E-B1F3-A6F17F0523B2}.Release|Win32.ActiveCfg = Release|Any CPU
-		{70906624-6807-42D7-8278-15262204ED1A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{70906624-6807-42D7-8278-15262204ED1A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{70906624-6807-42D7-8278-15262204ED1A}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{70906624-6807-42D7-8278-15262204ED1A}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{70906624-6807-42D7-8278-15262204ED1A}.Debug|Win32.ActiveCfg = Debug|Any CPU
-		{70906624-6807-42D7-8278-15262204ED1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{70906624-6807-42D7-8278-15262204ED1A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{70906624-6807-42D7-8278-15262204ED1A}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{70906624-6807-42D7-8278-15262204ED1A}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{70906624-6807-42D7-8278-15262204ED1A}.Release|Win32.ActiveCfg = Release|Any CPU
 		{8A3531F2-8F49-4410-A4B5-77639817429F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8A3531F2-8F49-4410-A4B5-77639817429F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8A3531F2-8F49-4410-A4B5-77639817429F}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
