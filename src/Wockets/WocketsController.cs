@@ -56,13 +56,13 @@ namespace Wockets
         private Classifier classifier;
         private string storageDirectory;
         private Session annotatedSession;
-        public Escape escape = new Escape();
+        public Escape _Escape = new Escape();
         /// <summary>
         /// Stores the current record that is being annotated
         /// </summary>
         //private AnnotatedRecord currentRecord;
         public Annotation currentRecord;
-
+        
         private int calibrationDirection = 0;
         private double[][] calibrations;
         private bool isCalibrating = false;
@@ -244,7 +244,7 @@ namespace Wockets
                 }
 
             }
-
+            
             polling = true;
             saving = true;
             aSavingThread = new Thread(new ThreadStart(Save));
@@ -450,10 +450,14 @@ namespace Wockets
                             int numDecodedPackets = 0;
                             if (currentReceiver._Type == ReceiverTypes.HTCDiamond)
                             {
-                                int dataLength = ((Wockets.Receivers.HTCDiamondReceiver)currentReceiver).Read();
+                                //int dataLength = ((Wockets.Receivers.HTCDiamondReceiver)currentReceiver).Read();
+                                int dataLength = currentReceiver._Buffer._Tail - currentReceiver._Buffer._Head; //((RFCOMMReceiver)currentReceiver).bluetoothStream._Tail - currentReceiver._Head;
+                                if (dataLength < 0)
+                                    dataLength = currentReceiver._Buffer._Bytes.Length - currentReceiver._Buffer._Head + currentReceiver._Buffer._Tail;//((RFCOMMReceiver)currentReceiver).bluetoothStream._Buffer.Length - currentReceiver._Head + ((RFCOMMReceiver)currentReceiver).bluetoothStream._Tail;
                                 if (dataLength > 0)
                                 {
-                                    numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer._Bytes, dataLength);
+                                    //numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer._Bytes, dataLength);
+                                    numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer); 
                                     sensor.Packets += numDecodedPackets;
                                 }
 
@@ -641,7 +645,7 @@ namespace Wockets
                                                 newinstance.setValue(this._instances.attribute(j), FeatureExtractor.Features[j]);
                                             double predicted = classifier.classifyInstance(newinstance);
                                             string predicted_activity = newinstance.dataset().classAttribute().value_Renamed((int)predicted);
-                                            this.escape._Move = predicted_activity;
+                                            this._Escape._Move = predicted_activity;
                                         }
                                     }
 

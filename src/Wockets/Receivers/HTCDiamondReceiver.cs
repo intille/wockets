@@ -8,6 +8,7 @@ using Microsoft.WindowsMobile.Status;
 #endif
 using Wockets.Data;
 using Wockets.Utils;
+using System.Threading;
 
 namespace Wockets.Receivers
 {
@@ -114,12 +115,15 @@ namespace Wockets.Receivers
         #endregion Serialization Constants
 
         private const int MAXIMUM_SAMPLING_RATE = 20;
-        private const int BUFFER_SIZE = 16;
+        private const int BUFFER_SIZE = 1024;
         private const int SEND_BUFFER_SIZE = 0;
-        private int bufferIndex;
+        //private int bufferIndex;
         private double lastTS;
         private int sampleTimeSpace = 0;
+        private Thread pollingThread;
+
 #if (PocketPC)
+
         #region HTC Diamond Touch Code
         enum HTCSensor : uint
         {
@@ -202,24 +206,37 @@ namespace Wockets.Receivers
         public HTCDiamondReceiver()
             : base(BUFFER_SIZE)
         {
-            this.bufferIndex = 0;
+            //this.bufferIndex = 0;
             this.type = ReceiverTypes.HTCDiamond;
             this.lastTS = WocketsTimer.GetUnixTime();
             this.sampleTimeSpace = 1000 / MAXIMUM_SAMPLING_RATE;
+            
         }
 
 
-
+        private void Poll()
+        {
+            while (this._Status == ReceiverStatus.Connected)
+            {
+                Read();
+                Thread.Sleep(this.sampleTimeSpace);
+            }
+        }
 
  
         public override bool Initialize()
         {
+            
 #if (PocketPC)
+
             IntPtr hEvent = CreateEvent(IntPtr.Zero, true, false, "HTC_GSENSOR_SERVICESTART");
             SetEvent(hEvent);
             CloseHandle(hEvent);
             myOrientationState.Changed += new ChangeEventHandler(myOrientationState_Changed);
             this.status = ReceiverStatus.Connected;
+            this.pollingThread = new Thread(new ThreadStart(Poll));
+            this.pollingThread.Priority = ThreadPriority.Highest;
+            this.pollingThread.Start();
 #endif
             return true;
         }
@@ -240,6 +257,7 @@ namespace Wockets.Receivers
         public  int Read()
         {
 #if (PocketPC)
+
             //Check for the 20Hz
             double now = WocketsTimer.GetUnixTime();
             if ((now - lastTS) < this.sampleTimeSpace)
@@ -249,47 +267,47 @@ namespace Wockets.Receivers
             HTCGSensorData data;
             HTCSensorGetDataOutput(myHandle, out data);
 
-            this._Buffer._Bytes[this.bufferIndex++] = 0xff;
-            this.bufferIndex = this.bufferIndex % this._Buffer._Bytes.Length;
+            this._Buffer._Bytes[this._Buffer._Tail++] = 0xff;
+            this._Buffer._Tail = this._Buffer._Tail % this._Buffer._Bytes.Length;
 
             byte[] bytes = BitConverter.GetBytes(data.TiltX);
             for (int i = 0; (i < bytes.Length); i++)
             {
-                this._Buffer._Bytes[this.bufferIndex++] = bytes[i];
-                this.bufferIndex = this.bufferIndex % this._Buffer._Bytes.Length;
+                this._Buffer._Bytes[this._Buffer._Tail++] = bytes[i];
+                this._Buffer._Tail = this._Buffer._Tail % this._Buffer._Bytes.Length;
             }
 
             bytes = BitConverter.GetBytes(data.TiltY);
             for (int i = 0; (i < bytes.Length); i++)
             {
-                this._Buffer._Bytes[this.bufferIndex++] = bytes[i];
-                this.bufferIndex = this.bufferIndex % this._Buffer._Bytes.Length;
+                this._Buffer._Bytes[this._Buffer._Tail++] = bytes[i];
+                this._Buffer._Tail = this._Buffer._Tail % this._Buffer._Bytes.Length;
             }
 
             bytes = BitConverter.GetBytes(data.TiltZ);
             for (int i = 0; (i < bytes.Length); i++)
             {
-                this._Buffer._Bytes[this.bufferIndex++] = bytes[i];
-                this.bufferIndex = this.bufferIndex % this._Buffer._Bytes.Length;
+                this._Buffer._Bytes[this._Buffer._Tail++] = bytes[i];
+                this._Buffer._Tail = this._Buffer._Tail % this._Buffer._Bytes.Length;
             }
 
             bytes = BitConverter.GetBytes(data.AngleX);
             for (int i = 0; (i < bytes.Length); i++)
             {
-                this._Buffer._Bytes[this.bufferIndex++] = bytes[i];
-                this.bufferIndex = this.bufferIndex % this._Buffer._Bytes.Length;
+                this._Buffer._Bytes[this._Buffer._Tail++] = bytes[i];
+                this._Buffer._Tail = this._Buffer._Tail % this._Buffer._Bytes.Length;
             }
 
             bytes = BitConverter.GetBytes(data.AngleY);
             for (int i = 0; (i < bytes.Length); i++)
             {
-                this._Buffer._Bytes[this.bufferIndex++] = bytes[i];
-                this.bufferIndex = this.bufferIndex % this._Buffer._Bytes.Length;
+                this._Buffer._Bytes[this._Buffer._Tail++] = bytes[i];
+                this._Buffer._Tail = this._Buffer._Tail % this._Buffer._Bytes.Length;
             }
 
 
-            this._Buffer._Bytes[this.bufferIndex++] = 0xff;
-            this.bufferIndex = this.bufferIndex % this._Buffer._Bytes.Length;
+            this._Buffer._Bytes[this._Buffer._Tail++] = 0xff;
+            this._Buffer._Tail = this._Buffer._Tail % this._Buffer._Bytes.Length;
 #endif
             return BUFFER_SIZE;
         }
@@ -302,7 +320,9 @@ namespace Wockets.Receivers
         }
         public override bool Dispose()
         {
-#if (PocketPC)
+            #if (PocketPC)
+
+            this._Status = ReceiverStatus.Disconnected;
             if (myHandle != IntPtr.Zero)
             {
                 HTCSensorClose(myHandle);
@@ -321,8 +341,9 @@ namespace Wockets.Receivers
             // Once it hits 0, the service is stopped.
             IntPtr hEvent = CreateEvent(IntPtr.Zero, true, false, "HTC_GSENSOR_SERVICESTOP");
             SetEvent(hEvent);
-            CloseHandle(hEvent);
+            CloseHandle(hEvent);  
 #endif
+
             return true;
         }
 
