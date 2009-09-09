@@ -421,20 +421,6 @@ namespace Wockets
             while (polling)
             {
 
-                #region Receiver Reconnection Code
-#if (PocketPC)
-                /*
-                for (int i = 0; (i < this._Receivers.Count); i++)
-                {
-                    if (this._Receivers[i]._Running==false)                     
-                        this._Receivers[i].BeginReconnect();
-                    if ((this._Receivers[i]._Running == true) && (this._Receivers[i]._Reconnecting == true))
-                        this._Receivers[i].EndReconnect();
-                }*/
-
-
-#endif
-                #endregion Receiver Reconnection Code
 
                 try
                 {
@@ -456,8 +442,8 @@ namespace Wockets
                                     dataLength = currentReceiver._Buffer._Bytes.Length - currentReceiver._Buffer._Head + currentReceiver._Buffer._Tail;//((RFCOMMReceiver)currentReceiver).bluetoothStream._Buffer.Length - currentReceiver._Head + ((RFCOMMReceiver)currentReceiver).bluetoothStream._Tail;
                                 if (dataLength > 0)
                                 {
-                                    //numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer._Bytes, dataLength);
-                                    numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer); 
+                                   // numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer._Bytes, dataLength);
+                                    numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer);
                                     sensor.Packets += numDecodedPackets;
                                 }
 
@@ -518,7 +504,7 @@ namespace Wockets
                                     }*/
                                     #endregion Read Data
 
-
+                                    /*
 
                                     #region Calibration Code
 
@@ -650,7 +636,7 @@ namespace Wockets
                                     }
 
                                     #endregion Classifying
-
+                                    */
                                 }
                         }
                     }

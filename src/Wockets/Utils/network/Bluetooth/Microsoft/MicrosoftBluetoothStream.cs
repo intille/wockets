@@ -139,10 +139,12 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                         }
                     }
 
-                    //if (socket.Available > 0)                        
-                    bytesReceived = socket.Receive(singleReadBuffer, LOCAL_BUFFER_SIZE, SocketFlags.None);
-                    timestamp = WocketsTimer.GetUnixTime();
-                    //Thread.Sleep(10);
+                    if (socket.Available > 0)
+                    {
+                        bytesReceived = socket.Receive(singleReadBuffer, LOCAL_BUFFER_SIZE, SocketFlags.None);
+                        timestamp = WocketsTimer.GetUnixTime();
+                    }
+                    Thread.Sleep(10);
                     //Logger.Warn("Bytes " + bytesReceived);
 
                     if (bytesReceived > 0)                       

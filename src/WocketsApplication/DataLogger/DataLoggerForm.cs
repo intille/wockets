@@ -748,6 +748,7 @@ namespace WocketsApplication.DataLogger
             Button button = (Button)sender;
             //int i = 0;
             //Boolean same = false;
+            
             if (button.BackColor == clickColor)
             {
                 button.BackColor = this.defaultColor;
