@@ -184,18 +184,18 @@
     <value>180, 17</value>
   </metadata>
   <data name="textBox_instructions_2.Text" xml:space="preserve">
-    <value>1.    Provide a valid path for the audio annotations.
+    <value>1.   Copy the all the audio files (".msi"and ".wav") to the "voice" folder within the following folder structure: 
+       "...\session\annotation\voice"
 
-2.    Provide a valid protocol file (e.g. "ActivityLabelsRealtime.xml").
+2.    Check you have the "ActivityLabelsRealtime.xml" file in the followig directory: 
+        "...\session\wockets\"
 
-3.    Provide a session file name (e.g. "session_participant1.txt"). This field is optional. 
-       It can accept an existing session file or a new session file (e.g. "session_p1.txt"). 
-       If the field is left blank, a session file named "annotation_session.txt" will be automatically created.
+3.    Provide a valid path for the session.
 
-4.    All the session files will be saved in the "AnnotationFiles" folder. 
-       This folder will be created within the folder containing the audio annotation files.
+4.    All the session files will be saved in the "annotator_files" folder under the following folder structure: 
+       "...\session\annotation\audioannotation\annotator_files"
 
-5.    Click the "Start" button after all the fields are completed.
+5.    Click the "Start" button after all the steps are completed.
 
 </value>
   </data>

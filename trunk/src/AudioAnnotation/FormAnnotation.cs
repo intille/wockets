@@ -198,10 +198,16 @@ namespace AudioAnnotation
         private TextReader tr;
 
         private string DataSessionName = "";
+        private string SessionFileName = "";
         private string DataSessionDir = "";
+
         private string DataAudioDir = "";
         private string DataOutputDir = "";
-        private string SessionFileName = "";
+
+        private string Folder_session = "";
+        private string Folder_annotation = "";
+        private string Folder_audioannotation = "";
+        private string Folder_annotator_files = "";
 
         private int SessionPart = 1;
         private bool SessionStarted = false;
@@ -332,96 +338,136 @@ namespace AudioAnnotation
 
             try
             {
-                //string name = " ";
+                Folder_annotation = Folder_session + "annotation\\";
+                // check if anotation folder exist, if it doesn't exist, create it.
+                if (Directory.Exists(Folder_annotation) == false)
+                {   Directory.CreateDirectory(Folder_annotation); }
 
-                string name = textBox_3.Text.Trim();
+                Folder_audioannotation = Folder_annotation + "audioannotation\\";
+                if (Directory.Exists(Folder_audioannotation) == false)
+                { Directory.CreateDirectory(Folder_audioannotation); }
 
+                Folder_annotator_files = Folder_audioannotation + "annotator_files\\";
+                if (Directory.Exists(Folder_annotator_files) == false)
+                { Directory.CreateDirectory(Folder_annotator_files); }
 
-                if (name.CompareTo("") == 0)
-                {
-                    name = "annotation_session.txt";
-                    DataOutputDir = "";
-                }
-                else
-                {   //get file session name and output directory
-                    FileInfo finfo = new FileInfo(name);
-                    if (finfo.Exists)
-                    {
-                        name = finfo.Name;
-                        DataOutputDir = finfo.Directory.FullName + "\\";
+                // Load Session File  //string name = textBox_3.Text.Trim();
+                //string name = Folder_annotator_files + "annotation_session.txt";
+                string name = "annotation_session.txt";
+               
 
-                    }
-                    else
-                    {
-                        //if (name.Contains(".txt") == false)
-                        // { name = name + ".txt"; }
+                #region old code commented
+                //if (name.CompareTo("") == 0)
+                //{
+                //    name = "annotation_session.txt";
+                //    DataOutputDir = "";
+                //}
+                //else
+                //{   
+                    //get file session name and output directory
+                 //   FileInfo finfo = new FileInfo(name);
+                //    if (finfo.Exists)
+                 //   {
+                 //       name = finfo.Name;
+                 //       DataOutputDir = finfo.Directory.FullName + "\\";
 
-                        //name = "annotation_session.txt";
-                        //DataOutputDir = "";  
-                        //File.Create(name);
-                        // finfo = new FileInfo(name);
-                        name = finfo.Name;
-                        DataOutputDir = finfo.Directory.FullName + "\\";
+                  //  }
+                  //  else
+                  //  {
+                        
+                   //     name = finfo.Name;
+                   //     DataOutputDir = finfo.Directory.FullName + "\\";
 
-                    }
-                }
-
-
-                /*
-                if (SessionPart == 1)
-                { //name = textBox_2.Text.Trim(); 
-                    name = "session_p1.txt";
-                }
-                else if (SessionPart == 2)
-                {
-                    name = "session_p2.txt";
-                }
-                 */
+                   // }
+                //}
+                #endregion 
 
 
                 if (SessionDir_Exist())
                 {
                     if (LoadActivityLabels())
                     {
-                        LoadGridColumnHeaders();
-
-                        if (name.CompareTo("") != 0)
+                        if (LoadGridColumnHeaders())
                         {
-                            if (name.Contains(".txt") == false)
-                            { name = name + ".txt"; }
-
-                            SessionFileName = name;
-                            SessionFileToDataDir();
-
-                            name = DataSessionDir + name;
-
-
-                            string[] session_files = Directory.GetFiles(DataSessionDir);
-                            DataSessionName = "";
-
-                            for (int i = 0; i < session_files.Length; i++)
+                            if (name.CompareTo("") != 0)
                             {
-                                if (name.CompareTo(session_files[i]) == 0)
+                                if (name.Contains(".txt") == false)
+                                { name = name + ".txt"; }
+
+                                SessionFileName = name;
+                                SessionFileToDataDir();
+
+                                name = DataSessionDir + name;
+
+
+                                string[] session_files = Directory.GetFiles(DataSessionDir);
+                                DataSessionName = "";
+
+                                for (int i = 0; i < session_files.Length; i++)
                                 {
-                                    int is_started = IsSessionStarted();
-                                    if (is_started == 1)
-                                    { DataSessionName = session_files[i]; }
-                                    else if (is_started == -1)
+                                    if (name.CompareTo(session_files[i]) == 0)
                                     {
+                                        int is_started = IsSessionStarted();
+                                        if (is_started == 1)
+                                        { DataSessionName = session_files[i]; }
+                                        else if (is_started == -1)
+                                        {
+                                            // delete previous Xml object
+                                            XmlSession = null;
+                                            return false;
+                                        }
+
+                                        break;
+                                    }
+                                }
+
+
+                                //if session name file not found
+                                if (DataSessionName.CompareTo("") == 0)
+                                {
+                                    DataSessionName = name;
+
+                                    //Load list
+                                    if (LoadList(dataGridView1) == false)
+                                    {
+                                        label_play.Text = "No audio files were found. Please check the directory name.";
+
                                         // delete previous Xml object
                                         XmlSession = null;
-                                        return false;
+                                    }
+                                    else
+                                    { is_data_loaded = true; }
+
+                                }
+                                else
+                                {
+                                    // !note: this should return an OK value
+                                    LoadRowsToGrid(DataSessionName);
+                                    is_data_loaded = true;
+
+                                    if (files == null)
+                                    {
+                                        LoadAudioFiles();
                                     }
 
-                                    break;
+                                    if (files != null)
+                                    {
+                                        if (files.Length > 0)
+                                        {
+                                            StartDate = files[0].LastWriteTime.ToShortDateString();
+                                            EndDate = files[files.Length - 1].LastWriteTime.ToShortDateString();
+                                        }
+                                    }
+
                                 }
-                            }
 
-
-                            //if session name file not found
-                            if (DataSessionName.CompareTo("") == 0)
+                            } //if textbox is blank
+                            else
                             {
-                                DataSessionName = name;
+                                DataSessionName = DataSessionDir + "annotation_session.txt";
+                                //"Session_" + DateTime.Now.Year.ToString() + "-" +
+                                //DateTime.Now.Month.ToString() + "-" +
+                                //DateTime.Now.Day.ToString() + ".txt";
 
                                 //Load list
                                 if (LoadList(dataGridView1) == false)
@@ -435,47 +481,13 @@ namespace AudioAnnotation
                                 { is_data_loaded = true; }
 
                             }
-                            else
-                            {
-                                // !note: this should return an OK value
-                                LoadRowsToGrid(DataSessionName);
-                                is_data_loaded = true;
-
-                                if (files == null)
-                                {
-                                    LoadAudioFiles();
-                                }
-
-                                if (files != null)
-                                {
-                                    if (files.Length > 0)
-                                    {
-                                        StartDate = files[0].LastWriteTime.ToShortDateString();
-                                        EndDate = files[files.Length - 1].LastWriteTime.ToShortDateString();
-                                    }
-                                }
-
-                            }
-
-                        } //if textbox is blank
+                        }
                         else
                         {
-                            DataSessionName = DataSessionDir + "annotation_session.txt";
-                            //"Session_" + DateTime.Now.Year.ToString() + "-" +
-                            //DateTime.Now.Month.ToString() + "-" +
-                            //DateTime.Now.Day.ToString() + ".txt";
+                            label_play.Text = "Problem in the ActivityLabelsRealtime.xml file, at least two categories need to be specified. The category labels cannot be loaded.";
 
-                            //Load list
-                            if (LoadList(dataGridView1) == false)
-                            {
-                                label_play.Text = "No audio files were found. Please check the directory name.";
-
-                                // delete previous Xml object
-                                XmlSession = null;
-                            }
-                            else
-                            { is_data_loaded = true; }
-
+                            // delete previous Xml object
+                            XmlSession = null;
                         }
 
                     }// if Xml file not loaded
@@ -491,7 +503,7 @@ namespace AudioAnnotation
                 }
                 else //if SessionDir doesn't exist
                 {
-                    label_play.Text = "No .wav audio files where found in the selected directory.";
+                    label_play.Text = "No audio files where found in the session\\annotation\\voice directory.";
                     XmlSession = null;
                 }
 
@@ -621,6 +633,8 @@ namespace AudioAnnotation
 
         }
 
+        #region old code commeted
+        /*
         private bool AudioDir_Exist()
         {
             bool result = false;
@@ -633,21 +647,29 @@ namespace AudioAnnotation
 
             return result;
         }
+        */
+        #endregion
+
+
 
         private bool SessionDir_Exist()
         {
             bool result = false;
+            DataAudioDir = Folder_annotation + "voice\\"; 
 
-            if (DataAudioDir.CompareTo("") != 0)
+            //if (DataAudioDir.CompareTo("") != 0)
+            if( Directory.Exists(DataAudioDir) == true)
             {
+                //DataSessionDir = DataAudioDir+ "\\AnnotationFiles\\";
+                DataSessionDir = Folder_annotator_files;
 
-                DataSessionDir = DataAudioDir + "\\AnnotationFiles\\";
+                //if (!Directory.Exists(DataSessionDir))
+                //{ Directory.CreateDirectory(DataSessionDir); }
 
-                if (!Directory.Exists(DataSessionDir))
-                { Directory.CreateDirectory(DataSessionDir); }
+                //if (DataOutputDir.CompareTo("") == 0)
+                //{ DataOutputDir = DataSessionDir; }
 
-                if (DataOutputDir.CompareTo("") == 0)
-                { DataOutputDir = DataSessionDir; }
+                DataOutputDir = Folder_annotator_files;
 
                 result = true;
             }
@@ -655,12 +677,14 @@ namespace AudioAnnotation
             return result;
         }
 
-        private void LoadGridColumnHeaders()
+
+        private bool LoadGridColumnHeaders()
         {
+            bool result = false;
 
             if (list_category_name != null)
             {
-                if (list_category_name.Count > 0)
+                if ((list_category_name.Count > 0) && (list_category_name.Count >= 2))
                 {
                     /*if (SessionPart == 1)
                     { dataGridView1.Columns[CINDEX.category_label].HeaderText = list_category_name[0].ToUpper(); }
@@ -671,8 +695,11 @@ namespace AudioAnnotation
                     dataGridView1.Columns[C1.category_label].HeaderText = list_category_name[0];
                     dataGridView1.Columns[C2.category_label].HeaderText = list_category_name[1];
 
-                }
+                    result = true;
+                }  
             }
+
+            return result;
 
         }
 
@@ -682,16 +709,16 @@ namespace AudioAnnotation
             {
                 //------ hide ------------
                 textBox_1.Visible = false;
-                textBox_2.Visible = false;
+                //textBox_2.Visible = false;
                 textBox_instructions_1.Visible = false;
                 textBox_instructions_2.Visible = false;
 
                 label_files_path.Visible = false;
-                label_protocol_file.Visible = false;
+                //label_protocol_file.Visible = false;
 
                 button_1.Visible = false;
                 button_2.Visible = false;
-                button_3.Visible = false;
+                //button_3.Visible = false;
 
                 panel_controls_1.Visible = false;
                 label_panel1_1.Visible = false;
@@ -793,11 +820,6 @@ namespace AudioAnnotation
                     this.folderBrowserDialog.RootFolder = System.Environment.SpecialFolder.Desktop;
                 }
 
-
-
-
-
-
                 DialogResult result = this.folderBrowserDialog.ShowDialog();
 
                 if (result == DialogResult.OK)
@@ -805,7 +827,7 @@ namespace AudioAnnotation
                     string fullPath = this.folderBrowserDialog.SelectedPath;
                     textBox_1.Text = fullPath;
 
-                    folder = new DirectoryInfo(fullPath);
+                    folder = new DirectoryInfo(fullPath + "\\annotation\\voice\\");
 
 
                     files_wav = folder.GetFiles("*.wav");
@@ -818,14 +840,14 @@ namespace AudioAnnotation
                     {
                         DataAudioDir = files_wav[0].DirectoryName;
 
-                        if (textBox_2.Text.Trim().CompareTo("") == 0)
-                        { textBox_instructions_1.Text = "Please provide a valid path for the protocol file, then click Start."; }
+                        if (textBox_1.Text.Trim().CompareTo("") == 0)
+                        { textBox_instructions_1.Text = "Please provide a valid path for the audio files, then click Start."; }
                         else
                         { textBox_instructions_1.Text = ""; }
                     }
                     else
                     {
-                        textBox_instructions_1.Text = "No audio files were found. Please check for the right directory.";
+                        textBox_instructions_1.Text = "No audio files were found. Please check you have the files in the directory: session\annotation\voice";
                     }
 
                 }
@@ -840,6 +862,8 @@ namespace AudioAnnotation
         }
 
 
+        # region Browse for Xml File, Browse for session file
+        /*
         // Browse for Xml File
         private void button_3_Click(object sender, EventArgs e)
         {
@@ -969,6 +993,9 @@ namespace AudioAnnotation
             }
 
         }
+        */
+        
+        #endregion
 
 
         private void button_add_label_Click(object sender, EventArgs e)
@@ -3548,13 +3575,13 @@ namespace AudioAnnotation
                 XmlSession = new Session();
                 CActivityList = new BindingList<ActivityList>();
 
-
                 //string labels_file_name = DataSessionDir + "ActivityLabelsRealtime.xml";
                 //if (File.Exists(labels_file_name) == false)
                 //{ labels_file_name = "ActivityLabelsRealtime.xml"; }
+                //string labels_file_name = textBox_2.Text;
 
-                string labels_file_name = textBox_2.Text;
-
+                // Load the "ActivityLabelsRealtime.xml" file
+                string labels_file_name = Folder_session + "wockets\\ActivityLabelsRealtime.xml";
 
                 if (File.Exists(labels_file_name))
                 {
@@ -3868,14 +3895,14 @@ namespace AudioAnnotation
                 // ----------backup and create output files ------------------
 
                 // Annotation Intervals Files
-                if (File.Exists(DataSessionDir + "AnnotationIntervals.xml"))
-                { File.Delete(DataSessionDir + "AnnotationIntervals.xml"); }
+                if (File.Exists( Folder_audioannotation + "AnnotationIntervals.xml"))
+                { File.Delete( Folder_audioannotation + "AnnotationIntervals.xml"); }
 
-                if (File.Exists(DataSessionDir + "AnnotationIntervals.csv"))
-                { File.Delete(DataSessionDir + "AnnotationIntervals.csv"); }
+                if (File.Exists(Folder_audioannotation + "AnnotationIntervals.csv"))
+                { File.Delete(Folder_audioannotation + "AnnotationIntervals.csv"); }
 
-                intervals_file_xml = new StreamWriter(DataSessionDir + "AnnotationIntervals.xml");
-                intervals_file_csv = new StreamWriter(DataSessionDir + "AnnotationIntervals.csv");
+                intervals_file_xml = new StreamWriter(Folder_audioannotation + "AnnotationIntervals.xml");
+                intervals_file_csv = new StreamWriter(Folder_audioannotation + "AnnotationIntervals.csv");
 
 
                 // Annotation Intervals Files, category 1
@@ -4078,11 +4105,11 @@ namespace AudioAnnotation
             {
 
                 DirectoryInfo directory = new DirectoryInfo(textBox_1.Text);
-                DataAudioDir = directory.FullName;
+                //DataAudioDir = directory.FullName;
+                Folder_session = directory.FullName + "\\";
 
 
                 //Initialize Components
-
                 if (LoadData())
                 {
                     LoadViewGrid("grid");
