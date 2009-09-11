@@ -110,7 +110,7 @@ namespace DataMerger
 
                 
                     //annotation files   
-                    if (File.Exists(this.textBox1.Text+"\\"+ MERGED_SUBDIRECTORY + "\\AnnotationIntervals.xml"))
+                    if (File.Exists(this.textBox1.Text+"\\"+ ANNOTATION_SUBDIRECTORY + "\\AnnotationIntervals.xml"))
                         this.progressForm.AppendLog("Annotation File .....................Found\r\n");
                     else
                         this.progressForm.AppendLog("Annotation File ..................... Not Found\r\n");
@@ -323,8 +323,9 @@ namespace DataMerger
 
         public static string MITES_SUBDIRECTORY = "mites";
         public static string WOCKETS_SUBDIRECTORY = "wockets";
-        public static string OTHER_SUBDIRECTORY = "other";
+        public static string OTHER_SUBDIRECTORY = "othersensors";
         public static string MERGED_SUBDIRECTORY = "merged";
+        public static string ANNOTATION_SUBDIRECTORY = "annotation\\audioannotation";
 
         public static string CSVProgress = "";
         public static void toCSV(string aDataDirectory, string masterDirectory, int maxControllers, string[] filter)
@@ -1438,9 +1439,9 @@ namespace DataMerger
             AXML.Annotation aannotation = null;
             try
             {
-                if (File.Exists(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\AnnotationIntervals.xml"))
+                if (File.Exists(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\AnnotationIntervals.xml"))
                 {
-                    AXML.Reader reader = new AXML.Reader(masterDirectory, aDataDirectory + "\\" + MERGED_SUBDIRECTORY, "AnnotationIntervals.xml");
+                    AXML.Reader reader = new AXML.Reader(masterDirectory, aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY, "AnnotationIntervals.xml");
                     aannotation = reader.parse();
                     aannotation.RemoveData(filter);
                     aannotation.DataDirectory = aDataDirectory;
