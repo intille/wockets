@@ -1363,7 +1363,20 @@ namespace DataMerger
                     while ((sensewear_line = sensewearReader.ReadLine()) != null)
                     {
                         tokens = sensewear_line.Split(',');
-                        sensewearUnixTime = Convert.ToInt64(tokens[0].Trim()) - (8 * 60 * 60 * 1000);//UnixTime.GetUnixTime(sensewearTime);
+                        string[] tsTokens = tokens[0].Split(' ');
+
+                        //2009-08-24 14:32:00.000
+                        if (tsTokens.Length > 1)
+                        {
+                            string[] dateTokens = tsTokens[0].Split('-');
+                            string[] timeTokens = tsTokens[1].Split('.');
+                            timeTokens = timeTokens[0].Split(':');
+                            DateTime sensewearDateTime=new DateTime(Convert.ToInt32(dateTokens[0]), Convert.ToInt32(dateTokens[1]), Convert.ToInt32(dateTokens[2]), Convert.ToInt32(timeTokens[0]), Convert.ToInt32(timeTokens[1]), Convert.ToInt32(timeTokens[2]));
+                            sensewearUnixTime = UnixTime.GetUnixTime(sensewearDateTime);
+                        }
+                        else //unix time
+                            sensewearUnixTime = Convert.ToInt64(tokens[0].Trim()) - (8 * 60 * 60 * 1000);
+                        
                         UnixTime.GetDateTime((long)sensewearUnixTime, out sensewearTime);
 
                         if ((sensewearTime.Day == prevSensewearTime.Day) && (sensewearTime.Hour == prevSensewearTime.Hour) &&
