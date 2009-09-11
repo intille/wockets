@@ -1725,13 +1725,14 @@ namespace NESPDataViewer
         {
             SetGraphPanels();
             string[] files;
-
+            
             paneOrders = new Hashtable();
             int paneOrdering = 1;
 
             #region DETERMINE WHICH GRAPHS TO DISPLAY BASED ON AVAILABLE FILES
+            
             #region ACCELEROMETER GRAPHS
-            files = Directory.GetFiles(path, "MITes*Raw*");
+            files = Directory.GetFiles(path + "\\merged\\", "MITes*Raw*");
             for (int i = 0; i < files.Length; i++)
             {
                 string channel = "", location = "";
@@ -1748,7 +1749,7 @@ namespace NESPDataViewer
 
 
             #region WOCKETS ACCELEROMETER GRAPHS
-            files = Directory.GetFiles(path, "Wocket*Raw*");
+            files = Directory.GetFiles(path + "\\merged\\", "Wocket*Raw*");
             for (int i = 0; i < files.Length; i++)
             {
                 string channel = "", location = "";
@@ -1763,9 +1764,10 @@ namespace NESPDataViewer
             }
             #endregion
 
+
             //ADD_GRAPH STEP 1
             #region OXYCON
-            string oxyFile = Path.Combine(path, "Oxycon.csv"); 
+            string oxyFile = Path.Combine(path + "\\merged\\", "Oxycon.csv"); 
             if (File.Exists(oxyFile))
             {
                 string title ="Oxycon";
@@ -1777,7 +1779,7 @@ namespace NESPDataViewer
             #endregion
 
             #region Zephyr
-            string zephyrFile = Path.Combine(path, "Zephyr.csv");
+            string zephyrFile = Path.Combine(path + "\\merged\\", "Zephyr.csv");
             if (File.Exists(zephyrFile))
             {
                 string title = "Zephyr";
@@ -1787,8 +1789,9 @@ namespace NESPDataViewer
                 paneOrdering++;
             }
             #endregion Zephyr
+
             #region Columbia
-            string columbiaFile = Path.Combine(path,"Columbia.csv");
+            string columbiaFile = Path.Combine(path + "\\merged\\", "Columbia.csv");
                   
             if (File.Exists(columbiaFile))
             {
@@ -1802,7 +1805,7 @@ namespace NESPDataViewer
 
 
             #region GPS
-            string gpsFile = Path.Combine(path, "GPS.csv");
+            string gpsFile = Path.Combine(path + "\\merged\\", "GPS.csv");
 
             if (File.Exists(gpsFile))
             {
@@ -1814,8 +1817,9 @@ namespace NESPDataViewer
             }
             #endregion
 
+
             #region Actigraphs
-            string[] file = Directory.GetFileSystemEntries(path, "*-actigraph*.csv");
+            string[] file = Directory.GetFileSystemEntries(path + "\\merged\\", "*-actigraph*.csv");
 
             if (file.Length > 0)
             {
@@ -1836,7 +1840,7 @@ namespace NESPDataViewer
             #endregion Actigraphs
 
             #region Sensewear
-            string sensewearFile = Path.Combine(path, "Sensewear.csv");
+            string sensewearFile = Path.Combine(path + "\\merged\\", "Sensewear.csv");
             if (File.Exists(sensewearFile))
             {
                 string title = "Sensewear";
@@ -1851,7 +1855,7 @@ namespace NESPDataViewer
             GraphPane hPane = null;
             string filepath = "";
 
-            files = Directory.GetFiles(path, "HeartRate*");
+            files = Directory.GetFiles(path + "\\merged\\", "HeartRate*");
             if (files.Length > 0)
             {
                 string title = "Heart Rate";
@@ -1859,17 +1863,22 @@ namespace NESPDataViewer
                 paneOrders.Add(title, paneOrdering);
                 CreateHeartRateGraph(hPane, files);
             }
-            else if (AnyMatches(path, "GPS*,POI*"))
+            else if (AnyMatches(path + "\\merged\\", "GPS*,POI*"))
             {
                 string title = paneOrdering + " Location";
                 hPane = AddPane(title, "");
             }
-            else if (AnyMatches(path, "annotat*,photos*,surveys*"))
+            else if (AnyMatches(path + "\\annotation\\phoneannotation\\", "annotat*,photos*,surveys*"))
             {
                 string title = paneOrdering + " Labels";
                 hPane = AddPane(title, "");
             }
-            else if (AnyMatches(path, "average-*"))
+            else if (AnyMatches(path + "\\annotation\\audioannotation\\", "annotat*"))
+            {
+                string title = paneOrdering + " Labels";
+                hPane = AddPane(title, "");
+            }
+            else if (AnyMatches(path + "\\annotation\\phoneannotation\\", "average-*"))
             {
                 string title = paneOrdering + " Annotation";
                 hPane = AddPane(title, "");
@@ -1890,33 +1899,42 @@ namespace NESPDataViewer
                listACT.Add(0, 0);
                aPane.AddCurve("annotation", listACT, Color.White, SymbolType.TriangleDown);
                
-
+                // add GPS
                 paneOrders.Add(title, paneOrdering);
-                filepath = Path.Combine(path, "GPSlog.csv");
+                filepath = Path.Combine(path + "\\merged\\", "GPSlog.csv");
                 if (File.Exists(filepath))
                     CreateGPSGraph(hPane, filepath);
-                filepath = Path.Combine(path, "POIlog.csv");
+                filepath = Path.Combine(path + "\\merged\\", "POIlog.csv");
                 if (File.Exists(filepath))
                     CreatePOIGraph(hPane, filepath);
 
-                files = Directory.GetFiles(path, "AnnotationIntervals.csv");
-                for (int i = 0; i < files.Length; i++)
+                //add audio annotations
+                if (Directory.Exists(path + "\\annotation\\audioannotation\\"))
                 {
-                    string name = Path.GetFileNameWithoutExtension(files[i]);
-                    CreateDiaryGraph(aPane, files[i], name, 10 + 20 * i);
+                    files = Directory.GetFiles(path + "\\annotation\\audioannotation\\", "AnnotationIntervals.csv");
+                    for (int i = 0; i < files.Length; i++)
+                    {
+                        string name = Path.GetFileNameWithoutExtension(files[i]);
+                        CreateDiaryGraph(aPane, files[i], name, 10 + 20 * i);
+                    }
                 }
 
-                filepath = Path.Combine(path, "photos.csv");
-                if (File.Exists(filepath))
-                    CreatePhotoGraph(hPane, filepath, path);
+                //add phone annotations
+                if (Directory.Exists(path + "\\annotation\\phoneannotation\\"))
+                {
+                    filepath = Path.Combine(path + "\\annotation\\phoneannotation\\", "photos.csv");
+                    if (File.Exists(filepath))
+                        CreatePhotoGraph(hPane, filepath, path + "\\annotation\\phoneannotation\\");
 
-                filepath = Path.Combine(path, "surveys.csv");
-                if (File.Exists(filepath))
-                    CreateSurveyGraph(hPane, filepath);
+                    filepath = Path.Combine(path + "\\annotation\\phoneannotation\\", "surveys.csv");
+                    if (File.Exists(filepath))
+                        CreateSurveyGraph(hPane, filepath);
 
-                files = Directory.GetFiles(path, "average-*");
-                if (files.Length > 0)
-                    CreateAgreementGraph(hPane, files);
+
+                    files = Directory.GetFiles(path + "\\annotation\\phoneannotation\\", "average-*");
+                    if (files.Length > 0)
+                        CreateAgreementGraph(hPane, files);
+                }
 
             }
             #endregion
