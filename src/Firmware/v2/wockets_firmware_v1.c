@@ -98,12 +98,13 @@ int main()
 	
 	
     for(;;)  {            /* Forever */
-	 set_sleep_mode(SLEEP_MODE_PWR_SAVE);
+	 	 
+	 //set_sleep_mode(SLEEP_MODE_PWR_SAVE);
 	 sleep_enable();
-	 MCUCR = 0x60;            // Disable BOD during sleep to reduce power consumption (used to monitor supply voltage) 
-   	 MCUCR = 0x40;
-	 sleep_cpu();     
-	 sleep_disable();
+	 //MCUCR = 0x60;            // Disable BOD during sleep to reduce power consumption (used to monitor supply voltage) 
+   	 //MCUCR = 0x40;
+	 //sleep_cpu();     
+	 //sleep_disable();
 	 
 	}  
 

@@ -68,6 +68,7 @@ namespace WocketsApplication.DataLogger
         private const string EMPTY_PANEL = "Empty";
         private Hashtable views;
         private Hashtable panels;
+        private ArrayList activityButtons = new ArrayList();
 
         private void InitializeInterface()
         {
@@ -687,8 +688,14 @@ namespace WocketsApplication.DataLogger
                 PictureBox p2 = new PictureBox();
                 p2.Size = new Size(32, 32);
                 p2.Image = this.batteryImg[0];
-                p2.Location = new System.Drawing.Point(currentTextX + 50, currentTextY+5);
-                t.Text = "W" + this.wocketsController._Sensors[i]._ID;
+                p2.Location = new System.Drawing.Point(currentTextX + 120, currentTextY+5);
+                if (this.wocketsController._Sensors[i]._Receiver._Type == ReceiverTypes.HTCDiamond)
+                    t.Text = "Internal";
+                else
+                {
+                    string address = ((Wockets.Receivers.RFCOMMReceiver)((Wockets.Sensors.Accelerometers.Wocket)(this.wocketsController._Sensors[i]))._Receiver)._Address;
+                    t.Text = "W" + address.Substring(address.Length - 2, 2);
+                }
                 t.Name = "W" + this.wocketsController._Sensors[i]._ID;
                 t.Size = new System.Drawing.Size(textBoxWidth, 32);
                 t.Location = new System.Drawing.Point(currentTextX, currentTextY);
@@ -714,20 +721,21 @@ namespace WocketsApplication.DataLogger
             #region graphical Annotation
 
             ((Panel)this.panels[BUTTON_ANNOTATION_PANEL]).AutoScroll = true;
-            ArrayList activityButtons = new ArrayList();
+           
             int max_buttons_per_row = 4;
             int act_button_width = 0;
             int act_button_height = 0;
             int numberOfButtons = 0;
             float fontSize = 7F;
             int act_button_x = 0;
-            int act_button_y = 37;
+            int act_button_y = 0;
             int marginHeight = 20;
 
             int screenWidth = ((Panel)this.panels[BUTTON_ANNOTATION_PANEL]).Width;
             int screenHeight = ((Panel)this.panels[BUTTON_ANNOTATION_PANEL]).Height;
             int scrollbarWidth = 28;
 
+          
             for (int i = 0; (i < this.annotatedSession.OverlappingActivityLists.Count); i++)
             {
                 Activity[] acts = this.annotatedSession.OverlappingActivityLists[i].ToArray();
@@ -739,11 +747,11 @@ namespace WocketsApplication.DataLogger
                     {
                         buttons[j] = new System.Windows.Forms.Button();
                         MakeButtonMultiline(buttons[j]);
-                        buttons[j].Name = this.annotatedSession.OverlappingActivityLists[i]._Name + "_" + acts[j]._Name;
+                        buttons[j].Name = i+"_" +j;
                         buttons[j].Text = truncateText(acts[j]._Name);
                         buttons[j].Click += new EventHandler(this.activityButton_Click);
                         //      buttons[j].Font = new System.Drawing.Font("Microsoft Sans Serif", fontSize, System.Drawing.FontStyle.Regular);
-                        buttons[j].BackColor = this.defaultColor;
+                        buttons[j].BackColor = Color.SkyBlue;
                         numberOfButtons += 1;
                     }
                     activityButtons.Add(buttons);
@@ -759,7 +767,7 @@ namespace WocketsApplication.DataLogger
                         labels[j].Text = truncateText(acts[j]._Name);
                         labels[j].Click += new EventHandler(this.activityButton_Click);
                         //      labels[j].Font = new System.Drawing.Font("Microsoft Sans Serif", fontSize, System.Drawing.FontStyle.Regular);
-                        labels[j].BackColor = this.defaultColor;
+                        labels[j].BackColor = Color.SkyBlue;
                         numberOfButtons += 1;
                     }
                     activityButtons.Add(labels);
@@ -795,39 +803,40 @@ namespace WocketsApplication.DataLogger
                 fontSize = 14F;
             }
 
-            if(isPocketPC)
+            if (isPocketPC)
             {
                 for (int i = 0; i < activityButtons.Count; i++)
-            {
-                System.Windows.Forms.Button[] activityList = (System.Windows.Forms.Button[])activityButtons[i];
-                int buttonsOnRow = 0;
-                for (int j = 0; j < activityList.Length; j++)
                 {
-                    /*if (j == 0)
+                    System.Windows.Forms.Button[] activityList = (System.Windows.Forms.Button[])activityButtons[i];
+                    int buttonsOnRow = 0;
+                    for (int j = 0; j < activityList.Length; j++)
                     {
-                        this.selectedButtons.Add(activityList[j]);
-                        activityList[j].BackColor = clickColor;
-                    }*/
-                    activityList[j].Visible = true;
-                    activityList[j].Width = act_button_width;
-                    activityList[j].Height = act_button_height;
-                    activityList[j].Location = new System.Drawing.Point(act_button_x, act_button_y);
-                    activityList[j].Font = new System.Drawing.Font("Microsoft Sans Serif", fontSize, System.Drawing.FontStyle.Regular);
-                    ((Panel)this.panels[BUTTON_ANNOTATION_PANEL]).Controls.Add(activityList[j]);
-                    buttonsOnRow += 1;
 
-                    if (buttonsOnRow == max_buttons_per_row)
-                    {
-                        act_button_x = 0;
-                        act_button_y += act_button_height;
-                        buttonsOnRow = 0;
+                        activityList[j].Visible = true;
+                        activityList[j].Width = act_button_width;
+                        activityList[j].Height = act_button_height;
+                        activityList[j].Location = new System.Drawing.Point(act_button_x, act_button_y);
+                        activityList[j].Font = new System.Drawing.Font("Microsoft Sans Serif", fontSize, System.Drawing.FontStyle.Regular);
+                        ((Panel)this.panels[BUTTON_ANNOTATION_PANEL]).Controls.Add(activityList[j]);
+                        buttonsOnRow += 1;
+
+                        if (buttonsOnRow == activityList.Length) //completed a category
+                        {
+                            act_button_x = 0;
+                            act_button_y += act_button_height + marginHeight;
+                            buttonsOnRow = 0;
+                        }
+                        else if (buttonsOnRow == max_buttons_per_row) //completed a row within a category
+                        {
+                            act_button_x = 0;
+                            act_button_y += act_button_height;
+                            buttonsOnRow = 0;
+                        }
+                        else //added a button within a row
+                            act_button_x += act_button_width;
                     }
-                    else
-                        act_button_x += act_button_width;
+
                 }
-                act_button_x = 0;
-                act_button_y += act_button_height + marginHeight;
-            }
             }
             else
             {
@@ -837,11 +846,7 @@ namespace WocketsApplication.DataLogger
                     int buttonsOnRow = 0;
                     for (int j = 0; j < activityList.Length; j++)
                     {
-                        /*if (j == 0)
-                        {
-                            this.selectedButtons.Add(activityList[j]);
-                            activityList[j].BackColor = clickColor;
-                        }*/
+
                         activityList[j].Visible = true;
                         activityList[j].Width = act_button_width;
                         activityList[j].Height = act_button_height;
@@ -850,17 +855,21 @@ namespace WocketsApplication.DataLogger
                         ((Panel)this.panels[BUTTON_ANNOTATION_PANEL]).Controls.Add(activityList[j]);
                         buttonsOnRow += 1;
 
-                        if (buttonsOnRow == max_buttons_per_row)
+                        if (buttonsOnRow == activityList.Length) //completed a category
+                        {
+                            act_button_x = 0;
+                            act_button_y += act_button_height + marginHeight;
+                            buttonsOnRow = 0;
+                        }
+                        else if (buttonsOnRow == max_buttons_per_row) //completed a row within a category
                         {
                             act_button_x = 0;
                             act_button_y += act_button_height;
                             buttonsOnRow = 0;
                         }
-                        else
+                        else //added a button within a row
                             act_button_x += act_button_width;
                     }
-                    act_button_x = 0;
-                    act_button_y += act_button_height + marginHeight;
                 }
             }
 
