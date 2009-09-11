@@ -78,9 +78,9 @@ namespace WocketsApplication
             item = new ListViewItem();
             item.Text = "Calibrate";
             this.mainList.Items.Add(item);
-            item = new ListViewItem();
-            item.Text = "Play Exergame";
-            this.mainList.Items.Add(item);
+            //item = new ListViewItem();
+            //item.Text = "Play Exergame";
+            //this.mainList.Items.Add(item);
             this.mainList.SelectedIndexChanged += new EventHandler(this.mainViewChanged);
             this.mainMenu1.MenuItems.Add(this.BackItem);
             this.mainMenu1.MenuItems.Add(this.NextItem);

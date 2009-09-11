@@ -42,6 +42,7 @@ namespace WocketsApplication.DataLogger
 {
     public partial class DataLoggerForm : Form, SetTextControlCallback
     {
+       
         #region Declarations of Objects
 
         #region Definition of Plotting and Graphing Variables       
@@ -746,19 +747,41 @@ namespace WocketsApplication.DataLogger
         private void activityButton_Click(object sender, EventArgs e)
         {
             Button button = (Button)sender;
-            //int i = 0;
-            //Boolean same = false;
+            string[] name = button.Name.Split('_');
+            int category = Convert.ToInt32(name[0]);
+            int index = Convert.ToInt32(name[1]);
+
+              
+            this.overallTimer.reset();
+               
+            System.Windows.Forms.Button[] activityList = (System.Windows.Forms.Button[])activityButtons[category];
+            for (int j = 0; j < activityList.Length; j++)
+            {
+                if (activityList[j].BackColor == Color.DodgerBlue)
+                {
+                    this.overallTimer.start();
+                    activityList[j].BackColor = Color.SkyBlue;
+                    selectedButtons.Remove(activityList[j]);
+                }
+                else if (index == j)
+                {
+                    activityList[j].BackColor = Color.DodgerBlue;
+                    selectedButtons.Add(activityList[j]);
+                }      
+            }
+                    
             
-            if (button.BackColor == clickColor)
+            
+          /*  if (button.BackColor == clickColor)
             {
                 button.BackColor = this.defaultColor;
-                selectedButtons.Remove(button);
+                //selectedButtons.Remove(button);
             }
             else
             {
                 button.BackColor = clickColor;
-                selectedButtons.Add(button);
-            }
+                //selectedButtons.Add(button);
+            }*/
 
             if (this.currentRecord != null)
             {
@@ -801,7 +824,10 @@ namespace WocketsApplication.DataLogger
                 for (int i = 0; i < selectedButtons.Count; i++)
                 {
                     System.Windows.Forms.Button but = (System.Windows.Forms.Button)selectedButtons[i];
-                    this.currentRecord.Activities.Add(new Activity(but.Name.Split(delimiter)[1], but.Name.Split(delimiter)[0]));
+                    string[] name = but.Name.Split('_');
+                    int category = Convert.ToInt32(name[0]);
+                    int index = Convert.ToInt32(name[1]);
+                    this.currentRecord.Activities.Add(new Activity(this.annotatedSession.OverlappingActivityLists[category][index]._Name, this.annotatedSession.OverlappingActivityLists[category]._Name));
                 }
             }
         }

@@ -296,7 +296,6 @@ namespace Wockets
    
             NetworkStacks._BluetoothStack.Dispose();
 
-
         }
 
         private void Save()
@@ -307,8 +306,9 @@ namespace Wockets
                 {
                     for (int i = 0; (i < this._Sensors.Count); i++)
                     {
-                        Thread.Sleep(1000);
-                        this._Sensors[i].Save();                        
+                        
+                        this._Sensors[i].Save();
+                        Thread.Sleep(50);
                     }
                 }
                 catch (Exception ee)
