@@ -31,8 +31,8 @@ namespace TimeSync_Phone
         {
             this.mainMenu1 = new System.Windows.Forms.MainMenu();
             this.menuItem1 = new System.Windows.Forms.MenuItem();
-            this.textBox1 = new System.Windows.Forms.TextBox();
             this.menuItem2 = new System.Windows.Forms.MenuItem();
+            this.textBox1 = new System.Windows.Forms.TextBox();
             this.button1 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
@@ -46,6 +46,11 @@ namespace TimeSync_Phone
             this.menuItem1.Enabled = false;
             this.menuItem1.Text = "";
             // 
+            // menuItem2
+            // 
+            this.menuItem2.Text = "Quit";
+            this.menuItem2.Click += new System.EventHandler(this.menuItem1_Click);
+            // 
             // textBox1
             // 
             this.textBox1.BackColor = System.Drawing.Color.DimGray;
@@ -53,16 +58,13 @@ namespace TimeSync_Phone
             this.textBox1.Font = new System.Drawing.Font("Tahoma", 8F, System.Drawing.FontStyle.Regular);
             this.textBox1.ForeColor = System.Drawing.Color.White;
             this.textBox1.Location = new System.Drawing.Point(8, 91);
+            this.textBox1.MaxLength = 42767;
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(225, 174);
+            this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox1.Size = new System.Drawing.Size(225, 177);
             this.textBox1.TabIndex = 1;
             this.textBox1.Text = "Ready...";
-            // 
-            // menuItem2
-            // 
-            this.menuItem2.Text = "Quit";
-            this.menuItem2.Click += new System.EventHandler(this.menuItem1_Click);
             // 
             // button1
             // 

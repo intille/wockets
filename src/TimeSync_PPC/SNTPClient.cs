@@ -150,7 +150,13 @@ namespace TimeSync_Phone
 		Reserved				// 16-255 - reserved
     }
 
-
+    //Cradle Detection
+    public enum CradleResult
+    {   Cradled, 
+        Uncradled, 
+        WebException, 
+        OtherException
+    }
    
   
 
@@ -167,6 +173,43 @@ namespace TimeSync_Phone
 		private const byte offOriginateTimestamp = 24;
 		private const byte offReceiveTimestamp   = 32;
 		private const byte offTransmitTimestamp  = 40;
+        
+        //Cradle Detection
+        #region Cradle Detection Function
+
+        private const string Home = "127.0.0.1";
+        public string DeviceIP = "";
+        public IPHostEntry CIPHost;
+ 
+        public CradleResult IsDeviceCradled()
+        {
+            try
+            {
+                //CIPHost = Dns.GetHostEntry("ppp_peer");
+                string HostName = Dns.GetHostName();
+                System.Net.IPHostEntry IPHost = Dns.GetHostEntry(HostName);
+                
+                DeviceIP = CIPHost.AddressList[0].ToString();
+                
+                if (DeviceIP != IPAddress.Parse(Home).ToString())
+                {
+                    return CradleResult.Cradled;
+                }
+                else { return CradleResult.Uncradled; }
+            }
+            catch (System.Net.WebException webEx)
+            {
+                return CradleResult.WebException;
+            }
+            catch (System.Exception othEx)
+            {
+                return CradleResult.OtherException;
+            }
+        }
+
+        #endregion
+
+
 
 		// Leap Indicator
 		public _LeapIndicator LeapIndicator
@@ -483,50 +526,7 @@ namespace TimeSync_Phone
 
 
 
-        
-		// Connect to the time server and update system time
-		public void Connect(bool UpdateSystemTime)
-		{
-			try {
-				// Resolve server address
-				IPHostEntry hostadd = Dns.GetHostEntry(TimeServer);
-				IPEndPoint EPhost = new IPEndPoint(hostadd.AddressList[0], 123);
-	
-				//Connect the time server
-				UdpClient TimeSocket = new UdpClient();
-				TimeSocket.Connect(EPhost);
-
-				// Initialize data structure
-				Initialize();
-				TimeSocket.Send(SNTPData, SNTPData.Length);
-				SNTPData = TimeSocket.Receive(ref EPhost);
-				if(!IsResponseValid())
-				{
-					throw new Exception("Invalid response from " + TimeServer);
-				}
-				DestinationTimestamp = DateTime.Now;
-        
-			} catch(SocketException e)
-			  {
-				throw new Exception(e.Message);
-			  }
-
-			// Update system time
-			if(UpdateSystemTime)
-			{
-				SetTime();
-			}
-		}
-         
-        
- 
-
-
-
-
-		// Check if the response from server is valid
-
-
+        #region commented implementation 1
         /*
         // Connect to the time server and update system time
         public void Connect(bool UpdateSystemTime)
@@ -586,12 +586,297 @@ namespace TimeSync_Phone
         }
         */
 
+        #endregion
+
+        #region commented implementation 2
+        /*
+        // Connect to the time server and update system time
+		public void Connect(bool UpdateSystemTime)
+		{
+            try
+            {
+                // Resolve server address
+                IPHostEntry hostadd = Dns.GetHostEntry(TimeServer);
+                IPEndPoint EPhost = new IPEndPoint(hostadd.AddressList[0], 123);
+                try
+                {
+                    //Connect the time server
+                    UdpClient TimeSocket = new UdpClient();
+                    TimeSocket.Connect(EPhost);
+
+                    // Initialize data structure
+                    Initialize();
+                    TimeSocket.Send(SNTPData, SNTPData.Length);
+                    SNTPData = TimeSocket.Receive(ref EPhost);
+                    if (!IsResponseValid())
+                    {
+                        throw new Exception("Invalid response from " + TimeServer);
+                    }
+                    DestinationTimestamp = DateTime.Now;
+                }
+                catch (SocketException e)
+                {
+                    throw new Exception(e.Message);
+                }
+            }
+            catch (SocketException e)
+            {
+                throw new Exception(e.Message);
+            }
+
+			// Update system time
+			if(UpdateSystemTime)
+			{
+				SetTime();
+			}
+		}
+     */
+#endregion  
+        
+        #region commented implementation 3 : callback function
+        /*
+        //-----------------------------------
+        // Handling the asychroous connection
+        //-----------------------------------
+        private bool hostconnected = false;
+        private bool hostfound = false;
+
+        IPHostEntry hostadd;
+        IPEndPoint  EPhost;
+        UdpClient   TimeSocket;
+        
+
+        private void finishAsyncLog(IAsyncResult result)
+        {
+            UdpClient mysocket = (UdpClient)result.AsyncState;
+            mysocket.Client.EndConnect(result);
+            hostconnected = true;
+        }
+
+ 
+        // Record the IPs in the state object for later use.
+        public void GetHostEntryCallback(IAsyncResult ar)
+        {
+            //string ioContext = (string)ar.AsyncState;
+            //ioContext.IPs = Dns.EndGetHostEntry(ar);
+            //GetHostEntryFinished.Set();
+
+            hostadd = Dns.EndGetHostEntry(ar);
+            hostfound = true;
+        }     
+
+        
+
+
+		// Connect to the time server and update system time
+        public bool Connect(bool UpdateSystemTime)
+		{
+            bool result = false;
+          
+            try
+            {
+                // Resolve server address
+                Dns.BeginGetHostEntry(TimeServer,new AsyncCallback(GetHostEntryCallback), TimeServer);
+
+                // Wait here until the resolve completes 
+                int iterator = 0;
+
+                while ( (!hostfound) && (iterator<2) )
+                {
+                    System.Threading.Thread.Sleep(5000); // sleep for 5 seconds
+                    iterator++;
+                }
+
+
+                if (hostfound)
+                {   
+                    iterator = 0;
+
+                    //Connect the time server
+                    EPhost = new IPEndPoint(hostadd.AddressList[0], 123);
+                    TimeSocket = new UdpClient();
+
+                    TimeSocket.Client.BeginConnect(EPhost, new AsyncCallback(this.finishAsyncLog), TimeSocket);
+                    
+                    while ( (!hostconnected) && (iterator<2) )
+                    {
+                        System.Threading.Thread.Sleep(5000); // sleep for 5 seconds
+                        iterator++;
+                    }
+
+
+                    if (hostconnected)
+                    {
+                        result = true;
+
+                        // Initialize data structure
+                        Initialize();
+                        TimeSocket.Send(SNTPData, SNTPData.Length);
+                        SNTPData = TimeSocket.Receive(ref EPhost);
+                        if (!IsResponseValid())
+                        {
+                            throw new Exception("Invalid response from " + TimeServer);
+                        }
+
+                        DestinationTimestamp = DateTime.Now;
+                    }
+                }
+
+                
+            }
+            catch (SocketException e)
+            {
+                throw new Exception(e.Message);
+                
+            }
+
+			// Update system time
+			if(UpdateSystemTime)
+			{
+				SetTime();
+			}
+
+            return result; 
+		}
+        */
+        #endregion
+
+        #region implementation 4: simple with receive timeout
+     /*
+        // Connect to the time server and update system time
+        public void Connect(bool UpdateSystemTime)
+        {
+            Socket server = null;
+
+            try
+            {
+                //Resolve server address
+                // it will lauch an exception if the timeserver is not found
+                IPHostEntry hostadd = Dns.GetHostEntry(TimeServer);
+                IPEndPoint EPhost = new IPEndPoint(hostadd.AddressList[0], 123);
+
+                server = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+
+                int sockopt = (int)server.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout);
+                server.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, 5000);
+                sockopt = (int)server.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout);
+
+
+                Initialize();
+
+                server.SendTo(SNTPData, SNTPData.Length, SocketFlags.None, EPhost);
+
+                IPEndPoint sender = new IPEndPoint(IPAddress.Any, 0);
+                EndPoint tmp_remote = (EndPoint)sender;
+
+                server.ReceiveFrom(SNTPData, ref tmp_remote);
+
+                if (!IsResponseValid())
+                { throw new Exception("Invalid Response from " + TimeServer); }
+
+                DestinationTimestamp = DateTime.Now;
+            }
+            catch (SocketException e)
+            {
+                throw new Exception(e.Message);
+            }
+            finally
+            {
+                if (server != null)
+                { server.Close(); }
+            }
+
+            //Update System Time
+            if (UpdateSystemTime)
+            {
+                SetTime();
+            }
+        }
+     */
+        #endregion
+
+        #region implementation 5: adding the timeout
+
+        public int Connect(int timeout_msecs, bool UpdateSystemTime)
+        {
+            int sucess = -1;
+
+            try
+            {
+                IPEndPoint listenEP = new IPEndPoint(IPAddress.Any, 123);
+                Socket sendSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+                IPHostEntry hostEntry = Dns.GetHostEntry(TimeServer);
+                IPEndPoint sendEP = new IPEndPoint(hostEntry.AddressList[0], 123);
+                EndPoint epSendEP = (EndPoint)sendEP;
+
+                int messageLength = 0;
+
+                try
+                {
+                    sendSocket.Bind(listenEP);
+                    Initialize();
+
+                    bool messageReceived = false;
+                    int elapsedTime = 0;
+
+                    //Timeout code
+                    while (!messageReceived && (elapsedTime < timeout_msecs))
+                    {
+                        sendSocket.SendTo(SNTPData, SNTPData.Length, SocketFlags.None, sendEP);
+                        
+                        //Check if data has been received by the listening socket and is available to be read
+                        if (sendSocket.Available > 0)
+                        {
+                            messageLength = sendSocket.ReceiveFrom(SNTPData, ref epSendEP);
+                            if (!IsResponseValid())
+                            {
+                                throw new Exception("Invalid response from " + TimeServer);
+                            }
+                            messageReceived = true;
+                            break;
+                        }
+                        //Wait a second
+                        System.Threading.Thread.Sleep(1000);
+                        elapsedTime += 1000;
+                    }
+                    if (!messageReceived)
+                    {
+                        throw new TimeoutException("Timeout while trying to connect to " + TimeServer);
+                    }
+                }
+                catch (SocketException e)
+                {
+                    throw new Exception(e.Message);
+                }
+                finally
+                {
+                    if (sendSocket != null)
+                    { sendSocket.Close(); }
+                }
+
+                DestinationTimestamp = DateTime.Now;
+            }
+            catch (SocketException e)
+            {
+                throw new Exception(e.Message);
+            }
+
+            // Update system time
+            if (UpdateSystemTime)
+            {
+                sucess = SetTime();
+            }
+
+            return sucess;
+
+        }
+
+        #endregion
 
 
 
-
-
-		public bool IsResponseValid()
+        // Check if the response from server is valid
+        public bool IsResponseValid()
 		{
 			if(SNTPData.Length < SNTPDataLength || Mode != _Mode.Server)
 			{
@@ -607,8 +892,9 @@ namespace TimeSync_Phone
 		public override string ToString()
 		{
 			string str;
-
+            
 			str = "Leap Indicator: ";
+       
 			switch(LeapIndicator)
 			{
 				case _LeapIndicator.NoWarning:
@@ -661,6 +947,7 @@ namespace TimeSync_Phone
 					str += "Secondary Reference";
 					break;
 			}
+          
 			str += "\r\nLocal time: " + TransmitTimestamp.ToString();
 			str += "\r\nPrecision: " + Precision.ToString() + " s";
 			str += "\r\nPoll Interval: " + PollInterval.ToString() + " s";
@@ -713,23 +1000,39 @@ namespace TimeSync_Phone
 
 
 		// Set system time according to transmit timestamp
-		private void SetTime()
+		private int SetTime()
 		{
-			SYSTEMTIME st;
+
+            int sucess = 0;
+            SYSTEMTIME st;
+
 
 			// Thanks to Jim Hollenhorst <hollenho@attbi.com>
 			DateTime trts = DateTime.Now.AddMilliseconds(LocalClockOffset);
+          
+            if ((trts.Year  == TransmitTimestamp.Year) &&
+                (trts.Month == TransmitTimestamp.Month) &&
+                (trts.Day   == TransmitTimestamp.Day)  )
+            {
+                sucess = 1;
+            }
+            else
+            {  trts = TransmitTimestamp; }   
 
-			st.year = (short)trts.Year;
-			st.month = (short)trts.Month;
-			st.dayOfWeek = (short)trts.DayOfWeek;
-			st.day = (short)trts.Day;
-			st.hour = (short)trts.Hour;
-			st.minute = (short)trts.Minute;
-			st.second = (short)trts.Second;
-			st.milliseconds = (short)trts.Millisecond;
 
-			SetLocalTime(ref st);
+                st.year = (short)trts.Year;
+                st.month = (short)trts.Month;
+                st.dayOfWeek = (short)trts.DayOfWeek;
+                st.day = (short)trts.Day;
+                st.hour = (short)trts.Hour;
+                st.minute = (short)trts.Minute;
+                st.second = (short)trts.Second;
+                st.milliseconds = (short)trts.Millisecond;
+
+                SetLocalTime(ref st);
+
+                return sucess;
+            
         }
 
 
