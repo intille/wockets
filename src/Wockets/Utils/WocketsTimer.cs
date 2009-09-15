@@ -142,8 +142,10 @@ namespace Wockets.Utils
             }
 
             QueryPerformanceCounter(out counter);
-            if (prevCount >= counter)
+            if (prevCount > counter)
             {
+                Thread.Sleep(1);
+                QueryPerformanceCounter(out counter);
                 referenceCounter = counter;
                 referenceTime = ((TimeSpan)(DateTime.Now.Subtract(UnixRef))).TotalMilliseconds;
                 if (referenceTime <= previousTime)

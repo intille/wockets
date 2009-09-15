@@ -83,7 +83,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
 
 
                 btStream.processingThread = new Thread(new ThreadStart(btStream.Process));
-                btStream.processingThread.Priority = ThreadPriority.Highest;
+                btStream.processingThread.Priority = ThreadPriority.AboveNormal;
                 btStream.processingThread.Start();
 
             }
@@ -169,12 +169,13 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
 
 
 
+
                 int ii;
                 for (ii = 0; ii < bytesReceived; ii++)
                 {
                     this.buffer._Timestamp[this.buffer._Tail] = timestamp;
                     this.buffer._Bytes[this.buffer._Tail++] = singleReadBuffer[ii];
-                    this.buffer._Tail %= this.buffer._Bytes.Length;
+                    this.buffer._Tail %= this.buffer._Bytes.Length;                                       
                 }
 
             }
