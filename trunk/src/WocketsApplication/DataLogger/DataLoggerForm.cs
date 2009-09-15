@@ -1275,32 +1275,33 @@ namespace WocketsApplication.DataLogger
         }
 
 
+        int sound_timer = 0;
         private void readDataTimer_Tick(object sender, EventArgs e)
         {
-            
-            int zeroes = 0;
+                        
             for (int i = 0; i < this.wocketsController._Sensors.Count; i++)
             {
-                if (this.wocketsController._Receivers[i].Disconnected != 0)
+                if ( (this.wocketsController._Receivers[i]._Status== ReceiverStatus.Disconnected) ||
+                    (this.wocketsController._Receivers[i]._Status== ReceiverStatus.Reconnecting))
                 {
-                    this.wocketsController._Receivers[i].Disconnected += 1;
-                    if (this.wocketsController._Receivers[i].Disconnected >= 3600 && !this.play_sound)
+                    if (this.wocketsController._Receivers[i].Disconnected >= 1000)
                     {
-                        this.play_sound = true;
-                        alert.LoopPlay();
+                        if (sound_timer > 150)
+                        {
+                            alert.Play();                            
+                            sound_timer = 0;
+                        }
+                        else
+                            sound_timer++;
                     }
+                    else
+                        this.wocketsController._Receivers[i].Disconnected += 1;
                 }
                 else
-                {
-                    zeroes += 1;
-                }
+                    this.wocketsController._Receivers[i].Disconnected = 0;                
             }
 
-            if (zeroes == 6 && this.play_sound)
-            {
-                alert.Play();
-                this.play_sound = false;
-            }
+
 
             this.SRcounter++;
 

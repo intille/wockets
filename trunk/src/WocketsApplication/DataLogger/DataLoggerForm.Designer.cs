@@ -688,9 +688,9 @@ namespace WocketsApplication.DataLogger
                 PictureBox p2 = new PictureBox();
                 p2.Size = new Size(32, 32);
                 p2.Image = this.batteryImg[0];
-                p2.Location = new System.Drawing.Point(currentTextX + 120, currentTextY+5);
+                p2.Location = new System.Drawing.Point(currentTextX + 80, currentTextY+5);
                 if (this.wocketsController._Sensors[i]._Receiver._Type == ReceiverTypes.HTCDiamond)
-                    t.Text = "Internal";
+                    t.Text = "Intrnl";
                 else
                 {
                     string address = ((Wockets.Receivers.RFCOMMReceiver)((Wockets.Sensors.Accelerometers.Wocket)(this.wocketsController._Sensors[i]))._Receiver)._Address;

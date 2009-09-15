@@ -49,14 +49,6 @@ namespace Wockets.Decoders.Accelerometers
 
             while (rawDataIndex !=data._Tail)
             {
-                if (this.cmd && data._Bytes[rawDataIndex] == ((byte)'C'))
-                {
-                    if (rawDataIndex + 1 != data._Tail && data._Bytes[rawDataIndex + 1] == ((byte)'M'))
-                    {
-                        if (rawDataIndex + 2 != data._Tail && data._Bytes[rawDataIndex + 2] == ((byte)'D'))
-                            this.cmd = false;
-                    }
-                }
 
                 if ((data._Bytes[rawDataIndex] & 0x80) != 0) //grab the next 6 bytes
                 {

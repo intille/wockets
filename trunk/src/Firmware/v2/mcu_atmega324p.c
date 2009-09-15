@@ -246,7 +246,7 @@ void TransmitByte( unsigned char data )
   UCSR0A=UCSR0A & 0xdf;
   
   UDR0 =  data;  /* Start transmission   */
-  while ( !(UCSR0A & (1<<TXC0)) );        /*  Wait to Transmit - This is needed to avoid getting into power save mode before transmission */
+ // while ( !(UCSR0A & (1<<TXC0)) );        /*  Wait to Transmit - This is needed to avoid getting into power save mode before transmission */
    
 }
 
