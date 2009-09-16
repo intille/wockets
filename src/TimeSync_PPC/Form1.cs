@@ -58,7 +58,7 @@ namespace TimeSync_Phone
                 client = new SNTPClient(TimeServer);
 
 
-                isconnected = client.Connect(6000, true);
+                isconnected = client.Connect(5000, true);
 
                 if (isconnected == 0)
                 {
