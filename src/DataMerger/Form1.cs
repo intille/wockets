@@ -140,6 +140,8 @@ namespace DataMerger
 
 
                     //oxycon
+                    #region commented oxycon read from othersensors
+                    /*
                     if (File.Exists(this.textBox1.Text+"\\"+ OTHER_SUBDIRECTORY + "\\OxyconSyncronizationTime.txt"))
                     {
                         this.progressForm.AppendLog("Oxycon Synchronization File .....................Found\r\n");
@@ -167,6 +169,72 @@ namespace DataMerger
                     }
                     else
                         this.progressForm.AppendLog("Oxycon Synchronization File ....................Not Found\r\n");
+                    */
+                    #endregion
+
+                    if( File.Exists(this.textBox1.Text + "\\" + MITES_SUBDIRECTORY + "\\OxyconSyncronizationTime.txt") )
+                    {
+                        if (!File.Exists(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY + "\\OxyconSyncronizationTime.txt"))
+                        { 
+                            File.Move(this.textBox1.Text + "\\" + MITES_SUBDIRECTORY + "\\OxyconSyncronizationTime.txt", 
+                                      this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY + "\\OxyconSyncronizationTime.txt"); 
+                        }
+                    }
+                    
+                    
+                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-oxycon.dat");
+                    FileInfo finfo;
+                    if (file.Length == 0)
+                    {   
+                        file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MITES_SUBDIRECTORY + "\\", "*-oxycon.dat");
+                        for(int i= 0; i < file.Length; i++)
+                        {
+                            finfo = new FileInfo(file[i]);
+                            File.Move(file[i], this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY + "\\" + finfo.Name); 
+                        }   
+                     }
+
+                     file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-flashcard*");
+                     if (file.Length == 0)
+                     {
+                         file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MITES_SUBDIRECTORY + "\\", "*-flashcard*");
+                         for (int i = 0; i < file.Length; i++)
+                         {
+                            finfo = new FileInfo(file[i]);
+                            File.Move(file[i], this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY + "\\" + finfo.Name);
+                         }
+                    }
+
+
+                    // check oxycon files from MITES directory
+                    if (File.Exists(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY + "\\OxyconSyncronizationTime.txt"))
+                    {
+                        this.progressForm.AppendLog("Oxycon Synchronization File .....................Found\r\n");
+                        file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-oxycon.dat");
+                        if (file.Length == 1)
+                            this.progressForm.AppendLog("Oxycon PC File .....................Found\r\n");
+                        else if (file.Length == 0)
+                            this.progressForm.AppendLog("Oxycon PC File .....................Not Found\r\n");
+
+
+                        file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-flashcard.dat");
+                        if (file.Length == 1)
+                            this.progressForm.AppendLog("Oxycon Flash File .....................Found\r\n");
+                        else if (file.Length == 0)
+                        {
+                            file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-flash.dat");
+                            if (file.Length == 1)
+                            {
+                                this.progressForm.AppendLog("Oxycon Flash.dat wrong name .....................Renaming\r\n");
+                                File.Copy(file[0], file[0].Replace("-flash.dat", "-flashcard.dat"));
+                            }
+                            else
+                                this.progressForm.AppendLog("Oxycon Flash file not found.... manual inspection needed\r\n");
+                        }
+                    }
+                    else
+                    { this.progressForm.AppendLog("Oxycon Synchronization File ....................Not Found\r\n"); }
+                    
 
 
                     //omron
