@@ -1811,7 +1811,7 @@ namespace NESPDataViewer
             {
                 string title = "GPS";
                 GraphPane ePane = AddPane(title, "GPS");
-                CreateGPSDeviceGraph(ePane, columbiaFile);
+                CreateGPSDeviceGraph(ePane, gpsFile);
                 paneOrders.Add(title, paneOrdering);
                 paneOrdering++;
             }
