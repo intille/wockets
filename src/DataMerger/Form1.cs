@@ -421,6 +421,8 @@ namespace DataMerger
             //Actigraph
             TextWriter[] actigraphCSV;
             Hashtable[] actigraphData;
+            string[] actigraphType;
+
 
 
             //Zephyr
@@ -503,6 +505,8 @@ namespace DataMerger
             string csv_line6 = "UnixTimeStamp,TimeStamp,VectorMagnitude";
             string hr_csv_header = "UnixTimeStamp,TimeStamp,HR";
             string actigraph_csv_header = "UnixTimeStamp,TimeStamp,Actigraph";
+            string actigraph_csv_header_gt1m = "UnixTimeStamp,TimeStamp,ActigraphX,ActigraphY";
+            string actigraph_csv_header_gtx = "UnixTimeStamp,TimeStamp,ActigraphX,ActigraphY,ActigraphZ";
             string sensewear_csv_header = "UnixTimeStamp,TimeStamp,SensewearSR,Sensewear_AVTranAcc,Senserwear_AVLongAcc,Sensewear_AVForAcc";
             string zephyr_csv_header = "UnixTimeStamp,TimeStamp,ZephyrHeart Rate Data,ZephyrECG - Amplitude Data,ZephyrECG - Noise Data,ZephyrRES - Breathing Wave Amplitude (V) Data,ZephyrRES - Respiration Rate Data,ZephyrTEM - Skin Temperature Data,ZephyrBAT - Battery Voltage (V) Data,ZephyrPOS - Posture Data,ZephyrACC - Activity Data,ZephyrACC - Peak Acceleration (g) Data,ZephyrACC - Vertical Acc Minimum (g) Data,ZephyrACC - Vertical Acc Peak (g) Data,ZephyrACC - Lateral Acc Minimum (g) Data,ZephyrACC - Lateral Acc Peak (g) Data,ZephyrACC - Sagittal Acc Minimum (g) Data,ZephyrACC - Sagittal Acc Peak (g)";
             string oxycon_csv_header = "UnixTimeStamp,TimeStamp,OxyconHR,OxyconBF,OxyconVE,OxyconVO2,OxyconVO2kg,OxyconMET,OxyconEE,OxyconRER";
@@ -679,6 +683,9 @@ namespace DataMerger
             file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*-actigraph*.csv");
             actigraphCSV = new TextWriter[file.Length];
             actigraphData = new Hashtable[file.Length];
+            actigraphType = new string[file.Length];
+
+
 
             try
             {
@@ -694,36 +701,136 @@ namespace DataMerger
                     DateTime actigraphTime = new DateTime();
 
                     actigraphReader = new StreamReader(file[i]);
-                    Match m;
-                    do
+                    actigraph_line = actigraphReader.ReadLine();//read first line
+
+                    if (actigraph_line.Contains("ActiSoft"))
                     {
-                        actigraph_line = actigraphReader.ReadLine();
-                        tokens = actigraph_line.Split(',');
-                        m = Regex.Match(tokens[0].Trim(), "^[0-9]+/[0-9]+/[0-9]+$");
-                    } while (m.Success == false);
-
-
-                    tokens = actigraph_line.Split(',');
-                    Match m1 = Regex.Match(tokens[0].Trim(), "([0-9]+)/([0-9]+)/([0-9]+)");
-                    Match m2 = Regex.Match(tokens[1].Trim(), "([0-9]+):([0-9]+):([0-9]+)");
-                    actigraphTime = new DateTime(Convert.ToInt32("20" + m1.Groups[3].Value), Convert.ToInt32(m1.Groups[1].Value), Convert.ToInt32(m1.Groups[2].Value), Convert.ToInt32(m2.Groups[1].Value), Convert.ToInt32(m2.Groups[2].Value), Convert.ToInt32(m2.Groups[3].Value));
-                    actigraphUnixTime = UnixTime.GetUnixTime(actigraphTime);
-
-                    do
-                    {
-                        tokens = actigraph_line.Split(',');
-                        if (tokens[0].Length > 1)
+                        actigraphType[i] = "ActiSoft";
+                        Match m;
+                        do
                         {
-                            m1 = Regex.Match(tokens[0], "([0-9]+)/([0-9]+)/([0-9]+)");
-                            m2 = Regex.Match(tokens[1], "([0-9]+):([0-9]+):([0-9]+)");
-                            actigraphTime = new DateTime(Convert.ToInt32("20" + m1.Groups[3].Value), Convert.ToInt32(m1.Groups[1].Value), Convert.ToInt32(m1.Groups[2].Value), Convert.ToInt32(m2.Groups[1].Value), Convert.ToInt32(m2.Groups[2].Value), Convert.ToInt32(m2.Groups[3].Value));
-                            actigraphUnixTime = UnixTime.GetUnixTime(actigraphTime);
-                            string actigraphKey = actigraphTime.Year + "-" + actigraphTime.Month + "-" + actigraphTime.Day + "-" + actigraphTime.Hour + "-" + actigraphTime.Minute + "-" + actigraphTime.Second;
-                            string actigraphLine = "" + Convert.ToInt32(tokens[2]);
-                            actigraphData[i].Add(actigraphKey, actigraphLine);
-                        }
-                    } while ((actigraph_line = actigraphReader.ReadLine()) != null);
+                            actigraph_line = actigraphReader.ReadLine();
+                            tokens = actigraph_line.Split(',');
+                            m = Regex.Match(tokens[0].Trim(), "^[0-9]+/[0-9]+/[0-9]+$");
+                        } while (m.Success == false);
 
+
+                        tokens = actigraph_line.Split(',');
+                        Match m1 = Regex.Match(tokens[0].Trim(), "([0-9]+)/([0-9]+)/([0-9]+)");
+                        Match m2 = Regex.Match(tokens[1].Trim(), "([0-9]+):([0-9]+):([0-9]+)");
+                        actigraphTime = new DateTime(Convert.ToInt32("20" + m1.Groups[3].Value), Convert.ToInt32(m1.Groups[1].Value), Convert.ToInt32(m1.Groups[2].Value), Convert.ToInt32(m2.Groups[1].Value), Convert.ToInt32(m2.Groups[2].Value), Convert.ToInt32(m2.Groups[3].Value));
+                        actigraphUnixTime = UnixTime.GetUnixTime(actigraphTime);
+
+                        do
+                        {
+                            tokens = actigraph_line.Split(',');
+                            if (tokens[0].Length > 1)
+                            {
+                                m1 = Regex.Match(tokens[0], "([0-9]+)/([0-9]+)/([0-9]+)");
+                                m2 = Regex.Match(tokens[1], "([0-9]+):([0-9]+):([0-9]+)");
+                                actigraphTime = new DateTime(Convert.ToInt32("20" + m1.Groups[3].Value), Convert.ToInt32(m1.Groups[1].Value), Convert.ToInt32(m1.Groups[2].Value), Convert.ToInt32(m2.Groups[1].Value), Convert.ToInt32(m2.Groups[2].Value), Convert.ToInt32(m2.Groups[3].Value));
+                                actigraphUnixTime = UnixTime.GetUnixTime(actigraphTime);
+                                string actigraphKey = actigraphTime.Year + "-" + actigraphTime.Month + "-" + actigraphTime.Day + "-" + actigraphTime.Hour + "-" + actigraphTime.Minute + "-" + actigraphTime.Second;
+                                string actigraphLine = "" + Convert.ToInt32(tokens[2]);
+                                actigraphData[i].Add(actigraphKey, actigraphLine);
+                            }
+                        } while ((actigraph_line = actigraphReader.ReadLine()) != null);
+                    }
+                    else if (actigraph_line.Contains("GT1M"))
+                    {
+                        actigraphType[i] = "GT1M";
+                        Match m;
+                        int actihour = 0, actiminute = 0, actisecond = 0, actiyear = 0, actiday = 0, actimonth = 0;
+                        do
+                        {
+                            actigraph_line = actigraphReader.ReadLine();
+                            if (actigraph_line.Contains("Start Time"))
+                            {
+                                tokens = actigraph_line.Split(' ');
+                                m = Regex.Match(tokens[2].Trim(), "([0-9]+):([0-9]+):([0-9]+)");
+                                actihour = Convert.ToInt32(m.Groups[1].Value);
+                                actiminute = Convert.ToInt32(m.Groups[2].Value);
+                                actisecond = Convert.ToInt32(m.Groups[3].Value);
+                            }
+                            else if (actigraph_line.Contains("Start Date"))
+                            {
+                                tokens = actigraph_line.Split(' ');
+                                m = Regex.Match(tokens[2].Trim(), "([0-9]+)/([0-9]+)/([0-9]+)");
+                                actimonth = Convert.ToInt32(m.Groups[1].Value);
+                                actiday = Convert.ToInt32(m.Groups[2].Value);
+                                actiyear = Convert.ToInt32(m.Groups[3].Value);
+                            }
+                            tokens = actigraph_line.Split(',');                            
+                        } while (tokens.Length!=3);
+
+
+                        tokens = actigraph_line.Split(',');
+                        //Match m1 = Regex.Match(tokens[0].Trim(), "([0-9]+)/([0-9]+)/([0-9]+)");
+                        //Match m2 = Regex.Match(tokens[1].Trim(), "([0-9]+):([0-9]+):([0-9]+)");
+                        actigraphTime = new DateTime(actiyear, actimonth, actiday, actihour, actiminute, actisecond);//(Convert.ToInt32("20" + m1.Groups[3].Value), Convert.ToInt32(m1.Groups[1].Value), Convert.ToInt32(m1.Groups[2].Value), Convert.ToInt32(m2.Groups[1].Value), Convert.ToInt32(m2.Groups[2].Value), Convert.ToInt32(m2.Groups[3].Value));
+                        actigraphUnixTime = UnixTime.GetUnixTime(actigraphTime);
+
+                        do
+                        {
+                            tokens = actigraph_line.Split(',');
+                            if (tokens.Length == 3)
+                            {
+                                actigraphUnixTime = UnixTime.GetUnixTime(actigraphTime);
+                                string actigraphKey = actigraphTime.Year + "-" + actigraphTime.Month + "-" + actigraphTime.Day + "-" + actigraphTime.Hour + "-" + actigraphTime.Minute + "-" + actigraphTime.Second;
+                                string actigraphLine = Convert.ToInt32(tokens[0]) + "," + Convert.ToInt32(tokens[1]);
+                                actigraphData[i].Add(actigraphKey, actigraphLine);
+                                actigraphTime = actigraphTime.AddSeconds(1.0);
+                            }
+                        } while ((actigraph_line = actigraphReader.ReadLine()) != null);
+
+                    }
+                    else if (actigraph_line.Contains("GT3X"))
+                    {
+                        actigraphType[i] = "GT3X";
+                        Match m;
+                        int actihour = 0, actiminute = 0, actisecond = 0, actiyear = 0, actiday = 0, actimonth = 0;
+                        do
+                        {
+                            actigraph_line = actigraphReader.ReadLine();
+                            if (actigraph_line.Contains("Start Time"))
+                            {
+                                tokens = actigraph_line.Split(' ');
+                                m = Regex.Match(tokens[2].Trim(), "([0-9]+):([0-9]+):([0-9]+)");
+                                actihour = Convert.ToInt32(m.Groups[1].Value);
+                                actiminute = Convert.ToInt32(m.Groups[2].Value);
+                                actisecond = Convert.ToInt32(m.Groups[3].Value);
+                            }
+                            else if (actigraph_line.Contains("Start Date"))
+                            {
+                                tokens = actigraph_line.Split(' ');
+                                m = Regex.Match(tokens[2].Trim(), "([0-9]+)/([0-9]+)/([0-9]+)");
+                                actimonth = Convert.ToInt32(m.Groups[1].Value);
+                                actiday = Convert.ToInt32(m.Groups[2].Value);
+                                actiyear = Convert.ToInt32(m.Groups[3].Value);
+                            }
+                            tokens = actigraph_line.Split(',');  
+                        } while (tokens.Length!=5);
+
+
+                        tokens = actigraph_line.Split(',');
+                        //Match m1 = Regex.Match(tokens[0].Trim(), "([0-9]+)/([0-9]+)/([0-9]+)");
+                        //Match m2 = Regex.Match(tokens[1].Trim(), "([0-9]+):([0-9]+):([0-9]+)");
+                        actigraphTime = new DateTime(actiyear, actimonth, actiday, actihour, actiminute, actisecond);//(Convert.ToInt32("20" + m1.Groups[3].Value), Convert.ToInt32(m1.Groups[1].Value), Convert.ToInt32(m1.Groups[2].Value), Convert.ToInt32(m2.Groups[1].Value), Convert.ToInt32(m2.Groups[2].Value), Convert.ToInt32(m2.Groups[3].Value));
+                        actigraphUnixTime = UnixTime.GetUnixTime(actigraphTime);
+
+                        do
+                        {
+                            tokens = actigraph_line.Split(',');
+                            if (tokens.Length == 5)
+                            {
+                                actigraphUnixTime = UnixTime.GetUnixTime(actigraphTime);
+                                string actigraphKey = actigraphTime.Year + "-" + actigraphTime.Month + "-" + actigraphTime.Day + "-" + actigraphTime.Hour + "-" + actigraphTime.Minute + "-" + actigraphTime.Second;
+                                string actigraphLine = Convert.ToInt32(tokens[0]) + "," + Convert.ToInt32(tokens[1]) + "," + Convert.ToInt32(tokens[2]);
+                                actigraphData[i].Add(actigraphKey, actigraphLine);
+                                actigraphTime = actigraphTime.AddSeconds(1.0);
+                            }
+                        } while ((actigraph_line = actigraphReader.ReadLine()) != null);
+                    }
                     actigraphReader.Close();
                 }
             }
@@ -1708,8 +1815,21 @@ namespace DataMerger
 
             for (int i = 0; (i < actigraphData.Length); i++)
             {
-                master_csv_header += ",Actigraph" + (i + 1);
-                actigraphCSV[i].WriteLine(actigraph_csv_header);
+                if (actigraphType[i] == "GT3X")
+                {
+                    master_csv_header += ",Actigraph" + (i + 1) + "_X,Actigraph" + (i + 1) + "_Y,Actigraph" + (i + 1) + "_Z";
+                    actigraphCSV[i].WriteLine(actigraph_csv_header_gtx);
+                }
+                else if (actigraphType[i] == "GT1M")
+                {
+                    master_csv_header += ",Actigraph" + (i + 1) + "_X,Actigraph" + (i + 1) + "_Y";
+                    actigraphCSV[i].WriteLine(actigraph_csv_header_gt1m);
+                }
+                else
+                {
+                    master_csv_header += ",Actigraph" + (i + 1);
+                    actigraphCSV[i].WriteLine(actigraph_csv_header);
+                }
             }
             master_csv_header += ",SensewearSR,Sensewear_AVTranAcc,Senserwear_AVLongAcc,Sensewear_AVForAcc";
             master_csv_header += ",ZephyrHeart Rate Data,ZephyrECG - Amplitude Data,ZephyrECG - Noise Data,ZephyrRES - Breathing Wave Amplitude (V) Data,ZephyrRES - Respiration Rate Data,ZephyrTEM - Skin Temperature Data,ZephyrBAT - Battery Voltage (V) Data,ZephyrPOS - Posture Data,ZephyrACC - Activity Data,ZephyrACC - Peak Acceleration (g) Data,ZephyrACC - Vertical Acc Minimum (g) Data,ZephyrACC - Vertical Acc Peak (g) Data,ZephyrACC - Lateral Acc Minimum (g) Data,ZephyrACC - Lateral Acc Peak (g) Data,ZephyrACC - Sagittal Acc Minimum (g) Data,ZephyrACC - Sagittal Acc Peak (g)";
