@@ -40,7 +40,7 @@ using WocketsApplication.Feedback;
 
 namespace WocketsApplication.DataLogger
 {
-    public partial class DataLoggerForm : Form, SetTextControlCallback
+    public partial class DataLoggerForm : Form, SetTextControlCallback, IDisposable
     {
        
         #region Declarations of Objects
@@ -234,6 +234,26 @@ namespace WocketsApplication.DataLogger
            
 
         }
+
+        private bool disposed = false;
+
+        // Implement IDisposable.
+        // Do not make this method virtual.
+        // A derived class should not be able to override this method.
+        public void Dispose()
+        {
+            Dispose(true);
+            // This object will be cleaned up by the Dispose method.
+            // Therefore, you should call GC.SupressFinalize to
+            // take this object off the finalization queue
+            // and prevent finalization code for this object
+            // from executing a second time.
+            GC.SuppressFinalize(this);
+        }
+
+
+
+
 
         #region Annotator-Only Constructor
         private WocketsController wocketsController;
@@ -1359,32 +1379,37 @@ namespace WocketsApplication.DataLogger
         delegate void UpdateGraphCallback();
         public void UpdateGraph()
         {
-            // InvokeRequired required compares the thread ID of the
-            // calling thread to the thread ID of the creating thread.
-            // If these threads are different, it returns true.
-            if (((Panel)this.panels[VISUALIZE_PANEL]).InvokeRequired)
+
+            if (!disposed)
             {
-                UpdateGraphCallback d = new UpdateGraphCallback(UpdateGraph);
-                this.Invoke(d, new object[] { });
-            }
-            else
-            {
-
-                for (int i = 0; i < this.wocketsController._Sensors.Count; i++)
+                // InvokeRequired required compares the thread ID of the
+                // calling thread to the thread ID of the creating thread.
+                // If these threads are different, it returns true.
+                if (((Panel)this.panels[VISUALIZE_PANEL]).InvokeRequired)
                 {
-                    String key = "W" + this.wocketsController._Receivers[i]._ID;
-                    if (this.wocketsController._Receivers[i]._Status== ReceiverStatus.Connected)
-                        ((PictureBox)this.sensorStatus[key]).Image = (Image)this.connectedWocketImage;
-                    else
-                        ((PictureBox)this.sensorStatus[key]).Image = (Image)this.disconnectedWocketImage;
-
+                    UpdateGraphCallback d = new UpdateGraphCallback(UpdateGraph);
+                    this.Invoke(d, new object[] { });
                 }
-
-                if  (isPlotting)
+                else
                 {
-                    GraphAccelerometerValues();
+
+                    for (int i = 0; i < this.wocketsController._Sensors.Count; i++)
+                    {
+                        String key = "W" + this.wocketsController._Receivers[i]._ID;
+                        if (this.wocketsController._Receivers[i]._Status == ReceiverStatus.Connected)
+                            ((PictureBox)this.sensorStatus[key]).Image = (Image)this.connectedWocketImage;
+                        else
+                            ((PictureBox)this.sensorStatus[key]).Image = (Image)this.disconnectedWocketImage;
+
+                    }
+
+                    if (isPlotting)
+                    {
+                        GraphAccelerometerValues();
+                    }
                 }
             }
+
         }
         #endregion Timer Methods
 

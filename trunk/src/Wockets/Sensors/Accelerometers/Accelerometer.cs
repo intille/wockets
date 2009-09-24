@@ -287,12 +287,13 @@ namespace Wockets.Sensors.Accelerometers
 
        
         private int lastHead = 0;
+        AccelerationData prevdata = null; 
         public override void Save()
         {
            
             if (_Saving)
             {
-                int currentHead = this._Decoder._Head;
+    
 
                 flushTimer++;
                 if (flushTimer >= MAX_FLUSH_TIME)
@@ -304,24 +305,30 @@ namespace Wockets.Sensors.Accelerometers
                     flushTimer = 0;
                 }
 
-
-                if (((tail <= currentHead) && ((currentHead - tail) < (this._Decoder._Data.Length / 2))) ||
-                    ((tail>currentHead) && ((this._Decoder._Data.Length -tail +currentHead)<(this._Decoder._Data.Length / 2))))
+                int currentHead = this._Decoder._Head;
+               
+               if ((currentHead==0) || (((tail <= currentHead) && ((currentHead - tail) < (this._Decoder._Data.Length / 4))) ||
+                    ((tail>currentHead) && ((this._Decoder._Data.Length -tail +currentHead)<(this._Decoder._Data.Length / 4)))))
                     return;
-
-                
-
+                else //save up to where the head points
+                    currentHead--;
+                               
 
                 DetermineFilePath();
-                AccelerationData data = ((AccelerationData)this._Decoder._Data[tail]);               
+                
 
-                while ((tail != currentHead) && (data.UnixTimeStamp > 0) && (data.UnixTimeStamp >= this.tailUnixTimestamp))
+                //caution: The decoder buffer needs to be large enough or this code
+                //need to be fast enough to make sure that data is saved before being overwritten in the
+                //circular buffer
+                AccelerationData data = ((AccelerationData)this._Decoder._Data[tail]);
+                while ((tail != currentHead) && (data.UnixTimeStamp > 0))
                 {
                     aUnixTime = data.UnixTimeStamp;
 
                     if (aUnixTime < lastUnixTime)
                     {
-                        Console.WriteLine("StepBackUnix!: " + (lastUnixTime - aUnixTime));
+                        Logger.Error(new Exception("Data overwritten without saving Accelerometer.cs" + this._ID));
+                        break;
                     }
 
                     // Roughly once per second save full timestamp, no matter what
@@ -345,6 +352,7 @@ namespace Wockets.Sensors.Accelerometers
 
                     lastUnixTime = aUnixTime;
                     this.tailUnixTimestamp = aUnixTime;
+                    prevdata = data;
                     if (tail >= this._Decoder._Data.Length-1)
                         tail = 0;
                     else
@@ -352,10 +360,7 @@ namespace Wockets.Sensors.Accelerometers
                     data = ((AccelerationData)this._Decoder._Data[tail]);
 
 
-                }
-
-                lastHead = currentHead;
-               
+                }                    
             }
         }
 
@@ -423,7 +428,8 @@ namespace Wockets.Sensors.Accelerometers
             {
                 GenerateBinaryFileList();
                 if (someBinaryFiles.Count < 1)
-                    throw new Exception("Error: no PLFormat files for sensor " + this._ID);
+                    return false;
+                    //throw new Exception("Error: no PLFormat files for sensor " + this._ID);
                 SetupNextFiles(0);
                 loading = true;
             }

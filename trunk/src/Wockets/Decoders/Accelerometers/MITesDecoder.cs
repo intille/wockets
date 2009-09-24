@@ -43,7 +43,7 @@ namespace Wockets.Decoders.Accelerometers
             return true;
         }*/
 
-        public override int Decode(int sourceSensor, CircularBuffer data)
+        public override int Decode(int sourceSensor, CircularBuffer data,int start,int end)
         {
             return 0;
         }

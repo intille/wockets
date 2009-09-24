@@ -30,7 +30,7 @@ namespace Wockets
         #region Serialization Constants
         private const string SENSORDATA_ELEMENT = "SENSORDATA";
         #endregion Serialization Constants
-            
+
         private DecoderList decoders;
         private ReceiverList receivers;
         private SensorList sensors;
@@ -52,7 +52,7 @@ namespace Wockets
         private TextWriter trainingTW = null;
         private TextWriter structureTW = null;
         private Instances instances;
-        private WocketsController wocketsController; 
+        private WocketsController wocketsController;
         private Classifier classifier;
         private string storageDirectory;
         private Session annotatedSession;
@@ -62,7 +62,7 @@ namespace Wockets
         /// </summary>
         //private AnnotatedRecord currentRecord;
         public Annotation currentRecord;
-        
+
         private int calibrationDirection = 0;
         private double[][] calibrations;
         private bool isCalibrating = false;
@@ -75,10 +75,10 @@ namespace Wockets
         public bool IsCalibrating
         {
             get
-            {              
+            {
                 return this.isCalibrating;
             }
-            set 
+            set
             {
                 if (value)
                     this.time = WocketsTimer.GetUnixTime();
@@ -103,7 +103,7 @@ namespace Wockets
             get
             {
                 return this.calibrations;
-            }   
+            }
         }
 
         public int _CalibrationDirection
@@ -130,13 +130,13 @@ namespace Wockets
             }
         }
 
-        public WocketsController(string name,string filename,string description)
+        public WocketsController(string name, string filename, string description)
         {
             this.decoders = new DecoderList();
             this.receivers = new ReceiverList();
             this.sensors = new SensorList();
-            this.name =name;
-            this.filename =filename;
+            this.name = name;
+            this.filename = filename;
             this.description = description;
 
 
@@ -146,7 +146,7 @@ namespace Wockets
 
             for (int i = 0; (i < 7); i++)
             {
-               // this.calibrationImages[i] = (Image)new Bitmap(Constants.CALIBRATIONS_DIRECTORY + "calibration" + (i + 1) + ".gif");
+                // this.calibrationImages[i] = (Image)new Bitmap(Constants.CALIBRATIONS_DIRECTORY + "calibration" + (i + 1) + ".gif");
                 this.calibrations[i] = new double[3];
             }
             this.samples = new int[CALIBRATION_SAMPLES][];
@@ -193,7 +193,7 @@ namespace Wockets
         public DecoderList _Decoders
         {
             get
-            {                         
+            {
                 return this.decoders;
             }
             set
@@ -237,24 +237,24 @@ namespace Wockets
                     this._Receivers[i].Initialize();
                     //this._Receivers[i].
                     //Thread.Sleep(2000);
-                    
+
                 }
                 catch (Exception e)
                 {
                 }
 
             }
-            
+
             polling = true;
             saving = true;
             aSavingThread = new Thread(new ThreadStart(Save));
             aPollingThread = new Thread(new ThreadStart(Poll));
             aPollingThread.Priority = ThreadPriority.Highest;
-            aPollingThread.Start();            
+            aPollingThread.Start();
             aSavingThread.Start();
 
-            
-         
+
+
         }
 
         public void Dispose()
@@ -292,8 +292,8 @@ namespace Wockets
             }
 
             for (int i = 0; (i < this._Sensors.Count); i++)
-                this._Sensors[i].Dispose();         
-   
+                this._Sensors[i].Dispose();
+
             NetworkStacks._BluetoothStack.Dispose();
 
         }
@@ -306,7 +306,7 @@ namespace Wockets
                 {
                     for (int i = 0; (i < this._Sensors.Count); i++)
                     {
-                        
+
                         this._Sensors[i].Save();
                         Thread.Sleep(50);
                     }
@@ -355,11 +355,11 @@ namespace Wockets
 
         public Session _annotatedSession
         {
-            get 
+            get
             {
                 return this.annotatedSession;
             }
-            set 
+            set
             {
                 this.annotatedSession = value;
             }
@@ -402,7 +402,7 @@ namespace Wockets
         }
 
         public static object MyLock = new object();
-        
+
         private void Poll()
         {
             #region Poll All Wockets and MITes and Decode Data
@@ -410,10 +410,10 @@ namespace Wockets
             //int quantum= CeGetThreadQuantum(new IntPtr(aPollingThread.ManagedThreadId));
 
             Receiver currentReceiver = null;
-            Sensor sensor = null;            
+            Sensor sensor = null;
 
-            int[] batteryPoll=new int[this._Sensors.Count];
-            int[] alive=new int[this._Sensors.Count];
+            int[] batteryPoll = new int[this._Sensors.Count];
+            int[] alive = new int[this._Sensors.Count];
 
             GET_BT GET_BT_CMD = new GET_BT();
             ALIVE ALIVE_CMD = new ALIVE();
@@ -421,39 +421,36 @@ namespace Wockets
             while (polling)
             {
 
-
-                try
+                for (int i = 0; (i < this._Sensors.Count); i++)
                 {
-                    for (int i = 0; (i < this._Sensors.Count); i++)
+                    sensor = this._Sensors[i];
+                    currentReceiver = sensor._Receiver;
+                    try
                     {
-                        sensor = this._Sensors[i];
-                        currentReceiver = sensor._Receiver;
                         currentReceiver.Update();
+
 
                         if (currentReceiver._Status == ReceiverStatus.Connected)
                         {
                             Decoder decoder = sensor._Decoder;
                             int numDecodedPackets = 0;
-                            if (currentReceiver._Type == ReceiverTypes.HTCDiamond)
+                            int tail = currentReceiver._Buffer._Tail;
+                            int head = currentReceiver._Buffer._Head;
+
+                            int dataLength = tail - head; //((RFCOMMReceiver)currentReceiver).bluetoothStream._Tail - currentReceiver._Head;
+                            if (dataLength < 0)
+                                dataLength = currentReceiver._Buffer._Bytes.Length - head + tail;//((RFCOMMReceiver)currentReceiver).bluetoothStream._Buffer.Length - currentReceiver._Head + ((RFCOMMReceiver)currentReceiver).bluetoothStream._Tail;
+
+                            if (dataLength > 0)
                             {
-                                //int dataLength = ((Wockets.Receivers.HTCDiamondReceiver)currentReceiver).Read();
-                                int dataLength = currentReceiver._Buffer._Tail - currentReceiver._Buffer._Head; //((RFCOMMReceiver)currentReceiver).bluetoothStream._Tail - currentReceiver._Head;
-                                if (dataLength < 0)
-                                    dataLength = currentReceiver._Buffer._Bytes.Length - currentReceiver._Buffer._Head + currentReceiver._Buffer._Tail;//((RFCOMMReceiver)currentReceiver).bluetoothStream._Buffer.Length - currentReceiver._Head + ((RFCOMMReceiver)currentReceiver).bluetoothStream._Tail;
-                                if (dataLength > 0)
-                                {
-                                   // numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer._Bytes, dataLength);
-                                    numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer);
+                                if (currentReceiver._Type == ReceiverTypes.HTCDiamond)
+                                {                             
+                                    numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer, head,tail);
                                     sensor.Packets += numDecodedPackets;
                                 }
-
-                            }
-                            else
-                                if (sensor._Class == SensorClasses.Wockets)
+                                else if (sensor._Class == SensorClasses.Wockets)
                                 {
 
-                                    //CircularBuffer sendBuffer = ((RFCOMMReceiver)currentReceiver)._SBuffer;
-                              
                                     #region Write Data
                                     #region Battery Query
                                     /*batteryPoll[i] -= 1;
@@ -464,193 +461,36 @@ namespace Wockets
                                     }*/
                                     #endregion Battery Query
 
-                                    #region Alive 
+                                    #region Alive
                                     alive[i] -= 1;
                                     if (alive[i] <= 0)
-                                    {            
+                                    {
                                         ((SerialReceiver)currentReceiver).Write(ALIVE_CMD._Bytes);
                                         alive[i] = 2000;// + i * 10;
                                     }
                                     #endregion Alive
 
-
-                      
                                     #endregion Write Data
 
                                     #region Read Data
 
-                                    int dataLength = currentReceiver._Buffer._Tail - currentReceiver._Buffer._Head; //((RFCOMMReceiver)currentReceiver).bluetoothStream._Tail - currentReceiver._Head;
-                                    if (dataLength < 0)
-                                        dataLength = currentReceiver._Buffer._Bytes.Length - currentReceiver._Buffer._Head + currentReceiver._Buffer._Tail;//((RFCOMMReceiver)currentReceiver).bluetoothStream._Buffer.Length - currentReceiver._Head + ((RFCOMMReceiver)currentReceiver).bluetoothStream._Tail;
-                                    if (dataLength > 0)
-                                    {
-                                        int tail = currentReceiver._Buffer._Tail;//((RFCOMMReceiver)currentReceiver).bluetoothStream._Tail;
-                                        int head = currentReceiver._Buffer._Head;//currentReceiver._Head;
-                                        numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer); //((RFCOMMReceiver)currentReceiver).bluetoothStream._Buffer, head, tail);
-                                        currentReceiver._Buffer._Head = tail;//((RFCOMMReceiver)currentReceiver)._Head = tail;
-                                        sensor.Packets += numDecodedPackets;
-                                    }
-                                    /*
-                                    int dataLength = currentReceiver._Tail - currentReceiver._Head;
-                                    if (dataLength < 0)
-                                        dataLength = currentReceiver._Buffer.Length - currentReceiver._Head + currentReceiver._Tail;
-                                    if (dataLength > 0)
-                                    {
-                                        int tail = currentReceiver._Tail;
-                                        int head = currentReceiver._Head;
-                                        numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer, head, tail);
-                                        ((RFCOMMReceiver)currentReceiver)._Head = tail;
-                                        sensor.Packets += numDecodedPackets;
-                                    }*/
+                                    numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer,head,tail); //((RFCOMMReceiver)currentReceiver).bluetoothStream._Buffer, head, tail);
+                                    currentReceiver._Buffer._Head = tail;//((RFCOMMReceiver)currentReceiver)._Head = tail;
+                                    sensor.Packets += numDecodedPackets;
                                     #endregion Read Data
-
-                                    /*
-
-                                    #region Calibration Code
-
-                                    //store sum of abs values of consecutive accelerometer readings                
-                                    if ((numDecodedPackets > 0) && (isCalibrating))
-                                    {
-                                        if (this.calibrationCounter < CALIBRATION_SAMPLES)
-                                        {
-                                            //currentIndex = 0;
-                                            if (this.currentIndex == -1)
-                                                this.currentIndex = decoder._Head;
-
-                                            while ((decoder._Data[currentIndex].UnixTimeStamp >= this.time) && (decoder._Data[currentIndex].Type== Wockets.Data.SensorDataType.ACCEL) && (currentIndex != decoder._Head))
-                                            {
-                                                if (this.calibrationCounter == CALIBRATION_SAMPLES)
-                                                {
-                                                    this.isCalibrating = false;
-                                                    break;
-                                                }
-
-
-                                                this.samples[this.calibrationCounter][0] = (int)((AccelerationData)decoder._Data[currentIndex]).X;
-                                                this.samples[this.calibrationCounter][1] = (int)((AccelerationData)decoder._Data[currentIndex]).Y;
-                                                this.samples[this.calibrationCounter][2] = (int)((AccelerationData)decoder._Data[currentIndex]).Z;
-
-                                                this.calibrations[this.calibrationDirection][0] += (int)((AccelerationData)decoder._Data[currentIndex]).X;
-                                                this.calibrations[this.calibrationDirection][1] += (int)((AccelerationData)decoder._Data[currentIndex]).Y;
-                                                this.calibrations[this.calibrationDirection][2] += (int)((AccelerationData)decoder._Data[currentIndex]).Z;
-
-                                                this.calibrationCounter++;
-
-                                                this.time = decoder._Data[currentIndex].UnixTimeStamp;
-                                                currentIndex++;
-
-                                                if (currentIndex == decoder._Data.Length)
-                                                    currentIndex = 0;
-                                            }
-                                        }
-
-                                    }
-
-                                    #endregion Calibration Code
-
-
-                                    
-                                    #region Training
-
-                                    if (Training)
-                                    {
-                                        //create arff file
-                                        if (trainingTW == null)
-                                        {
-                                            string arffFileName = this._storageDirectory+ "\\output" + DateTime.Now.ToString().Replace('/', '_').Replace(':', '_').Replace(' ', '_') + ".arff";                   
-                                            trainingTW = new StreamWriter(arffFileName);                    
-                                            trainingTW.WriteLine("@RELATION wockets");
-                                            string arffHeader = FeatureExtractor.GetArffHeader();
-                                            arffHeader += "\n@ATTRIBUTE activity {";
-                                            int j = 0;
-                                            for (j = 0; (j < ((this._annotatedSession.OverlappingActivityLists[0]).Count - 1)); j++)
-                                                arffHeader+=this._annotatedSession.OverlappingActivityLists[0][j]._Name.Replace(' ', '_') + ",";
-                                            arffHeader+=this._annotatedSession.OverlappingActivityLists[0][j]._Name.Replace(' ', '_') + "}\n";
-                                            arffHeader+="\n@DATA\n\n";
-                                            
-                                            
-                                            
-                                            trainingTW.WriteLine(arffHeader);
-                                            string structureArffFile = this._storageDirectory + "\\structure.arff";
-                                            structureTW = new StreamWriter(structureArffFile);
-                                            structureTW.WriteLine("@RELATION wockets");
-                                            structureTW.WriteLine(arffHeader);
-
-                                        }
-                                        string current_activity = "unknown";
-                                        lock (MyLock)
-                                        {
-                                            if (this._currentRecord != null)
-                                            {
-                                                double lastTimeStamp = FeatureExtractor.StoreWocketsWindow();
-                                                if (FeatureExtractor.GenerateFeatureVector(lastTimeStamp))
-                                                {
-                                                    current_activity = this._currentRecord.Activities._CurrentActivity;
-                                                    string arffSample = FeatureExtractor.toString() + "," + current_activity;
-                                                    trainingTW.WriteLine(arffSample);
-                                                    if (count < 5)
-                                                    {
-                                                        count++;
-                                                        structureTW.WriteLine(arffSample);
-                                                    }
-                                                    extractedVectors++;
-                                                    if (structureFileExamples < 10)
-                                                    {
-                                                        structureTW.WriteLine(arffSample);
-                                                        structureFileExamples++;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        
-                                    }
-                                    else
-                                    {
-                                        if (trainingTW != null)
-                                        {
-                                            structureTW.Flush();
-                                            structureTW.Close();                  
-                                            structureTW = null;
-                                            trainingTW.Flush();
-                                            trainingTW.Close();
-                                            trainingTW = null;
-                                        }
-                                    }
-                                    #endregion Training
-
-                                    #region Classifying
-
-                                    if (this._Classifying)
-                                    {
-                                        double lastTimeStamp = FeatureExtractor.StoreWocketsWindow();//WocketsTimer.LastTimeStamp;//WocketsTimer.FeatureExtractor.StoreMITesWindow();
-                                        if (FeatureExtractor.GenerateFeatureVector(lastTimeStamp))
-                                        {
-                                            Instance newinstance = new Instance(this._instances.numAttributes());
-                                            newinstance.Dataset = this._instances;
-                                            for (int j = 0; (j < FeatureExtractor.Features.Length); j++)
-                                                newinstance.setValue(this._instances.attribute(j), FeatureExtractor.Features[j]);
-                                            double predicted = classifier.classifyInstance(newinstance);
-                                            string predicted_activity = newinstance.dataset().classAttribute().value_Renamed((int)predicted);
-                                            this._Escape._Move = predicted_activity;
-                                        }
-                                    }
-
-                                    #endregion Classifying
-                                    */
                                 }
+
+                            }
+                            
                         }
+
                     }
 
-                }
-                catch (BurstyException be)
-                {
-                    Logger.Warn("Bursty Data," + sensor._ID + "," + be.Message);
-                    currentReceiver.Dispose();
-                }
-                catch (Exception ex)
-                {
-                    Logger.Warn("Disconnection," + sensor._ID+","+ex.Message);
-                    currentReceiver.Dispose();
+                    catch (Exception ex)
+                    {
+                        Logger.Error(ex);
+                        currentReceiver.Dispose();
+                    }
                 }
 
 

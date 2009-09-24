@@ -43,6 +43,7 @@ namespace Wockets.Utils
 
 
         private static bool initialized = false;
+        private static object mylock= new object();
         /// <summary>
         /// 
         /// </summary>
@@ -99,13 +100,15 @@ namespace Wockets.Utils
         public static void InitializeTime()
         {
             //get the performance counter frequency only once
-            QueryPerformanceFrequency(out freq);
-            freq_1 = 1.0 / (double)freq;
+            /*QueryPerformanceFrequency(out freq);
+            freq_1 = 1.0 / (double)freq;*/
+           
             referenceTime = ((TimeSpan)(DateTime.Now.Subtract(UnixRef))).TotalMilliseconds;
             //DateTime dt=(new DateTime(1970, 1, 1, 0, 0, 0)).AddMilliseconds(referenceTime);
-            System.Int64 refCount = 0;
-            QueryPerformanceCounter(out refCount);
-            referenceCounter = (double)refCount;
+           // System.Int64 refCount = 0;
+           // QueryPerformanceCounter(out refCount);
+            //referenceCounter = (double)refCount;
+            referenceCounter = (double) System.Environment.TickCount;
             initialized = true;
 
             //TimeStamp = WocketsTimer.GetUnixTime();
@@ -135,13 +138,36 @@ namespace Wockets.Utils
         public static double GetUnixTime()
         {
             //Initialize precise timer if not initialized
-            if (initialized == false)
+            lock (mylock)
             {
-                InitializeTime();
-                initialized = true;
+                if (initialized == false)
+                {
+                    InitializeTime();
+                    initialized = true;
+                }
             }
 
-            QueryPerformanceCounter(out counter);
+            try
+            {
+               /* lock (mylock)
+                {
+                    QueryPerformanceCounter(out counter);
+                }*/
+                //current_time = (double)(referenceTime + ((((double)counter - referenceCounter) * freq_1) * 1000.0));
+                current_time = (double) (referenceTime+ ((double)System.Environment.TickCount-referenceCounter));
+                if (current_time < previousTime)
+                    current_time = previousTime + 2.0;
+                previousTime = current_time;
+                //prevCount = counter;
+            }
+            catch (Exception e)
+            {
+                initialized = false;
+                Logger.Error(e);
+                current_time = previousTime + 1.0;
+                previousTime = current_time;
+            }
+            /*
             if (prevCount > counter)
             {
                 Thread.Sleep(1);
@@ -150,11 +176,9 @@ namespace Wockets.Utils
                 referenceTime = ((TimeSpan)(DateTime.Now.Subtract(UnixRef))).TotalMilliseconds;
                 if (referenceTime <= previousTime)
                     referenceTime = previousTime + 1;
-            }
+            }*/
 
-            current_time = (double)(referenceTime + ((((double)counter - referenceCounter) * freq_1) * 1000.0));
-            previousTime = current_time;            
-            prevCount = counter;
+           
             
             
             //current_time = x++;
@@ -168,8 +192,11 @@ namespace Wockets.Utils
                 previousTime++;
                 return previousTime;
             }
-
+            
             previousTime = current_time;*/
+
+ 
+
             return current_time;
         }
         /// <summary>
