@@ -15,7 +15,7 @@ namespace Wockets.Decoders.Accelerometers
         private const int HTCDIAMOND_CHANNEL = 83;
         #endregion Serialization Constants
 
-        private const int BUFFER_SIZE = 200; // should not exceed 4096 (Lower Level Buffer Size) / 6 (HTC Packet Size)
+        private const int BUFFER_SIZE = 512; // should not exceed 4096 (Lower Level Buffer Size) / 6 (HTC Packet Size)
         private bool headerSeen;
 
 
@@ -40,45 +40,58 @@ namespace Wockets.Decoders.Accelerometers
         }
          */
 
-        public override int Decode(int sourceSensor, CircularBuffer data)
+        public override int Decode(int sourceSensor, CircularBuffer data, int start,int end)
         {
-            int rawDataIndex = data._Head;
+            int rawDataIndex = start;
             int numDecodedPackets = 0;
-            while (rawDataIndex != data._Tail)
+
+            //count number of packets to decode
+            int dataLength = end - start; //((RFCOMMReceiver)currentReceiver).bluetoothStream._Tail - currentReceiver._Head;
+            if (dataLength < 0)
+                dataLength = data._Bytes.Length - start+ end;//((RFCOMMReceiver)currentReceiver).bluetoothStream._Buffer.Length - currentReceiver._Head + ((RFCOMMReceiver)currentReceiver).bluetoothStream._Tail;
+            int maxDecodedPackets = dataLength / HTCDiamondTouchAccelerationData.NUM_RAW_BYTES;
+
+            while ((maxDecodedPackets > 0) && (rawDataIndex != end))
             {
-                int firstByte = rawDataIndex;
-                int lastByte = (rawDataIndex + HTCDiamondTouchAccelerationData.NUM_RAW_BYTES - 1) % data._Bytes.Length;
+                //lock (data._Bytes)
+                //{
+                    int firstByte = rawDataIndex;
+                    int lastByte = (rawDataIndex + HTCDiamondTouchAccelerationData.NUM_RAW_BYTES - 1) % data._Bytes.Length;
 
-                if (((data._Bytes[firstByte] & 0xff) != 0) && ((data._Bytes[lastByte] & 0xff) != 0))
-                {
-                    HTCDiamondTouchAccelerationData datum = ((HTCDiamondTouchAccelerationData)this._Data[this.head]);
-                    datum.Reset();
-                    //copy raw bytes
-                    for (int i = 0; (i < HTCDiamondTouchAccelerationData.NUM_RAW_BYTES); i++)
+
+                    if ((data._Bytes[firstByte] == 0xff) && ((data._Bytes[lastByte] == 0xff)))
                     {
-                        datum.RawBytes[i] = data._Bytes[rawDataIndex];
-                        rawDataIndex = (rawDataIndex + 1) % data._Bytes.Length;
+                        HTCDiamondTouchAccelerationData datum = ((HTCDiamondTouchAccelerationData)this._Data[this.head]);
+                        datum.Reset();
+                        //copy raw bytes
+                        for (int i = 0; (i < HTCDiamondTouchAccelerationData.NUM_RAW_BYTES); i++)
+                        {
+                            datum.RawBytes[i] = data._Bytes[rawDataIndex];
+                            rawDataIndex = (rawDataIndex + 1) % data._Bytes.Length;
+                        }
+                        datum.Type = SensorDataType.ACCEL;
+                        datum.SensorID = (byte)sourceSensor;
+                        datum.X = (short)(BitConverter.ToInt16(datum.RawBytes, 1) + 1024);
+                        datum.Y = (short)(BitConverter.ToInt16(datum.RawBytes, 3) + 1024);
+                        datum.Z = (short)(BitConverter.ToInt16(datum.RawBytes, 5) + 1024);
+                        datum.UnixTimeStamp = WocketsTimer.GetUnixTime();
+
+                        if (this.head >= (BUFFER_SIZE - 1))
+                            this.head = 0;
+                        else
+                            this.head++;
+
+                        numDecodedPackets++;
+                        data._Head = (data._Head + HTCDiamondTouchAccelerationData.NUM_RAW_BYTES) % data._Bytes.Length;
+
+                        if (numDecodedPackets == maxDecodedPackets)
+                            break;
                     }
-
-                    datum.Type = SensorDataType.ACCEL;
-                    datum.SensorID = (byte)sourceSensor;
-                    datum.X = (short)(BitConverter.ToInt16(datum.RawBytes, 1) + 1024);
-                    datum.Y = (short)(BitConverter.ToInt16(datum.RawBytes, 3) + 1024);
-                    datum.Z = (short)(BitConverter.ToInt16(datum.RawBytes, 5) + 1024);
-                    datum.UnixTimeStamp = WocketsTimer.GetUnixTime();
-
-                    if (this.head >= (BUFFER_SIZE - 1))
-                        this.head = 0;
                     else
-                        this.head++;
-
-                    numDecodedPackets++;
-                    data._Head = (data._Head + HTCDiamondTouchAccelerationData.NUM_RAW_BYTES) % data._Bytes.Length;
-                }
-                else
-                    break;
+                        break;
+                //}
             }
-
+           
             return numDecodedPackets;
         }
         public override int Decode(int sensorID, byte[] data, int length)

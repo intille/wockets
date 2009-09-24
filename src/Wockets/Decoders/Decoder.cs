@@ -139,7 +139,7 @@ namespace Wockets.Decoders
         }
 
         public abstract int Decode(int sensorID,byte[] data, int length);
-        public abstract int Decode(int sensorID, CircularBuffer data);
+        public abstract int Decode(int sensorID, CircularBuffer data, int start,int end);
 
         //Serialization
         public abstract string ToXML();

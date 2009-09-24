@@ -67,7 +67,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
         public static BluetoothStream Open(CircularBuffer buffer,CircularBuffer sbuffer, byte[] address, string pin)
         {
             MicrosoftBluetoothStream btStream = new MicrosoftBluetoothStream(buffer,sbuffer, address, pin);
-
+            btStream._Status = BluetoothStatus.Reconnecting;
             try
             {
 
@@ -142,7 +142,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                     if (socket.Available > 0)
                     {
                         bytesReceived = socket.Receive(singleReadBuffer, LOCAL_BUFFER_SIZE, SocketFlags.None);
-                        timestamp = WocketsTimer.GetUnixTime();
+                       // timestamp = WocketsTimer.GetUnixTime();
                     }
                     Thread.Sleep(10);
                     //Logger.Warn("Bytes " + bytesReceived);
@@ -171,13 +171,14 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
 
 
                 int ii;
+                int mytail = this.buffer._Tail;
                 for (ii = 0; ii < bytesReceived; ii++)
                 {
-                    this.buffer._Timestamp[this.buffer._Tail] = timestamp;
-                    this.buffer._Bytes[this.buffer._Tail++] = singleReadBuffer[ii];
-                    this.buffer._Tail %= this.buffer._Bytes.Length;                                       
+                   // this.buffer._Timestamp[this.buffer._Tail] = timestamp;
+                    this.buffer._Bytes[mytail++] = singleReadBuffer[ii];
+                    mytail %= this.buffer._Bytes.Length;                                       
                 }
-
+                this.buffer._Tail =mytail;
             }
 
         }   

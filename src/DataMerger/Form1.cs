@@ -2126,8 +2126,9 @@ namespace DataMerger
                 columbia_csv_line = timestamp;
                 gps_csv_line = timestamp;
                 rti_csv_line = timestamp;
-               
-                master_csv_line += "," + current_activity;
+                
+                if (aannotation != null)
+                    master_csv_line += "," + current_activity;
                 #endregion Setup prefix of CSV lines
 
 
@@ -2703,8 +2704,22 @@ namespace DataMerger
                 {
                     if (actigraphData[i].ContainsKey(key) == false)
                     {
-                        actigraphCSV[i].WriteLine(actigraph_csv_line[i] + ",");
-                        master_csv_line = master_csv_line + ",";
+                        if (actigraphType[i] == "GT3X")
+                        {
+                            actigraphCSV[i].WriteLine(actigraph_csv_line[i] + ",,,");
+                            master_csv_line = master_csv_line + ",,,";
+                        }
+                        else if (actigraphType[i] == "GT1M")
+                        {
+                            actigraphCSV[i].WriteLine(actigraph_csv_line[i] + ",,");
+                            master_csv_line = master_csv_line + ",,";
+                        }
+                        else
+                        {
+                            actigraphCSV[i].WriteLine(actigraph_csv_line[i] + ",");
+                            master_csv_line = master_csv_line + ",";
+                        }
+              
                     }
                     else
                     {

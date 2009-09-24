@@ -254,7 +254,7 @@ namespace Wockets.Receivers
         /// Ideally the when the device is in a motionless state, the vector would be of length 9.8.
         /// However, the sensor is not extremely accurate, so this almost never the case.
         /// </returns>
-        public  int Read()
+        public int Read()
         {
 #if (PocketPC)
 
@@ -264,50 +264,54 @@ namespace Wockets.Receivers
                 return 0;
             lastTS = now;
 
+
             HTCGSensorData data;
             HTCSensorGetDataOutput(myHandle, out data);
 
-            this._Buffer._Bytes[this._Buffer._Tail++] = 0xff;
-            this._Buffer._Tail = this._Buffer._Tail % this._Buffer._Bytes.Length;
+            int mytail = 0;
+            mytail = this._Buffer._Tail;
+
+            this._Buffer._Bytes[mytail++] = 0xff;
+            mytail = mytail % this._Buffer._Bytes.Length;
 
             byte[] bytes = BitConverter.GetBytes(data.TiltX);
             for (int i = 0; (i < bytes.Length); i++)
             {
-                this._Buffer._Bytes[this._Buffer._Tail++] = bytes[i];
-                this._Buffer._Tail = this._Buffer._Tail % this._Buffer._Bytes.Length;
+                this._Buffer._Bytes[mytail++] = bytes[i];
+                mytail = mytail % this._Buffer._Bytes.Length;
             }
 
             bytes = BitConverter.GetBytes(data.TiltY);
             for (int i = 0; (i < bytes.Length); i++)
             {
-                this._Buffer._Bytes[this._Buffer._Tail++] = bytes[i];
-                this._Buffer._Tail = this._Buffer._Tail % this._Buffer._Bytes.Length;
+                this._Buffer._Bytes[mytail++] = bytes[i];
+                mytail = mytail % this._Buffer._Bytes.Length;
             }
 
             bytes = BitConverter.GetBytes(data.TiltZ);
             for (int i = 0; (i < bytes.Length); i++)
             {
-                this._Buffer._Bytes[this._Buffer._Tail++] = bytes[i];
-                this._Buffer._Tail = this._Buffer._Tail % this._Buffer._Bytes.Length;
+                this._Buffer._Bytes[mytail++] = bytes[i];
+                mytail = mytail % this._Buffer._Bytes.Length;
             }
 
             bytes = BitConverter.GetBytes(data.AngleX);
             for (int i = 0; (i < bytes.Length); i++)
             {
-                this._Buffer._Bytes[this._Buffer._Tail++] = bytes[i];
-                this._Buffer._Tail = this._Buffer._Tail % this._Buffer._Bytes.Length;
+                this._Buffer._Bytes[mytail++] = bytes[i];
+                mytail = mytail % this._Buffer._Bytes.Length;
             }
 
             bytes = BitConverter.GetBytes(data.AngleY);
             for (int i = 0; (i < bytes.Length); i++)
             {
-                this._Buffer._Bytes[this._Buffer._Tail++] = bytes[i];
-                this._Buffer._Tail = this._Buffer._Tail % this._Buffer._Bytes.Length;
+                this._Buffer._Bytes[mytail++] = bytes[i];
+                mytail = mytail % this._Buffer._Bytes.Length;
             }
+            this._Buffer._Bytes[mytail++] = 0xff;
+            mytail = mytail % this._Buffer._Bytes.Length;
 
-
-            this._Buffer._Bytes[this._Buffer._Tail++] = 0xff;
-            this._Buffer._Tail = this._Buffer._Tail % this._Buffer._Bytes.Length;
+            this._Buffer._Tail = mytail;
 #endif
             return BUFFER_SIZE;
         }

@@ -836,10 +836,12 @@ namespace NESPDataViewer
         private void CreateActigraphGraph(GraphPane gp, string filePath, int id)
         {
             string[] values = FileReadWrite.ReadLinesFromFile(filePath);
-            Color[] colors = new Color[5] { Color.Red, Color.YellowGreen, Color.Beige, Color.Aqua, Color.Violet };
-            PointPairList listCounts = new PointPairList();
+            Color[] colors = new Color[9] { Color.Red, Color.YellowGreen, Color.Beige, Color.Aqua, Color.Violet,Color.Bisque,Color.Cyan,Color.DarkOrange,Color.Khaki };
+            PointPairList listCountsX = new PointPairList();
+            PointPairList listCountsY = new PointPairList();
+            PointPairList listCountsZ = new PointPairList();
                       //for each row, add values to PointPairLists
-            
+            int numAxes = 0;
             for (int i = 0; i < values.Length; i++)
             {
                 try
@@ -864,33 +866,43 @@ namespace NESPDataViewer
                             y = Convert.ToDouble(split[2]);//Column 3/C
                             if (_isUsingLabels)
                             {
-                                label = String.Format("Actigraph "+(id+1)+" AC"+(id+1)+"\n{0} {1}", dt.ToLongTimeString(), y);
-                                listCounts.Add(x, y, label);
+                                label = String.Format("Actigraph "+(id+1)+" AC_X\n{0} {1}", dt.ToLongTimeString(), y);
+                                listCountsX.Add(x, y, label);
                             }
-                            else listCounts.Add(x, y);
-                            /*
-                            if (id == 0)
-                            {
-                                LineSegment segment = new LineSegment();
-                                segment.X1 = x;
-                                segment.Y1 = y;
-                                lineSegments.Add(x, segment);
-                            }
-                            else if (id == 1)
-                            {
-                                if (lineSegments.ContainsKey(x))
-                                {
-                                    ((LineSegment)lineSegments[x]).X2 = x;
-                                    ((LineSegment)lineSegments[x]).Y2 = y;
-                                }
-                            }
-                             */
+                            else listCountsX.Add(x, y);
+                            numAxes = 1;
                         }
+
+                        if ((split.Length > 3) && (split[3].Length > 0))
+                        {
+                            y = Convert.ToDouble(split[3]);//Column 3/C
+                            if (_isUsingLabels)
+                            {
+                                label = String.Format("Actigraph " + (id + 1) + " AC_Y\n{0} {1}", dt.ToLongTimeString(), y);
+                                listCountsY.Add(x, y, label);
+                            }
+                            else listCountsY.Add(x, y);
+                            numAxes = 2;
+                        }
+
+                        if ((split.Length > 4) && (split[4].Length > 0))
+                        {
+                            y = Convert.ToDouble(split[4]);//Column 3/C
+                            if (_isUsingLabels)
+                            {
+                                label = String.Format("Actigraph " + (id + 1) + " AC_Z\n{0} {1}", dt.ToLongTimeString(), y);
+                                listCountsZ.Add(x, y, label);
+                            }
+                            else listCountsZ.Add(x, y);
+                            numAxes = 3;
+                        }
+
                         #endregion
 
                         #endregion
 
                     }
+                    
 
                 }
                 catch { }
@@ -902,16 +914,43 @@ namespace NESPDataViewer
 
             #region ON Y-AXIS
             #region 
-            pointsCurve = gp.AddCurve("Actigraph " + id, listCounts, colors[id%5], SymbolType.Circle);
-            pointsCurve.Symbol.Fill = new Fill(colors[id%5]);
-            if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
-            pointsCurve.Line.IsVisible = false;
-            pointsCurve.Tag = "AC"+(id+1);
-            _alLinesWithSymbols.Add(pointsCurve);
+            if (numAxes >= 1)
+            {
+                pointsCurve = gp.AddCurve("Actigraph " + id + " X", listCountsX, colors[id % colors.Length], SymbolType.Circle);
+                pointsCurve.Symbol.Fill = new Fill(colors[(id * 3) % colors.Length]);
+                if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
+                pointsCurve.Line.IsVisible = false;
+                pointsCurve.Tag = "AC" + (id + 1);
+                _alLinesWithSymbols.Add(pointsCurve);
+            }
+
+            if (numAxes >= 2)
+            {
+                pointsCurve = gp.AddCurve("Actigraph " + id + " Y", listCountsY, colors[id % colors.Length], SymbolType.Circle);
+                pointsCurve.Symbol.Fill = new Fill(colors[((id * 3) % colors.Length) + 1]);
+
+                if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
+                pointsCurve.Line.IsVisible = false;
+                pointsCurve.Tag = "AC" + (id + 1);
+                _alLinesWithSymbols.Add(pointsCurve);
+            }
+
+            if (numAxes >= 3)
+            {
+                pointsCurve = gp.AddCurve("Actigraph " + id + " Z", listCountsZ, colors[id % colors.Length], SymbolType.Circle);
+                pointsCurve.Symbol.Fill = new Fill(colors[((id * 3) % colors.Length) + 1]);
+
+                if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
+                pointsCurve.Line.IsVisible = false;
+                pointsCurve.Tag = "AC" + (id + 1);
+                _alLinesWithSymbols.Add(pointsCurve);
+            }
+
+            
             #endregion
             #endregion
             #endregion
-            WidenDatesIfNeeded(listCounts);    
+            WidenDatesIfNeeded(listCountsX);    
         }
         #endregion Actigraph
 
@@ -1819,7 +1858,7 @@ namespace NESPDataViewer
 
 
             #region Actigraphs
-            string[] file = Directory.GetFileSystemEntries(path + "\\merged\\", "*-actigraph*.csv");
+            string[] file = Directory.GetFileSystemEntries(path + "\\merged\\", "Actigraph*.csv");
 
             if (file.Length > 0)
             {
@@ -1827,7 +1866,7 @@ namespace NESPDataViewer
                 GraphPane ePane = AddPane(title, "Actigraphs");
                 for (int i = 0; (i < file.Length); i++)
                 {
-                    string actigraphFile = Path.Combine(path, "Actigraph" + (i + 1) + ".csv");
+                    string actigraphFile = Path.Combine(path, "merged\\Actigraph" + (i + 1) + ".csv");
                     if (File.Exists(actigraphFile))                    
                         CreateActigraphGraph(ePane, actigraphFile,i);
                 }

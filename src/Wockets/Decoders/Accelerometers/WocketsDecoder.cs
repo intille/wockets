@@ -17,7 +17,7 @@ namespace Wockets.Decoders.Accelerometers
         private const string WOCKETS_TYPE = "Wockets";
         #endregion Serialization Constants
 
-        private const int BUFFER_SIZE = 1200; 
+        private const int BUFFER_SIZE = 2048; 
         private bool headerSeen;
         private double timestamp = 0;
         private int bytesToRead = 0;
@@ -37,17 +37,17 @@ namespace Wockets.Decoders.Accelerometers
         }
 
 
-        
+ 
 
-        public override int Decode(int sourceSensor, CircularBuffer data)
+        public override int Decode(int sourceSensor, CircularBuffer data,int start,int end)
         {
 
-            int rawDataIndex = data._Head;
+            int rawDataIndex = start;
             int numDecodedPackets = 0;
             int bufferHead = this.head;
             
 
-            while (rawDataIndex !=data._Tail)
+            while (rawDataIndex !=end)
             {
 
                 if ((data._Bytes[rawDataIndex] & 0x80) != 0) //grab the next 6 bytes
@@ -94,7 +94,7 @@ namespace Wockets.Decoders.Accelerometers
 
                         WocketsAccelerationData datum = ((WocketsAccelerationData)this._Data[bufferHead]);
                         datum.Reset();
-                        datum.UnixTimeStamp = this.timestamp;//WocketsTimer.GetUnixTime();
+                        datum.UnixTimeStamp = WocketsTimer.GetUnixTime(); //this.timestamp;//WocketsTimer.GetUnixTime();
                         //copy raw bytes
                         for (int i = 0; (i < bytesToRead); i++)
                             datum.RawBytes[i] = this.packet[i];
