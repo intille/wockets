@@ -247,9 +247,11 @@ namespace Wockets
 
             polling = true;
             saving = true;
+            //Priorities are very critical to avoid buffer overflow
             aSavingThread = new Thread(new ThreadStart(Save));
+            aSavingThread.Priority = ThreadPriority.AboveNormal;
             aPollingThread = new Thread(new ThreadStart(Poll));
-            aPollingThread.Priority = ThreadPriority.Highest;
+            aPollingThread.Priority = ThreadPriority.Normal;
             aPollingThread.Start();
             aSavingThread.Start();
 
@@ -308,7 +310,7 @@ namespace Wockets
                     {
 
                         this._Sensors[i].Save();
-                        Thread.Sleep(50);
+                        Thread.Sleep(1000);
                     }
                 }
                 catch (Exception ee)

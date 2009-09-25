@@ -327,7 +327,8 @@ namespace Wockets.Sensors.Accelerometers
 
                     if (aUnixTime < lastUnixTime)
                     {
-                        Logger.Error(new Exception("Data overwritten without saving Accelerometer.cs" + this._ID));
+                        string s = "Data overwritten without saving Accelerometer.cs" + this._ID+" "+aUnixTime+" "+lastUnixTime;
+                        Logger.Error(new Exception(s));
                         break;
                     }
 
