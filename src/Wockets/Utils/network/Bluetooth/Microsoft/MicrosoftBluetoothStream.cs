@@ -66,6 +66,8 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
         
         public static BluetoothStream Open(CircularBuffer buffer,CircularBuffer sbuffer, byte[] address, string pin)
         {
+            //os shuts it down so make sure it is open
+            NetworkStacks._BluetoothStack.Initialize();
             MicrosoftBluetoothStream btStream = new MicrosoftBluetoothStream(buffer,sbuffer, address, pin);
             btStream._Status = BluetoothStatus.Reconnecting;
             try

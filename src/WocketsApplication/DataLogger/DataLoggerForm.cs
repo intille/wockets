@@ -779,7 +779,6 @@ namespace WocketsApplication.DataLogger
             {
                 if (activityList[j].BackColor == Color.DodgerBlue)
                 {
-                    this.overallTimer.start();
                     activityList[j].BackColor = Color.SkyBlue;
                     selectedButtons.Remove(activityList[j]);
                 }
@@ -805,6 +804,7 @@ namespace WocketsApplication.DataLogger
 
             if (this.currentRecord != null)
             {
+                this.overallTimer.stop();
                 stopAnnotation();
 
                 TextWriter tw = new StreamWriter(this.storageDirectory + "\\AnnotationIntervals.xml");                
@@ -812,7 +812,10 @@ namespace WocketsApplication.DataLogger
                 tw.Close();
             }
             if (selectedButtons.Count > 0)
-                startAnnotation();  
+            {
+                this.overallTimer.start();
+                startAnnotation();
+            }
         }
 
 
