@@ -745,7 +745,7 @@ namespace AudioAnnotation
             this.Controls.Add(this.panel_controls_2);
             this.Controls.Add(this.dataGridView1);
             this.Name = "FormAnnotation";
-            this.Text = "Annotate From Audio ";
+            this.Text = "Wockets Annotator - Version 1.7 September 28,2009";
             this.Load += new System.EventHandler(this.FormAnnotation_Load);
             this.SizeChanged += new System.EventHandler(this.FormAnnotation_SizeChanged);
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FormAnnotation_FormClosing);
