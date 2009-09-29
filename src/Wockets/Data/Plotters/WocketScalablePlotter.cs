@@ -231,10 +231,12 @@ namespace Wockets.Data.Plotters
                         
                         data = ((AccelerationData)this.wocketsController._Sensors[i]._Decoder._Data[tail]);
                         plottedPoints++;
-                        if  ((this.mode == PlottingMode.Delayed) && (plottedPoints == pointsToPlot[i]))
+                        if ((this.mode == PlottingMode.Delayed) && (plottedPoints == pointsToPlot[i]))
+                            break;
+                        else if (plottedPoints == 20)
                             break;
                     }
-                    this.decoderTails[i] = tail;
+                    this.decoderTails[i] = currentHead;
                 }
 
             }

@@ -44,6 +44,7 @@ unsigned char aBuffer[MAX_COMMAND_RESPONSE_SIZE];
 unsigned short word=0;
 unsigned short address=0xffff;
 unsigned char response_length=0;
+unsigned char disconnected_reset=0;
 
 void TransmitFrame(WOCKETS_UNCOMPRESSED_FRAME f){
 	
@@ -118,6 +119,7 @@ ISR(TIMER2_OVF_vect){
 		//When the counter wraps around the timer
 		TCNT2=170;
 		if (sleep==0){
+
 			 if (_rn41_is_connected()){
 				_atmega324p_yellow_led_off();
 				if (led_counter==1)
@@ -128,6 +130,7 @@ ISR(TIMER2_OVF_vect){
 					led_counter=0;	
 				sleep_counter=0;
 				sleep_counter2=0;
+				disconnected_reset=0;
 
 
 		
@@ -370,7 +373,14 @@ ISR(TIMER2_OVF_vect){
 
 				
 
-			}else{
+			}else{  //not connected
+
+
+				//reset the radio once
+				if (disconnected_reset==0){
+					_rn41_reset();
+					disconnected_reset=1;
+				}
 
 				_atmega324p_green_led_off();
 				if (led_counter==1)
