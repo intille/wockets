@@ -363,6 +363,7 @@ namespace WocketsApplication.DataLogger
 
             #endregion Bluetooth reception channels initialization
 
+            //aPlottingThread.Priority = ThreadPriority.AboveNormal;
             aPlottingThread.Start();
 
             //Terminate the progress thread
@@ -1299,19 +1300,23 @@ namespace WocketsApplication.DataLogger
 
 
         int sound_timer = 0;
+
+
         private void readDataTimer_Tick(object sender, EventArgs e)
         {
-                        
+
             for (int i = 0; i < this.wocketsController._Sensors.Count; i++)
             {
-                if ( (this.wocketsController._Receivers[i]._Status== ReceiverStatus.Disconnected) ||
-                    (this.wocketsController._Receivers[i]._Status== ReceiverStatus.Reconnecting))
+                String key = "W" + this.wocketsController._Receivers[i]._ID;
+
+                if ((this.wocketsController._Receivers[i]._Status == ReceiverStatus.Disconnected) ||
+                    (this.wocketsController._Receivers[i]._Status == ReceiverStatus.Reconnecting))
                 {
                     if (this.wocketsController._Receivers[i].Disconnected >= 1000)
                     {
                         if (sound_timer > 150)
                         {
-                            alert.Play();                            
+                            alert.Play();
                             sound_timer = 0;
                         }
                         else
@@ -1319,9 +1324,13 @@ namespace WocketsApplication.DataLogger
                     }
                     else
                         this.wocketsController._Receivers[i].Disconnected += 1;
+                    ((PictureBox)this.sensorStatus[key]).Image = (Image)this.disconnectedWocketImage;
                 }
                 else
-                    this.wocketsController._Receivers[i].Disconnected = 0;                
+                {
+                    this.wocketsController._Receivers[i].Disconnected = 0;
+                    ((PictureBox)this.sensorStatus[key]).Image = (Image)this.connectedWocketImage;
+                }
             }
 
 
@@ -1395,17 +1404,6 @@ namespace WocketsApplication.DataLogger
                 }
                 else
                 {
-
-                    for (int i = 0; i < this.wocketsController._Sensors.Count; i++)
-                    {
-                        String key = "W" + this.wocketsController._Receivers[i]._ID;
-                        if (this.wocketsController._Receivers[i]._Status == ReceiverStatus.Connected)
-                            ((PictureBox)this.sensorStatus[key]).Image = (Image)this.connectedWocketImage;
-                        else
-                            ((PictureBox)this.sensorStatus[key]).Image = (Image)this.disconnectedWocketImage;
-
-                    }
-
                     if (isPlotting)
                     {
                         GraphAccelerometerValues();

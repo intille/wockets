@@ -248,7 +248,7 @@ namespace Wockets
             polling = true;
             saving = true;
             //Priorities are very critical to avoid buffer overflow
-            aSavingThread = new Thread(new ThreadStart(Save));
+            aSavingThread = new Thread(new ThreadStart(Save));           
             aSavingThread.Priority = ThreadPriority.AboveNormal;
             aPollingThread = new Thread(new ThreadStart(Poll));
             aPollingThread.Priority = ThreadPriority.Normal;
@@ -411,6 +411,8 @@ namespace Wockets
             //CeSetThreadQuantum(new IntPtr(aPollingThread.ManagedThreadId),200);
             //int quantum= CeGetThreadQuantum(new IntPtr(aPollingThread.ManagedThreadId));
 
+            bool allWocketsDisconnected = true;
+            bool bluetoothIsReset = false;
             Receiver currentReceiver = null;
             Sensor sensor = null;
 
@@ -422,6 +424,7 @@ namespace Wockets
 
             while (polling)
             {
+                allWocketsDisconnected = true;
 
                 for (int i = 0; (i < this._Sensors.Count); i++)
                 {
@@ -443,6 +446,16 @@ namespace Wockets
                             if (dataLength < 0)
                                 dataLength = currentReceiver._Buffer._Bytes.Length - head + tail;//((RFCOMMReceiver)currentReceiver).bluetoothStream._Buffer.Length - currentReceiver._Head + ((RFCOMMReceiver)currentReceiver).bluetoothStream._Tail;
 
+                            //test if all wockets are disconnected
+                            if (sensor._Class == SensorClasses.Wockets)
+                            {
+                                if (bluetoothIsReset)
+                                    bluetoothIsReset = false;
+
+                                if (allWocketsDisconnected)
+                                    allWocketsDisconnected = false;
+                            }
+
                             if (dataLength > 0)
                             {
                                 if (currentReceiver._Type == ReceiverTypes.HTCDiamond)
@@ -452,7 +465,7 @@ namespace Wockets
                                 }
                                 else if (sensor._Class == SensorClasses.Wockets)
                                 {
-
+                                   
                                     #region Write Data
                                     #region Battery Query
                                     /*batteryPoll[i] -= 1;
@@ -495,6 +508,14 @@ namespace Wockets
                     }
                 }
 
+                //reset bluetooth stack once if all wockets are disconnected
+                if ((!bluetoothIsReset) && (allWocketsDisconnected)) 
+                {
+                    Logger.Warn("All Wockets Disconnected. BT Reset.");
+                    NetworkStacks._BluetoothStack.Dispose();
+                    NetworkStacks._BluetoothStack.Initialize();
+                    bluetoothIsReset = true;
+                }
 
                 Thread.Sleep(10);
             }

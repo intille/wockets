@@ -307,8 +307,8 @@ namespace Wockets.Sensors.Accelerometers
 
                 int currentHead = this._Decoder._Head;
                
-               if ((currentHead==0) || (((tail <= currentHead) && ((currentHead - tail) < (this._Decoder._Data.Length / 4))) ||
-                    ((tail>currentHead) && ((this._Decoder._Data.Length -tail +currentHead)<(this._Decoder._Data.Length / 4)))))
+               if ((currentHead==0) || (((tail <= currentHead) && ((currentHead - tail) < (this._Decoder._Data.Length / 6))) ||
+                    ((tail>currentHead) && ((this._Decoder._Data.Length -tail +currentHead)<(this._Decoder._Data.Length / 6)))))
                     return;
                 else //save up to where the head points
                     currentHead--;
