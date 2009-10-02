@@ -32,7 +32,7 @@ namespace Wockets.Utils
 
         private static System.Int64 counter = 0;
         private static double referenceCounter = 0;
-        
+
         private static System.Int64 freq = 0;
         private static double referenceTime;
         private static double max_previous_time = 0;
@@ -43,7 +43,6 @@ namespace Wockets.Utils
 
 
         private static bool initialized = false;
-        private static object mylock= new object();
         /// <summary>
         /// 
         /// </summary>
@@ -100,15 +99,13 @@ namespace Wockets.Utils
         public static void InitializeTime()
         {
             //get the performance counter frequency only once
-            /*QueryPerformanceFrequency(out freq);
-            freq_1 = 1.0 / (double)freq;*/
-           
+            QueryPerformanceFrequency(out freq);
+            freq_1 = 1.0 / (double)freq;
             referenceTime = ((TimeSpan)(DateTime.Now.Subtract(UnixRef))).TotalMilliseconds;
             //DateTime dt=(new DateTime(1970, 1, 1, 0, 0, 0)).AddMilliseconds(referenceTime);
-           // System.Int64 refCount = 0;
-           // QueryPerformanceCounter(out refCount);
-            //referenceCounter = (double)refCount;
-            referenceCounter = (double) System.Environment.TickCount;
+            System.Int64 refCount = 0;
+            QueryPerformanceCounter(out refCount);
+            referenceCounter = (double)refCount;
             initialized = true;
 
             //TimeStamp = WocketsTimer.GetUnixTime();
@@ -134,40 +131,17 @@ namespace Wockets.Utils
             }
         }
         private static int x = 0;
-        private static System.Int64 prevCount=0;
+        private static System.Int64 prevCount = 0;
         public static double GetUnixTime()
         {
             //Initialize precise timer if not initialized
-            lock (mylock)
+            if (initialized == false)
             {
-                if (initialized == false)
-                {
-                    InitializeTime();
-                    initialized = true;
-                }
+                InitializeTime();
+                initialized = true;
             }
 
-            try
-            {
-               /* lock (mylock)
-                {
-                    QueryPerformanceCounter(out counter);
-                }*/
-                //current_time = (double)(referenceTime + ((((double)counter - referenceCounter) * freq_1) * 1000.0));
-                current_time = (double) (referenceTime+ ((double)System.Environment.TickCount-referenceCounter));
-                if (current_time < previousTime)
-                    current_time = previousTime + 2.0;
-                previousTime = current_time;
-                //prevCount = counter;
-            }
-            catch (Exception e)
-            {
-                initialized = false;
-                Logger.Error(e);
-                current_time = previousTime + 1.0;
-                previousTime = current_time;
-            }
-            /*
+            QueryPerformanceCounter(out counter);
             if (prevCount > counter)
             {
                 Thread.Sleep(1);
@@ -176,11 +150,13 @@ namespace Wockets.Utils
                 referenceTime = ((TimeSpan)(DateTime.Now.Subtract(UnixRef))).TotalMilliseconds;
                 if (referenceTime <= previousTime)
                     referenceTime = previousTime + 1;
-            }*/
+            }
 
-           
-            
-            
+            current_time = (double)(referenceTime + ((((double)counter - referenceCounter) * freq_1) * 1000.0));
+            previousTime = current_time;
+            prevCount = counter;
+
+
             //current_time = x++;
             //double diff = current_time - previousTime;
             //if (diff<=1)
@@ -192,11 +168,8 @@ namespace Wockets.Utils
                 previousTime++;
                 return previousTime;
             }
-            
+
             previousTime = current_time;*/
-
- 
-
             return current_time;
         }
         /// <summary>

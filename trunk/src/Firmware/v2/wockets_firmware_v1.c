@@ -45,6 +45,7 @@ unsigned short word=0;
 unsigned short address=0xffff;
 unsigned char response_length=0;
 unsigned char disconnected_reset=0;
+unsigned short sequence=0;
 
 void TransmitFrame(WOCKETS_UNCOMPRESSED_FRAME f){
 	
@@ -367,11 +368,13 @@ ISR(TIMER2_OVF_vect){
 				
 				//tag if close to ack
 				if (ack==0xff)
-					TransmitFrame(encode(1,adc_result[ADC3], adc_result[ADC2], adc_result[ADC1]));
+				TransmitFrame(encode(1,adc_result[ADC3], adc_result[ADC2], adc_result[ADC1]));
+					//TransmitFrame(encode(1,sequence & 0xff,(sequence>>8)&0xff,0));//adc_result[ADC3], adc_result[ADC2], adc_result[ADC1]));
 				else  //otherwise dont tag
-					TransmitFrame(encode(0,adc_result[ADC3], adc_result[ADC2], adc_result[ADC1]));
+				TransmitFrame(encode(0,adc_result[ADC3], adc_result[ADC2], adc_result[ADC1]));
+					//TransmitFrame(encode(0,sequence & 0xff,(sequence>>8)&0xff,0));///adc_result[ADC3], adc_result[ADC2], adc_result[ADC1]));
 
-				
+				sequence++;
 
 			}else{  //not connected
 

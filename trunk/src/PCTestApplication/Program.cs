@@ -23,18 +23,20 @@ namespace PCTestApplication
         static void Main(string[] args)
         {
 
-            string storage = @"C:\Users\albinali\Desktop\Session9-10-18-0-17\wockets\";
+            string storage = @"C:\Users\albinali\Desktop\Session9-29-18-22-41\";
             WocketsController wc = new WocketsController("", "", "");
             wc.FromXML(storage+"SensorData.xml");
             int[] lostSeconds = new int[wc._Sensors.Count];
             double[] prevUnix = new double[wc._Sensors.Count];
             int i=0;
+            int prev_seq=-1;
             for ( i= 0; (i < wc._Sensors.Count); i++)
             {
                 double firstT = 0, lastT = 0;
                 int count = 0;
                 wc._Sensors[i]._RootStorageDirectory = storage + "data\\raw\\PLFormat\\";
                 TextWriter tw = new StreamWriter(storage + "sensor" + wc._Sensors[i]._ID + ".csv");
+                TextWriter twp = new StreamWriter(storage + "sensorloss" + wc._Sensors[i]._ID + ".csv");
                 try
                 {
                     int lastDecodedIndex = 0;
@@ -51,8 +53,18 @@ namespace PCTestApplication
                         if (firstT == 0)
                             firstT = data.UnixTimeStamp;
                         lastT = data.UnixTimeStamp;
-                        tw.WriteLine(data.UnixTimeStamp + "," + data.X + "," + data.Y + "," + data.Z);
+                        int seq= ((data.X&0xff) | ((data.Y<<8)));
+                        if (prev_seq >= 0)
+                        {
+                            if ((prev_seq + 1) != seq)
+                                twp.WriteLine(data.UnixTimeStamp + "," + seq);
+                        }
 
+                       
+
+                        tw.WriteLine(data.UnixTimeStamp + "," + data.X + "," + data.Y + "," + data.Z+","+seq);
+
+                        prev_seq=seq;
                         if ((prevUnix[i] > 1000) && ((data.UnixTimeStamp - prevUnix[i]) > 60000))
                             lostSeconds[i] += (int)((data.UnixTimeStamp - prevUnix[i]) / 1000.0);
 
@@ -70,9 +82,11 @@ namespace PCTestApplication
                 //tw.WriteLine("lost " + lostSeconds[i]);
                 tw.Flush();
                 tw.Close();
+                twp.Flush();
+                twp.Close();
             }
-    
 
+            Environment.Exit(0);
             TextReader[] trs = new StreamReader[wc._Sensors.Count];
             Hashtable[] sensordata = new Hashtable[wc._Sensors.Count];
             string[] sensorlines = new string[wc._Sensors.Count];

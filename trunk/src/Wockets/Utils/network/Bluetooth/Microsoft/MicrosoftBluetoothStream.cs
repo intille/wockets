@@ -85,12 +85,14 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
 
 
                 btStream.processingThread = new Thread(new ThreadStart(btStream.Process));
-                btStream.processingThread.Priority = ThreadPriority.AboveNormal;
+                btStream.processingThread.Priority = ThreadPriority.Highest;
                 btStream.processingThread.Start();
+                Logger.Warn("Microsoft Open:Reconnection for receiver " + btStream.hexAddress + " success spawned process thread");
 
             }
             catch (Exception e)
-            {                
+            {
+                Logger.Warn("Microsoft Open:Reconnection for receiver " + btStream.hexAddress + " failed");
                 btStream = null;
             }
             return btStream;
@@ -102,6 +104,9 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
         //this is the buffer used to read asynchonously from the socket. When
         //the asynchronous read returns, this is copied into the localBuffer.   
         private const int LOCAL_BUFFER_SIZE = 2048;
+        private int logCounter = 0;
+        private int totalBytes = 0;
+        private int sentBytes = 0;
 
         public override void Process()
         {
@@ -109,11 +114,12 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
             this.status = BluetoothStatus.Connected;
             byte[] singleReadBuffer = new byte[LOCAL_BUFFER_SIZE];
             double timestamp = 0.0;
-
+            logCounter = 0;
+            Logger.Warn("Microsoft Process:Processing thread started for receiver " + this._HexAddress + " status:" + this.status.ToString());
             while (this.status== BluetoothStatus.Connected)
             {            
                 int bytesReceived = 0;
-
+                logCounter++;
                 try
                 {
                     lock (this.sbuffer)
@@ -125,9 +131,12 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                             if (socket.Send(sendByte, 1, SocketFlags.None) != 1)
                             {
                                 this.errorMessage = "MicrosoftBluetoothStream failed at Process(). Cannot send bytes to " + _RemoteEP.ToString();
+                                Logger.Warn("Receiver " + this._HexAddress + " disconnected send, tail=" + this.buffer._Tail + "," + this.buffer._Head);
                                 this.status = BluetoothStatus.Disconnected;
+                                
                                 return;
                             }
+                            sentBytes++;
 
                             if (this.sbuffer._Head >= (this.sbuffer._Bytes.Length - 1))
                                 this.sbuffer._Head = 0;
@@ -141,13 +150,19 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                         }
                     }
 
+                    //socket.co
                     if (socket.Available > 0)
                     {
                         bytesReceived = socket.Receive(singleReadBuffer, LOCAL_BUFFER_SIZE, SocketFlags.None);
+                        totalBytes += bytesReceived;
                        // timestamp = WocketsTimer.GetUnixTime();
                     }
                     Thread.Sleep(10);
-                    //Logger.Warn("Bytes " + bytesReceived);
+                    if (logCounter > 2000)
+                    {
+                        Logger.Warn("Receiver " + this._HexAddress + ",sent:" + sentBytes + ",received:" + totalBytes);
+                        logCounter = 0;
+                    }
 
                     if (bytesReceived > 0)                       
                         disconnectionCounter = 0;                    
@@ -156,8 +171,9 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                         disconnectionCounter++;
                         if (disconnectionCounter > MAX_DISCONNECTION_COUNTER)
                         {
+                            Logger.Warn("Receiver " + this._HexAddress + " disconnected timeout, tail=" + this.buffer._Tail + ",head=" + this.buffer._Head);
                             this.status= BluetoothStatus.Disconnected;
-                          
+                            return;                          
                         }
                     }
 
@@ -166,7 +182,9 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                 }
                 catch (Exception e)
                 {
+                    Logger.Warn("Receiver " + this._HexAddress + " disconnected other exception, tail=" + this.buffer._Tail + "," + this.buffer._Head);
                     this.status = BluetoothStatus.Disconnected;
+                    return;
                 }
 
 

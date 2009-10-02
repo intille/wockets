@@ -36,6 +36,7 @@ namespace Wockets.Sensors
         private int id;
         private int sr;
         private bool saving;
+        public int SavedPackets = 0;
         private int disconnected = 0;
         private int ndisc = 0;
         private int tdisc = 0;
