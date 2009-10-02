@@ -249,9 +249,9 @@ namespace Wockets
             saving = true;
             //Priorities are very critical to avoid buffer overflow
             aSavingThread = new Thread(new ThreadStart(Save));           
-            aSavingThread.Priority = ThreadPriority.AboveNormal;
+            aSavingThread.Priority = ThreadPriority.Highest;
             aPollingThread = new Thread(new ThreadStart(Poll));
-            aPollingThread.Priority = ThreadPriority.Normal;
+            aPollingThread.Priority = ThreadPriority.Highest;
             aPollingThread.Start();
             aSavingThread.Start();
 
@@ -421,10 +421,12 @@ namespace Wockets
 
             GET_BT GET_BT_CMD = new GET_BT();
             ALIVE ALIVE_CMD = new ALIVE();
+            int pollCounter = 0;
 
             while (polling)
             {
                 allWocketsDisconnected = true;
+                pollCounter++;
 
                 for (int i = 0; (i < this._Sensors.Count); i++)
                 {
@@ -495,6 +497,12 @@ namespace Wockets
                                     #endregion Read Data
                                 }
 
+                            }
+
+                            if (pollCounter > 2000)
+                            {
+                                Logger.Warn("Receiver "+ sensor._Receiver._ID + " decoded:"+sensor.Packets +",saved:"+sensor.SavedPackets +", tail=" + tail + ",head=" + head);
+                                pollCounter = 0;
                             }
                             
                         }

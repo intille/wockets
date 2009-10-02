@@ -22,7 +22,7 @@ namespace Wockets.Utils
             Directory.CreateDirectory(filePath+"\\data\\log");
             errorPath = filePath + "\\data\\log\\error.txt";
             warnPath = filePath + "\\data\\log\\warn.txt";
-            debugPath = filePath + "\\data\\log\\debug.txt";
+            debugPath = filePath + "\\data\\log\\debug.csv";
             e = new StreamWriter(new FileStream(errorPath, FileMode.Create));
             w = new StreamWriter(new FileStream(warnPath, FileMode.Create));
             d = new StreamWriter(new FileStream(debugPath, FileMode.Create));
@@ -41,7 +41,7 @@ namespace Wockets.Utils
         {
             lock (dLock)
             {
-                d.WriteLine("DEBUG: " + WocketsTimer.GetUnixTime() + "," + DateTime.Now + "," + msg);                
+                d.WriteLine(WocketsTimer.GetUnixTime() + "," + DateTime.Now + "," + msg);                
                 d.Flush();
             }
         }

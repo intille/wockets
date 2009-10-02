@@ -128,6 +128,7 @@ namespace Wockets.Receivers
                     this.bluetoothStream = null;                    
                     this.status = ReceiverStatus.Disconnected;
                     this._SBuffer._Head = 0;//ignore all pending send bytes
+                    Logger.Warn("Update:Detected disconnection for receiver " + this._ID);
                 }
 
                 //ideas - delay reconnection
@@ -137,16 +138,19 @@ namespace Wockets.Receivers
                     this.status = ReceiverStatus.Reconnecting;
                     reconnectionThread = new Thread(new ThreadStart(this.Reconnect));
                     reconnectionThread.Start();
+                    Logger.Warn("Update:Spwaned reconnection thread for receiver " + this._ID);
                 }
 
                 if ((this.status != ReceiverStatus.Connected) && (this.bluetoothStream != null) && (this.bluetoothStream._Status == BluetoothStatus.Connected))
                 {
                     if (this.status == ReceiverStatus.Reconnecting)
                     {
+                        Logger.Warn("Update:Waiting on Join for receiver " + this._ID);
                         reconnectionThread.Join();
                         reconnectionThread.Abort();
                         reconnectionThread = null;
                     }
+                    Logger.Warn("Update:Connected with receiver receiver " + this._ID);
                     this.status = ReceiverStatus.Connected;
                 }
             }
@@ -199,7 +203,12 @@ namespace Wockets.Receivers
         {
             
             try
-            {                
+            {
+                this._Buffer = new CircularBuffer(this._Buffer._Bytes.Length);
+                this.head = 0;
+                this._SBuffer = new CircularBuffer(SEND_BUFFER_SIZE);  
+
+                Logger.Warn("Attempting reconnection for receiver " + this._ID);
                 this.bluetoothStream = NetworkStacks._BluetoothStack.Connect(this._Buffer,this._SBuffer , this.address_bytes, this.pin);              
                 if (this.bluetoothStream == null)
                     return false;

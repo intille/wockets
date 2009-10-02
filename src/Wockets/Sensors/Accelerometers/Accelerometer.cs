@@ -288,6 +288,7 @@ namespace Wockets.Sensors.Accelerometers
        
         private int lastHead = 0;
         AccelerationData prevdata = null; 
+       
         public override void Save()
         {
            
@@ -312,6 +313,7 @@ namespace Wockets.Sensors.Accelerometers
                     return;
                 else //save up to where the head points
                     currentHead--;
+               
                                
 
                 DetermineFilePath();
@@ -358,6 +360,7 @@ namespace Wockets.Sensors.Accelerometers
                         tail = 0;
                     else
                         tail++;
+                    this.SavedPackets++;
                     data = ((AccelerationData)this._Decoder._Data[tail]);
 
 

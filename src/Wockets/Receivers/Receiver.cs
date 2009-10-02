@@ -29,6 +29,7 @@ namespace Wockets.Receivers
         protected int ndisc = 0;
         protected int disconCount=0;
 
+
         public Receiver(int bufferSize)
         {
             //this.isRunning = false;
