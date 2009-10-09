@@ -741,9 +741,9 @@ namespace AudioAnnotation
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.DimGray;
             this.ClientSize = new System.Drawing.Size(1075, 609);
-            this.Controls.Add(this.panel_controls_1);
             this.Controls.Add(this.panel_controls_2);
             this.Controls.Add(this.dataGridView1);
+            this.Controls.Add(this.panel_controls_1);
             this.Name = "FormAnnotation";
             this.Text = "Wockets Annotator - Version 1.9 October 7,2009";
             this.Load += new System.EventHandler(this.FormAnnotation_Load);
