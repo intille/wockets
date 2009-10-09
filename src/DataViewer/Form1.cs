@@ -745,9 +745,9 @@ namespace NESPDataViewer
                         double y = 0; string label = "";
 
                         #region GPSSpeed
-                        if ((split.Length > 3) && (split[3].Length > 0))
+                        if ((split.Length > 4) && (split[4].Length > 0))
                         {
-                            y = Convert.ToDouble(split[3]);//Column 3/C
+                            y = Convert.ToDouble(split[4]);//Column 3/C
                             if (_isUsingLabels)
                             {
                                 label = String.Format("GPS Speed\n{0} {1}", dt.ToLongTimeString(), y);
@@ -758,9 +758,9 @@ namespace NESPDataViewer
                         #endregion
 
                         #region GPSAltitude
-                        if ((split.Length > 4) && (split[4].Length > 0))
+                        if ((split.Length > 5) && (split[5].Length > 0))
                         {
-                            y = Convert.ToDouble(split[4]);//Column 4/D
+                            y = Convert.ToDouble(split[5]);//Column 4/D
                             if (_isUsingLabels)
                             {
                                 label = String.Format("GPS Altitude\n{0} {1}", dt.ToLongTimeString(), y);

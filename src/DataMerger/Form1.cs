@@ -848,6 +848,9 @@ namespace DataMerger
                                 string actigraphLine = Convert.ToInt32(tokens[0]) + "," + Convert.ToInt32(tokens[1]);
                                 actigraphData[i].Add(actigraphKey, actigraphLine);
                                 actigraphTime = actigraphTime.AddSeconds(1.0);
+
+                                if (actigraphLine.Contains("144,92"))
+                                    Console.Write("");
                             }
                         } while ((actigraph_line = actigraphReader.ReadLine()) != null);
 
@@ -1002,7 +1005,7 @@ namespace DataMerger
             if (File.Exists(aDataDirectory + "\\" + OTHER_SUBDIRECTORY + "\\OxyconSyncronizationTime.txt"))
             {
 
-                file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*-flashcard*");
+                file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*-oxycon-flashcard.dat");
                 if (file.Length == 1)
                 {
 
@@ -1040,8 +1043,10 @@ namespace DataMerger
                                 oxycon_line = oxycon_line.Trim();
                                 RegexOptions options = RegexOptions.None;
                                 Regex regex = new Regex(@"[ ]{2,}", options);
+                                
                                 oxycon_line = regex.Replace(oxycon_line, @" ");
-
+                                regex = new Regex(@"[\t]", options);
+                                oxycon_line = regex.Replace(oxycon_line, @" ");
 
                                 tokens = oxycon_line.Split(' ');
                                 string[] timeTokens = tokens[0].Split(':');
@@ -1094,7 +1099,7 @@ namespace DataMerger
 
 
                     //find first 3 matching lines with the same differnece in time
-                    file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*-flashcard.dat");
+                    file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*-oxycon-flashcard.dat");
                     try
                     {
                         if (file.Length == 1)
@@ -1180,7 +1185,7 @@ namespace DataMerger
 
 
                     //Load Oxycon data
-                    file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*-flashcard.dat");
+                    file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*oxycon-flashcard.dat");
                     try
                     {
                         if (file.Length == 1)
@@ -1546,13 +1551,16 @@ namespace DataMerger
                             string[] dateTokens = tsTokens[0].Split('-');
                             string[] timeTokens = tsTokens[1].Split('.');
                             timeTokens = timeTokens[0].Split(':');
-                            DateTime sensewearDateTime=new DateTime(Convert.ToInt32(dateTokens[0]), Convert.ToInt32(dateTokens[1]), Convert.ToInt32(dateTokens[2]), Convert.ToInt32(timeTokens[0]), Convert.ToInt32(timeTokens[1]), Convert.ToInt32(timeTokens[2]));
-                            sensewearUnixTime = UnixTime.GetUnixTime(sensewearDateTime);
+                            sensewearTime = new DateTime(Convert.ToInt32(dateTokens[0]), Convert.ToInt32(dateTokens[1]), Convert.ToInt32(dateTokens[2]), Convert.ToInt32(timeTokens[0]), Convert.ToInt32(timeTokens[1]), Convert.ToInt32(timeTokens[2]));
+                            sensewearUnixTime = UnixTime.GetUnixTime(sensewearTime);
                         }
-                        else //unix time
+                        else
+                        { //unix time
                             sensewearUnixTime = Convert.ToInt64(tokens[0].Trim()) - (8 * 60 * 60 * 1000);
+                            UnixTime.GetDateTime((long)sensewearUnixTime, out sensewearTime);
+                        }
                         
-                        UnixTime.GetDateTime((long)sensewearUnixTime, out sensewearTime);
+                        
 
                         if ((sensewearTime.Day == prevSensewearTime.Day) && (sensewearTime.Hour == prevSensewearTime.Hour) &&
                             (sensewearTime.Minute == prevSensewearTime.Minute) && (sensewearTime.Second == prevSensewearTime.Second))
