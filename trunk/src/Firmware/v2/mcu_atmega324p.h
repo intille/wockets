@@ -32,6 +32,8 @@
 #define SLEEP2 2
 #define SLEEP3 3
 
+#define USER_BUTTON_PIN 5
+
 //#define ADC3 3
 
 //LED CONTROL PORT C
@@ -46,12 +48,13 @@ void _atmega324p_yellow_led_off();
 void _atmega324p_power_down();
 void _atmega324p_init_uart0(unsigned int baud);
 void _atmega324p_init_adc();
+void _atmega324p_reset();
 void _atmega324p_set_prescalar_adc(unsigned char prescalar);
 void _atmega324p_set_reference_adc();
 void _atmega324p_set_channel_adc(unsigned char channel);
 unsigned short  _atmega324p_a2dConvert10bit(unsigned char ch);
 unsigned char ReceiveByte(unsigned char *data);
 void TransmitByte( unsigned char data );
-
+unsigned char _atmega324p_shutdown();
 
 

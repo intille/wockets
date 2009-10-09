@@ -22,6 +22,7 @@
 #include <avr/sfr_defs.h>
 #include <avr/interrupt.h>
 #include <avr/sleep.h>
+#include <avr/wdt.h>
 #include <util/delay.h>
 #include <stdlib.h>
 
@@ -106,6 +107,13 @@ void _atmega324p_disable_adc(){
 void _atmega324p_start_adc(){
 	sbi(ADCSRA, ADIF);   // clear hardware "conversion complete" flag 
 	sbi(ADCSRA,ADSC);
+}
+
+void _atmega324p_reset()
+{
+	cli(); //irq's off
+	wdt_enable(WDTO_15MS); //wd on,15ms
+	while(1); //loop 
 }
 
 //ADSC is 1 while converting, 0 when it is done.
@@ -208,7 +216,7 @@ void _atmega324p_yellow_led_off(){
 
 
 void _atmega324p_powerdown(){
-SMCR = 0x05;
+	SMCR = 0x05;
 }
 
 void _atmega324p_disable_JTAG(void)
@@ -228,13 +236,13 @@ void _atmega324p_disable_JTAG(void)
 unsigned char ReceiveByte(unsigned char *data)
   {
   	int count=0;
-   while ( !(UCSR1A &  (1<<RXC1)) )
+   while ( !(UCSR0A &  (1<<RXC0)) )
    {
    		if (count++==1) return 1; //timed out
    			_delay_ms(1);
    }     /*  Wait for incoming data   */
 
-   *data=UDR1;
+   *data=UDR0;
 
    return 0;/* Return success*/
   }
@@ -258,6 +266,13 @@ void _atmega324p_power_down()
 }
 
 
+unsigned char _atmega324p_shutdown(){
+
+	return (0x01 & (PINA>>USER_BUTTON_PIN));
+
+
+}
+
 //unsigned char i;
 //unsigned char r;
 //char buffer[8];
@@ -270,11 +285,13 @@ void _atmega324p_init(unsigned int baud){
 
 //	r=0;
 
+
+	
 	//initialize UART0, connected to the RX of the BT
 	//using UART0 for TX and UART1 for RX - this change is needed in conjunction with power save
 	//to avoid overwriting the RX buffer by TX data
 	_atmega324p_init_uart0(baud);
-	_atmega324p_init_uart1(baud);
+	//_atmega324p_init_uart1(baud);
 
 	//set the BT
 	_rn41_init();
@@ -285,6 +302,10 @@ void _atmega324p_init(unsigned int baud){
 	//initialize the digital to analog converter
 	_atmega324p_init_adc();
 
+
+	//set user button as input
+	cbi(DDRA,USER_BUTTON_PIN);
+	sbi(PINA,USER_BUTTON_PIN);
 
 	//power save mode
 

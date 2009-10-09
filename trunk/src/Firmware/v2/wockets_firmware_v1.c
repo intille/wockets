@@ -8,6 +8,7 @@
 #include <util/delay.h>
 #include <stdlib.h>
 #include <avr/io.h>
+#include <avr/wdt.h>
 #include <avr/interrupt.h>
 #include <avr/sleep.h>
 #include <avr/eeprom.h> 
@@ -44,8 +45,9 @@ unsigned char aBuffer[MAX_COMMAND_RESPONSE_SIZE];
 unsigned short word=0;
 unsigned short address=0xffff;
 unsigned char response_length=0;
-unsigned char disconnected_reset=0;
+unsigned char disconnected_reset=1;
 unsigned short sequence=0;
+
 
 void TransmitFrame(WOCKETS_UNCOMPRESSED_FRAME f){
 	
@@ -62,6 +64,10 @@ void TransmitFrame(WOCKETS_UNCOMPRESSED_FRAME f){
 
 int main()
 {
+	//disable watchdog to avoid reset
+	MCUSR = 0;
+	wdt_disable();
+	
 	word=eeprom_read_word((uint16_t *)((uint16_t)BAUD_RATE_ADDRESS));
 	if (word==BAUD_9600)
 		word=ATMEGA324P_BAUD_9600;
@@ -79,38 +85,68 @@ int main()
 		eeprom_write_word((uint16_t *)BAUD_RATE_ADDRESS,BAUD_38400);
 	}	
 	_atmega324p_init(word);
-	
-	led_counter=1;
+	_atmega324p_green_led_off();
+
+	led_counter=0;
 	_rn41_on();
 	_mma7260qt_wakeup();
 	
-	/*cli();							
-	eeprom_write_word((uint16_t *)0x80 ,31);
-	sei();
-
-
-	cli();							
-	word=eeprom_read_word((uint16_t *)((uint16_t)0x80));
-	sei();
-
-	cli();							
-	eeprom_write_word((uint16_t *)0x00 ,word+1);
-	sei();*/
 
 	
 	
-    for(;;)  {            /* Forever */
+    while(sleep==0)  {            /* Forever */
 	 	 
 	 //set_sleep_mode(SLEEP_MODE_PWR_SAVE);
-	 sleep_enable();
+	 //sleep_enable();
 	 //MCUCR = 0x60;            // Disable BOD during sleep to reduce power consumption (used to monitor supply voltage) 
    	 //MCUCR = 0x40;
 	 //sleep_cpu();     
 	 //sleep_disable();
+	 	_delay_ms(5);
+		if (!_atmega324p_shutdown())
+			sleep=1;		 
+
+		led_counter++;
+		if (_rn41_is_connected()){
+			_atmega324p_yellow_led_off();
+			if (led_counter==1)
+					_atmega324p_green_led_on();
+			else if (led_counter==2)
+				_atmega324p_green_led_off();
+			else if (led_counter>=2000)
+				led_counter=0;	
+		}else{	 				
+			if (led_counter==1)
+				_atmega324p_yellow_led_on();
+			else if (led_counter==2)
+				_atmega324p_yellow_led_off();
+			else if (led_counter>=2000)
+				led_counter=0;    
+		}           
 	 
 	}  
 
-	
+	//shutdown to minimize power
+	//_atmega324p_reset();
+	//make sure watchdog timer is disabled
+	MCUSR = 0;
+	wdt_disable();
+
+	cli();
+	TIMSK2=0;	
+	_atmega324p_yellow_led_off();
+	_atmega324p_green_led_on();
+	_rn41_off();	
+	_mma7260qt_sleep();	
+	sleep_enable();	
+	set_sleep_mode(SLEEP_MODE_PWR_SAVE);
+	sleep_cpu();
+
+
+	//won't be executed as long as the power save is entered correctly
+	_atmega324p_yellow_led_on();
+	_atmega324p_green_led_on();
+
 	return 0;
 }
 
@@ -119,21 +155,14 @@ ISR(TIMER2_OVF_vect){
 
 		//When the counter wraps around the timer
 		TCNT2=170;
+
 		if (sleep==0){
 
 			 if (_rn41_is_connected()){
-				_atmega324p_yellow_led_off();
-				if (led_counter==1)
-					_atmega324p_green_led_on();
-				else if (led_counter==10)
-					_atmega324p_green_led_off();
-				else if (led_counter==600)
-					led_counter=0;	
+
 				sleep_counter=0;
 				sleep_counter2=0;
 				disconnected_reset=0;
-
-
 		
 				/* 	Receive a byte on each timer interrupt only if no command is being received or
 					if a command has been received in full */
@@ -347,21 +376,13 @@ ISR(TIMER2_OVF_vect){
 					response_length=0;
 				}
 					
-					    
-				
-				
-																													
-
-          
 				alive_timer++;					
-				if (alive_timer>=	3000) //if no acks for approx 30 seconds, reset radio
+				if (alive_timer>=2730) //if no acks for approx 30 seconds, reset radio
 				{
-					_rn41_reset();
-					alive_timer=0;
-					//_delay_ms(10000);
+					_atmega324p_reset();
+					alive_timer=0;					
 				}
-					 
-					
+					 					
 				adc_result[ADC1]=_atmega324p_a2dConvert10bit(ADC1);
 				adc_result[ADC2]=_atmega324p_a2dConvert10bit(ADC2);
 				adc_result[ADC3]=_atmega324p_a2dConvert10bit(ADC3);
@@ -378,39 +399,25 @@ ISR(TIMER2_OVF_vect){
 
 			}else{  //not connected
 
-
 				//reset the radio once
 				if (disconnected_reset==0){
-					_rn41_reset();
+					_atmega324p_reset();
 					disconnected_reset=1;
 				}
 
-				_atmega324p_green_led_off();
-				if (led_counter==1)
-					_atmega324p_yellow_led_on();
-				else if (led_counter==10)
-					_atmega324p_yellow_led_off();
-				else if (led_counter==600)
-					led_counter=0;                
 				sleep_counter++;
 
-				if (sleep_counter>=14400)
+				if (sleep_counter>=91)
 				{
 					sleep_counter=0;
-					sleep_counter2++;					
-
+					sleep_counter2++;
 				}
-				if (sleep_counter2>30)
-				{
-					sleep=1;													
-					_atmega324p_yellow_led_off();
-					_rn41_off();
-					_mma7260qt_sleep();		
-					_atmega324p_power_down();
-				}
+				
+				//sleep after 1 hour
+				if (sleep_counter2>3600)				
+					sleep=1;					
 			}
-
-				led_counter++;	
+				
 		}
 
 }
