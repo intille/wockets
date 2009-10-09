@@ -356,32 +356,7 @@ namespace AudioAnnotation
                 string name = "annotation_session.txt";
                
 
-                #region old code commented
-                //if (name.CompareTo("") == 0)
-                //{
-                //    name = "annotation_session.txt";
-                //    DataOutputDir = "";
-                //}
-                //else
-                //{   
-                    //get file session name and output directory
-                 //   FileInfo finfo = new FileInfo(name);
-                //    if (finfo.Exists)
-                 //   {
-                 //       name = finfo.Name;
-                 //       DataOutputDir = finfo.Directory.FullName + "\\";
-
-                  //  }
-                  //  else
-                  //  {
-                        
-                   //     name = finfo.Name;
-                   //     DataOutputDir = finfo.Directory.FullName + "\\";
-
-                   // }
-                //}
-                #endregion 
-
+                
 
                 if (SessionDir_Exist())
                 {
@@ -633,42 +608,18 @@ namespace AudioAnnotation
 
         }
 
-        #region old code commeted
-        /*
-        private bool AudioDir_Exist()
-        {
-            bool result = false;
-
-            if (files.Length > 0)
-            {
-                DataAudioDir = files[0].DirectoryName;
-                result = true;
-            }
-
-            return result;
-        }
-        */
-        #endregion
-
-
+        
 
         private bool SessionDir_Exist()
         {
             bool result = false;
             DataAudioDir = Folder_annotation + "voice\\"; 
 
-            //if (DataAudioDir.CompareTo("") != 0)
+      
             if( Directory.Exists(DataAudioDir) == true)
             {
-                //DataSessionDir = DataAudioDir+ "\\AnnotationFiles\\";
+              
                 DataSessionDir = Folder_annotator_files;
-
-                //if (!Directory.Exists(DataSessionDir))
-                //{ Directory.CreateDirectory(DataSessionDir); }
-
-                //if (DataOutputDir.CompareTo("") == 0)
-                //{ DataOutputDir = DataSessionDir; }
-
                 DataOutputDir = Folder_annotator_files;
 
                 result = true;
@@ -860,142 +811,6 @@ namespace AudioAnnotation
                 Console.WriteLine(err.Message);
             }
         }
-
-
-        # region Browse for Xml File, Browse for session file
-        /*
-        // Browse for Xml File
-        private void button_3_Click(object sender, EventArgs e)
-        {
-            try
-            {
-
-                this.openFileDialog.Title = "";
-
-                if (textBox_2.Text.Trim().CompareTo("") != 0)
-                {
-                    if (Directory.Exists(textBox_2.Text))
-                    { this.openFileDialog.InitialDirectory = textBox_2.Text.ToString(); }
-                    else
-                    { this.openFileDialog.InitialDirectory = this.folderBrowserDialog.SelectedPath; }
-                }
-                else
-                {
-                    this.openFileDialog.InitialDirectory = this.folderBrowserDialog.SelectedPath;
-
-                }
-
-
-
-
-                this.openFileDialog.Filter = "All files (*.xml)|*.xml";
-                this.openFileDialog.FilterIndex = 2;
-                this.openFileDialog.RestoreDirectory = true;
-
-
-                if (this.openFileDialog.ShowDialog() == DialogResult.OK)
-                {
-                    string fname = this.openFileDialog.FileName;
-
-                    if (File.Exists(fname))
-                    {
-                        textBox_2.Text = fname;
-
-                        if (textBox_2.Text.Trim().CompareTo("") == 0)
-                        {
-                            textBox_instructions_1.Text = "Please provide a valid path for the protocol file, then click Start.";
-                        }
-                        else
-                        {
-                            textBox_instructions_1.Text = "";
-                            textBox_instructions_1.Text = "";
-                        }
-                    }
-                    else
-                    { textBox_2.Text = ""; }
-
-                }
-                else
-                {
-                    textBox_instructions_1.Text = "Protocol file path not valid. Please check for the right directory.";
-                }
-
-
-            } // end try
-
-            catch (Exception err)
-            {
-                Console.WriteLine(err.Message);
-            }
-        }
-
-        // Browse for txt session File
-        private void button_browse_session_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                this.openFileDialog_Session.Title = "";
-
-                if (textBox_3.Text.Trim().CompareTo("") != 0)
-                {
-                    if (Directory.Exists(textBox_3.Text))
-                    { this.openFileDialog_Session.InitialDirectory = textBox_3.Text.ToString(); }
-                    else
-                    { this.openFileDialog_Session.InitialDirectory = this.folderBrowserDialog.SelectedPath; }
-                }
-                else
-                {
-                    this.openFileDialog_Session.InitialDirectory = this.folderBrowserDialog.SelectedPath;
-
-                }
-
-
-
-
-                this.openFileDialog_Session.Filter = "All files (*.txt)|*.txt";
-                this.openFileDialog_Session.FilterIndex = 2;
-                this.openFileDialog_Session.RestoreDirectory = true;
-
-
-                if (this.openFileDialog_Session.ShowDialog() == DialogResult.OK)
-                {
-                    string fname = this.openFileDialog_Session.FileName;
-
-                    if (File.Exists(fname))
-                    {
-                        textBox_3.Text = fname;
-
-                        if (textBox_3.Text.Trim().CompareTo("") == 0)
-                        {
-                            textBox_instructions_1.Text = "Please provide a valid path for the session file, then click Start.";
-                        }
-                        else
-                        {
-                            textBox_instructions_1.Text = "";
-                            textBox_instructions_1.Text = "";
-                        }
-                    }
-                    else
-                    { textBox_3.Text = ""; }
-
-                }
-                else
-                {
-                    textBox_instructions_1.Text = "Session file path not valid. Please check for the right directory.";
-                }
-
-
-            } // end try
-
-            catch (Exception err)
-            {
-                Console.WriteLine(err.Message);
-            }
-
-        }
-        */
-        
-        #endregion
 
 
         private void button_add_label_Click(object sender, EventArgs e)
@@ -3575,11 +3390,6 @@ namespace AudioAnnotation
                 XmlSession = new Session();
                 CActivityList = new BindingList<ActivityList>();
 
-                //string labels_file_name = DataSessionDir + "ActivityLabelsRealtime.xml";
-                //if (File.Exists(labels_file_name) == false)
-                //{ labels_file_name = "ActivityLabelsRealtime.xml"; }
-                //string labels_file_name = textBox_2.Text;
-
                 // Load the "ActivityLabelsRealtime.xml" file
                 string labels_file_name = Folder_session + "wockets\\ActivityLabelsRealtime.xml";
 
@@ -3668,7 +3478,6 @@ namespace AudioAnnotation
             }
         }
 
-
         private bool CheckLabelsList()
         {
             int start_row, end_row, _category;
@@ -3696,9 +3505,10 @@ namespace AudioAnnotation
             LabelsList_1.Clear();
             LabelsList_2.Clear();
 
+
+
             // check that both columns labels are correct
             // If not, send the appropriate message to correct them
-
 
             // there are two categories
             for (int c = 1; c <= 2; c++)
@@ -3770,7 +3580,6 @@ namespace AudioAnnotation
                             if ((end_row + 1) < nrows)
                             {
                                 start_row = search_start_forward(end_row + 1, nrows);
-                                //end_row = search_close_row_forward(start_row + 1, nrows, start_row + 1, true);
                                 end_row = search_close_row_forward(start_row, nrows, start_row + 1, true);
                             }
                             else
@@ -3780,16 +3589,7 @@ namespace AudioAnnotation
                         }
                         else
                         {
-                            //record is incorrect
-                            //end_row = nrows; ???
-
-                            //label_play.Text = "The label for category " + list_category_name[_category] +
-                            //                   " in rows: " + start_row.ToString() +
-                            //                  " and " + end_row.ToString() + " do not match. Please check.";
-
-                            //label_play.Text = "There are label mismatches. Please check the fields highlighted in yellow. After corrections, click the 'Generate Xml' button.";
-
-
+                            
                             incorrect_records = true;
 
 
@@ -3860,8 +3660,6 @@ namespace AudioAnnotation
             return incorrect_records;
 
         }
-
-
 
         //ArrayList records = new ArrayList();
         Annotation currentRecord;
@@ -4011,15 +3809,24 @@ namespace AudioAnnotation
                 intervals_file_xml_2.WriteLine(XmlSession_2.ToXML());
                 intervals_file_csv_2.WriteLine(XmlSession_2.ToCSV());
 
-                // Close the Xml file
+                // Close files session 1
                 intervals_file_xml_1.Flush();
                 intervals_file_xml_1.Close();
+
+                intervals_file_csv_1.Flush();
+                intervals_file_csv_1.Close();
+
+
+                // Close files session 2
+                intervals_file_xml_2.Flush();
+                intervals_file_xml_2.Close();
 
                 intervals_file_csv_2.Flush();
                 intervals_file_csv_2.Close();
 
 
                 #endregion
+
 
 
                 //set the DataDirectory
@@ -4085,13 +3892,6 @@ namespace AudioAnnotation
 
         }
 
-
-        private void SynchronizeLabels()
-        { 
-             
-        }
-
-
         #endregion
 
 
@@ -4105,7 +3905,6 @@ namespace AudioAnnotation
             {
 
                 DirectoryInfo directory = new DirectoryInfo(textBox_1.Text);
-                //DataAudioDir = directory.FullName;
                 Folder_session = directory.FullName + "\\";
 
 
@@ -4157,8 +3956,9 @@ namespace AudioAnnotation
 
         private void button_exit_Click(object sender, EventArgs e)
         {
+            if (checkBox_ExitWithoutSaving.Checked == false)
+            { SaveCurrentSessionToFile(); }
 
-            //SaveRowsToFile(DataSessionName);
             Application.Exit();
         }
 
@@ -4167,36 +3967,20 @@ namespace AudioAnnotation
             button_category_select.Enabled = false;
             label_category_button.Enabled = false;
 
-            //if (label_category_button.Text.CompareTo("  Next   Category") == 0)
-            if (SessionPart == 1)
+             if (SessionPart == 1)
             {
-                //SaveCurrentSessionToFile();
-                //label_category_button.Text = "Previous Category";
                 button_category_select.Image = Resources.Im_previous;
                 SessionPart = 2;
 
-                //LoadData();
-
                 LoadSessionView_2();
-
-
-
-
             }
             else
             {
 
-                //SaveCurrentSessionToFile();
-                //button_category_select.Text = "Next Category";
-                //label_category_button.Text ="  Next   Category";
                 button_category_select.Image = Resources.Im_next;
                 SessionPart = 1;
 
-
-                //LoadData();
-
                 LoadSessionView_1();
-
 
             }
 
@@ -4376,6 +4160,7 @@ namespace AudioAnnotation
 
         }
 
+
         private void checkBox_SiglePassMode_CheckedChanged(object sender, EventArgs e)
         {
             if (checkBox_SiglePassMode.Checked)
@@ -4391,6 +4176,7 @@ namespace AudioAnnotation
 
         #endregion
 
+       
 
 
 
