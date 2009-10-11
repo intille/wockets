@@ -46,14 +46,11 @@ namespace Wockets.Utils
             }
         }
 
-        public static void Error(Exception ex)
+        public static void Error(String msg)
         {
             lock (eLock)
             {
-                e.WriteLine(DateTime.Now + " Error:");
-                e.WriteLine(ex.Message.Trim());
-                e.WriteLine("Stack Trace    : " + ex.StackTrace.Trim());
-                e.WriteLine("^^-------------------------------------------------------------------^^");
+                e.WriteLine(WocketsTimer.GetUnixTime() + "," + DateTime.Now + "," + msg);
                 e.Flush();
             }
         }

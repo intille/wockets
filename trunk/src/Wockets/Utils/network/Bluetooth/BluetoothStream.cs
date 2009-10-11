@@ -21,7 +21,7 @@ namespace Wockets.Utils.network.Bluetooth
         protected string errorMessage;
         protected CircularBuffer buffer;  
 
-        protected const int MAX_DISCONNECTION_COUNTER = 1500;
+        protected const int MAX_DISCONNECTION_COUNTER = 400;
         protected int disconnectionCounter = 0;
         protected Thread processingThread;
         protected Thread reconnectionThread;

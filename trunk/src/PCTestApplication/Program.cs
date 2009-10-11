@@ -23,7 +23,7 @@ namespace PCTestApplication
         static void Main(string[] args)
         {
 
-            string storage = @"C:\Users\albinali\Desktop\Session9-29-18-22-41\";
+            string storage = @"C:\Users\albinali\Desktop\Session10-11-1-12-7\wockets\";
             WocketsController wc = new WocketsController("", "", "");
             wc.FromXML(storage+"SensorData.xml");
             int[] lostSeconds = new int[wc._Sensors.Count];
@@ -37,6 +37,7 @@ namespace PCTestApplication
                 wc._Sensors[i]._RootStorageDirectory = storage + "data\\raw\\PLFormat\\";
                 TextWriter tw = new StreamWriter(storage + "sensor" + wc._Sensors[i]._ID + ".csv");
                 TextWriter twp = new StreamWriter(storage + "sensorloss" + wc._Sensors[i]._ID + ".csv");
+                double totalLoss = 0;
                 try
                 {
                     int lastDecodedIndex = 0;
@@ -52,19 +53,23 @@ namespace PCTestApplication
                         Wockets.Data.Accelerometers.AccelerationData data = (Wockets.Data.Accelerometers.AccelerationData)wc._Sensors[i]._Decoder._Data[lastDecodedIndex];
                         if (firstT == 0)
                             firstT = data.UnixTimeStamp;
+
+                        if ((lastT>1000) && ((data.UnixTimeStamp- lastT) > 1000))
+                            totalLoss += (data.UnixTimeStamp-lastT);
+
                         lastT = data.UnixTimeStamp;
-                        int seq= ((data.X&0xff) | ((data.Y<<8)));
+                        /*int seq= ((data.X&0xff) | ((data.Y<<8)));
                         if (prev_seq >= 0)
                         {
                             if ((prev_seq + 1) != seq)
                                 twp.WriteLine(data.UnixTimeStamp + "," + seq);
-                        }
+                        }*/
 
                        
 
-                        tw.WriteLine(data.UnixTimeStamp + "," + data.X + "," + data.Y + "," + data.Z+","+seq);
-
-                        prev_seq=seq;
+                        //tw.WriteLine(data.UnixTimeStamp + "," + data.X + "," + data.Y + "," + data.Z+","+seq);
+                        tw.WriteLine(data.UnixTimeStamp + "," + data.X + "," + data.Y + "," + data.Z);
+                        //prev_seq=seq;
                         if ((prevUnix[i] > 1000) && ((data.UnixTimeStamp - prevUnix[i]) > 60000))
                             lostSeconds[i] += (int)((data.UnixTimeStamp - prevUnix[i]) / 1000.0);
 
@@ -83,6 +88,7 @@ namespace PCTestApplication
                 tw.Flush();
                 tw.Close();
                 twp.Flush();
+                twp.WriteLine("Total Loss in seconds " + totalLoss/1000 + " in mins" + totalLoss / 60000);
                 twp.Close();
             }
 

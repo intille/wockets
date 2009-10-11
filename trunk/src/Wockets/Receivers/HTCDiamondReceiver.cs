@@ -9,6 +9,7 @@ using Microsoft.WindowsMobile.Status;
 using Wockets.Data;
 using Wockets.Utils;
 using System.Threading;
+using Microsoft.Win32; 
 
 namespace Wockets.Receivers
 {
@@ -233,6 +234,11 @@ namespace Wockets.Receivers
             SetEvent(hEvent);
             CloseHandle(hEvent);
             myOrientationState.Changed += new ChangeEventHandler(myOrientationState_Changed);
+
+            RegistryKey rk = Registry.LocalMachine.OpenSubKey("System\\CurrentControlSet\\Control\\Power\\State\\Unattended", true);
+            rk.SetValue("ecs1:", 0, RegistryValueKind.DWord);
+            rk.Close();
+
             this.status = ReceiverStatus.Connected;
             this.pollingThread = new Thread(new ThreadStart(Poll));
             this.pollingThread.Priority = ThreadPriority.Highest;

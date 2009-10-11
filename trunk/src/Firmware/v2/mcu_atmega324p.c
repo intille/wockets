@@ -32,7 +32,7 @@ void _atmega324p_init_uart0(unsigned int baud){
 	UBRR0H = (unsigned char)(baud>>8);
 	UBRR0L = (unsigned char)baud;
 	/* Enable receiver and transmitter */
-	UCSR0B = (1<<TXEN0);//|(1<<RXEN0);
+	UCSR0B = (1<<TXEN0)|(1<<RXEN0);
 	/* Set frame format: 8data, 2stop bit */
 	//UCSR0C = (1<<USBS0)|(3<<UCSZ00);  //change 1 to 0 and &
 	UCSR0C = (3<<UCSZ00);  //change 1 to 0 and &
@@ -43,7 +43,7 @@ void _atmega324p_init_uart1(unsigned int baud){
 	UBRR1H = (unsigned char)(baud>>8);
 	UBRR1L = (unsigned char)baud;
 	/* Enable receiver and transmitter */
-	UCSR1B = (1<<RXEN1);
+	UCSR1B = (1<<TXEN1)|(1<<RXEN1);
 	/* Set frame format: 8data, 2stop bit */
 	UCSR1C =(3<<UCSZ10);  //change 1 to 0 and &
 }
@@ -107,13 +107,6 @@ void _atmega324p_disable_adc(){
 void _atmega324p_start_adc(){
 	sbi(ADCSRA, ADIF);   // clear hardware "conversion complete" flag 
 	sbi(ADCSRA,ADSC);
-}
-
-void _atmega324p_reset()
-{
-	cli(); //irq's off
-	wdt_enable(WDTO_15MS); //wd on,15ms
-	while(1); //loop 
 }
 
 //ADSC is 1 while converting, 0 when it is done.
@@ -216,7 +209,7 @@ void _atmega324p_yellow_led_off(){
 
 
 void _atmega324p_powerdown(){
-	SMCR = 0x05;
+SMCR = 0x05;
 }
 
 void _atmega324p_disable_JTAG(void)
@@ -254,9 +247,16 @@ void TransmitByte( unsigned char data )
   UCSR0A=UCSR0A & 0xdf;
   
   UDR0 =  data;  /* Start transmission   */
- // while ( !(UCSR0A & (1<<TXC0)) );        /*  Wait to Transmit - This is needed to avoid getting into power save mode before transmission */
    
 }
+
+unsigned char _atmega324p_shutdown(){
+
+        return (0x01 & (PINA>>USER_BUTTON_PIN));
+
+
+}
+
 
 void _atmega324p_power_down()
 {
@@ -266,12 +266,13 @@ void _atmega324p_power_down()
 }
 
 
-unsigned char _atmega324p_shutdown(){
-
-	return (0x01 & (PINA>>USER_BUTTON_PIN));
-
-
+void _atmega324p_reset()
+{		
+        cli(); //irq's off
+        wdt_enable(WDTO_15MS); //wd on,15ms
+        while(1); //loop 
 }
+
 
 //unsigned char i;
 //unsigned char r;
@@ -285,13 +286,8 @@ void _atmega324p_init(unsigned int baud){
 
 //	r=0;
 
-
-	
 	//initialize UART0, connected to the RX of the BT
-	//using UART0 for TX and UART1 for RX - this change is needed in conjunction with power save
-	//to avoid overwriting the RX buffer by TX data
 	_atmega324p_init_uart0(baud);
-	//_atmega324p_init_uart1(baud);
 
 	//set the BT
 	_rn41_init();
@@ -304,12 +300,13 @@ void _atmega324p_init(unsigned int baud){
 
 
 	//set user button as input
-	cbi(DDRA,USER_BUTTON_PIN);
-	sbi(PINA,USER_BUTTON_PIN);
+        cbi(DDRA,USER_BUTTON_PIN);
+        sbi(PINA,USER_BUTTON_PIN);
+
 
 	//power save mode
 
-	//SMCR |=((1<<SM0)|(1<<SM1) | (1<<SE));
+	SMCR |=((1<<SM0)|(1<<SM1) | (1<<SE));
 
 	//timer setup timer/counter2
 
@@ -320,6 +317,7 @@ void _atmega324p_init(unsigned int baud){
 
 	
 }
+
 
 
 
