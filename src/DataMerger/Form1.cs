@@ -849,8 +849,8 @@ namespace DataMerger
                                 actigraphData[i].Add(actigraphKey, actigraphLine);
                                 actigraphTime = actigraphTime.AddSeconds(1.0);
 
-                                if (actigraphLine.Contains("144,92"))
-                                    Console.Write("");
+                                //if (actigraphLine.Contains("144,92"))
+                                  //  Console.Write("");
                             }
                         } while ((actigraph_line = actigraphReader.ReadLine()) != null);
 
@@ -1240,8 +1240,8 @@ namespace DataMerger
                                     oxyconUnixTime = UnixTime.GetUnixTime(oxyconTime);
                                     string oxyconKey = oxyconTime.Year + "-" + oxyconTime.Month + "-" + oxyconTime.Day + "-" + oxyconTime.Hour + "-" + oxyconTime.Minute + "-" + oxyconTime.Second;
                                     string oxyconLine = "";
-                                    if (oxyconTime.Day >= 10)
-                                        Console.Write("");
+                                    //if (oxyconTime.Day >= 10)
+                                      //  Console.Write("");
                                     if ((tokens[1].Length > 0) && (tokens[1] != "-"))
                                         oxyconLine += Convert.ToInt32(tokens[1]);
                                     oxyconLine += ",";
@@ -1691,6 +1691,14 @@ namespace DataMerger
                 prevZ = new int[sannotation.MaximumSensorID + 1];
                 acCounters = new int[sannotation.MaximumSensorID + 1];
 
+                for (int k = 0; (k < prevX.Length); k++)
+                {
+                    prevX[k] = -1;
+                    prevY[k] = -1;
+                    prevZ[k] = -1;
+
+                }
+
                 //Create CSV Arrays
                 activityCountCSVs = new StreamWriter[sannotation.MaximumSensorID + 1];
                 samplingCSVs = new StreamWriter[sannotation.MaximumSensorID + 1];
@@ -1737,6 +1745,10 @@ namespace DataMerger
 
                 //Initialize arrays based on number of sensors
                 rawData = new int[sannotation.MaximumSensorID + 1, 3, 500];
+                for (int i = 0; (i < sannotation.MaximumSensorID + 1); i++)
+                    for (int j=0;(j<3);j++)
+                        for (int k=0;(k<500);k++)
+                            rawData[i,j,k]=-1;
                 timeData = new long[sannotation.MaximumSensorID + 1, 500];
                 AUC = new int[sannotation.MaximumSensorID + 1, 3];
                 VMAG = new double[sannotation.MaximumSensorID + 1];
@@ -1852,6 +1864,13 @@ namespace DataMerger
                 wprevY = new int[wcontroller._Sensors.Count];
                 wprevZ = new int[wcontroller._Sensors.Count];
                 wacCounters = new int[wcontroller._Sensors.Count];
+                 for (int k = 0; (k < wprevX.Length); k++)
+                {
+                    wprevX[k] = -1;
+                    wprevY[k] = -1;
+                    wprevZ[k] = -1;
+
+                 }
 
 
 
@@ -1860,6 +1879,10 @@ namespace DataMerger
 
                 //Initialize arrays based on number of sensors
                 wrawData = new int[wcontroller._Sensors.Count, 3, 500];
+                for (int i = 0; (i < wcontroller._Sensors.Count); i++)
+                    for (int j = 0; (j < 3); j++)
+                        for (int k = 0; (k < 500); k++)
+                            wrawData[i,j,k]=-1;
                 wtimeData = new long[wcontroller._Sensors.Count, 500];
                 wAUC = new int[wcontroller._Sensors.Count, 3];
                 wVMAG = new double[wcontroller._Sensors.Count];
@@ -2122,6 +2145,9 @@ namespace DataMerger
                 timestamp = diff.TotalMilliseconds + "," + currentDateTime.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ssK");
                 currentUnixTime = diff.TotalMilliseconds;
 
+                //if (currentUnixTime == 1255223724000)
+                 //   Console.Write("");
+
                 #region Setup prefix of CSV lines
                 master_csv_line = timestamp;
                 hr_csv_line = timestamp;
@@ -2285,7 +2311,7 @@ namespace DataMerger
                                     //Calculate MITes Raw Values
                                     if ((channel != 0) && (channel <= sannotation.MaximumSensorID)) //if junk comes ignore it
                                     {
-                                        if ((prevX[channel] > 0) && (prevY[channel] > 0) && (prevZ[channel] > 0) && (rawData[channel, 0, headPtr] > 0) && (rawData[channel, 1, headPtr] > 0) && (rawData[channel, 2, headPtr] > 0))
+                                        if ((prevX[channel] > -1) && (prevY[channel] > -1) && (prevZ[channel] > -1) && (rawData[channel, 0, headPtr] > -1) && (rawData[channel, 1, headPtr] > -1) && (rawData[channel, 2, headPtr] > -1))
                                         {
                                             averageX[channel] = averageX[channel] + Math.Abs(prevX[channel] - rawData[channel, 0, headPtr]);
                                             averageRawX[channel] = averageRawX[channel] + rawData[channel, 0, headPtr];
@@ -2501,6 +2527,9 @@ namespace DataMerger
                             wunixtimestamp[i] = data.UnixTimeStamp;
                             whead[wcontroller._Sensors[i]._ID] = (whead[wcontroller._Sensors[i]._ID] + 1) % 500;
 
+                            //if (data.UnixTimeStamp == 1255223724999)
+                              //  Console.Write("");
+
                         }
 
                     }
@@ -2529,7 +2558,12 @@ namespace DataMerger
                             wrunningMeanY += wrawData[wcontroller._Sensors[i]._ID, 1, wheadPtr];
                             wrunningMeanZ += wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr];
                             wnumMeanPts++;
+                           
+
                             wheadPtr--;
+
+
+
                             if (wheadPtr < 0)
                                 wheadPtr = 499;
                         }
@@ -2553,11 +2587,14 @@ namespace DataMerger
 
                         while ((wtimeData[wcontroller._Sensors[i]._ID, wheadPtr] > 0) && (wheadPtr != whead[wcontroller._Sensors[i]._ID]))
                         {
-
+                            double ttt=wtimeData[wcontroller._Sensors[i]._ID, wheadPtr] ;
+                            //if (ttt == 1255223724999)
+                              //  Console.Write("");
                             if (((wtimeData[wcontroller._Sensors[i]._ID, wheadPtr] - currentUnixTime) >= 0) && ((wtimeData[wcontroller._Sensors[i]._ID, wheadPtr] - currentUnixTime) <= 1000))
                             {
-
-                                if ((wprevX[wcontroller._Sensors[i]._ID] > 0) && (wprevY[wcontroller._Sensors[i]._ID] > 0) && (wprevZ[wcontroller._Sensors[i]._ID] > 0) && (wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr] > 0) && (wrawData[wcontroller._Sensors[i]._ID, 1, wheadPtr] > 0) && (wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr] > 0))
+                                //if (wcontroller._Sensors[i]._ID == 3)
+                                  //  Console.Write("");
+                                if ((wprevX[wcontroller._Sensors[i]._ID] > -1) && (wprevY[wcontroller._Sensors[i]._ID] > -1) && (wprevZ[wcontroller._Sensors[i]._ID] > -1) && (wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr] > -1) && (wrawData[wcontroller._Sensors[i]._ID, 1, wheadPtr] > -1) && (wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr] > -1))
                                 {
                                     waverageX[wcontroller._Sensors[i]._ID] = waverageX[wcontroller._Sensors[i]._ID] + Math.Abs(wprevX[wcontroller._Sensors[i]._ID] - wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr]);
                                     waverageRawX[wcontroller._Sensors[i]._ID] = waverageRawX[wcontroller._Sensors[i]._ID] + wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr];
@@ -2566,6 +2603,8 @@ namespace DataMerger
                                     waverageZ[wcontroller._Sensors[i]._ID] = waverageZ[wcontroller._Sensors[i]._ID] + Math.Abs(wprevZ[wcontroller._Sensors[i]._ID] - wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr]);
                                     waverageRawZ[wcontroller._Sensors[i]._ID] = waverageRawZ[wcontroller._Sensors[i]._ID] + wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr];
                                     wacCounters[wcontroller._Sensors[i]._ID] = wacCounters[wcontroller._Sensors[i]._ID] + 1;
+//                                    if (ttt == 1255223724999)
+//                                        Console.Write("");
                                 }
 
                                 wprevX[wcontroller._Sensors[i]._ID] = wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr];
