@@ -246,14 +246,14 @@ namespace Wockets
             }
 
             polling = true;
-            saving = true;
+            //saving = true;
             //Priorities are very critical to avoid buffer overflow
-            aSavingThread = new Thread(new ThreadStart(Save));           
-            aSavingThread.Priority = ThreadPriority.Highest;
+            //aSavingThread = new Thread(new ThreadStart(Save));           
+            //aSavingThread.Priority = ThreadPriority.Highest;
             aPollingThread = new Thread(new ThreadStart(Poll));
             aPollingThread.Priority = ThreadPriority.Highest;
             aPollingThread.Start();
-            aSavingThread.Start();
+          //  aSavingThread.Start();
 
 
 
@@ -304,20 +304,20 @@ namespace Wockets
         {
             while (saving)
             {
-                try
+
+                for (int i = 0; (i < this._Sensors.Count); i++)
                 {
-                    for (int i = 0; (i < this._Sensors.Count); i++)
+                    try
                     {
 
                         this._Sensors[i].Save();
                         Thread.Sleep(1000);
                     }
+                    catch (Exception ee)
+                    {
+                        Logger.Error(ee.Message);
+                    }
                 }
-                catch (Exception ee)
-                {
-                    Logger.Error(ee);
-                }
-
             }
         }
 
@@ -422,7 +422,7 @@ namespace Wockets
             GET_BT GET_BT_CMD = new GET_BT();
             ALIVE ALIVE_CMD = new ALIVE();
             int pollCounter = 0;
-            Logger.Warn("Version 1.7, October 02, 2009");
+            Logger.Warn("Version 1.9, October 09, 2009");
 
             while (polling)
             {
@@ -484,7 +484,7 @@ namespace Wockets
                                     if (alive[i] <= 0)
                                     {
                                         ((SerialReceiver)currentReceiver).Write(ALIVE_CMD._Bytes);
-                                        alive[i] = 2000;// + i * 10;
+                                        alive[i] = 200;// + i * 10;
                                     }
                                     #endregion Alive
 
@@ -497,6 +497,9 @@ namespace Wockets
                                     sensor.Packets += numDecodedPackets;
                                     #endregion Read Data
                                 }
+
+                                if (numDecodedPackets>0)
+                                    sensor.Save();
 
                             }
 
@@ -512,7 +515,7 @@ namespace Wockets
 
                     catch (Exception ex)
                     {
-                        Logger.Error(ex);
+                        Logger.Error(ex.Message+ " \nTrace:"+ex.StackTrace);
                         currentReceiver.Dispose();
                     }
                 }
@@ -520,7 +523,7 @@ namespace Wockets
                 //reset bluetooth stack once if all wockets are disconnected
                 if ((!bluetoothIsReset) && (allWocketsDisconnected)) 
                 {
-                    Logger.Warn("All Wockets Disconnected. BT Reset.");
+                    Logger.Debug("All Wockets Disconnected. BT Reset.");
                     NetworkStacks._BluetoothStack.Dispose();
                     NetworkStacks._BluetoothStack.Initialize();
                     bluetoothIsReset = true;

@@ -56,7 +56,7 @@ void TransmitFrame(WOCKETS_UNCOMPRESSED_FRAME f){
 	TransmitByte(f.byte3);
 	TransmitByte(f.byte4);
 	TransmitByte(f.byte5);
-	
+
 }
 
 
@@ -135,7 +135,7 @@ int main()
 	cli();
 	TIMSK2=0;	
 	_atmega324p_yellow_led_off();
-	_atmega324p_green_led_on();
+	_atmega324p_green_led_off();
 	_rn41_off();	
 	_mma7260qt_sleep();	
 	sleep_enable();	
@@ -170,6 +170,7 @@ ISR(TIMER2_OVF_vect){
 				{				
 					aBuffer[command_counter++]=aByte;
 
+			
 					//for the first byte set the opcode and set the commands length and reset timer
 					if ((aByte>>5)==COMMAND_PREFIX)
 					{
@@ -185,7 +186,7 @@ ISR(TIMER2_OVF_vect){
 								case (unsigned char)GET_POWER_DOWN_TIMER:
 								case (unsigned char)RESET_WOCKET:
 								case (unsigned char)GET_BAUD_RATE:
-								case (unsigned char)ALIVE:
+								case (unsigned char)ALIVE:			
 									command_length=1;
 									break;
 								case (unsigned char)SET_LED:
@@ -379,6 +380,8 @@ ISR(TIMER2_OVF_vect){
 				alive_timer++;					
 				if (alive_timer>=2730) //if no acks for approx 30 seconds, reset radio
 				{
+					//_atmega324p_green_led_on();
+					//_delay_ms(5000);
 					_atmega324p_reset();
 					alive_timer=0;					
 				}
@@ -390,10 +393,10 @@ ISR(TIMER2_OVF_vect){
 				//tag if close to ack
 				if (ack==0xff)
 				TransmitFrame(encode(1,adc_result[ADC3], adc_result[ADC2], adc_result[ADC1]));
-					//TransmitFrame(encode(1,sequence & 0xff,(sequence>>8)&0xff,0));//adc_result[ADC3], adc_result[ADC2], adc_result[ADC1]));
+				//	TransmitFrame(encode(1,sequence & 0xff,(sequence>>8)&0xff,0));//adc_result[ADC3], adc_result[ADC2], adc_result[ADC1]));
 				else  //otherwise dont tag
 				TransmitFrame(encode(0,adc_result[ADC3], adc_result[ADC2], adc_result[ADC1]));
-					//TransmitFrame(encode(0,sequence & 0xff,(sequence>>8)&0xff,0));///adc_result[ADC3], adc_result[ADC2], adc_result[ADC1]));
+				//	TransmitFrame(encode(0,sequence & 0xff,(sequence>>8)&0xff,0));///adc_result[ADC3], adc_result[ADC2], adc_result[ADC1]));
 
 				sequence++;
 

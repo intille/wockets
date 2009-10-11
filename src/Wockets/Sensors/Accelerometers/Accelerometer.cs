@@ -308,13 +308,13 @@ namespace Wockets.Sensors.Accelerometers
 
                 int currentHead = this._Decoder._Head;
                
-               if ((currentHead==0) || (((tail <= currentHead) && ((currentHead - tail) < (this._Decoder._Data.Length / 6))) ||
+               /*if ((currentHead==0) || (((tail <= currentHead) && ((currentHead - tail) < (this._Decoder._Data.Length / 6))) ||
                     ((tail>currentHead) && ((this._Decoder._Data.Length -tail +currentHead)<(this._Decoder._Data.Length / 6)))))
                     return;
                 else //save up to where the head points
                     currentHead--;
                
-                               
+                 */              
 
                 DetermineFilePath();
                 
@@ -329,8 +329,8 @@ namespace Wockets.Sensors.Accelerometers
 
                     if (aUnixTime < lastUnixTime)
                     {
-                        string s = "Data overwritten without saving Accelerometer.cs" + this._ID+" "+aUnixTime+" "+lastUnixTime;
-                        Logger.Error(new Exception(s));
+                        string s = "Data overwritten without saving Accelerometer.cs Save " + this._ID+" "+aUnixTime+" "+lastUnixTime;                        
+                        Logger.Error(s);
                         break;
                     }
 

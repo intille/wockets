@@ -15,7 +15,7 @@ using weka.classifiers.trees;
 using System.IO.Ports;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
-
+using Microsoft.Win32; 
 
 using Wockets;
 using Wockets.Utils;
@@ -222,6 +222,10 @@ namespace WocketsApplication.DataLogger
                 isPocketPC = true;
 
             Logger.InitLogger(storageDirectory);
+            RegistryKey rk = Registry.LocalMachine.OpenSubKey("System\\CurrentControlSet\\Control\\Power\\State\\Unattended", true);
+            rk.SetValue("wav1:", 0, RegistryValueKind.DWord);
+            rk.Close();
+
             this.LastTime = this.FirstTime = DateTime.Now.Ticks;
             if (mode == 1)
                 InitializeAnnotator(storageDirectory, wocketsController, annotatedSession, classifierConfiguration);
