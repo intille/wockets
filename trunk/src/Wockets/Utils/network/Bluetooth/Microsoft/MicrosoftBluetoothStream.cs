@@ -86,7 +86,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
 
 
                 btStream.processingThread = new Thread(new ThreadStart(btStream.Process));
-                btStream.processingThread.Priority = ThreadPriority.Highest;
+                btStream.processingThread.Priority = ThreadPriority.AboveNormal;
                 btStream.processingThread.Start();
                 Logger.Debug("Microsoft Open:Reconnection for receiver " + btStream.hexAddress + " success spawned process thread");
 

@@ -329,10 +329,12 @@ namespace Wockets.Sensors.Accelerometers
 
                     if (aUnixTime < lastUnixTime)
                     {
-                        string s = "Data overwritten without saving Accelerometer.cs Save " + this._ID+" "+aUnixTime+" "+lastUnixTime;                        
+                        string s = "Data overwritten without saving Accelerometer.cs Save " + this._ID + " " + aUnixTime + " " + lastUnixTime;
                         Logger.Error(s);
                         break;
                     }
+                    //else if ((aUnixTime - lastUnixTime) > 2000)
+                    //    Console.WriteLine("");
 
                     // Roughly once per second save full timestamp, no matter what
                     if (isForceTimestampSave || (timeSaveCount == TIMESTAMP_AFTER_SAMPLES))

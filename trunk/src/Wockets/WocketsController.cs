@@ -246,14 +246,14 @@ namespace Wockets
             }
 
             polling = true;
-            //saving = true;
+            saving = true;
             //Priorities are very critical to avoid buffer overflow
-            //aSavingThread = new Thread(new ThreadStart(Save));           
-            //aSavingThread.Priority = ThreadPriority.Highest;
+            aSavingThread = new Thread(new ThreadStart(Save));           
+            aSavingThread.Priority = ThreadPriority.Highest;
             aPollingThread = new Thread(new ThreadStart(Poll));
             aPollingThread.Priority = ThreadPriority.Highest;
             aPollingThread.Start();
-          //  aSavingThread.Start();
+            aSavingThread.Start();
 
 
 
@@ -498,8 +498,8 @@ namespace Wockets
                                     #endregion Read Data
                                 }
 
-                                if (numDecodedPackets>0)
-                                    sensor.Save();
+                           //     if (numDecodedPackets>0)
+                            //        sensor.Save();
 
                             }
 
