@@ -489,7 +489,7 @@ namespace NESPDataViewer
             
 
         }
-        private void CreateAccelerationGraph(int paneOrder, string filepath, string channel, string location,string type)
+        private void CreateAccelerationGraph(int paneOrder, string filepath, string channel, string location,string type,string mac)
         {
             #region ACCELERATION X Y Z
             string[] accel = FileReadWrite.ReadLinesFromFile(filepath);
@@ -633,8 +633,11 @@ namespace NESPDataViewer
             #endregion
 
 
+            if (mac.Length==0)
+                AddAccelerationCurve(type+" " + channel, location,listX, listY, listZ,listActivityCounts,listSampleRates,listAUCs,listVMAGs);
+            else
+                AddAccelerationCurve(mac, location, listX, listY, listZ, listActivityCounts, listSampleRates, listAUCs, listVMAGs);
 
-            AddAccelerationCurve(type+" " + channel + " " + location, location,listX, listY, listZ,listActivityCounts,listSampleRates,listAUCs,listVMAGs);
             paneOrders.Add(type + " " + channel + " " + location, paneOrder);
             WidenDatesIfNeeded(listX);
         }
@@ -1781,24 +1784,35 @@ namespace NESPDataViewer
                     channel = sensorinfo[1];
                     location = sensorinfo[3];
                 }
-                CreateAccelerationGraph(paneOrdering, files[i], channel, location,"MITes");
+                CreateAccelerationGraph(paneOrdering, files[i], channel, location,"MITes","");
                 paneOrdering++;
             }
             #endregion
 
 
             #region WOCKETS ACCELEROMETER GRAPHS
+            Wockets.WocketsController wc = new Wockets.WocketsController("", "", "");
+            wc.FromXML(path + "\\wockets\\SensorData.xml");
             files = Directory.GetFiles(path + "\\merged\\", "Wocket*Raw*");
             for (int i = 0; i < files.Length; i++)
             {
                 string channel = "", location = "";
                 string[] sensorinfo = Path.GetFileNameWithoutExtension(files[i]).Split('_');
+                string mac = "";
                 if (sensorinfo.Length >= 4)
                 {
                     channel = sensorinfo[1];
+                    if (wc._Receivers[Convert.ToInt32(channel)] is Wockets.Receivers.RFCOMMReceiver)
+                    {
+                        mac = ((Wockets.Receivers.RFCOMMReceiver)wc._Receivers[Convert.ToInt32(channel)])._Address;
+                        mac = mac.Substring(mac.Length - 2, 2);
+                        mac = "Wocket " + mac;
+                    }
+                    else
+                        mac = "Internal";
                     location = sensorinfo[3];
                 }
-                CreateAccelerationGraph(paneOrdering, files[i], channel, location,"Wocket");
+                CreateAccelerationGraph(paneOrdering, files[i], channel, location,"Wocket",mac);
                 paneOrdering++;
             }
             #endregion

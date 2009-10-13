@@ -283,6 +283,10 @@ namespace Wockets.Sensors.Accelerometers
                 bw.Flush();
                 bw.CloseFile();
             }
+
+            if (br != null)            
+                br.CloseFile();
+            
         }
 
        
