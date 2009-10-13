@@ -23,7 +23,7 @@ namespace PCTestApplication
         static void Main(string[] args)
         {
 
-            string storage = @"C:\Users\albinali\Desktop\Session10-12-0-8-6\wockets\";
+            string storage = @"C:\Users\albinali\Desktop\0ct1209\0ct1209\wockets\";
             WocketsController wc = new WocketsController("", "", "");
             wc.FromXML(storage+"SensorData.xml");
             int[] lostSeconds = new int[wc._Sensors.Count];

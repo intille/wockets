@@ -293,11 +293,11 @@ namespace Wockets.Decoders.Accelerometers
             dom.LoadXml(xml);
             XmlNode xNode = dom.DocumentElement;
 
-            if ((xNode.Name == WocketsDecoder.DECODER_ELEMENT) && (xNode.HasChildNodes))
+            if ((xNode.Name == WocketsDecoder.DECODER_ELEMENT))
             {
                 foreach (XmlAttribute xAttribute in xNode.Attributes)
                 {
-                    if ((xAttribute.Name == WocketsDecoder.TYPE_ATTRIBUTE) && (xAttribute.Value != WocketsDecoder.TYPE_ATTRIBUTE))
+                    if ((xAttribute.Name == WocketsDecoder.TYPE_ATTRIBUTE) && (xAttribute.Value != WocketsDecoder.WOCKETS_TYPE))
                         throw new Exception("XML Parsing error - wockets decoder parsing a decoder of a different type "+xAttribute.Value);
                     else if (xAttribute.Name == WocketsDecoder.ID_ATTRIBUTE)
                         this._ID = Convert.ToInt32(xAttribute.Value);  

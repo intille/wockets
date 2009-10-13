@@ -296,7 +296,8 @@ namespace Wockets
             for (int i = 0; (i < this._Sensors.Count); i++)
                 this._Sensors[i].Dispose();
 
-            NetworkStacks._BluetoothStack.Dispose();
+            
+            //NetworkStacks._BluetoothStack.Dispose();
 
         }
 
@@ -422,7 +423,7 @@ namespace Wockets
             GET_BT GET_BT_CMD = new GET_BT();
             ALIVE ALIVE_CMD = new ALIVE();
             int pollCounter = 0;
-            Logger.Warn("Version 1.9, October 09, 2009");
+            Logger.Warn("Version 1.10, October 12, 2009");
 
             while (polling)
             {
@@ -471,12 +472,12 @@ namespace Wockets
                                    
                                     #region Write Data
                                     #region Battery Query
-                                    /*batteryPoll[i] -= 1;
+                                    batteryPoll[i] -= 1;
                                     if (batteryPoll[i] <= 0)
                                     {
                                         ((SerialReceiver)currentReceiver).Write(GET_BT_CMD._Bytes);
                                         batteryPoll[i] = 6000 + i * 200;
-                                    }*/
+                                    }
                                     #endregion Battery Query
 
                                     #region Alive

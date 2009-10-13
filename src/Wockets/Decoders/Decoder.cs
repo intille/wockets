@@ -42,7 +42,7 @@ namespace Wockets.Decoders
             this.size = 0;
             this.packet = new byte[packetSize];
             this.packetPosition = 0;
-            this.id = IDCounter++;
+            this.id = 0;
             this.index = 0;
             this.head = 0;
         }

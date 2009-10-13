@@ -1825,9 +1825,35 @@ namespace DataMerger
                 waucCSVs = new StreamWriter[wcontroller._Sensors.Count];
                 wvmagCSVs = new StreamWriter[wcontroller._Sensors.Count];
                 wrmCSVs = new StreamWriter[wcontroller._Sensors.Count];
+             
+                WocketsController wc = new WocketsController("", "", "");
+                wc.FromXML(aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY + "\\SensorData.xml");
+
                 for (int i = 0; (i < wcontroller._Sensors.Count); i++)
                 {
                     int sensor_id = wcontroller._Sensors[i]._ID;
+                    wc._Sensors[i]._RootStorageDirectory = aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY + "\\data\\raw\\PLFormat\\";
+                    if (CSVProgress == "")
+                        CSVProgress = "Generating Raw Data File for Wocket " + sensor_id.ToString("00");
+                    //Write out raw data
+                    TextWriter tw = new StreamWriter(aDataDirectory + "\\"+ MERGED_SUBDIRECTORY+"\\" + "Wocket" + sensor_id.ToString("00")+".csv");
+                    int lastDecodedPacket = 0;
+                    
+                        while (wc._Sensors[i].Load())
+                        {
+                            if (wc._Sensors[i]._Decoder._Head == 0)
+                                lastDecodedPacket = wc._Sensors[i]._Decoder._Data.Length - 1;
+                            else
+                                lastDecodedPacket = wc._Sensors[i]._Decoder._Head - 1;
+
+                            Wockets.Data.Accelerometers.AccelerationData data = (Wockets.Data.Accelerometers.AccelerationData)wc._Sensors[i]._Decoder._Data[lastDecodedPacket];
+                            tw.WriteLine(data.UnixTimeStamp + "," + data.X + "," + data.Y + "," + data.Z);
+                        }
+              
+                    tw.Flush();
+                    tw.Close();
+
+
                     string location = wcontroller._Sensors[i]._Location.Replace(' ', '-');
                     lastDecodedIndex[i] = 0;
                     wactivityCountCSVs[sensor_id] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Wocket_" + sensor_id.ToString("00") + "_SAD_" + location + ".csv");
@@ -1850,6 +1876,8 @@ namespace DataMerger
                         "Wocket" + sensor_id.ToString("00") + "_RM_SIZE," + "Wocket" + sensor_id.ToString("00") + "_VMAG";
                 }
 
+                wc.Dispose();
+               
 
                 //create some counters for activity counts
                 waverageX = new int[wcontroller._Sensors.Count];

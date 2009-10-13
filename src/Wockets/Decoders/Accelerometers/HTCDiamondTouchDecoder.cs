@@ -11,7 +11,7 @@ namespace Wockets.Decoders.Accelerometers
     public sealed class HTCDiamondTouchDecoder : Decoder
     {
         #region Serialization Constants
-        private const string HTCDIAMOND_TYPE = "HTCDiamond";
+        private const string HTCDIAMOND_TYPE = "HTCDiamondTouch";
         private const int HTCDIAMOND_CHANNEL = 83;
         #endregion Serialization Constants
 
@@ -151,7 +151,7 @@ namespace Wockets.Decoders.Accelerometers
             dom.LoadXml(xml);
             XmlNode xNode = dom.DocumentElement;
 
-            if ((xNode.Name == HTCDiamondTouchDecoder.DECODER_ELEMENT) && (xNode.HasChildNodes))
+            if ((xNode.Name == HTCDiamondTouchDecoder.DECODER_ELEMENT))
             {
                 foreach (XmlAttribute xAttribute in xNode.Attributes)
                 {

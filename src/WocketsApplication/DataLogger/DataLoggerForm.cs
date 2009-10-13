@@ -621,10 +621,8 @@ namespace WocketsApplication.DataLogger
             progressMessage = "Initializing receivers ... searching " + this.wocketsController._Receivers.Count + " BT receivers\r\n";
 
             this.wocketsController.Initialize();
-            foreach (Decoder d in this.wocketsController._Decoders)
-            {
-                // d.Subscribe(SensorDataType.BATTERYLEVEL, new Response.ResponseHandler(this.BatteryCallback));
-            }
+            foreach (Decoder d in this.wocketsController._Decoders)            
+                d.Subscribe(SensorDataType.BATTERYLEVEL, new Response.ResponseHandler(this.BatteryCallback));            
 
             //Try to initialize all receivers 10 times then exit
             /*int initializationAttempt = 0;
