@@ -423,7 +423,7 @@ namespace Wockets
             GET_BT GET_BT_CMD = new GET_BT();
             ALIVE ALIVE_CMD = new ALIVE();
             int pollCounter = 0;
-            Logger.Warn("Version 1.10, October 12, 2009");
+            Logger.Warn("Version 1.11, October 16, 2009");
 
             while (polling)
             {

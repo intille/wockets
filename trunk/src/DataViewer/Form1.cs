@@ -1793,7 +1793,7 @@ namespace NESPDataViewer
             #region WOCKETS ACCELEROMETER GRAPHS
             Wockets.WocketsController wc = new Wockets.WocketsController("", "", "");
             wc.FromXML(path + "\\wockets\\SensorData.xml");
-            files = Directory.GetFiles(path + "\\merged\\", "Wocket*Raw*");
+            files = Directory.GetFiles(path + "\\merged\\", "Wocket*RawMean*");
             for (int i = 0; i < files.Length; i++)
             {
                 string channel = "", location = "";

@@ -92,7 +92,7 @@ namespace PCTestApplication
                 twp.Close();
             }
 
-            Environment.Exit(0);
+            //Environment.Exit(0);
             TextReader[] trs = new StreamReader[wc._Sensors.Count];
             Hashtable[] sensordata = new Hashtable[wc._Sensors.Count];
             string[] sensorlines = new string[wc._Sensors.Count];

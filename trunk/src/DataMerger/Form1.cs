@@ -1826,17 +1826,24 @@ namespace DataMerger
                 wvmagCSVs = new StreamWriter[wcontroller._Sensors.Count];
                 wrmCSVs = new StreamWriter[wcontroller._Sensors.Count];
              
+
+                /* Write Wockets raw data to csv files */
                 WocketsController wc = new WocketsController("", "", "");
                 wc.FromXML(aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY + "\\SensorData.xml");
+                int[] wocketsSR = new int[wcontroller._Sensors.Count];
+                
 
                 for (int i = 0; (i < wcontroller._Sensors.Count); i++)
                 {
                     int sensor_id = wcontroller._Sensors[i]._ID;
+                    int wocketSR = 0;
+                    long prevWocketTS = 0;
+                    int totalseconds = 0;
                     wc._Sensors[i]._RootStorageDirectory = aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY + "\\data\\raw\\PLFormat\\";
                     if (CSVProgress == "")
                         CSVProgress = "Generating Raw Data File for Wocket " + sensor_id.ToString("00");
                     //Write out raw data
-                    TextWriter tw = new StreamWriter(aDataDirectory + "\\"+ MERGED_SUBDIRECTORY+"\\" + "Wocket" + sensor_id.ToString("00")+".csv");
+                    TextWriter tw = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "Wocket_RawData_" + sensor_id.ToString("00") + "_" + wcontroller._Sensors[i]._Location.Replace(' ','-')+ ".csv");
                     int lastDecodedPacket = 0;
                     
                         while (wc._Sensors[i].Load())
@@ -1848,10 +1855,19 @@ namespace DataMerger
 
                             Wockets.Data.Accelerometers.AccelerationData data = (Wockets.Data.Accelerometers.AccelerationData)wc._Sensors[i]._Decoder._Data[lastDecodedPacket];
                             tw.WriteLine(data.UnixTimeStamp + "," + data.X + "," + data.Y + "," + data.Z);
+
+                            long currentTS=(long)(data.UnixTimeStamp/1000.0);
+                            if ((currentTS - prevWocketTS) < 1)
+                                wocketSR++;                            
+                            if ((currentTS - prevWocketTS)==1)
+                                totalseconds++;
+                            prevWocketTS = currentTS;
                         }
-              
+                        wocketsSR[i] = (int) Math.Round((double)wocketSR/(double)totalseconds);
                     tw.Flush();
                     tw.Close();
+
+           
 
 
                     string location = wcontroller._Sensors[i]._Location.Replace(' ', '-');
@@ -1877,8 +1893,171 @@ namespace DataMerger
                 }
 
                 wc.Dispose();
-               
 
+                /* Correct the wockets timestamps */
+
+                TextReader[] wocketsTR = new TextReader[wcontroller._Sensors.Count];
+                TextWriter[] wocketsTW = new TextWriter[wcontroller._Sensors.Count];
+                int LoadedSeconds = 10;
+                for (int k = 0; (k < wcontroller._Sensors.Count); k++)
+                {
+                    wocketsTR[k] = new StreamReader(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "Wocket_RawData_" + wcontroller._Sensors[k]._ID.ToString("00") + "_" + wcontroller._Sensors[k]._Location.Replace(' ', '-') + ".csv");
+                    wocketsTW[k] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "Wocket_RawCorrectedData_" + wcontroller._Sensors[k]._ID.ToString("00") + "_" + wcontroller._Sensors[k]._Location.Replace(' ', '-') + ".csv");
+
+                    ArrayList[] loadedData = new ArrayList[LoadedSeconds];
+                    long[] loadedDataTime = new long[LoadedSeconds];
+                    for (int m = 0; (m < LoadedSeconds); m++)
+                        loadedData[m] = new ArrayList();
+                    int loadedIndex = 0;
+                    string dataline = "";
+                    long lastSecond = 0;
+                    int nextCorrected = 0;
+                    long nextCorrectedTime = 0;
+                    double delta = 1000.0/wocketsSR[k];
+                    double recordTime = 0;
+
+                    if (CSVProgress == "")
+                        CSVProgress = "Correcting Timestamps for Raw Data File for Wocket " +  wcontroller._Sensors[k]._ID.ToString("00");
+
+                    while ((dataline = wocketsTR[k].ReadLine()) != null)
+                    {
+                        string[] wocketTokens = dataline.Split(',');
+                        int wocketX = Convert.ToInt32(wocketTokens[1]);
+                        int wocketY = Convert.ToInt32(wocketTokens[2]);
+                        int wocketZ = Convert.ToInt32(wocketTokens[3]);
+                        long unixtime = (long)(Convert.ToDouble(wocketTokens[0])/1000.0);
+
+                        if ((k == 2) && (unixtime >= 1255347111))
+                            Console.Write(""); 
+                       
+                        
+                        if (nextCorrectedTime == 0)
+                            nextCorrectedTime = unixtime;
+                        if (lastSecond == 0)
+                            lastSecond = unixtime;
+                        
+                        //if a new second is being loaded
+                        if (lastSecond != unixtime)
+                        {
+                            //while ((unixtime - nextCorrected) > 9)
+                              //  nextCorrected++;
+                            //check if you have enough to correct
+                            while ((unixtime - nextCorrectedTime) > 8)
+                            {
+                          
+
+                                //if the data needs compensation
+                                if (loadedData[nextCorrected].Count < (wocketsSR[k] - 2)) //lower number of samples
+                                {
+                                    //check if seconds that follow compensate for the current second
+                                    int dataCounter = loadedData[nextCorrected].Count;
+                                    bool compensated = false;
+                                    int compensatedCounter = 1;
+                                    for (int r = 1; (r < 8); r++)
+                                    {
+
+                                        int adjacentDataIndex = (nextCorrected + r) % LoadedSeconds;
+                                        if (loadedData[adjacentDataIndex].Count > 0)
+                                        {
+                                            string[] adjTokens = ((string)loadedData[adjacentDataIndex][0]).Split(',');
+                                            long adjunixtime = (long)(Convert.ToDouble(adjTokens[0]) / 1000.0);
+                                            if ((adjunixtime - unixtime) < 8)
+                                                dataCounter += loadedData[adjacentDataIndex].Count;
+                                            compensatedCounter++;
+                                            if ((dataCounter / (r + 1)) >= (wocketsSR[k] - 10))
+                                            {
+                                                compensated = true;
+                                                break;
+                                            }
+                                        }else
+                                            compensatedCounter++;
+                                       
+                                    }
+
+                                    //use data points from adjacent seconds
+                                    if (compensated)
+                                    {
+                                        int totalCompensatedPoints = loadedData[nextCorrected].Count;
+                                        for (int m = 1; (m < compensatedCounter); m++)
+                                        {
+                                            int compenstingArray = (nextCorrected + m) % LoadedSeconds;
+                                            for (int n = 0; (n < loadedData[compenstingArray].Count); n++)
+                                            {
+                                                loadedData[nextCorrected].Add(loadedData[compenstingArray][n]);
+                                                loadedData[compenstingArray].RemoveAt(n);
+                                                //wocketsTW[k].WriteLine(recordTime + "," + recordTokens[1] + "," + recordTokens[2] + "," + recordTokens[3]);
+                                                //recordTime += delta;
+                                                totalCompensatedPoints++;
+                                                if (wocketsSR[k] == totalCompensatedPoints)
+                                                {
+                                                    compensated = false;
+                                                    break;
+                                                }
+                                            }
+
+                                            //if done compensating stop moving data points and just write it out
+                                            if (!compensated)
+                                                break;
+                                        }
+                                    }
+
+                                }
+
+                                //
+                                recordTime = nextCorrectedTime*1000.0;
+                                for (int n = 0; (n < loadedData[nextCorrected].Count); n++)
+                                {
+                                    string[] recordTokens = ((string)loadedData[nextCorrected][n]).Split(',');
+                                    wocketsTW[k].WriteLine(recordTime + "," + recordTokens[1] + "," + recordTokens[2] + "," + recordTokens[3]);
+                                    recordTime += delta;
+                                }
+                                loadedData[nextCorrected] = new ArrayList();
+                                nextCorrected = (nextCorrected + 1) % LoadedSeconds;                                
+                                //nextCorrectedTime = loadedDataTime[nextCorrected];
+                                nextCorrectedTime++;
+                               // if (nextCorrectedTime != (long)(Convert.ToDouble(((string)loadedData[nextCorrected][0]).Split(',')[0])))
+                                 //   Console.Write("");
+                                
+                                //try
+                                //{
+                               //= (long)(Convert.ToDouble(((string)loadedData[nextCorrected][0]).Split(',')[0]));
+                                //}
+                                //catch (Exception e)
+                                //{
+                                //}
+                            }
+
+                            //only increment to a next array if you have filled it with at least 1 element
+                            //if (loadedData[loadedIndex].Count > 0)
+                            //{
+                                
+                            //loadedDataTime[loadedIndex] = (long)(Convert.ToDouble(((string)loadedData[loadedIndex][0]).Split(',')[0]));                               
+                          
+                            //}
+
+                           // if (lastSecond == 1255347136)
+                            //    Console.Write("");
+                            //add arraylists for each second between last second and now
+                            while (lastSecond != unixtime)
+                            {
+                                loadedIndex++;
+                                if (loadedIndex == LoadedSeconds)
+                                    loadedIndex = 0;
+                                loadedData[loadedIndex] = new ArrayList();
+                                lastSecond++;
+                            }
+                        }
+
+                        
+                       
+
+                        loadedData[loadedIndex].Add(unixtime + "," + wocketX + "," + wocketY + "," + wocketZ);
+                        lastSecond = unixtime;
+                        //nextCorrectedTime = lastSecond-8;
+                    }
+
+                    wocketsTW[k].Close();
+                }
                 //create some counters for activity counts
                 waverageX = new int[wcontroller._Sensors.Count];
                 waverageY = new int[wcontroller._Sensors.Count];
@@ -2165,6 +2344,11 @@ namespace DataMerger
             string gps_csv_line = "";
             string rti_csv_line = "";
             #endregion Initialize CSV lines
+
+            TextReader[] wocketsTR1 = new TextReader[wcontroller._Sensors.Count];
+
+            for (int k = 0; (k < wcontroller._Sensors.Count); k++)
+                wocketsTR1[k] = new StreamReader(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "Wocket_RawCorrectedData_" + wcontroller._Sensors[k]._ID.ToString("00") + "_" + wcontroller._Sensors[k]._Location.Replace(' ', '-') + ".csv");
 
             while (((TimeSpan)endDateTime.Subtract(currentDateTime)).TotalSeconds >= 0)
             {
@@ -2533,26 +2717,37 @@ namespace DataMerger
                 //if there is Wockets data
                 if (wcontroller != null)
                 {
-
+                    
                     #region Load Wockets data if needed
                     for (int i = 0; (i < wcontroller._Sensors.Count); i++)
                     {
 
                         //always have at least 5 seconds worth of data for the MITes
-                        while (((wunixtimestamp[i] - currentUnixTime) <= MEAN_SIZE) && (wcontroller._Sensors[i].Load()))
+                        //while (((wunixtimestamp[i] - currentUnixTime) <= MEAN_SIZE) && (wcontroller._Sensors[i].Load()))
+                        string s = "";
+                        while (((wunixtimestamp[i] - currentUnixTime) <= MEAN_SIZE) && ((s=wocketsTR1[i].ReadLine())!=null))
                         {
-
+                            string[] wocketsTokens = s.Split(',');
+                            wrawData[wcontroller._Sensors[i]._ID, 0, whead[wcontroller._Sensors[i]._ID]] = Convert.ToInt32(wocketsTokens[1]);
+                            wrawData[wcontroller._Sensors[i]._ID, 1, whead[wcontroller._Sensors[i]._ID]] = Convert.ToInt32(wocketsTokens[2]);
+                            wrawData[wcontroller._Sensors[i]._ID, 2, whead[wcontroller._Sensors[i]._ID]] = Convert.ToInt32(wocketsTokens[3]);
+                            wtimeData[wcontroller._Sensors[i]._ID, whead[wcontroller._Sensors[i]._ID]] = (long)Convert.ToDouble(wocketsTokens[0]);
+                            wunixtimestamp[i] = Convert.ToDouble(wocketsTokens[0]);
+                            /*
                             if (wcontroller._Sensors[i]._Decoder._Head == 0)
                                 lastDecodedIndex[i] = wcontroller._Sensors[i]._Decoder._Data.Length - 1;
                             else
                                 lastDecodedIndex[i] = wcontroller._Sensors[i]._Decoder._Head - 1;
 
                             Wockets.Data.Accelerometers.AccelerationData data = (Wockets.Data.Accelerometers.AccelerationData)wcontroller._Sensors[i]._Decoder._Data[lastDecodedIndex[i]];
+                           
+
                             wrawData[wcontroller._Sensors[i]._ID, 0, whead[wcontroller._Sensors[i]._ID]] = data.X;
                             wrawData[wcontroller._Sensors[i]._ID, 1, whead[wcontroller._Sensors[i]._ID]] = data.Y;
                             wrawData[wcontroller._Sensors[i]._ID, 2, whead[wcontroller._Sensors[i]._ID]] = data.Z;
                             wtimeData[wcontroller._Sensors[i]._ID, whead[wcontroller._Sensors[i]._ID]] = (long)data.UnixTimeStamp;
                             wunixtimestamp[i] = data.UnixTimeStamp;
+                             */
                             whead[wcontroller._Sensors[i]._ID] = (whead[wcontroller._Sensors[i]._ID] + 1) % 500;
 
                             //if (data.UnixTimeStamp == 1255223724999)
@@ -2977,6 +3172,7 @@ namespace DataMerger
                     wrmCSVs[sensor_id].Close();
                     waucCSVs[sensor_id].Close();
                     wvmagCSVs[sensor_id].Close();
+                    wocketsTR1[sensor_id].Close();
                 }
             }
 

@@ -104,18 +104,68 @@ namespace MobiRnD_RDT.Utilities
         public static string[] ReadLinesFromFile(string filepath)
         {
             string[] lines = new string[0];
-
-
+            
             lines = (string[])ReadListFromFile(filepath).ToArray(typeof(string));
+                            
+            return lines;
+
+        }
+
+        public static string[] ReadLinesFromFile(string filepath,int start,int length)
+        {
+            string[] lines = new string[0];
+
+            lines = (string[])ReadListFromFile(filepath,start,length).ToArray(typeof(string));
 
             return lines;
+
+        }
+
+        public static ArrayList ReadListFromFile(string filepath,int start,int length)
+        {
+            ArrayList alLines = new ArrayList();
+            int count = 0;
+
+            if (File.Exists(filepath))
+            {
+                StreamReader sr = null;
+                try
+                {
+                    lock (typeof(FileReadWrite))
+                    {
+                        sr = new StreamReader(filepath, Encoding.Default);
+                        string line = "";
+                        while ((line = sr.ReadLine()) != null)
+                        {
+                            if ((count>=start) && (length>0))
+                                alLines.Add(line);
+                            count++;
+                            if (count >= length)
+                                break;
+                        }
+                        sr.Close();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw (ex);
+                }
+                finally
+                {
+                    if (sr != null) sr.Close();
+                }
+            }
+            else throw (new FileNotFoundException(filepath));
+
+
+            return alLines;
 
         }
 
         public static ArrayList ReadListFromFile(string filepath)
         {
             ArrayList alLines = new ArrayList();
-
+            
             if (File.Exists(filepath))
             {
                 StreamReader sr = null;
