@@ -580,36 +580,7 @@ namespace AudioAnnotation
             return data_loaded;
         }
 
-        private void LoadAudioFiles()
-        {
-            try
-            {
-
-                DirectoryInfo dir = new DirectoryInfo(DataAudioDir);
-
-                if (dir.Exists)
-                {
-
-                    files_wav = dir.GetFiles("*.wav");
-                    files = dir.GetFiles("*.msv");
-
-                    if (files_wav.Length != files.Length)
-                    { label_play.Text = "Warning: mistmatch between number of msv and wav files!"; }
-
-
-                }
-
-            } // end try
-
-            catch (Exception err)
-            {
-                Console.WriteLine(err.Message);
-            }
-
-        }
-
-        
-
+      
         private bool SessionDir_Exist()
         {
             bool result = false;
@@ -752,65 +723,7 @@ namespace AudioAnnotation
 
 
         // Browse for Audio Files
-        private void button_load_Click(object sender, EventArgs e)
-        {
-            try
-            {
 
-                this.folderBrowserDialog.ShowNewFolderButton = false;
-
-                if (textBox_1.Text.Trim().CompareTo("") != 0)
-                {
-                    if (Directory.Exists(textBox_1.Text))
-                    { this.folderBrowserDialog.SelectedPath = textBox_1.Text.ToString(); }
-                    else
-                    { this.folderBrowserDialog.RootFolder = System.Environment.SpecialFolder.Desktop; }
-                }
-                else
-                {
-                    this.folderBrowserDialog.RootFolder = System.Environment.SpecialFolder.Desktop;
-                }
-
-                DialogResult result = this.folderBrowserDialog.ShowDialog();
-
-                if (result == DialogResult.OK)
-                {
-                    string fullPath = this.folderBrowserDialog.SelectedPath;
-                    textBox_1.Text = fullPath;
-
-                    folder = new DirectoryInfo(fullPath + "\\annotation\\voice\\");
-
-
-                    files_wav = folder.GetFiles("*.wav");
-                    files = folder.GetFiles("*.msv");
-
-                    if (files_wav.Length != files.Length)
-                    { textBox_instructions_1.Text = "Warning: mistmatch between number of msv and wav files!"; }
-
-                    if (files_wav.Length > 0)
-                    {
-                        DataAudioDir = files_wav[0].DirectoryName;
-
-                        if (textBox_1.Text.Trim().CompareTo("") == 0)
-                        { textBox_instructions_1.Text = "Please provide a valid path for the audio files, then click Start."; }
-                        else
-                        { textBox_instructions_1.Text = ""; }
-                    }
-                    else
-                    {
-                        textBox_instructions_1.Text = "No audio files were found. Please check you have the files in the directory: session\annotation\voice";
-                    }
-
-                }
-
-
-            } // end try
-
-            catch (Exception err)
-            {
-                Console.WriteLine(err.Message);
-            }
-        }
 
 
         private void button_add_label_Click(object sender, EventArgs e)
@@ -994,7 +907,112 @@ namespace AudioAnnotation
         #endregion
 
 
-        #region Sound Files
+
+
+
+
+
+        #region Audio Files
+
+
+        private void LoadAudioFiles()
+        {
+            try
+            {
+
+                DirectoryInfo dir = new DirectoryInfo(DataAudioDir);
+
+                if (dir.Exists)
+                {
+
+                    files_wav = dir.GetFiles("*.wav");
+                    files = dir.GetFiles("*.msv");
+
+                    // sort the recorder audio files by creation time (Oct-22-2009)
+                    Array.Sort(files, new CompareFileInfoByDate());
+
+
+                    if (files_wav.Length != files.Length)
+                    { label_play.Text = "Warning: mistmatch between number of msv and wav files!"; }
+
+
+                }
+
+            } // end try
+
+            catch (Exception err)
+            {
+                Console.WriteLine(err.Message);
+            }
+
+        }
+
+
+        private void button_load_Click(object sender, EventArgs e)
+        {
+            try
+            {
+
+                this.folderBrowserDialog.ShowNewFolderButton = false;
+
+                if (textBox_1.Text.Trim().CompareTo("") != 0)
+                {
+                    if (Directory.Exists(textBox_1.Text))
+                    { this.folderBrowserDialog.SelectedPath = textBox_1.Text.ToString(); }
+                    else
+                    { this.folderBrowserDialog.RootFolder = System.Environment.SpecialFolder.Desktop; }
+                }
+                else
+                {
+                    this.folderBrowserDialog.RootFolder = System.Environment.SpecialFolder.Desktop;
+                }
+
+                DialogResult result = this.folderBrowserDialog.ShowDialog();
+
+
+                if (result == DialogResult.OK)
+                {
+                    string fullPath = this.folderBrowserDialog.SelectedPath;
+                    textBox_1.Text = fullPath;
+
+                    folder = new DirectoryInfo(fullPath + "\\annotation\\voice\\");
+
+
+                    files_wav = folder.GetFiles("*.wav");
+                    files = folder.GetFiles("*.msv");
+
+                    // sort the recorder audio files by creation time (Oct-22-2009)
+                    Array.Sort(files, new CompareFileInfoByDate());
+
+
+                    if (files_wav.Length != files.Length)
+                    { textBox_instructions_1.Text = "Warning: mistmatch between number of msv and wav files!"; }
+
+                    if (files_wav.Length > 0)
+                    {
+                        DataAudioDir = files_wav[0].DirectoryName;
+
+                        if (textBox_1.Text.Trim().CompareTo("") == 0)
+                        { textBox_instructions_1.Text = "Please provide a valid path for the audio files, then click Start."; }
+                        else
+                        { textBox_instructions_1.Text = ""; }
+                    }
+                    else
+                    {
+                        textBox_instructions_1.Text = "No audio files were found. Please check you have the files in the directory: session\annotation\voice";
+                    }
+
+                }
+
+
+            } // end try
+
+            catch (Exception err)
+            {
+                Console.WriteLine(err.Message);
+            }
+        }
+
 
         private void PlayFile(int index)
         {
@@ -1517,6 +1535,10 @@ namespace AudioAnnotation
         }
 
         #endregion
+
+
+
+
 
 
         #region Sessions
