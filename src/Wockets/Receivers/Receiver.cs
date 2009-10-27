@@ -25,6 +25,7 @@ namespace Wockets.Receivers
         protected ReceiverTypes type;
         protected Thread reconnectionThread=null;
         protected int disconTime=0;
+        protected double disconnectionTime = 0;
         protected long lastTime;
         protected int ndisc = 0;
         protected int disconCount=0;

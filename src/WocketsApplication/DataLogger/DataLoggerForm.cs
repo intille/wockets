@@ -160,7 +160,10 @@ namespace WocketsApplication.DataLogger
         
         #endregion Sampling Rate and Activity Count Components
 
-        private Sound alert = new Sound(Constants.NEEDED_FILES_PATH + "sounds\\stop.wav");
+        //private Sound alert = new Sound(Constants.NEEDED_FILES_PATH + "sounds\\stop.wav");
+        private Sound disconnectedAlert = new Sound(Constants.NEEDED_FILES_PATH + "sounds\\Disconnected.wav");
+        private Sound connectedAlert = new Sound(Constants.NEEDED_FILES_PATH + "sounds\\Connected.wav");
+        private Sound maxoutAlert = new Sound(Constants.NEEDED_FILES_PATH + "sounds\\Maxout.wav");
         private bool play_sound = false;
 
 
@@ -311,6 +314,8 @@ namespace WocketsApplication.DataLogger
 
         }
 
+        ReceiverStatus[] receiversStatus;        
+
         public void InitializeDataLogger(string storageDirectory, WocketsController wocketsController, Session annotatedSession, DTConfiguration classifierConfiguration)
         {
             this.storageDirectory = storageDirectory;
@@ -364,6 +369,10 @@ namespace WocketsApplication.DataLogger
             progressMessage = "Initializing receivers ... searching " + this.wocketsController._Receivers.Count + " receivers\r\n";            
 
             this.wocketsController.Initialize();
+            receiversStatus = new ReceiverStatus[this.wocketsController._Receivers.Count];
+            for (int i = 0; (i < receiversStatus.Length); i++)
+                receiversStatus[i] = ReceiverStatus.Connected;
+
 
             #endregion Bluetooth reception channels initialization
 
@@ -1063,9 +1072,9 @@ namespace WocketsApplication.DataLogger
             MenuItem mi = (MenuItem)sender;
             mi.Checked = !(mi.Checked);
             this.isGaming = mi.Checked;
-            Thread aGamingThread = new Thread(new ThreadStart(this.wocketsController._Escape.PlayExergame));
-            this.wocketsController._Escape.isGaming = this.isGaming;
-            aGamingThread.Start();
+            //Thread aGamingThread = new Thread(new ThreadStart(this.wocketsController._Escape.PlayExergame));
+            //this.wocketsController._Escape.isGaming = this.isGaming;
+            //aGamingThread.Start();
         }
 
         private void view_menu_Click(object sender, EventArgs e)
@@ -1302,19 +1311,40 @@ namespace WocketsApplication.DataLogger
 
 
         int sound_timer = 0;
-
+        int maxout_timer = 0;
+        bool PlayMaxout = false;
+        int totalMaxouts = 0;
 
         private void readDataTimer_Tick(object sender, EventArgs e)
         {
-
+            int totalDisconnections = 0;
+            bool playDisconnection = false;
+        
+         
+             
             for (int i = 0; i < this.wocketsController._Sensors.Count; i++)
             {
                 String key = "W" + this.wocketsController._Receivers[i]._ID;
 
+                if (receiversStatus[i] != this.wocketsController._Receivers[i]._Status)
+                {
+                    if (this.wocketsController._Receivers[i]._Status == ReceiverStatus.Connected)
+                    {
+                        updateCommand("Wocket " + this.wocketsController._Receivers[i]._ID + " connected!");
+                        connectedAlert.Play();
+                     
+                    }
+                    else if ((this.wocketsController._Receivers[i]._Status == ReceiverStatus.Disconnected) ||
+                        (this.wocketsController._Receivers[i]._Status == ReceiverStatus.Reconnecting))
+                        playDisconnection = true;
+                                                                   
+                }
                 if ((this.wocketsController._Receivers[i]._Status == ReceiverStatus.Disconnected) ||
                     (this.wocketsController._Receivers[i]._Status == ReceiverStatus.Reconnecting))
                 {
-                    if (this.wocketsController._Receivers[i].Disconnected >= 1000)
+                    totalDisconnections++;
+
+                   /* if (this.wocketsController._Receivers[i].Disconnected >= 1000)
                     {
                         if (sound_timer > 150)
                         {
@@ -1326,17 +1356,91 @@ namespace WocketsApplication.DataLogger
                     }
                     else
                         this.wocketsController._Receivers[i].Disconnected += 1;
+                    */
                     ((PictureBox)this.sensorStatus[key]).Image = (Image)this.disconnectedWocketImage;
                 }
-                else
+                else //connected
                 {
+
+                    if (this.wocketsController._Decoders[i].MaxedoutSamples > 0)
+                    {
+                        PlayMaxout = true;
+                        totalMaxouts += this.wocketsController._Decoders[i].MaxedoutSamples;
+                        this.wocketsController._Decoders[i].MaxedoutSamples = 0; //+= (this.wocketsController._Decoders[i].MaxedOutX + this.wocketsController._Decoders[i].MaxedOutY +
+                                //this.wocketsController._Decoders[i].MaxedOutZ);
+                       // this.wocketsController._Decoders[i].MaxedOutX = this.wocketsController._Decoders[i].MaxedOutY = this.wocketsController._Decoders[i].MaxedOutZ = 0;
+                    }
+
                     this.wocketsController._Receivers[i].Disconnected = 0;
                     ((PictureBox)this.sensorStatus[key]).Image = (Image)this.connectedWocketImage;
                 }
+
+                receiversStatus[i] = this.wocketsController._Receivers[i]._Status;
+                //((Label)this.sensorLabels[key]).Text = this.wocketsController._Decoders[i].LastX.ToString();
+            }
+            maxout_timer++;
+          
+            if ((PlayMaxout) && (maxout_timer>=100))
+            {
+                updateCommand(totalMaxouts + " wocket reading(s) maxedout!");
+                maxoutAlert.Play();
+                PlayMaxout = false;
+                maxout_timer = 0;
+                totalMaxouts = 0;
+            }
+            if ((playDisconnection) && (totalDisconnections > 0))
+            {
+                updateCommand( totalDisconnections + " wockets disconnected!");
+                for (int j = 0; (j < totalDisconnections); j++)
+                {
+                    disconnectedAlert.Play();
+                    Thread.Sleep(200);
+                }
             }
 
+            for (int i = 0; i < this.wocketsController._Sensors.Count; i++)
+            {
+                if (this.wocketsController._Sensors[i]._Class == Wockets.Sensors.SensorClasses.Wockets)
+                {
+                    string address = ((Wockets.Receivers.RFCOMMReceiver)((Wockets.Sensors.Accelerometers.Wocket)(this.wocketsController._Sensors[i]))._Receiver)._Address;
+                    Decoder decoder = this.wocketsController._Decoders[i];
+                    Receiver receiver=this.wocketsController._Receivers[i];
 
+                    double pmaxedout5 = -1; 
+                    double pmaxedout = -1;
 
+                    if (decoder.LastSamples5Minutes>0)
+                        pmaxedout5 = ((double)((double)decoder.LastMaxedout5Minutes / (double)decoder.LastSamples5Minutes))*100;
+                    if (decoder.TotalSamples>0)
+                        pmaxedout = ((double)((double)decoder.TotalMaxedOutSamples / (double)decoder.TotalSamples))*100;
+
+                    double pdataloss5 = -1;
+                    double pdataloss = -1;
+                    double secondsSinceStart=(WocketsTimer.GetUnixTime() - wocketsController.StartTime)/1000;
+
+                    if (decoder.TotalSamples > 0)
+                    {
+                        pdataloss = (double)decoder.TotalSamples / 90.0;
+                        pdataloss /= secondsSinceStart;
+                        pdataloss *= 100;
+                        pdataloss = 100 - pdataloss;
+                        if (pdataloss < 1.0)
+                            pdataloss = 0;
+                    }
+
+                    if (decoder.LastSamples5Minutes > 0)
+                    {
+                        pdataloss5 = (double)decoder.LastSamples5Minutes / 90.0;
+                        pdataloss5 /= ( 60);
+                        pdataloss5 *= 100;
+                        pdataloss5 = 100 - pdataloss5;
+                        if (pdataloss5 < 1.0)
+                            pdataloss5 = 0;
+                    }
+                    this.SampLabels[i].Text = "W" + address.Substring(address.Length - 2, 2) + ": " + (pmaxedout5 == -1 ? "?" : pmaxedout5.ToString("0.0")) + "% / " + (pmaxedout == -1 ? "?" : pmaxedout.ToString("0.0")) + "% , " + (pdataloss5 == -1 ? "?" : pdataloss5.ToString("0.0")) + "% / " + (pdataloss == -1 ? "?" : pdataloss.ToString("0.0")) + "% , " + this.wocketsController._Receivers[i].NumDisconnect + " , " + this.wocketsController._Receivers[i].TimeDisconnect + "s";
+                }
+            }
+            /*
             this.SRcounter++;
 
             if (this.SRcounter > 1600)//Update status interface every 5 minutes
@@ -1364,10 +1468,11 @@ namespace WocketsApplication.DataLogger
                 
 
             }
+             * */
             
             if (isQuitting)
             {
-                this.alert.Stop();
+                //this.alert.Stop();
 
                 this.wocketsController.Dispose();
 

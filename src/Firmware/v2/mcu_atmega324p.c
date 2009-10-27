@@ -43,7 +43,7 @@ void _atmega324p_init_uart1(unsigned int baud){
 	UBRR1H = (unsigned char)(baud>>8);
 	UBRR1L = (unsigned char)baud;
 	/* Enable receiver and transmitter */
-	UCSR1B = (1<<TXEN1)|(1<<RXEN1);
+	UCSR1B = (1<<RXEN1)|(1<<TXEN1);
 	/* Set frame format: 8data, 2stop bit */
 	UCSR1C =(3<<UCSZ10);  //change 1 to 0 and &
 }
@@ -87,7 +87,7 @@ void _atmega324p_set_prescalar_adc(unsigned char prescalar){
 
 //To do : add support to other than the internal
 void _atmega324p_set_reference_adc(){
-	ADMUX |= (1 << REFS0); // Set ADC reference to AVCC
+	ADMUX |=(1 << REFS0); // Set ADC reference to AVCC
 }
 
 void _atmega324p_enable_adc(){
@@ -146,6 +146,21 @@ void _atmega324p_set_channel_adc(unsigned char channel){
 		sbi(ADMUX,2);
 		cbi(ADMUX,3);
 		cbi(ADMUX,4);
+	}else if (channel==ADC6)
+	{
+		cbi(ADMUX,0);
+		sbi(ADMUX,1);
+		sbi(ADMUX,2);
+		cbi(ADMUX,3);
+		cbi(ADMUX,4);
+	}
+	else if (channel==ADC7)
+	{
+		sbi(ADMUX,0);
+		sbi(ADMUX,1);
+		sbi(ADMUX,2);
+		cbi(ADMUX,3);
+		cbi(ADMUX,4);
 	}
 /*	else if (channel==ADC3){
 		sbi(ADMUX,0);
@@ -169,6 +184,7 @@ void _atmega324p_init_adc(){
 	cbi(DDRA,X_PIN);
 	cbi(DDRA,Y_PIN);
 	cbi(DDRA,Z_PIN);
+	cbi(DDRA,6);
 	 _atmega324p_set_reference_adc();	
   // 	ADMUX |= (1 << REFS0); // Set ADC reference to AVCC
   	//ADMUX |= (1 << ADLAR); // Left adjust ADC result to allow easy 8 bit reading
@@ -177,8 +193,9 @@ void _atmega324p_init_adc(){
    //ADCSRB &= (0<<ADTS2) | (0<<ADTS1) | (0<<ADTS0); //setting Free Running Mode
 	
 	//_atmega324p_enable_free_running_adc();
-	_atmega324p_set_prescalar_adc(PRESCALAR_8);
+	_atmega324p_set_prescalar_adc(PRESCALAR_64);
    //ADCSRA |= (0 << ADPS2) | (1 << ADPS1) | (1 << ADPS0); // Set ADC prescalar to 8 - 125KHz sample rate @ 1MHz
+   //Set prescalar to 64 -125 KHZ rate @ 8MHz
 	_atmega324p_enable_adc();
 
 
@@ -288,6 +305,7 @@ void _atmega324p_init(unsigned int baud){
 
 	//initialize UART0, connected to the RX of the BT
 	_atmega324p_init_uart0(baud);
+//	_atmega324p_init_uart1(baud);
 
 	//set the BT
 	_rn41_init();

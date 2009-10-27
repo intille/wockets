@@ -31,6 +31,23 @@ namespace Wockets.Decoders
         protected bool[] subscribed = new bool[] { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false };
         protected bool cmd = false;
 
+       
+        
+        
+        public int MaxedoutSamples = 0;
+
+        protected int TotalMaxedout5Minutes = 0;
+        protected int TotalSamples5Minutes = 0;
+
+        public int LastMaxedout5Minutes = 0;
+        public int LastSamples5Minutes = 0;
+
+        public long TotalMaxedOutSamples = 0;
+        public long TotalSamples = 0;
+        
+
+
+
 
         public Decoder()
         {

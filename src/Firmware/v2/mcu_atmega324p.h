@@ -25,6 +25,8 @@
 #define ADC2 2
 #define ADC3 3
 #define ADC4 4
+#define ADC6 6
+#define ADC7 7
 
 
 #define ENABLE_SLEEP 0

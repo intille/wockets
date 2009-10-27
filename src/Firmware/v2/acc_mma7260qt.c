@@ -61,7 +61,7 @@ void _mma7260qt_init(){
 	cbi(DDRA, DOCK_N);
 
 	//set default sensitivity to 1.5G
-	sensitivity=_mma7260qt_set_sensitivity(_1_5G);	
+	sensitivity=_mma7260qt_set_sensitivity(_6G);	
 	//_mma7260qt_sleep(); //initially asleep
 	_mma7260qt_wakeup(); //initially awake
 	

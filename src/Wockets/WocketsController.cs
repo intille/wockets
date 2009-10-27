@@ -56,7 +56,10 @@ namespace Wockets
         private Classifier classifier;
         private string storageDirectory;
         private Session annotatedSession;
-        public Escape _Escape = new Escape();
+        public double StartTime = 0;
+        //public Escape _Escape = new Escape();
+
+
         /// <summary>
         /// Stores the current record that is being annotated
         /// </summary>
@@ -423,7 +426,8 @@ namespace Wockets
             GET_BT GET_BT_CMD = new GET_BT();
             ALIVE ALIVE_CMD = new ALIVE();
             int pollCounter = 0;
-            Logger.Warn("Version 1.11, October 16, 2009");
+            Logger.Warn("Version 1.13 October 20,2009");
+            this.StartTime = WocketsTimer.GetUnixTime();
 
             while (polling)
             {
