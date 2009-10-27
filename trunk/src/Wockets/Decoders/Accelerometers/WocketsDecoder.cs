@@ -36,7 +36,7 @@ namespace Wockets.Decoders.Accelerometers
             this.type = DecoderTypes.Wockets;
         }
 
-
+        private double start5minutes = 0;
         public override int Decode(int sourceSensor, CircularBuffer data,int start,int end)
         {
 
@@ -103,6 +103,33 @@ namespace Wockets.Decoders.Accelerometers
                         datum.X = (short)((((short)(this.packet[0] & 0x03)) << 8) | (((short)(this.packet[1] & 0x7f)) << 1) | (((short)(this.packet[2] & 0x40)) >> 6));
                         datum.Y = (short)((((short)(this.packet[2] & 0x3f)) << 4) | (((short)(this.packet[3] & 0x78)) >> 3));
                         datum.Z = (short)((((short)(this.packet[3] & 0x07)) << 7) | ((short)(this.packet[4] & 0x7f)));
+
+
+
+                        if (start5minutes == 0)
+                            start5minutes = datum.UnixTimeStamp;
+                        if ((datum.UnixTimeStamp - start5minutes) > 60000)
+                        {
+                            LastMaxedout5Minutes = TotalMaxedout5Minutes;
+                            LastSamples5Minutes = TotalSamples5Minutes;
+
+                            TotalSamples5Minutes = 0;
+                            TotalMaxedout5Minutes = 0;
+                            start5minutes = datum.UnixTimeStamp;
+                        }
+
+
+                        TotalSamples++;
+                        TotalSamples5Minutes++;
+                        if ((datum.X == 1023) || (datum.X == 0) || (datum.Y == 1023) || (datum.Y == 0) ||
+                            (datum.Z == 1023) || (datum.Z == 0))
+                        {
+                            MaxedoutSamples++;
+                            TotalMaxedOutSamples++;
+                            TotalMaxedout5Minutes++;
+                        }
+                 
+                        
                         //Set time stamps                       
                         datum._PeggyBacked = ((this.packet[0] & 0x1c) > 0);
                         if (datum._PeggyBacked)

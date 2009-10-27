@@ -128,6 +128,8 @@ namespace Wockets.Receivers
                     this.bluetoothStream = null;                    
                     this.status = ReceiverStatus.Disconnected;
                     this._SBuffer._Head = 0;//ignore all pending send bytes
+                    this.ndisc++;
+                    this.disconnectionTime = WocketsTimer.GetUnixTime();
                     Logger.Debug("Update:Detected disconnection for receiver " + this._ID);
                 }
 
@@ -152,6 +154,8 @@ namespace Wockets.Receivers
                     }
                     Logger.Debug("Update:Connected with receiver receiver " + this._ID);
                     this.status = ReceiverStatus.Connected;
+                    if (this.disconnectionTime!=0)                    
+                        this.disconTime += (int)((WocketsTimer.GetUnixTime() - this.disconnectionTime) / 1000);
                 }
             }
         }

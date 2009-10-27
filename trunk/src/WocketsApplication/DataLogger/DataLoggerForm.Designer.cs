@@ -600,20 +600,24 @@ namespace WocketsApplication.DataLogger
 
             Label cur = new Label();
             cur.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular);
-            cur.Text = "Samp/sec, #Disconnects, Time Disconnect";
+            cur.Text = "Wocket, % Maxedout, % Lost, #Dis, TDis";
             cur.Location = new Point(5, 16);
             cur.Size = new Size(500, 50);
             ((Panel)this.panels[QUALITY_PANEL]).Controls.Add(cur);
             for (int i = 0; i < this.wocketsController._Sensors.Count; i++)
             {
-                cur = new Label();
-                cur.Font = new System.Drawing.Font("Tahoma", 10F, System.Drawing.FontStyle.Regular);
-                cur.Text = "Sensor "+this.wocketsController._Sensors[i]._ID+": ?, ?, ?";
-                cur.Location = new Point(16, 66 + i * 30);
-                cur.Size = new Size(500, 40);
-                this.SampLabels[i] = cur;
-                ((Panel)this.panels[QUALITY_PANEL]).Controls.Add(cur);
-                cur.BringToFront();
+                if (this.wocketsController._Sensors[i]._Class == Wockets.Sensors.SensorClasses.Wockets)
+                {
+                    cur = new Label();
+                    cur.Font = new System.Drawing.Font("Tahoma", 8F, System.Drawing.FontStyle.Regular);
+                    string address = ((Wockets.Receivers.RFCOMMReceiver)((Wockets.Sensors.Accelerometers.Wocket)(this.wocketsController._Sensors[i]))._Receiver)._Address;  
+                    cur.Text = "W" + address.Substring(address.Length - 2, 2) +": ?/?, ?/?,?/?,?/?";
+                    cur.Location = new Point(16, 66 + i * 30);
+                    cur.Size = new Size(500, 40);
+                    this.SampLabels[i] = cur;
+                    ((Panel)this.panels[QUALITY_PANEL]).Controls.Add(cur);
+                    cur.BringToFront();
+                }
             }
 
 

@@ -1,3 +1,5 @@
+using ZedGraph;
+
 namespace NESPDataViewer
 {
     partial class Form1
@@ -40,6 +42,7 @@ namespace NESPDataViewer
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.buttonZoomOut = new System.Windows.Forms.Button();
+            this.buttonDisplayRaw = new System.Windows.Forms.Button();
             this.lbScrollTime = new System.Windows.Forms.Label();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -59,6 +62,7 @@ namespace NESPDataViewer
             this.zedGraphControl1.ScrollMinY2 = 0;
             this.zedGraphControl1.Size = new System.Drawing.Size(404, 240);
             this.zedGraphControl1.TabIndex = 0;
+
             // 
             // hScrollBar1
             // 
@@ -143,11 +147,24 @@ namespace NESPDataViewer
             this.buttonZoomOut.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.buttonZoomOut.Location = new System.Drawing.Point(432, 364);
             this.buttonZoomOut.Name = "buttonZoomOut";
-            this.buttonZoomOut.Size = new System.Drawing.Size(87, 40);
+            this.buttonZoomOut.Size = new System.Drawing.Size(87, 25);
             this.buttonZoomOut.TabIndex = 10;
-            this.buttonZoomOut.Text = "Scan Through";
+            this.buttonZoomOut.Text = "Scan";
             this.buttonZoomOut.UseVisualStyleBackColor = true;
             this.buttonZoomOut.Click += new System.EventHandler(this.buttonZoomOut_Click);
+
+            // 
+            // buttonDisplayRaw
+            // 
+            this.buttonDisplayRaw.Enabled = false;
+            this.buttonDisplayRaw.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.buttonDisplayRaw.Location = new System.Drawing.Point(432, 364);
+            this.buttonDisplayRaw.Name = "buttonDisplayRaw";
+            this.buttonDisplayRaw.Size = new System.Drawing.Size(87, 25);
+            this.buttonDisplayRaw.TabIndex = 10;
+            this.buttonDisplayRaw.Text = "Display Raw";
+            this.buttonDisplayRaw.UseVisualStyleBackColor = true;
+            this.buttonDisplayRaw.Click += new System.EventHandler(buttonDisplayRaw_Click);
             // 
             // lbScrollTime
             // 
@@ -165,6 +182,7 @@ namespace NESPDataViewer
             this.ClientSize = new System.Drawing.Size(531, 510);
             this.Controls.Add(this.lbScrollTime);
             this.Controls.Add(this.buttonZoomOut);
+            this.Controls.Add(this.buttonDisplayRaw);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.lbSecondDate);
@@ -174,7 +192,7 @@ namespace NESPDataViewer
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
-            this.Text = "Wockets Data Viewer - Version 1.10 October 12,2009";
+            this.Text = "Wockets Data Viewer - Version 1.13 October 20,2009";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.Resize += new System.EventHandler(this.Form1_Resize);
             this.menuStrip1.ResumeLayout(false);
@@ -184,6 +202,8 @@ namespace NESPDataViewer
             this.PerformLayout();
 
         }
+
+     
 
         #endregion
 
@@ -198,6 +218,7 @@ namespace NESPDataViewer
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.Button buttonZoomOut;
+        private System.Windows.Forms.Button buttonDisplayRaw;
         private System.Windows.Forms.Label lbScrollTime;
     }
 }

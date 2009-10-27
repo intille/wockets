@@ -152,7 +152,8 @@ namespace NESPDataViewer
             lbFirstDate.Location = new Point(5, hScrollBar1.Bottom);
             lbSecondDate.Location = new Point(hScrollBar1.Right - lbSecondDate.Width, hScrollBar1.Bottom);
             lbScrollTime.Location = new Point(hScrollBar1.Left, hScrollBar1.Top - lbScrollTime.Height);
-            buttonZoomOut.Location = new Point(hScrollBar1.Right + 5, hScrollBar1.Top);
+            buttonZoomOut.Location = new Point(hScrollBar1.Right + 5, hScrollBar1.Top-5);
+            buttonDisplayRaw.Location = new Point(hScrollBar1.Right + 5, hScrollBar1.Top+20);
             hScrollBar1.Visible = false;
         }
 
@@ -337,6 +338,7 @@ namespace NESPDataViewer
             groupBox1.Enabled = isEnabled;
             hScrollBar1.Enabled = isEnabled;
             buttonZoomOut.Enabled = isEnabled;
+            buttonDisplayRaw.Enabled = isEnabled;
 
             zedGraphControl1.Visible = isEnabled;
         }
@@ -2109,6 +2111,31 @@ namespace NESPDataViewer
                 _zoomedOut = true;
                 buttonZoomOut.Text = "Scroll Through";
             }
+        }
+
+
+        Form2 rawForm = null;
+        void buttonDisplayRaw_Click(object sender, System.EventArgs e)
+        {           
+            XDate startx = (XDate)zedGraphControl1.MasterPane[0].XAxis.Scale.Min;
+            XDate endx = (XDate)zedGraphControl1.MasterPane[0].XAxis.Scale.Max;
+
+            if (((TimeSpan)(endx.DateTime.Subtract(startx.DateTime))).TotalMinutes > 20)
+            {
+                MessageBox.Show("Cannot display more than 20 minutes of raw data at a time. Please select a 20 minute segment or less then click Display Raw");
+                return;
+            }
+
+            if ((rawForm == null) || (rawForm.IsDisposed))
+                rawForm = new Form2();
+
+            rawForm.StartX = startx;
+            rawForm.EndX = endx;
+            rawForm.PathDataset = _pathDataset;
+
+            if (rawForm.Visible == false)
+                rawForm.Show();
+
         }
         #endregion
 

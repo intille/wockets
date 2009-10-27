@@ -170,7 +170,7 @@ ISR(TIMER2_OVF_vect){
 				{				
 					aBuffer[command_counter++]=aByte;
 
-			
+//			TransmitFrame(encode(1,1023,1023, 1023));
 					//for the first byte set the opcode and set the commands length and reset timer
 					if ((aByte>>5)==COMMAND_PREFIX)
 					{
@@ -386,13 +386,13 @@ ISR(TIMER2_OVF_vect){
 					alive_timer=0;					
 				}
 					 					
-				adc_result[ADC1]=_atmega324p_a2dConvert10bit(ADC1);
-				adc_result[ADC2]=_atmega324p_a2dConvert10bit(ADC2);
-				adc_result[ADC3]=_atmega324p_a2dConvert10bit(ADC3);
+				adc_result[ADC1]=0;//_atmega324p_a2dConvert10bit(ADC1);
+				adc_result[ADC2]=0;//_atmega324p_a2dConvert10bit(ADC2);
+				adc_result[ADC3]=_atmega324p_a2dConvert10bit(ADC7);
 				
 				//tag if close to ack
 				if (ack==0xff)
-				TransmitFrame(encode(1,adc_result[ADC3], adc_result[ADC2], adc_result[ADC1]));
+					TransmitFrame(encode(0,adc_result[ADC3], adc_result[ADC2], adc_result[ADC1]));
 				//	TransmitFrame(encode(1,sequence & 0xff,(sequence>>8)&0xff,0));//adc_result[ADC3], adc_result[ADC2], adc_result[ADC1]));
 				else  //otherwise dont tag
 				TransmitFrame(encode(0,adc_result[ADC3], adc_result[ADC2], adc_result[ADC1]));

@@ -68,6 +68,13 @@ namespace Wockets.Utils
             return ((int)tmp);
         }
 
+        public static double GetDoubleTime(DateTime dt)
+        {
+            TimeSpan ts = dt.Subtract(UnixRef);
+            return ts.TotalMilliseconds;
+
+        }
+
         /// <summary>
         /// 
         /// </summary>
