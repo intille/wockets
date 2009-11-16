@@ -1312,6 +1312,7 @@ namespace WocketsApplication.DataLogger
 
         int sound_timer = 0;
         int maxout_timer = 0;
+        int disconnection_timer = 0;
         bool PlayMaxout = false;
         int totalMaxouts = 0;
 
@@ -1330,7 +1331,7 @@ namespace WocketsApplication.DataLogger
                 {
                     if (this.wocketsController._Receivers[i]._Status == ReceiverStatus.Connected)
                     {
-                        updateCommand("Wocket " + this.wocketsController._Receivers[i]._ID + " connected!");
+                        //updateCommand("Wocket " + this.wocketsController._Receivers[i]._ID + " connected!");
                         connectedAlert.Play();
                      
                     }
@@ -1343,6 +1344,7 @@ namespace WocketsApplication.DataLogger
                     (this.wocketsController._Receivers[i]._Status == ReceiverStatus.Reconnecting))
                 {
                     totalDisconnections++;
+                    playDisconnection = true;
 
                    /* if (this.wocketsController._Receivers[i].Disconnected >= 1000)
                     {
@@ -1379,23 +1381,26 @@ namespace WocketsApplication.DataLogger
                 //((Label)this.sensorLabels[key]).Text = this.wocketsController._Decoders[i].LastX.ToString();
             }
             maxout_timer++;
+            disconnection_timer++;
           
             if ((PlayMaxout) && (maxout_timer>=100))
             {
-                updateCommand(totalMaxouts + " wocket reading(s) maxedout!");
-                maxoutAlert.Play();
+                //updateCommand(totalMaxouts + " wocket reading(s) maxedout!");
+               // maxoutAlert.Play();
                 PlayMaxout = false;
                 maxout_timer = 0;
                 totalMaxouts = 0;
             }
-            if ((playDisconnection) && (totalDisconnections > 0))
+            if ((playDisconnection) && (totalDisconnections > 0) && (disconnection_timer >= 200))
             {
-                updateCommand( totalDisconnections + " wockets disconnected!");
+                //updateCommand( totalDisconnections + " wockets disconnected!");
                 for (int j = 0; (j < totalDisconnections); j++)
                 {
                     disconnectedAlert.Play();
                     Thread.Sleep(200);
                 }
+
+                disconnection_timer = 0;
             }
 
             for (int i = 0; i < this.wocketsController._Sensors.Count; i++)

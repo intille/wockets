@@ -426,7 +426,7 @@ namespace Wockets
             GET_BT GET_BT_CMD = new GET_BT();
             ALIVE ALIVE_CMD = new ALIVE();
             int pollCounter = 0;
-            Logger.Warn("Version 1.13 October 20,2009");
+            Logger.Warn("Version 1.15 October 28,2009");
             this.StartTime = WocketsTimer.GetUnixTime();
 
             while (polling)

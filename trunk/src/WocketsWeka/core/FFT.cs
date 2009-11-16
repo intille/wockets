@@ -23,6 +23,17 @@ namespace WocketsWeka.core
 
         private static double energy;
         private static double entropy;
+
+        private static double activityBandEnergy;
+        private static double lowIntensityEnergy;
+        private static double moderateHighIntensityEnergy;
+        private static double energyByRange;
+        private static double ratioEnergy;
+
+        public static bool isComputeActivityBand=false;
+        public static bool isComputeLowEnergy=false;
+        public static bool isComputeModerateEnergy=false;
+        public static bool isComputeRatioEnergy = false;
       
 
         private static int maxFrequencies;
@@ -85,7 +96,7 @@ namespace WocketsWeka.core
 
             InitializeBuffers(ref a1, ref a2, ref a3,size);
         }
-
+        
         public static void Calculate(int[] input)
         {
             if ((input.Length & (input.Length - 1)) != 0)
@@ -100,6 +111,25 @@ namespace WocketsWeka.core
             ComputeFFT();
             FFT.CalculateMagnitudeAngle();
             FFT.ComputeEnergy();
+            FFT.ComputeEntropy();
+            if (isComputeActivityBand)
+            {
+                FFT.ComputeEnergy(0, 4.0);
+                activityBandEnergy = FFT.EnergyByRange;
+            }
+            if (isComputeLowEnergy)
+            {
+                FFT.ComputeEnergy(0, 1.2);
+                lowIntensityEnergy = FFT.EnergyByRange;
+            }
+            if (isComputeModerateEnergy)
+            {
+                FFT.ComputeEnergy(1.0, 10.0);
+                moderateHighIntensityEnergy = FFT.EnergyByRange;
+            }
+
+            if (isComputeRatioEnergy)
+                ComputeRatioEnergy();
 
             //WARNING: The frequencies has to be calculated last, because we are sorting
             // the magnitude data structures that may impact other features.
@@ -170,6 +200,49 @@ namespace WocketsWeka.core
             }
         }
 
+        public static double RatioEnergy
+        {
+            get
+            {
+                return FFT.ratioEnergy;
+            }
+        }
+
+
+        public static double ActivityBandEnergy
+        {
+            get
+            {
+                return FFT.activityBandEnergy;
+            }
+        }
+
+
+        public static double LowIntensityEnergy
+        {
+            get
+            {
+                return FFT.lowIntensityEnergy;
+            }
+        }
+
+
+        public static double ModVigIntensityEnergy
+        {
+            get
+            {
+                return FFT.moderateHighIntensityEnergy;
+            }
+        }
+
+        public static double EnergyByRange
+        {
+            get
+            {
+                return FFT.energyByRange;
+            }
+        }
+
         public static double Entropy
         {
             get
@@ -186,12 +259,36 @@ namespace WocketsWeka.core
             }
         }
 
+
+        private static void ComputeRatioEnergy()
+        {
+            double max = 0.0;
+            double sum = 0.0;
+            for (int i = 1; (i < FFT.magnitude.Length); i++)
+            {
+                if (FFT.magnitude[i] > max)
+                    max = FFT.magnitude[i];
+                sum += FFT.magnitude[i];
+            }
+
+            FFT.ratioEnergy = (sum - max) / max;
+        }
+
         private static void ComputeEnergy()
         {
             FFT.energy = 0;
 
             for (int i = 1; (i < FFT.magnitude.Length); i++)
                 FFT.energy += FFT.magnitude[i] * FFT.magnitude[i];       
+        }
+
+        private static void ComputeEnergy(double lowerFrequency, double higherFrequency)
+        {
+            FFT.energyByRange = 0;
+
+            for (int i = 1; (i < FFT.magnitude.Length); i++)
+                if ( (FFT.frequencies[i-1]>=lowerFrequency) && (FFT.frequencies[i-1]<=higherFrequency))
+                    FFT.energyByRange += FFT.magnitude[i] * FFT.magnitude[i];
         }
 
         private static void ComputeEntropy()

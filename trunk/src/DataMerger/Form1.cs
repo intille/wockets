@@ -526,6 +526,10 @@ namespace DataMerger
             DateTime prevSensewearTime = new DateTime();
             double sensewearUnixTime = 0;
 
+            //Sensewear vanderbilt
+            string vanderbiltSensewearDataLine = "";
+            Hashtable sensewearData = new Hashtable();
+
             //Columbia
             TextWriter columbiaCSV = null;
             TextReader columbiaReader = null;
@@ -552,8 +556,23 @@ namespace DataMerger
             //RTI
             TextWriter rtiCSV = null;
             TextReader rtiReader = null;
+            double rtiX = 0;
+            double rtiY = 0;
+            double rtiZ = 0;
+            double rtiUnixTime = 0;
+            DateTime rtiTime = new DateTime();
+            Hashtable rtiData = new Hashtable();
+      
 
 
+            //RT3
+            TextWriter rt3CSV = null;
+            TextReader rt3Reader = null;
+            int rt3SR = 0;    
+            double rt3UnixTime = 0;
+            DateTime rt3Time = new DateTime();
+            Hashtable rt3Data = new Hashtable();
+            string rt3_dataline="";
 
 
 
@@ -576,29 +595,128 @@ namespace DataMerger
             string actigraph_csv_header_gt1m = "UnixTimeStamp,TimeStamp,ActigraphX,ActigraphY";
             string actigraph_csv_header_gtx = "UnixTimeStamp,TimeStamp,ActigraphX,ActigraphY,ActigraphZ";
             string sensewear_csv_header = "UnixTimeStamp,TimeStamp,SensewearSR,Sensewear_AVTranAcc,Senserwear_AVLongAcc,Sensewear_AVForAcc";
+            string sensewear_csv_header_vanderbilt = "UnixTimeStamp,TimeStamp,SensewearSR,Sensewear_numpeaks_accelerometer_transverse,Sensewear_numpeaks_accelerometer_longitudinal,Sensewear_heat_flux_average_original_rate,Sensewear_skin_temp_average_original_rate,Sensewear_transverse_accelerometer_average,Sensewear_longitudinal_accelerometer_average,Sensewear_cover_temp_average,Sensewear_transverse_accelerometer_MAD_graphable,Sensewear_longitudinal_accelerometer_MAD_graphable,Sensewear_STEPS,Sensewear_gsr_average,Sensewear_energy_expenditure_per_minute";
             string zephyr_csv_header = "UnixTimeStamp,TimeStamp,ZephyrHeart Rate Data,ZephyrECG - Amplitude Data,ZephyrECG - Noise Data,ZephyrRES - Breathing Wave Amplitude (V) Data,ZephyrRES - Respiration Rate Data,ZephyrTEM - Skin Temperature Data,ZephyrBAT - Battery Voltage (V) Data,ZephyrPOS - Posture Data,ZephyrACC - Activity Data,ZephyrACC - Peak Acceleration (g) Data,ZephyrACC - Vertical Acc Minimum (g) Data,ZephyrACC - Vertical Acc Peak (g) Data,ZephyrACC - Lateral Acc Minimum (g) Data,ZephyrACC - Lateral Acc Peak (g) Data,ZephyrACC - Sagittal Acc Minimum (g) Data,ZephyrACC - Sagittal Acc Peak (g)";
             string oxycon_csv_header = "UnixTimeStamp,TimeStamp,OxyconHR,OxyconBF,OxyconVE,OxyconVO2,OxyconVO2kg,OxyconMET,OxyconEE,OxyconRER";
             string omron_csv_header = "UnixTimeStamp,TimeStamp,Steps";
             string columbia_csv_header = "UnixTimeStamp,TimeStamp,ColumbiaX,ColumbiaY,ColumbiaZ,ColumbiaFlow,ColumbiaValve";
             string gps_csv_header = "UnixTimeStamp,TimeStamp,GPSLatitude,GPSLongitude,GPSSpeed,GPSAltitude";
+            string rti_csv_header = "UnixTimeStamp,TimeStamp,RTIX,RTIY,RTIZ,RTI_AUC_X,RTI_AUC_Y,RTI_AUC_Z,RTI_AUC_XYZ";
+            string rt3_csv_header = "UnixTimeStamp,TimeStamp,RT3_SR,RT3_Total_Calories,RT3_Activity_Calories,RT3_VM,RT3_ActCntsX,RT3_ActCntsY,RT3_ActCntsZ";
             string master_csv_header = "UnixTimeStamp,TimeStamp";
 
             //files found
 
             bool sensewearFound = false;
+            bool sensewearVanderbiltFound = false;
             bool zephyrFound = false;
             bool oxyconFound = false;
             bool omronFound = false;
             bool columbiaFound = false;
             bool gpsFound = false;
             bool rtiFound = false;
+            bool rt3Found=false;
 
 
+
+
+
+            #region Read RTI data
+            string[] file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*-rti*.csv");
+
+           string rti_line = "";
+            try
+            {
+                if (file.Length == 1)
+                {
+                    if (CSVProgress == "")
+                        CSVProgress = "Processing RTI Data";
+                    rtiReader = new StreamReader(file[0]);
+
+                    //skip first 25 lines
+                    for (int k = 0; (k < 7); k++)
+                        rti_line = rtiReader.ReadLine();
+
+                    string prevRTIKey = "";
+                    double xRTI = 0;
+                    double yRTI = 0;
+                    double zRTI = 0;
+                    int rtiCount = 0;
+
+                    while ((rti_line = rtiReader.ReadLine()) != null)
+                    {
+                        tokens = rti_line.Split(',');
+                        if (tokens.Length == 4)
+                        {
+
+                            string[] dateTokens = tokens[0].Split(' ');
+                            //bool isPM = (dateTokens[2] == "PM");                           
+                            string[] timeTokens = dateTokens[1].Split('.');
+                            int mseconds = Convert.ToInt32(timeTokens[1]);
+                            timeTokens = timeTokens[0].Split(':');
+                            dateTokens = dateTokens[0].Split('/');
+                            rtiTime = new DateTime(Convert.ToInt32(dateTokens[2]), Convert.ToInt32(dateTokens[0]), Convert.ToInt32(dateTokens[1]), Convert.ToInt32(timeTokens[0]), Convert.ToInt32(timeTokens[1]), Convert.ToInt32(timeTokens[2]),mseconds);
+                            //if (isPM)
+                            //    rtiTime.AddHours(12.0);
+
+                            
+                            rtiUnixTime = UnixTime.GetUnixTime(rtiTime);
+                            string rtiKey = rtiTime.Year + "-" + rtiTime.Month + "-" + rtiTime.Day + "-" + rtiTime.Hour + "-" + rtiTime.Minute + "-" + rtiTime.Second;
+                            string rtiLine = "";
+
+
+                            if (prevRTIKey == "")
+                                prevRTIKey = rtiKey;
+
+                            //save previous data
+                            if (prevRTIKey != rtiKey)
+                            {
+                                rtiLine += ((double)(xRTI/(double)rtiCount)).ToString("0.00");
+                                rtiLine += ",";
+                                rtiLine += ((double)(yRTI / (double)rtiCount)).ToString("0.00");
+                                rtiLine += ",";
+                                rtiLine += ((double)(zRTI / (double)rtiCount)).ToString("0.00");
+                                rtiLine += ",";
+                                rtiLine += xRTI.ToString("0.00");
+                                rtiLine += ",";
+                                rtiLine += yRTI.ToString("0.00");
+                                rtiLine += ",";
+                                rtiLine += zRTI.ToString("0.00");
+                                rtiLine += ",";
+                                rtiLine += ((double)(Math.Abs(xRTI)+Math.Abs(yRTI)+Math.Abs(zRTI))).ToString("0.00");
+
+                                if (rtiData.Contains(prevRTIKey) == false)
+                                    rtiData.Add(prevRTIKey, rtiLine);
+
+                                xRTI = 0;
+                                yRTI = 0;
+                                zRTI = 0;
+                                rtiCount = 0;
+                            }
+
+
+                            xRTI += Convert.ToDouble(tokens[1]);
+                            yRTI += Convert.ToDouble(tokens[2]);
+                            zRTI += Convert.ToDouble(tokens[3]);
+                            rtiCount++;
+                            prevRTIKey = rtiKey;
+                        }
+                    }
+
+                    rtiFound = true;
+                }
+            }
+            catch (Exception e)
+            {
+                throw new Exception("RTI: Parsing failed " + e.Message);
+            }
+           
+            #endregion Read RTI data
 
 
 
             #region Read Columbia data
-            string[] file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*-columbia*.csv");
+            file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*-columbia*.csv");
 
             string columbia_line = "";
             try
@@ -1529,16 +1647,20 @@ namespace DataMerger
             Hashtable SLong = new Hashtable();
             Hashtable SAcc = new Hashtable();
 
+
             try
             {
                 if (file.Length == 1)
                 {
                     sensewearReader = new StreamReader(file[0]);
-                    sensewearReader.ReadLine(); //skip first line
+                    sensewear_line=sensewearReader.ReadLine(); //skip first line
+                    if (sensewear_line.Contains("numpeaks_"))
+                        sensewearVanderbiltFound = true;
+                    else
+                        sensewearFound = true;
 
 
                     sensewearSR = 1;
-
 
                     while ((sensewear_line = sensewearReader.ReadLine()) != null)
                     {
@@ -1559,39 +1681,61 @@ namespace DataMerger
                             sensewearUnixTime = Convert.ToInt64(tokens[0].Trim()) - (8 * 60 * 60 * 1000);
                             UnixTime.GetDateTime((long)sensewearUnixTime, out sensewearTime);
                         }
-                        
-                        
 
-                        if ((sensewearTime.Day == prevSensewearTime.Day) && (sensewearTime.Hour == prevSensewearTime.Hour) &&
-                            (sensewearTime.Minute == prevSensewearTime.Minute) && (sensewearTime.Second == prevSensewearTime.Second))
+
+                        if (sensewearFound)
                         {
-                            sensewearSR++;
-                            if (tokens[5].Length > 0)
-                                sensewearTrans += Convert.ToDouble(tokens[5]);
-                            if (tokens[6].Length > 0)
-                                sensewearLong += Convert.ToDouble(tokens[6]);
-                            if (tokens[11].Length > 0)
-                                sensewearForAcc += Convert.ToDouble(tokens[11]);
+                            if ((sensewearTime.Day == prevSensewearTime.Day) && (sensewearTime.Hour == prevSensewearTime.Hour) &&
+                                (sensewearTime.Minute == prevSensewearTime.Minute) && (sensewearTime.Second == prevSensewearTime.Second))
+                            {
+                                sensewearSR++;
+                                if (tokens[5].Length > 0)
+                                    sensewearTrans += Convert.ToDouble(tokens[5]);
+                                if (tokens[6].Length > 0)
+                                    sensewearLong += Convert.ToDouble(tokens[6]);
+                                if (tokens[11].Length > 0)
+                                    sensewearForAcc += Convert.ToDouble(tokens[11]);
+                            }
+                            else
+                            {
+                                string time = prevSensewearTime.Year + "-" + prevSensewearTime.Month + "-" + prevSensewearTime.Day + "-" + prevSensewearTime.Hour + "-" + prevSensewearTime.Minute + "-" + prevSensewearTime.Second;
+                                SSR.Add(time, sensewearSR);
+                                STrans.Add(time, sensewearTrans);
+                                SLong.Add(time, sensewearLong);
+                                SAcc.Add(time, sensewearForAcc);
+
+                                sensewearSR = 1;
+                                sensewearTrans = Convert.ToDouble(tokens[5]);
+                                sensewearLong = Convert.ToDouble(tokens[6]);
+                                sensewearForAcc = Convert.ToDouble(tokens[11]);
+                            }
                         }
-                        else
+                        else if (sensewearVanderbiltFound)
                         {
-                            string time = prevSensewearTime.Year + "-" + prevSensewearTime.Month + "-" + prevSensewearTime.Day + "-" + prevSensewearTime.Hour + "-" + prevSensewearTime.Minute + "-" + prevSensewearTime.Second;
-                            SSR.Add(time, sensewearSR);
-                            STrans.Add(time, sensewearTrans);
-                            SLong.Add(time, sensewearLong);
-                            SAcc.Add(time, sensewearForAcc);
-
+                            
+                            string time = sensewearTime.Year + "-" + sensewearTime.Month + "-" + sensewearTime.Day + "-" + sensewearTime.Hour + "-" + sensewearTime.Minute + "-" + sensewearTime.Second;
                             sensewearSR = 1;
-                            sensewearTrans = Convert.ToDouble(tokens[5]);
-                            sensewearLong = Convert.ToDouble(tokens[6]);
-                            sensewearForAcc = Convert.ToDouble(tokens[11]);
+                            vanderbiltSensewearDataLine = sensewearSR + ",";
+                            vanderbiltSensewearDataLine += tokens[1]+",";
+                            vanderbiltSensewearDataLine += tokens[2]+",";
+                            vanderbiltSensewearDataLine += tokens[3]+",";
+                            vanderbiltSensewearDataLine += tokens[4]+",";
+                            vanderbiltSensewearDataLine += tokens[5]+",";
+                            vanderbiltSensewearDataLine += tokens[6]+",";
+                            vanderbiltSensewearDataLine += tokens[7]+",";
+                            vanderbiltSensewearDataLine += tokens[8]+",";
+                            vanderbiltSensewearDataLine += tokens[9]+",";
+                            vanderbiltSensewearDataLine +=tokens[10]+",";
+                            vanderbiltSensewearDataLine +=tokens[11]+",";
+                            vanderbiltSensewearDataLine +=tokens[15];
+                            sensewearData.Add(time, vanderbiltSensewearDataLine);
                         }
 
                         prevSensewearTime = sensewearTime;
 
                     }
 
-                    sensewearFound = true;
+                    
                 }
             }
             catch (Exception e)
@@ -1603,6 +1747,59 @@ namespace DataMerger
 
 
 
+            #region Read RT3 data
+            file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*-rt3*.csv");
+            string rt3_line = "";
+            Hashtable rt3 = new Hashtable();
+
+            try
+            {
+                if (file.Length == 1)
+                {
+                    rt3Reader = new StreamReader(file[0]);                                      
+                    rt3Found = true;                   
+                    for (int j = 0; (j < 20); j++)                       
+                        rt3_line = rt3Reader.ReadLine(); //skip first line
+
+                    rt3SR = 1;
+
+                    while ((rt3_line = rt3Reader.ReadLine()) != null)
+                    {
+                        tokens = rt3_line.Split(',');
+
+                        //11/20/2008,7:54:00
+
+                        string[] dateTokens = tokens[1].Split('/');
+                        string[] timeTokens = tokens[2].Split(':');
+                        rt3Time = new DateTime(Convert.ToInt32(dateTokens[2]), Convert.ToInt32(dateTokens[0]), Convert.ToInt32(dateTokens[1]), Convert.ToInt32(timeTokens[0]), Convert.ToInt32(timeTokens[1]), Convert.ToInt32(timeTokens[2]));
+                        rt3UnixTime = UnixTime.GetUnixTime(sensewearTime);
+
+                        //Entry,Date,Time,Total Calories,Activity Calories,VM,Start Flag,Stop Flag,ActCntsX,ActCntsY,ActCntsZ
+                        string time = rt3Time.Year + "-" + rt3Time.Month + "-" + rt3Time.Day + "-" + rt3Time.Hour + "-" + rt3Time.Minute + "-" + rt3Time.Second;
+                        rt3SR = 1;
+                        rt3_dataline = rt3SR + ",";
+                        rt3_dataline += tokens[3] + ",";
+                        rt3_dataline += tokens[4] + ",";
+                        rt3_dataline += tokens[5] + ",";
+                        rt3_dataline += tokens[8] + ",";
+                        rt3_dataline += tokens[9] + ",";
+                        rt3_dataline += tokens[10];
+                        rt3Data.Add(time, rt3_dataline);
+
+
+                    }
+
+
+                }
+            }
+            catch (Exception e)
+            {
+                throw new Exception("RT3: Parsing failed " + e.Message);
+            }
+            #endregion Read RT3 data
+
+
+
 
             #region Setup master and other sensor files
             try
@@ -1611,8 +1808,10 @@ namespace DataMerger
                 hrCSV = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\HeartRate_MITes.csv");
                 for (int i = 0; (i < actigraphCSV.Length); i++)
                     actigraphCSV[i] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Actigraph" + (i + 1) + ".csv");
-                if (sensewearFound)
+                if ( (sensewearFound) || (sensewearVanderbiltFound))
                     sensewearCSV = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Sensewear.csv");
+
+
                 if (zephyrFound)
                     zephyrCSV = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Zephyr.csv");
                 if (oxyconFound)
@@ -1623,6 +1822,10 @@ namespace DataMerger
                     columbiaCSV = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Columbia.csv");
                 if (gpsFound)
                     gpsCSV= new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\GPS.csv");
+                if (rtiFound)
+                    rtiCSV = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\RTI.csv");
+                if (rt3Found)
+                    rt3CSV = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\RT3.csv");
             }
             catch (Exception e)
             {
@@ -1805,7 +2008,7 @@ namespace DataMerger
             WocketsController wcontroller = null;
             double[] wunixtimestamp = null;
 
-            if (Directory.Exists(aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY))
+            if ((Directory.Exists(aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY)) && (Directory.GetFiles(aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY).Length>0))
             {
                 wcontroller = new WocketsController("", "", "");
                 wcontroller.FromXML(aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY + "\\SensorData.xml");
@@ -1899,6 +2102,9 @@ namespace DataMerger
                 TextReader[] wocketsTR = new TextReader[wcontroller._Sensors.Count];
                 TextWriter[] wocketsTW = new TextWriter[wcontroller._Sensors.Count];
                 int LoadedSeconds = 10;
+                int[] compensatedWindows = new int[10];
+                int uncompensatedWindows = 0;
+                int correctWindows = 0;
                 for (int k = 0; (k < wcontroller._Sensors.Count); k++)
                 {
                     wocketsTR[k] = new StreamReader(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "Wocket_RawData_" + wcontroller._Sensors[k]._ID.ToString("00") + "_" + wcontroller._Sensors[k]._Location.Replace(' ', '-') + ".csv");
@@ -1927,10 +2133,9 @@ namespace DataMerger
                         int wocketZ = Convert.ToInt32(wocketTokens[3]);
                         long unixtime = (long)(Convert.ToDouble(wocketTokens[0])/1000.0);
 
-                        if ((k == 2) && (unixtime >= 1255347111))
-                            Console.Write(""); 
-                       
-                        
+                       // if ((k == 2) && (unixtime >= 1255347111))
+                         //   Console.Write(""); 
+                                               
                         if (nextCorrectedTime == 0)
                             nextCorrectedTime = unixtime;
                         if (lastSecond == 0)
@@ -1939,20 +2144,19 @@ namespace DataMerger
                         //if a new second is being loaded
                         if (lastSecond != unixtime)
                         {
-                            //while ((unixtime - nextCorrected) > 9)
-                              //  nextCorrected++;
+                           
                             //check if you have enough to correct
                             while ((unixtime - nextCorrectedTime) > 8)
                             {
-                          
-
+                                bool compensated = false;
+                                int compensatedCounter = 0;
                                 //if the data needs compensation
                                 if (loadedData[nextCorrected].Count < (wocketsSR[k] - 2)) //lower number of samples
                                 {
+                                    compensatedCounter = 1;
                                     //check if seconds that follow compensate for the current second
                                     int dataCounter = loadedData[nextCorrected].Count;
-                                    bool compensated = false;
-                                    int compensatedCounter = 1;
+                                    int expectedCompensatedSR = 0;
                                     for (int r = 1; (r < 8); r++)
                                     {
 
@@ -1964,80 +2168,99 @@ namespace DataMerger
                                             if ((adjunixtime - unixtime) < 8)
                                                 dataCounter += loadedData[adjacentDataIndex].Count;
                                             compensatedCounter++;
-                                            if ((dataCounter / (r + 1)) >= (wocketsSR[k] - 10))
+                                            if ((dataCounter / (r + 1)) >= (wocketsSR[k] - 2))
                                             {
+                                                expectedCompensatedSR = dataCounter / (r + 1);
                                                 compensated = true;
+
                                                 break;
                                             }
-                                        }else
+                                        }
+                                        else
                                             compensatedCounter++;
-                                       
+
                                     }
 
                                     //use data points from adjacent seconds
                                     if (compensated)
                                     {
-                                        int totalCompensatedPoints = loadedData[nextCorrected].Count;
-                                        for (int m = 1; (m < compensatedCounter); m++)
-                                        {
-                                            int compenstingArray = (nextCorrected + m) % LoadedSeconds;
-                                            for (int n = 0; (n < loadedData[compenstingArray].Count); n++)
-                                            {
-                                                loadedData[nextCorrected].Add(loadedData[compenstingArray][n]);
-                                                loadedData[compenstingArray].RemoveAt(n);
-                                                //wocketsTW[k].WriteLine(recordTime + "," + recordTokens[1] + "," + recordTokens[2] + "," + recordTokens[3]);
-                                                //recordTime += delta;
-                                                totalCompensatedPoints++;
-                                                if (wocketsSR[k] == totalCompensatedPoints)
-                                                {
-                                                    compensated = false;
-                                                    break;
-                                                }
-                                            }
+                                        compensatedWindows[compensatedCounter] = compensatedWindows[compensatedCounter] + 1;
+                                        //int totalCompensatedPoints = loadedData[nextCorrected].Count;
+                                        int correctingArray = nextCorrected;
 
-                                            //if done compensating stop moving data points and just write it out
-                                            if (!compensated)
-                                                break;
+                                        //go through all arrays that were used in correction
+                                        for (int r = 0; (r < compensatedCounter); r++)
+                                        {
+                                            correctingArray = (nextCorrected + r) % LoadedSeconds;
+
+                                            for (int m = r + 1; (m < compensatedCounter); m++)
+                                            {
+                                                int compenstingArray = (nextCorrected + m) % LoadedSeconds;
+                                                int totalCompensatedPoints = loadedData[correctingArray].Count;
+                                                int compensatingArraySize = loadedData[compenstingArray].Count;
+                                                for (int n = 0; (n < compensatingArraySize); n++)
+                                                {
+                                                    //always remove the top entry of the array to do the correction and preserve the order
+                                                    loadedData[correctingArray].Add(loadedData[compenstingArray][0]);
+                                                    loadedData[compenstingArray].RemoveAt(0);
+                                                    //wocketsTW[k].WriteLine(recordTime + "," + recordTokens[1] + "," + recordTokens[2] + "," + recordTokens[3]);
+                                                    //recordTime += delta;
+                                                    totalCompensatedPoints++;
+                                                    if (expectedCompensatedSR == totalCompensatedPoints)
+                                                        break;
+                                                }
+                                                if (expectedCompensatedSR == totalCompensatedPoints)
+                                                    break;
+                                            }
                                         }
                                     }
-
+                                    else
+                                        uncompensatedWindows++;
                                 }
+                                else
+                                    correctWindows++;
 
-                                //
-                                recordTime = nextCorrectedTime*1000.0;
-                                for (int n = 0; (n < loadedData[nextCorrected].Count); n++)
+                                //Write out all data that got time corrected
+                                //including where we have taken data points
+                                if (!compensated) //no compensation
                                 {
-                                    string[] recordTokens = ((string)loadedData[nextCorrected][n]).Split(',');
-                                    wocketsTW[k].WriteLine(recordTime + "," + recordTokens[1] + "," + recordTokens[2] + "," + recordTokens[3]);
-                                    recordTime += delta;
+
+                                    recordTime = nextCorrectedTime * 1000.0;
+                                    for (int n = 0; (n < loadedData[nextCorrected].Count); n++)
+                                    {
+                                        string[] recordTokens = ((string)loadedData[nextCorrected][n]).Split(',');
+                                        wocketsTW[k].WriteLine(recordTime + "," + recordTokens[1] + "," + recordTokens[2] + "," + recordTokens[3]);
+                                        recordTime += delta;
+                                    }
+                                    loadedData[nextCorrected] = new ArrayList();
+                                    nextCorrected = (nextCorrected + 1) % LoadedSeconds;
+                                    nextCorrectedTime++;
                                 }
-                                loadedData[nextCorrected] = new ArrayList();
-                                nextCorrected = (nextCorrected + 1) % LoadedSeconds;                                
-                                //nextCorrectedTime = loadedDataTime[nextCorrected];
-                                nextCorrectedTime++;
-                               // if (nextCorrectedTime != (long)(Convert.ToDouble(((string)loadedData[nextCorrected][0]).Split(',')[0])))
-                                 //   Console.Write("");
-                                
-                                //try
-                                //{
-                               //= (long)(Convert.ToDouble(((string)loadedData[nextCorrected][0]).Split(',')[0]));
-                                //}
-                                //catch (Exception e)
-                                //{
-                                //}
+                                else
+                                {
+                                    int correctionIndex = 0;
+                                    int correctionLength = compensatedCounter;
+                                    
+                                    while (correctionIndex != compensatedCounter)
+                                    {
+                                        recordTime = nextCorrectedTime * 1000.0;
+                                        for (int n = 0; (n < loadedData[nextCorrected].Count); n++)
+                                        {
+                                            string[] recordTokens = ((string)loadedData[nextCorrected][n]).Split(',');
+                                            wocketsTW[k].WriteLine(recordTime + "," + recordTokens[1] + "," + recordTokens[2] + "," + recordTokens[3]);
+                                            recordTime += delta;
+                                        }
+                                        loadedData[nextCorrected] = new ArrayList();
+                                        nextCorrected = (nextCorrected + 1) % LoadedSeconds;
+                                        nextCorrectedTime++;
+                                        correctionIndex++;
+                                    }
+
+                                    compensated = false;
+                                }
                             }
 
-                            //only increment to a next array if you have filled it with at least 1 element
-                            //if (loadedData[loadedIndex].Count > 0)
-                            //{
-                                
-                            //loadedDataTime[loadedIndex] = (long)(Convert.ToDouble(((string)loadedData[loadedIndex][0]).Split(',')[0]));                               
-                          
-                            //}
 
-                           // if (lastSecond == 1255347136)
-                            //    Console.Write("");
-                            //add arraylists for each second between last second and now
                             while (lastSecond != unixtime)
                             {
                                 loadedIndex++;
@@ -2058,6 +2281,8 @@ namespace DataMerger
 
                     wocketsTW[k].Close();
                 }
+
+
                 //create some counters for activity counts
                 waverageX = new int[wcontroller._Sensors.Count];
                 waverageY = new int[wcontroller._Sensors.Count];
@@ -2137,16 +2362,34 @@ namespace DataMerger
                     actigraphCSV[i].WriteLine(actigraph_csv_header);
                 }
             }
-            master_csv_header += ",SensewearSR,Sensewear_AVTranAcc,Senserwear_AVLongAcc,Sensewear_AVForAcc";
-            master_csv_header += ",ZephyrHeart Rate Data,ZephyrECG - Amplitude Data,ZephyrECG - Noise Data,ZephyrRES - Breathing Wave Amplitude (V) Data,ZephyrRES - Respiration Rate Data,ZephyrTEM - Skin Temperature Data,ZephyrBAT - Battery Voltage (V) Data,ZephyrPOS - Posture Data,ZephyrACC - Activity Data,ZephyrACC - Peak Acceleration (g) Data,ZephyrACC - Vertical Acc Minimum (g) Data,ZephyrACC - Vertical Acc Peak (g) Data,ZephyrACC - Lateral Acc Minimum (g) Data,ZephyrACC - Lateral Acc Peak (g) Data,ZephyrACC - Sagittal Acc Minimum (g) Data,ZephyrACC - Sagittal Acc Peak (g)";
-            master_csv_header += ",OxyconHR,OxyconBF,OxyconVE,OxyconVO2,OxyconVO2kg,OxyconMET,OxyconEE,OxyconRER";//OxyconRER,Oxyconttot,Oxycontex";
-            master_csv_header += ",OmronSteps";
-            master_csv_header += ",ColumbiaX,ColumbiaY,ColumbiaZ,ColumbiaFlow,ColumbiaValve";
-            master_csv_header += ",GPSLatitude,GPSLongitude,GPSSpeed,GPSAltitude";
+
+            if (sensewearFound)
+                master_csv_header += ",SensewearSR,Sensewear_AVTranAcc,Senserwear_AVLongAcc,Sensewear_AVForAcc";
+            else if (sensewearVanderbiltFound)
+                master_csv_header += ",SensewearSR,Sensewear_numpeaks_accelerometer_transverse,Sensewear_numpeaks_accelerometer_longitudinal,Sensewear_heat_flux_average_original_rate,Sensewear_skin_temp_average_original_rate,Sensewear_transverse_accelerometer_average,Sensewear_longitudinal_accelerometer_average,Sensewear_cover_temp_average,Sensewear_transverse_accelerometer_MAD_graphable,Sensewear_longitudinal_accelerometer_MAD_graphable,Sensewear_STEPS,Sensewear_gsr_average,Sensewear_energy_expenditure_per_minute";
+            if (zephyrFound)
+                master_csv_header += ",ZephyrHeart Rate Data,ZephyrECG - Amplitude Data,ZephyrECG - Noise Data,ZephyrRES - Breathing Wave Amplitude (V) Data,ZephyrRES - Respiration Rate Data,ZephyrTEM - Skin Temperature Data,ZephyrBAT - Battery Voltage (V) Data,ZephyrPOS - Posture Data,ZephyrACC - Activity Data,ZephyrACC - Peak Acceleration (g) Data,ZephyrACC - Vertical Acc Minimum (g) Data,ZephyrACC - Vertical Acc Peak (g) Data,ZephyrACC - Lateral Acc Minimum (g) Data,ZephyrACC - Lateral Acc Peak (g) Data,ZephyrACC - Sagittal Acc Minimum (g) Data,ZephyrACC - Sagittal Acc Peak (g)";
+            if (oxyconFound)
+                master_csv_header += ",OxyconHR,OxyconBF,OxyconVE,OxyconVO2,OxyconVO2kg,OxyconMET,OxyconEE,OxyconRER";//OxyconRER,Oxyconttot,Oxycontex";
+            if (omronFound)
+                master_csv_header += ",OmronSteps";
+            if (columbiaFound)
+                master_csv_header += ",ColumbiaX,ColumbiaY,ColumbiaZ,ColumbiaFlow,ColumbiaValve";
+            if (gpsFound)
+                master_csv_header += ",GPSLatitude,GPSLongitude,GPSSpeed,GPSAltitude";
+            if (rtiFound)
+                master_csv_header += ",RTIX,RTIY,RTIZ,RTI_AUC_X,RTI_AUC_Y,RTI_AUC_Z,RTI_AUC_XYZ";
+            if (rt3Found)
+                master_csv_header += ",RT3_SR,RT3_Total_Calories,RT3_Activity_Calories,RT3_VM,RT3_ActCntsX,RT3_ActCntsY,RT3_ActCntsZ";
+
             masterCSV.WriteLine(master_csv_header);
             hrCSV.WriteLine(hr_csv_header);
-            if ((sensewearCSV != null) && (sensewearFound))
-                sensewearCSV.WriteLine(sensewear_csv_header);
+            if (sensewearCSV != null)
+                if (sensewearFound)
+                    sensewearCSV.WriteLine(sensewear_csv_header);
+                else if (sensewearVanderbiltFound)
+                    sensewearCSV.WriteLine(sensewear_csv_header_vanderbilt);
+           
             if ((zephyrCSV != null) && (zephyrFound))
                 zephyrCSV.WriteLine(zephyr_csv_header);
             if ((oxyconCSV != null) && (oxyconFound))
@@ -2157,6 +2400,10 @@ namespace DataMerger
                 columbiaCSV.WriteLine(columbia_csv_header);
             if ((gpsCSV != null) && (gpsFound))
                 gpsCSV.WriteLine(gps_csv_header);
+            if ((rtiCSV != null) && (rtiFound))
+                rtiCSV.WriteLine(rti_csv_header);
+            if ((rt3CSV != null) && (rt3Found))
+                rt3CSV.WriteLine(rt3_csv_header);
 
 
 
@@ -2343,13 +2590,16 @@ namespace DataMerger
             string columbia_csv_line = "";
             string gps_csv_line = "";
             string rti_csv_line = "";
+            string rt3_csv_line = "";
             #endregion Initialize CSV lines
 
-            TextReader[] wocketsTR1 = new TextReader[wcontroller._Sensors.Count];
-
-            for (int k = 0; (k < wcontroller._Sensors.Count); k++)
-                wocketsTR1[k] = new StreamReader(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "Wocket_RawCorrectedData_" + wcontroller._Sensors[k]._ID.ToString("00") + "_" + wcontroller._Sensors[k]._Location.Replace(' ', '-') + ".csv");
-
+            TextReader[] wocketsTR1=null;
+            if (wcontroller != null)
+            {
+                wocketsTR1 = new TextReader[wcontroller._Sensors.Count];
+                for (int k = 0; (k < wcontroller._Sensors.Count); k++)
+                    wocketsTR1[k] = new StreamReader(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "Wocket_RawCorrectedData_" + wcontroller._Sensors[k]._ID.ToString("00") + "_" + wcontroller._Sensors[k]._Location.Replace(' ', '-') + ".csv");
+            }
             while (((TimeSpan)endDateTime.Subtract(currentDateTime)).TotalSeconds >= 0)
             {
                 string key = currentDateTime.Year + "-" + currentDateTime.Month + "-" + currentDateTime.Day + "-" + currentDateTime.Hour + "-" + currentDateTime.Minute + "-" + currentDateTime.Second;
@@ -2357,9 +2607,7 @@ namespace DataMerger
                 timestamp = diff.TotalMilliseconds + "," + currentDateTime.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ssK");
                 currentUnixTime = diff.TotalMilliseconds;
 
-                //if (currentUnixTime == 1255223724000)
-                 //   Console.Write("");
-
+      
                 #region Setup prefix of CSV lines
                 master_csv_line = timestamp;
                 hr_csv_line = timestamp;
@@ -2372,6 +2620,7 @@ namespace DataMerger
                 columbia_csv_line = timestamp;
                 gps_csv_line = timestamp;
                 rti_csv_line = timestamp;
+                rt3_csv_line = timestamp;
                 
                 if (aannotation != null)
                     master_csv_line += "," + current_activity;
@@ -3016,9 +3265,31 @@ namespace DataMerger
                         master_csv_line = master_csv_line + ",,,,";
                     }
                 }
-                else
-                    master_csv_line = master_csv_line + ",,,,";
+                //else
+                 //   master_csv_line = master_csv_line + ",,,,";
                 #endregion Write CSV line for Sensewear
+
+
+                #region Write CSV line for Sensewear Vanderbilt
+                if ((sensewearVanderbiltFound) && (sensewearCSV != null))
+                {
+                    if (sensewearData.ContainsKey(key))
+                    {
+                        sensewearCSV.WriteLine(sensewear_csv_line + "," + ((string)sensewearData[key]));
+                        master_csv_line = master_csv_line + "," + ((string)sensewearData[key]);
+                    }
+                    else
+                    {
+                        sensewearCSV.WriteLine(sensewear_csv_line + ",,,,,,,,,,,,,");
+                        master_csv_line = master_csv_line + ",,,,,,,,,,,,,";
+                    }
+                }
+                //else
+                  //  master_csv_line = master_csv_line + ",,,,,,,,,,,,,";
+
+
+                #endregion Write CSV line for Sensewear Vanderbilt
+
 
                 #region Write CSV line for Zephyr
                 if ((zephyrFound) && (zephyrCSV != null))
@@ -3034,8 +3305,8 @@ namespace DataMerger
                         master_csv_line = master_csv_line + ",,,,,,,,,,,,,,,,";
                     }
                 }
-                else
-                    master_csv_line = master_csv_line + ",,,,,,,,,,,,,,,,";
+               // else
+               //     master_csv_line = master_csv_line + ",,,,,,,,,,,,,,,,";
                 #endregion Write CSV line for Zephyr
 
                 #region Write CSV line for Oxycon
@@ -3055,8 +3326,8 @@ namespace DataMerger
                         master_csv_line = master_csv_line + ",,,,,,,,";
                     }
                 }
-                else
-                    master_csv_line = master_csv_line + ",,,,,,,,";
+             //   else
+               //     master_csv_line = master_csv_line + ",,,,,,,,";
                 #endregion Write CSV line for Oxycon
 
                 #region Write CSV line for Omron
@@ -3073,8 +3344,8 @@ namespace DataMerger
                         master_csv_line = master_csv_line + ",";
                     }
                 }
-                else
-                    master_csv_line = master_csv_line + ",";
+               // else
+                 //   master_csv_line = master_csv_line + ",";
                 #endregion Write CSV line for Omron
 
 
@@ -3092,8 +3363,8 @@ namespace DataMerger
                         master_csv_line = master_csv_line + ",,,,,";
                     }
                 }
-                else
-                    master_csv_line = master_csv_line + ",,,,,";
+             //   else
+               //     master_csv_line = master_csv_line + ",,,,,";
                 #endregion Write CSV line for Columbia
 
 
@@ -3111,10 +3382,47 @@ namespace DataMerger
                         master_csv_line = master_csv_line + ",,,,";
                     }
                 }
-                else
-                    master_csv_line = master_csv_line + ",,,,";
+              //  else
+                //    master_csv_line = master_csv_line + ",,,,";
                 #endregion Write CSV line for GPS
 
+
+                #region Write CSV line for RTI
+                if ((rtiFound) && (rtiCSV != null))
+                {
+                    if (rtiData.ContainsKey(key))
+                    {
+                        rtiCSV.WriteLine(rti_csv_line + "," + ((string)rtiData[key]));
+                        master_csv_line = master_csv_line + "," + ((string)rtiData[key]);
+                    }
+                    else
+                    {
+                        rtiCSV.WriteLine(rti_csv_line + ",,,,");
+                        master_csv_line = master_csv_line + ",,,,";
+                    }
+                }
+               // else
+                 //   master_csv_line = master_csv_line + ",,,,";
+                #endregion Write CSV line for RTI
+
+
+                #region Write CSV line for RT3
+                if ((rt3Found) && (rt3CSV != null))
+                {
+                    if (rt3Data.ContainsKey(key))
+                    {                
+                        rt3CSV.WriteLine(rt3_csv_line + "," + ((string)rt3Data[key]));
+                        master_csv_line = master_csv_line + "," + ((string)rt3Data[key]);
+                    }
+                    else
+                    {
+                        rt3CSV.WriteLine(rt3_csv_line + ",,,,");
+                        master_csv_line = master_csv_line + ",,,,";
+                    }
+                }
+                else
+                    master_csv_line = master_csv_line + ",,,,";
+                #endregion Write CSV line for RT3
 
                 #region Write master CSV line
                 masterCSV.WriteLine(master_csv_line);

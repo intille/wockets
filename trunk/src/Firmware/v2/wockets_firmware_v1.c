@@ -386,9 +386,9 @@ ISR(TIMER2_OVF_vect){
 					alive_timer=0;					
 				}
 					 					
-				adc_result[ADC1]=0;//_atmega324p_a2dConvert10bit(ADC1);
-				adc_result[ADC2]=0;//_atmega324p_a2dConvert10bit(ADC2);
-				adc_result[ADC3]=_atmega324p_a2dConvert10bit(ADC7);
+				adc_result[ADC1]=_atmega324p_a2dConvert10bit(ADC1);
+				adc_result[ADC2]=_atmega324p_a2dConvert10bit(ADC2);
+				adc_result[ADC3]=_atmega324p_a2dConvert10bit(ADC3);
 				
 				//tag if close to ack
 				if (ack==0xff)
