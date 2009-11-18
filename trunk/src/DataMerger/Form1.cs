@@ -649,7 +649,7 @@ namespace DataMerger
                         if (tokens.Length == 4)
                         {
 
-                            string[] dateTokens = tokens[0].Split(' ');
+                            string[] dateTokens = tokens[0].Split(new char[] { ' ', '\t' });
                             //bool isPM = (dateTokens[2] == "PM");                           
                             string[] timeTokens = dateTokens[1].Split('.');
                             int mseconds = Convert.ToInt32(timeTokens[1]);
@@ -2187,7 +2187,8 @@ namespace DataMerger
                                         compensatedWindows[compensatedCounter] = compensatedWindows[compensatedCounter] + 1;
                                         //int totalCompensatedPoints = loadedData[nextCorrected].Count;
                                         int correctingArray = nextCorrected;
-
+                                       // if (compensatedCounter > 3)
+                                       //     Console.Write("");
                                         //go through all arrays that were used in correction
                                         for (int r = 0; (r < compensatedCounter); r++)
                                         {
