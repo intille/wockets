@@ -282,7 +282,13 @@ namespace weka.core
 			
 			return m_Objects[m_Size - 1];
 		}
-		
+
+
+        public System.Object firstElement()
+        {
+
+            return m_Objects[0];
+        }
 		/// <summary> Deletes an element from this vector.
 		/// 
 		/// </summary>

@@ -1829,12 +1829,14 @@ static void filterloop()
 
         public static bool ACSF = false;
         static int ACSFIndex = 0;
-        static double TotalMass = 100.0;
+        static double TotalMass = 62.0;
         static double TrunkMass = 0.497; //(Hip)
         static double ArmMass = 0.0500; //(Arm)
         static double LegMass = 0.1610; //(Leg)
 
         static double[] limbs = new double[5]{TrunkMass,ArmMass,ArmMass,LegMass,LegMass};
+        //0 HR, 1 Hip, 4 DA, 7 DW, 8 NDA, 11 DT, 14 DArm, 17 NDW
+        static int[] limbsIndex = new int[5] {1, 3, 7,  2, 4 };
 
 
         public static bool ACTotalSF = false;
@@ -2413,7 +2415,10 @@ AXML.Annotation aannotation, SXML.SensorAnnotation sannotation, GeneralConfigura
                         //double bpvalue=BandPasspt1_20Hz_(i, input[i][j]);
                         acAbsSum += Math.Abs(bpvalue[i][j]);
                         acSVMSensor[j] += Math.Pow(bpvalue[i][j], 2.0);
-                        inputFFT[j] = (int)(bpvalue[i][j]);
+                        //because the FFT uses fixed point, we have to multiply
+                        //it by a thousand to avoid any problems when calculating
+                        //the fft
+                        inputFFT[j] = (int)(bpvalue[i][j]*1000.0);
                        
                         if (ACRange)
                         {
@@ -2424,13 +2429,7 @@ AXML.Annotation aannotation, SXML.SensorAnnotation sannotation, GeneralConfigura
                         }
 
 
-                        if (ACPitch)
-                        {
-                            acfSum = 0;
-                            for (int k = 0; (k < (Extractor.inputColumnSize - j)); k++)
-                                acfSum += bpvalue[i][k] * bpvalue[i][k + j];
-                            acf[j] = acfSum;
-                        }
+                     
                     }
                     
                     meanlp=sumlp / Extractor.inputColumnSize;
@@ -2456,7 +2455,19 @@ AXML.Annotation aannotation, SXML.SensorAnnotation sannotation, GeneralConfigura
                         }
 
                         standardized[i][j] = bpvalue[i][j] - meansbp[i];
+
+                        if (ACPitch)
+                        {
+                            acfSum = 0;
+                            for (int k = 0; (k < (Extractor.inputColumnSize - j)); k++)
+                                acfSum += (bpvalue[i][k]- meansbp[i]) * (bpvalue[i][k + j]- meansbp[i]);
+                            acf[j] = acfSum;
+                        }
                     }
+                     for (j = 0; (j < Extractor.inputColumnSize); j++)
+                         acf[j] /= squaredSum;
+                    
+
 
 
                     if (DCMeanTotal)
@@ -2499,15 +2510,26 @@ AXML.Annotation aannotation, SXML.SensorAnnotation sannotation, GeneralConfigura
                                 acSVMSensor[k] = 0;
                             }
                             fv[acSVMIndex++] = totalSVM/Extractor.inputColumnSize;
-                            //acTotalSVM += fv[ACSVMIndex - 1];
+                            acTotalSVM += fv[acSVMIndex - 1];
                         }
 
 
                         if (ACSF)
                         {
-                            int location = i % 3;
-                            fv[acSFIndex + location] = limbs[location] * fv[acAbsAreaSensorIndex - 1];
-                            acTotalSF += fv[acSFIndex + location];
+                            int location = i / 3;
+                            int currenLimbIndex = -1;
+                            for (int m = 0; (m < limbsIndex.Length); m++)
+                                if (limbsIndex[m] == location)
+                                {
+                                    currenLimbIndex = m;
+                                    break;
+                                }
+                            if (currenLimbIndex >= 0)
+                            {
+                                double sgForce=limbs[currenLimbIndex] * fv[ACAbsAreaSensorIndex + limbsIndex[currenLimbIndex] - 1];
+                                fv[acSFIndex + currenLimbIndex] = sgForce;
+                                acTotalSF += fv[acSFIndex + currenLimbIndex];
+                            }
 
                         }
 
@@ -2522,10 +2544,10 @@ AXML.Annotation aannotation, SXML.SensorAnnotation sannotation, GeneralConfigura
                        
                         //features[energyIndex++] = FFT.Energy;
                         double[] maxFreqsMags = FFT.MaximumFrequencies;
-                        for (int k = 0; (k < NumberFrequencies); k++)
+                        for (int k = 0; (k < maxFreqsMags.Length); k++)
                         {
                             fv[acFFTFreqsIndex++] = maxFreqsMags[k++];
-                            fv[acFFTMagsIndex++] = maxFreqsMags[k++];                            
+                            fv[acFFTMagsIndex++] = maxFreqsMags[k];                            
                         }
 
                         
@@ -2547,7 +2569,7 @@ AXML.Annotation aannotation, SXML.SensorAnnotation sannotation, GeneralConfigura
                     if (ACSkew)
                         fv[acSkewIndex++] = (cubicSum * Math.Sqrt(Extractor.inputColumnSize)) / Math.Pow(squaredSum, 1.5);
                     if (ACKur)
-                        fv[acKurIndex++] = ((fourthSum * Extractor.inputColumnSize) / Math.Pow(squaredSum, 2.0)) - 3.0;
+                        fv[acKurIndex++] = ((fourthSum * Extractor.inputColumnSize) / Math.Pow(squaredSum, 2.0));
                      if (ACVar)
                          fv[acVarIndex++] = squaredSum / (Extractor.inputColumnSize - 1);
                      if (ACAbsCV)
@@ -2569,16 +2591,21 @@ AXML.Annotation aannotation, SXML.SensorAnnotation sannotation, GeneralConfigura
 
                     if (ACPitch)
                     {
-                        double maxACF=-99999999.0;
-                        int maxK=0;
+                        //pick the first minimum
+                        double minACF=99999999.0;
+                        int minK=0;
                         for (int k=0;(k<Extractor.inputColumnSize);k++)
-                            if (acf[k] > maxACF)
+                            if (acf[k]< minACF)
                             {
-                                maxK = k;
-                                maxACF = acf[k];
+                                minK = k;
+                                minACF = acf[k];
+                                if (minACF < 0.001)
+                                    break;
                             }
 
-                        fv[acPitchIndex++] = maxK;
+                        fv[acPitchIndex++] = minK;
+                        //if (maxK != 1)
+                          //  Console.Write("");
                     }
 
                     if (ACMCR)
@@ -2624,7 +2651,7 @@ AXML.Annotation aannotation, SXML.SensorAnnotation sannotation, GeneralConfigura
             ocount++;
            
             
-            if (ocount == 50)
+            if (ocount == 1)
             {
                 TextWriter iwriter = new StreamWriter("input.csv");
                 TextWriter lpwriter = new StreamWriter("lpinput.csv");
