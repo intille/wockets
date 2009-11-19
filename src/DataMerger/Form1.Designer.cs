@@ -102,7 +102,7 @@ namespace DataMerger
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.label1);
             this.Name = "Form1";
-            this.Text = "Wockets Conversion Software - Version 1.17 November 16,2009";
+            this.Text = "Wockets Conversion Software - Version 1.18 November 18,2009";
             this.ResumeLayout(false);
             this.PerformLayout();
 

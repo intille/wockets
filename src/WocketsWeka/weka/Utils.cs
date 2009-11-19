@@ -1618,18 +1618,18 @@ namespace weka.core
 		{
 			
 			int[] index = new int[array.Length];
-			array = new double[array.Length];
-			array.CopyTo(array, 0);
+			double[] myarray = new double[array.Length];
+			array.CopyTo(myarray, 0);
 			for (int i = 0; i < index.Length; i++)
 			{
 				index[i] = i;
-				if (System.Double.IsNaN(array[i]))
+				if (System.Double.IsNaN(myarray[i]))
 				{
 					//UPGRADE_TODO: The equivalent in .NET for field 'java.lang.Double.MAX_VALUE' may return a different value. "ms-help://MS.VSCC.v80/dv_commoner/local/redirect.htm?index='!DefaultContextWindowIndex'&keyword='jlca1043'"
-					array[i] = System.Double.MaxValue;
+					myarray[i] = System.Double.MaxValue;
 				}
 			}
-			quickSort(array, index, 0, array.Length - 1);
+			quickSort(myarray, index, 0, myarray.Length - 1);
 			return index;
 		}
 		

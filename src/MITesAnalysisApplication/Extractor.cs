@@ -2858,200 +2858,222 @@ AXML.Annotation aannotation, SXML.SensorAnnotation sannotation, GeneralConfigura
 
             for (int i = 0; (i < inputRowSize); i++)
             {
+                int sensor_id=(i/3);
+                string axis_id = "X";
+                if (i % 3 == 1)
+                    axis_id = "Y";
+                else if (i % 3 == 2)
+                    axis_id = "Z";
+                string sensorLocation = ((SXML.Sensor)sannotation.Sensors[sensor_id+1]).Location.Replace(' ', '_');
+                sensorLocation = sensorLocation.Replace('_', '-');
                 if (DCMean)
                 {
-                    DCMean_ATTRIBUTES += "@ATTRIBUTE DCMean" + i + " NUMERIC\n";
-                    arffAttriburesLabels[dcMeanIndex++] = "DCMean" + i;
+                    DCMean_ATTRIBUTES += "@ATTRIBUTE DCMean" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id + " NUMERIC\n";
+                    arffAttriburesLabels[dcMeanIndex++] = "DCMean" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id;
                 }
                 if (DCArea)
                 {
-                    DCArea_ATTRIBUTES += "@ATTRIBUTE DCArea" + i + " NUMERIC\n";
-                    arffAttriburesLabels[dcAreaIndex++] = "DCArea" + i;
+                    DCArea_ATTRIBUTES += "@ATTRIBUTE DCArea" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id + " NUMERIC\n";
+                    arffAttriburesLabels[dcAreaIndex++] = "DCArea" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id;
                 }
 
                 if (ACAbsMean)
                 {
-                    ACAbsMean_ATTRIBUTES += "@ATTRIBUTE ACAbsMean" + i + " NUMERIC\n";
-                    arffAttriburesLabels[acAbsMeanIndex++] = "ACAbsMean" + i;
+                    ACAbsMean_ATTRIBUTES += "@ATTRIBUTE ACAbsMean" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id + " NUMERIC\n";
+                    arffAttriburesLabels[acAbsMeanIndex++] = "ACAbsMean" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id;
                 }
 
                 if (ACAbsArea)
                 {
-                    ACAbsArea_ATTRIBUTES += "@ATTRIBUTE ACAbsArea" + i + " NUMERIC\n";
-                    arffAttriburesLabels[acAbsAreaIndex++] = "ACAbsArea" + i;
+                    ACAbsArea_ATTRIBUTES += "@ATTRIBUTE ACAbsArea" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id + " NUMERIC\n";
+                    arffAttriburesLabels[acAbsAreaIndex++] = "ACAbsArea" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id;
                 }
 
                 if (SpectralContent)
                 {
                     for (int j = 0; (j < NumberFrequencies); j++)
                     {
-                        ACFFTFreqs_ATTRIBUTES += "@ATTRIBUTE ACFFTFreqs" + i + "_Max" + j + " NUMERIC\n";
-                        arffAttriburesLabels[acFFTFreqsIndex++] = "ACFFTFreqs" + i + "_Max" + j;
+                        ACFFTFreqs_ATTRIBUTES += "@ATTRIBUTE ACFFTFreqs" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id + "_Max" + j + " NUMERIC\n";
+                        arffAttriburesLabels[acFFTFreqsIndex++] = "ACFFTFreqs" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id + "_Max" + j;
 
-                        ACFFTMags_ATTRIBUTES += "@ATTRIBUTE ACFFTMags" + i + "_Max" + j + " NUMERIC\n";
-                        arffAttriburesLabels[acFFTMagsIndex++] = "ACFFTFreqs" + i + "_Max" + j;
+                        ACFFTMags_ATTRIBUTES += "@ATTRIBUTE ACFFTMags" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id + "_Max" + j + " NUMERIC\n";
+                        arffAttriburesLabels[acFFTMagsIndex++] = "ACFFTFreqs" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id + "_Max" + j;
                     }
                 }
 
                 if (ACEntropy)
                 {
-                    ACEntropy_ATTRIBUTES += "@ATTRIBUTE ACEntropy" + i + " NUMERIC\n";
-                    arffAttriburesLabels[acEntropyIndex++] = "ACEntropy" + i;
+                    ACEntropy_ATTRIBUTES += "@ATTRIBUTE ACEntropy" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id + " NUMERIC\n";
+                    arffAttriburesLabels[acEntropyIndex++] = "ACEntropy" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id;
                 }
 
                 if (ACEnergy)
                 {
-                    ACEnergy_ATTRIBUTES += "@ATTRIBUTE ACEnergy" + i + " NUMERIC\n";
-                    arffAttriburesLabels[acEnergyIndex++] = "ACEnergy" + i;
+                    ACEnergy_ATTRIBUTES += "@ATTRIBUTE ACEnergy" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id + " NUMERIC\n";
+                    arffAttriburesLabels[acEnergyIndex++] = "ACEnergy" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id;
                 }
 
                 if (ACSkew)
                 {
-                    ACSkew_ATTRIBUTES += "@ATTRIBUTE ACSkew" + i + " NUMERIC\n";
-                    arffAttriburesLabels[acSkewIndex++] = "ACSkew" + i;
+                    ACSkew_ATTRIBUTES += "@ATTRIBUTE ACSkew" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id + " NUMERIC\n";
+                    arffAttriburesLabels[acSkewIndex++] = "ACSkew" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id;
                 }
 
                 if (ACKur)
                 {
-                    ACKur_ATTRIBUTES += "@ATTRIBUTE ACKur" + i + " NUMERIC\n";
-                    arffAttriburesLabels[acKurIndex++] = "ACKur" + i;
+                    ACKur_ATTRIBUTES += "@ATTRIBUTE ACKur" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id + " NUMERIC\n";
+                    arffAttriburesLabels[acKurIndex++] = "ACKur" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id;
                 }
 
                 if (ACQuartiles)
                 {
                     for (int j = 0; (j < 3); j++)
                     {
-                        ACQuartiles_ATTRIBUTES += "@ATTRIBUTE ACQuartiles" + i + "_Quartile" + j + " NUMERIC\n";
-                        arffAttriburesLabels[acQuartilesIndex++] = "ACQuartiles" + i + "_Quartile" + j;
+                        ACQuartiles_ATTRIBUTES += "@ATTRIBUTE ACQuartiles" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id + "_Quartile" + j + " NUMERIC\n";
+                        arffAttriburesLabels[acQuartilesIndex++] = "ACQuartiles" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id + "_Quartile" + j;
                     }
                 }
 
                 if (ACVar)
                 {
-                    ACVar_ATTRIBUTES += "@ATTRIBUTE ACVar" + i + " NUMERIC\n";
-                    arffAttriburesLabels[acVarIndex++] = "ACVar" + i;
+                    ACVar_ATTRIBUTES += "@ATTRIBUTE ACVar" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id + " NUMERIC\n";
+                    arffAttriburesLabels[acVarIndex++] = "ACVar" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id;
                 }
 
                 if (ACAbsCV)
                 {
-                    ACAbsCV_ATTRIBUTES += "@ATTRIBUTE ACAbsCV" + i + " NUMERIC\n";
-                    arffAttriburesLabels[acAbsCVIndex++] = "ACAbsCV" + i;
+                    ACAbsCV_ATTRIBUTES += "@ATTRIBUTE ACAbsCV" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id + " NUMERIC\n";
+                    arffAttriburesLabels[acAbsCVIndex++] = "ACAbsCV" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id;
                 }
 
                 if (ACIQR)
                 {
-                    ACIQR_ATTRIBUTES += "@ATTRIBUTE ACIQR" + i + " NUMERIC\n";
-                    arffAttriburesLabels[acIQRIndex++] = "ACIQR" + i;
+                    ACIQR_ATTRIBUTES += "@ATTRIBUTE ACIQR" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id + " NUMERIC\n";
+                    arffAttriburesLabels[acIQRIndex++] = "ACIQR" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id;
                 }
 
 
                 if (ACRange)
                 {
-                    ACRange_ATTRIBUTES += "@ATTRIBUTE ACRange" + i + " NUMERIC\n";
-                    arffAttriburesLabels[acRangeIndex++] = "ACRange" + i;
+                    ACRange_ATTRIBUTES += "@ATTRIBUTE ACRange" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id + " NUMERIC\n";
+                    arffAttriburesLabels[acRangeIndex++] = "ACRange" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id;
                 }
 
                 if (ACBandEnergy)
                 {
-                    ACBandEnergy_ATTRIBUTES += "@ATTRIBUTE ACBandEnergy" + i + " NUMERIC\n";
-                    arffAttriburesLabels[acBandEnergyIndex++] = "ACBandEnergy" + i;
+                    ACBandEnergy_ATTRIBUTES += "@ATTRIBUTE ACBandEnergy" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id + " NUMERIC\n";
+                    arffAttriburesLabels[acBandEnergyIndex++] = "ACBandEnergy" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id;
                 }
 
                 if (ACLowEnergy)
                 {
-                    ACLowEnergy_ATTRIBUTES += "@ATTRIBUTE ACLowEnergy" + i + " NUMERIC\n";
-                    arffAttriburesLabels[acLowEnergyIndex++] = "ACLowEnergy" + i;
+                    ACLowEnergy_ATTRIBUTES += "@ATTRIBUTE ACLowEnergy" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id + " NUMERIC\n";
+                    arffAttriburesLabels[acLowEnergyIndex++] = "ACLowEnergy" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id;
                 }
 
                 if (ACModVigEnergy)
                 {
-                    ACModVigEnergy_ATTRIBUTES += "@ATTRIBUTE ACModVigEnergy" + i + " NUMERIC\n";
-                    arffAttriburesLabels[acModVigEnergyIndex++] = "ACModVigEnergy" + i;
+                    ACModVigEnergy_ATTRIBUTES += "@ATTRIBUTE ACModVigEnergy" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id + " NUMERIC\n";
+                    arffAttriburesLabels[acModVigEnergyIndex++] = "ACModVigEnergy" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id;
                 }
 
                 if (ACPitch)
                 {
-                    ACPitch_ATTRIBUTES += "@ATTRIBUTE ACPitch" + i + " NUMERIC\n";
-                    arffAttriburesLabels[acPitchIndex++] = "ACPitch" + i;
+                    ACPitch_ATTRIBUTES += "@ATTRIBUTE ACPitch" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id + " NUMERIC\n";
+                    arffAttriburesLabels[acPitchIndex++] = "ACPitch" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id;
                 }
 
                 if (ACMCR)
                 {
-                    ACMCR_ATTRIBUTES += "@ATTRIBUTE ACMCR" + i + " NUMERIC\n";
-                    arffAttriburesLabels[acMCRIndex++] = "ACMCR" + i;
+                    ACMCR_ATTRIBUTES += "@ATTRIBUTE ACMCR" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id + " NUMERIC\n";
+                    arffAttriburesLabels[acMCRIndex++] = "ACMCR" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id;
                 }
 
                 if (ACCorr)
                 {
+                    
                     //***correlation coefficients
                     for (int k = i - 1; k >= 0; k--)
                     {
-                        ACCorr_ATTRIBUTES += "@ATTRIBUTE ACCorr" + i +"_"+k+ " NUMERIC\n";
-                        arffAttriburesLabels[acCorrIndex++] = "ACCorr" + i + "_" + k;              
+                        int other_sensor_id = (k / 3)+1;
+                        string other_sensor_axis = "X";
+                        string other_sensorLocation = ((SXML.Sensor)sannotation.Sensors[other_sensor_id]).Location;
+                        other_sensorLocation = other_sensorLocation.Replace(' ', '_');
+                        other_sensorLocation = other_sensorLocation.Replace('_', '-');
+                     
+                        if (k % 3 == 1)
+                            other_sensor_axis = "Y";
+                        else if (k % 3 == 2)
+                            other_sensor_axis = "Z";
+
+                        ACCorr_ATTRIBUTES += "@ATTRIBUTE ACCorr" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id + "_" + "Sensor" + other_sensor_id + "_Location" + other_sensorLocation  +"_Axis_" + other_sensor_axis + " NUMERIC\n";
+                        arffAttriburesLabels[acCorrIndex++] = "ACCorr" + "_Sensor" + sensor_id + "_Location" + sensorLocation + "_Axis_" + axis_id + "_" + "Sensor" + other_sensor_id + "_Location" + other_sensorLocation + "_Axis_" + other_sensor_axis;              
                     }
                 }
             }
 
             for (int i = 0; (i < extractorSensorCount); i++)
             {
+                string sensorLocation = ((SXML.Sensor)sannotation.Sensors[i + 1]).Location.Replace(' ', '_'); ;
+                sensorLocation = sensorLocation.Replace('_', '-');
                 if (DCAreaSensor)
                 {
-                    DCAreaSensor_ATTRIBUTES += "@ATTRIBUTE DCAreaSensor" + i + " NUMERIC\n";
-                    arffAttriburesLabels[dcAreaSensorIndex++] = "DCArea" + i;
+                    DCAreaSensor_ATTRIBUTES += "@ATTRIBUTE DCArea_Sensor" + i + "_Location" + sensorLocation + " NUMERIC\n";
+                    arffAttriburesLabels[dcAreaSensorIndex++] = "DCArea_Sensor" + i + "_Location" + sensorLocation;
                 }
 
                 if (DCPostureDist)
                 {
-                    DCPostureDist_ATTRIBUTES += "@ATTRIBUTE DCPostureDist" + i + "_MeanX_MeanY NUMERIC\n";
-                    arffAttriburesLabels[dcPostureDistIndex++] = "DCPostureDist" + i + "_MeanX_MeanY";
-                    DCPostureDist_ATTRIBUTES += "@ATTRIBUTE DCPostureDist" + i + "_MeanX_MeanZ NUMERIC\n";
-                    arffAttriburesLabels[dcPostureDistIndex++] = "DCPostureDist" + i + "_MeanX_MeanZ";
-                    DCPostureDist_ATTRIBUTES += "@ATTRIBUTE DCPostureDist" + i + "_MeanY_MeanZ NUMERIC\n";
-                    arffAttriburesLabels[dcPostureDistIndex++] = "DCPostureDist" + i + "_MeanY_MeanZ";
+                    DCPostureDist_ATTRIBUTES += "@ATTRIBUTE DCPostureDist_Sensor" + i + "_Location" + sensorLocation + "_MeanX_MeanY NUMERIC\n";
+                    arffAttriburesLabels[dcPostureDistIndex++] = "DCPostureDist_Sensor" + i + "_Location" + sensorLocation + "_MeanX_MeanY";
+                    DCPostureDist_ATTRIBUTES += "@ATTRIBUTE DCPostureDist_Sensor" + i + "_Location" + sensorLocation + "_MeanX_MeanZ NUMERIC\n";
+                    arffAttriburesLabels[dcPostureDistIndex++] = "DCPostureDist_Sensor" + i + "_Location" + sensorLocation + "_MeanX_MeanZ";
+                    DCPostureDist_ATTRIBUTES += "@ATTRIBUTE DCPostureDist_Sensor" + i + "_Location" + sensorLocation + "_MeanY_MeanZ NUMERIC\n";
+                    arffAttriburesLabels[dcPostureDistIndex++] = "DCPostureDist_Sensor" + i + "_Location" + sensorLocation + "_MeanY_MeanZ";
                 }
 
                 if (ACAbsAreaSensor)
                 {
-                    ACAbsAreaSensor_ATTRIBUTES += "@ATTRIBUTE ACAbsAreaSensor" + i + " NUMERIC\n";
-                    arffAttriburesLabels[acAbsAreaSensorIndex++] = "ACAbsAreaSensor" + i;
+                    ACAbsAreaSensor_ATTRIBUTES += "@ATTRIBUTE ACAbsArea_Sensor" + i + "_Location" + sensorLocation + " NUMERIC\n";
+                    arffAttriburesLabels[acAbsAreaSensorIndex++] = "ACAbsArea_Sensor" + i + "_Location" + sensorLocation;
                 }
 
 
                 if (ACSVM)
                 {
-                    ACSVM_ATTRIBUTES += "@ATTRIBUTE ACSVM" + i + " NUMERIC\n";
-                    arffAttriburesLabels[acSVMIndex++] = "ACSVM" + i;
+                    ACSVM_ATTRIBUTES += "@ATTRIBUTE ACSVM_Sensor" + i + "_Location" + sensorLocation + " NUMERIC\n";
+                    arffAttriburesLabels[acSVMIndex++] = "ACSVM_Sensor" + i + "_Location" + sensorLocation;
                 }
 
                 if (ACSF)
                 {
-                    ACSF_ATTRIBUTES += "@ATTRIBUTE ACSF" + i + " NUMERIC\n";
-                    arffAttriburesLabels[acSFIndex++] = "ACSF" + i;
+                    ACSF_ATTRIBUTES += "@ATTRIBUTE ACSF_Sensor" + i + "_Location" + sensorLocation + " NUMERIC\n";
+                    arffAttriburesLabels[acSFIndex++] = "ACSF_Sensor" + i + "_Location" + sensorLocation;
                 }
             }
 
             if (DCMeanTotal)
             {
-                DCMeanTotal_ATTRIBUTES = "@ATTRIBUTE DCMeanTotal NUMERIC\n";
-                arffAttriburesLabels[dcMeanTotalIndex] = "DCMeanTotal";
+                DCMeanTotal_ATTRIBUTES = "@ATTRIBUTE DCMeanTotalAllSensors_LocationAll NUMERIC\n";
+                arffAttriburesLabels[dcMeanTotalIndex] = "DCMeanTotalAllSensors_LocationAll";
             }
 
             if (ACTotalAbsArea)
             {
-                ACTotalAbsArea_ATTRIBUTES = "@ATTRIBUTE ACTotalAbsArea NUMERIC\n";
-                arffAttriburesLabels[acTotalAbsAreaIndex] = "ACTotalAbsArea";
+                ACTotalAbsArea_ATTRIBUTES = "@ATTRIBUTE ACTotalAbsAreaAllSensors_LocationAll NUMERIC\n";
+                arffAttriburesLabels[acTotalAbsAreaIndex] = "ACTotalAbsAreaAllSensors_LocationAll";
             }
 
             if (ACTotalSVM)
             {
-                ACTotalSVM_ATTRIBUTES = "@ATTRIBUTE ACTotalSVM NUMERIC\n";
-                arffAttriburesLabels[acTotalSVMIndex] = "ACTotalSVM";
+                ACTotalSVM_ATTRIBUTES = "@ATTRIBUTE ACTotalSVMAllSensors_LocationAll NUMERIC\n";
+                arffAttriburesLabels[acTotalSVMIndex] = "ACTotalSVMAllSensors_LocationAll";
             }
 
             if (ACTotalSF)
             {
-                ACTotalSF_ATTRIBUTES = "@ATTRIBUTE ACTotalSF NUMERIC\n";
-                arffAttriburesLabels[acTotalSFIndex] = "ACTotalSF";
+                ACTotalSF_ATTRIBUTES = "@ATTRIBUTE ACTotalSFAllSensors_LocationAll NUMERIC\n";
+                arffAttriburesLabels[acTotalSFIndex] = "ACTotalSFAllSensors_LocationAll";
             }
 
             string allAttributes = "";
