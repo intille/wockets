@@ -559,6 +559,15 @@ namespace DataMerger
             double rtiX = 0;
             double rtiY = 0;
             double rtiZ = 0;
+            double[] rtiPrevX = new double[5];
+            double[] rtiPrevY = new double[5];
+            double[] rtiPrevZ = new double[5];
+            int[] rtiPrevCounts = new int[5];
+            double rtiRMX = 0;
+            double rtiRMY = 0;
+            double rtiRMZ = 0;
+            int rtiTotalCount = 0;
+
             double rtiUnixTime = 0;
             DateTime rtiTime = new DateTime();
             Hashtable rtiData = new Hashtable();
@@ -641,7 +650,12 @@ namespace DataMerger
                     double xRTI = 0;
                     double yRTI = 0;
                     double zRTI = 0;
+                    double xAUCRTI = 0;
+                    double yAUCRTI = 0;
+                    double zAUCRTI = 0;
                     int rtiCount = 0;
+                    int rtiPrevIndex = 0;
+                    int runningMeanSize = 0;
 
                     while ((rti_line = rtiReader.ReadLine()) != null)
                     {
@@ -650,11 +664,22 @@ namespace DataMerger
                         {
 
                             string[] dateTokens = tokens[0].Split(new char[] { ' ', '\t' });
-                            //bool isPM = (dateTokens[2] == "PM");                           
-                            string[] timeTokens = dateTokens[1].Split('.');
+                            //bool isPM = (dateTokens[2] == "PM");
+                            string[] timeTokens=null;
+                            if (dateTokens[1].Contains("/"))
+                                timeTokens = dateTokens[0].Split('.');
+                            else
+                                timeTokens = dateTokens[1].Split('.');
+
                             int mseconds = Convert.ToInt32(timeTokens[1]);
                             timeTokens = timeTokens[0].Split(':');
-                            dateTokens = dateTokens[0].Split('/');
+
+                            if (dateTokens[1].Contains("/"))
+                                dateTokens = dateTokens[1].Split('/');
+                            else
+                                dateTokens = dateTokens[0].Split('/');
+                            if (dateTokens[2].Length == 2)
+                                dateTokens[2] = "20" + dateTokens[2];
                             rtiTime = new DateTime(Convert.ToInt32(dateTokens[2]), Convert.ToInt32(dateTokens[0]), Convert.ToInt32(dateTokens[1]), Convert.ToInt32(timeTokens[0]), Convert.ToInt32(timeTokens[1]), Convert.ToInt32(timeTokens[2]),mseconds);
                             //if (isPM)
                             //    rtiTime.AddHours(12.0);
@@ -668,22 +693,56 @@ namespace DataMerger
                             if (prevRTIKey == "")
                                 prevRTIKey = rtiKey;
 
+
                             //save previous data
                             if (prevRTIKey != rtiKey)
                             {
-                                rtiLine += ((double)(xRTI/(double)rtiCount)).ToString("0.00");
-                                rtiLine += ",";
-                                rtiLine += ((double)(yRTI / (double)rtiCount)).ToString("0.00");
-                                rtiLine += ",";
-                                rtiLine += ((double)(zRTI / (double)rtiCount)).ToString("0.00");
-                                rtiLine += ",";
-                                rtiLine += xRTI.ToString("0.00");
-                                rtiLine += ",";
-                                rtiLine += yRTI.ToString("0.00");
-                                rtiLine += ",";
-                                rtiLine += zRTI.ToString("0.00");
-                                rtiLine += ",";
-                                rtiLine += ((double)(Math.Abs(xRTI)+Math.Abs(yRTI)+Math.Abs(zRTI))).ToString("0.00");
+
+                                if (runningMeanSize >= 5)
+                                {
+                                    rtiLine += ((double)(xRTI / (double)rtiCount)).ToString("0.00");
+                                    rtiLine += ",";
+                                    rtiLine += ((double)(yRTI / (double)rtiCount)).ToString("0.00");
+                                    rtiLine += ",";
+                                    rtiLine += ((double)(zRTI / (double)rtiCount)).ToString("0.00");
+                                    rtiLine += ",";
+                                    rtiLine += (xAUCRTI).ToString("0.00");
+                                    rtiLine += ",";
+                                    rtiLine += (yAUCRTI).ToString("0.00");
+                                    rtiLine += ",";
+                                    rtiLine += (zAUCRTI).ToString("0.00");
+                                    rtiLine += ",";
+                                    rtiLine += ((double)(Math.Abs(xAUCRTI) + Math.Abs(yAUCRTI) + Math.Abs(zAUCRTI))).ToString("0.00");
+
+                                }
+                                else
+                                    rtiLine += ",,,,,,";
+
+                                rtiRMX = 0;
+                                rtiRMY = 0;
+                                rtiRMZ =0; 
+                                for (int m = 0; (m < 5); m++)
+                                {
+                                    rtiRMX += rtiPrevX[m];
+                                    rtiRMY += rtiPrevY[m];
+                                    rtiRMZ += rtiPrevZ[m];
+                                    rtiTotalCount += rtiPrevCounts[m];
+                                }
+
+                                rtiRMX = rtiRMX / rtiTotalCount;
+                                rtiRMY = rtiRMY / rtiTotalCount;
+                                rtiRMZ = rtiRMZ / rtiTotalCount;
+
+                                rtiPrevCounts[rtiPrevIndex] = rtiCount;
+                                rtiPrevX[rtiPrevIndex] = xRTI;
+                                rtiPrevY[rtiPrevIndex] = yRTI;
+                                rtiPrevZ[rtiPrevIndex++] = zRTI;                                
+                                rtiPrevIndex = (rtiPrevIndex % 5);
+
+
+                                if (runningMeanSize<5)
+                                    runningMeanSize++;
+
 
                                 if (rtiData.Contains(prevRTIKey) == false)
                                     rtiData.Add(prevRTIKey, rtiLine);
@@ -692,12 +751,19 @@ namespace DataMerger
                                 yRTI = 0;
                                 zRTI = 0;
                                 rtiCount = 0;
+                                xAUCRTI = 0;
+                                yAUCRTI = 0;
+                                zAUCRTI = 0;
+                                rtiTotalCount = 0;
                             }
 
 
-                            xRTI += Convert.ToDouble(tokens[1]);
-                            yRTI += Convert.ToDouble(tokens[2]);
-                            zRTI += Convert.ToDouble(tokens[3]);
+                            xRTI += (Convert.ToDouble(tokens[1])+1.5)*1000.0;
+                            yRTI += (Convert.ToDouble(tokens[2]) + 1.5) * 1000.0;
+                            zRTI += (Convert.ToDouble(tokens[3]) + 1.5) * 1000.0;
+                            xAUCRTI += Math.Abs(((Convert.ToDouble(tokens[1]) + 1.5) * 1000.0) - rtiRMX);
+                            yAUCRTI += Math.Abs(((Convert.ToDouble(tokens[2]) + 1.5) * 1000.0) - rtiRMY);
+                            zAUCRTI += Math.Abs(((Convert.ToDouble(tokens[3]) + 1.5) * 1000.0) - rtiRMZ);
                             rtiCount++;
                             prevRTIKey = rtiKey;
                         }
@@ -2806,7 +2872,21 @@ namespace DataMerger
                                         double t1 = timeData[channel, prevHead];
                                         if ((t2 > 0) & (t1 > 0))
                                         {
+                                            /*
+                                             *                          double fa=Math.Abs((rawData[channel, 0, headPtr] - runningMeanX));
+                                            double fb=Math.Abs((rawData[channel, 0, prevHead] - runningMeanX));
 
+
+
+                                            AUC[channel, 0] = AUC[channel, 0] + (int)( ((t2 - t1) *  ((fa-fb)/ 2))*1000);
+                                            fa = Math.Abs((rawData[channel, 1, headPtr] - runningMeanY));
+                                            fb = Math.Abs((rawData[channel, 1, prevHead] - runningMeanY));
+
+                                            AUC[channel, 1] = AUC[channel, 1] + (int)( ((t2 - t1) * ((fa - fb) / 2))*1000);
+                                            fa = Math.Abs((rawData[channel, 2, headPtr] - runningMeanZ));
+                                            fb = Math.Abs((rawData[channel, 2, prevHead] - runningMeanZ));
+                                            AUC[channel, 2] = AUC[channel, 2] + (int)(((t2 - t1) * ((fa - fb) / 2))*1000);
+                                             */
                                             AUC[channel, 0] = AUC[channel, 0] + (int)Math.Abs((rawData[channel, 0, headPtr] - runningMeanX));
                                             AUC[channel, 1] = AUC[channel, 1] + (int)Math.Abs((rawData[channel, 1, headPtr] - runningMeanY));
                                             AUC[channel, 2] = AUC[channel, 2] + (int)Math.Abs((rawData[channel, 2, headPtr] - runningMeanZ));

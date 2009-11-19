@@ -195,7 +195,7 @@ namespace weka.attributeSelection
 		/// <summary>hold statistics for repeated feature selection, such as
 		/// under cross validation 
 		/// </summary>
-		private double[][] m_rankResults = null;
+		public double[][] m_rankResults = null;
 		private double[] m_subsetResults = null;
 		private int m_trials = 0;
 		
@@ -365,7 +365,9 @@ namespace weka.attributeSelection
 			train = new Instances(new System.IO.StreamReader(trainFileName, System.Text.Encoding.Default));
 			return SelectAttributes(ASEvaluator, options, train);
 		}
-		
+
+
+        public int[] CVRanks=null;
 		/// <summary> returns a string summarizing the results of repeated attribute
 		/// selection runs on splits of a dataset.
 		/// </summary>
@@ -436,6 +438,8 @@ namespace weka.attributeSelection
 				
 				// now sort them by mean rank
 				int[] s = Utils.sort(m_rankResults[1]);
+                CVRanks=new int[s.Length];
+                s.CopyTo(CVRanks, 0);
 				for (int i = 0; i < s.Length; i++)
 				{
 					if (m_rankResults[1][s[i]] > 0)
