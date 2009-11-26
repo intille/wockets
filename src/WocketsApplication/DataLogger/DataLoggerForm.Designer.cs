@@ -29,6 +29,8 @@ namespace WocketsApplication.DataLogger
         private System.Windows.Forms.MenuItem menuItemPlottingPanel1;
         private System.Windows.Forms.MenuItem menuItemOnPlottingPanel1;
         private System.Windows.Forms.MenuItem menuItemOffPlottingPane1l;
+        private System.Windows.Forms.MenuItem menuItemTrainPanel1;
+        private System.Windows.Forms.MenuItem menuItemClassifyPanel1;
 
 
 #if (PocketPC)
@@ -65,6 +67,8 @@ namespace WocketsApplication.DataLogger
 
         private const string VISUALIZE_PANEL = "Visualize";
         private const string ANNOTATE_PANEL = "Annotate";
+        public const string CLASSIFY_OPTION = "Classify";
+        public const string TRAINING_OPTION = "Training";
         private const string ANNOTATE_LIST_PANEL = "List";
         private const string LOG_PANEL = "Log";
         private const string CLASSIFIER_LABEL_PANEL = "ClassifierLabel";
@@ -84,12 +88,21 @@ namespace WocketsApplication.DataLogger
 
             this.mainMenuPanel1 = new MainMenu();
             this.menuItemQuitPanel1 = new MenuItem();
+            this.menuItemTrainPanel1 = new MenuItem();
+            this.menuItemClassifyPanel1 = new MenuItem();
             this.menuItemPlottingPanel1 = new MenuItem();
             this.menuItemOffPlottingPane1l = new MenuItem();
             this.menuItemOnPlottingPanel1 = new MenuItem();
 
             this.mainMenuPanel1.MenuItems.Add(this.menuItemQuitPanel1);
             this.menuItemQuitPanel1.Click += new EventHandler(menuItemQuitPanel1_Click);
+
+            this.mainMenuPanel1.MenuItems.Add(this.menuItemTrainPanel1);
+            this.menuItemTrainPanel1.Click += new EventHandler(menuItemTrainPanel1_Click);
+
+            this.mainMenuPanel1.MenuItems.Add(this.menuItemClassifyPanel1);
+            this.menuItemClassifyPanel1.Click += new EventHandler(menuItemClassifyPanel1_Click);
+
             this.mainMenuPanel1.MenuItems.Add(this.menuItemPlottingPanel1);
             this.menuItemPlottingPanel1.MenuItems.Add(this.menuItemOffPlottingPane1l);
             this.menuItemOffPlottingPane1l.Click += new EventHandler(menuItemOffPlottingPane1l_Click);
@@ -978,6 +991,35 @@ namespace WocketsApplication.DataLogger
 
             #endregion Calculation of Widgets locations and sizes
 
+
+        }
+
+        void menuItemClassifyPanel1_Click(object sender, EventArgs e)
+        {
+            if (this.wocketsController._Classifying)
+            {
+                this.wocketsController._Classifying = false;
+                this.menuItemClassifyPanel1.Checked = false;
+            }
+            else
+            {
+                this.wocketsController._Classifying = true;
+                this.menuItemClassifyPanel1.Checked = true;
+            }
+        }
+
+        void menuItemTrainPanel1_Click(object sender, EventArgs e)
+        {
+            if (this.wocketsController._Training)
+            {
+                this.wocketsController._Training = false;
+                this.menuItemTrainPanel1.Checked = false;
+            }
+            else
+            {
+                this.wocketsController._Training = true;
+                this.menuItemTrainPanel1.Checked = true;
+            }
 
         }
 

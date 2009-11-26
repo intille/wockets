@@ -729,6 +729,7 @@ namespace MITesAnalysisApplication
                 //Extractor.Extract(interpolated_data);
                 //Extractor.Extract(interpolated_data);
                 Extractor.ExtractOptional(interpolated_data);
+               // Extractor.ExtractOverhead(interpolated_data);
 
 
                 //Output the data to the ARFF file
@@ -799,6 +800,7 @@ namespace MITesAnalysisApplication
 
             TextWriter tw = new StreamWriter(aDataDirectory + "\\output-" + sourceFile + ".arff");
             tw.WriteLine("@RELATION wockets");
+            tw.WriteLine("@ATTRIBUTE TIME NUMERIC");
             tw.WriteLine(Extractor.GetArffHeader());
 
 
@@ -1007,7 +1009,7 @@ namespace MITesAnalysisApplication
                     string arffSample = Extractor.toString() + activity_suffix;
                     //if (activity_suffix.Contains("unknown") == false)
                     //{
-                    tw.WriteLine(arffSample + "," + realtime_activity);
+                    tw.WriteLine(lastTimeStamp+","+arffSample + "," + realtime_activity);
                     featureVectorIndex++;
                     //}
 
@@ -1020,8 +1022,564 @@ namespace MITesAnalysisApplication
             tw.Close();
         }
 
+        public static string MITES_SUBDIRECTORY = "mites";
+        public static string WOCKETS_SUBDIRECTORY = "wockets";
+        public static string OTHER_SUBDIRECTORY = "..\\othersensors";
+        public static string MERGED_SUBDIRECTORY = "merged";
+
         public static void toARFF(string aDataDirectory, string masterDirectory, int maxControllers, string[] filter)
         {
+            string[] file =null;
+            string[] tokens = null;
+            TextWriter oxyconCSV = null;
+            TextReader oxyconReader = null;
+            double oxyconUnixTime = 0;
+            DateTime oxyconTime = new DateTime();
+            Hashtable oxyconData = new Hashtable();
+            bool oxyconFound = false;
+
+            ArrayList OxyconX = new ArrayList();
+            ArrayList OxyconY = new ArrayList();
+            double firstOxyconTimer=0;
+            CubicSpline oxyconCS = null;
+            double[] OxyconXVals=null;                        
+            double[] OxyconYVals=null;
+            double prevEE = -1;
+            double currentEE = 0;
+            double prevEETime = 0;
+            double cumCals = 0;
+            double smallestOxyconValue = 0;
+           
+            //Get Oxycon Ground Truth
+            if (File.Exists(aDataDirectory + "\\" + OTHER_SUBDIRECTORY + "\\OxyconSyncronizationTime.txt"))
+            {
+
+                file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*-oxycon-flashcard.dat");
+                if (file.Length == 1)
+                {
+
+                    TextReader oxyconOriginTR = new StreamReader(aDataDirectory + "\\" + OTHER_SUBDIRECTORY + "\\OxyconSyncronizationTime.txt");
+                    string originOxycon = oxyconOriginTR.ReadLine();
+                    DateTime oxyconOriginTime = new DateTime();
+                    try
+                    {
+                        tokens = originOxycon.Split(',');
+                        tokens = tokens[0].Split('.');
+                        oxyconOriginTR.Close();
+                        UnixTime.GetDateTime(Convert.ToInt64(tokens[0]), out oxyconOriginTime);
+                    }
+                    catch (Exception e)
+                    {
+                        throw new Exception("Oxycon Synchronization: Parsing failed " + e.Message);
+                    }
+
+                    //Synchronize Both files to find a matching point and pick the time stamps
+                    int oxyconAdjustment = 0;
+                    file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*-oxycon.dat");
+                    string oxycon_line = "";
+                    Hashtable oxyconData1 = new Hashtable();
+                    int checkCount = 0;
+                    try
+                    {
+                        if (file.Length == 1)
+                        {
+                            oxyconReader = new StreamReader(file[0]);
+                            for (int j = 0; (j < 8); j++)
+                                oxycon_line = oxyconReader.ReadLine();//skip first 8 lines
+
+                            while ((oxycon_line = oxyconReader.ReadLine()) != null)
+                            {
+                                oxycon_line = oxycon_line.Trim();
+                                RegexOptions options = RegexOptions.None;
+                                Regex regex = new Regex(@"[ ]{2,}", options);
+
+                                oxycon_line = regex.Replace(oxycon_line, @" ");
+                                regex = new Regex(@"[\t]", options);
+                                oxycon_line = regex.Replace(oxycon_line, @" ");
+
+                                tokens = oxycon_line.Split(' ');
+                                string[] timeTokens = tokens[0].Split(':');
+                                int oxyconSeconds = 0;
+
+                                if (timeTokens.Length >= 2)
+                                {
+                                    string oxyconKey = "";
+
+                                    if (timeTokens.Length == 2) //always mins:seconds
+                                        oxyconSeconds = Convert.ToInt32(timeTokens[0]) * 60 + Convert.ToInt32(timeTokens[1]);
+                                    else //3 tokens can either include minutes or hours can be mins:secs:00 or hrs:mins:secs
+                                        oxyconSeconds = Convert.ToInt32(timeTokens[0]) * 60 * 60 + Convert.ToInt32(timeTokens[1]) * 60 + Convert.ToInt32(timeTokens[2]);
+
+
+
+                                    if ((tokens[2].Length > 0) && (tokens[2] != "-"))
+                                        oxyconKey += Convert.ToInt32(tokens[2]);
+                                    oxyconKey += ",";
+                                    if ((tokens[3].Length > 0) && (tokens[3] != "-"))
+                                        oxyconKey += Convert.ToInt32(tokens[3]);
+                                    oxyconKey += ",";
+
+                                    if ((tokens[4].Length > 0) && (tokens[4] != "-"))
+                                        oxyconKey += Convert.ToInt32(tokens[4]);
+                                    oxyconKey += ",";
+                                    if ((tokens[5].Length > 0) && (tokens[5] != "-"))
+                                        oxyconKey += Convert.ToDouble(tokens[5]);
+                                    oxyconKey += ",";
+
+                                    if ((tokens[6].Length > 0) && (tokens[6] != "-"))
+                                        oxyconKey += Convert.ToDouble(tokens[6]);
+                                    oxyconKey += ",";
+                                    if ((tokens[7].Length > 0) && (tokens[7] != "-"))
+                                        oxyconKey += Convert.ToDouble(tokens[7]);
+                                    oxyconKey += ",";
+                                    if ((tokens[8].Length > 0) && (tokens[8] != "-"))
+                                        oxyconKey += Convert.ToDouble(tokens[8]);
+                                    oxyconKey += ",";
+                                    if (oxyconData1.ContainsKey(oxyconKey) == false)
+                                        oxyconData1.Add(oxyconKey, oxyconSeconds);
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        throw new Exception("Oxycon PC File: Parsing failed " + e.Message);
+                    }
+
+
+                    //find first 3 matching lines with the same differnece in time
+                    file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*-oxycon-flashcard.dat");
+                    try
+                    {
+                        if (file.Length == 1)
+                        {
+                            oxyconReader = new StreamReader(file[0]);
+                            for (int j = 0; (j < 8); j++)
+                                oxycon_line = oxyconReader.ReadLine();//skip first 8 lines
+
+                            while ((oxycon_line = oxyconReader.ReadLine()) != null)
+                            {
+                                oxycon_line = oxycon_line.Trim();
+                                RegexOptions options = RegexOptions.None;
+                                Regex regex = new Regex(@"[ ]{2,}", options);
+                                oxycon_line = regex.Replace(oxycon_line, @" ");
+
+                                tokens = oxycon_line.Split(' ');
+                                string[] timeTokens = tokens[0].Split(':');
+                                int oxyconSeconds = 0;
+
+                                if (timeTokens.Length >= 2)
+                                {
+                                    string oxyconKey = "";
+
+                                    if (timeTokens.Length == 2) //always mins:seconds
+                                        oxyconSeconds = Convert.ToInt32(timeTokens[0]) * 60 + Convert.ToInt32(timeTokens[1]);
+                                    else //3 tokens can either include minutes or hours can be mins:secs:00 or hrs:mins:secs
+                                        oxyconSeconds = Convert.ToInt32(timeTokens[0]) * 60 * 60 + Convert.ToInt32(timeTokens[1]) * 60 + Convert.ToInt32(timeTokens[2]);
+
+
+
+                                    if ((tokens[2].Length > 0) && (tokens[2] != "-"))
+                                        oxyconKey += Convert.ToInt32(tokens[2]);
+                                    oxyconKey += ",";
+                                    if ((tokens[3].Length > 0) && (tokens[3] != "-"))
+                                        oxyconKey += Convert.ToInt32(tokens[3]);
+                                    oxyconKey += ",";
+
+                                    if ((tokens[4].Length > 0) && (tokens[4] != "-"))
+                                        oxyconKey += Convert.ToInt32(tokens[4]);
+                                    oxyconKey += ",";
+                                    if ((tokens[5].Length > 0) && (tokens[5] != "-"))
+                                        oxyconKey += Convert.ToDouble(tokens[5]);
+                                    oxyconKey += ",";
+
+                                    if ((tokens[6].Length > 0) && (tokens[6] != "-"))
+                                        oxyconKey += Convert.ToDouble(tokens[6]);
+                                    oxyconKey += ",";
+                                    if ((tokens[7].Length > 0) && (tokens[7] != "-"))
+                                        oxyconKey += Convert.ToDouble(tokens[7]);
+                                    oxyconKey += ",";
+                                    if ((tokens[8].Length > 0) && (tokens[8] != "-"))
+                                        oxyconKey += Convert.ToDouble(tokens[8]);
+                                    oxyconKey += ",";
+                                    if (oxyconData1.ContainsKey(oxyconKey))
+                                    {
+                                        int flashTime = oxyconSeconds;
+                                        int pcTime = (int)oxyconData1[oxyconKey];
+                                        if (pcTime <= flashTime)
+                                        {
+                                            int difference = flashTime - pcTime;
+                                            if (difference == oxyconAdjustment)
+                                                checkCount++;
+                                            else
+                                                checkCount = 0;
+
+                                            oxyconAdjustment = difference;
+
+                                            //break when the same oxycon adjustment is seen 3 times
+                                            if (checkCount == 3)
+                                                break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        throw new Exception("Oxycon Flash: Parsing failed 1 " + e.Message);
+                    }
+
+                    oxyconData1.Clear();
+
+
+                    //Load Oxycon data
+                    file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*oxycon-flashcard.dat");
+                    try
+                    {
+                        if (file.Length == 1)
+                        {
+                            //if (CSVProgress == "")
+                              //  CSVProgress = "Processing Oxycon Data";
+                            oxyconReader = new StreamReader(file[0]);
+                            for (int j = 0; (j < 8); j++)
+                                oxycon_line = oxyconReader.ReadLine();//skip first 8 lines
+
+                            while ((oxycon_line = oxyconReader.ReadLine()) != null)
+                            {
+                                oxycon_line = oxycon_line.Trim();
+                                RegexOptions options = RegexOptions.None;
+                                Regex regex = new Regex(@"[ ]{2,}", options);
+                                oxycon_line = regex.Replace(oxycon_line, @" ");
+
+                                tokens = oxycon_line.Split(' ');
+                                string[] timeTokens = tokens[0].Split(':');
+
+                                if (timeTokens.Length >= 2)
+                                {
+
+                                    if (timeTokens.Length == 2) //always mins:seconds
+                                    {
+                                        oxyconTime = oxyconOriginTime.AddMinutes(Convert.ToDouble(timeTokens[0]));
+                                        oxyconTime = oxyconTime.AddSeconds(Convert.ToDouble(timeTokens[1]));
+                                    }
+                                    else //3 tokens can either include minutes or hours can be mins:secs:00 or hrs:mins:secs
+                                    {
+
+                                        //OXYCON BUG: The oxycon output files are very buggy
+                                        // sometimes they report min:sec:00 and sometimes hr:min:sec
+
+                                        if (Convert.ToDouble(timeTokens[0]) >= 24) //this is min:sec:00
+                                        {
+                                            oxyconTime = oxyconOriginTime.AddMinutes(Convert.ToDouble(timeTokens[0]));
+                                            oxyconTime = oxyconTime.AddSeconds(Convert.ToDouble(timeTokens[1]));
+                                        }
+                                        else  //this is hr:min:sec
+                                        {
+                                            oxyconTime = oxyconOriginTime.AddHours(Convert.ToDouble(timeTokens[0]));
+                                            oxyconTime = oxyconTime.AddMinutes(Convert.ToDouble(timeTokens[1]));
+                                            oxyconTime = oxyconTime.AddSeconds(Convert.ToDouble(timeTokens[2]));
+                                        }
+
+                                    }
+
+
+                                    oxyconTime = oxyconTime.AddSeconds(-1.0 * oxyconAdjustment);
+
+                                    oxyconUnixTime = UnixTime.GetUnixTime(oxyconTime);
+
+
+
+                                    if ((tokens[7].Length > 0) && (tokens[7] != "-"))
+                                    {
+                                        OxyconX.Add(oxyconUnixTime);
+                                        OxyconY.Add(Convert.ToDouble(tokens[7]));
+                                    }
+
+                                    string oxyconKey = oxyconTime.Year + "-" + oxyconTime.Month + "-" + oxyconTime.Day + "-" + oxyconTime.Hour + "-" + oxyconTime.Minute + "-" + oxyconTime.Second;
+                                    string oxyconLine = "";
+                                    //if (oxyconTime.Day >= 10)
+                                    //  Console.Write("");
+                                    if ((tokens[1].Length > 0) && (tokens[1] != "-"))
+                                        oxyconLine += Convert.ToInt32(tokens[1]);
+                                    oxyconLine += ",";
+
+                                    if ((tokens[2].Length > 0) && (tokens[2] != "-"))
+                                        oxyconLine += Convert.ToInt32(tokens[2]);
+                                    oxyconLine += ",";
+
+                                    if ((tokens[3].Length > 0) && (tokens[3] != "-"))
+                                        oxyconLine += Convert.ToInt32(tokens[3]);
+                                    oxyconLine += ",";
+                                    if ((tokens[4].Length > 0) && (tokens[4] != "-"))
+                                        oxyconLine += Convert.ToInt32(tokens[4]);
+                                    oxyconLine += ",";
+
+                                    if ((tokens[5].Length > 0) && (tokens[5] != "-"))
+                                        oxyconLine += Convert.ToDouble(tokens[5]);
+                                    oxyconLine += ",";
+                                    if ((tokens[6].Length > 0) && (tokens[6] != "-"))
+                                        oxyconLine += Convert.ToDouble(tokens[6]);
+                                    oxyconLine += ",";
+                                    if ((tokens[7].Length > 0) && (tokens[7] != "-"))
+                                        oxyconLine += Convert.ToDouble(tokens[7]);
+                                    oxyconLine += ",";
+                                    if ((tokens[8].Length > 0) && (tokens[8] != "-"))
+                                        oxyconLine += Convert.ToDouble(tokens[8]);
+                                    oxyconLine += ",";
+                                    if (oxyconData.ContainsKey(oxyconKey) == false)
+                                        oxyconData.Add(oxyconKey, oxyconLine);
+                                }
+                            }
+
+                            oxyconFound = true;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        throw new Exception("Oxycon Flash: Parsing failed 2 " + e.Message);
+                    }
+
+                }
+                else if (file.Length == 2) //sometimes 2 oxycon sessions were recorded
+                {
+
+                    TextReader oxyconOriginTR = new StreamReader(aDataDirectory + "\\" + OTHER_SUBDIRECTORY + "\\OxyconSyncronizationTime.txt");
+                    string originOxycon = oxyconOriginTR.ReadLine();
+                    DateTime oxyconOriginTime = new DateTime();
+                    try
+                    {
+                        tokens = originOxycon.Split(',');
+                        tokens = tokens[0].Split('.');
+                        UnixTime.GetDateTime(Convert.ToInt64(tokens[0]), out oxyconOriginTime);
+                    }
+                    catch (Exception e)
+                    {
+                        throw new Exception("Oxycon Synchronization: Parsing failed " + e.Message);
+                    }
+
+
+                    string oxycon_line = "";
+                    //Load Oxycon data
+                    file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*-flashcard.1.dat");
+                    try
+                    {
+                        if (file.Length == 1)
+                        {
+                            //if (CSVProgress == "")
+                              //  CSVProgress = "Processing Flashcard1";
+                            oxyconReader = new StreamReader(file[0]);
+                            for (int j = 0; (j < 8); j++)
+                                oxycon_line = oxyconReader.ReadLine();//skip first 8 lines
+
+                            while ((oxycon_line = oxyconReader.ReadLine()) != null)
+                            {
+                                oxycon_line = oxycon_line.Trim();
+                                RegexOptions options = RegexOptions.None;
+                                Regex regex = new Regex(@"[ ]{2,}", options);
+                                oxycon_line = regex.Replace(oxycon_line, @" ");
+
+                                tokens = oxycon_line.Split(' ');
+                                string[] timeTokens = tokens[0].Split(':');
+
+                                if (timeTokens.Length >= 2)
+                                {
+
+                                    if (timeTokens.Length == 2) //always mins:seconds
+                                    {
+                                        oxyconTime = oxyconOriginTime.AddMinutes(Convert.ToDouble(timeTokens[0]));
+                                        oxyconTime = oxyconTime.AddSeconds(Convert.ToDouble(timeTokens[1]));
+                                    }
+                                    else //3 tokens can either include minutes or hours can be mins:secs:00 or hrs:mins:secs
+                                    {
+
+
+                                        if (Convert.ToDouble(timeTokens[0]) >= 24) //this is min:sec:00
+                                        {
+                                            oxyconTime = oxyconOriginTime.AddMinutes(Convert.ToDouble(timeTokens[0]));
+                                            oxyconTime = oxyconTime.AddSeconds(Convert.ToDouble(timeTokens[1]));
+                                        }
+                                        else  //this is hr:min:sec
+                                        {
+                                            oxyconTime = oxyconOriginTime.AddHours(Convert.ToDouble(timeTokens[0]));
+                                            oxyconTime = oxyconTime.AddMinutes(Convert.ToDouble(timeTokens[1]));
+                                            oxyconTime = oxyconTime.AddSeconds(Convert.ToDouble(timeTokens[2]));
+                                        }
+
+
+                                    }
+
+
+
+
+                                    oxyconUnixTime = UnixTime.GetUnixTime(oxyconTime);
+                                    string oxyconKey = oxyconTime.Year + "-" + oxyconTime.Month + "-" + oxyconTime.Day + "-" + oxyconTime.Hour + "-" + oxyconTime.Minute + "-" + oxyconTime.Second;
+                                    string oxyconLine = "";
+
+                                    if ((tokens[1].Length > 0) && (tokens[1] != "-"))
+                                        oxyconLine += Convert.ToInt32(tokens[1]);
+                                    oxyconLine += ",";
+
+                                    if ((tokens[2].Length > 0) && (tokens[2] != "-"))
+                                        oxyconLine += Convert.ToInt32(tokens[2]);
+                                    oxyconLine += ",";
+
+                                    if ((tokens[3].Length > 0) && (tokens[3] != "-"))
+                                        oxyconLine += Convert.ToInt32(tokens[3]);
+                                    oxyconLine += ",";
+                                    if ((tokens[4].Length > 0) && (tokens[4] != "-"))
+                                        oxyconLine += Convert.ToInt32(tokens[4]);
+                                    oxyconLine += ",";
+
+                                    if ((tokens[5].Length > 0) && (tokens[5] != "-"))
+                                        oxyconLine += Convert.ToDouble(tokens[5]);
+                                    oxyconLine += ",";
+                                    if ((tokens[6].Length > 0) && (tokens[6] != "-"))
+                                        oxyconLine += Convert.ToDouble(tokens[6]);
+                                    oxyconLine += ",";
+                                    if ((tokens[7].Length > 0) && (tokens[7] != "-"))
+                                        oxyconLine += Convert.ToDouble(tokens[7]);
+                                    oxyconLine += ",";
+                                    if ((tokens[8].Length > 0) && (tokens[8] != "-"))
+                                        oxyconLine += Convert.ToDouble(tokens[8]);
+                                    oxyconLine += ",";
+                                    if (oxyconData.ContainsKey(oxyconKey) == false)
+                                        oxyconData.Add(oxyconKey, oxyconLine);
+                                }
+                            }
+
+                            oxyconFound = true;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        throw new Exception("Oxycon Flash: Parsing failed 2 " + e.Message);
+                    }
+
+
+
+
+
+
+
+
+                    originOxycon = oxyconOriginTR.ReadLine();
+                    oxyconOriginTime = new DateTime();
+                    try
+                    {
+                        tokens = originOxycon.Split(',');
+                        tokens = tokens[0].Split('.');
+                        oxyconOriginTR.Close();
+                        UnixTime.GetDateTime(Convert.ToInt64(tokens[0]), out oxyconOriginTime);
+                    }
+                    catch (Exception e)
+                    {
+                        throw new Exception("Oxycon Synchronization: Parsing failed " + e.Message);
+                    }
+
+
+
+                    //Load Oxycon data
+                    file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*-flashcard.2.dat");
+                    try
+                    {
+                        if (file.Length == 1)
+                        {
+                            //if (CSVProgress == "")
+                              //  CSVProgress = "Processing Flashcard1";
+                            oxyconReader = new StreamReader(file[0]);
+                            for (int j = 0; (j < 8); j++)
+                                oxycon_line = oxyconReader.ReadLine();//skip first 8 lines
+
+                            while ((oxycon_line = oxyconReader.ReadLine()) != null)
+                            {
+                                oxycon_line = oxycon_line.Trim();
+                                RegexOptions options = RegexOptions.None;
+                                Regex regex = new Regex(@"[ ]{2,}", options);
+                                oxycon_line = regex.Replace(oxycon_line, @" ");
+
+                                tokens = oxycon_line.Split(' ');
+                                string[] timeTokens = tokens[0].Split(':');
+
+                                if (timeTokens.Length >= 2)
+                                {
+
+                                    if (timeTokens.Length == 2) //always mins:seconds
+                                    {
+                                        oxyconTime = oxyconOriginTime.AddMinutes(Convert.ToDouble(timeTokens[0]));
+                                        oxyconTime = oxyconTime.AddSeconds(Convert.ToDouble(timeTokens[1]));
+                                    }
+                                    else //3 tokens can either include minutes or hours can be mins:secs:00 or hrs:mins:secs
+                                    {
+
+
+
+                                        if (Convert.ToDouble(timeTokens[0]) >= 24) //this is min:sec:00
+                                        {
+                                            oxyconTime = oxyconOriginTime.AddMinutes(Convert.ToDouble(timeTokens[0]));
+                                            oxyconTime = oxyconTime.AddSeconds(Convert.ToDouble(timeTokens[1]));
+                                        }
+                                        else  //this is hr:min:sec
+                                        {
+                                            oxyconTime = oxyconOriginTime.AddHours(Convert.ToDouble(timeTokens[0]));
+                                            oxyconTime = oxyconTime.AddMinutes(Convert.ToDouble(timeTokens[1]));
+                                            oxyconTime = oxyconTime.AddSeconds(Convert.ToDouble(timeTokens[2]));
+                                        }
+
+                                    }
+
+
+
+
+                                    oxyconUnixTime = UnixTime.GetUnixTime(oxyconTime);
+                                    string oxyconKey = oxyconTime.Year + "-" + oxyconTime.Month + "-" + oxyconTime.Day + "-" + oxyconTime.Hour + "-" + oxyconTime.Minute + "-" + oxyconTime.Second;
+                                    string oxyconLine = "";
+
+                                    if ((tokens[1].Length > 0) && (tokens[1] != "-"))
+                                        oxyconLine += Convert.ToInt32(tokens[1]);
+                                    oxyconLine += ",";
+
+                                    if ((tokens[2].Length > 0) && (tokens[2] != "-"))
+                                        oxyconLine += Convert.ToInt32(tokens[2]);
+                                    oxyconLine += ",";
+
+                                    if ((tokens[3].Length > 0) && (tokens[3] != "-"))
+                                        oxyconLine += Convert.ToInt32(tokens[3]);
+                                    oxyconLine += ",";
+                                    if ((tokens[4].Length > 0) && (tokens[4] != "-"))
+                                        oxyconLine += Convert.ToInt32(tokens[4]);
+                                    oxyconLine += ",";
+
+                                    if ((tokens[5].Length > 0) && (tokens[5] != "-"))
+                                        oxyconLine += Convert.ToDouble(tokens[5]);
+                                    oxyconLine += ",";
+                                    if ((tokens[6].Length > 0) && (tokens[6] != "-"))
+                                        oxyconLine += Convert.ToDouble(tokens[6]);
+                                    oxyconLine += ",";
+                                    if ((tokens[7].Length > 0) && (tokens[7] != "-"))
+                                        oxyconLine += Convert.ToDouble(tokens[7]);
+                                    oxyconLine += ",";
+                                    if ((tokens[8].Length > 0) && (tokens[8] != "-"))
+                                        oxyconLine += Convert.ToDouble(tokens[8]);
+                                    oxyconLine += ",";
+                                    if (oxyconData.ContainsKey(oxyconKey) == false)
+                                        oxyconData.Add(oxyconKey, oxyconLine);
+                                }
+                            }
+
+                            oxyconFound = true;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        throw new Exception("Oxycon Flash: Parsing failed 2 " + e.Message);
+                    }
+
+                }
+            }
+            //CubicSpline cs = new CubicSpline(admissible_xvals, admissible_yvals);
+
+            double firstSecond = 0;
             MITesDecoder aMITesDecoder = new MITesDecoder();
             MITesLoggerReader aMITesLoggerReader = new MITesLoggerReader(aMITesDecoder, aDataDirectory);
             AXML.Annotation aannotation = null;
@@ -1085,9 +1643,14 @@ namespace MITesAnalysisApplication
             TextWriter tw = new StreamWriter(aDataDirectory + "\\realtime-output.arff");
             tw.WriteLine("@RELATION wockets");
             //tw.WriteLine(Extractor.GetArffHeader());
+            tw.WriteLine("@ATTRIBUTE TIME NUMERIC");
+            tw.WriteLine("@ATTRIBUTE EE NUMERIC");
+            tw.WriteLine("@ATTRIBUTE CALS NUMERIC");
+            tw.WriteLine("@ATTRIBUTE CUMCALS NUMERIC");
             tw.WriteLine(Extractor.GetArffHeaderOptional());
             tw.Write("@ATTRIBUTE activity {unknown");
             Hashtable recorded_activities = new Hashtable();
+    
             for (int i = 0; (i < aannotation.Data.Count); i++)
             {
                 AXML.AnnotatedRecord record = ((AXML.AnnotatedRecord)aannotation.Data[i]);
@@ -1120,6 +1683,11 @@ namespace MITesAnalysisApplication
             AXML.AnnotatedRecord annotatedRecord = ((AXML.AnnotatedRecord)aannotation.Data[activityIndex]);
             string current_activity = "unknown";
             TextWriter tww = new StreamWriter("test.csv");
+            TextWriter eewriter = new StreamWriter("ee.csv");
+            Hashtable eeEstimates = new Hashtable();
+            Hashtable eeCounts = new Hashtable();
+            Hashtable modes = new Hashtable();
+            Hashtable eeModes = new Hashtable();
             do
             {
                 //decode the frame
@@ -1166,14 +1734,110 @@ namespace MITesAnalysisApplication
                 //{
                 if ((Extractor.GenerateFeatureVector(lastTimeStamp)))
                 {
-                    string arffSample = Extractor.toString() + "," + current_activity;
-                    tw.WriteLine(arffSample);
+                    
+                    //lastTimeStamp -= correction;
+                    if (firstSecond == 0)
+                    {                        
+                        firstSecond = lastTimeStamp;
+                        double correction = 4 * 60 * 60 * 1000.0;
+                        //setup Oxycon data
+                        OxyconXVals = new double[OxyconX.Count];
+                        OxyconYVals = new double[OxyconY.Count];
+                        
+                        for (int m = 0; (m < OxyconXVals.Length); m++)
+                        {
+                            OxyconXVals[m] = ((double)OxyconX[m]) - correction - firstSecond;
+                            OxyconYVals[m] = ((double)OxyconY[m]);
+                        }
+
+                        oxyconCS = new CubicSpline(OxyconXVals, OxyconYVals);
+
+                        smallestOxyconValue = OxyconXVals[0];
+                    }
+                    
+                    int currentMilliSecond = (int)(lastTimeStamp - firstSecond);
+
+                    //output only when we have oxycon values
+                    if ((double)currentMilliSecond >= smallestOxyconValue)
+                    {
+                        //currentEE = oxyconCS.interpolate((double)currentMilliSecond);
+                        int oxyconIndex = 0;
+                        
+                        for (int n = 0; (n < OxyconXVals.Length); n++)
+                        {
+                            if (OxyconXVals[n] >= currentMilliSecond)
+                            {
+                                oxyconIndex = n;
+                                break;
+                            }
+                        }
+
+                        if (oxyconIndex > 5)
+                        {
+                            for (int n = oxyconIndex - 5; (n < oxyconIndex); n++)
+                            //{
+                                currentEE += OxyconYVals[n];
+                            //}
+                            currentEE = currentEE / 5;
+
+                            double cals = 0;
+                            double averageEE = 0;
+                            if (prevEE != -1)
+                            {
+                                averageEE = (prevEE * 1000.0 + currentEE * 1000.0) / 2;
+                                averageEE = averageEE / (24 * 60 * 60 * 1000);
+                                cals = averageEE * (currentMilliSecond - prevEETime);
+                                cumCals += cals;
+                                if (eeEstimates.ContainsKey(current_activity) == false)
+                                {
+                                    eeEstimates.Add(current_activity,0);
+                                    eeCounts.Add(current_activity,0);
+                                    modes.Add(current_activity, new Hashtable());
+                                }
+
+
+                                eeEstimates[current_activity] = (int)eeEstimates[current_activity] + (int) currentEE;
+                                eeCounts[current_activity] = (int)eeCounts[current_activity] + 1;
+                                if (((Hashtable)modes[current_activity]).ContainsKey((int)currentEE) == false)
+                                    ((Hashtable)modes[current_activity]).Add((int)currentEE, 0);
+
+                                ((Hashtable)modes[current_activity])[(int)currentEE] = (int)((Hashtable)modes[current_activity])[(int)currentEE] + 1;
+                                string arffSample = currentMilliSecond + "," + currentEE + "," + cals.ToString("0.00") + "," + cumCals.ToString("0.00") + "," + Extractor.toString() + "," + current_activity;
+
+                                if (current_activity!="unknown")
+                                    tw.WriteLine(arffSample);
+                            }
+                        }
+                        prevEE = currentEE;
+                        prevEETime = currentMilliSecond;
+                    }
 
                 }
                 //}
 
             } while (isData = aMITesLoggerReader.GetSensorData(10));
 
+            foreach (string s in eeCounts.Keys)
+            {
+                eeEstimates[s]=(int)eeEstimates[s]/(int)eeCounts[s];
+              
+                int eemode = 0;
+                int eecount=0;
+                foreach (int eeval in ((Hashtable)modes[s]).Keys)
+                {
+                    if ((int)((Hashtable)modes[s])[eeval] > eecount)
+                    {
+                        eemode = eeval;
+                        eecount = (int) ((Hashtable)modes[s])[eeval];
+                    }
+                }
+                
+                eewriter.WriteLine(s + "," + (int)eeEstimates[s]+","+eemode);
+                eeModes.Add(s, eemode);
+            }
+
+            
+            eewriter.Close();
             tww.Close();
             tw.Close();
         }
@@ -1837,6 +2501,7 @@ static void filterloop()
         static double[] limbs = new double[5]{TrunkMass,ArmMass,ArmMass,LegMass,LegMass};
         //0 HR, 1 Hip, 4 DA, 7 DW, 8 NDA, 11 DT, 14 DArm, 17 NDW
         static int[] limbsIndex = new int[5] {1, 3, 7,  2, 4 };
+        static int[] limbsFV = new int[5] { 0, 2, 4, 1, 3 };
 
 
         public static bool ACTotalSF = false;
@@ -2251,9 +2916,115 @@ AXML.Annotation aannotation, SXML.SensorAnnotation sannotation, GeneralConfigura
 
         }
 
+        public static int ComputeDistance(string s, string t)
+        {
+            int n = s.Length;
+            int m = t.Length;
+            int[,] d = new int[n + 1, m + 1]; // matrix
+
+            // Step 1
+            if (n == 0)
+            {
+                return m;
+            }
+
+            if (m == 0)
+            {
+                return n;
+            }
+
+            // Step 2
+            for (int i = 0; i <= n; d[i, 0] = i++)
+            {
+            }
+
+            for (int j = 0; j <= m; d[0, j] = j++)
+            {
+            }
+
+            // Step 3
+            for (int i = 1; i <= n; i++)
+            {
+                //Step 4
+                for (int j = 1; j <= m; j++)
+                {
+                    // Step 5
+                    int cost = (t[j - 1] == s[i - 1]) ? 0 : 1;
+
+                    // Step 6
+                    d[i, j] = Math.Min(
+                        Math.Min(d[i - 1, j] + 1, d[i, j - 1] + 1),
+                        d[i - 1, j - 1] + cost);
+                }
+            }
+            // Step 7
+            return d[n, m];
+        }
+
+        public static double LevenshteinDistance(int[] s, int[] t, bool useDistanceCost, bool normalize)
+        {
+            
+            double half = Math.Floor(s.Length / 2.0);
+            double upperLimit = half;
+            if (useDistanceCost)
+            {
+                if ((s.Length % 2) == 1) //even
+                    upperLimit = half * (half + 1);
+                else //odd
+                    upperLimit = half * half;
+            }
+            
+            int[][] d = new int[s.Length + 1][];           
+
+            for (int i = 0; (i < (s.Length + 1)); i++)
+                d[i] = new int[t.Length + 1];
+
+            for (int i = 0; (i < d.Length); i++)
+                d[i][0] = i; //deletion
+            for (int j = 0; (j < d[0].Length); j++)
+                d[0][j] = j; //insertion
+
+            for (int j = 1; (j <= t.Length); j++)
+                for (int i = 1; (i <= s.Length); i++)
+                {
+                   //if (s[i-1] == t[j-1])
+                     // d[i][j] = d[i - 1][j - 1];
+                    int cost = 0;
+
+                    if (s[i - 1] != t[j - 1])
+                        if (useDistanceCost)
+                        {
+                            for (int k = 0; (k < t.Length); k++)
+                            {
+                                if (t[k] == s[i - 1])
+                                {
+                                    cost = Math.Abs(k-i+1);
+                                    break;
+                                }
+                            }
+                            
+                        }
+                        else
+                            cost = 1;
+                    
+
+                   // if (useDistanceCost)
+                       //     d[i][j] = Math.Min(d[i - 1][j] + Math.Abs(i-1-j), Math.Min(d[i][j - 1] + Math.Abs(i-j+1), d[i - 1][j - 1] + Math.Abs(i-1-j+1)));
+                    //else
+                            d[i][j] = Math.Min(d[i - 1][j] + 1, Math.Min(d[i][j - 1] + 1, d[i - 1][j - 1] + cost));
+                }
+
+            if (normalize)
+                return ((double)d[s.Length][t.Length]) / upperLimit;
+            else
+                return ((double)d[s.Length][t.Length]);            
+        }
+
+
+        
 
         //LowPass 1Hz Butterworth
-        public static double LowPass1Hz(int axis,double input)
+        public static double LowPass1Hz(int axis, double input)
         {
             LP1Hz_xv[axis][0] = LP1Hz_xv[axis][1];
             LP1Hz_xv[axis][1] = LP1Hz_xv[axis][2];
@@ -2263,6 +3034,8 @@ AXML.Annotation aannotation, SXML.SensorAnnotation sannotation, GeneralConfigura
             LP1Hz_yv[axis][1] = LP1Hz_yv[axis][2];
             LP1Hz_yv[axis][2] = (LP1Hz_xv[axis][0] + LP1Hz_xv[axis][2]) + 2 * LP1Hz_xv[axis][1] + (-0.9329347318 * LP1Hz_yv[axis][0]) + (1.9306064272 * LP1Hz_yv[axis][1]);
             return LP1Hz_yv[axis][2];
+
+            //return input;
         }
 
 
@@ -2284,6 +3057,7 @@ AXML.Annotation aannotation, SXML.SensorAnnotation sannotation, GeneralConfigura
                                         + (-0.2610321874 * BPpt1_20Hz_yv[axis][0]) + (1.2245774774 * BPpt1_20Hz_yv[axis][1])
                                         + (-2.6621991985 * BPpt1_20Hz_yv[axis][2]) + (2.6986404043 * BPpt1_20Hz_yv[axis][3]);
             return BPpt1_20Hz_yv[axis][4];
+            //return input;
         }
 
         /*
@@ -2304,7 +3078,505 @@ AXML.Annotation aannotation, SXML.SensorAnnotation sannotation, GeneralConfigura
 }
 */
         static int  ocount = 0;
-   
+
+
+
+        public static void ExtractOverhead(double[][] input)//,int fftInterpolationPower, int fftMaximumFrequencies)
+        {
+            
+
+            int j = 0, i = 0;
+            double min = 0, max = 0, total = 0, variance = 0;
+            double sumbp = 0, sumlp = 0, sum = 0;
+            double sumACAbsArea = 0;
+            double[][] lpvalue = new double[input.Length][];
+            double[][] bpvalue = new double[input.Length][];
+            double[] bpValues = new double[Extractor.inputColumnSize];
+
+            TextWriter overhead = new StreamWriter("Overhead.csv");
+
+            for (i = 0; (i < inputRowSize); i++)
+            {
+                lpvalue[i] = new double[input[0].Length];
+                bpvalue[i] = new double[input[0].Length];
+            }
+
+            //Overhead of Low Pass Filtering
+            
+            double startTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+            for (int m = 0; (m < 1000); m++)
+                for (i = 0; (i < inputRowSize); i++)
+                    for (j = 0; (j < Extractor.inputColumnSize); j++)
+                          lpvalue[i][j]=LowPass1Hz(i, input[i][j]);
+            double endTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+            double difference = endTime - startTime;
+            double cost = difference ;
+            overhead.WriteLine("Low Pass 1Hz," + cost.ToString("0.00"));
+
+ 
+            //Overhead of Band Pass Filtering
+            startTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+            for (int m = 0; (m < 1000); m++)
+                for (i = 0; (i < inputRowSize); i++)
+                    for (j = 0; (j < Extractor.inputColumnSize); j++)
+                        bpvalue[i][j]=BandPasspt1_20Hz_(i, input[i][j]);
+            endTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+            difference = endTime - startTime;
+            cost = difference ;
+            overhead.WriteLine("Band Pass 1-20Hz," + cost.ToString("0.00"));
+
+
+
+            int meanIndex = DCMeanIndex;
+            double meanlp = 0, meanbp = 0, mean = 0;
+            double acAbsMean = 0;
+
+            double meanTotal = 0;
+            double acAbsSum = 0;
+            double acTotalAbsArea = 0;
+            double[] acSVMSensor = new double[Extractor.inputColumnSize];
+            double acTotalSVM = 0;
+            double acTotalSF = 0;
+
+
+            int dcMeanIndex = DCMeanIndex;
+            int dcMeanTotalIndex = DCMeanTotalIndex;
+            int dcAreaIndex = DCAreaIndex;
+            int dcAreaSensorIndex = DCAreaSensorIndex;
+            int dcPostureDistIndex = DCPostureDistIndex;
+            int acAbsMeanIndex = ACAbsMeanIndex;
+            int acAbsAreaIndex = ACAbsAreaIndex;
+            int acAbsAreaSensorIndex = ACAbsAreaSensorIndex;
+            int acTotalAbsAreaIndex = ACTotalAbsAreaIndex;
+            int acSVMIndex = ACSVMIndex;
+            int acTotalSVMIndex = ACTotalSVMIndex;
+            int acFFTFreqsIndex = ACFFTFreqsIndex;
+            int acFFTMagsIndex = ACFFTMagsIndex;
+            int acEntropyIndex = ACEntropyIndex;
+            int acEnergyIndex = ACEnergyIndex;
+            int acSkewIndex = ACSkewIndex;
+            int acKurIndex = ACKurIndex;
+            int acQuartilesIndex = ACQuartilesIndex;
+            int acVarIndex = ACVarIndex;
+            int acAbsCVIndex = ACAbsCVIndex;
+            int acIQRIndex = ACIQRIndex;
+            int acRangeIndex = ACRangeIndex;
+            int acBandEnergyIndex = ACBandEnergyIndex;
+            int acLowEnergyIndex = ACLowEnergyIndex;
+            int acModVigEnergyIndex = ACModVigEnergyIndex;
+            int acPitchIndex = ACPitchIndex;
+            int acMCRIndex = ACMCRIndex;
+            int acCorrIndex = ACCorrIndex;
+            int acSFIndex = ACSFIndex;
+            int acTotalSFIndex = ACTotalSFIndex;
+
+
+            //Overhead of Means
+            startTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+            for (int m = 0; (m < 1000); m++)            
+                for (i = 0; (i < inputRowSize); i++)
+                {
+                    for (j = 0; (j < Extractor.inputColumnSize); j++)
+                        sumbp += bpvalue[i][j];                
+                    meanbp = sumbp / Extractor.inputColumnSize;
+                    meansbp[i] = meanbp;
+                }
+            endTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+            difference = endTime - startTime;
+            cost = difference ;
+            overhead.WriteLine("Means," + cost.ToString("0.00"));
+
+
+
+
+            //Overhead of Range
+            startTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+            for (int m = 0; (m < 1000); m++)
+                for (i = 0; (i < inputRowSize); i++)
+                {
+                    for (j = 0; (j < Extractor.inputColumnSize); j++)
+                    {
+                            if (bpvalue[i][j] < min)
+                                min = bpvalue[i][j];
+                            if (bpvalue[i][j] > max)
+                                max = bpvalue[i][j];          
+                    }
+                }
+            endTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+            difference = endTime - startTime;
+            cost = difference ;
+            overhead.WriteLine("Range," + cost.ToString("0.00"));
+
+
+            //Overhead of Pitch
+            startTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+            for (int m = 0; (m < 1000); m++)
+                for (i = 0; (i < inputRowSize); i++)
+                {
+                    sumlp = 0;
+                    sum = 0;
+                    sumbp = 0;
+                    acAbsSum = 0;
+                    min = 999999999.0;
+                    max = -999999999.0;
+                    double cubicSum = 0;
+                    double squaredSum = 0;
+                    double fourthSum = 0;
+                    double acfSum = 0;
+                    double[] acf = new double[Extractor.inputColumnSize];
+                   
+                            
+                    for (j = 0; (j < Extractor.inputColumnSize); j++)                                
+                        sumbp += bpvalue[i][j];                            
+                    meanbp = sumbp / Extractor.inputColumnSize;                            
+                    meansbp[i] = meanbp;
+                        
+                    for (j = 0; (j < Extractor.inputColumnSize); j++)
+                    {
+                        sumbp += bpvalue[i][j];
+                        bpValues[j] = bpvalue[i][j];
+                        squaredSum += Math.Pow((bpvalue[i][j] - meansbp[i]), 2.0);
+                    }
+                    meanbp = sumbp / Extractor.inputColumnSize;
+                    meansbp[i] = meanbp;
+
+                    for (j = 0; (j < Extractor.inputColumnSize); j++)
+                    {
+
+                        acfSum = 0;
+                        for (int k = 0; (k < (Extractor.inputColumnSize - j)); k++)
+                            acfSum += (bpvalue[i][k] - meansbp[i]) * (bpvalue[i][k + j] - meansbp[i]);
+                        acf[j] = acfSum;
+
+                    }
+                    for (j = 0; (j < Extractor.inputColumnSize); j++)
+                        acf[j] /= squaredSum;
+
+                    //pick the first minimum
+                    double minACF = 99999999.0;
+                    int minK = 0;
+                    for (int k = 0; (k < Extractor.inputColumnSize); k++)
+                        if (acf[k] < minACF)
+                        {
+                            minK = k;
+                            minACF = acf[k];
+                            if (minACF < 0.001)
+                                break;
+                        }
+
+                }
+            endTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+            difference = endTime - startTime;
+            cost = difference ;
+            overhead.WriteLine("Pitch," + cost.ToString("0.00"));
+
+
+
+            //Overhead of Skewness
+            startTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+            for (int m = 0; (m < 1000); m++)
+                for (i = 0; (i < inputRowSize); i++)
+                {
+
+                    double cubicSum = 0;
+                    double squaredSum = 0;
+
+                    for (j = 0; (j < Extractor.inputColumnSize); j++)
+                        sumbp += bpvalue[i][j];
+                    meanbp = sumbp / Extractor.inputColumnSize;
+                    meansbp[i] = meanbp;
+                    for (j = 0; (j < Extractor.inputColumnSize); j++)
+                    {
+                        squaredSum += Math.Pow((bpvalue[i][j] - meansbp[i]), 2.0);
+                        cubicSum += Math.Pow((bpvalue[i][j] - meansbp[i]), 3.0);
+                    }
+                    double skew=(cubicSum * Math.Sqrt(Extractor.inputColumnSize)) / Math.Pow(squaredSum, 1.5);                 
+                }
+            endTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+            difference = endTime - startTime;
+            cost = difference ;
+            overhead.WriteLine("Skewness," + cost.ToString("0.00"));
+
+
+            //Overhead of Kurtosis
+            startTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+            for (int m = 0; (m < 1000); m++)
+                for (i = 0; (i < inputRowSize); i++)
+                {
+
+                    double fourthSum = 0;
+                    double squaredSum = 0;
+                    for (j = 0; (j < Extractor.inputColumnSize); j++)
+                        sumbp += bpvalue[i][j];
+                    meanbp = sumbp / Extractor.inputColumnSize;
+                    meansbp[i] = meanbp;
+                    for (j = 0; (j < Extractor.inputColumnSize); j++)
+                    {
+                        squaredSum += Math.Pow((bpvalue[i][j] - meansbp[i]), 2.0);
+                        fourthSum += Math.Pow((bpvalue[i][j] - meansbp[i]), 4.0);
+                    }
+                    double kurtosis = ((fourthSum * Extractor.inputColumnSize) / Math.Pow(squaredSum, 2.0));
+                }
+            endTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+            difference = endTime - startTime;
+            cost = difference ;
+            overhead.WriteLine("Kurtosis," + cost.ToString("0.00"));
+
+            //overhead of FFT Mags
+            startTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+            for (int m = 0; (m < 1000); m++)
+                for (i = 0; (i < inputRowSize); i++)
+                {
+                    for (j = 0; (j < Extractor.inputColumnSize); j++)
+                        inputFFT[j] = (int)(bpvalue[i][j] * 1000.0);
+                    FFT.CalculateFFTMags(inputFFT);
+                }
+             endTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+             difference = endTime - startTime;
+             cost = difference ;
+             overhead.WriteLine("FFTMags," + cost.ToString("0.00"));
+
+             //overhead of FFT Energy
+             startTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+             for (int m = 0; (m < 1000); m++)
+                 for (i = 0; (i < inputRowSize); i++)
+                 {
+                     for (j = 0; (j < Extractor.inputColumnSize); j++)
+                         inputFFT[j] = (int)(bpvalue[i][j] * 1000.0);
+                     FFT.CalculateFFTEnergy(inputFFT);
+                 }
+             endTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+             difference = endTime - startTime;
+             cost = difference ;
+             overhead.WriteLine("FFTEnergy," + cost.ToString("0.00"));
+
+             //overhead of FFT Entropy
+             startTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+             for (int m = 0; (m < 1000); m++)
+                 for (i = 0; (i < inputRowSize); i++)
+                 {
+                     for (j = 0; (j < Extractor.inputColumnSize); j++)
+                         inputFFT[j] = (int)(bpvalue[i][j] * 1000.0);
+                     FFT.CalculateFFTEntropy(inputFFT);
+                 }
+             endTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+             difference = endTime - startTime;
+             cost = difference ;
+             overhead.WriteLine("FFTEntropy," + cost.ToString("0.00"));
+
+
+             //overhead of FFT Entropy
+             startTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+             for (int m = 0; (m < 1000); m++)
+                 for (i = 0; (i < inputRowSize); i++)
+                 {
+                     for (j = 0; (j < Extractor.inputColumnSize); j++)
+                         inputFFT[j] = (int)(bpvalue[i][j] * 1000.0);
+                     FFT.CalculateLowEnergy(inputFFT);
+                 }
+             endTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+             difference = endTime - startTime;
+             cost = difference ;
+             overhead.WriteLine("FFTLowEnergy," + cost.ToString("0.00"));
+
+
+             //overhead of FFT Activity Band
+             startTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+             for (int m = 0; (m < 1000); m++)
+                 for (i = 0; (i < inputRowSize); i++)
+                 {
+                     for (j = 0; (j < Extractor.inputColumnSize); j++)
+                         inputFFT[j] = (int)(bpvalue[i][j] * 1000.0);
+                     FFT.CalculateActivityBand(inputFFT);
+                 }
+             endTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+             difference = endTime - startTime;
+             cost = difference ;
+             overhead.WriteLine("FFTActivityBand," + cost.ToString("0.00"));
+
+             //overhead of FFT Moderate Energy
+             startTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+             for (int m = 0; (m < 1000); m++)
+                 for (i = 0; (i < inputRowSize); i++)
+                 {
+                     for (j = 0; (j < Extractor.inputColumnSize); j++)
+                         inputFFT[j] = (int)(bpvalue[i][j] * 1000.0);
+                     FFT.CalculateModerateEnergy(inputFFT);
+                 }
+             endTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+             difference = endTime - startTime;
+             cost = difference ;
+             overhead.WriteLine("FFTModerateEnergy," + cost.ToString("0.00"));
+
+             //overhead of FFT RatioEnergy
+             startTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+             for (int m = 0; (m < 1000); m++)
+                 for (i = 0; (i < inputRowSize); i++)
+                 {
+                     for (j = 0; (j < Extractor.inputColumnSize); j++)
+                         inputFFT[j] = (int)(bpvalue[i][j] * 1000.0);
+                     FFT.CalculateRatioEnergy(inputFFT);
+                 }
+             endTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+             difference = endTime - startTime;
+             cost = difference ;
+             overhead.WriteLine("FFTRatioEnergy," + cost.ToString("0.00"));
+
+             //overhead of FFT RatioEnergy
+             startTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+             for (int m = 0; (m < 1000); m++)
+                 for (i = 0; (i < inputRowSize); i++)
+                 {
+                     for (j = 0; (j < Extractor.inputColumnSize); j++)
+                         inputFFT[j] = (int)(bpvalue[i][j] * 1000.0);
+                     FFT.CalculateMaximumFrequencies(inputFFT);
+                 }
+             endTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+             difference = endTime - startTime;
+             cost = difference ;
+             overhead.WriteLine("FFTMaximumFrequencies," + cost.ToString("0.00"));
+
+
+
+             //Overhead of Variance
+             startTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+             for (int m = 0; (m < 1000); m++)
+                 for (i = 0; (i < inputRowSize); i++)
+                 {
+
+                     double squaredSum = 0;
+                     for (j = 0; (j < Extractor.inputColumnSize); j++)
+                         sumbp += bpvalue[i][j];
+                     meanbp = sumbp / Extractor.inputColumnSize;
+                     meansbp[i] = meanbp;
+                     for (j = 0; (j < Extractor.inputColumnSize); j++)
+                     {
+                         squaredSum += Math.Pow((bpvalue[i][j] - meansbp[i]), 2.0);
+                     }
+                     double var = squaredSum / (Extractor.inputColumnSize - 1); 
+                 }
+             endTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+             difference = endTime - startTime;
+             cost = difference ;
+             overhead.WriteLine("Variance," + cost.ToString("0.00"));
+
+
+
+             //Overhead of SVM
+             startTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+             for (int m = 0; (m < 1000); m++)
+                 for (i = 0; (i < inputRowSize); i++)
+                 {
+
+                     double squaredSum = 0;
+                     for (j = 0; (j < Extractor.inputColumnSize); j++)
+                         acSVMSensor[j] += Math.Pow(bpvalue[i][j], 2.0);
+
+                     double totalSVM = 0;
+                     for (int k = 0; (k < Extractor.inputColumnSize); k++)
+                     {
+                         totalSVM += Math.Sqrt(acSVMSensor[k]);
+                         acSVMSensor[k] = 0;
+                     }
+                 }
+             endTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+             difference = endTime - startTime;
+             cost = difference ;
+             overhead.WriteLine("SVM," + cost.ToString("0.00"));
+
+             //Overhead of Quartile
+             startTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+             for (int m = 0; (m < 1000); m++)
+                 for (i = 0; (i < inputRowSize); i++)
+                 {
+                     Wockets.Utils.QuickSort.Sort(bpValues, 0, bpValues.Length - 1);                
+                 }
+             endTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+             difference = endTime - startTime;
+             cost = difference ;
+             overhead.WriteLine("Quartiles," + cost.ToString("0.00"));
+
+
+
+             //Overhead of Crossings
+             startTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+             for (int m = 0; (m < 1000); m++)
+                 for (i = 0; (i < inputRowSize); i++)
+                 {
+
+                     int numCrossings = 0;
+                     for (int k = 1; (k < Extractor.inputColumnSize); k++)
+                         if (((bpValues[k] > meansbp[i]) && (bpValues[k - 1] <= meansbp[i])) ||
+                              ((bpValues[k] < meansbp[i]) && (bpValues[k - 1] >= meansbp[i])))
+                             numCrossings++;
+                 }
+
+
+             endTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+             difference = endTime - startTime;
+             cost = difference ;
+             overhead.WriteLine("Crossings," + cost.ToString("0.00"));
+
+             //Overhead of Correlations
+             startTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+             for (int m = 0; (m < 1000); m++)
+                 for (i = 0; (i < inputRowSize); i++)
+                 {
+
+                     //***correlation coefficients
+                     for (int k = i - 1; k >= 0; k--)
+                     {
+                         double t=0;
+                         for (int w = 0; (w < Extractor.inputColumnSize); w++)
+                             t += standardized[i][w] * standardized[k][w];
+                         t /= (Extractor.inputColumnSize - 1);
+                         t /= Math.Sqrt(fv[acVarIndex - 1]);  // ith std deviation
+                         t /= Math.Sqrt(fv[acVarIndex - 1 - (i - k)]);  //kth std deviation 
+                         acCorrIndex++;
+                     }
+                 }
+
+
+             endTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+             difference = endTime - startTime;
+             cost = difference ;
+             overhead.WriteLine("Correlations," + cost.ToString("0.00"));
+
+
+             //Overhead of Segmental Force
+             startTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+             for (int z = 0; (z < 1000); z++)
+                 for (i = 0; (i < inputRowSize); i++)
+                 {
+                     int location = i / 3;
+                     int currenLimbIndex = -1;
+                     for (int m = 0; (m < limbsIndex.Length); m++)
+                         if (limbsIndex[m] == location)
+                         {
+                             currenLimbIndex = m;
+                             break;
+                         }
+                     if (currenLimbIndex >= 0)
+                     {
+                         double sgForce = limbs[currenLimbIndex] * fv[ACAbsAreaSensorIndex + limbsIndex[currenLimbIndex] - 1];
+                         fv[acSFIndex + currenLimbIndex] = sgForce;
+                         acTotalSF += fv[acSFIndex + currenLimbIndex];
+                     }
+                 }
+
+
+             endTime = Wockets.Utils.WocketsTimer.GetUnixTime();
+             difference = endTime - startTime;
+             cost = difference ;
+             overhead.WriteLine("Segmental Force," + cost.ToString("0.00"));
+             overhead.Close();
+             Environment.Exit(0);
+
+
+        }
+
+
+
         public static void ExtractOptional(double[][] input)//,int fftInterpolationPower, int fftMaximumFrequencies)
         {
 
@@ -2337,6 +3609,7 @@ AXML.Annotation aannotation, SXML.SensorAnnotation sannotation, GeneralConfigura
                 int meanIndex = DCMeanIndex;     
                 double meanlp = 0,meanbp=0,mean=0;
                 double acAbsMean = 0;
+                double dcSum = 0;
                 
                 double meanTotal=0;
                 double acAbsSum = 0;          
@@ -2393,6 +3666,7 @@ AXML.Annotation aannotation, SXML.SensorAnnotation sannotation, GeneralConfigura
                     sum = 0;
                     sumbp = 0;
                     acAbsSum = 0;
+                    dcSum = 0;
                     min = 999999999.0;
                     max = -999999999.0;
                     double cubicSum = 0;
@@ -2408,12 +3682,7 @@ AXML.Annotation aannotation, SXML.SensorAnnotation sannotation, GeneralConfigura
                         sumbp += bpvalue[i][j];
                         sum += input[i][j];
                         bpValues[j] = bpvalue[i][j];
-
-                       // standardized[i][j] = bpvalue[i][j] - meansbp[i]; //mean subtracted
-
-
-                        //double bpvalue=BandPasspt1_20Hz_(i, input[i][j]);
-                        acAbsSum += Math.Abs(bpvalue[i][j]);
+                       
                         acSVMSensor[j] += Math.Pow(bpvalue[i][j], 2.0);
                         //because the FFT uses fixed point, we have to multiply
                         //it by a thousand to avoid any problems when calculating
@@ -2436,7 +3705,7 @@ AXML.Annotation aannotation, SXML.SensorAnnotation sannotation, GeneralConfigura
                     meanbp = sumbp/ Extractor.inputColumnSize;
                     mean= sum/Extractor.inputColumnSize;
 
-                    acAbsMean = acAbsSum / Extractor.inputColumnSize;
+                    
                     
                     if (DCMean)
                         fv[meanIndex++] = mean;
@@ -2453,8 +3722,9 @@ AXML.Annotation aannotation, SXML.SensorAnnotation sannotation, GeneralConfigura
                             cubicSum += Math.Pow((bpvalue[i][j] - meansbp[i]), 3.0);
                             fourthSum += Math.Pow((bpvalue[i][j] - meansbp[i]), 4.0);
                         }
-
+                        acAbsSum += Math.Abs(bpvalue[i][j]- meansbp[i]);
                         standardized[i][j] = bpvalue[i][j] - meansbp[i];
+                        dcSum += Math.Abs(lpvalue[i][j] - meanslp[i]);
 
                         if (ACPitch)
                         {
@@ -2464,6 +3734,9 @@ AXML.Annotation aannotation, SXML.SensorAnnotation sannotation, GeneralConfigura
                             acf[j] = acfSum;
                         }
                     }
+
+                    acAbsMean = acAbsSum / Extractor.inputColumnSize;
+
                      for (j = 0; (j < Extractor.inputColumnSize); j++)
                          acf[j] /= squaredSum;
                     
@@ -2474,7 +3747,7 @@ AXML.Annotation aannotation, SXML.SensorAnnotation sannotation, GeneralConfigura
                         meanTotal += mean;
 
                     if (DCArea)
-                        fv[dcAreaIndex++] = sum;
+                        fv[dcAreaIndex++] = dcSum;
 
                     if (ACAbsMean)
                         fv[acAbsMeanIndex++] = acAbsMean;
@@ -2518,17 +3791,17 @@ AXML.Annotation aannotation, SXML.SensorAnnotation sannotation, GeneralConfigura
                         {
                             int location = i / 3;
                             int currenLimbIndex = -1;
-                            for (int m = 0; (m < limbsIndex.Length); m++)
-                                if (limbsIndex[m] == location)
+                            for (int m = 0; (m < limbsFV.Length); m++)
+                                if (limbsFV[m] == location)
                                 {
                                     currenLimbIndex = m;
                                     break;
                                 }
                             if (currenLimbIndex >= 0)
                             {
-                                double sgForce=limbs[currenLimbIndex] * fv[ACAbsAreaSensorIndex + limbsIndex[currenLimbIndex] - 1];
-                                fv[acSFIndex + currenLimbIndex] = sgForce;
-                                acTotalSF += fv[acSFIndex + currenLimbIndex];
+                                double sgForce=limbs[currenLimbIndex] * fv[ACAbsAreaSensorIndex + limbsIndex[currenLimbIndex]];
+                                fv[acSFIndex + limbsIndex[currenLimbIndex]-1] = sgForce;
+                                acTotalSF += fv[acSFIndex + limbsIndex[currenLimbIndex]];
                             }
 
                         }
