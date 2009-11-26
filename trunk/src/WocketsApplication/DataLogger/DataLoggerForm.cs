@@ -319,9 +319,12 @@ namespace WocketsApplication.DataLogger
         public void InitializeDataLogger(string storageDirectory, WocketsController wocketsController, Session annotatedSession, DTConfiguration classifierConfiguration)
         {
             this.storageDirectory = storageDirectory;
-            this.wocketsController = wocketsController;
+            this.wocketsController = wocketsController;            
             this.annotatedSession = annotatedSession;
             this.classifierConfiguration = classifierConfiguration;
+            this.wocketsController._annotatedSession = this.annotatedSession;
+            this.wocketsController._storageDirectory = this.storageDirectory;
+
 
             //Initialize high resolution unix timer
             WocketsTimer.InitializeTime();
@@ -865,6 +868,7 @@ namespace WocketsApplication.DataLogger
                     this.currentRecord.Activities.Add(new Activity(this.annotatedSession.OverlappingActivityLists[category][index]._Name, this.annotatedSession.OverlappingActivityLists[category]._Name));
                 }
             }
+            this.wocketsController.currentRecord = this.currentRecord;
         }
 
         private void stopAnnotation()
@@ -877,6 +881,8 @@ namespace WocketsApplication.DataLogger
             this.currentRecord._EndUnix = ts.TotalSeconds;
             this.annotatedSession.Annotations.Add(this.currentRecord);
             this.currentRecord = null;
+            this.wocketsController.currentRecord = null;
+            
         }
 
         /*
@@ -1029,13 +1035,15 @@ namespace WocketsApplication.DataLogger
             mi.Checked = !(mi.Checked);
             this.isTraining = mi.Checked;
             this.wocketsController.Training = this.isTraining;
+
+            this.wocketsController._Training = mi.Checked;
         }
 
         private void classifying_Click(object sender, EventArgs e)
         {
             MenuItem mi = (MenuItem)sender;
             mi.Checked = !(mi.Checked);
-
+            /*
             classifier = new J48();
             if (!File.Exists(this.storageDirectory + "\\model.xml"))
             {
@@ -1065,6 +1073,8 @@ namespace WocketsApplication.DataLogger
             this.wocketsController._Classifying = this.isClassifying;
             this.wocketsController._instances = this.instances;
             this.wocketsController._classifier = this.classifier;
+             */
+            this.wocketsController._Classifying = mi.Checked;
         }
 
         private void gaming_Click(object sender, EventArgs e)

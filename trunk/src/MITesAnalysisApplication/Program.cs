@@ -20,6 +20,13 @@ namespace MITesAnalysisApplication
     {
         static void Main(string[] args)
         {
+            /**  Compares 2 lists
+            int[] s=new int[5]{1,2,3,4,5};
+            int[] t=new int[5]{5,3,1,4,2};
+            double ttt = Extractor.LevenshteinDistance(s, t, true, true);
+            */
+
+
             string storage = @"C:\DataAnalysis\Stanford-MITes\Subject3\0003v2-sept2408\mites";
             string[] arffList = Directory.GetFiles(storage, "*.arff");
             foreach (string f in arffList)
@@ -31,6 +38,8 @@ namespace MITesAnalysisApplication
             filter[1] = "setup";
             
             Extractor.toARFF(storage, "..\\NeededFiles\\Master\\", 3, filter); 
+
+            /*
             string[] originalFile = Directory.GetFileSystemEntries(storage, "*output*.arff");                
             if (originalFile.Length != 1)
               throw new Exception("Multiple Arff Files in Directory");
@@ -141,6 +150,7 @@ namespace MITesAnalysisApplication
                 tw.Close();
 
             }
+             */
 
           
 

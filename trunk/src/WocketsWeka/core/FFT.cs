@@ -96,6 +96,162 @@ namespace WocketsWeka.core
 
             InitializeBuffers(ref a1, ref a2, ref a3,size);
         }
+
+        public static void CalculateFFTMags(int[] input)
+        {
+            if ((input.Length & (input.Length - 1)) != 0)
+                throw new Exception("FFT input not power of 2.");
+            unsafe
+            {
+                int* t = (int*)a1.ToInt32();
+                for (int i = 0; (i < input.Length); i++)
+                    *(t + i) = input[i];
+
+            }
+            ComputeFFT();
+            FFT.CalculateMagnitudeAngle();
+
+        }
+
+        public static void CalculateFFTEnergy(int[] input)
+        {
+            if ((input.Length & (input.Length - 1)) != 0)
+                throw new Exception("FFT input not power of 2.");
+            unsafe
+            {
+                int* t = (int*)a1.ToInt32();
+                for (int i = 0; (i < input.Length); i++)
+                    *(t + i) = input[i];
+
+            }
+            ComputeFFT();
+            FFT.CalculateMagnitudeAngle();
+            FFT.ComputeEnergy();
+            
+        }
+
+
+        public static void CalculateFFTEntropy(int[] input)
+        {
+            if ((input.Length & (input.Length - 1)) != 0)
+                throw new Exception("FFT input not power of 2.");
+            unsafe
+            {
+                int* t = (int*)a1.ToInt32();
+                for (int i = 0; (i < input.Length); i++)
+                    *(t + i) = input[i];
+
+            }
+            ComputeFFT();
+            FFT.CalculateMagnitudeAngle();            
+            FFT.ComputeEntropy();
+        }
+
+        public static void CalculateActivityBand(int[] input)
+        {
+            if ((input.Length & (input.Length - 1)) != 0)
+                throw new Exception("FFT input not power of 2.");
+            unsafe
+            {
+                int* t = (int*)a1.ToInt32();
+                for (int i = 0; (i < input.Length); i++)
+                    *(t + i) = input[i];
+
+            }
+            ComputeFFT();
+            FFT.CalculateMagnitudeAngle();
+            if (isComputeActivityBand)
+            {
+                FFT.ComputeEnergy(0, 4.0);
+                activityBandEnergy = FFT.EnergyByRange;
+            }
+
+        }
+
+
+
+        public static void CalculateLowEnergy(int[] input)
+        {
+            if ((input.Length & (input.Length - 1)) != 0)
+                throw new Exception("FFT input not power of 2.");
+            unsafe
+            {
+                int* t = (int*)a1.ToInt32();
+                for (int i = 0; (i < input.Length); i++)
+                    *(t + i) = input[i];
+
+            }
+            ComputeFFT();
+            FFT.CalculateMagnitudeAngle();
+            
+            if (isComputeLowEnergy)
+            {
+                FFT.ComputeEnergy(0, 1.2);
+                lowIntensityEnergy = FFT.EnergyByRange;
+            }  
+        }
+
+        public static void CalculateModerateEnergy(int[] input)
+        {
+            if ((input.Length & (input.Length - 1)) != 0)
+                throw new Exception("FFT input not power of 2.");
+            unsafe
+            {
+                int* t = (int*)a1.ToInt32();
+                for (int i = 0; (i < input.Length); i++)
+                    *(t + i) = input[i];
+
+            }
+            ComputeFFT();
+            FFT.CalculateMagnitudeAngle();
+            if (isComputeModerateEnergy)
+            {
+                FFT.ComputeEnergy(1.0, 10.0);
+                moderateHighIntensityEnergy = FFT.EnergyByRange;
+            }
+        }
+
+
+        public static void CalculateRatioEnergy(int[] input)
+        {
+            if ((input.Length & (input.Length - 1)) != 0)
+                throw new Exception("FFT input not power of 2.");
+            unsafe
+            {
+                int* t = (int*)a1.ToInt32();
+                for (int i = 0; (i < input.Length); i++)
+                    *(t + i) = input[i];
+
+            }
+            ComputeFFT();
+            FFT.CalculateMagnitudeAngle();
+
+
+            if (isComputeRatioEnergy)
+                ComputeRatioEnergy();
+        }
+
+
+        public static void CalculateMaximumFrequencies(int[] input)
+        {
+            if ((input.Length & (input.Length - 1)) != 0)
+                throw new Exception("FFT input not power of 2.");
+            unsafe
+            {
+                int* t = (int*)a1.ToInt32();
+                for (int i = 0; (i < input.Length); i++)
+                    *(t + i) = input[i];
+
+            }
+            ComputeFFT();
+            FFT.CalculateMagnitudeAngle();
+
+            //WARNING: The frequencies has to be calculated last, because we are sorting
+            // the magnitude data structures that may impact other features.
+            //This is done for efficiency reasons to avoid copying the FFT array
+            FFT.ComputeMaximumFrequencies();
+
+        }
         
         public static void Calculate(int[] input)
         {

@@ -22,6 +22,9 @@ using weka.classifiers;
 using Wockets.Applications.Games.Escape;
 using weka;
 using weka.core;
+using weka.classifiers.trees;
+using Wockets.Data.Classifiers;
+using Wockets.Data.Classifiers.Trees;
 
 namespace Wockets
 {
@@ -44,7 +47,10 @@ namespace Wockets
         private Thread aPollingThread;
         private Thread aSavingThread;
         private Thread aGamingThread;
+        private Thread aClassifyingThread;
         private bool polling = false;
+        private bool classifying = false;
+        private bool training = false;
         private bool saving = false;
         private bool gaming = true;
         private bool isTraining = false;
@@ -56,6 +62,7 @@ namespace Wockets
         private Classifier classifier;
         private string storageDirectory;
         private Session annotatedSession;
+        
         public double StartTime = 0;
         //public Escape _Escape = new Escape();
 
@@ -250,13 +257,16 @@ namespace Wockets
 
             polling = true;
             saving = true;
+            //classifying = true;
             //Priorities are very critical to avoid buffer overflow
             aSavingThread = new Thread(new ThreadStart(Save));           
             aSavingThread.Priority = ThreadPriority.Highest;
             aPollingThread = new Thread(new ThreadStart(Poll));
             aPollingThread.Priority = ThreadPriority.Highest;
+            aClassifyingThread = new Thread(new ThreadStart(Classify));
             aPollingThread.Start();
             aSavingThread.Start();
+            aClassifyingThread.Start();
 
 
 
@@ -336,17 +346,7 @@ namespace Wockets
                 this.isTraining = value;
             }
         }
-        public bool _Classifying
-        {
-            get
-            {
-                return this.isClassifying;
-            }
-            set
-            {
-                this.isClassifying = value;
-            }
-        }
+
         public Annotation _currentRecord
         {
             get
@@ -406,6 +406,208 @@ namespace Wockets
                 this.classifier = value;
             }
         }
+
+
+        public bool _Classifying
+        {
+            get
+            {
+                return this.classifying;
+            }
+            set
+            {
+                this.classifying = value;
+            }
+        }
+
+        public bool _Training
+        {
+            get
+            {
+                return this.training;
+            }
+            set
+            {
+                this.training = value;
+            }
+        }
+
+        private void Classify()
+        {
+            //ClassifierConfiguration configuration = new DTConfiguration();
+            //configuration.FromXML(storageDirectory + "\\Configuration.xml");
+            //need to pass an activity list that shows all the combinations of activities.
+            //for now just have 1 category of activities.            
+            //FeatureExtractor.Initialize(this.wocketsController, configuration, this.annotatedSession.OverlappingActivityLists[0]);
+            TextWriter trainingTW = null;
+            TextWriter structureTW = null;
+            int[] labelCounters=null;
+            Classifier classifier = null;
+            FastVector fvWekaAttributes;
+            Instances instances=null;
+            string[] activityLabels=null;
+            Hashtable labelIndex = new Hashtable(); 
+            string arffFileName;
+            int classificationCounter = 0;
+
+
+            while (true)
+            {
+
+                if (classifying)
+                {
+               
+                    if (classifier == null)
+                    {
+                        classifier = new J48();
+                        if (!File.Exists("/model.xml"))
+                        {
+                            string[] arffFiles = Directory.GetFileSystemEntries("/", "output*.arff");
+                            if (arffFiles.Length != 1)
+                                throw new Exception("Multiple Arff Files in Directory");
+                            instances = new Instances(new StreamReader(arffFiles[0]));
+                            instances.Class = instances.attribute(FeatureExtractor.ArffAttributeLabels.Length);
+                            classifier.buildClassifier(instances);
+                            TextWriter tc = new StreamWriter("/model.xml");
+                            classifier.toXML(tc);
+                            tc.Flush();
+                            tc.Close();
+                        }
+                        else
+                        {
+                            instances = new Instances(new StreamReader("/structure.arff"));
+                            instances.Class = instances.attribute(FeatureExtractor.ArffAttributeLabels.Length);
+                            classifier.buildClassifier("/model.xml", instances);
+                        }
+
+
+                        fvWekaAttributes = new FastVector(FeatureExtractor.ArffAttributeLabels.Length + 1);
+                        for (int i = 0; (i < FeatureExtractor.ArffAttributeLabels.Length); i++)
+                            fvWekaAttributes.addElement(new weka.core.Attribute(FeatureExtractor.ArffAttributeLabels[i]));
+
+                        FastVector fvClassVal = new FastVector();
+                        labelCounters = new int[this.annotatedSession.OverlappingActivityLists[0].Count + 1];
+                        activityLabels = new string[this.annotatedSession.OverlappingActivityLists[0].Count + 1];
+                        for (int i = 0; (i < this.annotatedSession.OverlappingActivityLists[0].Count); i++)
+                        {
+                            labelCounters[i] = 0;
+                            string label = "";
+                            int j = 0;
+                            for (j = 0; (j < this.annotatedSession.OverlappingActivityLists.Count - 1); j++)
+                                label += this.annotatedSession.OverlappingActivityLists[j][i]._Name.Replace(' ', '_') + "_";
+                            label += this.annotatedSession.OverlappingActivityLists[j][i]._Name.Replace(' ', '_');
+                            activityLabels[i] = label;
+                            labelIndex.Add(label, i);
+                            fvClassVal.addElement(label);
+                        }
+                    }
+                    else
+                    {
+                        double lastTimeStamp = FeatureExtractor.StoreWocketsWindow();
+                        if (FeatureExtractor.GenerateFeatureVector(lastTimeStamp))
+                        {
+                            Instance newinstance = new Instance(instances.numAttributes());
+                            newinstance.Dataset = instances;
+                            for (int i = 0; (i < FeatureExtractor.Features.Length); i++)
+                                newinstance.setValue(instances.attribute(i), FeatureExtractor.Features[i]);
+                            double predicted = classifier.classifyInstance(newinstance);
+                            string predicted_activity = newinstance.dataset().classAttribute().value_Renamed((int)predicted);
+
+                            int currentIndex = (int)labelIndex[predicted_activity];
+                            labelCounters[currentIndex] = (int)labelCounters[currentIndex] + 1;
+                            classificationCounter++;
+
+                            if (classificationCounter == 5)
+                            {
+                                classificationCounter = 0;
+                                int mostCount = 0;
+                                string mostActivity = "";
+                                //Color indicate;
+                                //int level;
+                                for (int j = 0; (j < labelCounters.Length); j++)
+                                {
+                                   // level = 240 - 240 * labelCounters[j] / configuration._SmoothWindows;
+                                    //indicate = Color.FromArgb(level, level, level);
+                                    //this.ActGUIlabels[j].ForeColor = indicate;
+                                    //this.ActGUIlabels[j].Invalidate();
+                                    if (labelCounters[j] > mostCount)
+                                    {
+                                        mostActivity = activityLabels[j];
+                                        mostCount = labelCounters[j];
+                                    }
+                                    labelCounters[j] = 0;
+                                }
+
+                            }
+                        }
+                    }
+                }
+
+                #region Training
+
+                if (training)
+                {
+                    //create arff file
+                    if (trainingTW == null)
+                    {
+                        arffFileName ="output" + DateTime.Now.ToString().Replace('/', '_').Replace(':', '_').Replace(' ', '_') + ".arff";
+                        trainingTW = new StreamWriter(arffFileName);
+                        trainingTW.WriteLine("@RELATION wockets");
+                        string arffHeader = FeatureExtractor.GetArffHeader();
+                        arffHeader += "\n@ATTRIBUTE activity {";
+                        int i = 0;
+                        for (i = 0; (i < ((this.annotatedSession.OverlappingActivityLists[0]).Count - 1)); i++)
+                            arffHeader += this.annotatedSession.OverlappingActivityLists[0][i]._Name.Replace(' ', '_') + ",";
+                        arffHeader += this.annotatedSession.OverlappingActivityLists[0][i]._Name.Replace(' ', '_') + "}\n";
+                        arffHeader += "\n@DATA\n\n";
+
+
+
+                        trainingTW.WriteLine(arffHeader);
+                        string structureArffFile = "structure.arff";
+                        structureTW = new StreamWriter(structureArffFile);
+                        structureTW.WriteLine("@RELATION wockets");
+                        structureTW.WriteLine(arffHeader);
+
+                    }
+                    string current_activity = "unknown";
+                    if (this.currentRecord != null)
+                    {
+                        double lastTimeStamp = FeatureExtractor.StoreWocketsWindow();
+                        if (FeatureExtractor.GenerateFeatureVector(lastTimeStamp))
+                        {
+                            current_activity = this.currentRecord.Activities._CurrentActivity;
+                            string arffSample = FeatureExtractor.toString() + "," + current_activity;
+                            trainingTW.WriteLine(arffSample);
+                            extractedVectors++;
+                            if (structureFileExamples < 10)
+                            {
+                                structureTW.WriteLine(arffSample);
+                                structureFileExamples++;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    if (trainingTW != null)
+                    {
+                        structureTW.Flush();
+                        structureTW.Close();
+                        structureTW = null;
+                        trainingTW.Flush();
+                        trainingTW.Close();
+                        trainingTW = null;
+                    }
+                }
+                #endregion Training
+
+
+                Thread.Sleep(50);
+            }
+
+        }
+
 
         public static object MyLock = new object();
 
