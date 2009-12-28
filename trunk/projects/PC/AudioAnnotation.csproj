@@ -1,0 +1,136 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{7638C74A-D831-4E37-A542-CEA2229231CD}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>AudioAnnotation</RootNamespace>
+    <AssemblyName>AudioAnnotation</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\bin\PC\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\bin\PC\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\src\AudioAnnotation\FormAnnotation.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="..\..\src\AudioAnnotation\FormAnnotation.Designer.cs">
+      <DependentUpon>FormAnnotation.cs</DependentUpon>
+    </Compile>
+    <Compile Include="..\..\src\AudioAnnotation\Program.cs" />
+    <Compile Include="..\..\src\AudioAnnotation\Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="..\..\src\AudioAnnotation\FormAnnotation.resx">
+      <DependentUpon>FormAnnotation.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\src\AudioAnnotation\Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\src\AudioAnnotation\PopUp_Message_Window.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>PopUp_Message_Window.cs</DependentUpon>
+    </EmbeddedResource>
+    <Compile Include="..\..\src\AudioAnnotation\Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <None Include="..\..\src\AudioAnnotation\Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="..\..\src\AudioAnnotation\Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <Compile Include="..\..\src\AudioAnnotation\PopUp_Message_Window.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="..\..\src\AudioAnnotation\PopUp_Message_Window.Designer.cs">
+      <DependentUpon>PopUp_Message_Window.cs</DependentUpon>
+    </Compile>
+<<<<<<< .mine
+    <Compile Include="..\..\src\AudioAnnotation\CompareFileInfoByDate.cs" />
+=======
+    <Compile Include="..\..\src\AudioAnnotation\CompareFileInfoByDate.cs">
+    </Compile>
+>>>>>>> .r256
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="Wockets.csproj">
+      <Project>{16986364-6B54-443E-B1F3-A6F17F0523B2}</Project>
+      <Name>Wockets</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\bin\NeededFiles\Resources\delete-48x48.png">
+      <Link>Resources\delete-48x48.png</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\bin\NeededFiles\Resources\plus-48x48.png">
+      <Link>Resources\plus-48x48.png</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\bin\NeededFiles\Resources\right-48x48.png">
+      <Link>Resources\right-48x48.png</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\bin\NeededFiles\Resources\left-48x48.png">
+      <Link>Resources\left-48x48.png</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\bin\NeededFiles\Resources\save-48x48.png">
+      <Link>Resources\save-48x48.png</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\bin\NeededFiles\Resources\gear-48x48.png">
+      <Link>Resources\gear-48x48.png</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\bin\NeededFiles\Resources\stop-48x48.png">
+      <Link>Resources\stop-48x48.png</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
