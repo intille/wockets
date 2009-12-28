@@ -1,4 +1,4 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -344,7 +344,7 @@
     <Compile Include="..\..\src\Wockets\Applications\Games\Escape\Sounds.cs">
       <Link>Applications\Games\Escape\Sounds.cs</Link>
     </Compile>
-    <Compile Include="Utils\QuickSort.cs" />
+    <Compile Include="..\..\src\Wockets\Utils\QuickSort.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="SerialIO.csproj">
