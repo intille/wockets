@@ -60,18 +60,7 @@ namespace Wockets.Data.Plotters
             this.plotAreaSize = new Size(this.aPanel.Width, ((int)this.aPanel.Height));
             graphSize = (int)Math.Floor((plotAreaSize.Height / ((double)numSensors)));
 
-            sdata = new MemoryMappedFileStream[numSensors];
-            shead = new MemoryMappedFileStream[numSensors];
-            this.sdataSize = (int) Decoder._DUSize * Wockets.Decoders.Accelerometers.WocketsDecoder.BUFFER_SIZE;
-            for (int i = 0; (i < numSensors); i++)
-            {
-                sdata[i] = new MemoryMappedFileStream("\\Temp\\wocket" + i + ".dat", "wocket" + i, (uint) this.sdataSize, MemoryProtection.PageReadWrite);
-                shead[i] = new MemoryMappedFileStream("\\Temp\\whead" + i + ".dat", "whead" + i, sizeof(int), MemoryProtection.PageReadWrite);
-                
-                sdata[i].MapViewToProcessMemory(0, this.sdataSize);
-                shead[i].MapViewToProcessMemory(0, sizeof(int));
-            
-            }
+
 
             scaleFactors = new double[numSensors];
             currentColumns = new int[numSensors];
@@ -93,6 +82,26 @@ namespace Wockets.Data.Plotters
                 double range = 1024;//((Accelerometer)this.wocketsController._Sensors[i])._Max - ((Accelerometer)this.wocketsController._Sensors[i])._Min;
                 scaleFactors[i] = graphSize / range;
             }
+
+
+            sdata = new MemoryMappedFileStream[numSensors];
+            shead = new MemoryMappedFileStream[numSensors];
+            this.sdataSize = (int) Decoder._DUSize * Wockets.Decoders.Accelerometers.WocketsDecoder.BUFFER_SIZE;
+            for (int i = 0; (i < numSensors); i++)
+            {
+                sdata[i] = new MemoryMappedFileStream("\\Temp\\wocket" + i + ".dat", "wocket" + i, (uint) this.sdataSize, MemoryProtection.PageReadWrite);
+                shead[i] = new MemoryMappedFileStream("\\Temp\\whead" + i + ".dat", "whead" + i, sizeof(int), MemoryProtection.PageReadWrite);
+                
+                sdata[i].MapViewToProcessMemory(0, this.sdataSize);
+                shead[i].MapViewToProcessMemory(0, sizeof(int));
+                
+                shead[i].Read(head, 0, 4);
+                int currentHead = BitConverter.ToInt32(head, 0);                
+                this.decoderTails[i] = currentHead;
+                shead[i].Seek(0, System.IO.SeekOrigin.Begin);
+            
+            }
+
             int dy = (int)Math.Floor(plotAreaSize.Height / ((double)numSensors));
             int offset = dy;
             axisOffset = new int[numSensors];
@@ -125,7 +134,17 @@ namespace Wockets.Data.Plotters
         AccelerationData data = new Accelerometers.WocketsAccelerationData();
         byte[] timestamp = new byte[sizeof(double)];
         byte[] acc = new byte[sizeof(short)];
-    
+
+        public void Dispose()
+        {
+            for (int i = 0; (i < numSensors); i++)
+            {
+                sdata[i].Close();
+                shead[i].Close();
+
+            }
+
+        }
         public void Draw(Graphics g)
         {
             int lastColumnDrawn = 0;
