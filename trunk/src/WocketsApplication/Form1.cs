@@ -142,7 +142,10 @@ namespace WocketsApplication
                 }
                 else
                 {
+                    if (plotter != null)
+                        plotter.Dispose();
                     plotter = new WocketsScalablePlotter(plotterPanel, selectedWockets.Count);
+                    plotterPanel.Visible = true;
                     plotterTimer.Enabled = true;        
                 }
             }
@@ -612,6 +615,9 @@ namespace WocketsApplication
                         this.panels[ControlID.PLOTTER_PANEL].Visible = true;
                         this.panels[ControlID.PLOTTER_PANEL].Dock = DockStyle.None;
                         this.currentPanel = ControlID.PLOTTER_PANEL;
+
+                        UpdatePlotter();
+
                     }
                     else
                         MessageBox.Show("Cannot plot without connecting wockets!");
@@ -644,6 +650,7 @@ namespace WocketsApplication
                     this.panels[ControlID.PLOTTER_PANEL].Visible = false;
                     this.currentPanel = ControlID.HOME_PANEL;
                     plotterTimer.Enabled = false;
+                    plotterPanel.Visible = false;
                 }
             }
 
