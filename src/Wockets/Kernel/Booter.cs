@@ -58,6 +58,7 @@ namespace Wockets.Kernel
             wcontroller = new WocketsController("", "", "");           
             wcontroller.FromXML(path+"//NeededFiles//SensorConfigurations//SensorData43.xml");
             Logger.InitLogger(storageDirectory);
+            Logger.Debug2("Time,Time,PowerPercent,Voltage,Current,Temperature\n");
             
         }
         public static void Boot()
