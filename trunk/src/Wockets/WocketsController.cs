@@ -772,6 +772,8 @@ namespace Wockets
                                 if (pollCounter > 2000)
                                 {
                                     Logger.Warn("Receiver " + sensor._Receiver._ID + " decoded:" + sensor.Packets + ",saved:" + sensor.SavedPackets + ", tail=" + tail + ",head=" + head);
+                                    SYSTEM_POWER_STATUS_EX2 bpower = Battery.GetSystemPowerStatus();
+                                    Logger.Debug2(bpower.BatteryLifePercent + "," + bpower.BatteryVoltage + "," + bpower.BatteryCurrent + "," + bpower.BatteryTemperature);
                                     pollCounter = 0;
                                 }
 
