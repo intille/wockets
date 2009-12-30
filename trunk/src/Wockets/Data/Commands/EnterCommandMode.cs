@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Wockets.Data.Commands
 {
-    internal class EnterCommandMode: Command
+    public class EnterCommandMode: Command
     {
         public EnterCommandMode()
         {

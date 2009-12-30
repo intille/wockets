@@ -12,6 +12,8 @@ namespace Wockets.Kernel.Types
         DISCOVER,
         CONNECT,
         SET_SENSORS,
-        DISCONNECT
+        DISCONNECT,
+        SET_SNIFF,
+        TERMINATE
     }
 }

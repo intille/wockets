@@ -8,6 +8,7 @@ using Wockets.Receivers;
 using Wockets.Utils.network;
 using Wockets.Kernel.Types;
 using Wockets.IPC;
+using Wockets.Data.Commands;
 using Microsoft.Win32;
 using InTheHand.Net.Sockets;
 
@@ -101,7 +102,31 @@ namespace Wockets.Kernel
                 //same time from multiple applications
                 lock (kernelLock)
                 {
-                    if (msg == KernelCommand.CONNECT.ToString())
+                    if (msg == KernelCommand.SET_SNIFF.ToString())
+                    {
+                        if (_WocketsRunning)
+                        {                           
+                            EnterCommandMode enter = new EnterCommandMode();
+                            BT_RST reset = new BT_RST();
+                            ushort tsniff=0;
+                            if (param == SleepModes.Sleep1Second.ToString())
+                                tsniff = 1000;
+                            else if (param == SleepModes.Sleep2Seconds.ToString())
+                                tsniff = 2000;
+                                
+                            SET_SM sniff=new SET_SM(tsniff);
+                            PAUSE pause = new PAUSE();
+                            for (int i = 0; (i < lwcontroller._Receivers.Count); i++)
+                            {
+                                ((SerialReceiver)lwcontroller._Receivers[i]).Write(pause._Bytes);
+                                Thread.Sleep(500);
+                                ((SerialReceiver)lwcontroller._Receivers[i]).Write(enter._Bytes);  
+                                ((SerialReceiver)lwcontroller._Receivers[i]).Write(sniff._Bytes);
+                                ((SerialReceiver)lwcontroller._Receivers[i]).Write(reset._Bytes);
+                            }
+                        }
+                    }
+                    else if (msg == KernelCommand.CONNECT.ToString())
                     {
                         if (!_WocketsRunning)
                         {
@@ -171,15 +196,10 @@ namespace Wockets.Kernel
                                 if (status == 1)
                                 {
                                     string mac = (string)rk.GetValue("MacAddress");
-                                    //for (int j = 0; (j < 5); j++)
-                                    //{
-                                      //  if (Booter.wcontroller._Sensors[j]._Loaded == false)
-                                       // {
-                                            ((RFCOMMReceiver)Booter.wcontroller._Receivers[index])._Address = mac;
-                                            Booter.wcontroller._Sensors[index++]._Loaded = true;                                           
-                                        //}
 
-                                    //}
+                                    ((RFCOMMReceiver)Booter.wcontroller._Receivers[index])._Address = mac;
+                                    Booter.wcontroller._Sensors[index++]._Loaded = true;
+
                                 }
                                 rk.Close();
                             }
@@ -211,7 +231,11 @@ namespace Wockets.Kernel
                     string param = (string)rk.GetValue("Param");//, processID.ToString(), RegistryValueKind.DWord);        
                     rk.Close();
 
-                    if (msg == KernelCommand.REGISTER.ToString())
+                    if (msg == KernelCommand.TERMINATE.ToString())
+                    {                    
+                        System.Diagnostics.Process.GetCurrentProcess().Kill();
+                    }
+                    else if (msg == KernelCommand.REGISTER.ToString())
                     {
                         rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + param + "}");                        
                         rk.SetValue("Message", "", RegistryValueKind.String);
