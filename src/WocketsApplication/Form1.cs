@@ -27,6 +27,10 @@ namespace WocketsApplication
     {
         private const int NUMBER_PANELS=6;
         //private const int NUMBER_BUTTONS=9;
+
+        private const int SCREEN_RESOLUTION_X = 480;
+        private const int SCREEN_RESOLUTION_Y = 800;
+
         private ClickableAlphaPanel[] panels= new ClickableAlphaPanel[NUMBER_PANELS];
         private int[] slidingPanels = new int[2] { 0, 1 };
         private int[] numberButtons = new int[NUMBER_PANELS];
@@ -257,12 +261,12 @@ namespace WocketsApplication
            {
 
                this.panels[i] = new ClickableAlphaPanel(this.numberButtons[i]);
-                this.panels[i].Size = new Size(480, 640);
+               this.panels[i].Size = new Size(SCREEN_RESOLUTION_X, SCREEN_RESOLUTION_Y);
                 this.panels[i].MouseDown += new MouseEventHandler(owner_MouseDown);
                 this.panels[i].MouseUp += new MouseEventHandler(owner_MouseUp);                
                 this.panels[i].BackColor=colors[i];
                 this.panels[i].Dock = DockStyle.Fill;
-                this.panels[i]._Backbuffer=new Bitmap(480, 640, PixelFormat.Format32bppRgb);
+                this.panels[i]._Backbuffer = new Bitmap(SCREEN_RESOLUTION_X, SCREEN_RESOLUTION_Y, PixelFormat.Format32bppRgb);
                 this.Controls.Add(this.panels[i]);
             }
 
@@ -608,6 +612,11 @@ namespace WocketsApplication
                     if (wocketsKernelGuid!=null)
                         Core.Unregister(wocketsKernelGuid);
                     ScreenUtils.ShowTaskBar(true);
+                    
+                    //Terminate the kernel
+                    //if (wocketsKernelGuid != null)
+                    //    Core.Send(KernelCommand.TERMINATE, wocketsKernelGuid);
+
                     Application.Exit();
                     System.Diagnostics.Process.GetCurrentProcess().Kill();
                     
