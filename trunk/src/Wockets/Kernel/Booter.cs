@@ -29,6 +29,7 @@ namespace Wockets.Kernel
         private static Hashtable applicationThreads = new Hashtable();
         private static Semaphore registryLock;
         private static WocketsController wcontroller = null;
+        private static string rootStorageDirectory = "";
         private static string storageDirectory = "";
         private static string path = "";
 
@@ -53,12 +54,12 @@ namespace Wockets.Kernel
                     break;
                 }
             }
-            storageDirectory = firstCard + "\\Wockets\\";
-            Directory.CreateDirectory(storageDirectory);
+            rootStorageDirectory = firstCard + "\\Wockets\\";
+            Directory.CreateDirectory(rootStorageDirectory);
             
             wcontroller = new WocketsController("", "", "");           
             wcontroller.FromXML(path+"//NeededFiles//SensorConfigurations//SensorData43.xml");
-            Logger.InitLogger(storageDirectory);
+            Logger.InitLogger(rootStorageDirectory + "kernellog\\");
             Logger.Debug2("Time,Time,PowerPercent,Voltage,Current,Temperature\n");
             
         }
@@ -149,6 +150,7 @@ namespace Wockets.Kernel
                                     index++;
                                 }
                             }
+                            storageDirectory = rootStorageDirectory + "\\Session" + DateTime.Now.Month + "-" + DateTime.Now.Day + "-" + DateTime.Now.Hour + "-" + DateTime.Now.Minute + "-" + DateTime.Now.Second;
                             lwcontroller._storageDirectory = storageDirectory;
                             for (int i = lwcontroller._Sensors.Count-1; (i>=0); i--)
                             {
@@ -160,7 +162,7 @@ namespace Wockets.Kernel
                                 }
                                 else
                                 {
-                                    lwcontroller._Sensors[i]._RootStorageDirectory = storageDirectory;
+                                    lwcontroller._Sensors[i]._RootStorageDirectory = storageDirectory+"\\data\\raw\\PLFormat";
                                 }
                             }
 

@@ -22,11 +22,11 @@ namespace Wockets.Utils
 
         public static void InitLogger(String filePath)
         {
-            Directory.CreateDirectory(filePath+"\\data\\log");
-            errorPath = filePath + "\\data\\log\\error.txt";
-            warnPath = filePath + "\\data\\log\\warn.txt";
-            debugPath = filePath + "\\data\\log\\debug.csv";
-            debug2Path = filePath + "\\data\\log\\debug2.csv";
+            Directory.CreateDirectory(filePath);
+            errorPath = filePath + "error.txt";
+            warnPath = filePath + "warn.txt";
+            debugPath = filePath + "debug.csv";
+            debug2Path = filePath + "debug2.csv";
             e = new StreamWriter(new FileStream(errorPath, FileMode.Create));
             w = new StreamWriter(new FileStream(warnPath, FileMode.Create));
             d = new StreamWriter(new FileStream(debugPath, FileMode.Create));

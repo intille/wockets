@@ -12,6 +12,7 @@ namespace Wockets.Utils.network.Bluetooth
         public static ProtocolType _ProtocolType = (ProtocolType)0x0003;
         public static AddressFamily _AddressFamily = (AddressFamily)32;
         public static readonly Guid _SerialPort = new Guid(0x00001101, 0x0000, 0x1000, 0x80, 0x00, 0x00, 0x80, 0x5F, 0x9B, 0x34, 0xFB);
+        public TSniff _Tsniff = TSniff.Sniff2Seconds;
 
         private const int MAC_SIZE = 6;
         protected byte[] address=null;

@@ -7,6 +7,9 @@ using Wockets.Sensors;
 using Wockets.Decoders;
 using Wockets.Receivers;
 using Wockets.Utils;
+#if (PocketPC)
+using Microsoft.ApplicationBlocks.MemoryMappedFile;
+#endif
 
 namespace Wockets.Sensors.Accelerometers
 {
@@ -66,8 +69,13 @@ namespace Wockets.Sensors.Accelerometers
 
         #endregion IO storage variables
 
+        private MemoryMappedFileStream sdata = null;
+        private MemoryMappedFileStream shead = null;
+        private int sdataSize = 0;
+        byte[] head = new byte[4];
         public Accelerometer(SensorClasses sensorclass):base(SensorTypes.ACCEL,sensorclass)
         {
+
         }
 
 
@@ -278,6 +286,11 @@ namespace Wockets.Sensors.Accelerometers
 
         public override void Dispose()
         {
+            if (sdata != null)
+                sdata.Close();
+            if (shead != null)
+                shead.Close();
+
             if (bw != null)
             {
                 bw.Flush();
@@ -291,14 +304,29 @@ namespace Wockets.Sensors.Accelerometers
 
        
         private int lastHead = 0;
-        AccelerationData prevdata = null; 
-       
+        AccelerationData prevdata = null;
+        AccelerationData data = new WocketsAccelerationData();
+        byte[] timestamp = new byte[sizeof(double)];
+        byte[] acc = new byte[sizeof(short)];
         public override void Save()
         {
            
             if (_Saving)
             {
-    
+                if (sdata == null)
+                {
+                    this.sdataSize = (int)Decoder._DUSize * Wockets.Decoders.Accelerometers.WocketsDecoder.BUFFER_SIZE;
+                    sdata = new MemoryMappedFileStream("\\Temp\\wocket" + this._ID + ".dat", "wocket" + this._ID, (uint)this.sdataSize, MemoryProtection.PageReadWrite);
+                    shead = new MemoryMappedFileStream("\\Temp\\whead" + this._ID + ".dat", "whead" + this._ID, sizeof(int), MemoryProtection.PageReadWrite);
+
+                    sdata.MapViewToProcessMemory(0, this.sdataSize);
+                    shead.MapViewToProcessMemory(0, sizeof(int));
+                    shead.Read(head, 0, 4);
+                    int lastHead = BitConverter.ToInt32(head, 0);
+                    tail = lastHead;
+                    shead.Seek(0, System.IO.SeekOrigin.Begin);
+                    sdata.Seek((lastHead * (sizeof(double) + 3 * sizeof(short))), System.IO.SeekOrigin.Begin);
+                }
 
                 flushTimer++;
                 if (flushTimer >= MAX_FLUSH_TIME)
@@ -310,7 +338,9 @@ namespace Wockets.Sensors.Accelerometers
                     flushTimer = 0;
                 }
 
-                int currentHead = this._Decoder._Head;
+                shead.Read(head, 0, 4);
+                int currentHead = BitConverter.ToInt32(head, 0);
+                shead.Seek(0, System.IO.SeekOrigin.Begin);
                
                /*if ((currentHead==0) || (((tail <= currentHead) && ((currentHead - tail) < (this._Decoder._Data.Length / 6))) ||
                     ((tail>currentHead) && ((this._Decoder._Data.Length -tail +currentHead)<(this._Decoder._Data.Length / 6)))))
@@ -326,7 +356,15 @@ namespace Wockets.Sensors.Accelerometers
                 //caution: The decoder buffer needs to be large enough or this code
                 //need to be fast enough to make sure that data is saved before being overwritten in the
                 //circular buffer
-                AccelerationData data = ((AccelerationData)this._Decoder._Data[tail]);
+                sdata.Read(timestamp, 0, sizeof(double));
+                data.UnixTimeStamp = BitConverter.ToDouble(timestamp, 0);
+                sdata.Read(acc, 0, sizeof(short));
+                data.X = BitConverter.ToInt16(acc, 0);
+                sdata.Read(acc, 0, sizeof(short));
+                data.Y = BitConverter.ToInt16(acc, 0);
+                sdata.Read(acc, 0, sizeof(short));
+                data.Z = BitConverter.ToInt16(acc, 0);
+                //AccelerationData data = ((AccelerationData)this._Decoder._Data[tail]);
                 while ((tail != currentHead) && (data.UnixTimeStamp > 0))
                 {
                     aUnixTime = data.UnixTimeStamp;
@@ -362,13 +400,24 @@ namespace Wockets.Sensors.Accelerometers
                     lastUnixTime = aUnixTime;
                     this.tailUnixTimestamp = aUnixTime;
                     prevdata = data;
-                    if (tail >= this._Decoder._Data.Length-1)
+                    if (tail >= this._Decoder._Data.Length - 1)
+                    {
                         tail = 0;
+                        sdata.Seek(0, System.IO.SeekOrigin.Begin);
+                    }
                     else
                         tail++;
                     this.SavedPackets++;
-                    data = ((AccelerationData)this._Decoder._Data[tail]);
+                    //data = ((AccelerationData)this._Decoder._Data[tail]);
 
+                    sdata.Read(timestamp, 0, sizeof(double));
+                    data.UnixTimeStamp = BitConverter.ToDouble(timestamp, 0);
+                    sdata.Read(acc, 0, sizeof(short));
+                    data.X = BitConverter.ToInt16(acc, 0);
+                    sdata.Read(acc, 0, sizeof(short));
+                    data.Y = BitConverter.ToInt16(acc, 0);
+                    sdata.Read(acc, 0, sizeof(short));
+                    data.Z = BitConverter.ToInt16(acc, 0);
 
                 }                    
             }
