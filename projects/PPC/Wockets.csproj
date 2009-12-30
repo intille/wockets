@@ -452,8 +452,14 @@
     <Compile Include="..\..\src\Wockets\Utils\QuickSort.cs">
       <Link>Utils\QuickSort.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Utils\Battery.cs" >
+    <Compile Include="..\..\src\Wockets\Utils\Battery.cs">
       <Link>Utils\Battery.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\PAUSE.cs" >
+      <Link>Data\Commands\PAUSE.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\RESUME.cs" >
+      <Link>Data\Commands\RESUME.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
