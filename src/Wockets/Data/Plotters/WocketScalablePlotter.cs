@@ -99,6 +99,7 @@ namespace Wockets.Data.Plotters
                 int currentHead = BitConverter.ToInt32(head, 0);                
                 this.decoderTails[i] = currentHead;
                 shead[i].Seek(0, System.IO.SeekOrigin.Begin);
+                sdata[i].Seek((currentHead*(sizeof(double)+3*sizeof(short))), System.IO.SeekOrigin.Begin);
             
             }
 

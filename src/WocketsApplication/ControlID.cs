@@ -8,13 +8,13 @@ namespace WocketsApplication
     public class ControlID
     {
         public const int HOME_PANEL = 0;
-        public const int HOME_PANEL_BUTTON_COUNT = 11;
+        public const int HOME_PANEL_BUTTON_COUNT = 10;
         public const int ABOUT_PANEL = 1;
         public const int ABOUT_PANEL_BUTTON_COUNT = 0;
         public const int SETTINGS_PANEL = 2;
         public const int SETTINGS_PANEL_BUTTON_COUNT = 3;        
         public const int WOCKETS_PANEL = 3;
-        public const int WOCKETS_PANEL_BUTTON_COUNT = 3;
+        public const int WOCKETS_PANEL_BUTTON_COUNT = 4;
         public const int WOCKETS_CONFIGURATION_PANEL = 4;
         public const int WOCKETS_CONFIGURATION_PANEL_BUTTON_COUNT = 6;
         public const int PLOTTER_PANEL = 5;
@@ -22,16 +22,28 @@ namespace WocketsApplication
 
         //Home Screen                
         public const int LINE_CHART_BUTTON = 0;
+        public const int BATTERY_BUTTON = 1;
+        public const int GREEN_POWER_BUTTON = 2;
+
+        public const int START_KERNEL_BUTTON = 3;
+        public const int STOP_KERNEL_BUTTON = 4;
+
+        public const int CONNECT_BUTTON = 5;
+        public const int DISCONNECT_BUTTON = 6;
+
+        public const int SETTINGS_BUTTON = 7;
+        public const int MINIMIZE_BUTTON = 8;
+        public const int RESET_BUTTON = 9;
+
         public const int ANNOTATE_BUTTON = 1;
         public const int STATISTICS_BUTTON = 2;      
         public const int QUALITY_BUTTON = 3;
-        public const int BATTERY_BUTTON = 4;
-        public const int HEALTH_BUTTON = 5;
-        public const int SETTINGS_BUTTON = 6;
-        public const int MINIMIZE_BUTTON = 7;
-        public const int RESET_BUTTON = 8;
-        public const int CONNECT_BUTTON = 9;
-        public const int DISCONNECT_BUTTON = 10;
+    
+
+
+
+
+        public const int HEALTH_BUTTON = 11;
 
       
 
@@ -46,7 +58,8 @@ namespace WocketsApplication
         public const int WOCKETS_BACK_BUTTON = 0;
         public const int WOCKETS_UP_BUTTON = 1;
         public const int WOCKETS_DOWN_BUTTON = 2;
-        public const int WOCKETS_SAVE_BUTTON = 3;
+        //public const int WOCKETS_SAVE_BUTTON = 3;
+        public const int WOCKETS_RELOAD_BUTTON = 3;
 
         //Wockets Detail Screen
         public const int WOCKETS_CONFIGURATIONS_BACK_BUTTON = 0;        

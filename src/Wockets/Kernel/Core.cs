@@ -28,12 +28,33 @@ namespace Wockets.Kernel
             NamedEvents namedEvent = new NamedEvents();
             registryLock.WaitOne();
             RegistryKey rk = Registry.LocalMachine.OpenSubKey(COMMAND_CHANNEL, true);
-            rk.SetValue("Message", KernelCommand.DISCOVER.ToString(), RegistryValueKind.String);
+            rk.SetValue("Message", command.ToString(), RegistryValueKind.String);
             rk.SetValue("Param", senderGuid.ToString(), RegistryValueKind.String);
             rk.Flush();
             rk.Close();
             registryLock.Release();
             namedEvent.Send(Channels.COMMAND.ToString());
+        }
+        public static bool SetSniff(string channel, SleepModes mode)
+        {
+            bool success = false;
+            if (_Registered)
+            {
+                string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + channel + "}";
+                NamedEvents namedEvent = new NamedEvents();
+
+                registryLock.WaitOne();
+                RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
+                rk.SetValue("Message", KernelCommand.SET_SNIFF.ToString(), RegistryValueKind.String);     
+                rk.SetValue("Param", mode.ToString(), RegistryValueKind.String);
+
+
+                rk.Flush();
+                rk.Close();
+                registryLock.Release();
+                namedEvent.Send(channel + "-kernel");
+            }
+            return success;
         }
         public static void SetSensors(string channel, ArrayList s)
         {

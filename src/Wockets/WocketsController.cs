@@ -705,7 +705,7 @@ namespace Wockets
                                         if (alive[i] <= 0)
                                         {
                                             ((SerialReceiver)currentReceiver).Write(ALIVE_CMD._Bytes);
-                                            alive[i] = 200;// + i * 10;
+                                            alive[i] =  200;//10 for sniff in continuous worked well
                                         }
                                         #endregion Alive
 
@@ -783,6 +783,7 @@ namespace Wockets
 
                         catch (Exception ex)
                         {
+                            alive[i] = 200;//10;//200 in continuous worked well
                             Logger.Error(ex.Message + " \nTrace:" + ex.StackTrace);
                             currentReceiver.Dispose();
                         }

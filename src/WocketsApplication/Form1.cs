@@ -115,6 +115,7 @@ namespace WocketsApplication
                    wocketsConnected = true;
                    //plotterTimer.Enabled = true;
                    UpdatePlotter();
+                  
                 }
                 else if (response == ApplicationResponse.DISCONNECT_SUCCESS.ToString())
                 {
@@ -164,21 +165,20 @@ namespace WocketsApplication
                     Application.Exit();                
             }
 
-            wocketsKernelGuid=Core.Register();
-            if ((wocketsKernelGuid!=null)&& (wocketsKernelGuid.Length > 0))
+            wocketsKernelGuid = Core.Register();
+            if ((wocketsKernelGuid != null) && (wocketsKernelGuid.Length > 0))
             {
                 kListenerThread = new Thread(new ThreadStart(KernelListener));
                 kListenerThread.Start();
-            }            
+            } 
             ScreenUtils.ShowTaskBar(false);
             ScreenUtils.ShowTrayBar(false);
             InitializeComponent();
             InitializeInterface();
 
             //all commands should be sent after initializing interface
-            wocketsList._Status = "Searching for Wockets...";
-            if (wocketsKernelGuid!=null)
-                Core.Send(KernelCommand.DISCOVER, wocketsKernelGuid);
+
+            wocketsList._Status = "Refresh to search for wockets...";
             //this.slidingThread = new Thread(new ThreadStart(timeAnimation_Tick));
             _alphaManager = new AlphaContainer(this);
              this.Refresh();    
@@ -286,14 +286,25 @@ namespace WocketsApplication
 
             //Home Screen Buttons
             AddButton(ControlID.HOME_PANEL, ControlID.LINE_CHART_BUTTON, "Buttons\\LineChartPressed.png", "Buttons\\LineChartUnpressed.png", 0, 0, 128);
-            AddButton(ControlID.HOME_PANEL, ControlID.ANNOTATE_BUTTON, "Buttons\\AnnotatePressed.png", "Buttons\\AnnotateUnpressed.png", 160, 0, 128);
-            AddButton(ControlID.HOME_PANEL, ControlID.STATISTICS_BUTTON, "Buttons\\StatisticsPressed.png", "Buttons\\StatisticsUnpressed.png", 310, 0, 128);
-            AddButton(ControlID.HOME_PANEL, ControlID.QUALITY_BUTTON, "Buttons\\SignalQualityPressed.png", "Buttons\\SignalQualityUnpressed.png", 0, 160, 128);
-            AddButton(ControlID.HOME_PANEL, ControlID.BATTERY_BUTTON, "Buttons\\BatteryPressed.png", "Buttons\\BatteryUnpressed.png", 160, 160, 128);
-            AddButton(ControlID.HOME_PANEL, ControlID.HEALTH_BUTTON, "Buttons\\HeartPressed.png", "Buttons\\HeartUnpressed.png", 310, 160, 128);
+            AddButton(ControlID.HOME_PANEL, ControlID.BATTERY_BUTTON, "Buttons\\BatteryPressed.png", "Buttons\\BatteryUnpressed.png", 160, 0, 128);
+            AddButton(ControlID.HOME_PANEL, ControlID.GREEN_POWER_BUTTON, "Buttons\\SavePowerPressed-128.png", "Buttons\\SavePowerUnpressed-128.png", 310, 0, 128);
+
+            AddButton(ControlID.HOME_PANEL, ControlID.START_KERNEL_BUTTON, "Buttons\\StartKernelPressed-128.png", "Buttons\\StartKernelUnpressed-128.png", 0, 160, 128);
+            AddButton(ControlID.HOME_PANEL, ControlID.STOP_KERNEL_BUTTON, "Buttons\\StopKernelPressed-128.png", "Buttons\\StopKernelUnpressed-128.png", 160, 160, 128);
+
+            AddButton(ControlID.HOME_PANEL, ControlID.CONNECT_BUTTON, "Buttons\\ConnectPressed-128.png", "Buttons\\ConnectUnpressed-128.png", 310, 160, 128);
+            AddButton(ControlID.HOME_PANEL, ControlID.DISCONNECT_BUTTON, "Buttons\\DisconnectPressed-128.png", "Buttons\\DisconnectUnpressed-128.png", 0, 310, 128);
+
             
-            AddButton(ControlID.HOME_PANEL, ControlID.CONNECT_BUTTON, "Buttons\\ConnectPressed-128.png", "Buttons\\ConnectUnpressed-128.png", 0, 320, 128);
-            AddButton(ControlID.HOME_PANEL, ControlID.DISCONNECT_BUTTON, "Buttons\\DisconnectPressed-128.png", "Buttons\\DisconnectUnpressed-128.png", 160, 320, 128);
+            
+            //AddButton(ControlID.HOME_PANEL, ControlID.ANNOTATE_BUTTON, "Buttons\\AnnotatePressed.png", "Buttons\\AnnotateUnpressed.png", 0, 160, 128);
+            //AddButton(ControlID.HOME_PANEL, ControlID.STATISTICS_BUTTON, "Buttons\\StatisticsPressed.png", "Buttons\\StatisticsUnpressed.png", 310, 0, 128);
+            //AddButton(ControlID.HOME_PANEL, ControlID.QUALITY_BUTTON, "Buttons\\SignalQualityPressed.png", "Buttons\\SignalQualityUnpressed.png", 0, 160, 128);
+            
+            //AddButton(ControlID.HOME_PANEL, ControlID.HEALTH_BUTTON, "Buttons\\HeartPressed.png", "Buttons\\HeartUnpressed.png", 310, 160, 128);
+            
+
+  
             
             
 
@@ -309,6 +320,7 @@ namespace WocketsApplication
             AddButton(ControlID.WOCKETS_PANEL, ControlID.WOCKETS_BACK_BUTTON, "Buttons\\Back48Pressed.png", "Buttons\\Back48Unpressed.png", 400, this.Height -48, 48);
             AddButton(ControlID.WOCKETS_PANEL, ControlID.WOCKETS_UP_BUTTON, "Buttons\\Up48Pressed.png", "Buttons\\Up48Unpressed.png", 250, this.Height - 48, 48);
             AddButton(ControlID.WOCKETS_PANEL, ControlID.WOCKETS_DOWN_BUTTON, "Buttons\\Down48Pressed.png", "Buttons\\Down48Unpressed.png", 180, this.Height - 48, 48);
+            AddButton(ControlID.WOCKETS_PANEL, ControlID.WOCKETS_RELOAD_BUTTON, "Buttons\\BluetoothReloadPressed-48.png", "Buttons\\BluetoothReloadUnpressed-48.png", 20, this.Height - 48, 48);
             //AddButton(ControlID.WOCKETS_PANEL, ControlID.WOCKETS_SAVE_BUTTON, "Buttons\\SavePressed-64.png", "Buttons\\SaveUnpressed-64.png", 100, this.Height - 64, 64);
 
             wocketsList = new WocketSlidingList();                                         
@@ -350,14 +362,7 @@ namespace WocketsApplication
            
             this.panels[ControlID.PLOTTER_PANEL].Controls.Add(plotterPanel);            
 
-            /*         
-        private TextBox bluetoothName;
-        private Label bluetoothMac;
-        private TextBox bluetoothPIN;
-        private ComboBox bluetoothTP;
-        private ComboBox bluetoothSM;
-             
-             */
+
             
             //this.panels[ControlID.WOCKETS_CONFIGURATION_PANEL].Controls.Add(
             //add bluetooth panel
@@ -499,6 +504,7 @@ namespace WocketsApplication
                 }
             }
             this.Refresh();
+            
         }
 
 
@@ -549,9 +555,15 @@ namespace WocketsApplication
                     wocketsList.MoveDown();
                 else if (name == ControlID.WOCKETS_DOWN_BUTTON)
                     wocketsList.MoveUp();
-                else if (name == ControlID.WOCKETS_SAVE_BUTTON)
+                else if (name == ControlID.WOCKETS_RELOAD_BUTTON)
                 {
+                    wocketsList._Status = "Searching for Wockets...";
+                    if (wocketsKernelGuid != null)
+                        Core.Send(KernelCommand.DISCOVER, wocketsKernelGuid);
                 }
+               /* else if (name == ControlID.WOCKETS_SAVE_BUTTON)
+                {
+                }*/
             }
             else if (currentPanel == ControlID.WOCKETS_CONFIGURATION_PANEL)
             {
@@ -567,7 +579,27 @@ namespace WocketsApplication
 
             else if (currentPanel == ControlID.HOME_PANEL)
             {
-                if (name == ControlID.RESET_BUTTON)
+
+                if (name == ControlID.START_KERNEL_BUTTON)
+                {
+                    //Process.Start("//Program Files//kernel//Kernel.exe","");
+                }
+                else if (name == ControlID.STOP_KERNEL_BUTTON)
+                {         
+                    if (wocketsKernelGuid != null)
+                        Core.Send(KernelCommand.TERMINATE, wocketsKernelGuid);
+                }
+                if (name == ControlID.BATTERY_BUTTON)
+                {
+                    if (wocketsConnected)
+                        Core.SetSniff(wocketsKernelGuid, SleepModes.NoSleep);
+                }
+                else if (name == ControlID.GREEN_POWER_BUTTON)
+                {
+                    if (wocketsConnected)
+                        Core.SetSniff(wocketsKernelGuid, SleepModes.Sleep1Second);
+                }
+                else if (name == ControlID.RESET_BUTTON)
                 {
                     if (wocketsKernelGuid!=null)
                         Core.Unregister(wocketsKernelGuid);
@@ -588,10 +620,17 @@ namespace WocketsApplication
                 }
                 else if (name == ControlID.CONNECT_BUTTON)
                 {
-                    if (!wocketsConnected)
-                        Core.Connect(wocketsKernelGuid);
-                    else
-                        MessageBox.Show("Wockets Already Connected!");
+       
+                          
+
+                    if (Core._Registered)
+                    {
+                        if (!wocketsConnected)
+                            Core.Connect(wocketsKernelGuid);
+                        else
+                            MessageBox.Show("Wockets Already Connected!");
+                    }else
+                        MessageBox.Show("Application not registered!");
 
                 }
                 else if (name == ControlID.DISCONNECT_BUTTON)
@@ -651,6 +690,8 @@ namespace WocketsApplication
                     this.currentPanel = ControlID.HOME_PANEL;
                     plotterTimer.Enabled = false;
                     plotterPanel.Visible = false;
+
+                    //Core.SetSniff(wocketsKernelGuid, SleepModes.Sleep1Second);
                 }
             }
 
