@@ -84,7 +84,10 @@ namespace WocketsApplication
                         wocketsList._Status = "";
                     }
                     else
+                    {
                         wocketsList._Status = "No Wockets Found...";
+                        wocketsList.Refresh();
+                    }
               
                 }
             }
@@ -178,7 +181,7 @@ namespace WocketsApplication
 
             //all commands should be sent after initializing interface
 
-            wocketsList._Status = "Refresh to search for wockets...";
+            wocketsList._Status = "Refresh wockets...";
             //this.slidingThread = new Thread(new ThreadStart(timeAnimation_Tick));
             _alphaManager = new AlphaContainer(this);
              this.Refresh();    
@@ -289,11 +292,11 @@ namespace WocketsApplication
             AddButton(ControlID.HOME_PANEL, ControlID.BATTERY_BUTTON, "Buttons\\BatteryPressed.png", "Buttons\\BatteryUnpressed.png", 160, 0, 128);
             AddButton(ControlID.HOME_PANEL, ControlID.GREEN_POWER_BUTTON, "Buttons\\SavePowerPressed-128.png", "Buttons\\SavePowerUnpressed-128.png", 310, 0, 128);
 
-            AddButton(ControlID.HOME_PANEL, ControlID.START_KERNEL_BUTTON, "Buttons\\StartKernelPressed-128.png", "Buttons\\StartKernelUnpressed-128.png", 0, 160, 128);
-            AddButton(ControlID.HOME_PANEL, ControlID.STOP_KERNEL_BUTTON, "Buttons\\StopKernelPressed-128.png", "Buttons\\StopKernelUnpressed-128.png", 160, 160, 128);
+            //AddButton(ControlID.HOME_PANEL, ControlID.START_KERNEL_BUTTON, "Buttons\\StartKernelPressed-128.png", "Buttons\\StartKernelUnpressed-128.png", 0, 160, 128);
+            //AddButton(ControlID.HOME_PANEL, ControlID.STOP_KERNEL_BUTTON, "Buttons\\StopKernelPressed-128.png", "Buttons\\StopKernelUnpressed-128.png", 160, 160, 128);
 
-            AddButton(ControlID.HOME_PANEL, ControlID.CONNECT_BUTTON, "Buttons\\ConnectPressed-128.png", "Buttons\\ConnectUnpressed-128.png", 310, 160, 128);
-            AddButton(ControlID.HOME_PANEL, ControlID.DISCONNECT_BUTTON, "Buttons\\DisconnectPressed-128.png", "Buttons\\DisconnectUnpressed-128.png", 0, 310, 128);
+            AddButton(ControlID.HOME_PANEL, ControlID.CONNECT_BUTTON, "Buttons\\ConnectPressed-128.png", "Buttons\\ConnectUnpressed-128.png", 0, 160, 128);
+            AddButton(ControlID.HOME_PANEL, ControlID.DISCONNECT_BUTTON, "Buttons\\DisconnectPressed-128.png", "Buttons\\DisconnectUnpressed-128.png", 160, 160, 128);
 
             
             
@@ -558,6 +561,7 @@ namespace WocketsApplication
                 else if (name == ControlID.WOCKETS_RELOAD_BUTTON)
                 {
                     wocketsList._Status = "Searching for Wockets...";
+                    wocketsList.Refresh();
                     if (wocketsKernelGuid != null)
                         Core.Send(KernelCommand.DISCOVER, wocketsKernelGuid);
                 }

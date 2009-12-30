@@ -705,7 +705,11 @@ namespace Wockets
                                         if (alive[i] <= 0)
                                         {
                                             ((SerialReceiver)currentReceiver).Write(ALIVE_CMD._Bytes);
-                                            alive[i] =  200;//10 for sniff in continuous worked well
+                                            //if (((RFCOMMReceiver)currentReceiver)._Tsniff == Wockets.Utils.network.Bluetooth.TSniff.Continuous)
+                                                alive[i] = 200;//10 for sniff in continuous worked well
+                                            //else
+                                             //   alive[i] = 10;
+                                            //if (((RFCOMMReceiver)currentReceiver)._Tsniff== Wockets.Utils.network.Bluetooth.TSniff.Sniff2Seconds)
                                         }
                                         #endregion Alive
 

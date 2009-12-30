@@ -173,8 +173,10 @@ namespace Wockets.Decoders
         public bool Dispose()
         {
 #if (PocketPC)
-            this.sdata.Close();
-            this.shead.Close();
+            if (this.sdata!=null)
+                this.sdata.Close();
+            if (this.shead!=null)
+                this.shead.Close();
 #endif
             return true;
         }

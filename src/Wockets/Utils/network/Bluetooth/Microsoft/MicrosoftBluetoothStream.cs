@@ -18,6 +18,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
         public MicrosoftBluetoothEndPoint _RemoteEP;
         private bool disposed = false;
 
+
         public MicrosoftBluetoothStream(CircularBuffer buffer, CircularBuffer sbuffer, byte[] address, string pin)
             : base(buffer,sbuffer, address, pin)
         {
@@ -117,6 +118,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
             byte[] singleReadBuffer = new byte[LOCAL_BUFFER_SIZE];
             double timestamp = 0.0;
             logCounter = 0;
+            int lastReceiveCounter = 0;
             Logger.Debug("Microsoft Process:Processing thread started for receiver " + this._HexAddress + " status:" + this.status.ToString());
             while (this.status== BluetoothStatus.Connected)
             {            
@@ -162,11 +164,22 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                         {
 
                             bytesReceived = socket.Receive(singleReadBuffer, LOCAL_BUFFER_SIZE, SocketFlags.None);
-
                             totalBytes += bytesReceived;
+                            /*if (logCounter>lastReceiveCounter)
+                            {
+                                int diff=logCounter - lastReceiveCounter;
+                                if (diff > 40)
+                                    _Tsniff = TSniff.Sniff2Seconds;
+                                else if (diff > 10)
+                                    _Tsniff = TSniff.Sniff1Second;
+                                else
+                                    _Tsniff = TSniff.Continuous;
+                            }*/
+                            lastReceiveCounter = logCounter;
                             // timestamp = WocketsTimer.GetUnixTime();
                         }
                     }
+
                     Thread.Sleep(30);
                     if (logCounter > 500)
                     {

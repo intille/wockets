@@ -57,6 +57,13 @@ namespace Wockets.Receivers
         private int sniffTime = 0;
         private bool sniffMode;
         public CircularBuffer _SBuffer;
+        public TSniff _Tsniff
+        {
+            get
+            {
+                return this.bluetoothStream._Tsniff;
+            }
+        }
 
 
         public RFCOMMReceiver()
