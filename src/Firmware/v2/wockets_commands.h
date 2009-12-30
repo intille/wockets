@@ -47,6 +47,10 @@
 #define GET_BAUD_RATE				0b11001
 #define SET_BAUD_RATE				0b11010
 #define ALIVE						0b11011
+#define PAUSE						0b11100
+#define RESUME						0b11101
+
+
 
 
 

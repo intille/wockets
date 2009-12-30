@@ -30,6 +30,7 @@ unsigned int sleep=0;
 unsigned int disconnection_counter=0;
 
 unsigned char battery;
+unsigned char paused=0;
 
 unsigned char aByte=0;
 unsigned char opcode=0;
@@ -187,6 +188,8 @@ ISR(TIMER2_OVF_vect){
 								case (unsigned char)RESET_WOCKET:
 								case (unsigned char)GET_BAUD_RATE:
 								case (unsigned char)ALIVE:			
+								case (unsigned char)PAUSE:
+								case (unsigned char)RESUME:
 									command_length=1;
 									break;
 								case (unsigned char)SET_LED:
@@ -220,6 +223,14 @@ ISR(TIMER2_OVF_vect){
 				{					
 					switch (opcode)
 					{
+						case (unsigned char)PAUSE:							
+							paused=1;
+							processed_counter=command_counter;							
+							break;
+						case (unsigned char)RESUME:							
+							paused=0;
+							processed_counter=command_counter;							
+							break;
 						//reset alive timer if it is alive
 						case (unsigned char)ALIVE:							
 							alive_timer=0;
@@ -377,31 +388,34 @@ ISR(TIMER2_OVF_vect){
 					response_length=0;
 				}
 					
-				alive_timer++;					
-				if (alive_timer>=2730) //if no acks for approx 30 seconds, reset radio
-				{
+				if (paused==0){
+					alive_timer++;					
+					if (alive_timer>=2730) //if no acks for approx 30 seconds, reset radio
+					{
 					//_atmega324p_green_led_on();
 					//_delay_ms(5000);
-					_atmega324p_reset();
-					alive_timer=0;					
-				}
+						_atmega324p_reset();
+						alive_timer=0;					
+					}
 					 					
-				adc_result[ADC1]=_atmega324p_a2dConvert10bit(ADC1);
-				adc_result[ADC2]=_atmega324p_a2dConvert10bit(ADC2);
-				adc_result[ADC3]=_atmega324p_a2dConvert10bit(ADC3);
+					adc_result[ADC1]=_atmega324p_a2dConvert10bit(ADC1);
+					adc_result[ADC2]=_atmega324p_a2dConvert10bit(ADC2);
+					adc_result[ADC3]=_atmega324p_a2dConvert10bit(ADC3);
 				
 				//tag if close to ack
-				if (ack==0xff)
-					TransmitFrame(encode(0,adc_result[ADC3], adc_result[ADC2], adc_result[ADC1]));
-				//	TransmitFrame(encode(1,sequence & 0xff,(sequence>>8)&0xff,0));//adc_result[ADC3], adc_result[ADC2], adc_result[ADC1]));
-				else  //otherwise dont tag
-				TransmitFrame(encode(0,adc_result[ADC3], adc_result[ADC2], adc_result[ADC1]));
-				//	TransmitFrame(encode(0,sequence & 0xff,(sequence>>8)&0xff,0));///adc_result[ADC3], adc_result[ADC2], adc_result[ADC1]));
-
-				sequence++;
+					if (ack==0xff)
+						TransmitFrame(encode(0,adc_result[ADC3], adc_result[ADC2], adc_result[ADC1]));
+					//	TransmitFrame(encode(1,sequence & 0xff,(sequence>>8)&0xff,0));//adc_result[ADC3], adc_result[ADC2], adc_result[ADC1]));
+					else  //otherwise dont tag
+						TransmitFrame(encode(0,adc_result[ADC3], adc_result[ADC2], adc_result[ADC1]));
+					//	TransmitFrame(encode(0,sequence & 0xff,(sequence>>8)&0xff,0));///adc_result[ADC3], adc_result[ADC2], adc_result[ADC1]));
+	
+					sequence++;
+				}
 
 			}else{  //not connected
 
+				paused=0;
 				//reset the radio once
 				if (disconnected_reset==0){
 					_atmega324p_reset();
