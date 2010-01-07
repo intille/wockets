@@ -29,8 +29,12 @@ namespace WocketsApplication
         private const int NUMBER_PANELS=6;
         //private const int NUMBER_BUTTONS=9;
 
-        private const int SCREEN_RESOLUTION_X = 480;
-        private const int SCREEN_RESOLUTION_Y = 800;
+        //--- Primary Screen Dimentions ---
+        // P3300: 240x320
+        // Diamond Touch: 480x640
+        // Diamond Touch 2: 480x800
+        private int SCREEN_RESOLUTION_X = Screen.PrimaryScreen.Bounds.Width; 
+        private int SCREEN_RESOLUTION_Y = Screen.PrimaryScreen.Bounds.Height; 
 
         private ClickableAlphaPanel[] panels= new ClickableAlphaPanel[NUMBER_PANELS];
         private int[] slidingPanels = new int[2] { 0, 1 };
@@ -100,17 +104,18 @@ namespace WocketsApplication
         }
 
         private bool wocketsConnected = false;
+        
         private void KernelListener()
         {
             NamedEvents namedEvent = new NamedEvents();
             while (true)
             {
                 //ensures prior synchronization
-
                 namedEvent.Receive(wocketsKernelGuid);
 
 
-                RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + wocketsKernelGuid + "}");
+                RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_REGISTERED_APPLICATIONS_PATH + 
+                                                                         "\\{" + wocketsKernelGuid + "}");
                 string response = (string)rk.GetValue("Message");
                 rk.Close();
 
@@ -163,7 +168,7 @@ namespace WocketsApplication
 
         public Form1()
         {                    
-            //MainThreadID = Thread.CurrentThread.ManagedThreadId;
+            
             RegistryKey rk = Registry.LocalMachine.OpenSubKey("Software\\MIT\\Wockets", true);
             if (rk == null)
             {
@@ -174,11 +179,14 @@ namespace WocketsApplication
             }
 
             wocketsKernelGuid = Core.Register();
+
             if ((wocketsKernelGuid != null) && (wocketsKernelGuid.Length > 0))
             {
                 kListenerThread = new Thread(new ThreadStart(KernelListener));
                 kListenerThread.Start();
             } 
+
+
             ScreenUtils.ShowTaskBar(false);
             ScreenUtils.ShowTrayBar(false);
             InitializeComponent();
@@ -191,6 +199,9 @@ namespace WocketsApplication
             _alphaManager = new AlphaContainer(this);
              this.Refresh();    
         }
+
+
+
 
 
 
@@ -629,8 +640,8 @@ namespace WocketsApplication
                     ScreenUtils.ShowTaskBar(true);
                     
                     //Terminate the kernel
-                    //if (wocketsKernelGuid != null)
-                    //    Core.Send(KernelCommand.TERMINATE, wocketsKernelGuid);
+                    if (wocketsKernelGuid != null)
+                        Core.Send(KernelCommand.TERMINATE, wocketsKernelGuid);
 
                     Application.Exit();
                     System.Diagnostics.Process.GetCurrentProcess().Kill();
@@ -648,18 +659,15 @@ namespace WocketsApplication
                 }
                 else if (name == ControlID.CONNECT_BUTTON)
                 {
-       
-                          
-
                     if (Core._Registered)
                     {
                         if (!wocketsConnected)
                             Core.Connect(wocketsKernelGuid);
                         else
                             MessageBox.Show("Wockets Already Connected!");
-                    }else
+                    }
+                    else
                         MessageBox.Show("Application not registered!");
-
                 }
                 else if (name == ControlID.DISCONNECT_BUTTON)
                 {
