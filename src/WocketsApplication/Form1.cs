@@ -18,7 +18,8 @@ using Wockets.Kernel.Types;
 using Wockets.IPC;
 using Wockets.Kernel;
 using Wockets.Data.Plotters;
-
+//using OpenNETCF.GDIPlus;
+using OpenNETCF.Windows.Forms;
 
 
 namespace WocketsApplication
@@ -238,9 +239,17 @@ namespace WocketsApplication
         ArrayList selectedWockets = new ArrayList();
         WocketsScalablePlotter plotter=null;
         private Panel plotterPanel;
+
+
+
+
+       // RoundGauge gg = new RoundGauge();
+
         public void InitializeInterface()
         {
-            
+            //GdiplusStartupInput input = new GdiplusStartupInput();
+            //GdiplusStartupOutput output;
+            //GpStatusPlus stat = NativeMethods.GdiplusStartup(out token, input, out output);
 
             currentTransition = Transitions.LEFT_TO_RIGHT;
 
@@ -302,7 +311,13 @@ namespace WocketsApplication
             AddButton(ControlID.HOME_PANEL, ControlID.CONNECT_BUTTON, "Buttons\\ConnectPressed-128.png", "Buttons\\ConnectUnpressed-128.png", 0, 160, 128);
             AddButton(ControlID.HOME_PANEL, ControlID.DISCONNECT_BUTTON, "Buttons\\DisconnectPressed-128.png", "Buttons\\DisconnectUnpressed-128.png", 160, 160, 128);
 
-            
+
+           // gauge.Visible = true;
+           // gauge.Location = new Point(200, 200);
+            //this.panels[ControlID.HOME_PANEL].Controls.Add(gauge);
+
+            //gg.Size = new Size(400, 400);
+            //this.panels[ControlID.HOME_PANEL].Controls.Add(gg);
             
             //AddButton(ControlID.HOME_PANEL, ControlID.ANNOTATE_BUTTON, "Buttons\\AnnotatePressed.png", "Buttons\\AnnotateUnpressed.png", 0, 160, 128);
             //AddButton(ControlID.HOME_PANEL, ControlID.STATISTICS_BUTTON, "Buttons\\StatisticsPressed.png", "Buttons\\StatisticsUnpressed.png", 310, 0, 128);
@@ -352,7 +367,7 @@ namespace WocketsApplication
             bluetoothName = new Label();
             bluetoothName.Location = new Point(10, 10);
             bluetoothName.Size = new Size(250, 40);
-            bluetoothName.Font = new Font(FontFamily.GenericSansSerif, 14.0f, FontStyle.Underline|FontStyle.Bold);
+            bluetoothName.Font = new Font(FontFamily.GenericSansSerif, 14.0f, System.Drawing.FontStyle.Underline | System.Drawing.FontStyle.Bold);
             bluetoothPanel.Controls.Add(bluetoothName);
             this.panels[ControlID.WOCKETS_CONFIGURATION_PANEL].Controls.Add(bluetoothPanel);            
 
