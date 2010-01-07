@@ -168,7 +168,7 @@ namespace Wockets.Receivers
         extern static IntPtr HTCSensorGetPollingInterval(IntPtr handle, out uint poll);
         #endregion
 
-        IntPtr myHandle = HTCSensorOpen(HTCSensor.GSensor);
+        IntPtr myHandle = IntPtr.Zero; //HTCSensorOpen(HTCSensor.GSensor);
 
 
 
@@ -267,7 +267,11 @@ namespace Wockets.Receivers
         public override bool Initialize()
         {
             
+
+
 #if (PocketPC)
+
+            myHandle = HTCSensorOpen(HTCSensor.GSensor);
 
             IntPtr hEvent = CreateEvent(IntPtr.Zero, true, false, "HTC_GSENSOR_SERVICESTART");
             SetEvent(hEvent);
