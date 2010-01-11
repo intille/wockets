@@ -39,23 +39,9 @@ namespace DataMerger
                 //Check if all the files that we are looking for exist
                 try
                 {
-                    /*string[] file = Directory.GetDirectories(this.textBox1.Text);
-                    foreach (string directory in file)
-                        if (directory.Contains("phone"))
-                        {
-                            this.progressForm.AppendLog("Phone Annotation .....................Found\r\n");
-                            if ((File.Exists(directory + "\\AnnotationIntervals.xml")) && (File.Exists(directory + "\\AnnotationIntervals.csv")) &&
-                                (File.Exists(this.textBox1.Text + "\\AnnotationIntervals.xml")) && (File.Exists(this.textBox1.Text + "\\AnnotationIntervals.csv")))
-                            {
-                                File.Copy(this.textBox1.Text + "\\AnnotationIntervals.xml", this.textBox1.Text + "\\AnnotationIntervalsPC.xml", true);
-                                File.Copy(this.textBox1.Text + "\\AnnotationIntervals.csv", this.textBox1.Text + "\\AnnotationIntervals-PC.csv", true);
 
-                                File.Copy(directory + "\\AnnotationIntervals.xml", this.textBox1.Text + "\\AnnotationIntervals.xml", true);
-                                File.Copy(directory + "\\AnnotationIntervals.csv", this.textBox1.Text + "\\AnnotationIntervals.csv", true);
-                                this.progressForm.AppendLog("Phone Annotation .....................Copied\r\n");
-                            }
-                        }
-                     */
+                     
+
 
                     this.progressForm.AppendLog("Older Merged MITes CSVs .....................Deleting\r\n");
                    string[] file = Directory.GetFileSystemEntries(this.textBox1.Text +"\\"+MERGED_SUBDIRECTORY, "*MITes*.csv");
@@ -107,7 +93,7 @@ namespace DataMerger
                     file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*rti*.csv");
                     foreach (string filename in file)
                         File.Delete(filename);
-
+                   
                 
                     //annotation files   
                     if (File.Exists(this.textBox1.Text+"\\"+ ANNOTATION_SUBDIRECTORY + "\\AnnotationIntervals.xml"))
@@ -122,7 +108,7 @@ namespace DataMerger
                         this.progressForm.AppendLog("Activity Labels File .....................Not Found\r\n");
            
                     //Sensewear
-                    file = Directory.GetFileSystemEntries(this.textBox1.Text+"\\"+ OTHER_SUBDIRECTORY, "*-sensewear*.csv");
+                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-sensewear*.csv");
                     if (file.Length == 1)
                         this.progressForm.AppendLog("Sensewear File .....................Found\r\n");
                     else if (file.Length == 0)
@@ -337,6 +323,7 @@ namespace DataMerger
             try
             {
                 toCSV(this.textBox1.Text, "..\\NeededFiles\\Master\\", 3, filter);
+                toQualityCSV(this.textBox1.Text, "..\\NeededFiles\\Master\\", 3, filter);
             }
             catch (Exception e)
             {
@@ -387,6 +374,419 @@ namespace DataMerger
 
 
 
+        public static void toQualityCSV(string aDataDirectory, string masterDirectory, int maxControllers, string[] filter)
+        {
+            int ACCELEROMETER_STATISTICS_LENGTH=16;
+            int WOCKETS_SR = 92;
+            int MITES_SR = 45;
+
+
+
+            if (CSVProgress == "")
+                CSVProgress = "Generating Quality Assessment Summary in HTML";
+            
+            //Calculate Data Gaps
+            WocketsController wc = new WocketsController("", "", "");
+            wc.FromXML(aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY +"\\SensorData.xml");
+            
+            SXML.Reader sreader = new SXML.Reader(masterDirectory, aDataDirectory + "\\" + MITES_SUBDIRECTORY);
+            SXML.SensorAnnotation  sannotation = sreader.parse(maxControllers);
+                        
+            Session session = new Session();
+            session.FromXML(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\AnnotationIntervals.xml");
+
+            int numPostures = session.OverlappingActivityLists[0].Count;
+            Hashtable postures = new Hashtable();
+            for (int i=0;(i<numPostures);i++)
+                postures.Add(session.OverlappingActivityLists[0][i]._Name,i);
+            int[] timeLostPostureSensorCounter = new int[numPostures];
+
+            int[] wocketsSR = new int[wc._Sensors.Count];
+            int[] trueWocketsSR = new int[wc._Sensors.Count];
+            int[][] modeWocketsSR = new int[wc._Sensors.Count][];
+            
+            
+            bool[] disconnected = new bool[wc._Sensors.Count];
+            int[] zeroWocketsSR = new int[wc._Sensors.Count];
+            int[] numDisconnected = new int[wc._Sensors.Count];
+            ArrayList[] disconnectionDistribution = new ArrayList[wc._Sensors.Count];
+            int[] disconnectionTimer = new int[wc._Sensors.Count];
+            int[] numDisconnections = new int[wc._Sensors.Count];
+            int[] meanDisconnection = new int[wc._Sensors.Count];
+            int[] sdDisconnection = new int[wc._Sensors.Count];
+
+            int[][] timeLostPostureSensorDistribution = new int[wc._Sensors.Count][];
+            int[][] percentLostPostureSensorDistribution = new int[wc._Sensors.Count][];            
+            int[][] percentLostPostureSensorCounter= new int[wc._Sensors.Count][];                       
+
+            int[] mitesSR= new int[sannotation.Sensors.Count];    
+            int[] trueMitesSR = new int[sannotation.Sensors.Count];
+            int[][] modeMITesSR = new int[sannotation.Sensors.Count][];
+            Hashtable annotatedPostures=new Hashtable();
+           
+           // int[] wocketsCounter = new int[wc._Sensors.Count];
+           // int[] mitesCounter = new int[sannotation.Sensors.Count];
+            int numSeconds = 0;
+            for (int i = 0; (i < sannotation.Sensors.Count); i++)
+            {
+                mitesSR[i]=0;
+                trueMitesSR[i] = 0;
+                modeMITesSR[i] = new int[1000];                
+            }
+            int mitesStartIndex=3+session.OverlappingActivityLists.Count;
+
+            for (int i = 0; (i < wc._Sensors.Count); i++)
+            {
+                wocketsSR[i]=0;
+                trueWocketsSR[i] = 0;
+                modeWocketsSR[i] = new int[1000];
+                disconnected[i] = false;
+                disconnectionDistribution[i] = new ArrayList();
+                disconnectionTimer[i] = 0;
+                timeLostPostureSensorDistribution[i] = new int[numPostures];
+                percentLostPostureSensorDistribution[i] = new int[numPostures];
+                //timeLostPostureSensorCounter[i] = new int[numPostures];
+            }
+           
+
+            int wocketsStartIndex = mitesStartIndex + (ACCELEROMETER_STATISTICS_LENGTH * sannotation.Sensors.Count);
+
+            int numCategories = session.OverlappingActivityLists.Count;
+            int currentAnnotation = 0;
+
+            int annotationsLength = session.Annotations.Count;
+            double startTime = session.Annotations[0]._StartUnix;
+            double endTime = session.Annotations[annotationsLength-1]._EndUnix;
+            TextReader tr = new StreamReader(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\MITesSummaryData.csv");
+            string line = "";
+            tr.ReadLine();
+
+            
+
+            while ((line = tr.ReadLine()) != null)
+            {
+                string[] tokens = line.Split(',');
+                double currentTime = Convert.ToDouble(tokens[0]);
+                string posture = tokens[2];
+                string current_posture = "unknown";
+                if ((currentAnnotation<session.Annotations.Count-1)&&(session.Annotations[currentAnnotation]._EndUnix < currentTime))
+                    currentAnnotation++;
+
+                if ((currentTime >= session.Annotations[currentAnnotation]._StartUnix) &&
+                    (currentTime <= session.Annotations[currentAnnotation]._EndUnix))
+                {
+                    current_posture = session.Annotations[currentAnnotation].Activities[0]._Name;
+                    if (current_posture == "none")
+                        current_posture = "unknown";
+                    if (!annotatedPostures.ContainsKey(current_posture))
+                        annotatedPostures.Add(current_posture, 1);
+                    else
+                    {
+                        int annotatedSeconds = (int)annotatedPostures[current_posture] +1;
+                        annotatedPostures[current_posture]= annotatedSeconds;
+                        
+                    }
+                }
+
+                //Calculate quality metrics on data that has been annotated only
+                if ((currentTime >= startTime) && (currentTime <= endTime))
+                {
+                    //mites SR
+                    for (int i = 0; (i < sannotation.Sensors.Count); i++)
+                    {
+                        int sr=Convert.ToInt32(tokens[mitesStartIndex + (ACCELEROMETER_STATISTICS_LENGTH * i)]);
+                        mitesSR[i] += sr;
+                        modeMITesSR[i][sr] = modeMITesSR[i][sr] + 1;
+                        
+                    }
+
+                    int currentPostureIndex = (int)postures[current_posture];
+                    //the number of seconds in  a particular posture
+                    timeLostPostureSensorCounter[currentPostureIndex] = timeLostPostureSensorCounter[currentPostureIndex] + 1;
+                    //wockets SR
+                    for (int i = 0; (i < wc._Sensors.Count); i++)
+                    {
+                        int sr= Convert.ToInt32(tokens[wocketsStartIndex + (ACCELEROMETER_STATISTICS_LENGTH * i)]);
+                        wocketsSR[i] += sr;
+                        modeWocketsSR[i][sr] = modeWocketsSR[i][sr] + 1;
+
+                        //add the samples collected per activity
+                   
+                        timeLostPostureSensorDistribution[i][currentPostureIndex] =   timeLostPostureSensorDistribution[i][currentPostureIndex] + sr;
+                      
+
+                        if (sr == 0)
+                        {
+                            zeroWocketsSR[i] = zeroWocketsSR[i] + 1;
+                            if (zeroWocketsSR[i] == 5)
+                            {
+                                disconnected[i] = true;
+                                numDisconnected[i] = numDisconnected[i] + 1;
+                            }
+                            disconnectionTimer[i]++;
+                        }
+                        else
+                        {
+                            if (disconnectionTimer[i] >= 5)
+                                disconnectionDistribution[i].Add(disconnectionTimer[i]);
+                            zeroWocketsSR[i] = 0;
+                            disconnected[i] = false;
+                            disconnectionTimer[i] = 0;
+                        }
+                    }
+
+                    numSeconds++;
+                }
+
+
+            }
+
+            //calculate time lost, % data lost, burstiness
+
+
+
+            #region Wockets Loss Calculation
+            int totalSeconds = (int)((endTime - startTime) / 1000.0);
+            int expectedWocketsSamples = WOCKETS_SR * totalSeconds;
+            int expectedMITesSamples = MITES_SR * totalSeconds;
+            int[] wocketsSecondsLost = new int[wc._Sensors.Count];
+            int[] mitesSecondsLost = new int[sannotation.Sensors.Count];
+            int[] wocketsPercentLost = new int[wc._Sensors.Count];
+            int[] mitesPercentLost = new int[sannotation.Sensors.Count];
+            for (int i = 0; (i < wc._Sensors.Count); i++)
+            {
+                if (wocketsSR[i] < expectedWocketsSamples)
+                {
+                    wocketsSecondsLost[i] = (expectedWocketsSamples - wocketsSR[i]) / WOCKETS_SR;
+                    wocketsPercentLost[i] = (int)( ((double)wocketsSecondsLost[i] /(double) totalSeconds) * 100.0);
+                }
+
+                if (disconnectionTimer[i] >= 5)
+                    disconnectionDistribution[i].Add(disconnectionTimer[i]);
+            }
+            #endregion Wockets Loss Calculation
+
+            #region Wockets per Activity Loss Calculation
+            for (int i = 0; (i < timeLostPostureSensorCounter.Length); i++)
+            {
+                expectedWocketsSamples = WOCKETS_SR * timeLostPostureSensorCounter[i];
+                for (int j = 0; (j < wc._Sensors.Count); j++)
+                {
+                    if (timeLostPostureSensorDistribution[j][i] < expectedWocketsSamples)
+                    {
+                        timeLostPostureSensorDistribution[j][i] = (int) Math.Ceiling((expectedWocketsSamples - timeLostPostureSensorDistribution[j][i]) / (double)WOCKETS_SR);
+                        percentLostPostureSensorDistribution[j][i] = (int) Math.Ceiling((((double)timeLostPostureSensorDistribution[j][i] / (double)timeLostPostureSensorCounter[i]) * 100.0));
+                    }
+                    else
+                    {
+                        timeLostPostureSensorDistribution[j][i] = 0;
+                        percentLostPostureSensorDistribution[j][i] = 0;
+                    }
+                }
+            }
+           
+            #endregion Wockets per Activity Loss Calculation
+
+            #region MEAN and SD Calculation
+            for (int i = 0; (i < wc._Sensors.Count); i++)
+            {
+               numDisconnections[i]=disconnectionDistribution[i].Count;
+               meanDisconnection[i] = 0;
+               for (int j = 0; (j < disconnectionDistribution[i].Count); j++)               
+                   meanDisconnection[i] = meanDisconnection[i] + (int)disconnectionDistribution[i][j];    
+                if (numDisconnections[i]>0)
+                    meanDisconnection[i] = meanDisconnection[i] / numDisconnections[i];
+                
+               for (int j = 0; (j < disconnectionDistribution[i].Count); j++)               
+                   sdDisconnection[i] = sdDisconnection[i]  + (int) Math.Pow( ( (double) (int)disconnectionDistribution[i][j]- meanDisconnection[i]),2.0);
+
+               if (disconnectionDistribution[i].Count > 1)
+                   sdDisconnection[i] = (int)Math.Sqrt(sdDisconnection[i] / (disconnectionDistribution[i].Count - 1));
+               else
+                   sdDisconnection[i] = -1;
+           }
+
+           #endregion MEAN and SD Calculation
+
+           #region MITes Loss Calculation
+           for (int i = 0; (i < sannotation.Sensors.Count); i++)
+           {
+               if (mitesSR[i] < expectedMITesSamples)
+                   mitesSecondsLost[i] = (expectedMITesSamples - mitesSR[i]) / MITES_SR;
+               mitesPercentLost[i] = (int)(((double)mitesSecondsLost[i] / (double)totalSeconds) * 100.0);
+           }
+            #endregion MITes Loss Calculation
+            tr.Close();
+
+
+            int[] mitesMaxedOut = new int[sannotation.MaximumSensorID+1];
+            int[] mitesSamplesCount = new int[sannotation.MaximumSensorID+1];
+            MITesDecoder aMITesDecoder = new MITesDecoder();
+            MITesLoggerReader aMITesLoggerReader = new MITesLoggerReader(aMITesDecoder, aDataDirectory + "\\" + MITES_SUBDIRECTORY);
+            bool isData = true;
+            do
+            {
+                //decode the frame
+                int i = aMITesDecoder.GetSomeMITesData()[0].channel;
+                int x = aMITesDecoder.GetSomeMITesData()[0].x;
+                int y = aMITesDecoder.GetSomeMITesData()[0].y;
+                int z = aMITesDecoder.GetSomeMITesData()[0].z;
+                mitesSamplesCount[i] = mitesSamplesCount[i] + 1;
+                if ((x >= 1023) || (y >= 1023) || (z >= 1023))
+                    mitesMaxedOut[i] = mitesMaxedOut[i] + 1;
+
+            } while (isData = aMITesLoggerReader.GetSensorData(10));
+
+            #region Percent Maxed Out Wockets
+            int[] maxedOut = new int[wc._Sensors.Count];
+            int[] samplesCount = new int[wc._Sensors.Count];
+
+          
+
+            for (int i = 0; (i < wc._Sensors.Count); i++)
+            {
+                       
+                wc._Sensors[i]._RootStorageDirectory = aDataDirectory+"\\"+ WOCKETS_SUBDIRECTORY + "\\data\\raw\\PLFormat\\";
+                try
+                {
+                    int lastDecodedIndex = 0;
+                    while (wc._Sensors[i].Load())
+                    {
+                        samplesCount[i] = samplesCount[i] + 1;
+
+                        if (wc._Sensors[i]._Decoder._Head == 0)
+                            lastDecodedIndex = wc._Sensors[i]._Decoder._Data.Length - 1;
+                        else
+                            lastDecodedIndex = wc._Sensors[i]._Decoder._Head - 1;                      
+                        Wockets.Data.Accelerometers.AccelerationData data = (Wockets.Data.Accelerometers.AccelerationData)wc._Sensors[i]._Decoder._Data[lastDecodedIndex];
+                        if ((data.X >= 1023) || (data.Y >= 1023) || (data.Z >= 1023))
+                            maxedOut[i] = maxedOut[i] + 1;
+                    }
+                }
+                catch (Exception)
+                {
+                }
+            }
+            #endregion Percent Maxed Out Wockets
+
+            string summary = "<h2>Data Loss, Disconnections and Maxing out Statistics </h2><TABLE border=\"1\">\n";
+            int numRows=wc._Sensors.Count-1 + sannotation.Sensors.Count;
+            string[] rows = new string[numRows];
+            string header="<TR>\n";
+            
+            string[] hlabels= new string[]{"Placement\\Metric","Data Loss (seconds)","% Data Loss","Num Disconnections","Mean Disconnection (seconds)","SD Disconnection (seconds)","Num Maxed Out","% Maxed Out"};            
+
+            for (int i=0;(i<hlabels.Length);i++)
+                header += "<TD><div align=\"center\"><strong>" + hlabels[i] + "</strong></div></TD>\n";
+            
+            header+="</TR>\n";
+            summary+=header;
+            
+            for (int i = 0; (i < sannotation.Sensors.Count); i++)
+            {
+                string row="<TR>\n";
+                row += "<TD><div align=\"center\"><strong>MITes " + ((SXML.Sensor)sannotation.Sensors[i]).Location + "</strong></div></TD>\n";
+
+                if (mitesPercentLost[i] >= 20)
+                {
+                    row += "<TD bgcolor=\"#FF0000\"><div align=\"center\">" + mitesSecondsLost[i].ToString() + "</div></TD>\n"; ;
+                    row += "<TD bgcolor=\"#FF0000\"><div align=\"center\">" + mitesPercentLost[i].ToString() + "%" + "</div></TD>\n";
+                }
+                else
+                {
+                    row += "<TD><div align=\"center\">" + mitesSecondsLost[i].ToString() + "</div></TD>\n"; ;
+                    row += "<TD><div align=\"center\">" + mitesPercentLost[i].ToString() + "%" + "</div></TD>\n"; 
+                }
+
+                int percent = (int)(((double)mitesMaxedOut[Convert.ToInt32(((SXML.Sensor)sannotation.Sensors[i]).ID)] / (double)mitesSamplesCount[Convert.ToInt32(((SXML.Sensor)sannotation.Sensors[i]).ID)]) * 100.0);
+                row += "<TD><div align=\"center\">" + "N/A" + "</div></TD>\n";
+                row += "<TD><div align=\"center\">" + "N/A" + "</div></TD>\n";
+                row += "<TD><div align=\"center\">" + "N/A" + "</div></TD>\n";
+                row += "<TD><div align=\"center\">" + mitesMaxedOut[Convert.ToInt32(((SXML.Sensor)sannotation.Sensors[i]).ID)] + "</div></TD>\n";
+                row += "<TD><div align=\"center\">" + percent + "% </div></TD>\n";
+                row+="</TR>\n";                
+                summary+=row;
+            }
+
+
+            summary += "<TR><TD colspan=\"8\"></TD></TR><TR>\n";
+
+            for (int i = 0; (i < wc._Sensors.Count-1); i++)
+            {
+
+                                
+                string row="<TR>\n";
+                row += "<TD><div align=\"center\"><strong>Wocket " + wc._Sensors[i]._Location + "</strong></div></TD>\n";
+
+                if (wocketsPercentLost[i] >= 20)
+                {
+                    row += "<TD bgcolor=\"#FF0000\"><div align=\"center\">" + wocketsSecondsLost[i].ToString() + "</div></TD>\n";
+                    row += "<TD bgcolor=\"#FF0000\"><div align=\"center\">" + wocketsPercentLost[i].ToString() + "%" + "</div></TD>\n";
+                }
+                else
+                {
+                    row += "<TD><div align=\"center\">" + wocketsSecondsLost[i].ToString() + "</div></TD>\n";
+                    row += "<TD><div align=\"center\">" + wocketsPercentLost[i].ToString() + "%" + "</div></TD>\n";
+                }
+                row += "<TD><div align=\"center\">" + numDisconnections[i].ToString() + "</div></TD>\n";
+                row += "<TD><div align=\"center\">" + meanDisconnection[i].ToString() + "</div></TD>\n";
+                if (sdDisconnection[i]>=0)
+                    row += "<TD><div align=\"center\">" + sdDisconnection[i].ToString() + "</div></TD>\n";
+                else
+                    row += "<TD><div align=\"center\">N/A</div></TD>\n";
+                row += "<TD><div align=\"center\">" + maxedOut[i].ToString() + "</div></TD>\n";
+                row += "<TD><div align=\"center\">" + ((int)(((double)maxedOut[i] / (double)samplesCount[i]) * 100.0)).ToString() + "% </div></TD>\n";
+                row+="</TR>\n";                
+                summary+=row;
+
+
+            }
+            summary += "</TABLE>\n";
+
+
+
+
+            summary = "<HTML><HEAD></HEAD><BODY>" + summary + "</BODY></HTML>";
+            TextWriter tw = new StreamWriter(aDataDirectory + "\\result.html");
+            tw.WriteLine(summary);
+           tw.WriteLine("\n<p>&nbsp;</p>\n");
+
+           summary = "<h2>Data Loss by Posture and Activity Statistics</h2><TABLE border=\"1\">\n";
+            numRows =numPostures;
+            rows = new string[numRows];
+            header = "<TR>\n<td><div align=\"center\"><strong>Activity\\Placement</strong></div></td><td><strong>Num Seconds</strong></td>\n";
+            for (int j = 0; (j < wc._Sensors.Count-1); j++)
+                header += "<TD><div align=\"center\"><strong>" + wc._Sensors[j]._Location + "</strong></div></TD>\n";
+            header += "</TR>\n";
+            summary += header;
+
+            for (int i = 0; (i < numPostures); i++)
+            {
+                if (annotatedPostures.ContainsKey(session.OverlappingActivityLists[0][i]._Name))
+                {
+                    string row = "<TR>\n";
+                    row += "<TD><div align=\"center\"><strong>" + session.OverlappingActivityLists[0][i]._Name + "</strong></div></TD>\n";
+                    row += "<TD><div>" + (int) annotatedPostures[session.OverlappingActivityLists[0][i]._Name] + "</TD>\n";
+                    for (int j = 0; (j < wc._Sensors.Count - 1); j++)
+                        if (percentLostPostureSensorDistribution[j][i] > 20)
+                            row += "<TD bgcolor=\"#FF0000\"><div align=\"center\">" + timeLostPostureSensorDistribution[j][i].ToString() + " | " + percentLostPostureSensorDistribution[j][i].ToString() + "%" + "</div></TD>\n";
+                        else
+                            row += "<TD ><div align=\"center\">" + timeLostPostureSensorDistribution[j][i].ToString() + " | " + percentLostPostureSensorDistribution[j][i].ToString() + "%" + "</div></TD>\n";
+
+                    row += "</TR>\n";
+                    summary += row;
+                }
+
+            }
+
+            summary += "</TABLE></HTML>";
+            tw.WriteLine(summary);
+
+
+            tw.Close();
+   
+
+        }
         //directories
 
         public static string MITES_SUBDIRECTORY = "mites";

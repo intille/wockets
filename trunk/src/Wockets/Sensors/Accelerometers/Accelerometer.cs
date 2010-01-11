@@ -69,8 +69,10 @@ namespace Wockets.Sensors.Accelerometers
 
         #endregion IO storage variables
 
+#if (PocketPC)
         private MemoryMappedFileStream sdata = null;
         private MemoryMappedFileStream shead = null;
+#endif
         private int sdataSize = 0;
         byte[] head = new byte[4];
         public Accelerometer(SensorClasses sensorclass):base(SensorTypes.ACCEL,sensorclass)
@@ -286,11 +288,13 @@ namespace Wockets.Sensors.Accelerometers
 
         public override void Dispose()
         {
+
+#if (PocketPC)
             if (sdata != null)
                 sdata.Close();
             if (shead != null)
                 shead.Close();
-
+#endif
             if (bw != null)
             {
                 bw.Flush();
@@ -310,7 +314,7 @@ namespace Wockets.Sensors.Accelerometers
         byte[] acc = new byte[sizeof(short)];
         public override void Save()
         {
-           
+#if (PocketPC)           
             if (_Saving)
             {
                 if (sdata == null)
@@ -421,6 +425,7 @@ namespace Wockets.Sensors.Accelerometers
 
                 }                    
             }
+#endif
         }
 
         ArrayList someBinaryFiles = new ArrayList();
