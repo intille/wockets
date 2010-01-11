@@ -1,0 +1,5 @@
+C:\wockets\v1\projects\PPC\obj\Debug\ResolveAssemblyReference.cache
+C:\wockets\v1\bin\PPC\Wockets.dll
+C:\wockets\v1\bin\PPC\Wockets.pdb
+C:\wockets\v1\projects\PPC\obj\Debug\Wockets.dll
+C:\wockets\v1\projects\PPC\obj\Debug\Wockets.pdb
