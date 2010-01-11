@@ -1,0 +1,411 @@
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{5D98635F-251B-464F-9132-AF594E8D482B}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Wockets</RootNamespace>
+    <AssemblyName>Wockets</AssemblyName>
+    <ProjectTypeGuids>{4D628B5B-2FBC-4AA6-8C16-197242AEB884};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <PlatformFamilyName>PocketPC</PlatformFamilyName>
+    <PlatformID>3C41C503-53EF-4c2a-8DD4-A8217CAD115E</PlatformID>
+    <OSVersion>4.20</OSVersion>
+    <DeployDirSuffix>wockets</DeployDirSuffix>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <FormFactorID>
+    </FormFactorID>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\bin\PPC\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;$(PlatformFamilyName)</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <FileAlignment>512</FileAlignment>
+    <WarningLevel>4</WarningLevel>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\bin\PPC\Release\</OutputPath>
+    <DefineConstants>TRACE;$(PlatformFamilyName)</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <FileAlignment>512</FileAlignment>
+    <WarningLevel>4</WarningLevel>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.VisualBasic" />
+    <Reference Include="Microsoft.WindowsMobile, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\bin\NeededFiles\dlls\Microsoft.WindowsMobile.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.WindowsMobile.Status, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\bin\NeededFiles\dlls\Microsoft.WindowsMobile.Status.dll</HintPath>
+    </Reference>
+    <Reference Include="mscorlib">
+      <HintPath>..\..\..\..\..\..\..\..\..\..\Program Files (x86)\Microsoft Visual Studio 8\SmartDevices\SDK\CompactFramework\2.0\v2.0\WindowsCE\mscorlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System">
+      <HintPath>..\..\..\..\..\..\..\..\..\..\Program Files (x86)\Microsoft Visual Studio 8\SmartDevices\SDK\CompactFramework\2.0\v2.0\WindowsCE\System.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Data">
+      <HintPath>..\..\..\..\..\..\..\..\..\..\Program Files (x86)\Microsoft Visual Studio 8\SmartDevices\SDK\CompactFramework\2.0\v2.0\WindowsCE\System.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Drawing">
+      <HintPath>..\..\..\..\..\..\..\..\..\..\Program Files (x86)\Microsoft Visual Studio 8\SmartDevices\SDK\CompactFramework\2.0\v2.0\WindowsCE\System.Drawing.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Windows.Forms">
+      <HintPath>..\..\..\..\..\..\..\..\..\..\Program Files (x86)\Microsoft Visual Studio 8\SmartDevices\SDK\CompactFramework\2.0\v2.0\WindowsCE\System.Windows.Forms.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml">
+      <HintPath>..\..\..\..\..\..\..\..\..\..\Program Files (x86)\Microsoft Visual Studio 8\SmartDevices\SDK\CompactFramework\2.0\v2.0\WindowsCE\System.Xml.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\src\Wockets\Data\Accelerometers\AccelerationData.cs">
+      <Link>Data\Accelerometers\AccelerationData.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Accelerometers\SparkfunAccelerationData.cs">
+      <Link>Data\Accelerometers\SparkfunAccelerationData.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Classifiers\ClassifierConfiguration.cs">
+      <Link>Data\Classifiers\ClassifierConfiguration.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Annotation\Activity.cs">
+      <Link>Data\Annotation\Activity.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Annotation\ActivityList.cs">
+      <Link>Data\Annotation\ActivityList.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Annotation\Annotation.cs">
+      <Link>Data\Annotation\Annotation.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Annotation\AnnotationList.cs">
+      <Link>Data\Annotation\AnnotationList.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Annotation\AnnotationProtocol.cs">
+      <Link>Data\Annotation\AnnotationProtocol.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Annotation\AnnotationProtocolList.cs">
+      <Link>Data\Annotation\AnnotationProtocolList.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Annotation\ConcurrentActivityLists.cs">
+      <Link>Data\Annotation\ConcurrentActivityLists.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Annotation\Session.cs">
+      <Link>Data\Annotation\Session.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Classifiers\Trees\DTClassifier.cs">
+      <Link>Data\Classifiers\Trees\DTClassifier.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Classifiers\Trees\DTConfiguration.cs">
+      <Link>Data\Classifiers\Trees\DTConfiguration.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Classifiers\Utils\FeatureExtractor.cs">
+      <Link>Data\Classifiers\Utils\FeatureExtractor.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Converter\ArffConverter.cs">
+      <Link>Data\Converter\ArffConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Converter\CSVConverter.cs">
+      <Link>Data\Converter\CSVConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Logger\PLFormatLogger.cs">
+      <Link>Data\Logger\PLFormatLogger.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Plotters\WocketScalablePlotter.cs">
+      <Link>Data\Plotters\WocketScalablePlotter.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Decoders\Decoder.cs">
+      <Link>Decoders\Decoder.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Decoders\DecoderList.cs">
+      <Link>Decoders\DecoderList.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Decoders\DecoderTypes.cs">
+      <Link>Decoders\DecoderTypes.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Decoders\Accelerometers\HTCDiamondTouchDecoder.cs">
+      <Link>Decoders\Accelerometers\HTCDiamondTouchDecoder.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Decoders\Accelerometers\MITesDecoder.cs">
+      <Link>Decoders\Accelerometers\MITesDecoder.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Decoders\Accelerometers\SparkfunDecoder.cs">
+      <Link>Decoders\Accelerometers\SparkfunDecoder.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Decoders\Accelerometers\WocketsDecoder.cs">
+      <Link>Decoders\Accelerometers\WocketsDecoder.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Receivers\HTCDiamondReceiver.cs">
+      <Link>Receivers\HTCDiamondReceiver.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Receivers\ReceiverList.cs">
+      <Link>Receivers\ReceiverList.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Receivers\ReceiverTypes.cs">
+      <Link>Receivers\ReceiverTypes.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Sensors\Accelerometers\Accelerometer.cs">
+      <Link>Sensors\Accelerometers\Accelerometer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Sensors\Accelerometers\HTCDiamondTouch.cs">
+      <Link>Sensors\Accelerometers\HTCDiamondTouch.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Sensors\Accelerometers\MITe.cs">
+      <Link>Sensors\Accelerometers\MITe.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Sensors\Accelerometers\Sparkfun.cs">
+      <Link>Sensors\Accelerometers\Sparkfun.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Sensors\Accelerometers\Wocket.cs">
+      <Link>Sensors\Accelerometers\Wocket.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Sensors\HeartRate\HeartRateSensor.cs">
+      <Link>Sensors\HeartRate\HeartRateSensor.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Sensors\Sensor.cs">
+      <Link>Sensors\Sensor.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Sensors\SensorClasses.cs">
+      <Link>Sensors\SensorClasses.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Sensors\SensorList.cs">
+      <Link>Sensors\SensorList.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Sensors\SensorTypes.cs">
+      <Link>Sensors\SensorTypes.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\DirectoryStructure.cs">
+      <Link>Utils\DirectoryStructure.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Accelerometers\HTCDiamondTouchAccelerationData.cs">
+      <Link>Data\Accelerometers\HTCDiamondTouchAccelerationData.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Accelerometers\MITesAccelerationData.cs">
+      <Link>Data\Accelerometers\MITesAccelerationData.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Properties\AssemblyInfo.cs">
+      <Link>Properties\AssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Receivers\Receiver.cs">
+      <Link>Receivers\Receiver.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Receivers\RFCOMMReceiver.cs">
+      <Link>Receivers\RFCOMMReceiver.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\SensorData.cs">
+      <Link>Data\SensorData.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Accelerometers\WocketsAccelerationData.cs">
+      <Link>Data\Accelerometers\WocketsAccelerationData.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\SensorDataTypes.cs">
+      <Link>Data\SensorDataTypes.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Receivers\SerialReceiver.cs">
+      <Link>Receivers\SerialReceiver.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Receivers\StandardCOMReceiver.cs">
+      <Link>Receivers\StandardCOMReceiver.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\WocketsTimer.cs">
+      <Link>Utils\WocketsTimer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\XMLSerializable.cs">
+      <Link>Utils\XMLSerializable.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\WocketsController.cs">
+      <Link>WocketsController.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\WocketsControllerList.cs">
+      <Link>WocketsControllerList.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Summary\Activity.cs">
+      <Link>Data\Summary\Activity.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Summary\ActivityList.cs">
+      <Link>Data\Summary\ActivityList.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Summary\Constants.cs">
+      <Link>Data\Summary\Constants.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Summary\Reader.cs">
+      <Link>Data\Summary\Reader.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\CommandTypes.cs">
+      <Link>Data\Commands\CommandTypes.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\Command.cs">
+      <Link>Data\Commands\ReceiverCommand.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\WocketCommand.cs">
+      <Link>Data\Commands\RFCOMMCommand.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\Logger.cs">
+      <Link>Utils\logger.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Decoders\Accelerometers\GenericDecoder.cs">
+      <Link>Decoders\Accelerometers\GenericDecoder.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\ByteReader.cs">
+      <Link>Utils\ByteReader.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\ByteWriter.cs">
+      <Link>Utils\ByteWriter.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\FileReader.cs">
+      <Link>Utils\FileReader.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\FileWriter.cs">
+      <Link>Utils\FileWriter.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\BatteryResponse.cs">
+      <Link>Data\Responses\BatteryResponse.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\Barrier.cs">
+      <Link>Utils\Barrier.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\MonitorEx.cs">
+      <Link>Utils\MonitorEx.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\network\Bluetooth\BluetoothStack.cs">
+      <Link>Utils\network\Bluetooth\BluetoothStack.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\network\Bluetooth\BluetoothStackTypes.cs">
+      <Link>Utils\network\Bluetooth\BluetoothStackTypes.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\network\Bluetooth\BluetoothStatus.cs">
+      <Link>Utils\network\Bluetooth\BluetoothStatus.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\network\Bluetooth\BluetoothStream.cs">
+      <Link>Utils\network\Bluetooth\BluetoothStream.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\network\Bluetooth\BluetoothStreamList.cs">
+      <Link>Utils\network\Bluetooth\BluetoothStreamList.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\network\Bluetooth\Microsoft\MicrosoftBluetoothStack.cs">
+      <Link>Utils\network\Bluetooth\Microsoft\MicrosoftBluetoothStack.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\network\Bluetooth\Microsoft\MicrosoftBluetoothStream.cs">
+      <Link>Utils\network\Bluetooth\Microsoft\MicrosoftBluetoothStream.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\network\Bluetooth\Widcomm\WidcommBluetoothStack.cs">
+      <Link>Utils\network\Bluetooth\Widcomm\WidcommBluetoothStack.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\network\Bluetooth\Widcomm\WidcommBluetoothStream.cs">
+      <Link>Utils\network\Bluetooth\Widcomm\WidcommBluetoothStream.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Receivers\ReceiverStatus.cs">
+      <Link>Receivers\ReceiverStatus.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\network\NetworkStacks.cs">
+      <Link>Utils\network\NetworkStacks.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Decoders\Response.cs">
+      <Link>Decoders\Response.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\Response.cs">
+      <Link>Data\Responses\Response.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Receivers\GenericReceiver.cs">
+      <Link>Receivers\GenericReceiver.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\ALIVE.cs">
+      <Link>Data\Commands\ALIVE.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\BT_RST.cs">
+      <Link>Data\Commands\BT_RST.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\EnterCommandMode.cs">
+      <Link>Data\Commands\EnterCommandMode.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\ExitCommandMode.cs">
+      <Link>Data\Commands\ExitCommandMode.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_BT.cs">
+      <Link>Data\Commands\GET_BT.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_PC.cs">
+      <Link>Data\Commands\GET_PC.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_SEN.cs">
+      <Link>Data\Commands\GET_SEN.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_SM.cs">
+      <Link>Data\Commands\GET_SM.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\LEDTypes.cs">
+      <Link>Data\Commands\LEDTypes.cs"</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\RST_WK.cs">
+      <Link>Data\Commands\RST_WK.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\SET_LED.cs">
+      <Link>Data\Commands\SET_LED.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\SET_SM.cs">
+      <Link>Data\Commands\SET_SM.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Exceptions\BurstyException.cs">
+      <Link>Exceptions\BurstyException.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\CircularBuffer.cs">
+      <Link>Utils\CircularBuffer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\network\Bluetooth\Microsoft\MicrosoftBluetoothEndpoint.cs">
+      <Link>Utils\network\Bluetooth\Microsoft\MicrosoftBluetoothEndpoint.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Applications\Games\Escape\Actions.cs">
+      <Link>Applications\Games\Escape\Actions.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Applications\Games\Escape\Audio.cs">
+      <Link>Applications\Games\Escape\Audio.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Applications\Games\Escape\Escape.cs">
+      <Link>Applications\Games\Escape\Escape.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Applications\Games\Escape\Player.cs">
+      <Link>Applications\Games\Escape\Player.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Applications\Games\Escape\Sounds.cs">
+      <Link>Applications\Games\Escape\Sounds.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\Battery.cs" >
+      <Link>Utils\Battery.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="WocketsWeka.csproj">
+      <Project>{637F0352-A172-4CD3-8C6B-C318CC92C14B}</Project>
+      <Name>WocketsWeka</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Condition="'$(TargetFrameworkVersion)' == 'v1.0'" Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.v1.targets" />
+  <Import Condition="'$(TargetFrameworkVersion)' == 'v2.0'" Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}">
+        <HostingProcess disable="1" />
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
