@@ -13,6 +13,12 @@ using weka.classifiers.evaluation;
 using weka.attributeSelection;
 using AXML;
 using System.Collections;
+using Wockets.Data.Annotation;
+using Wockets;
+using Wockets.Utils;
+using Wockets.Data.Classifiers.Trees;
+using Wockets.Data.Classifiers.Utils;
+using System.Text.RegularExpressions;
 
 namespace MITesAnalysisApplication
 {
@@ -256,9 +262,7 @@ namespace MITesAnalysisApplication
             }
         }
 
-        static void GenerateInterRateReliability()
-        {
-        }
+
         static void GenerateCrossValidationDecisionTrees()
         {
             string destination = @"C:\DataAnalysis\Stanford-Analysis\";
@@ -488,10 +492,311 @@ namespace MITesAnalysisApplication
             }
         }
 
+
+        static void GenerateArff()
+        {
+            Classifier classifier;
+            FastVector fvWekaAttributes;
+            Instances instances;
+            string[] activityLabels;
+            Hashtable labelIndex;
+            int[] labelCounters;
+
+            string storage = @"C:\Users\albinali\Desktop\wockets-Groden-12-11\InClassAfternoon130-220\naive\Session12-11-13-42-51\wockets\";
+            WocketsController wc = new WocketsController("", "", "");
+            wc.FromXML(storage + "SensorData.xml");
+            int[] lostSeconds = new int[wc._Sensors.Count];
+            double[] prevUnix = new double[wc._Sensors.Count];
+            bool isAllDone = false;
+
+
+            Session annotatedSession = new Session();
+            DTConfiguration classifierConfiguration = new DTConfiguration();
+
+            try
+            {
+                annotatedSession.FromXML(storage + "\\ActivityLabelsRealtime.xml");
+            }
+            catch (Exception e)
+            {
+            }
+
+
+            try
+            {
+                classifierConfiguration.FromXML(storage + "\\Configuration.xml");
+            }
+            catch (Exception e)
+            {
+            }
+
+
+
+            FeatureExtractor.Initialize(wc, classifierConfiguration, annotatedSession.OverlappingActivityLists[0]);
+
+            TextWriter tw = new StreamWriter(storage + "\\output.arff");
+            tw.WriteLine("@RELATION wockets");
+            tw.WriteLine(FeatureExtractor.GetArffHeader());
+            tw.Write("@ATTRIBUTE activity {unknown");
+            for (int i = 0; (i < annotatedSession.OverlappingActivityLists[0].Count); i++)
+                tw.Write("," + Regex.Replace(annotatedSession.OverlappingActivityLists[0][i]._Name, "[-]+", "_"));
+            tw.WriteLine("}");
+            tw.WriteLine("@DATA");
+            //"flapping,rocking,flaprock}\n");
+
+            labelIndex = new Hashtable();
+            int[] lastDecodedIndex = new int[wc._Sensors.Count];
+            double[] lastDecodedTime = new double[wc._Sensors.Count];
+            bool[] isDone = new bool[wc._Sensors.Count];
+            int nextSensor = 0;
+            double smallestTimestamp = 0;
+            for (int i = 0; (i < wc._Sensors.Count); i++)
+            {
+                wc._Sensors[i]._RootStorageDirectory = storage + "data\\raw\\PLFormat\\";
+                isDone[i] = false;
+                lastDecodedTime[i] = 0;
+                lastDecodedIndex[i] = 0;
+            }
+           
+            //double lastTimeStamp=0;
+            Wockets.Data.Accelerometers.AccelerationData data = null;
+            string previousActivity = "";
+            Wockets.Data.Annotation.Annotation annotation = null;
+            int classificationCounter = 0;
+            string realtime_activity = "unknown";
+            int realtimeIndex = 0;
+            
+            Session session=new Session();
+            session.FromXML(storage+"AnnotationIntervals.xml");
+            Wockets.Data.Annotation.Annotation realtimeRecord = session.Annotations[0];
+            realtimeRecord._StartUnix += 5000;
+            realtimeRecord._EndUnix -= 5000;
+            //AXML.AnnotatedRecord realtimeRecord = ((AXML.AnnotatedRecord)realtimeAnnotation.Data[realtimeIndex]);
+
+            while (isAllDone == false)
+            {
+                isAllDone = true;
+                for (int i = 0; (i < wc._Sensors.Count); i++)
+                {
+
+                    if (nextSensor == i)
+                    {
+                        if (wc._Sensors[i].Load())
+                        {
+                            if (wc._Sensors[i]._Decoder._Head == 0)
+                                lastDecodedIndex[i] = wc._Sensors[i]._Decoder._Data.Length - 1;
+                            else
+                                lastDecodedIndex[i] = wc._Sensors[i]._Decoder._Head - 1;
+                            data = (Wockets.Data.Accelerometers.AccelerationData)wc._Sensors[i]._Decoder._Data[lastDecodedIndex[i]];
+                            lastDecodedTime[i] = data.UnixTimeStamp;
+
+                            isAllDone = false;
+
+
+                            double lastTimeStamp = FeatureExtractor.StoreWocketsWindow();
+
+                            if (smallestTimestamp > realtimeRecord._EndUnix)
+                            {
+                                realtime_activity = "unknown";
+                                realtimeIndex++;
+                                if (realtimeIndex < session.Annotations.Count)
+                                {
+                                    realtimeRecord = session.Annotations[realtimeIndex];
+                                    realtimeRecord._StartUnix += 5000;
+                                    realtimeRecord._EndUnix -= 5000;
+                                }
+                            }
+
+                            if ((lastTimeStamp >= realtimeRecord._StartUnix) &&
+                                (lastTimeStamp <= realtimeRecord._EndUnix) && realtime_activity.Equals("unknown"))
+                            {
+                                realtime_activity = realtimeRecord.Activities._CurrentActivity;
+                                realtime_activity = realtime_activity.Replace("none", "").Replace('-', '_').Replace(':', '_').Replace('%', '_').Replace('/', '_');
+                                realtime_activity = Regex.Replace(realtime_activity, "[_]+", "_");
+                                realtime_activity = Regex.Replace(realtime_activity, "^[_]+", "");
+                                realtime_activity = Regex.Replace(realtime_activity, "[_]+$", "");
+                            }
+                            else if (lastTimeStamp > realtimeRecord._EndUnix)
+                                realtime_activity = "unknown";
+
+                            if (FeatureExtractor.GenerateFeatureVector(lastTimeStamp))
+                            {
+                                string arffSample = FeatureExtractor.toString() ;
+                                tw.WriteLine(arffSample + "," + realtime_activity);
+                            }
+                        }
+                    }
+
+                    nextSensor = 0;
+                    smallestTimestamp = lastDecodedTime[0];
+                    for (int j = 0; (j < wc._Sensors.Count); j++)
+                    {
+                        if (smallestTimestamp > lastDecodedTime[j])
+                        {
+                            smallestTimestamp = lastDecodedTime[j];
+                            nextSensor = j;
+                        }
+                    }
+
+                }
+            }
+
+
+
+            tw.Close();
+
+        }
+        static void GenerateInterRateReliability()
+        {
+            string root = @"C:\Users\albinali\Desktop\wockets-Groden-12-11\InLabMorning1100-1132\";
+            string file1 = root + @"expert\Session12-11-10-37-13";
+            string file2 = root + @"naive\Session12-11-10-57-59\wockets";
+            file1 += "\\AnnotationIntervals.xml";
+            file2 += "\\AnnotationIntervals.xml";
+            int totalCount = 0;
+            int boundaryCount = 0;
+            int delayedCount = 0;
+            double delayedAverage = 0;
+            bool agreeing = false;
+            int missedCount = 0;
+            bool a1Changed=false;
+            double offsetDelay=0;
+            int offsetCount=0;
+
+            Session session1 = new Session();
+            Session session2 = new Session();
+            session1.FromXML(file1);
+            session2.FromXML(file2);
+            Hashtable categories = new Hashtable();
+            string categorynames="";
+            for (int i = 0; (i<session1.OverlappingActivityLists[0].Count); i++)
+            {
+                categories.Add(session1.OverlappingActivityLists[0][i]._Name, i);
+                categorynames+=session1.OverlappingActivityLists[0][i]._Name+",";
+            }
+            
+            int dims=session1.OverlappingActivityLists[0].Count + 1;
+            categories.Add("unknown",dims-1);
+            categorynames+="unknown";
+            int[][] reliability = new int[dims][];
+            for (int i = 0; (i < reliability.Length); i++)
+            {
+                reliability[i] = new int[dims];
+                for (int j = 0; (j < dims); j++)
+                    reliability[i][j] = 0;
+            }
+
+            double startTime = session1.Annotations[0]._StartUnix;
+            if (session2.Annotations[0]._StartUnix < startTime)
+                startTime = session2.Annotations[0]._StartUnix;
+            double endTime = session1.Annotations[session1.Annotations.Count - 1]._EndUnix;
+            if (session2.Annotations[session2.Annotations.Count - 1]._EndUnix > endTime)
+                endTime = session2.Annotations[session2.Annotations.Count - 1]._EndUnix;
+
+            double currentTime=startTime;
+            int currentAnnotation1 = 0;
+            int currentAnnotation2 = 0;
+
+            while (currentTime <= endTime)
+            {
+                double a1end=session1.Annotations[currentAnnotation1]._EndUnix;
+                double a1start=session1.Annotations[currentAnnotation1]._StartUnix;
+
+                double a2end=session2.Annotations[currentAnnotation2]._EndUnix;
+                double a2start=session2.Annotations[currentAnnotation2]._StartUnix;
+
+                if ((currentTime > a1end) && (currentAnnotation1 < session1.Annotations.Count - 1))
+                {
+                    a1Changed = true;
+                    currentAnnotation1++;
+                }
+                else
+                    a1Changed = false;
+                if ((currentTime > a2end) && (currentAnnotation2 < session2.Annotations.Count - 1))
+                    currentAnnotation2++;
+
+                string a1label="unknown";
+                string a2label="unknown";
+                if ((currentTime<=a1end) && (currentTime>=a1start))
+                    a1label=session1.Annotations[currentAnnotation1].Activities._CurrentActivity;
+
+                if ((currentTime<=a2end) && (currentTime>=a2start))
+                    a2label=session2.Annotations[currentAnnotation2].Activities._CurrentActivity;
+
+                int a1Index = (int)categories[a1label];
+                int a2Index = (int)categories[a2label];
+                
+                reliability[a1Index][a2Index] = reliability[a1Index][a2Index] + 1;
+                totalCount++;
+
+                if (a1Index == a2Index)
+                    agreeing = true;                
+                else
+                {
+                    
+                    if (agreeing)
+                    {
+                        if ((a1Changed) && (a1label=="unknown"))
+                        {
+                            double diff = a2end - currentTime;
+                            if (diff < 10000)
+                            {
+                                offsetDelay += diff;
+                                offsetCount++;
+                            }
+                        }
+                    }
+                    agreeing = false;
+                    if (currentAnnotation2<session2.Annotations.Count - 1)
+                    {
+                        if (session2.Annotations[currentAnnotation2 + 1].Activities._CurrentActivity == a1label)
+                        {
+                            if (session2.Annotations[currentAnnotation2 + 1]._StartUnix < a1end)
+                            {
+                                double diff = session2.Annotations[currentAnnotation2 + 1]._StartUnix - a1start;
+                                if (diff < 10000)
+                                {
+                                    delayedAverage += diff;
+                                    delayedCount++;
+                                }
+                            }
+
+                        }
+                    }
+                }
+                currentTime += 1000;
+            }
+
+            TextWriter tw = new StreamWriter(root + "results.csv");
+            tw.WriteLine("Onset Error," + delayedAverage / delayedCount);
+            tw.WriteLine("Delayed Instances," + delayedCount);
+            tw.WriteLine("Offset Error," + offsetDelay/offsetCount);
+            tw.WriteLine("Offset Instances," + offsetCount);
+            tw.Close();
+            tw = new StreamWriter(root + "reliability.csv");
+            //tw.WriteLine(categorynames);
+            for (int i = 0; (i < dims); i++)
+                for (int j = 0; (j < dims); j++)
+                {
+                    tw.Write(reliability[i][j]);
+                    if (j == dims - 1)
+                        tw.WriteLine();
+                    else
+                        tw.Write(",");
+                }
+            tw.Close();
+
+
+     
+
+        }
+
         static void Main(string[] args)
         {
+            GenerateArff();
+           // GenerateInterRateReliability();
 
-            GenerateCrossValidationDecisionTrees();
+            //GenerateCrossValidationDecisionTrees();
             //GenerateTrainingCSVFiles();
             //STANFORD DATA
             /*  string storage = @"C:\DataAnalysis\Stanford-MITes\Subject3\0003v2-sept2408\mites";

@@ -82,7 +82,7 @@ namespace Wockets.Utils
         /// <returns></returns>
         public static double GetUnixTime(DateTime dt)
         {
-            TimeSpan ts = dt.ToUniversalTime().Subtract(UnixRef);
+            TimeSpan ts = dt.Subtract(UnixRef);
             return ts.TotalMilliseconds;
 
         }

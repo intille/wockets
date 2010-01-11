@@ -20,24 +20,24 @@ namespace Wockets.Data.Annotation
         public const string CATEGORY_ATTRIBUTE = "CATEGORY";
 
         private ActivityList activities;
-        private int start_month;
-        private int start_day;
-        private int start_year;
-        private int start_hour;
-        private int start_minute;
-        private int start_second;
-        private int start_millisecond;
-        private double start_unix;
+        private int start_month=-1;
+        private int start_day=-1;
+        private int start_year=-1;
+        private int start_hour=-1;
+        private int start_minute=-1;
+        private int start_second=-1;
+        private int start_millisecond=-1;
+        private double start_unix=-1;
         private string start_date;
         private string end_date;
-        private int end_month;
-        private int end_day;
-        private int end_year;
-        private int end_hour;
-        private int end_minute;
-        private int end_second;
-        private int end_millisecond;
-        private double end_unix;
+        private int end_month=-1;
+        private int end_day=-1;
+        private int end_year=-1;
+        private int end_hour=-1;
+        private int end_minute=-1;
+        private int end_second=-1;
+        private int end_millisecond=-1;
+        private double end_unix=-1;
 
 
 
@@ -265,7 +265,7 @@ namespace Wockets.Data.Annotation
                         this.start_second = Convert.ToInt32(m.Groups[3].Value);
                         this.start_millisecond = 0;
                         if (m.Groups[5].Value.Length > 0)
-                            this.start_millisecond = Convert.ToInt32(m.Groups[5].Value);
+                            this.start_millisecond = Convert.ToInt32(m.Groups[5].Value);                        
 
                     }
 
@@ -319,6 +319,18 @@ namespace Wockets.Data.Annotation
                         }
                         else
                             throw new Exception("Error parsing " + ENDDATE_ATTRIBUTE + ". " + iAttribute.Value);
+                    }
+
+                    if ((this.start_unix<0) && (this.start_year>0) && (this.start_hour>0))
+                    {
+                        DateTime dt=new DateTime(this.start_year,this.start_month,this.start_day,this.start_hour,this.start_minute,this.start_second,this.start_millisecond);
+                        this.start_unix = WocketsTimer.GetUnixTime(dt);
+                    }
+
+                    if ((this.end_unix < 0) && (this.end_year > 0) && (this.end_hour > 0))
+                    {
+                        DateTime dt = new DateTime(this.end_year, this.end_month, this.end_day, this.end_hour, this.end_minute, this.end_second,this.end_millisecond);
+                        this.end_unix = WocketsTimer.GetUnixTime(dt);
                     }
                 }
                 this.activities = new ActivityList();
