@@ -464,9 +464,9 @@ namespace NESPDataViewer
             while (currentTime<=startUnix)
             {
                 string s = tr.ReadLine();
-                currentTime = Convert.ToDouble(s.Split(',')[0]);
                 if (s == null)
                     break;
+                currentTime = Convert.ToDouble(s.Split(',')[0]);      
                 start++;
             }
             end = start;

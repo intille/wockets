@@ -43,7 +43,7 @@ namespace DataMerger
                      
 
 
-                    this.progressForm.AppendLog("Older Merged MITes CSVs .....................Deleting\r\n");
+                   this.progressForm.AppendLog("Older Merged MITes CSVs .....................Deleting\r\n");
                    string[] file = Directory.GetFileSystemEntries(this.textBox1.Text +"\\"+MERGED_SUBDIRECTORY, "*MITes*.csv");
                     foreach (string filename in file)
                         File.Delete(filename);
@@ -93,7 +93,7 @@ namespace DataMerger
                     file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*rti*.csv");
                     foreach (string filename in file)
                         File.Delete(filename);
-                   
+                  
                 
                     //annotation files   
                     if (File.Exists(this.textBox1.Text+"\\"+ ANNOTATION_SUBDIRECTORY + "\\AnnotationIntervals.xml"))
@@ -323,7 +323,7 @@ namespace DataMerger
             try
             {
                 toCSV(this.textBox1.Text, "..\\NeededFiles\\Master\\", 3, filter);
-                toQualityCSV(this.textBox1.Text, "..\\NeededFiles\\Master\\", 3, filter);
+                toQualityHTML(this.textBox1.Text, "..\\NeededFiles\\Master\\", 3, filter);
             }
             catch (Exception e)
             {
@@ -374,11 +374,11 @@ namespace DataMerger
 
 
 
-        public static void toQualityCSV(string aDataDirectory, string masterDirectory, int maxControllers, string[] filter)
+        public static void toQualityHTML(string aDataDirectory, string masterDirectory, int maxControllers, string[] filter)
         {
             int ACCELEROMETER_STATISTICS_LENGTH=16;
             int WOCKETS_SR = 92;
-            int MITES_SR = 45;
+            int MITES_SR = 45;           
 
 
 
@@ -391,16 +391,28 @@ namespace DataMerger
             
             SXML.Reader sreader = new SXML.Reader(masterDirectory, aDataDirectory + "\\" + MITES_SUBDIRECTORY);
             SXML.SensorAnnotation  sannotation = sreader.parse(maxControllers);
+            //remove the HR sensor
+            for(int i=0;(i<sannotation.Sensors.Count);i++)
+                if ((Convert.ToInt32(((SXML.Sensor)sannotation.Sensors[i]).ID) == 0))
+                {
+                    sannotation.Sensors.RemoveAt(i);
+                    break;
+                }
                         
             Session session = new Session();
             session.FromXML(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\AnnotationIntervals.xml");
 
-            int numPostures = session.OverlappingActivityLists[0].Count;
+            int numPostures = session.OverlappingActivityLists[0].Count * session.OverlappingActivityLists[1].Count +1;
             Hashtable postures = new Hashtable();
-            for (int i=0;(i<numPostures);i++)
-                postures.Add(session.OverlappingActivityLists[0][i]._Name,i);
+            int k = 0;
+            for (int i = 0; (i < session.OverlappingActivityLists[1].Count); i++)
+                for (int j = 0; (j < session.OverlappingActivityLists[0].Count); j++)
+                {
+                    postures.Add(session.OverlappingActivityLists[1][i]._Name + "_" + session.OverlappingActivityLists[0][j]._Name, k);
+                    k++;
+                }
+            postures.Add("unknown", k);
             int[] timeLostPostureSensorCounter = new int[numPostures];
-
             int[] wocketsSR = new int[wc._Sensors.Count];
             int[] trueWocketsSR = new int[wc._Sensors.Count];
             int[][] modeWocketsSR = new int[wc._Sensors.Count][];
@@ -475,9 +487,14 @@ namespace DataMerger
                 if ((currentTime >= session.Annotations[currentAnnotation]._StartUnix) &&
                     (currentTime <= session.Annotations[currentAnnotation]._EndUnix))
                 {
-                    current_posture = session.Annotations[currentAnnotation].Activities[0]._Name;
-                    if (current_posture == "none")
-                        current_posture = "unknown";
+                    /* Hack until selene fixes the audio annotator */
+                    if (session.Annotations[currentAnnotation].Activities[1]._Name == "none")
+                        session.Annotations[currentAnnotation].Activities[1]._Name = "unknown";
+                    if (session.Annotations[currentAnnotation].Activities[0]._Name == "none")
+                        session.Annotations[currentAnnotation].Activities[0]._Name = "unknown";
+
+                    current_posture = session.Annotations[currentAnnotation].Activities[1]._Name+"_"+ session.Annotations[currentAnnotation].Activities[0]._Name;
+  
                     if (!annotatedPostures.ContainsKey(current_posture))
                         annotatedPostures.Add(current_posture, 1);
                     else
@@ -494,14 +511,19 @@ namespace DataMerger
                     //mites SR
                     for (int i = 0; (i < sannotation.Sensors.Count); i++)
                     {
-                        int sr=Convert.ToInt32(tokens[mitesStartIndex + (ACCELEROMETER_STATISTICS_LENGTH * i)]);
+
+                        int sr = Convert.ToInt32(tokens[mitesStartIndex + (ACCELEROMETER_STATISTICS_LENGTH * i)]);
                         mitesSR[i] += sr;
                         modeMITesSR[i][sr] = modeMITesSR[i][sr] + 1;
-                        
+
                     }
 
+
+
                     int currentPostureIndex = (int)postures[current_posture];
+        
                     //the number of seconds in  a particular posture
+                   
                     timeLostPostureSensorCounter[currentPostureIndex] = timeLostPostureSensorCounter[currentPostureIndex] + 1;
                     //wockets SR
                     for (int i = 0; (i < wc._Sensors.Count); i++)
@@ -558,11 +580,13 @@ namespace DataMerger
                 if (wocketsSR[i] < expectedWocketsSamples)
                 {
                     wocketsSecondsLost[i] = (expectedWocketsSamples - wocketsSR[i]) / WOCKETS_SR;
-                    wocketsPercentLost[i] = (int)( ((double)wocketsSecondsLost[i] /(double) totalSeconds) * 100.0);
+                    wocketsPercentLost[i] = (int)(((double)wocketsSecondsLost[i] / (double)totalSeconds) * 100.0);
                 }
+
 
                 if (disconnectionTimer[i] >= 5)
                     disconnectionDistribution[i].Add(disconnectionTimer[i]);
+
             }
             #endregion Wockets Loss Calculation
 
@@ -595,7 +619,7 @@ namespace DataMerger
                for (int j = 0; (j < disconnectionDistribution[i].Count); j++)               
                    meanDisconnection[i] = meanDisconnection[i] + (int)disconnectionDistribution[i][j];    
                 if (numDisconnections[i]>0)
-                    meanDisconnection[i] = meanDisconnection[i] / numDisconnections[i];
+                    meanDisconnection[i] = (meanDisconnection[i]-1) / numDisconnections[i];
                 
                for (int j = 0; (j < disconnectionDistribution[i].Count); j++)               
                    sdDisconnection[i] = sdDisconnection[i]  + (int) Math.Pow( ( (double) (int)disconnectionDistribution[i][j]- meanDisconnection[i]),2.0);
@@ -754,31 +778,45 @@ namespace DataMerger
            summary = "<h2>Data Loss by Posture and Activity Statistics</h2><TABLE border=\"1\">\n";
             numRows =numPostures;
             rows = new string[numRows];
-            header = "<TR>\n<td><div align=\"center\"><strong>Activity\\Placement</strong></div></td><td><strong>Num Seconds</strong></td>\n";
+            header = "<TR>\n<td><div align=\"center\"><strong>Activity\\Placement</strong></div></td><td><strong>Total Seconds Annotated</strong></td>\n";
             for (int j = 0; (j < wc._Sensors.Count-1); j++)
-                header += "<TD><div align=\"center\"><strong>" + wc._Sensors[j]._Location + "</strong></div></TD>\n";
+                header += "<TD><div align=\"center\"><strong>" + wc._Sensors[j]._Location + "</br>(Seconds Lost|% Lost)</strong></div></TD>\n";
             header += "</TR>\n";
             summary += header;
 
-            for (int i = 0; (i < numPostures); i++)
-            {
-                if (annotatedPostures.ContainsKey(session.OverlappingActivityLists[0][i]._Name))
+            int m = 0;
+            for (int i = 0; (i < session.OverlappingActivityLists[1].Count); i++)
+                for (int j = 0; (j < session.OverlappingActivityLists[0].Count); j++)
                 {
-                    string row = "<TR>\n";
-                    row += "<TD><div align=\"center\"><strong>" + session.OverlappingActivityLists[0][i]._Name + "</strong></div></TD>\n";
-                    row += "<TD><div>" + (int) annotatedPostures[session.OverlappingActivityLists[0][i]._Name] + "</TD>\n";
-                    for (int j = 0; (j < wc._Sensors.Count - 1); j++)
-                        if (percentLostPostureSensorDistribution[j][i] > 20)
-                            row += "<TD bgcolor=\"#FF0000\"><div align=\"center\">" + timeLostPostureSensorDistribution[j][i].ToString() + " | " + percentLostPostureSensorDistribution[j][i].ToString() + "%" + "</div></TD>\n";
-                        else
-                            row += "<TD ><div align=\"center\">" + timeLostPostureSensorDistribution[j][i].ToString() + " | " + percentLostPostureSensorDistribution[j][i].ToString() + "%" + "</div></TD>\n";
+                    if (annotatedPostures.ContainsKey(session.OverlappingActivityLists[1][i]._Name + "_" + session.OverlappingActivityLists[0][j]._Name))
+                    {
+                        string row = "<TR>\n";
+                        row += "<TD><div align=\"center\"><strong>" + session.OverlappingActivityLists[1][i]._Name + "_" + session.OverlappingActivityLists[0][j]._Name + "</strong></div></TD>\n";
+                        row += "<TD><div>" + (int)annotatedPostures[session.OverlappingActivityLists[1][i]._Name + "_" + session.OverlappingActivityLists[0][j]._Name] + "</TD>\n";
+                        for (int r = 0; (r < wc._Sensors.Count - 1); r++)
+                            if (percentLostPostureSensorDistribution[r][m] > 20)
+                                row += "<TD bgcolor=\"#FF0000\"><div align=\"center\">" + timeLostPostureSensorDistribution[r][m].ToString() + " | " + percentLostPostureSensorDistribution[r][m].ToString() + "%" + "</div></TD>\n";
+                            else
+                                row += "<TD ><div align=\"center\">" + timeLostPostureSensorDistribution[r][m].ToString() + " | " + percentLostPostureSensorDistribution[r][m].ToString() + "%" + "</div></TD>\n";
 
-                    row += "</TR>\n";
-                    summary += row;
+                        row += "</TR>\n";
+                        summary += row;
+                    }
+                    m++;
                 }
+            tw.WriteLine(summary + "</TABLE>\n");
 
-            }
 
+            summary = "<h2>Other Sensors Statistics</h2><TABLE border=\"1\">\n";
+            header = "<TR>\n<td><div align=\"center\"><strong>Sensor Type</strong></div></td><td><strong>Data Present</strong></td><td><strong>Num Samples</strong></td>\n";
+            header += "</TR>\n";
+            summary += header;
+            summary += "<TR>\n<td><div align=\"center\"><strong>Oxycon</strong></div></td><td>"+(hasOxycon?"Yes":"No")+"</td><td>"+oxyconRecords+"</td>\n";
+            summary += "<TR>\n<td><div align=\"center\"><strong>Sensewear</strong></div></td><td>" + (hasSensewear ? "Yes" : "No") + "</td><td>" + sensewearRecords + "</td>\n";
+            summary += "<TR>\n<td><div align=\"center\"><strong>Actigraph</strong></div></td><td>" + (hasActigraph ? "Yes" : "No") + "</td><td>" + actigraphRecords + "</td>\n";
+            summary += "<TR>\n<td><div align=\"center\"><strong>Zephyr</strong></div></td><td>" + (hasZephyr ? "Yes" : "No") + "</td><td>" + zephyrRecords + "</td>\n";
+            summary += "<TR>\n<td><div align=\"center\"><strong>RTI</strong></div></td><td>" + (hasRTI ? "Yes" : "No") + "</td><td>" + rtiRecords + "</td>\n";
+            summary += "<TR>\n<td><div align=\"center\"><strong>Columbia</strong></div></td><td>" + (hasColumbia ? "Yes" : "No") + "</td><td>" + columbiaRecords + "</td>\n";
             summary += "</TABLE></HTML>";
             tw.WriteLine(summary);
 
@@ -796,6 +834,20 @@ namespace DataMerger
         public static string ANNOTATION_SUBDIRECTORY = "annotation\\audioannotation";
 
         public static string CSVProgress = "";
+        public static bool hasActigraph = false;
+        public static bool hasOxycon = false;
+        public static bool hasSensewear = false;
+        public static bool hasRTI = false;
+        public static bool hasZephyr = false;
+        public static bool hasColumbia = false;
+
+        public static int actigraphRecords = 0;
+        public static int oxyconRecords = 0;
+        public static int sensewearRecords = 0;
+        public static int rtiRecords = 0;
+        public static int zephyrRecords = 0;
+        public static int columbiaRecords = 0;
+
         public static void toCSV(string aDataDirectory, string masterDirectory, int maxControllers, string[] filter)
         {
 
@@ -1170,13 +1222,16 @@ namespace DataMerger
                     }
 
                     rtiFound = true;
+                    
                 }
             }
             catch (Exception e)
             {
                 throw new Exception("RTI: Parsing failed " + e.Message);
             }
-           
+
+            hasRTI = (rtiData.Count > 0);
+            rtiRecords = rtiData.Count ;
             #endregion Read RTI data
 
 
@@ -1232,6 +1287,8 @@ namespace DataMerger
                     }
 
                     columbiaFound = true;
+                    hasColumbia = true;
+                    columbiaRecords = columbiaData.Count;
                 }
             }
             catch (Exception e)
@@ -1493,6 +1550,12 @@ namespace DataMerger
             {
                 throw new Exception("Actigraphs: Parsing failed " + e.Message);
             }
+            for (int r = 0; (r < actigraphData.Length); r++)
+            {
+                if (hasActigraph == false)
+                    hasActigraph = (actigraphData[r].Count > 0);
+                actigraphRecords += actigraphData[r].Count;
+            }
             #endregion Read Actigraph data
 
             #region Read Zephyr data
@@ -1576,6 +1639,8 @@ namespace DataMerger
                     }
 
                     zephyrFound = true;
+                    hasZephyr = true;
+                    zephyrRecords = zephyrData.Count;
                 }
             }
             catch (Exception e)
@@ -1988,7 +2053,6 @@ namespace DataMerger
 
 
 
-
                     originOxycon = oxyconOriginTR.ReadLine();
                     oxyconOriginTime = new DateTime();
                     try
@@ -2103,6 +2167,9 @@ namespace DataMerger
 
                 }
             }
+
+            hasOxycon = (oxyconData.Count > 0);
+            oxyconRecords = oxyconData.Count;
             #endregion Read Oxycon data
 
             #region Read Sensewear data
@@ -2208,6 +2275,9 @@ namespace DataMerger
             {
                 throw new Exception("Sensewear: Parsing failed " + e.Message);
             }
+
+            hasSensewear = (SSR.Count > 0);
+            sensewearRecords = SSR.Count;
             #endregion Read Sensewear data
 
 
@@ -2512,7 +2582,7 @@ namespace DataMerger
                     if (CSVProgress == "")
                         CSVProgress = "Generating Raw Data File for Wocket " + sensor_id.ToString("00");
                     //Write out raw data
-                    TextWriter tw = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "Wocket_RawData_" + sensor_id.ToString("00") + "_" + wcontroller._Sensors[i]._Location.Replace(' ','-')+ ".csv");
+                    TextWriter tw = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "Wocket_" + sensor_id.ToString("00") + "_RawData_" + wcontroller._Sensors[i]._Location.Replace(' ', '-') + ".csv");
                     int lastDecodedPacket = 0;
                     
                         while (wc._Sensors[i].Load())
@@ -2573,8 +2643,8 @@ namespace DataMerger
                 int correctWindows = 0;
                 for (int k = 0; (k < wcontroller._Sensors.Count); k++)
                 {
-                    wocketsTR[k] = new StreamReader(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "Wocket_RawData_" + wcontroller._Sensors[k]._ID.ToString("00") + "_" + wcontroller._Sensors[k]._Location.Replace(' ', '-') + ".csv");
-                    wocketsTW[k] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "Wocket_RawCorrectedData_" + wcontroller._Sensors[k]._ID.ToString("00") + "_" + wcontroller._Sensors[k]._Location.Replace(' ', '-') + ".csv");
+                    wocketsTR[k] = new StreamReader(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "Wocket_" + wcontroller._Sensors[k]._ID.ToString("00") + "_RawData_" + wcontroller._Sensors[k]._Location.Replace(' ', '-') + ".csv");
+                    wocketsTW[k] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "Wocket_" + wcontroller._Sensors[k]._ID.ToString("00") + "_RawCorrectedData_"  + wcontroller._Sensors[k]._Location.Replace(' ', '-') + ".csv");
 
                     ArrayList[] loadedData = new ArrayList[LoadedSeconds];
                     long[] loadedDataTime = new long[LoadedSeconds];
@@ -3065,7 +3135,7 @@ namespace DataMerger
             {
                 wocketsTR1 = new TextReader[wcontroller._Sensors.Count];
                 for (int k = 0; (k < wcontroller._Sensors.Count); k++)
-                    wocketsTR1[k] = new StreamReader(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "Wocket_RawCorrectedData_" + wcontroller._Sensors[k]._ID.ToString("00") + "_" + wcontroller._Sensors[k]._Location.Replace(' ', '-') + ".csv");
+                    wocketsTR1[k] = new StreamReader(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "Wocket_" + wcontroller._Sensors[k]._ID.ToString("00") + "_RawCorrectedData_" + wcontroller._Sensors[k]._Location.Replace(' ', '-') + ".csv");
             }
             while (((TimeSpan)endDateTime.Subtract(currentDateTime)).TotalSeconds >= 0)
             {
