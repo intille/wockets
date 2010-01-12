@@ -635,12 +635,23 @@ namespace NESPDataViewer
             #endregion
 
 
-            if (mac.Length==0)
-                AddAccelerationCurve(type+" " + channel, location,listX, listY, listZ,listActivityCounts,listSampleRates,listAUCs,listVMAGs);
+            if (mac.Length == 0)
+            {
+                AddAccelerationCurve(type + " " + channel, location, listX, listY, listZ, listActivityCounts, listSampleRates, listAUCs, listVMAGs);
+                paneOrders.Add(type + " " + channel, paneOrder);
+            }
             else
+            {
                 AddAccelerationCurve(mac, location, listX, listY, listZ, listActivityCounts, listSampleRates, listAUCs, listVMAGs);
+                if (mac != "Internal")
+                {
+                    mac = mac.Substring(mac.Length - 2, 2);
+                    mac = "Wocket " + mac;
+                }
+                paneOrders.Add(mac, paneOrder);
+            }
 
-            paneOrders.Add(type + " " + channel + " " + location, paneOrder);
+          
             WidenDatesIfNeeded(listX);
         }
 
