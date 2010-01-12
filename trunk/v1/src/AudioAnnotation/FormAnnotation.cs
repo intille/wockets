@@ -909,9 +909,6 @@ namespace AudioAnnotation
 
 
 
-
-
-
         #region Audio Files
 
 
@@ -1836,9 +1833,9 @@ namespace AudioAnnotation
         }
 
 
-
-
         #endregion
+
+
 
 
         #region Status
@@ -3499,6 +3496,8 @@ namespace AudioAnnotation
                 label_play.Text = "Problems generating the Xml annotation file.";
             }
         }
+
+
 
         private bool CheckLabelsList()
         {
