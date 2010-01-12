@@ -561,8 +561,9 @@ namespace Wockets.Data.Annotation
                                     rec1_rm._StartMillisecond = prev_b_ann._EndMillisecond;
                                     rec1_rm._StartUnix = prev_b_ann._EndUnix;
 
-
-                                    rec1_rm.Activities.Add(new Activity("none", b_ann.Activities[0]._Category));
+                                    //sele modified
+                                    //rec1_rm.Activities.Add(new Activity("none", b_ann.Activities[0]._Category));
+                                    rec1_rm.Activities.Add(new Activity("unknown", b_ann.Activities[0]._Category));
 
                                     tempOutput.Add(rec1_rm);
 
@@ -583,7 +584,9 @@ namespace Wockets.Data.Annotation
                             }
                             else // the segment is not overlapping with prev_label, add "none"
                             {
-                                rec1.Activities.Add(new Activity("none", b_ann.Activities[0]._Category));
+                                //sele modified
+                                //rec1.Activities.Add(new Activity("none", b_ann.Activities[0]._Category));
+                                rec1.Activities.Add(new Activity("unknown", b_ann.Activities[0]._Category));
 
                                 tempOutput.Add(rec1);
 
@@ -602,10 +605,12 @@ namespace Wockets.Data.Annotation
                             // case starts are different 
                             Annotation rec1 = a_ann.copy();
 
-                            //the segment is not overlapping with the first part of the prev_label, add "none"
+                            //the segment is not overlapping with the first part of the prev_label, add "unknown"
                             //*** I need to check if it is not necessary to come back another register back
                             //*** to check for overlaps 
-                            rec1.Activities.Add(new Activity("none", b_ann.Activities[0]._Category));
+                            //sele modified
+                           //rec1.Activities.Add(new Activity("none", b_ann.Activities[0]._Category));
+                            rec1.Activities.Add(new Activity("unknown", b_ann.Activities[0]._Category));
 
                             if (end1 > prev_b_ann._StartUnix)
                             {
@@ -690,8 +695,9 @@ namespace Wockets.Data.Annotation
                                     rec1_rm._StartMillisecond = prev_b_ann._EndMillisecond;
                                     rec1_rm._StartUnix = prev_b_ann._EndUnix;
 
-
-                                    rec1_rm.Activities.Add(new Activity("none", b_ann.Activities[0]._Category));
+                                    //sele modified
+                                    //rec1_rm.Activities.Add(new Activity("none", b_ann.Activities[0]._Category));
+                                    rec1_rm.Activities.Add(new Activity("unknown", b_ann.Activities[0]._Category));
 
                                     tempOutput.Add(rec1_rm);
 
@@ -782,7 +788,9 @@ namespace Wockets.Data.Annotation
                                     rec1_rm._StartUnix = prev_a_ann._EndUnix;
 
                                     // indicate no intersection with previous label
-                                    rec1_rm.Activities.Add(new Activity("none", a_ann.Activities[0]._Category));
+                                    //sele modified
+                                    //rec1_rm.Activities.Add(new Activity("none", a_ann.Activities[0]._Category));
+                                    rec1_rm.Activities.Add(new Activity("unknown", a_ann.Activities[0]._Category));
 
                                     // add the label activities
                                     foreach (Activity act in b_ann.Activities)
@@ -809,7 +817,9 @@ namespace Wockets.Data.Annotation
                             else // the segment is not overlapping with prev_label, add "none"
                             {
                                 // indicate no intersection with previous label
-                                rec1.Activities.Add(new Activity("none", a_ann.Activities[0]._Category));
+                                //sele modified
+                                //rec1.Activities.Add(new Activity("none", a_ann.Activities[0]._Category));
+                                rec1.Activities.Add(new Activity("unknown", a_ann.Activities[0]._Category));
 
                                 // add the label activities
                                 foreach (Activity act in b_ann.Activities)
@@ -836,7 +846,9 @@ namespace Wockets.Data.Annotation
                             //the segment is not overlapping with the first part of the prev_label, add "none"
                             //*** I need to check if it is not necessary to come back another register back
                             //*** to check for overlaps 
-                            rec1.Activities.Add(new Activity("none", a_ann.Activities[0]._Category));
+                            //sele modified
+                            //rec1.Activities.Add(new Activity("none", a_ann.Activities[0]._Category));
+                            rec1.Activities.Add(new Activity("unknown", a_ann.Activities[0]._Category));
 
                             // add the label activities
                             foreach (Activity act in b_ann.Activities)
@@ -943,7 +955,10 @@ namespace Wockets.Data.Annotation
                                     rec1_rm._StartUnix = prev_a_ann._EndUnix;
 
                                     // indicate no intersection with previous label
-                                    rec1_rm.Activities.Add(new Activity("none", a_ann.Activities[0]._Category));
+                                    //sele modified
+                                    //rec1_rm.Activities.Add(new Activity("none", a_ann.Activities[0]._Category));
+                                    rec1_rm.Activities.Add(new Activity("unknown", a_ann.Activities[0]._Category));
+
 
                                     // add the label activities
                                     foreach (Activity act in b_ann.Activities)
@@ -1156,7 +1171,10 @@ namespace Wockets.Data.Annotation
                                     rec1_rm._EndMillisecond = b_ann._StartMillisecond;
                                     rec1_rm._EndUnix        = b_ann._StartUnix;
 
-                                    rec1_rm.Activities.Add(new Activity("none", b_ann.Activities[0]._Category));
+                                    //sele modified
+                                    //rec1_rm.Activities.Add(new Activity("none", b_ann.Activities[0]._Category));
+                                    rec1_rm.Activities.Add(new Activity("unknown", b_ann.Activities[0]._Category));
+
 
                                     tempOutput.Add(rec1_rm);
 
@@ -1166,7 +1184,9 @@ namespace Wockets.Data.Annotation
                             }
                             else // the segment is not overlapping with prev_label, add "none"
                             {
-                                rec1.Activities.Add(new Activity("none", b_ann.Activities[0]._Category));
+                                //sele modified
+                                //rec1.Activities.Add(new Activity("none", b_ann.Activities[0]._Category));
+                                rec1.Activities.Add(new Activity("unknown", b_ann.Activities[0]._Category));
 
                                 rec1._EndDate = b_ann._StartDate;
                                 rec1._EndHour = b_ann._StartHour;
@@ -1268,7 +1288,10 @@ namespace Wockets.Data.Annotation
                                     rec1_rm._EndUnix = a_ann._StartUnix;
 
                                     // add none, check order
-                                    rec1_rm.Activities.Add(new Activity("none", a_ann.Activities[0]._Category));
+                                    //sele modified
+                                    //rec1_rm.Activities.Add(new Activity("none", a_ann.Activities[0]._Category));
+                                    rec1_rm.Activities.Add(new Activity("unknown", a_ann.Activities[0]._Category));
+
 
                                     // add the b labels in order
                                     foreach (Activity act in b_ann.Activities)
@@ -1284,7 +1307,10 @@ namespace Wockets.Data.Annotation
                             else // the segment is not overlapping with prev_label, add "none"
                             {
                                 // add none, check order
-                                rec1.Activities.Add(new Activity("none", a_ann.Activities[0]._Category));
+                                //sele modified
+                                //rec1.Activities.Add(new Activity("none", a_ann.Activities[0]._Category));
+                                rec1.Activities.Add(new Activity("unknown", a_ann.Activities[0]._Category));
+
 
                                 // add the b labels in order
                                 foreach (Activity act in b_ann.Activities)
@@ -1401,7 +1427,10 @@ namespace Wockets.Data.Annotation
                                     rec1_rm._EndMillisecond = b_ann._StartMillisecond;
                                     rec1_rm._EndUnix = b_ann._StartUnix;
 
-                                    rec1_rm.Activities.Add(new Activity("none", b_ann.Activities[0]._Category));
+                                    //sele modified
+                                    //rec1_rm.Activities.Add(new Activity("none", b_ann.Activities[0]._Category));
+                                    rec1_rm.Activities.Add(new Activity("unknown", b_ann.Activities[0]._Category));
+
 
                                     tempOutput.Add(rec1_rm);
 
@@ -1411,7 +1440,10 @@ namespace Wockets.Data.Annotation
                             }
                             else // the segment is not overlapping with prev_label, add "none"
                             {
-                                rec1.Activities.Add(new Activity("none", b_ann.Activities[0]._Category));
+                                //sele modified
+                                //rec1.Activities.Add(new Activity("none", b_ann.Activities[0]._Category));
+                                rec1.Activities.Add(new Activity("unknown", b_ann.Activities[0]._Category));
+
 
                                 rec1._EndDate = b_ann._StartDate;
                                 rec1._EndHour = b_ann._StartHour;
@@ -1599,7 +1631,10 @@ namespace Wockets.Data.Annotation
                                     rec1_rm._EndUnix = a_ann._StartUnix;
 
                                     // add none, in order
-                                    rec1_rm.Activities.Add(new Activity("none", a_ann.Activities[0]._Category));
+                                    //sele modified
+                                    //rec1_rm.Activities.Add(new Activity("none", a_ann.Activities[0]._Category));
+                                    rec1_rm.Activities.Add(new Activity("unknown", a_ann.Activities[0]._Category));
+
 
                                     // add the b labels in order
                                     foreach (Activity act in b_ann.Activities)
@@ -1615,7 +1650,10 @@ namespace Wockets.Data.Annotation
                             else // the segment is not overlapping with prev_label, add "none"
                             {
                                 // add none, check order
-                                rec1.Activities.Add(new Activity("none", a_ann.Activities[0]._Category));
+                                //sele modified
+                                //rec1.Activities.Add(new Activity("none", a_ann.Activities[0]._Category));
+                                rec1.Activities.Add(new Activity("unknown", a_ann.Activities[0]._Category));
+
 
                                 // add the b labels in order
                                 foreach (Activity act in b_ann.Activities)
@@ -1765,6 +1803,8 @@ namespace Wockets.Data.Annotation
 
 
         #endregion
+
+
 
 
         // performs a deep copy
