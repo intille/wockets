@@ -488,9 +488,9 @@ namespace DataMerger
                     (currentTime <= session.Annotations[currentAnnotation]._EndUnix))
                 {
                     /* Hack until selene fixes the audio annotator */
-                    if (session.Annotations[currentAnnotation].Activities[1]._Name == "none")
+                    if ((session.Annotations[currentAnnotation].Activities[1]._Name == "none") || (session.Annotations[currentAnnotation].Activities[1]._Name == "") || (session.Annotations[currentAnnotation].Activities[1]._Name == "-"))
                         session.Annotations[currentAnnotation].Activities[1]._Name = "unknown";
-                    if (session.Annotations[currentAnnotation].Activities[0]._Name == "none")
+                    if ((session.Annotations[currentAnnotation].Activities[0]._Name == "none") || (session.Annotations[currentAnnotation].Activities[0]._Name == "") || (session.Annotations[currentAnnotation].Activities[0]._Name == "-"))
                         session.Annotations[currentAnnotation].Activities[0]._Name = "unknown";
 
                     current_posture = session.Annotations[currentAnnotation].Activities[1]._Name+"_"+ session.Annotations[currentAnnotation].Activities[0]._Name;
@@ -520,8 +520,13 @@ namespace DataMerger
 
 
 
-                    int currentPostureIndex = (int)postures[current_posture];
-        
+
+                    int currentPostureIndex = 0;
+
+     
+                        currentPostureIndex=(int)postures[current_posture];
+                 
+                
                     //the number of seconds in  a particular posture
                    
                     timeLostPostureSensorCounter[currentPostureIndex] = timeLostPostureSensorCounter[currentPostureIndex] + 1;
@@ -1112,7 +1117,7 @@ namespace DataMerger
                     while ((rti_line = rtiReader.ReadLine()) != null)
                     {
                         tokens = rti_line.Split(',');
-                        if (tokens.Length == 4)
+                        if (tokens.Length >= 4)
                         {
 
                             string[] dateTokens = tokens[0].Split(new char[] { ' ', '\t' });
