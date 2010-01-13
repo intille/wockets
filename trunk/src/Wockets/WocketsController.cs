@@ -48,6 +48,7 @@ namespace Wockets
         private Thread aSavingThread;
         private Thread aGamingThread;
         private Thread aClassifyingThread;
+        private Thread aBatteryThread;
         private bool polling = false;
         private bool classifying = false;
         private bool training = false;
@@ -272,11 +273,25 @@ namespace Wockets
             aPollingThread.Start();
             aSavingThread.Start();
             aClassifyingThread.Start();
-
+            aBatteryThread = new Thread(new ThreadStart(BatteryPoll));
+            aBatteryThread.Priority = ThreadPriority.Highest;
+            aBatteryThread.Start();
 
 
         }
 
+        private void BatteryPoll()
+        {
+            while (true)
+            {
+#if (PocketPC)
+                                    SYSTEM_POWER_STATUS_EX2 bpower = Battery.GetSystemPowerStatus();
+                                    Logger.Debug2(bpower.BatteryLifePercent + "," + bpower.BatteryVoltage + "," + bpower.BatteryCurrent + "," + bpower.BatteryTemperature);
+#endif
+
+                Thread.Sleep(500);
+            }
+        }
         public void Dispose()
         {
             saving = false;
@@ -290,6 +305,11 @@ namespace Wockets
             {
                 aSavingThread.Join();
                 aSavingThread.Abort();
+            }
+            if (aBatteryThread != null)
+            {
+                aBatteryThread.Join();
+                aBatteryThread.Abort();
             }
             if (trainingTW != null)
             {
@@ -780,10 +800,6 @@ namespace Wockets
                                 if (pollCounter > 2000)
                                 {
                                     Logger.Warn("Receiver " + sensor._Receiver._ID + " decoded:" + sensor.Packets + ",saved:" + sensor.SavedPackets + ", tail=" + tail + ",head=" + head);
-#if (PocketPC)
-                                    SYSTEM_POWER_STATUS_EX2 bpower = Battery.GetSystemPowerStatus();
-                                    Logger.Debug2(bpower.BatteryLifePercent + "," + bpower.BatteryVoltage + "," + bpower.BatteryCurrent + "," + bpower.BatteryTemperature);
-#endif
                                     pollCounter = 0;
                                 }
 
