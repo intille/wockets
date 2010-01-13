@@ -192,7 +192,7 @@ namespace NESPDataViewer
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
-            this.Text = "Wockets Data Viewer - Version 1.18 November 18,2009";
+            this.Text = "Wockets Data Viewer - Version 1.20 January 12,2010"; ;
             this.Load += new System.EventHandler(this.Form1_Load);
             this.Resize += new System.EventHandler(this.Form1_Resize);
             this.menuStrip1.ResumeLayout(false);
