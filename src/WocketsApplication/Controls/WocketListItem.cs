@@ -22,7 +22,7 @@ namespace WocketsApplication.Controls
         private AlphaPictureBox removeButton;
 
         private Pen borderPen = new Pen(Color.DarkGray,1.0f);
-        private static int index = 1;
+
 
 
         //Wockets Configuration Information
@@ -54,7 +54,7 @@ namespace WocketsApplication.Controls
         public string _MMF = "";
         public int _MMF_SIZE = 4096;
         
-        public WocketListItem(string name,string mac)
+        public WocketListItem(string name,string mac, int index)
         {
             this.Width = Screen.PrimaryScreen.WorkingArea.Width;
             this.Height = Screen.PrimaryScreen.WorkingArea.Height / 4;
@@ -67,7 +67,7 @@ namespace WocketsApplication.Controls
             Title = new Label();
             Mac = new Label();
             Status = new Label();
-            Title.Text = name + (index++);
+            Title.Text =  index +". "+ name;
             Title.Font = new Font(FontFamily.GenericSansSerif, 10.0f, FontStyle.Bold);
             Title.Location = new Point(10, 10);
             Title.Size = new Size(250,30);

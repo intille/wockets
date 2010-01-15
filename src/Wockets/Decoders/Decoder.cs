@@ -38,8 +38,8 @@ namespace Wockets.Decoders
         protected bool[] subscribed = new bool[] { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false };
         protected bool cmd = false;
 
-       
-        
+
+        public int _BufferSize = 0;
         
         public int MaxedoutSamples = 0;
 
@@ -72,7 +72,9 @@ namespace Wockets.Decoders
             this.packetPosition = 0;
             this.id = 0;
             this.index = 0;
-            this.head = 0;           
+            this.head = 0;
+            this._BufferSize = bufferSize;
+           
       
         }
 
@@ -169,7 +171,20 @@ namespace Wockets.Decoders
 
         public abstract int Decode(int sensorID,byte[] data, int length);
         public abstract int Decode(int sensorID, CircularBuffer data, int start,int end);
-        
+        public bool Initialize()
+        {
+            if (this.sdata == null)
+            {
+                this.sdata = new MemoryMappedFileStream("\\Temp\\wocket" + this._ID + ".dat", "wocket" + this._ID, (_DUSize * (uint)this._BufferSize), MemoryProtection.PageReadWrite);
+                this.shead = new MemoryMappedFileStream("\\Temp\\whead" + this._ID + ".dat", "whead" + this._ID, sizeof(int), MemoryProtection.PageReadWrite);
+                this.sdataSize = (int)(_DUSize * this._BufferSize);
+                this.sdata.MapViewToProcessMemory(0, this.sdataSize);
+                this.shead.MapViewToProcessMemory(0, sizeof(int));
+                this.shead.Write(BitConverter.GetBytes(this.head), 0, sizeof(int));
+                return true;
+            }
+            return false;
+        }
         public bool Dispose()
         {
 #if (PocketPC)

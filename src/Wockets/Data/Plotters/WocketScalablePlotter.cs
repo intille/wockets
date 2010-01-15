@@ -25,7 +25,7 @@ namespace Wockets.Data.Plotters
         private int[] axisOffset;
         private System.Drawing.Pen[] p;
         private int graphSize;
-        private WocketsController wocketsController=null;
+        private WocketsController wocketsController = null;
         private System.Windows.Forms.Panel aPanel;
 
         int[] currentColumns;
@@ -44,14 +44,14 @@ namespace Wockets.Data.Plotters
         private MemoryMappedFileStream[] sdata = null;
         private MemoryMappedFileStream[] shead = null;
         private int sdataSize = 0;
-        private int numSensors=0;
+        private int numSensors = 0;
 
 
         public WocketsScalablePlotter(System.Windows.Forms.Panel aPanel, int numSensors)
         {
-            this.numSensors=numSensors;
-            
-            if (numSensors> 3)
+            this.numSensors = numSensors;
+
+            if (numSensors > 3)
                 skippedPoints = 3;
             else if (numSensors > 1)
                 skippedPoints = 2;
@@ -86,21 +86,21 @@ namespace Wockets.Data.Plotters
 
             sdata = new MemoryMappedFileStream[numSensors];
             shead = new MemoryMappedFileStream[numSensors];
-            this.sdataSize = (int) Decoder._DUSize * Wockets.Decoders.Accelerometers.WocketsDecoder.BUFFER_SIZE;
+            this.sdataSize = (int)Decoder._DUSize * Wockets.Decoders.Accelerometers.WocketsDecoder.BUFFER_SIZE;
             for (int i = 0; (i < numSensors); i++)
             {
-                sdata[i] = new MemoryMappedFileStream("\\Temp\\wocket" + i + ".dat", "wocket" + i, (uint) this.sdataSize, MemoryProtection.PageReadWrite);
+                sdata[i] = new MemoryMappedFileStream("\\Temp\\wocket" + i + ".dat", "wocket" + i, (uint)this.sdataSize, MemoryProtection.PageReadWrite);
                 shead[i] = new MemoryMappedFileStream("\\Temp\\whead" + i + ".dat", "whead" + i, sizeof(int), MemoryProtection.PageReadWrite);
-                
+
                 sdata[i].MapViewToProcessMemory(0, this.sdataSize);
                 shead[i].MapViewToProcessMemory(0, sizeof(int));
-                
+
                 shead[i].Read(head, 0, 4);
-                int currentHead = BitConverter.ToInt32(head, 0);                
+                int currentHead = BitConverter.ToInt32(head, 0);
                 this.decoderTails[i] = currentHead;
                 shead[i].Seek(0, System.IO.SeekOrigin.Begin);
-                sdata[i].Seek((currentHead*(sizeof(double)+3*sizeof(short))), System.IO.SeekOrigin.Begin);
-            
+                sdata[i].Seek((currentHead * (sizeof(double) + 3 * sizeof(short))), System.IO.SeekOrigin.Begin);
+
             }
 
             int dy = (int)Math.Floor(plotAreaSize.Height / ((double)numSensors));
@@ -131,7 +131,7 @@ namespace Wockets.Data.Plotters
 
         }
 
-                byte[] head = new byte[4];
+        byte[] head = new byte[4];
         AccelerationData data = new Accelerometers.WocketsAccelerationData();
         byte[] timestamp = new byte[sizeof(double)];
         byte[] acc = new byte[sizeof(short)];
@@ -146,6 +146,7 @@ namespace Wockets.Data.Plotters
             }
 
         }
+        int x = 0;
         public void Draw(Graphics g)
         {
             int lastColumnDrawn = 0;
@@ -190,9 +191,13 @@ namespace Wockets.Data.Plotters
                     sdata[i].Read(acc, 0, sizeof(short));
                     data.Z = BitConverter.ToInt16(acc, 0);
 
+                    //if (data.UnixTimeStamp > 10231.0)
+                     //   ;
                     if (!((data.UnixTimeStamp > 0) && (data.UnixTimeStamp >= this.lastUnixTimestamps[i])))
                         break;
 
+                    if (data.UnixTimeStamp < this.lastUnixTimestamps[i])
+                        ;
                     /*if (skippedPoints > 0)
                     {
                         if ((tail % skippedPoints) != 0)
@@ -217,33 +222,33 @@ namespace Wockets.Data.Plotters
                         this.currentColumns[i] = 0;
                     }
 
-/*                    if ((this.wocketsController._Sensors[data.SensorID])._Class == Wockets.Sensors.SensorClasses.HTCDiamondTouch)
-                    {
-                        if (this.wocketsController._Sensors.Count != 1)
-                        {
+                    /*                    if ((this.wocketsController._Sensors[data.SensorID])._Class == Wockets.Sensors.SensorClasses.HTCDiamondTouch)
+                                        {
+                                            if (this.wocketsController._Sensors.Count != 1)
+                                            {
 
-                            g.DrawEllipse(p[0], lastColumnDrawn, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.X), 2, 2);
-                            g.DrawEllipse(p[1], lastColumnDrawn, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Y), 2, 2);
-                            g.DrawEllipse(p[2], lastColumnDrawn, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Z), 2, 2);
-                        }
-                        else
-                        {
-                            g.DrawLine(p[0], this.currentColumns[i], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * previousVals[i][0]), this.currentColumns[i] + 1, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.X));
-                            g.DrawLine(p[1], this.currentColumns[i], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * previousVals[i][1]), this.currentColumns[i] + 1, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Y));
-                            g.DrawLine(p[2], this.currentColumns[i], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * previousVals[i][2]), this.currentColumns[i] + 1, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Z));
-                        }
-                        if (this.currentColumns[i] > lastColumn[data.SensorID])
-                            lastColumn[data.SensorID] = this.currentColumns[i];
-                    }
+                                                g.DrawEllipse(p[0], lastColumnDrawn, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.X), 2, 2);
+                                                g.DrawEllipse(p[1], lastColumnDrawn, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Y), 2, 2);
+                                                g.DrawEllipse(p[2], lastColumnDrawn, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Z), 2, 2);
+                                            }
+                                            else
+                                            {
+                                                g.DrawLine(p[0], this.currentColumns[i], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * previousVals[i][0]), this.currentColumns[i] + 1, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.X));
+                                                g.DrawLine(p[1], this.currentColumns[i], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * previousVals[i][1]), this.currentColumns[i] + 1, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Y));
+                                                g.DrawLine(p[2], this.currentColumns[i], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * previousVals[i][2]), this.currentColumns[i] + 1, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Z));
+                                            }
+                                            if (this.currentColumns[i] > lastColumn[data.SensorID])
+                                                lastColumn[data.SensorID] = this.currentColumns[i];
+                                        }
 
-                    else
-                    {*/
-                        g.DrawLine(p[0], this.currentColumns[i], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * previousVals[i][0]), this.currentColumns[i] + 1, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.X));
-                        g.DrawLine(p[1], this.currentColumns[i], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * previousVals[i][1]), this.currentColumns[i] + 1, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Y));
-                        g.DrawLine(p[2], this.currentColumns[i], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * previousVals[i][2]), this.currentColumns[i] + 1, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Z));
+                                        else
+                                        {*/
+                    g.DrawLine(p[0], this.currentColumns[i], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * previousVals[i][0]), this.currentColumns[i] + 1, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.X));
+                    g.DrawLine(p[1], this.currentColumns[i], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * previousVals[i][1]), this.currentColumns[i] + 1, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Y));
+                    g.DrawLine(p[2], this.currentColumns[i], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * previousVals[i][2]), this.currentColumns[i] + 1, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Z));
 
-                        if (this.currentColumns[i] > lastColumn[i])
-                            lastColumn[i] = this.currentColumns[i];
+                    if (this.currentColumns[i] > lastColumn[i])
+                        lastColumn[i] = this.currentColumns[i];
 
                     //}
 
@@ -258,7 +263,7 @@ namespace Wockets.Data.Plotters
 
 
                     this.lastUnixTimestamps[i] = data.UnixTimeStamp;
-//                    if (tail >= (this.wocketsController._Sensors[i]._Decoder._Data.Length - 1))
+                    //                    if (tail >= (this.wocketsController._Sensors[i]._Decoder._Data.Length - 1))
                     if (tail >= (Wockets.Decoders.Accelerometers.WocketsDecoder.BUFFER_SIZE - 1))
                     {
                         tail = 0;
@@ -267,17 +272,17 @@ namespace Wockets.Data.Plotters
                     else
                         tail++;
 
-                   // data = ((AccelerationData)this.wocketsController._Sensors[i]._Decoder._Data[tail]);
-                   /* plottedPoints++;
-                    if ((this.mode == PlottingMode.Delayed) && (plottedPoints == pointsToPlot[i]))
-                        break;
-                    else if (plottedPoints == 20)
-                        break;*/
+                    // data = ((AccelerationData)this.wocketsController._Sensors[i]._Decoder._Data[tail]);
+                    /* plottedPoints++;
+                     if ((this.mode == PlottingMode.Delayed) && (plottedPoints == pointsToPlot[i]))
+                         break;
+                     else if (plottedPoints == 20)
+                         break;*/
                 }
                 this.decoderTails[i] = currentHead;
             }
 
-            
+
 
 
             if (requiresFullRedraw)

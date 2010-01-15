@@ -405,11 +405,15 @@ namespace DataMerger
             int numPostures = session.OverlappingActivityLists[0].Count * session.OverlappingActivityLists[1].Count +1;
             Hashtable postures = new Hashtable();
             int k = 0;
+          
             for (int i = 0; (i < session.OverlappingActivityLists[1].Count); i++)
                 for (int j = 0; (j < session.OverlappingActivityLists[0].Count); j++)
                 {
+
+
                     postures.Add(session.OverlappingActivityLists[1][i]._Name + "_" + session.OverlappingActivityLists[0][j]._Name, k);
                     k++;
+
                 }
             postures.Add("unknown", k);
             int[] timeLostPostureSensorCounter = new int[numPostures];
@@ -533,10 +537,16 @@ namespace DataMerger
                     //wockets SR
                     for (int i = 0; (i < wc._Sensors.Count); i++)
                     {
-                        int sr= Convert.ToInt32(tokens[wocketsStartIndex + (ACCELEROMETER_STATISTICS_LENGTH * i)]);
-                        wocketsSR[i] += sr;
-                        modeWocketsSR[i][sr] = modeWocketsSR[i][sr] + 1;
-
+                        int sr = 0;
+                        try
+                        {
+                            sr = Convert.ToInt32(tokens[wocketsStartIndex + (ACCELEROMETER_STATISTICS_LENGTH * i)]);
+                            wocketsSR[i] += sr;
+                            modeWocketsSR[i][sr] = modeWocketsSR[i][sr] + 1;
+                        }
+                        catch (Exception e)
+                        {
+                        }
                         //add the samples collected per activity
                    
                         timeLostPostureSensorDistribution[i][currentPostureIndex] =   timeLostPostureSensorDistribution[i][currentPostureIndex] + sr;
@@ -584,7 +594,7 @@ namespace DataMerger
             {
                 if (wocketsSR[i] < expectedWocketsSamples)
                 {
-                    wocketsSecondsLost[i] = (expectedWocketsSamples - wocketsSR[i]) / WOCKETS_SR;
+                    wocketsSecondsLost[i] = (int) Math.Ceiling((double)(expectedWocketsSamples - wocketsSR[i]) / WOCKETS_SR);
                     wocketsPercentLost[i] = (int)(((double)wocketsSecondsLost[i] / (double)totalSeconds) * 100.0);
                 }
 
@@ -603,8 +613,8 @@ namespace DataMerger
                 {
                     if (timeLostPostureSensorDistribution[j][i] < expectedWocketsSamples)
                     {
-                        timeLostPostureSensorDistribution[j][i] = (int) Math.Ceiling((expectedWocketsSamples - timeLostPostureSensorDistribution[j][i]) / (double)WOCKETS_SR);
-                        percentLostPostureSensorDistribution[j][i] = (int) Math.Ceiling((((double)timeLostPostureSensorDistribution[j][i] / (double)timeLostPostureSensorCounter[i]) * 100.0));
+                        timeLostPostureSensorDistribution[j][i] = (int) Math.Floor((expectedWocketsSamples - timeLostPostureSensorDistribution[j][i]) / (double)WOCKETS_SR);
+                        percentLostPostureSensorDistribution[j][i] = (int) Math.Floor((((double)timeLostPostureSensorDistribution[j][i] / (double)timeLostPostureSensorCounter[i]) * 100.0));
                     }
                     else
                     {

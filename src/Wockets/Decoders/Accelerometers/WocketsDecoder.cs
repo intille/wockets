@@ -42,23 +42,15 @@ namespace Wockets.Decoders.Accelerometers
 
         private double start5minutes = 0;
 
-
+        private static int ttt = 1;
 #if (PocketPC)
         public override int Decode(int sourceSensor, CircularBuffer data,int start,int end)
         {
-            if (this.sdata == null)
-            {
-                this.sdata = new MemoryMappedFileStream("\\Temp\\wocket" + sourceSensor + ".dat", "wocket" + sourceSensor, (_DUSize * (uint)BUFFER_SIZE), MemoryProtection.PageReadWrite);
-                this.shead = new MemoryMappedFileStream("\\Temp\\whead" + sourceSensor+ ".dat", "whead" + sourceSensor, sizeof(int), MemoryProtection.PageReadWrite);
-                this.sdataSize = (int)(_DUSize * BUFFER_SIZE);
-                this.sdata.MapViewToProcessMemory(0, this.sdataSize);
-                this.shead.MapViewToProcessMemory(0, sizeof(int));
-                this.shead.Write(BitConverter.GetBytes(this.head), 0, sizeof(int));
-            }
+
 
             int rawDataIndex = start;
             int numDecodedPackets = 0;
-            int bufferHead = this.head;
+            //int bufferHead = this.head;
             
 
             while (rawDataIndex !=end)
@@ -109,29 +101,31 @@ namespace Wockets.Decoders.Accelerometers
                         short x = (short)((((short)(this.packet[0] & 0x03)) << 8) | (((short)(this.packet[1] & 0x7f)) << 1) | (((short)(this.packet[2] & 0x40)) >> 6));
                         short y = (short)((((short)(this.packet[2] & 0x3f)) << 4) | (((short)(this.packet[3] & 0x78)) >> 3));
                         short z = (short)((((short)(this.packet[3] & 0x07)) << 7) | ((short)(this.packet[4] & 0x7f)));
-                        double ts=WocketsTimer.GetUnixTime();
-
+                        double ts = WocketsTimer.GetUnixTime();
+                    
 
                         this.sdata.Write(BitConverter.GetBytes(ts),0,sizeof(double));
-                        this.head+=sizeof(double);
+                        //this.head+=sizeof(double);
                         this.sdata.Write(BitConverter.GetBytes(x),0,sizeof(short));
-                        this.head+=sizeof(short);
+                        //this.head+=sizeof(short);
                         this.sdata.Write(BitConverter.GetBytes(y),0,sizeof(short));
-                        this.head+=sizeof(short);
+                        //this.head+=sizeof(short);
                         this.sdata.Write(BitConverter.GetBytes(z),0,sizeof(short));
-                        this.head+=sizeof(short);
-                        
-                        if (bufferHead >= (BUFFER_SIZE - 1))
+                        //this.head+=sizeof(short);
+
+                       // this.head++;
+                       
+                        if (this.head >= (BUFFER_SIZE - 1))
                         {
-                            bufferHead = 0;
-                            //this.head=0;
+                            //bufferHead = 0;
+                            this.head=0;
                             this.sdata.Seek(0, System.IO.SeekOrigin.Begin);
                         }
                         else
-                            bufferHead++;
+                            this.head++;
 
                         this.shead.Seek(0, System.IO.SeekOrigin.Begin);
-                        this.shead.Write(BitConverter.GetBytes(bufferHead),0,sizeof(int));
+                        this.shead.Write(BitConverter.GetBytes(this.head),0,sizeof(int));
 
                         numDecodedPackets++;
 
@@ -334,7 +328,7 @@ namespace Wockets.Decoders.Accelerometers
 
             this.lastTimestamp = currentTimestamp;
   */
-            this.head = bufferHead;
+            //this.head = bufferHead;
             //this._Size = decodedDataIndex;
             return numDecodedPackets;
         }

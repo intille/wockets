@@ -76,7 +76,8 @@ namespace Wockets.Kernel
                     commandThread = new Thread(new ThreadStart(CommandHandler));
                     commandThread.Start();
                     _Running = true;
-                    commandThread.Join();                    
+                     commandThread.Join();                    
+                           
                 }
             }
         }
@@ -165,7 +166,7 @@ namespace Wockets.Kernel
                                 }
                                 else
                                 {
-                                    lwcontroller._Sensors[i]._RootStorageDirectory = storageDirectory+"\\data\\raw\\PLFormat";
+                                    lwcontroller._Sensors[i]._RootStorageDirectory = storageDirectory+"\\data\\raw\\PLFormat\\";
                                 }
                             }
 
@@ -237,7 +238,13 @@ namespace Wockets.Kernel
                     rk.Close();
 
                     if (msg == KernelCommand.TERMINATE.ToString())
-                    {                    
+                    {
+
+
+                        rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_WOCKETS_PATH + "\\Kernel");
+                        rk.SetValue("Status", 0, RegistryValueKind.DWord);
+                        rk.Close();
+                        System.Diagnostics.Process.GetCurrentProcess().Close();
                         System.Diagnostics.Process.GetCurrentProcess().Kill();
                     }
                     else if (msg == KernelCommand.REGISTER.ToString())
@@ -248,7 +255,7 @@ namespace Wockets.Kernel
                         rk.Close();
 
                         //spawn the processing thread
-                        Thread applicationThread = new Thread(new ThreadStart(ApplicationHandler));
+                        Thread applicationThread = new Thread(new ThreadStart(ApplicationHandler));        
                         applicationPaths.Add(applicationThread.ManagedThreadId, param);
                         applicationThreads.Add(param,applicationThread);
                         applicationThread.Start();
@@ -292,6 +299,15 @@ namespace Wockets.Kernel
         {
             lock (discoveryLock)
             {
+
+                try
+                {
+                    Registry.LocalMachine.DeleteSubKeyTree(Core.REGISTRY_DISCOVERED_SENSORS_PATH);
+                }
+                catch (Exception)
+                {
+                }
+
                 NetworkStacks._BluetoothStack.Initialize();
                 BluetoothClient btc = new BluetoothClient();
                 BluetoothDeviceInfo[] devices = btc.DiscoverDevices();
@@ -355,17 +371,11 @@ namespace Wockets.Kernel
             {
             }
 
-            try
-            {
-                Registry.LocalMachine.DeleteSubKeyTree(Core.REGISTRY_DISCOVERED_SENSORS_PATH);
-            }
-            catch (Exception)
-            {
-            }
 
             RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_WOCKETS_PATH + "\\Kernel");
             rk.SetValue("Handle", 00000, RegistryValueKind.DWord);
             rk.SetValue("OnBoot", 1, RegistryValueKind.DWord);
+            rk.SetValue("Status", 1, RegistryValueKind.DWord);
             rk.Close();
             rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_WOCKETS_PATH + "\\Kernel\\Commands");
             rk.SetValue("GET_BT", 0, RegistryValueKind.DWord);

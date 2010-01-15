@@ -71,7 +71,7 @@ namespace WocketsApplication
                 else
                 {
 
-                    wocketsList.Controls.Clear();
+                    wocketsList.Controls.Clear();                   
                     RegistryKey rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_DISCOVERED_SENSORS_PATH); ;
                     string[] sensors = rk.GetSubKeyNames();
                     rk.Close();
@@ -82,7 +82,7 @@ namespace WocketsApplication
                         {
 
                             rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_DISCOVERED_SENSORS_PATH + "\\" + sensors[i]); ;
-                            WocketListItem wi = new WocketListItem((string)rk.GetValue("Name"), (string)rk.GetValue("MacAddress"));
+                            WocketListItem wi = new WocketListItem((string)rk.GetValue("Name"), (string)rk.GetValue("MacAddress"),i+1);
                             rk.Close();
                             wi.Index = i;
                             wi.Name = wi.Index.ToString();
@@ -94,10 +94,9 @@ namespace WocketsApplication
                     }
                     else
                     {
-                        wocketsList._Status = "No Wockets Found...";
-                        wocketsList.Refresh();
+                        wocketsList._Status = "No Wockets Found...";                        
                     }
-              
+                    wocketsList.Refresh();
                 }
             }
 
@@ -178,13 +177,7 @@ namespace WocketsApplication
                     Application.Exit();                
             }
 
-            wocketsKernelGuid = Core.Register();
-
-            if ((wocketsKernelGuid != null) && (wocketsKernelGuid.Length > 0))
-            {
-                kListenerThread = new Thread(new ThreadStart(KernelListener));
-                kListenerThread.Start();
-            } 
+  
 
 
             ScreenUtils.ShowTaskBar(false);
@@ -316,12 +309,12 @@ namespace WocketsApplication
             AddButton(ControlID.HOME_PANEL, ControlID.BATTERY_BUTTON, "Buttons\\BatteryPressed.png", "Buttons\\BatteryUnpressed.png", 160, 0, 128);
             AddButton(ControlID.HOME_PANEL, ControlID.GREEN_POWER_BUTTON, "Buttons\\SavePowerPressed-128.png", "Buttons\\SavePowerUnpressed-128.png", 310, 0, 128);
 
-            //AddButton(ControlID.HOME_PANEL, ControlID.START_KERNEL_BUTTON, "Buttons\\StartKernelPressed-128.png", "Buttons\\StartKernelUnpressed-128.png", 0, 160, 128);
-            //AddButton(ControlID.HOME_PANEL, ControlID.STOP_KERNEL_BUTTON, "Buttons\\StopKernelPressed-128.png", "Buttons\\StopKernelUnpressed-128.png", 160, 160, 128);
 
             AddButton(ControlID.HOME_PANEL, ControlID.CONNECT_BUTTON, "Buttons\\ConnectPressed-128.png", "Buttons\\ConnectUnpressed-128.png", 0, 160, 128);
             AddButton(ControlID.HOME_PANEL, ControlID.DISCONNECT_BUTTON, "Buttons\\DisconnectPressed-128.png", "Buttons\\DisconnectUnpressed-128.png", 160, 160, 128);
 
+            AddButton(ControlID.HOME_PANEL, ControlID.START_KERNEL_BUTTON, "Buttons\\StartKernelPressed-128.png", "Buttons\\StartKernelUnpressed-128.png", 310, 160, 128);
+            AddButton(ControlID.HOME_PANEL, ControlID.STOP_KERNEL_BUTTON, "Buttons\\StopKernelPressed-128.png", "Buttons\\StopKernelUnpressed-128.png", 0, 310, 128);
 
            // gauge.Visible = true;
            // gauge.Location = new Point(200, 200);
@@ -616,7 +609,20 @@ namespace WocketsApplication
 
                 if (name == ControlID.START_KERNEL_BUTTON)
                 {
-                    //Process.Start("//Program Files//kernel//Kernel.exe","");
+                    if (!Core._KernelStarted)
+                    {
+                        //Process p = new Process();
+                        //ProcessStartInfo startInfo = new ProcessStartInfo();
+                        //startInfo.
+                        Process.Start(@"/Program Files/wocketsapplication/Kernel.exe", "");
+                        Thread.Sleep(5000);                     
+                    }
+                    wocketsKernelGuid = Core.Register();
+                    if ((wocketsKernelGuid != null) && (wocketsKernelGuid.Length > 0))
+                    {
+                        kListenerThread = new Thread(new ThreadStart(KernelListener));
+                        kListenerThread.Start();
+                    } 
                 }
                 else if (name == ControlID.STOP_KERNEL_BUTTON)
                 {         
@@ -715,6 +721,7 @@ namespace WocketsApplication
                     this.panels[ControlID.WOCKETS_PANEL].Visible = true;
                     this.panels[ControlID.WOCKETS_PANEL].Dock = DockStyle.None;
                     this.currentPanel = ControlID.WOCKETS_PANEL;
+                    UpdatewWocketsList();
                 }
             }
             else if (currentPanel == ControlID.PLOTTER_PANEL)

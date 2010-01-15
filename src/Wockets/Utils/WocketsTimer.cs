@@ -168,6 +168,10 @@ namespace Wockets.Utils
                     current_time = previousTime + 2.0;
                     Logger.Debug("Timer reset -  prevTime: " + previousTime + " currentTime: " + current_time + " reference: " + referenceTime);
                 }
+                else if (current_time == previousTime)
+                {
+                    ;
+                }
                 previousTime = current_time;
                 //prevCount = counter;
             }
