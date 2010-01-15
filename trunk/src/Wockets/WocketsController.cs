@@ -259,9 +259,10 @@ namespace Wockets
 
             polling = true;
             saving = true;
-            //classifying = true;
-            //Priorities are very critical to avoid buffer overflow
+            classifying = true;
             
+            //Priorities are very critical to avoid buffer overflow
+           
             //selene commented it out for power test
             aSavingThread = new Thread(new ThreadStart(Save));           
             aSavingThread.Priority = ThreadPriority.Highest;
@@ -269,16 +270,27 @@ namespace Wockets
  
             aPollingThread = new Thread(new ThreadStart(Poll));
             aPollingThread.Priority = ThreadPriority.Highest;
-            aClassifyingThread = new Thread(new ThreadStart(Classify));
+            //aClassifyingThread = new Thread(new ThreadStart(Classify));
+           
             aPollingThread.Start();
             aSavingThread.Start();
             aClassifyingThread.Start();
+
+            
+
+        }
+
+
+        
+        public void InitializeBatteryThread()
+        {
             aBatteryThread = new Thread(new ThreadStart(BatteryPoll));
             aBatteryThread.Priority = ThreadPriority.Highest;
             aBatteryThread.Start();
-
-
         }
+        
+
+
 
         private void BatteryPoll()
         {
@@ -292,6 +304,8 @@ namespace Wockets
                 Thread.Sleep(500);
             }
         }
+
+
         public void Dispose()
         {
             saving = false;
@@ -301,11 +315,14 @@ namespace Wockets
                 aPollingThread.Join();
                 aPollingThread.Abort();
             }
+
             if (aSavingThread != null)
             {
                 aSavingThread.Join();
                 aSavingThread.Abort();
             }
+
+
             if (aBatteryThread != null)
             {
                 aBatteryThread.Join();
