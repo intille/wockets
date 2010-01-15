@@ -3497,8 +3497,6 @@ namespace AudioAnnotation
             }
         }
 
-
-
         private bool CheckLabelsList()
         {
             int start_row, end_row, _category;
@@ -3790,8 +3788,11 @@ namespace AudioAnnotation
                             currentRecord._StartHour = start_time.Hour;
                             currentRecord._StartMinute = start_time.Minute;
                             currentRecord._StartSecond = start_time.Second;
+                            currentRecord._StartMillisecond = 0;
+
                             ts = (start_time - new DateTime(1970, 1, 1, 0, 0, 0));
                             currentRecord._StartUnix = ts.TotalSeconds;
+
 
                             //Stop Time
                             end_time = DateTime.Parse(EndDate + " " + tokens[4]);
@@ -3800,6 +3801,8 @@ namespace AudioAnnotation
                             currentRecord._EndHour = end_time.Hour;
                             currentRecord._EndMinute = end_time.Minute;
                             currentRecord._EndSecond = end_time.Second;
+                            currentRecord._EndMillisecond = 0;
+
                             ts = (end_time - new DateTime(1970, 1, 1, 0, 0, 0));
                             currentRecord._EndUnix = ts.TotalSeconds;
 
