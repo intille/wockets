@@ -14,14 +14,31 @@ namespace Wockets.Kernel
         public static string REGISTRY_SENSORS_PATH = REGISTRY_WOCKETS_PATH + "\\Sensors";
         public static string REGISTRY_DISCOVERED_SENSORS_PATH = REGISTRY_WOCKETS_PATH + "\\Discovered";
         public static string COMMAND_CHANNEL = Core.REGISTRY_WOCKETS_PATH + "\\Command";
+        public static string REGISTRY_KERNEL_PATH = REGISTRY_WOCKETS_PATH + "\\Kernel";
         public static string REGISTRY_LOCK = "WocketsRLock";
         private static Semaphore registryLock;
         public static bool _Registered = false;
+        
 
 
         static Core()
         {
             registryLock = new Semaphore(1, 1, REGISTRY_LOCK);
+        }
+
+        public static bool _KernelStarted
+        {
+            get
+            {
+                RegistryKey rk = Registry.LocalMachine.OpenSubKey(REGISTRY_KERNEL_PATH);
+                int status=(int)rk.GetValue("Status");
+                rk.Close();
+                if (status == 1)
+                    return true;
+                else
+                    return false;
+
+            }
         }
         public static void Send(KernelCommand command,string senderGuid)
         {

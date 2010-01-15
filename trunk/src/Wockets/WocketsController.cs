@@ -246,7 +246,10 @@ namespace Wockets
                 try
                 {
                     if (this._Sensors[i]._Loaded)
+                    {
                         this._Receivers[i].Initialize();
+                        this._Decoders[i].Initialize();
+                    }
                     //this._Receivers[i].
                     //Thread.Sleep(2000);
 
@@ -263,19 +266,19 @@ namespace Wockets
             
             //Priorities are very critical to avoid buffer overflow
            
-            //selene commented it out for power test
-            aSavingThread = new Thread(new ThreadStart(Save));           
-            aSavingThread.Priority = ThreadPriority.Highest;
-           
+            
  
             aPollingThread = new Thread(new ThreadStart(Poll));
             aPollingThread.Priority = ThreadPriority.Highest;
             //aClassifyingThread = new Thread(new ThreadStart(Classify));
            
             aPollingThread.Start();
-            aSavingThread.Start();
             aClassifyingThread.Start();
 
+            //selene commented it out for power test
+            aSavingThread = new Thread(new ThreadStart(Save));
+            aSavingThread.Priority = ThreadPriority.Highest;
+            aSavingThread.Start();
             
 
         }
@@ -287,9 +290,11 @@ namespace Wockets
             aBatteryThread = new Thread(new ThreadStart(BatteryPoll));
             aBatteryThread.Priority = ThreadPriority.Highest;
             aBatteryThread.Start();
+
         }
         
 
+           
 
 
         private void BatteryPoll()
@@ -747,7 +752,7 @@ namespace Wockets
                                         {
                                             ((SerialReceiver)currentReceiver).Write(ALIVE_CMD._Bytes);
                                             //if (((RFCOMMReceiver)currentReceiver)._Tsniff == Wockets.Utils.network.Bluetooth.TSniff.Continuous)
-                                                alive[i] = 10;//10 for sniff, 200 in continuous worked well
+                                                alive[i] = 200;//10 for sniff, 200 in continuous worked well
                                             //else
                                              //   alive[i] = 10;
                                             //if (((RFCOMMReceiver)currentReceiver)._Tsniff== Wockets.Utils.network.Bluetooth.TSniff.Sniff2Seconds)
@@ -826,7 +831,7 @@ namespace Wockets
 
                         catch (Exception ex)
                         {
-                            alive[i] = 10;//10 in sniff//200 in continuous worked well
+                            alive[i] = 200;//10 in sniff//200 in continuous worked well
                             Logger.Error(ex.Message + " \nTrace:" + ex.StackTrace);
                             currentReceiver.Dispose();
                         }

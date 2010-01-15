@@ -8,7 +8,7 @@ namespace WocketsApplication
     public class ControlID
     {
         public const int HOME_PANEL = 0;
-        public const int HOME_PANEL_BUTTON_COUNT = 8;
+        public const int HOME_PANEL_BUTTON_COUNT = 10;
         public const int ABOUT_PANEL = 1;
         public const int ABOUT_PANEL_BUTTON_COUNT = 0;
         public const int SETTINGS_PANEL = 2;
@@ -35,6 +35,9 @@ namespace WocketsApplication
 
         public const int START_KERNEL_BUTTON = 8;
         public const int STOP_KERNEL_BUTTON = 9;
+
+
+
 
 
         public const int ANNOTATE_BUTTON = 1;

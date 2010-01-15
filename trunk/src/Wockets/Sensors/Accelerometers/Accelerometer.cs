@@ -357,20 +357,21 @@ namespace Wockets.Sensors.Accelerometers
                 DetermineFilePath();
                 
 
-                //caution: The decoder buffer needs to be large enough or this code
-                //need to be fast enough to make sure that data is saved before being overwritten in the
-                //circular buffer
-                sdata.Read(timestamp, 0, sizeof(double));
-                data.UnixTimeStamp = BitConverter.ToDouble(timestamp, 0);
-                sdata.Read(acc, 0, sizeof(short));
-                data.X = BitConverter.ToInt16(acc, 0);
-                sdata.Read(acc, 0, sizeof(short));
-                data.Y = BitConverter.ToInt16(acc, 0);
-                sdata.Read(acc, 0, sizeof(short));
-                data.Z = BitConverter.ToInt16(acc, 0);
+ 
                 //AccelerationData data = ((AccelerationData)this._Decoder._Data[tail]);
-                while ((tail != currentHead) && (data.UnixTimeStamp > 0))
+                while (tail != currentHead)// && (data.UnixTimeStamp > 0))
                 {
+
+
+                    sdata.Read(timestamp, 0, sizeof(double));
+                    data.UnixTimeStamp = BitConverter.ToDouble(timestamp, 0);
+                    sdata.Read(acc, 0, sizeof(short));
+                    data.X = BitConverter.ToInt16(acc, 0);
+                    sdata.Read(acc, 0, sizeof(short));
+                    data.Y = BitConverter.ToInt16(acc, 0);
+                    sdata.Read(acc, 0, sizeof(short));
+                    data.Z = BitConverter.ToInt16(acc, 0);
+
                     aUnixTime = data.UnixTimeStamp;
 
                     if (aUnixTime < lastUnixTime)
@@ -379,8 +380,7 @@ namespace Wockets.Sensors.Accelerometers
                         Logger.Error(s);
                         break;
                     }
-                    //else if ((aUnixTime - lastUnixTime) > 2000)
-                    //    Console.WriteLine("");
+        
 
                     // Roughly once per second save full timestamp, no matter what
                     if (isForceTimestampSave || (timeSaveCount == TIMESTAMP_AFTER_SAMPLES))
@@ -402,6 +402,7 @@ namespace Wockets.Sensors.Accelerometers
                             bw.WriteByte(data.RawBytes[j]);
 
                     lastUnixTime = aUnixTime;
+
                     this.tailUnixTimestamp = aUnixTime;
                     prevdata = data;
                     if (tail >= this._Decoder._Data.Length - 1)
@@ -414,14 +415,6 @@ namespace Wockets.Sensors.Accelerometers
                     this.SavedPackets++;
                     //data = ((AccelerationData)this._Decoder._Data[tail]);
 
-                    sdata.Read(timestamp, 0, sizeof(double));
-                    data.UnixTimeStamp = BitConverter.ToDouble(timestamp, 0);
-                    sdata.Read(acc, 0, sizeof(short));
-                    data.X = BitConverter.ToInt16(acc, 0);
-                    sdata.Read(acc, 0, sizeof(short));
-                    data.Y = BitConverter.ToInt16(acc, 0);
-                    sdata.Read(acc, 0, sizeof(short));
-                    data.Z = BitConverter.ToInt16(acc, 0);
 
                 }                    
             }
