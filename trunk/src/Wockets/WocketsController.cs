@@ -271,9 +271,10 @@ namespace Wockets
             aPollingThread = new Thread(new ThreadStart(Poll));
             aPollingThread.Priority = ThreadPriority.Highest;
             //aClassifyingThread = new Thread(new ThreadStart(Classify));
-           
+            // aClassifyingThread.Start();
+
             aPollingThread.Start();
-            aClassifyingThread.Start();
+           
 
             //selene commented it out for power test
             aSavingThread = new Thread(new ThreadStart(Save));
