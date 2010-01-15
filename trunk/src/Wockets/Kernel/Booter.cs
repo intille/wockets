@@ -61,6 +61,9 @@ namespace Wockets.Kernel
             wcontroller.FromXML(path+"//NeededFiles//SensorConfigurations//SensorData43.xml");
             Logger.InitLogger(rootStorageDirectory + "kernellog\\");
             Logger.Debug2("Time,Time,PowerPercent,Voltage,Current,Temperature\n");
+
+            //Used for logging the battery
+            //wcontroller.InitializeBatteryThread();
             
         }
         public static void Boot()
