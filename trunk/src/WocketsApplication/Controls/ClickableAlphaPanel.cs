@@ -61,6 +61,7 @@ namespace WocketsApplication.Controls
                 {
                     this._ButtonPressed[i] = false;
                     this.Controls.Add(this._UnpressedButtonControls[i]); 
+
                     this.Controls.Add(this._PressedButtonControls[i]);
 
                     if (this._ButtonText[i] != null)
