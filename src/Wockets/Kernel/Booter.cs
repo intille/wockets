@@ -170,9 +170,14 @@ namespace Wockets.Kernel
                                 }
                             }
 
-                            _WocketsRunning = true;
-                            lwcontroller.Initialize();
-                            Send(ApplicationResponse.CONNECT_SUCCESS, applicationGuid);
+                            if (lwcontroller._Sensors.Count > 0)
+                            {
+                                _WocketsRunning = true;
+                               lwcontroller.Initialize();
+                               Send(ApplicationResponse.CONNECT_SUCCESS, applicationGuid);
+                            }else
+                                Send(ApplicationResponse.CONNECT_FAILURE, applicationGuid);
+                            
                         }
                         else
                             Send(ApplicationResponse.CONNECT_FAILURE, applicationGuid);

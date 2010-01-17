@@ -10,6 +10,11 @@ using WocketsApplication.Controls.Alpha;
 
 namespace WocketsApplication.Controls
 {
+    public enum ButtonType
+    {
+        Fixed,
+        Alternating
+    }
     public class ClickableAlphaPanel: AlphaPanel
     {
         public Bitmap _Background;
@@ -18,6 +23,8 @@ namespace WocketsApplication.Controls
         public bool[] _ButtonPressed;
         public AlphaPictureBox[] _PressedButtonControls;
         public AlphaPictureBox[] _UnpressedButtonControls;
+        public ButtonType[] _ButtonType;
+        public AlphaLabel[] _ButtonText;
 
 
         public ClickableAlphaPanel()
@@ -28,6 +35,9 @@ namespace WocketsApplication.Controls
             this._PressedButtonControls = new AlphaPictureBox[NumButtons];
             this._UnpressedButtonControls = new AlphaPictureBox[NumButtons];
             this._ButtonPressed = new bool[NumButtons];
+            this._ButtonType = new ButtonType[NumButtons];
+            this._ButtonText = new AlphaLabel[NumButtons];
+
         }
 
         public void Initialize()
@@ -52,8 +62,16 @@ namespace WocketsApplication.Controls
                     this._ButtonPressed[i] = false;
                     this.Controls.Add(this._UnpressedButtonControls[i]); 
                     this.Controls.Add(this._PressedButtonControls[i]);
+
+                    if (this._ButtonText[i] != null)
+                    {
+                        this.Controls.Add(this._ButtonText[i]);                        
+                        this._ButtonText[i].BringToFront();
+                        this._ButtonText[i].Visible = true;
+                    }
                 }
             }  
-        }      
+        }
+
     }
 }

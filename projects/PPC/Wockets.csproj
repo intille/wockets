@@ -1,4 +1,4 @@
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -461,9 +461,10 @@
     <Compile Include="..\..\src\Wockets\Data\Commands\RESUME.cs">
       <Link>Data\Commands\RESUME.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Utils\network\Bluetooth\TSniff.cs" >
+    <Compile Include="..\..\src\Wockets\Utils\network\Bluetooth\TSniff.cs">
       <Link>Data\Commands\Utils\network\Bluetooth\TSniff.cs</Link>
     </Compile>
+    <Compile Include="Utils\ProcessCE.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="WocketsWeka.csproj">

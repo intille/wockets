@@ -13,6 +13,8 @@ namespace Wockets.Kernel.Types
         CONNECT_FAILURE,
         DISCONNECT_FAILURE,
         SET_SENSORS_SUCCESS,
-        SET_SENSORS_FAILURE
+        SET_SENSORS_FAILURE,
+        REGISTER_SUCCESS,
+        REGISTER_FAILURE
     }
 }

@@ -48,7 +48,7 @@ namespace WocketsApplication
        // private ClickableAlphaPanel[] buttonPanels = new ClickableAlphaPanel[9];
         //private Bitmap[] _buttonBackBuffers = new Bitmap[9];
 
-        private string wocketsKernelGuid = null;
+ 
 
         private Thread kListenerThread;
 
@@ -72,7 +72,9 @@ namespace WocketsApplication
                 {
 
                     wocketsList.Controls.Clear();                   
-                    RegistryKey rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_DISCOVERED_SENSORS_PATH); ;
+                    RegistryKey rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_DISCOVERED_SENSORS_PATH); 
+
+                    //BUG crashing
                     string[] sensors = rk.GetSubKeyNames();
                     rk.Close();
                     if (sensors.Length > 0)
@@ -110,11 +112,11 @@ namespace WocketsApplication
             while (true)
             {
                 //ensures prior synchronization
-                namedEvent.Receive(wocketsKernelGuid);
+                namedEvent.Receive(Core._KernelGuid);
 
 
-                RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_REGISTERED_APPLICATIONS_PATH + 
-                                                                         "\\{" + wocketsKernelGuid + "}");
+                RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_REGISTERED_APPLICATIONS_PATH +
+                                                                         "\\{" + Core._KernelGuid + "}");
                 string response = (string)rk.GetValue("Message");
                 rk.Close();
 
@@ -133,6 +135,7 @@ namespace WocketsApplication
                 {
                     wocketsConnected = false;                   
                 }
+            
                 namedEvent.Reset();
             }
         }
@@ -204,7 +207,7 @@ namespace WocketsApplication
         //private BluetoothPanel pp;
         private Transitions currentTransition;
 
-        public void AddButton(int panelID, int buttonID, string pressedFilename,string unpressedFilename, int x, int y,int size)
+        public void AddButton(int panelID, int buttonID, string pressedFilename,string unpressedFilename, int x, int y,int size, string unpressedText,ButtonType type)
         {
             this.panels[panelID]._UnpressedButtonControls[buttonID] = new AlphaPictureBox();
             this.panels[panelID]._UnpressedButtonControls[buttonID].Name = buttonID.ToString();
@@ -213,22 +216,35 @@ namespace WocketsApplication
             this.panels[panelID]._UnpressedButtonControls[buttonID].Visible = true;
             this.panels[panelID]._UnpressedButtonControls[buttonID].Location = new Point(x, y);
             this.panels[panelID]._UnpressedButtonControls[buttonID].Click += new EventHandler(clickHandler);
+            if (unpressedText != null)
+            {
+                this.panels[panelID]._ButtonText[buttonID] = new AlphaLabel();
+                
+                this.panels[panelID]._ButtonText[buttonID].Text = unpressedText;
+                this.panels[panelID]._ButtonText[buttonID].ForeColor = Color.FromArgb(205, 183, 158);
+                this.panels[panelID]._ButtonText[buttonID].Allign = StringAlignment.Center;
+                this.panels[panelID]._ButtonText[buttonID].Visible = true;
+                this.panels[panelID]._ButtonText[buttonID].Font = new Font(FontFamily.GenericSerif,9.0f,FontStyle.Regular);
+                this.panels[panelID]._ButtonText[buttonID].Size = new Size(128, 30);
+                this.panels[panelID]._ButtonText[buttonID].Location = new Point(x , y + size + 2);
+            }
+            
 
             this.panels[panelID]._PressedButtonControls[buttonID] = new AlphaPictureBox();
             this.panels[panelID]._PressedButtonControls[buttonID].Name = buttonID.ToString();
-            this.panels[panelID]._PressedButtonControls[buttonID].Size = new Size(128, 128);
+            this.panels[panelID]._PressedButtonControls[buttonID].Size = new Size(128, 30);
             this.panels[panelID]._PressedButtonControls[buttonID].Image = AlphaImage.CreateFromFile(Constants.PATH + pressedFilename);
             this.panels[panelID]._PressedButtonControls[buttonID].Visible = false;
             this.panels[panelID]._PressedButtonControls[buttonID].Location = new Point(x, y);
             this.panels[panelID]._PressedButtonControls[buttonID].Click += new EventHandler(clickHandler);
-            
-            
+  
+            this.panels[panelID]._ButtonType[buttonID] = type;
 
-        }
-
-
-        
- 
+            if (type == ButtonType.Alternating)
+            {
+                this.panels[panelID]._PressedButtonControls[buttonID].Enabled=false;
+            }
+        } 
 
 
         WocketSlidingList wocketsList = null;
@@ -300,21 +316,21 @@ namespace WocketsApplication
 
             //Main Page
             //Home Screen Bottom  Buttons
-            AddButton(ControlID.HOME_PANEL, ControlID.SETTINGS_BUTTON, "Buttons\\SettingsPressed.png", "Buttons\\SettingsUnpressed.png", 0, this.Height - 130, 128);
-            AddButton(ControlID.HOME_PANEL, ControlID.MINIMIZE_BUTTON, "Buttons\\MinimizePressed.png", "Buttons\\MinimizeUnpressed.png", 160, this.Height - 130, 128);
-            AddButton(ControlID.HOME_PANEL, ControlID.RESET_BUTTON, "Buttons\\TurnOffPressed.png", "Buttons\\TurnOffUnpressed.png", 310, this.Height - 130, 128);
+            AddButton(ControlID.HOME_PANEL, ControlID.SETTINGS_BUTTON, "Buttons\\SettingsPressed.png", "Buttons\\SettingsUnpressed.png", 0, this.Height - 130, 128, null,ButtonType.Fixed);
+            AddButton(ControlID.HOME_PANEL, ControlID.MINIMIZE_BUTTON, "Buttons\\MinimizePressed.png", "Buttons\\MinimizeUnpressed.png", 160, this.Height - 130, 128,  null, ButtonType.Fixed);
+            AddButton(ControlID.HOME_PANEL, ControlID.RESET_BUTTON, "Buttons\\TurnOffPressed.png", "Buttons\\TurnOffUnpressed.png", 310, this.Height - 130, 128,  null, ButtonType.Fixed);
 
             //Home Screen Buttons
-            AddButton(ControlID.HOME_PANEL, ControlID.LINE_CHART_BUTTON, "Buttons\\LineChartPressed.png", "Buttons\\LineChartUnpressed.png", 0, 0, 128);
-            AddButton(ControlID.HOME_PANEL, ControlID.BATTERY_BUTTON, "Buttons\\BatteryPressed.png", "Buttons\\BatteryUnpressed.png", 160, 0, 128);
-            AddButton(ControlID.HOME_PANEL, ControlID.GREEN_POWER_BUTTON, "Buttons\\SavePowerPressed-128.png", "Buttons\\SavePowerUnpressed-128.png", 310, 0, 128);
+            AddButton(ControlID.HOME_PANEL, ControlID.LINE_CHART_BUTTON, "Buttons\\LineChartPressed.png", "Buttons\\LineChartUnpressed.png", 0, 0, 128, "Plot", ButtonType.Fixed);
+            AddButton(ControlID.HOME_PANEL, ControlID.BATTERY_BUTTON, "Buttons\\BatteryPressed.png", "Buttons\\BatteryUnpressed.png", 160, 0, 128,  "Power", ButtonType.Fixed);
+            AddButton(ControlID.HOME_PANEL, ControlID.GREEN_POWER_BUTTON, "Buttons\\SavePowerPressed-128.png", "Buttons\\SavePowerUnpressed-128.png", 310, 0, 128,  "Go Green", ButtonType.Fixed);
 
 
-            AddButton(ControlID.HOME_PANEL, ControlID.CONNECT_BUTTON, "Buttons\\ConnectPressed-128.png", "Buttons\\ConnectUnpressed-128.png", 0, 160, 128);
-            AddButton(ControlID.HOME_PANEL, ControlID.DISCONNECT_BUTTON, "Buttons\\DisconnectPressed-128.png", "Buttons\\DisconnectUnpressed-128.png", 160, 160, 128);
+            AddButton(ControlID.HOME_PANEL, ControlID.CONNECT_BUTTON, "Buttons\\ConnectPressed-128.png", "Buttons\\ConnectUnpressed-128.png", 0, 160, 128,  "Connect", ButtonType.Fixed);
+            AddButton(ControlID.HOME_PANEL, ControlID.DISCONNECT_BUTTON, "Buttons\\DisconnectPressed-128.png", "Buttons\\DisconnectUnpressed-128.png", 160, 160, 128,  "Disconnect", ButtonType.Fixed);
 
-            AddButton(ControlID.HOME_PANEL, ControlID.START_KERNEL_BUTTON, "Buttons\\StartKernelPressed-128.png", "Buttons\\StartKernelUnpressed-128.png", 310, 160, 128);
-            AddButton(ControlID.HOME_PANEL, ControlID.STOP_KERNEL_BUTTON, "Buttons\\StopKernelPressed-128.png", "Buttons\\StopKernelUnpressed-128.png", 0, 310, 128);
+            AddButton(ControlID.HOME_PANEL, ControlID.KERNEL_BUTTON, "Buttons\\StopKernelUnpressed-128.png", "Buttons\\StartKernelUnpressed-128.png", 310, 160, 128, "Start Kernel", ButtonType.Alternating);
+            //AddButton(ControlID.HOME_PANEL, ControlID.STOP_KERNEL_BUTTON, "Buttons\\StopKernelPressed-128.png", "Buttons\\StopKernelUnpressed-128.png", 0, 310, 128, "Stop", "Stop", ButtonType.Fixed);
 
            // gauge.Visible = true;
            // gauge.Location = new Point(200, 200);
@@ -335,18 +351,18 @@ namespace WocketsApplication
             
 
             //Settings Bottom  Buttons
-            AddButton(ControlID.SETTINGS_PANEL, ControlID.BACK_BUTTON, "Buttons\\BackPressed.png", "Buttons\\BackUnpressed.png", 310, this.Height - 130, 128);
+            AddButton(ControlID.SETTINGS_PANEL, ControlID.BACK_BUTTON, "Buttons\\BackPressed.png", "Buttons\\BackUnpressed.png", 310, this.Height - 130, 128, null, ButtonType.Fixed);
 
             //Settings Buttons
-            AddButton(ControlID.SETTINGS_PANEL, ControlID.BLUETOOTH_BUTTON, "Buttons\\BluetoothPressed.png", "Buttons\\BluetoothUnpressed.png", 0, 0, 128);
-            AddButton(ControlID.SETTINGS_PANEL, ControlID.SOUND_BUTTON, "Buttons\\SoundPressed.png", "Buttons\\SoundUnpressed.png", 160, 0, 128);
+            AddButton(ControlID.SETTINGS_PANEL, ControlID.BLUETOOTH_BUTTON, "Buttons\\BluetoothPressed.png", "Buttons\\BluetoothUnpressed.png", 0, 0, 128,  "Wockets", ButtonType.Fixed);
+            AddButton(ControlID.SETTINGS_PANEL, ControlID.SOUND_BUTTON, "Buttons\\SoundPressed.png", "Buttons\\SoundUnpressed.png", 160, 0, 128, "Sound",  ButtonType.Fixed);
 
             //Wockets Screen
 
-            AddButton(ControlID.WOCKETS_PANEL, ControlID.WOCKETS_BACK_BUTTON, "Buttons\\Back48Pressed.png", "Buttons\\Back48Unpressed.png", 400, this.Height -48, 48);
-            AddButton(ControlID.WOCKETS_PANEL, ControlID.WOCKETS_UP_BUTTON, "Buttons\\Up48Pressed.png", "Buttons\\Up48Unpressed.png", 250, this.Height - 48, 48);
-            AddButton(ControlID.WOCKETS_PANEL, ControlID.WOCKETS_DOWN_BUTTON, "Buttons\\Down48Pressed.png", "Buttons\\Down48Unpressed.png", 180, this.Height - 48, 48);
-            AddButton(ControlID.WOCKETS_PANEL, ControlID.WOCKETS_RELOAD_BUTTON, "Buttons\\BluetoothReloadPressed-48.png", "Buttons\\BluetoothReloadUnpressed-48.png", 20, this.Height - 48, 48);
+            AddButton(ControlID.WOCKETS_PANEL, ControlID.WOCKETS_BACK_BUTTON, "Buttons\\Back48Pressed.png", "Buttons\\Back48Unpressed.png", 400, this.Height - 48, 48, null, ButtonType.Fixed);
+            AddButton(ControlID.WOCKETS_PANEL, ControlID.WOCKETS_UP_BUTTON, "Buttons\\Up48Pressed.png", "Buttons\\Up48Unpressed.png", 250, this.Height - 48, 48,  null, ButtonType.Fixed);
+            AddButton(ControlID.WOCKETS_PANEL, ControlID.WOCKETS_DOWN_BUTTON, "Buttons\\Down48Pressed.png", "Buttons\\Down48Unpressed.png", 180, this.Height - 48, 48, null, ButtonType.Fixed);
+            AddButton(ControlID.WOCKETS_PANEL, ControlID.WOCKETS_RELOAD_BUTTON, "Buttons\\BluetoothReloadPressed-48.png", "Buttons\\BluetoothReloadUnpressed-48.png", 20, this.Height - 48, 48, null,  ButtonType.Fixed);
             //AddButton(ControlID.WOCKETS_PANEL, ControlID.WOCKETS_SAVE_BUTTON, "Buttons\\SavePressed-64.png", "Buttons\\SaveUnpressed-64.png", 100, this.Height - 64, 64);
 
             wocketsList = new WocketSlidingList();                                         
@@ -358,12 +374,12 @@ namespace WocketsApplication
 
             //Wockets Configuration Panel
 
-            AddButton(ControlID.WOCKETS_CONFIGURATION_PANEL, ControlID.WOCKETS_CONFIGURATIONS_BLUETOOTH_BUTTON, "Buttons\\BluetoothUnpressed-64.png", "Buttons\\BluetoothPressed-64.png", 0, this.Height - 64, 64);
-            AddButton(ControlID.WOCKETS_CONFIGURATION_PANEL, ControlID.WOCKETS_CONFIGURATIONS_COMMAND_BUTTON, "Buttons\\CommandPressed-64.png", "Buttons\\CommandUnpressed-64.png", 80, this.Height - 64, 64);
-            AddButton(ControlID.WOCKETS_CONFIGURATION_PANEL, ControlID.WOCKETS_CONFIGURATIONS_TIMERS_BUTTON, "Buttons\\TimerPressed-64.png", "Buttons\\TimerUnpressed-64.png", 160, this.Height - 64, 64);
-            AddButton(ControlID.WOCKETS_CONFIGURATION_PANEL, ControlID.WOCKETS_CONFIGURATIONS_STATUS_BUTTON, "Buttons\\StatusPressed-64.png", "Buttons\\StatusUnpressed-64.png", 240, this.Height - 64, 64);
-            AddButton(ControlID.WOCKETS_CONFIGURATION_PANEL, ControlID.WOCKETS_CONFIGURATIONS_INFORMATION_BUTTON, "Buttons\\InformationPressed-64.png", "Buttons\\InformationUnpressed-64.png", 320, this.Height - 64, 64);
-            AddButton(ControlID.WOCKETS_CONFIGURATION_PANEL, ControlID.WOCKETS_CONFIGURATIONS_BACK_BUTTON, "Buttons\\Back64Pressed.png", "Buttons\\Back64Unpressed.png", 400, this.Height - 64, 64);
+            AddButton(ControlID.WOCKETS_CONFIGURATION_PANEL, ControlID.WOCKETS_CONFIGURATIONS_BLUETOOTH_BUTTON, "Buttons\\BluetoothUnpressed-64.png", "Buttons\\BluetoothPressed-64.png", 0, this.Height - 64, 64, null, ButtonType.Fixed);
+            AddButton(ControlID.WOCKETS_CONFIGURATION_PANEL, ControlID.WOCKETS_CONFIGURATIONS_COMMAND_BUTTON, "Buttons\\CommandPressed-64.png", "Buttons\\CommandUnpressed-64.png", 80, this.Height - 64, 64, null, ButtonType.Fixed);
+            AddButton(ControlID.WOCKETS_CONFIGURATION_PANEL, ControlID.WOCKETS_CONFIGURATIONS_TIMERS_BUTTON, "Buttons\\TimerPressed-64.png", "Buttons\\TimerUnpressed-64.png", 160, this.Height - 64, 64, null, ButtonType.Fixed);
+            AddButton(ControlID.WOCKETS_CONFIGURATION_PANEL, ControlID.WOCKETS_CONFIGURATIONS_STATUS_BUTTON, "Buttons\\StatusPressed-64.png", "Buttons\\StatusUnpressed-64.png", 240, this.Height - 64, 64, null, ButtonType.Fixed);
+            AddButton(ControlID.WOCKETS_CONFIGURATION_PANEL, ControlID.WOCKETS_CONFIGURATIONS_INFORMATION_BUTTON, "Buttons\\InformationPressed-64.png", "Buttons\\InformationUnpressed-64.png", 320, this.Height - 64, 64, null, ButtonType.Fixed);
+            AddButton(ControlID.WOCKETS_CONFIGURATION_PANEL, ControlID.WOCKETS_CONFIGURATIONS_BACK_BUTTON, "Buttons\\Back64Pressed.png", "Buttons\\Back64Unpressed.png", 400, this.Height - 64, 64, null,  ButtonType.Fixed);
             bluetoothPanel = new Panel();
             bluetoothPanel.Size = new Size(Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height);
             bluetoothPanel.Visible = true;
@@ -376,7 +392,7 @@ namespace WocketsApplication
             this.panels[ControlID.WOCKETS_CONFIGURATION_PANEL].Controls.Add(bluetoothPanel);            
 
             //Plotter Panel
-            AddButton(ControlID.PLOTTER_PANEL, ControlID.WOCKETS_BACK_BUTTON, "Buttons\\Back48Pressed.png", "Buttons\\Back48Unpressed.png", 400, this.Height - 48, 48);
+            AddButton(ControlID.PLOTTER_PANEL, ControlID.WOCKETS_BACK_BUTTON, "Buttons\\Back48Pressed.png", "Buttons\\Back48Unpressed.png", 400, this.Height - 48, 48, null, ButtonType.Fixed);
             plotterPanel = new Panel();
             plotterPanel.Size = new Size(Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height);
             plotterPanel.Visible = true;
@@ -469,7 +485,7 @@ namespace WocketsApplication
             {
                 for (int i = 0; (i < this.panels[currentPanel]._UnpressedButtonControls.Length); i++)
                 {
-                    if (this.panels[currentPanel]._ButtonPressed[i])
+                    if ((this.panels[currentPanel]._ButtonType[i]== ButtonType.Fixed) && (this.panels[currentPanel]._ButtonPressed[i]))
                     {
                         this.panels[currentPanel]._UnpressedButtonControls[i].Visible = true;
                         this.panels[currentPanel]._PressedButtonControls[i].Visible = false;
@@ -511,7 +527,7 @@ namespace WocketsApplication
 
                     if (this.panels[currentPanel]._UnpressedButtonControls[i].HitTest(e.X, e.Y))
                     {
-                        if (!this.panels[currentPanel]._ButtonPressed[i])
+                        if ((this.panels[currentPanel]._ButtonType[i]== ButtonType.Fixed) && (!this.panels[currentPanel]._ButtonPressed[i]))
                         {
                                 this.panels[currentPanel]._PressedButtonControls[i].Visible = true;
                                 this.panels[currentPanel]._UnpressedButtonControls[i].Visible = false;
@@ -519,7 +535,7 @@ namespace WocketsApplication
                                 this.panels[currentPanel]._PressedButtonControls[i].Refresh();
                         }
                     }
-                    else if (this.panels[currentPanel]._ButtonPressed[i])
+                    else if ((this.panels[currentPanel]._ButtonType[i]== ButtonType.Fixed) && (this.panels[currentPanel]._ButtonPressed[i]))
                     {
                         this.panels[currentPanel]._UnpressedButtonControls[i].Visible = true;
                         this.panels[currentPanel]._PressedButtonControls[i].Visible = false;                       
@@ -575,7 +591,7 @@ namespace WocketsApplication
                     {
                         s.Add(((WocketListItem)selectedWockets[i])._MacAddress);
                     }
-                    Core.SetSensors(wocketsKernelGuid,s);
+                    Core.SetSensors(Core._KernelGuid, s);
                 }
                 else if (name == ControlID.WOCKETS_UP_BUTTON)
                     wocketsList.MoveDown();
@@ -585,8 +601,8 @@ namespace WocketsApplication
                 {
                     wocketsList._Status = "Searching for Wockets...";
                     wocketsList.Refresh();
-                    if (wocketsKernelGuid != null)
-                        Core.Send(KernelCommand.DISCOVER, wocketsKernelGuid);
+                    if (Core._KernelGuid != null)
+                        Core.Send(KernelCommand.DISCOVER, Core._KernelGuid);
                 }
                /* else if (name == ControlID.WOCKETS_SAVE_BUTTON)
                 {
@@ -606,48 +622,100 @@ namespace WocketsApplication
 
             else if (currentPanel == ControlID.HOME_PANEL)
             {
-
-                if (name == ControlID.START_KERNEL_BUTTON)
+                if (name == ControlID.KERNEL_BUTTON)
                 {
-                    if (!Core._KernelStarted)
+                    if (!this.panels[currentPanel]._ButtonPressed[ControlID.KERNEL_BUTTON])
                     {
-                        //Process p = new Process();
-                        //ProcessStartInfo startInfo = new ProcessStartInfo();
-                        //startInfo.
-                        Process.Start(@"/Program Files/wocketsapplication/Kernel.exe", "");
-                        Thread.Sleep(5000);                     
+                       
+                        this.panels[currentPanel]._UnpressedButtonControls[ControlID.KERNEL_BUTTON].Enabled = false;
+                        this.panels[currentPanel]._PressedButtonControls[ControlID.KERNEL_BUTTON].Visible = true;
+                        this.panels[currentPanel]._UnpressedButtonControls[ControlID.KERNEL_BUTTON].Visible = false;                                              
+                        this.panels[currentPanel]._ButtonText[ControlID.KERNEL_BUTTON].Text = "Stop Kernel";
+                        this.panels[currentPanel]._ButtonPressed[ControlID.KERNEL_BUTTON] = true;
+
+                        if (this.panels[currentPanel]._Background != null)
+                        {
+                            Graphics offscreen = Graphics.FromImage(this.panels[currentPanel]._Backbuffer);
+                            offscreen.DrawImage(this.panels[currentPanel]._Background, 0, 0);
+                        }
+                        this.Refresh();
+                        this.panels[currentPanel]._PressedButtonControls[ControlID.KERNEL_BUTTON].Invalidate();
+
+                        if (!Core._KernelStarted)
+                            Core.Start();
+
+                        Thread.Sleep(5000);
+                        if (Core._KernelStarted)
+                        {
+                            if (!Core._Registered)
+                            {
+                                Core.Register();
+                                if (Core._Registered)
+                                {
+                                    kListenerThread = new Thread(new ThreadStart(KernelListener));
+                                    kListenerThread.Start();
+                                }
+                            }
+                        }
+
+                        this.panels[currentPanel]._PressedButtonControls[ControlID.KERNEL_BUTTON].Enabled = true;
+                    
+                        
+                    
                     }
-                    wocketsKernelGuid = Core.Register();
-                    if ((wocketsKernelGuid != null) && (wocketsKernelGuid.Length > 0))
+                    else
                     {
-                        kListenerThread = new Thread(new ThreadStart(KernelListener));
-                        kListenerThread.Start();
-                    } 
+
+                        this.panels[currentPanel]._PressedButtonControls[ControlID.KERNEL_BUTTON].Enabled = false;
+                        this.panels[currentPanel]._UnpressedButtonControls[ControlID.KERNEL_BUTTON].Visible = true;
+                        this.panels[currentPanel]._PressedButtonControls[ControlID.KERNEL_BUTTON].Visible = false;                        
+                        this.panels[currentPanel]._ButtonText[ControlID.KERNEL_BUTTON].Text = "Start Kernel";
+                        this.panels[currentPanel]._ButtonPressed[ControlID.KERNEL_BUTTON] = false;
+
+                        if (this.panels[currentPanel]._Background != null)
+                        {
+                            Graphics offscreen = Graphics.FromImage(this.panels[currentPanel]._Backbuffer);
+                            offscreen.DrawImage(this.panels[currentPanel]._Background, 0, 0);
+                        }
+                        this.Refresh();
+
+                        if (Core._KernelStarted)
+                        {
+
+                            wocketsConnected = false;
+                            Core._Registered = false;
+                            selectedWockets.Clear();
+                            Core.Terminate();
+                            
+                            this.panels[currentPanel]._UnpressedButtonControls[ControlID.KERNEL_BUTTON].Visible = true;
+                            this.panels[currentPanel]._PressedButtonControls[ControlID.KERNEL_BUTTON].Visible = false;
+                            this.panels[currentPanel]._ButtonText[ControlID.KERNEL_BUTTON].Text = "Start Kernel";
+                            this.panels[currentPanel]._ButtonPressed[ControlID.KERNEL_BUTTON] = false;
+                        }
+                        this.panels[currentPanel]._UnpressedButtonControls[ControlID.KERNEL_BUTTON].Enabled = true;
+                     
+                    }
+
                 }
-                else if (name == ControlID.STOP_KERNEL_BUTTON)
-                {         
-                    if (wocketsKernelGuid != null)
-                        Core.Send(KernelCommand.TERMINATE, wocketsKernelGuid);
-                }
-                if (name == ControlID.BATTERY_BUTTON)
+                else if (name == ControlID.BATTERY_BUTTON)
                 {
                     if (wocketsConnected)
-                        Core.SetSniff(wocketsKernelGuid, SleepModes.NoSleep);
+                        Core.SetSniff(Core._KernelGuid, SleepModes.NoSleep);
                 }
                 else if (name == ControlID.GREEN_POWER_BUTTON)
                 {
                     if (wocketsConnected)
-                        Core.SetSniff(wocketsKernelGuid, SleepModes.Sleep1Second);
+                        Core.SetSniff(Core._KernelGuid, SleepModes.Sleep1Second);
                 }
                 else if (name == ControlID.RESET_BUTTON)
                 {
-                    if (wocketsKernelGuid!=null)
-                        Core.Unregister(wocketsKernelGuid);
+                    if (Core._KernelGuid != null)
+                        Core.Unregister(Core._KernelGuid);
                     ScreenUtils.ShowTaskBar(true);
                     
                     //Terminate the kernel
-                    if (wocketsKernelGuid != null)
-                        Core.Send(KernelCommand.TERMINATE, wocketsKernelGuid);
+                    if (Core._KernelGuid != null)
+                        Core.Send(KernelCommand.TERMINATE, Core._KernelGuid);
 
                     Application.Exit();
                     System.Diagnostics.Process.GetCurrentProcess().Kill();
@@ -668,7 +736,7 @@ namespace WocketsApplication
                     if (Core._Registered)
                     {
                         if (!wocketsConnected)
-                            Core.Connect(wocketsKernelGuid);
+                            Core.Connect(Core._KernelGuid);
                         else
                             MessageBox.Show("Wockets Already Connected!");
                     }
@@ -679,7 +747,7 @@ namespace WocketsApplication
                 {
                     if (wocketsConnected)
                     {
-                        Core.Disconnect(wocketsKernelGuid);
+                        Core.Disconnect(Core._KernelGuid);
                         plotter = null;
                     }
                     else

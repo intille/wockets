@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Threading;
+using System.Diagnostics;
 using Wockets.IPC;
 using Wockets.Kernel.Types;
+using Wockets.Utils;
 using Microsoft.Win32;
 
 namespace Wockets.Kernel
@@ -16,29 +18,44 @@ namespace Wockets.Kernel
         public static string COMMAND_CHANNEL = Core.REGISTRY_WOCKETS_PATH + "\\Command";
         public static string REGISTRY_KERNEL_PATH = REGISTRY_WOCKETS_PATH + "\\Kernel";
         public static string REGISTRY_LOCK = "WocketsRLock";
+        public static string KERNEL_PATH = @"\Program Files\wocketsapplication\";
+        public static string KERNEL_EXECUTABLE = "Kernel.exe";
         private static Semaphore registryLock;
         public static bool _Registered = false;
-        
-
+        public static string _KernelGuid = null;
 
         static Core()
         {
             registryLock = new Semaphore(1, 1, REGISTRY_LOCK);
         }
 
-        public static bool _KernelStarted
+       public static bool _KernelStarted
         {
             get
             {
-                RegistryKey rk = Registry.LocalMachine.OpenSubKey(REGISTRY_KERNEL_PATH);
-                int status=(int)rk.GetValue("Status");
-                rk.Close();
-                if (status == 1)
-                    return true;
-                else
-                    return false;
-
+                return ProcessCE.IsRunning(KERNEL_PATH+KERNEL_EXECUTABLE);                
             }
+   
+        }
+        public static void Start()
+        {
+            if (!_KernelStarted)
+            {
+                System.Diagnostics.Process po = new System.Diagnostics.Process();
+                ProcessStartInfo startInfo = new ProcessStartInfo();
+                //startInfo.
+                startInfo.WorkingDirectory = KERNEL_PATH;
+                startInfo.FileName = KERNEL_PATH + "\\" + KERNEL_EXECUTABLE;
+                startInfo.UseShellExecute = false;
+                po.StartInfo = startInfo;
+                po.Start();
+            }
+        }
+
+        public static void Terminate()
+        {
+            if (_KernelGuid != null)            
+                Core.Send(KernelCommand.TERMINATE, _KernelGuid);            
         }
         public static void Send(KernelCommand command,string senderGuid)
         {
@@ -142,7 +159,7 @@ namespace Wockets.Kernel
             }
             return success;
         }
-        public static string Register()
+        public static bool Register()
         {
 
             NamedEvents namedEvent = new NamedEvents();
@@ -177,10 +194,11 @@ namespace Wockets.Kernel
             if (success)
             {
                 _Registered = true;
-                return guid;
+               _KernelGuid = guid;
+                return true;
             }
             else
-                return null;
+                return false;
         }
 
         public static bool Unregister(string guid)
