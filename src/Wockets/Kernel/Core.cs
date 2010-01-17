@@ -23,7 +23,8 @@ namespace Wockets.Kernel
         private static Semaphore registryLock;
         public static bool _Registered = false;
         public static string _KernelGuid = null;
-
+        public static bool _Connected = false;
+        public static string storagePath = "";
         static Core()
         {
             registryLock = new Semaphore(1, 1, REGISTRY_LOCK);
@@ -37,6 +38,28 @@ namespace Wockets.Kernel
             }
    
         }
+
+       public static string _StoragePath
+       {
+           get
+           {
+               if (_Connected)
+               {
+                   if (storagePath == "")
+                   {
+                       registryLock.WaitOne();
+                       RegistryKey rk = Registry.LocalMachine.OpenSubKey(REGISTRY_KERNEL_PATH);
+                       storagePath = (string)rk.GetValue("Storage");       
+                       rk.Close();
+                       registryLock.Release();
+                   }
+             
+               }
+               else               
+                   storagePath = "";               
+               return storagePath;
+           }
+       }
         public static void Start()
         {
             if (!_KernelStarted)
@@ -54,8 +77,11 @@ namespace Wockets.Kernel
 
         public static void Terminate()
         {
-            if (_KernelGuid != null)            
-                Core.Send(KernelCommand.TERMINATE, _KernelGuid);            
+            if (_KernelGuid != null)
+            {
+                storagePath = "";
+                Core.Send(KernelCommand.TERMINATE, _KernelGuid);
+            }
         }
         public static void Send(KernelCommand command,string senderGuid)
         {
@@ -125,6 +151,7 @@ namespace Wockets.Kernel
             bool success = false;
             if (_Registered)
             {
+                storagePath = "";
                 string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + channel + "}";
                 NamedEvents namedEvent = new NamedEvents();
 
