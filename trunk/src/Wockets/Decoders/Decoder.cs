@@ -173,6 +173,7 @@ namespace Wockets.Decoders
         public abstract int Decode(int sensorID, CircularBuffer data, int start,int end);
         public bool Initialize()
         {
+#if (PocketPC)
             if (this.sdata == null)
             {
                 this.sdata = new MemoryMappedFileStream("\\Temp\\wocket" + this._ID + ".dat", "wocket" + this._ID, (_DUSize * (uint)this._BufferSize), MemoryProtection.PageReadWrite);
@@ -183,6 +184,7 @@ namespace Wockets.Decoders
                 this.shead.Write(BitConverter.GetBytes(this.head), 0, sizeof(int));
                 return true;
             }
+#endif
             return false;
         }
         public bool Dispose()
