@@ -172,7 +172,13 @@ namespace Wockets.Kernel
 
                             if (lwcontroller._Sensors.Count > 0)
                             {
-                                _WocketsRunning = true;
+                                registryLock.WaitOne();
+                                rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_KERNEL_PATH,true);
+                                rk.SetValue("Storage", storageDirectory);                                                                   
+                                rk.Close();                                
+                                registryLock.Release();
+
+                               _WocketsRunning = true;
                                lwcontroller.Initialize();
                                Send(ApplicationResponse.CONNECT_SUCCESS, applicationGuid);
                             }else
@@ -381,6 +387,7 @@ namespace Wockets.Kernel
             rk.SetValue("Handle", 00000, RegistryValueKind.DWord);
             rk.SetValue("OnBoot", 1, RegistryValueKind.DWord);
             rk.SetValue("Status", 1, RegistryValueKind.DWord);
+            rk.SetValue("Storage","", RegistryValueKind.String);
             rk.Close();
             rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_WOCKETS_PATH + "\\Kernel\\Commands");
             rk.SetValue("GET_BT", 0, RegistryValueKind.DWord);

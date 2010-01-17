@@ -7,8 +7,9 @@ namespace WocketsApplication
 {
     public class ControlID
     {
+        public const int NUMBER_PANELS = 8;
         public const int HOME_PANEL = 0;
-        public const int HOME_PANEL_BUTTON_COUNT = 9;
+        public const int HOME_PANEL_BUTTON_COUNT = 10;
         public const int ABOUT_PANEL = 1;
         public const int ABOUT_PANEL_BUTTON_COUNT = 0;
         public const int SETTINGS_PANEL = 2;
@@ -19,6 +20,13 @@ namespace WocketsApplication
         public const int WOCKETS_CONFIGURATION_PANEL_BUTTON_COUNT = 6;
         public const int PLOTTER_PANEL = 5;
         public const int PLOTTER_PANEL_BUTTON_COUNT = 1;
+        public const int ANNOTATION_PROTCOLS_PANEL = 6;
+        public const int ANNOTATION_PROTOCOLS_PANEL_BUTTON_COUNT = 1;
+        public const int ANNOTATION_BUTTON_PANEL = 7;
+        public const int ANNOTATION_BUTTON_PANEL_BUTTON_COUNT = 1;
+
+
+        
 
         //Home Screen                
         public const int LINE_CHART_BUTTON = 0;
@@ -31,18 +39,17 @@ namespace WocketsApplication
         public const int SETTINGS_BUTTON = 5;
         public const int MINIMIZE_BUTTON = 6;
         public const int RESET_BUTTON = 7;
-
-
         public const int KERNEL_BUTTON = 8;
+        public const int ANNOTATION_BUTTON = 9;
         //public const int STOP_KERNEL_BUTTON = 9;
 
 
 
 
 
-        public const int ANNOTATE_BUTTON = 1;
-        public const int STATISTICS_BUTTON = 2;      
-        public const int QUALITY_BUTTON = 3;
+        //public const int ANNOTATE_BUTTON = 1;
+        //public const int STATISTICS_BUTTON = 2;      
+        //public const int QUALITY_BUTTON = 3;
     
 
 
@@ -79,5 +86,12 @@ namespace WocketsApplication
 
         public const int PLOTTER_BACK_BUTTON = 0;
 
+        //Annotation Screen
+
+        public const int ANNOTATION_BACK_BUTTON = 0;
+
+        //Annotation Screen
+
+        public const int ANNOTATION_BUTTON_BACK_BUTTON = 0;
     }
 }

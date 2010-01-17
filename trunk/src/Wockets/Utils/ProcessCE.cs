@@ -191,11 +191,11 @@ namespace Wockets.Utils
         public static IntPtr FindProcessPID(string fullpath)
         {
             fullpath = fullpath.ToLower();
-
+           
             IntPtr snapshot_handle = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS | TH32CS_SNAPNOHEAPS, 0);
 
             if ((Int32)snapshot_handle == INVALID_HANDLE_VALUE)
-                throw new Win32Exception(Marshal.GetLastWin32Error(), "CreateToolhelp32Snapshot failed.");
+                return IntPtr.Zero;
 
             try
             {
