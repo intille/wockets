@@ -1,4 +1,4 @@
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -192,17 +192,18 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Tabs.resx</DependentUpon>
     </Compile>
-    <Compile Include="..\..\src\WocketsApplication\Controls\Lamp.cs" >
+    <Compile Include="..\..\src\WocketsApplication\Controls\Lamp.cs">
       <Link>Controls\Lamp.cs</Link>
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="..\..\src\WocketsApplication\Controls\Needle.cs" >
+    <Compile Include="..\..\src\WocketsApplication\Controls\Needle.cs">
       <Link>Controls\Needle.cs</Link>
     </Compile>
     <Compile Include="..\..\src\WocketsApplication\Controls\RoundGauge.cs">
-      <Link>Controls\RoundGauge.cs</Link>   
+      <Link>Controls\RoundGauge.cs</Link>
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Controls\Utils\GUIHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\src\WocketsApplication\Properties\Resources\CosmosRed.jpg">
@@ -460,9 +461,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\src\WocketsApplication\Resources\DottedBlack.png">
-      <Link>Resources\DottedBlack.png</Link>
-    </None>
     <None Include="..\..\src\WocketsApplication\Resources\DottedBlack.xcf">
       <Link>Resources\DottedBlack.xcf</Link>
     </None>
@@ -733,6 +731,9 @@
       <Project>{5D98635F-251B-464F-9132-AF594E8D482B}</Project>
       <Name>Wockets</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\DottedBlack.png" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />
   <ProjectExtensions>
