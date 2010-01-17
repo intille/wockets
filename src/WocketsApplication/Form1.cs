@@ -16,6 +16,7 @@ using System.Diagnostics;
 using  Microsoft.Win32;
 using Wockets.Kernel.Types;
 using Wockets.IPC;
+using Wockets.Utils;
 using Wockets.Kernel;
 using Wockets.Data.Plotters;
 //using OpenNETCF.GDIPlus;
@@ -214,6 +215,7 @@ namespace WocketsApplication
             this.panels[panelID]._UnpressedButtonControls[buttonID].Size = new Size(size, size);
             this.panels[panelID]._UnpressedButtonControls[buttonID].Image = AlphaImage.CreateFromFile(Constants.PATH + unpressedFilename);
             this.panels[panelID]._UnpressedButtonControls[buttonID].Visible = true;
+
             this.panels[panelID]._UnpressedButtonControls[buttonID].Location = new Point(x, y);
             this.panels[panelID]._UnpressedButtonControls[buttonID].Click += new EventHandler(clickHandler);
             if (unpressedText != null)
@@ -235,7 +237,7 @@ namespace WocketsApplication
             this.panels[panelID]._PressedButtonControls[buttonID].Size = new Size(128, 30);
             this.panels[panelID]._PressedButtonControls[buttonID].Image = AlphaImage.CreateFromFile(Constants.PATH + pressedFilename);
             this.panels[panelID]._PressedButtonControls[buttonID].Visible = false;
-            this.panels[panelID]._PressedButtonControls[buttonID].Location = new Point(x, y);
+            this.panels[panelID]._PressedButtonControls[buttonID].Location = new Point(x, y);      
             this.panels[panelID]._PressedButtonControls[buttonID].Click += new EventHandler(clickHandler);
   
             this.panels[panelID]._ButtonType[buttonID] = type;
@@ -572,10 +574,12 @@ namespace WocketsApplication
                 currentPanel = ControlID.WOCKETS_CONFIGURATION_PANEL;
             }
         }
-        public delegate void ClickHandler(object sender, EventArgs e);        
+        public delegate void ClickHandler(object sender, EventArgs e);
+        private double clickTime = 0;
         private void clickHandler(object sender, EventArgs e)
         {
             AlphaPictureBox p = (AlphaPictureBox)sender;
+
 
 
             int name = Convert.ToInt32(p.Name);
@@ -626,10 +630,14 @@ namespace WocketsApplication
                 {
                     if (!this.panels[currentPanel]._ButtonPressed[ControlID.KERNEL_BUTTON])
                     {
-                       
+
+
+                      
                         this.panels[currentPanel]._UnpressedButtonControls[ControlID.KERNEL_BUTTON].Enabled = false;
+                        this.panels[currentPanel]._PressedButtonControls[ControlID.KERNEL_BUTTON].Size = new Size(128, 128);
+                        //this.panels[currentPanel]._PressedButtonControls[ControlID.KERNEL_BUTTON].BringToFront();
                         this.panels[currentPanel]._PressedButtonControls[ControlID.KERNEL_BUTTON].Visible = true;
-                        this.panels[currentPanel]._UnpressedButtonControls[ControlID.KERNEL_BUTTON].Visible = false;                                              
+                        this.panels[currentPanel]._UnpressedButtonControls[ControlID.KERNEL_BUTTON].Visible = false;
                         this.panels[currentPanel]._ButtonText[ControlID.KERNEL_BUTTON].Text = "Stop Kernel";
                         this.panels[currentPanel]._ButtonPressed[ControlID.KERNEL_BUTTON] = true;
 
@@ -638,8 +646,8 @@ namespace WocketsApplication
                             Graphics offscreen = Graphics.FromImage(this.panels[currentPanel]._Backbuffer);
                             offscreen.DrawImage(this.panels[currentPanel]._Background, 0, 0);
                         }
-                        this.Refresh();
-                        this.panels[currentPanel]._PressedButtonControls[ControlID.KERNEL_BUTTON].Invalidate();
+
+
 
                         if (!Core._KernelStarted)
                             Core.Start();
@@ -659,41 +667,48 @@ namespace WocketsApplication
                         }
 
                         this.panels[currentPanel]._PressedButtonControls[ControlID.KERNEL_BUTTON].Enabled = true;
-                    
-                        
-                    
+                        clickTime = WocketsTimer.GetUnixTime();
                     }
                     else
                     {
 
-                        this.panels[currentPanel]._PressedButtonControls[ControlID.KERNEL_BUTTON].Enabled = false;
-                        this.panels[currentPanel]._UnpressedButtonControls[ControlID.KERNEL_BUTTON].Visible = true;
-                        this.panels[currentPanel]._PressedButtonControls[ControlID.KERNEL_BUTTON].Visible = false;                        
-                        this.panels[currentPanel]._ButtonText[ControlID.KERNEL_BUTTON].Text = "Start Kernel";
-                        this.panels[currentPanel]._ButtonPressed[ControlID.KERNEL_BUTTON] = false;
-
-                        if (this.panels[currentPanel]._Background != null)
+                        if ((WocketsTimer.GetUnixTime() - clickTime) < 3000)
+                            return;
+                        if (MessageBox.Show("Are you sure you want to stop wockets kernel?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
                         {
-                            Graphics offscreen = Graphics.FromImage(this.panels[currentPanel]._Backbuffer);
-                            offscreen.DrawImage(this.panels[currentPanel]._Background, 0, 0);
-                        }
-                        this.Refresh();
-
-                        if (Core._KernelStarted)
-                        {
-
-                            wocketsConnected = false;
-                            Core._Registered = false;
-                            selectedWockets.Clear();
-                            Core.Terminate();
-                            
+                            this.panels[currentPanel]._PressedButtonControls[ControlID.KERNEL_BUTTON].Enabled = false;
+                            this.panels[currentPanel]._UnpressedButtonControls[ControlID.KERNEL_BUTTON].Size = new Size(128, 128);
                             this.panels[currentPanel]._UnpressedButtonControls[ControlID.KERNEL_BUTTON].Visible = true;
+                            //this.panels[currentPanel]._UnpressedButtonControls[ControlID.KERNEL_BUTTON].BringToFront();
                             this.panels[currentPanel]._PressedButtonControls[ControlID.KERNEL_BUTTON].Visible = false;
                             this.panels[currentPanel]._ButtonText[ControlID.KERNEL_BUTTON].Text = "Start Kernel";
                             this.panels[currentPanel]._ButtonPressed[ControlID.KERNEL_BUTTON] = false;
+
+                            if (this.panels[currentPanel]._Background != null)
+                            {
+                                Graphics offscreen = Graphics.FromImage(this.panels[currentPanel]._Backbuffer);
+                                offscreen.DrawImage(this.panels[currentPanel]._Background, 0, 0);
+                            }
+
+
+                            if (Core._KernelStarted)
+                            {
+
+                                wocketsConnected = false;
+                                Core._Registered = false;
+                                selectedWockets.Clear();
+                                Core.Terminate();
+
+                                this.panels[currentPanel]._UnpressedButtonControls[ControlID.KERNEL_BUTTON].Visible = true;
+                                this.panels[currentPanel]._PressedButtonControls[ControlID.KERNEL_BUTTON].Visible = false;
+                                this.panels[currentPanel]._ButtonText[ControlID.KERNEL_BUTTON].Text = "Start Kernel";
+                                this.panels[currentPanel]._ButtonPressed[ControlID.KERNEL_BUTTON] = false;
+                            }
+                            this.panels[currentPanel]._UnpressedButtonControls[ControlID.KERNEL_BUTTON].Enabled = true;
+
+                            //this.panels[currentPanel].Refresh();
+
                         }
-                        this.panels[currentPanel]._UnpressedButtonControls[ControlID.KERNEL_BUTTON].Enabled = true;
-                     
                     }
 
                 }
