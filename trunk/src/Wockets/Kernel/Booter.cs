@@ -254,7 +254,8 @@ namespace Wockets.Kernel
 
                         rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_WOCKETS_PATH + "\\Kernel");
                         rk.SetValue("Status", 0, RegistryValueKind.DWord);
-                        rk.Close();
+                        rk.Close();                        
+                        Logger.Close();
                         System.Diagnostics.Process.GetCurrentProcess().Close();
                         System.Diagnostics.Process.GetCurrentProcess().Kill();
                     }

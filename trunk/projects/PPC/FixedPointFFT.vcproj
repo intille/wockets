@@ -95,7 +95,7 @@
 			/>
 			<DeploymentTool
 				ForceDirty="-1"
-				RemoteDirectory="%CSIDL_PROGRAM_FILES%\wockets"
+				RemoteDirectory="%CSIDL_PROGRAM_FILES%\wocketsapplication"
 				RegisterOutput="0"
 				AdditionalFiles=""
 			/>

@@ -34,7 +34,12 @@ namespace Wockets.Kernel
         {
             get
             {
-                return ProcessCE.IsRunning(KERNEL_PATH+KERNEL_EXECUTABLE);                
+                registryLock.WaitOne();
+                RegistryKey rk = Registry.LocalMachine.OpenSubKey(REGISTRY_KERNEL_PATH);
+                int status = (int)rk.GetValue("Status");
+                rk.Close();
+                registryLock.Release();
+                return (status == 1);
             }
    
         }
@@ -118,8 +123,8 @@ namespace Wockets.Kernel
         }
         public static void SetSensors(string channel, ArrayList s)
         {
-            if (_Registered)
-            {
+            if ((_Registered) && (!_Connected))
+            {              
                 string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + channel + "}";
                 NamedEvents namedEvent = new NamedEvents();
                 registryLock.WaitOne();
