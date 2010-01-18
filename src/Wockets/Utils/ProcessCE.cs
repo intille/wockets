@@ -192,6 +192,7 @@ namespace Wockets.Utils
         {
             fullpath = fullpath.ToLower();
            
+
             IntPtr snapshot_handle = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS | TH32CS_SNAPNOHEAPS, 0);
 
             if ((Int32)snapshot_handle == INVALID_HANDLE_VALUE)
