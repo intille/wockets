@@ -17,7 +17,12 @@ namespace Wockets.Data.Annotation
 
         public string ToXML()
         {
-            string xml = "";
+            string xml = "<"+PROTOCOLS_ELEMENT+">\n";
+            for (int i = 0; (i < this.Count); i++)
+            {
+                xml += this[i].ToXML();
+            }
+            xml += "</" + PROTOCOLS_ELEMENT + ">\n";
             return xml;
         }
         public void FromXML(string xmlFile)

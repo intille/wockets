@@ -45,6 +45,7 @@
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="Microsoft.Windowsce.Forms" />
     <Reference Include="mscorlib" />
     <Reference Include="System" />
@@ -204,6 +205,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\Utils\GUIHelper.cs" />
+    <Compile Include="Controls\Utils\Keyboard.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\src\WocketsApplication\Properties\Resources\CosmosRed.jpg">
@@ -730,6 +732,10 @@
     <ProjectReference Include="Wockets.csproj">
       <Project>{5D98635F-251B-464F-9132-AF594E8D482B}</Project>
       <Name>Wockets</Name>
+    </ProjectReference>
+    <ProjectReference Include="WocketsWeka.csproj">
+      <Project>{637F0352-A172-4CD3-8C6B-C318CC92C14B}</Project>
+      <Name>WocketsWeka</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

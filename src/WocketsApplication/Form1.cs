@@ -25,6 +25,16 @@ using Wockets.Data.Classifiers.Trees;
 using Wockets.Data.Classifiers.Utils;
 //using OpenNETCF.GDIPlus;
 using OpenNETCF.Windows.Forms;
+
+using WocketsWeka;
+using weka.classifiers;
+using weka;
+using weka.core;
+using weka.classifiers.trees;
+using Wockets.Data.Classifiers;
+
+
+
 using WocketsApplication.Controls.Utils;
 
 namespace WocketsApplication
@@ -120,7 +130,7 @@ namespace WocketsApplication
         private TextWriter trainingTW = null;
         private TextWriter structureTW = null;
         private Thread mlThread = null;
-
+        private string arffFileName = "";
         private void InitializeML()
         {
 
@@ -131,7 +141,7 @@ namespace WocketsApplication
             FeatureExtractor.Initialize(selectedWockets.Count, 90, this.configuration, this.annotatedSession.OverlappingActivityLists[0]);
             if (trainingTW == null)
             {
-                string arffFileName = Core._StoragePath + "\\output" + DateTime.Now.ToString().Replace('/', '_').Replace(':', '_').Replace(' ', '_') + ".arff";
+                arffFileName = Core._StoragePath + "\\output" + DateTime.Now.ToString().Replace('/', '_').Replace(':', '_').Replace(' ', '_') + ".arff";
                 trainingTW = new StreamWriter(arffFileName);
                 trainingTW.WriteLine("@RELATION wockets");
                 string arffHeader = FeatureExtractor.GetArffHeader();
@@ -168,6 +178,9 @@ namespace WocketsApplication
             }
             FeatureExtractor.Cleanup();
         }
+
+
+        private AnnotationProtocolList models;
         private void KernelListener()
         {
             NamedEvents namedEvent = new NamedEvents();
@@ -217,7 +230,27 @@ namespace WocketsApplication
                     this.currentStatus = "Ready to connect";
                     UpdateStatus();
                     if (this._SaveFeatures)
+                    {
                         CleanupML();
+                        Keyboard.KeyboardOpen = true;
+                        Thread.Sleep(2000);
+                        string title=Microsoft.VisualBasic.Interaction.InputBox("Please type a name for this session", "Session Name", "",50,300);
+                        if (title != "")
+                        {
+                            models = new AnnotationProtocolList();
+                            if (File.Exists(Constants.PATH + "models.xml"))
+                                models.FromXML(Constants.PATH + "models.xml");
+                            AnnotationProtocol protocol = new AnnotationProtocol();
+                            protocol._Name = title;                            
+                            protocol._FileName = arffFileName;
+                            protocol._Description = "";
+                            models.Add(protocol);
+                            
+                            TextWriter tw = new StreamWriter(Constants.PATH + "models.xml");
+                            tw.WriteLine(models.ToXML());
+                            tw.Close();
+                        }
+                    }
                  
                 }
             
@@ -395,8 +428,13 @@ namespace WocketsApplication
         private AlphaLabel statusLabel;
         private string currentStatus = "";
 
-        private AlphaLabel saveLabel;
-        private CheckBox saveData;
+
+        private System.Windows.Forms.ListView modelsList;
+        private AnnotationProtocolList aModels;
+        private Button startMeasuringButton;
+        private Label modelLabel;
+
+
         private CheckBox saveFeatures;
 
 
@@ -424,7 +462,7 @@ namespace WocketsApplication
             this.numberButtons[ControlID.ANNOTATION_PROTCOLS_PANEL] = ControlID.ANNOTATION_PROTOCOLS_PANEL_BUTTON_COUNT;
             this.numberButtons[ControlID.ANNOTATION_BUTTON_PANEL] = ControlID.ANNOTATION_BUTTON_PANEL_BUTTON_COUNT;
             this.numberButtons[ControlID.ACTIVITY_PANEL] = ControlID.ACTIVITY_PANEL_BUTTON_COUNT;
-           
+            this.numberButtons[ControlID.MODELS_PANEL] = ControlID.MODELS_PANEL_BUTTON_COUNT;
             for (int i = 0; (i < ControlID.NUMBER_PANELS); i++)
            {
 
@@ -453,8 +491,8 @@ namespace WocketsApplication
             //this.panels[ControlID.WOCKETS_CONFIGURATION_PANEL]._BackgroundFile = Constants.PATH + "Backgrounds\\DottedBlack.png";
             //this.panels[ControlID.PLOTTER_PANEL]._Background = new Bitmap(Constants.PATH + "Backgrounds\\DottedBlack.png");
             //this.panels[ControlID.PLOTTER_PANEL]._BackgroundFile = Constants.PATH + "Backgrounds\\DottedBlack.png";
-            //this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL]._Background = new Bitmap(Constants.PATH + "Backgrounds\\DottedBlack.png");
-            //this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL]._BackgroundFile = Constants.PATH + "Backgrounds\\DottedBlack.png";
+            this.panels[ControlID.MODELS_PANEL].BackColor = Color.FromArgb(250, 237, 221);
+            this.panels[ControlID.MODELS_PANEL]._ClearCanvas = true;
             this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL].BackColor = Color.FromArgb(250, 237, 221);
             this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL]._ClearCanvas = true;
             this.panels[ControlID.ANNOTATION_BUTTON_PANEL].BackColor = Color.FromArgb(250, 237, 221);
@@ -534,6 +572,65 @@ namespace WocketsApplication
 
             AddButton(ControlID.ANNOTATION_PROTCOLS_PANEL, ControlID.HOME_ANNOTATION_PROTOCOL_BUTTON, "Buttons\\HomePressed-128.png", "Buttons\\HomeUnpressed-128.png", 0, this.Height - 130, 128, null, ButtonType.Fixed);
             #endregion Annotation Protocols Panel
+
+            #region Models Panel
+            //Setup the annotation protcols list
+            modelsList = new ListView();
+            modelsList.Location = new System.Drawing.Point(72, 44);
+            modelsList.View = View.List;
+            modelsList.Name = "modelsList";
+            modelsList.Size = new System.Drawing.Size(100, 100);
+            modelsList.TabIndex = 0;
+            modelsList.SelectedIndexChanged += new EventHandler(modelsList_SelectedIndexChanged);
+            //adjust top label size and location
+            modelLabel = new Label();
+            modelLabel.Width = (int)(Screen.PrimaryScreen.WorkingArea.Width * 0.90);
+            modelLabel.Height = (int)(Screen.PrimaryScreen.WorkingArea.Width * 0.15);
+            modelLabel.Location = new Point(2, 2);
+            //Load the activity protocols from the master directory
+            this.aModels = new AnnotationProtocolList();
+            if (File.Exists(Constants.PATH + "models.xml"))
+            {
+                this.aModels.FromXML(Constants.PATH + "models.xml");
+                longest_label = "";
+                for (int i = 0; (i < this.aModels.Count); i++)
+                {
+                    modelsList.Items.Add(new ListViewItem(this.aModels[i]._Name));
+                    if (longest_label.Length < this.aModels[i]._Name.Length)
+                        longest_label = this.aModels[i]._Name;
+                }
+            }
+
+            //Listbox dynamic placement
+            modelsList.Width = (int)(Screen.PrimaryScreen.WorkingArea.Width * 0.90);
+            modelsList.Height = (int)(Screen.PrimaryScreen.WorkingArea.Height * 0.60);
+            modelsList.Font = new Font(GUIHelper.FONT_FAMILY, 14F, this.Font.Style);
+            modelsList.Location = new Point((int)(Screen.PrimaryScreen.WorkingArea.Width * 0.05), (int)modelLabel.Location.Y + modelLabel.Height + 2);
+            this.panels[ControlID.MODELS_PANEL].Controls.Add(modelsList);
+
+
+            //add annotation label
+            modelLabel.Size = new Size(Screen.PrimaryScreen.WorkingArea.Width, 50);
+            modelLabel.Text = "Choose a learning profile";
+            modelLabel.BackColor = Color.FromArgb(250, 237, 221);
+            modelLabel.Font = new Font(FontFamily.GenericSerif, 14.0f, FontStyle.Bold);
+            modelLabel.Visible = true;
+            modelLabel.Location = new Point((int)(Screen.PrimaryScreen.WorkingArea.Width * 0.05), 10);
+            this.panels[ControlID.MODELS_PANEL].Controls.Add(modelLabel);
+
+            //add a button to start
+            startMeasuringButton = new Button();
+            startMeasuringButton.Size = new Size(400, 80);
+            startMeasuringButton.Text = "Begin Annotation";
+            startMeasuringButton.Font = new Font(FontFamily.GenericSerif, 14.0f, FontStyle.Bold);
+            startMeasuringButton.Enabled = false;
+            startMeasuringButton.Visible = true;
+            startMeasuringButton.Click += new EventHandler(startMeasuringButton_Click);
+            startMeasuringButton.Location = new Point(Screen.PrimaryScreen.WorkingArea.Width / 2 - 200, modelsList.Location.Y + modelsList.Height + 10);
+            this.panels[ControlID.MODELS_PANEL].Controls.Add(startMeasuringButton);
+
+            AddButton(ControlID.MODELS_PANEL , ControlID.HOME_MODELS_BUTTON, "Buttons\\HomePressed-128.png", "Buttons\\HomeUnpressed-128.png", 0, this.Height - 130, 128, null, ButtonType.Fixed);
+            #endregion Models Panel
 
             #region Annotation Buttons Panel
             this.panels[ControlID.ANNOTATION_BUTTON_PANEL].AutoScroll = true;
@@ -744,6 +841,127 @@ namespace WocketsApplication
 
 
 
+        }
+
+        int[] labelCounters=null;
+        Classifier classifier = null;
+        FastVector fvWekaAttributes;
+        Instances instances=null;
+        string[] activityLabels=null;
+        Hashtable labelIndex = new Hashtable();
+        private Thread classificationThread = null;
+        int classificationCounter = 0;
+        private void ClassificationThread()
+        {
+            while (true)
+            {
+                double lastTimeStamp = FeatureExtractor.StoreWocketsWindow();
+                if (FeatureExtractor.GenerateFeatureVector(lastTimeStamp))
+                {
+                    Instance newinstance = new Instance(instances.numAttributes());
+                    newinstance.Dataset = instances;
+                    for (int i = 0; (i < FeatureExtractor.Features.Length); i++)
+                        newinstance.setValue(instances.attribute(i), FeatureExtractor.Features[i]);
+                    double predicted = classifier.classifyInstance(newinstance);
+                    string predicted_activity = newinstance.dataset().classAttribute().value_Renamed((int)predicted);
+
+                    int currentIndex = (int)labelIndex[predicted_activity];
+                    labelCounters[currentIndex] = (int)labelCounters[currentIndex] + 1;
+                    classificationCounter++;
+
+                    if (classificationCounter == 5)
+                    {
+                        classificationCounter = 0;
+                        int mostCount = 0;
+                        string mostActivity = "";
+                        //Color indicate;
+                        //int level;
+                        for (int j = 0; (j < labelCounters.Length); j++)
+                        {
+                            // level = 240 - 240 * labelCounters[j] / configuration._SmoothWindows;
+                            //indicate = Color.FromArgb(level, level, level);
+                            //this.ActGUIlabels[j].ForeColor = indicate;
+                            //this.ActGUIlabels[j].Invalidate();
+                            if (labelCounters[j] > mostCount)
+                            {
+                                mostActivity = activityLabels[j];
+                                mostCount = labelCounters[j];
+                            }
+                            labelCounters[j] = 0;
+                        }
+
+                    }
+                }
+                Thread.Sleep(100);
+            }
+        }
+        void startMeasuringButton_Click(object sender, EventArgs e)
+        {
+            //Copy the annotation file to the storage directory
+            this.selectedModel = this.modelsList.SelectedIndices[0];
+
+            this.annotatedSession = new Session();
+            this.annotatedSession.FromXML(Core._StoragePath + "\\ActivityRealtime.xml");
+            this.configuration = new DTConfiguration();
+            this.configuration.FromXML(Core._StoragePath + "\\Configuration.xml");
+            Wockets.WocketsController wc = new Wockets.WocketsController("", "", "");
+            wc.FromXML(Core._StoragePath + "\\SensorData.xml");
+
+            FeatureExtractor.Initialize(wc._Sensors.Count, 90, this.configuration, this.annotatedSession.OverlappingActivityLists[0]);
+
+           // this.annotatedSession = new Session();
+           // this.annotatedSession.FromXML(Constants.PATH + "ActivityProtocols\\" + this.aProtocols[this.selectedActivityProtocol]._FileName);
+            classifier = new J48();
+            if (!File.Exists(Core._StoragePath+"\\model.xml"))
+            {
+                instances = new Instances(new StreamReader(this.aModels[this.selectedModel]._FileName));
+                instances.Class = instances.attribute(FeatureExtractor.ArffAttributeLabels.Length);
+                classifier.buildClassifier(instances);
+                TextWriter tc = new StreamWriter(Core._StoragePath+"\\model.xml");
+                classifier.toXML(tc);
+                tc.Flush();
+                tc.Close();
+            }
+            else
+            {
+                instances = new Instances(new StreamReader(Core._StoragePath + "\\structure.arff"));
+                instances.Class = instances.attribute(FeatureExtractor.ArffAttributeLabels.Length);
+                classifier.buildClassifier(Core._StoragePath + "\\model.xml", instances);
+            }
+
+
+            fvWekaAttributes = new FastVector(FeatureExtractor.ArffAttributeLabels.Length + 1);
+            for (int i = 0; (i < FeatureExtractor.ArffAttributeLabels.Length); i++)
+                fvWekaAttributes.addElement(new weka.core.Attribute(FeatureExtractor.ArffAttributeLabels[i]));
+
+            FastVector fvClassVal = new FastVector();
+            labelCounters = new int[this.annotatedSession.OverlappingActivityLists[0].Count + 1];
+            activityLabels = new string[this.annotatedSession.OverlappingActivityLists[0].Count + 1];
+            for (int i = 0; (i < this.annotatedSession.OverlappingActivityLists[0].Count); i++)
+            {
+                labelCounters[i] = 0;
+                string label = "";
+                int j = 0;
+                for (j = 0; (j < this.annotatedSession.OverlappingActivityLists.Count - 1); j++)
+                    label += this.annotatedSession.OverlappingActivityLists[j][i]._Name.Replace(' ', '_') + "_";
+                label += this.annotatedSession.OverlappingActivityLists[j][i]._Name.Replace(' ', '_');
+                activityLabels[i] = label;
+                labelIndex.Add(label, i);
+                fvClassVal.addElement(label);
+            }
+
+            classificationThread = new Thread(new ThreadStart(ClassificationThread));
+            classificationThread.Start();
+        }
+
+        private int selectedModel = -1;
+        void modelsList_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            this.selectedModel = -1;
+            if ((!startMeasuringButton.Enabled) && (((ListView)sender).SelectedIndices.Count == 1))
+                startMeasuringButton.Enabled = true;
+            else
+                startMeasuringButton.Enabled = false;
         }
 
         void doneAnnotation_Click(object sender, EventArgs e)
@@ -1310,6 +1528,12 @@ namespace WocketsApplication
                 }
                 else if (name == ControlID.MEASURE_ACTIVITY_BUTTON)
                 {
+                    this.panels[currentPanel].Visible = false;
+                    this.panels[ControlID.MODELS_PANEL].Location = new Point(0, 0);
+                    this.panels[ControlID.MODELS_PANEL].BringToFront();
+                    this.panels[ControlID.MODELS_PANEL].Visible = true;
+                    this.panels[ControlID.MODELS_PANEL].Dock = DockStyle.None;
+                    this.currentPanel = ControlID.MODELS_PANEL;
                 }
                 else if (name == ControlID.ANNOTATE_ACTIVITY_BUTTON)
                 {
@@ -1323,6 +1547,17 @@ namespace WocketsApplication
             }
             #endregion Activity Panel
 
+            #region Annotation Protocols Panel
+            else if (currentPanel == ControlID.MODELS_PANEL)
+            {
+                if (name == ControlID.HOME_ANNOTATION_PROTOCOL_BUTTON)
+                {
+                    this.panels[ControlID.HOME_PANEL].Visible = true;
+                    this.panels[currentPanel].Visible = false;
+                    this.currentPanel = ControlID.HOME_PANEL;
+                }
+            }
+            #endregion Annotation Protocols Panel
 
             #region Annotation Protocols Panel
             else if (currentPanel == ControlID.ANNOTATION_PROTCOLS_PANEL)
