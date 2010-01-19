@@ -65,7 +65,11 @@ namespace Wockets.Data.Annotation
 
         public string ToXML()
         {
-            string xml = "";
+            string xml = "<"+PROTOCOL_ELEMENT+">\n";
+            xml += "<" + NAME_ELEMENT + ">" + this.name + "</" + NAME_ELEMENT + ">";
+            xml += "<" + DESCRIPTION_ELEMENT + ">" + this.description + "</" + DESCRIPTION_ELEMENT + ">";
+            xml += "<" + FILE_ELEMENT + ">" + this.fileName + "</" + FILE_ELEMENT + ">";
+            xml += "</" + PROTOCOL_ELEMENT + ">\n";
             return xml;
         }
         public void FromXML(string xml)

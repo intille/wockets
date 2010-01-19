@@ -178,6 +178,11 @@ namespace Wockets.Kernel
                                 rk.Close();                                
                                 registryLock.Release();
 
+                                if (!Directory.Exists(storageDirectory))
+                                    Directory.CreateDirectory(storageDirectory);
+                                TextWriter tw = new StreamWriter(storageDirectory + "\\SensorData.xml");
+                                tw.WriteLine(lwcontroller.ToXML());
+                                tw.Close();
                                _WocketsRunning = true;
                                lwcontroller.Initialize();
                                Send(ApplicationResponse.CONNECT_SUCCESS, applicationGuid);

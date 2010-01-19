@@ -7,7 +7,7 @@ namespace WocketsApplication
 {
     public class ControlID
     {
-        public const int NUMBER_PANELS = 9;
+        public const int NUMBER_PANELS = 10;
         public const int HOME_PANEL = 0;
         public const int HOME_PANEL_BUTTON_COUNT = 9;
         public const int ABOUT_PANEL = 1;
@@ -80,6 +80,13 @@ namespace WocketsApplication
         public const int HOME_ANNOTATION_BUTTON_BUTTON = 0;
         public const int FINISH_ANNOTATION_BUTTON_BUTTON = 1;
         #endregion ANNOTATION BUTTON PANEL
+
+
+        #region MODELS PANEL
+        public const int MODELS_PANEL = 9;
+        public const int MODELS_PANEL_BUTTON_COUNT = 1;
+        public const int HOME_MODELS_BUTTON = 0;
+        #endregion MODELS PANEL
 
         //Settings Screen
        
