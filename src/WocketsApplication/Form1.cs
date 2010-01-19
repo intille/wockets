@@ -170,13 +170,52 @@ namespace WocketsApplication
                 mlThread.Abort();
                 mlThread = null;
             }
+
+            if (classificationThread != null)
+            {
+                classificationThread.Abort();
+                classificationThread = null;
+            }
+
             if (trainingTW != null)
             {
                 trainingTW.Flush();
                 trainingTW.Close();
                 trainingTW = null;
             }
+
+            if (structureTW != null)
+            {
+                structureTW.Flush();
+                structureTW.Close();
+                structureTW = null;
+            }
             FeatureExtractor.Cleanup();
+
+            //Save any existing arff files
+            if ((this._SaveFeatures) && (arffFileName != ""))
+            {
+
+                Keyboard.KeyboardOpen = true;
+                Thread.Sleep(2000);
+                string title = Microsoft.VisualBasic.Interaction.InputBox("Please type a name for this session", "Session Name", "", 50, 300);
+                if (title != "")
+                {
+                    models = new AnnotationProtocolList();
+                    if (File.Exists(Constants.PATH + "models.xml"))
+                        models.FromXML(Constants.PATH + "models.xml");
+                    AnnotationProtocol protocol = new AnnotationProtocol();
+                    protocol._Name = title;
+                    protocol._FileName = arffFileName;
+                    protocol._Description = "";
+                    models.Add(protocol);
+
+                    TextWriter tw = new StreamWriter(Constants.PATH + "models.xml");
+                    tw.WriteLine(models.ToXML());
+                    tw.Close();
+                    arffFileName = "";
+                }
+            }
         }
 
 
@@ -229,28 +268,10 @@ namespace WocketsApplication
                     this.selectedActivityProtocol = -1;
                     this.currentStatus = "Ready to connect";
                     UpdateStatus();
-                    if (this._SaveFeatures)
-                    {
-                        CleanupML();
-                        Keyboard.KeyboardOpen = true;
-                        Thread.Sleep(2000);
-                        string title=Microsoft.VisualBasic.Interaction.InputBox("Please type a name for this session", "Session Name", "",50,300);
-                        if (title != "")
-                        {
-                            models = new AnnotationProtocolList();
-                            if (File.Exists(Constants.PATH + "models.xml"))
-                                models.FromXML(Constants.PATH + "models.xml");
-                            AnnotationProtocol protocol = new AnnotationProtocol();
-                            protocol._Name = title;                            
-                            protocol._FileName = arffFileName;
-                            protocol._Description = "";
-                            models.Add(protocol);
-                            
-                            TextWriter tw = new StreamWriter(Constants.PATH + "models.xml");
-                            tw.WriteLine(models.ToXML());
-                            tw.Close();
-                        }
-                    }
+
+                    //if you disconnect stop and cleanup the ML and save any existing arff file
+                    CleanupML();
+             
                  
                 }
             
@@ -440,6 +461,11 @@ namespace WocketsApplication
 
         private AlphaLabel chooseActivityLabel;
         private Button doneAnnotation;
+        private Label examplesLabel;
+
+        private AlphaLabel bestGuessLabel;
+        private Button doneClassifying;
+
         public void InitializeInterface()
         {
             //GdiplusStartupInput input = new GdiplusStartupInput();
@@ -463,6 +489,7 @@ namespace WocketsApplication
             this.numberButtons[ControlID.ANNOTATION_BUTTON_PANEL] = ControlID.ANNOTATION_BUTTON_PANEL_BUTTON_COUNT;
             this.numberButtons[ControlID.ACTIVITY_PANEL] = ControlID.ACTIVITY_PANEL_BUTTON_COUNT;
             this.numberButtons[ControlID.MODELS_PANEL] = ControlID.MODELS_PANEL_BUTTON_COUNT;
+            this.numberButtons[ControlID.CLASSIFICATION_PANEL] = ControlID.CLASSIFICATION_PANEL_BUTTON_COUNT;
             for (int i = 0; (i < ControlID.NUMBER_PANELS); i++)
            {
 
@@ -472,11 +499,12 @@ namespace WocketsApplication
                 this.panels[i].MouseUp += new MouseEventHandler(owner_MouseUp);                
                 //this.panels[i].BackColor=colors[i];
                 this.panels[i].Dock = DockStyle.Fill;
-                this.panels[i]._Backbuffer = new Bitmap(SCREEN_RESOLUTION_X, SCREEN_RESOLUTION_Y, PixelFormat.Format32bppRgb);
+                this.panels[i]._Backbuffer = new Bitmap(SCREEN_RESOLUTION_X, SCREEN_RESOLUTION_Y, PixelFormat.Format16bppRgb555);
                 this.Controls.Add(this.panels[i]);
             }
 
             //setup backgrounds
+
             this.panels[ControlID.HOME_PANEL]._Background = new Bitmap(Constants.PATH + "Backgrounds\\DottedBlack.png");
             this.panels[ControlID.HOME_PANEL]._BackgroundFile = Constants.PATH + "Backgrounds\\DottedBlack.png";
             this.panels[ControlID.ABOUT_PANEL]._Background = (Bitmap)this.panels[ControlID.HOME_PANEL]._Background.Clone();
@@ -497,6 +525,8 @@ namespace WocketsApplication
             this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL]._ClearCanvas = true;
             this.panels[ControlID.ANNOTATION_BUTTON_PANEL].BackColor = Color.FromArgb(250, 237, 221);
             this.panels[ControlID.ANNOTATION_BUTTON_PANEL]._ClearCanvas = true;
+            this.panels[ControlID.CLASSIFICATION_PANEL].BackColor = Color.FromArgb(250, 237, 221);
+            this.panels[ControlID.CLASSIFICATION_PANEL]._ClearCanvas = true;
 
 
             #region Activity Panel
@@ -587,19 +617,7 @@ namespace WocketsApplication
             modelLabel.Width = (int)(Screen.PrimaryScreen.WorkingArea.Width * 0.90);
             modelLabel.Height = (int)(Screen.PrimaryScreen.WorkingArea.Width * 0.15);
             modelLabel.Location = new Point(2, 2);
-            //Load the activity protocols from the master directory
-            this.aModels = new AnnotationProtocolList();
-            if (File.Exists(Constants.PATH + "models.xml"))
-            {
-                this.aModels.FromXML(Constants.PATH + "models.xml");
-                longest_label = "";
-                for (int i = 0; (i < this.aModels.Count); i++)
-                {
-                    modelsList.Items.Add(new ListViewItem(this.aModels[i]._Name));
-                    if (longest_label.Length < this.aModels[i]._Name.Length)
-                        longest_label = this.aModels[i]._Name;
-                }
-            }
+   
 
             //Listbox dynamic placement
             modelsList.Width = (int)(Screen.PrimaryScreen.WorkingArea.Width * 0.90);
@@ -611,7 +629,7 @@ namespace WocketsApplication
 
             //add annotation label
             modelLabel.Size = new Size(Screen.PrimaryScreen.WorkingArea.Width, 50);
-            modelLabel.Text = "Choose a learning profile";
+            modelLabel.Text = "Select a learning profile";
             modelLabel.BackColor = Color.FromArgb(250, 237, 221);
             modelLabel.Font = new Font(FontFamily.GenericSerif, 14.0f, FontStyle.Bold);
             modelLabel.Visible = true;
@@ -621,7 +639,7 @@ namespace WocketsApplication
             //add a button to start
             startMeasuringButton = new Button();
             startMeasuringButton.Size = new Size(400, 80);
-            startMeasuringButton.Text = "Begin Annotation";
+            startMeasuringButton.Text = "Begin Measuring";
             startMeasuringButton.Font = new Font(FontFamily.GenericSerif, 14.0f, FontStyle.Bold);
             startMeasuringButton.Enabled = false;
             startMeasuringButton.Visible = true;
@@ -642,19 +660,56 @@ namespace WocketsApplication
             this.chooseActivityLabel.Visible = true;
             this.chooseActivityLabel.Location = new Point(1, 1);
             this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Controls.Add(this.chooseActivityLabel);
+
+            this.examplesLabel = new Label();
+            this.examplesLabel.Size = new Size(100, 40);
+            this.examplesLabel.Text = "O examples";
+            this.examplesLabel.ForeColor = Color.Black;
+            this.examplesLabel.Font = new Font(FontFamily.GenericSerif, 10.0f, FontStyle.Bold);
+            this.examplesLabel.Visible = true;
+            this.examplesLabel.Location = new Point(120, this.Height - 100);
+            this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Controls.Add(this.examplesLabel);
+
             doneAnnotation = new Button();
-            doneAnnotation.Size = new Size(300, 80);
+            doneAnnotation.Size = new Size(200, 80);
             doneAnnotation.Text = "Done Annotating";
-            doneAnnotation.Font = new Font(FontFamily.GenericSerif, 12.0f, FontStyle.Bold);
+            doneAnnotation.Font = new Font(FontFamily.GenericSerif, 10.0f, FontStyle.Bold);
             doneAnnotation.Enabled = true;
             doneAnnotation.Visible = true;
             doneAnnotation.Click += new EventHandler(doneAnnotation_Click);
-            doneAnnotation.Location = new Point(150, this.Height - 100);
+            doneAnnotation.Location = new Point(250, this.Height - 100);
             this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Controls.Add(doneAnnotation);
             
             AddButton(ControlID.ANNOTATION_BUTTON_PANEL, ControlID.HOME_ANNOTATION_BUTTON_BUTTON, "Buttons\\HomePressed-128.png", "Buttons\\HomeUnpressed-128.png", 0, this.Height - 130, 128, null, ButtonType.Fixed);
             //AddButton(ControlID.ANNOTATION_BUTTON_PANEL, ControlID.FINISH_ANNOTATION_BUTTON_BUTTON, "Buttons\\StopPressed-128.png", "Buttons\\StopUnpressed-128.png", 300, this.Height - 130, 128, null, ButtonType.Fixed);
             #endregion Annotation Buttons Panel
+
+
+
+
+
+            #region Classification Panel
+            this.bestGuessLabel = new AlphaLabel();
+            this.bestGuessLabel.Size = new Size(500, 40);
+            this.bestGuessLabel.Text = "Our Best Guess";
+            this.bestGuessLabel.ForeColor = Color.Black;
+            this.bestGuessLabel.Font = new Font(FontFamily.GenericSerif, 10.0f, FontStyle.Bold);
+            this.bestGuessLabel.Visible = true;
+            this.bestGuessLabel.Location = new Point(1, 1);
+            this.panels[ControlID.CLASSIFICATION_PANEL].Controls.Add(this.bestGuessLabel);
+            doneClassifying = new Button();
+            doneClassifying.Size = new Size(300, 80);
+            doneClassifying.Text = "Done Measuring";
+            doneClassifying.Font = new Font(FontFamily.GenericSerif, 12.0f, FontStyle.Bold);
+            doneClassifying.Enabled = true;
+            doneClassifying.Visible = true;
+            doneClassifying.Click += new EventHandler(doneClassifying_Click);
+            doneClassifying.Location = new Point(150, this.Height - 100);
+            this.panels[ControlID.CLASSIFICATION_PANEL].Controls.Add(doneClassifying);
+            AddButton(ControlID.CLASSIFICATION_PANEL, ControlID.HOME_CLASSIFICATION_BUTTON, "Buttons\\HomePressed-128.png", "Buttons\\HomeUnpressed-128.png", 0, this.Height - 130, 128, null, ButtonType.Fixed);            
+            #endregion Classification Panel
+
+
             //Main Page
             //Home Screen Bottom  Buttons
             //Line 1
@@ -843,12 +898,59 @@ namespace WocketsApplication
 
         }
 
+        void doneClassifying_Click(object sender, EventArgs e)
+        {
+            if (MessageBox.Show("Are you done measuring?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
+            {    
+                this.activityStatus = ActivityStatus.None;
+
+                for (int i = 0; i < activityButtons.Count; i++)
+                {
+                    System.Windows.Forms.Button[] activityList = (System.Windows.Forms.Button[])activityButtons[i];
+                    for (int j = 0; j < activityList.Length; j++)
+                        this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Controls.Remove(activityList[j]);
+                }
+                activityButtons.Clear();
+                this.panels[ControlID.HOME_PANEL].Visible = true;
+                this.panels[ControlID.CLASSIFICATION_PANEL].Visible = false;
+                this.currentPanel = ControlID.HOME_PANEL;
+                //if (this.saveFeatures.Checked)
+                CleanupML();
+                
+            }
+        }
+
+
+
+
+
+        delegate void UpdateClassificationCallback(string activity,int color);
+        public void UpdateClassification(string activity,int color)
+        {
+            if (!disposed)
+            {
+                // InvokeRequired required compares the thread ID of the
+                // calling thread to the thread ID of the creating thread.
+                // If these threads are different, it returns true.
+                if (((Label)this.classifiedLabels[activity]).InvokeRequired)
+                {
+                    UpdateClassificationCallback d = new UpdateClassificationCallback(UpdateClassification);
+                    this.Invoke(d, new object[] {activity,color });
+                }
+                else
+                {                    
+                    ((Label)this.classifiedLabels[activity]).ForeColor = Color.FromArgb(250*color, 237*color, 221*color);                  
+                }
+            }
+
+        }
+
         int[] labelCounters=null;
         Classifier classifier = null;
         FastVector fvWekaAttributes;
         Instances instances=null;
         string[] activityLabels=null;
-        Hashtable labelIndex = new Hashtable();
+        Hashtable labelIndex ;
         private Thread classificationThread = null;
         int classificationCounter = 0;
         private void ClassificationThread()
@@ -871,7 +973,7 @@ namespace WocketsApplication
 
                     if (classificationCounter == 5)
                     {
-                        classificationCounter = 0;
+                      
                         int mostCount = 0;
                         string mostActivity = "";
                         //Color indicate;
@@ -882,6 +984,9 @@ namespace WocketsApplication
                             //indicate = Color.FromArgb(level, level, level);
                             //this.ActGUIlabels[j].ForeColor = indicate;
                             //this.ActGUIlabels[j].Invalidate();
+                            double intensity=(1-(labelCounters[j] / classificationCounter));
+                            //((Label)this.classifiedLabels[activityLabels[j]]).ForeColor = Color.FromArgb((int) (250 *intensity) , (int)(237 * intensity), (int)(221 * intensity));
+                            UpdateClassification(activityLabels[j], (int) intensity);
                             if (labelCounters[j] > mostCount)
                             {
                                 mostActivity = activityLabels[j];
@@ -890,43 +995,56 @@ namespace WocketsApplication
                             labelCounters[j] = 0;
                         }
 
+                        classificationCounter = 0;
+                                               
                     }
+                    
                 }
                 Thread.Sleep(100);
             }
         }
+
+        private string modelDirectory = "";
+        private Hashtable classifiedLabels;
         void startMeasuringButton_Click(object sender, EventArgs e)
         {
             //Copy the annotation file to the storage directory
             this.selectedModel = this.modelsList.SelectedIndices[0];
+            if (!File.Exists(this.aModels[this.selectedModel]._FileName))
+            {
+                MessageBox.Show("Profile does not exist", "Confirm", MessageBoxButtons.OK, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
+                return; 
+            }
 
+            modelDirectory = this.aModels[this.selectedModel]._FileName.Substring(0, this.aModels[this.selectedModel]._FileName.LastIndexOf('\\'));
+                
             this.annotatedSession = new Session();
-            this.annotatedSession.FromXML(Core._StoragePath + "\\ActivityRealtime.xml");
+            this.annotatedSession.FromXML(modelDirectory + "\\ActivityLabelsRealtime.xml");
             this.configuration = new DTConfiguration();
-            this.configuration.FromXML(Core._StoragePath + "\\Configuration.xml");
+            this.configuration.FromXML(modelDirectory + "\\Configuration.xml");
             Wockets.WocketsController wc = new Wockets.WocketsController("", "", "");
-            wc.FromXML(Core._StoragePath + "\\SensorData.xml");
+            wc.FromXML(modelDirectory + "\\SensorData.xml");
 
             FeatureExtractor.Initialize(wc._Sensors.Count, 90, this.configuration, this.annotatedSession.OverlappingActivityLists[0]);
 
            // this.annotatedSession = new Session();
            // this.annotatedSession.FromXML(Constants.PATH + "ActivityProtocols\\" + this.aProtocols[this.selectedActivityProtocol]._FileName);
             classifier = new J48();
-            if (!File.Exists(Core._StoragePath+"\\model.xml"))
+            if (!File.Exists(modelDirectory + "\\model.xml"))
             {
                 instances = new Instances(new StreamReader(this.aModels[this.selectedModel]._FileName));
                 instances.Class = instances.attribute(FeatureExtractor.ArffAttributeLabels.Length);
                 classifier.buildClassifier(instances);
-                TextWriter tc = new StreamWriter(Core._StoragePath+"\\model.xml");
+                TextWriter tc = new StreamWriter(modelDirectory + "\\model.xml");
                 classifier.toXML(tc);
                 tc.Flush();
                 tc.Close();
             }
             else
             {
-                instances = new Instances(new StreamReader(Core._StoragePath + "\\structure.arff"));
+                instances = new Instances(new StreamReader(modelDirectory + "\\structure.arff"));
                 instances.Class = instances.attribute(FeatureExtractor.ArffAttributeLabels.Length);
-                classifier.buildClassifier(Core._StoragePath + "\\model.xml", instances);
+                classifier.buildClassifier(modelDirectory + "\\model.xml", instances);
             }
 
 
@@ -935,23 +1053,59 @@ namespace WocketsApplication
                 fvWekaAttributes.addElement(new weka.core.Attribute(FeatureExtractor.ArffAttributeLabels[i]));
 
             FastVector fvClassVal = new FastVector();
-            labelCounters = new int[this.annotatedSession.OverlappingActivityLists[0].Count + 1];
-            activityLabels = new string[this.annotatedSession.OverlappingActivityLists[0].Count + 1];
-            for (int i = 0; (i < this.annotatedSession.OverlappingActivityLists[0].Count); i++)
+            labelCounters = new int[this.annotatedSession.OverlappingActivityLists[0].Count];
+            activityLabels = new string[this.annotatedSession.OverlappingActivityLists[0].Count];
+            //for (int i = 0; (i < this.annotatedSession.OverlappingActivityLists[0].Count); i++)
+           // {
+
+            labelIndex = new Hashtable();
+            for (int i = 0; (i < instances.classAttribute().numValues()); i++)
             {
-                labelCounters[i] = 0;
+                /*labelCounters[i] = 0;
                 string label = "";
                 int j = 0;
                 for (j = 0; (j < this.annotatedSession.OverlappingActivityLists.Count - 1); j++)
                     label += this.annotatedSession.OverlappingActivityLists[j][i]._Name.Replace(' ', '_') + "_";
                 label += this.annotatedSession.OverlappingActivityLists[j][i]._Name.Replace(' ', '_');
+
                 activityLabels[i] = label;
                 labelIndex.Add(label, i);
-                fvClassVal.addElement(label);
+                fvClassVal.addElement(label);*/
+                labelCounters[i] = 0;
+                string activity = instances.classAttribute().value_Renamed(i);
+                activityLabels[i] = activity;
+                labelIndex.Add(activity, i);
+                fvClassVal.addElement(activity);
             }
 
+
+            //add the labels to the interface
+            int yLocation=40;
+            classifiedLabels = new Hashtable();
+            for (int i = 0; (i < instances.classAttribute().numValues()); i++)
+            {
+                string activity= instances.classAttribute().value_Renamed(i);
+                Label label = new Label();
+                label.Size = new Size(500, 40);
+                label.Text = activity;
+                label.BackColor = Color.FromArgb(250, 237, 221);
+                label.ForeColor = Color.FromArgb(250, 237, 221);
+                label.Font = new Font(FontFamily.GenericSerif, 10.0f, FontStyle.Bold);
+                label.Visible = true;
+                label.Location = new Point(10,yLocation );
+
+                classifiedLabels.Add(activity, label);
+                this.panels[ControlID.CLASSIFICATION_PANEL].Controls.Add(label);
+                yLocation += 40;
+            }
+            this.activityStatus = ActivityStatus.Measuring;
+            this.panels[ControlID.CLASSIFICATION_PANEL].Visible = true;
+            this.panels[currentPanel].Visible = false;
+            this.currentPanel = ControlID.CLASSIFICATION_PANEL;
             classificationThread = new Thread(new ThreadStart(ClassificationThread));
             classificationThread.Start();
+
+           
         }
 
         private int selectedModel = -1;
@@ -980,9 +1134,8 @@ namespace WocketsApplication
                 activityButtons.Clear();
                 this.panels[ControlID.HOME_PANEL].Visible = true;
                 this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Visible = false;
-                if (this.saveFeatures.Checked)
-                    CleanupML();
-
+                //if (this.saveFeatures.Checked)
+                CleanupML();
                 this.currentPanel = ControlID.HOME_PANEL;
             }
         }
@@ -1533,6 +1686,17 @@ namespace WocketsApplication
                     this.panels[ControlID.MODELS_PANEL].BringToFront();
                     this.panels[ControlID.MODELS_PANEL].Visible = true;
                     this.panels[ControlID.MODELS_PANEL].Dock = DockStyle.None;
+
+                    //Load the most recent models list before showing the models panel
+                    modelsList.Clear();
+                    this.aModels = new AnnotationProtocolList();                    
+                    if (File.Exists(Constants.PATH + "models.xml"))
+                    {
+                        this.aModels.FromXML(Constants.PATH + "models.xml");   
+                        for (int i = 0; (i < this.aModels.Count); i++)                        
+                            modelsList.Items.Add(new ListViewItem(this.aModels[i]._Name));                        
+                    }
+
                     this.currentPanel = ControlID.MODELS_PANEL;
                 }
                 else if (name == ControlID.ANNOTATE_ACTIVITY_BUTTON)
@@ -1583,6 +1747,17 @@ namespace WocketsApplication
             }
             #endregion Annotation Button Panel
 
+            #region Classification Panel
+            else if (currentPanel == ControlID.CLASSIFICATION_PANEL)
+            {
+                if (name == ControlID.HOME_CLASSIFICATION_BUTTON)
+                {
+                    this.panels[ControlID.HOME_PANEL].Visible = true;
+                    this.panels[ControlID.CLASSIFICATION_PANEL].Visible = false;
+                    this.currentPanel = ControlID.HOME_PANEL;
+                }
+            }
+            #endregion Classification Panel
             else if (currentPanel == ControlID.WOCKETS_PANEL)
             {
                 if (name == ControlID.WOCKETS_BACK_BUTTON)
@@ -1697,8 +1872,8 @@ namespace WocketsApplication
                                         this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Controls.Remove(activityList[j]);
                                 }
                                 activityButtons.Clear();
-                                if (this._SaveFeatures)
-                                    CleanupML();
+                                //if (this._SaveFeatures)
+                                CleanupML();
                                 this.panels[currentPanel]._UnpressedButtonControls[ControlID.KERNEL_BUTTON].Visible = true;
                                 this.panels[currentPanel]._PressedButtonControls[ControlID.KERNEL_BUTTON].Visible = false;
                                 this.panels[currentPanel]._ButtonText[ControlID.KERNEL_BUTTON].Text = "Start Kernel";
@@ -1728,6 +1903,15 @@ namespace WocketsApplication
                         this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Dock = DockStyle.None;
                         this.currentPanel = ControlID.ANNOTATION_BUTTON_PANEL;
                     }
+                    else if (this.activityStatus == ActivityStatus.Measuring)
+                    {
+                        this.panels[currentPanel].Visible = false;
+                        this.panels[ControlID.CLASSIFICATION_PANEL].Location = new Point(0, 0);
+                        this.panels[ControlID.CLASSIFICATION_PANEL].BringToFront();
+                        this.panels[ControlID.CLASSIFICATION_PANEL].Visible = true;
+                        this.panels[ControlID.CLASSIFICATION_PANEL].Dock = DockStyle.None;
+                        this.currentPanel = ControlID.CLASSIFICATION_PANEL;
+                    }
                     else
                     {
                         this.panels[currentPanel].Visible = false;
@@ -1754,7 +1938,9 @@ namespace WocketsApplication
 
                         this.selectedActivityProtocol = -1;
                         this.annotatedSession = null;
+
                         this.activityStatus = ActivityStatus.None;
+                        //cleanup any annotation buttons
                         for (int i = 0; i < activityButtons.Count; i++)
                         {
                             System.Windows.Forms.Button[] activityList = (System.Windows.Forms.Button[])activityButtons[i];
@@ -1762,8 +1948,9 @@ namespace WocketsApplication
                                 this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Controls.Remove(activityList[j]);
                         }
                         activityButtons.Clear();
-                        if (this._SaveFeatures)
-                            CleanupML();
+                        
+                        //Cleanup the machine learning buffers if needed
+                        CleanupML();
 
                         //Terminate the kernel
                         if (Core._KernelGuid != null)
@@ -1821,8 +2008,10 @@ namespace WocketsApplication
                                             Core._Connected = false;
                                             selectedWockets.Clear();
                                             this.selectedActivityProtocol = -1;
+                                            
                                             this.activityStatus = ActivityStatus.None;
-
+                                            
+                                            //cleanup any activity buttons
                                             for (int i = 0; i < activityButtons.Count; i++)
                                             {
                                                 System.Windows.Forms.Button[] activityList = (System.Windows.Forms.Button[])activityButtons[i];
@@ -1830,6 +2019,7 @@ namespace WocketsApplication
                                                     this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Controls.Remove(activityList[j]);
                                             }
                                             activityButtons.Clear();
+
                                             Core.Disconnect(Core._KernelGuid);
                                             plotter = null;
                                       
@@ -1992,8 +2182,33 @@ namespace WocketsApplication
             this.Refresh();
         }
 
+
+        delegate void UpdateExamplesCallback();
+        public void UpdateExamples()
+        {
+            if (!disposed)
+            {
+                // InvokeRequired required compares the thread ID of the
+                // calling thread to the thread ID of the creating thread.
+                // If these threads are different, it returns true.
+                if (this.examplesLabel.InvokeRequired)
+                {
+                    UpdateExamplesCallback d = new UpdateExamplesCallback(UpdateExamples);
+                    this.Invoke(d, new object[] { });
+                }
+                else
+                {
+                    this.examplesLabel.Text = this.trainingExamples + " examples";
+                }
+            }
+
+        }
+
+        int trainingExamples = 0;
         private void MLThread()
         {
+            int structureFileExamples = 0;
+            string prev_activity = "";
             while (true)
             {
                 string current_activity = "unknown";
@@ -2004,18 +2219,23 @@ namespace WocketsApplication
                 }
                 if (current_activity != "unknown")
                 {
+                    
                     double lastTimeStamp = FeatureExtractor.StoreWocketsWindow();
                     if (FeatureExtractor.GenerateFeatureVector(lastTimeStamp))
                     {           
                         string arffSample = FeatureExtractor.toString() + "," + current_activity;
-                        trainingTW.WriteLine(arffSample);
-                        /*extractedVectors++;
+                        trainingTW.WriteLine(arffSample);                  
                         if (structureFileExamples < 10)
                         {
                             structureTW.WriteLine(arffSample);
                             structureFileExamples++;
-                        }*/
+                        }
+
+                        if (prev_activity != current_activity)
+                            trainingExamples = 0;
                     }
+
+                    prev_activity = current_activity;
                 }
                 Thread.Sleep(100);
             }
@@ -2024,6 +2244,7 @@ namespace WocketsApplication
         {
             if (this.panels[currentPanel]._Background != null)
             {
+               // AlphaContainer._backBuffer
                 Graphics offscreen = Graphics.FromImage(this.panels[currentPanel]._Backbuffer);
                 offscreen.DrawImage(this.panels[currentPanel]._Background, 0, 0);
             }
