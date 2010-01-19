@@ -62,6 +62,7 @@ namespace Wockets.Data.Classifiers.Utils
 
         private static int discardedLossRateWindows = 0;
         private static int discardedConsecutiveLossWindows = 0;
+        private static bool _Initialized = false;
 
         public static string[] ArffAttributeLabels
         {
@@ -88,269 +89,272 @@ namespace Wockets.Data.Classifiers.Utils
         private static int[] decoderTails;
         public static void Initialize(int sensorCount,int samplingRate,ClassifierConfiguration configuration, ActivityList activities)
         {
-
-            sdata = new MemoryMappedFileStream[sensorCount];
-            shead = new MemoryMappedFileStream[sensorCount];
-            sdataSize = (int)Wockets.Decoders.Decoder._DUSize * Wockets.Decoders.Accelerometers.WocketsDecoder.BUFFER_SIZE;
-            decoderTails = new int[sensorCount];
-
-            for (int i = 0; (i < sensorCount); i++)
-                decoderTails[i] = 0;
-
-            for (int i = 0; (i < sensorCount); i++)
+            if (!_Initialized)
             {
-                sdata[i] = new MemoryMappedFileStream("\\Temp\\wocket" + i + ".dat", "wocket" + i, (uint)sdataSize, MemoryProtection.PageReadWrite);
-                shead[i] = new MemoryMappedFileStream("\\Temp\\whead" + i + ".dat", "whead" + i, sizeof(int), MemoryProtection.PageReadWrite);
 
-                sdata[i].MapViewToProcessMemory(0, sdataSize);
-                shead[i].MapViewToProcessMemory(0, sizeof(int));
+                sdata = new MemoryMappedFileStream[sensorCount];
+                shead = new MemoryMappedFileStream[sensorCount];
+                sdataSize = (int)Wockets.Decoders.Decoder._DUSize * Wockets.Decoders.Accelerometers.WocketsDecoder.BUFFER_SIZE;
+                decoderTails = new int[sensorCount];
 
-                shead[i].Read(head, 0, 4);
-                int currentHead = BitConverter.ToInt32(head, 0);
-                decoderTails[i] = currentHead;
-                shead[i].Seek(0, System.IO.SeekOrigin.Begin);
-                sdata[i].Seek((currentHead * (sizeof(double) + 3 * sizeof(short))), System.IO.SeekOrigin.Begin);
+                for (int i = 0; (i < sensorCount); i++)
+                    decoderTails[i] = 0;
 
-            }
-
-            FeatureExtractor.configuration = configuration;
-            //window counters and delimiters
-            next_window_end = 0;
-            total_window_count = 0;
-            num_feature_windows = 0;
-
-            //data quality variables
-            isAcceptableLossRate = true;
-            isAcceptableConsecutiveLoss = true;
-            unacceptable_window_count = 0;
-            unacceptable_consecutive_window_loss_count = 0;
-
-
-            //Upgrade to handle HR
-            extractorSensorCount = sensorCount;
-            inputRowSize = sensorCount * 3;
-            fftInterpolationPower = configuration._FFTInterpolatedPower;
-            fftMaximumFrequencies = configuration._FFTMaximumFrequencies;
-            inputColumnSize = (int)Math.Pow(2, configuration._FFTInterpolatedPower);
-
-            num_features = inputRowSize; // number of distances
-            num_features += 1; //total mean;
-            num_features += inputRowSize; // number of variances
-            num_features += inputRowSize; // number of ranges
-            num_features += 2 * configuration._FFTMaximumFrequencies * inputRowSize; // number of fft magnitudes and frequencies
-            num_features += inputRowSize; // number of energies
-            num_features += ((inputRowSize * inputRowSize) - inputRowSize) / 2; //correlation coefficients off-di
-
-
-            features = new double[num_features];
-            arffAttriburesLabels = new string[num_features];
-
-            standardized = new double[sensorCount * 3][];
-            for (int i = 0; (i < inputRowSize); i++)
-                standardized[i] = new double[inputColumnSize];//input[0].Length];
-
-            means = new double[inputRowSize];
-
-            inputFFT = new int[inputColumnSize];
-            FFT.Initialize(configuration._FFTInterpolatedPower, configuration._FFTMaximumFrequencies);
-            //FeatureExtractor.wocketsController = wocketsController;
-
-            //Create the ARFF File header
-            string arffHeader = "@RELATION wockets\n\n" + GetArffHeader();//sannotation.Sensors.Count * 3, configuration.FFTMaximumFrequencies);
-            arffHeader += "@ATTRIBUTE activity {";
-            for (int i = 0; (i < activities.Count); i++)
-                arffHeader += activities[i]._Name.Replace(' ', '_') + ",";
-            arffHeader += "unknown}\n";
-            arffHeader += "\n@DATA\n\n";
-
-
-            //total number of points per interpolated window
-            INTERPOLATED_SAMPLING_RATE_PER_WINDOW = (int)Math.Pow(2, configuration._FFTInterpolatedPower); //128;  
-
-            //space between interpolated samples
-            INTERPOLATED_SAMPLES_SPACING = (double)configuration._WindowTime / INTERPOLATED_SAMPLING_RATE_PER_WINDOW;
-
-
-            //EXPECTED_SAMPLING_RATES = new int[extractorSensorCount]; - Calculate during loading
-            EXPECTED_WINDOW_SIZES = new int[extractorSensorCount];
-            EXPECTED_GOOD_SAMPLING_RATES = new int[extractorSensorCount];
-            EXPECTED_SAMPLES_SPACING = new double[extractorSensorCount];
-
-            for (int i = 0; (i < sensorCount); i++)
-            {
-                EXPECTED_WINDOW_SIZES[i] = (int)(samplingRate * (configuration._WindowTime / 1000.0));
-                EXPECTED_GOOD_SAMPLING_RATES[i] = EXPECTED_WINDOW_SIZES[i] - (int)(configuration._MaximumNonconsecutiveFrameLoss * EXPECTED_WINDOW_SIZES[i]);
-                EXPECTED_SAMPLES_SPACING[i] = (double)configuration._WindowTime / EXPECTED_WINDOW_SIZES[i];
-            }
-
-
-            //2 D array that stores Sensor axes + time stamps on each row  X expected WINDOW SIZE
-            data = new double[extractorSensorCount * 4][]; // 1 row for each axis
-
-            // 2D array that stores Sensor axes X INTERPOLATED WINDOW SIZE
-            interpolated_data = new double[extractorSensorCount * 3][];
-
-            // array to store the y location for each axes as data is received
-            // will be different for every sensor of course
-            y_index = new int[extractorSensorCount];
-
-
-            //Initialize expected data array
-            for (int i = 0; (i < sensorCount); i++)
-            {
-                for (int j = 0; j < 4; j++)
+                for (int i = 0; (i < sensorCount); i++)
                 {
-                    data[(i * 4) + j] = new double[EXPECTED_WINDOW_SIZES[i]];
-                    for (int k = 0; (k < EXPECTED_WINDOW_SIZES[i]); k++)
-                        data[(i * 4) + j][k] = 0;
+                    sdata[i] = new MemoryMappedFileStream("\\Temp\\wocket" + i + ".dat", "wocket" + i, (uint)sdataSize, MemoryProtection.PageReadWrite);
+                    shead[i] = new MemoryMappedFileStream("\\Temp\\whead" + i + ".dat", "whead" + i, sizeof(int), MemoryProtection.PageReadWrite);
+
+                    sdata[i].MapViewToProcessMemory(0, sdataSize);
+                    shead[i].MapViewToProcessMemory(0, sizeof(int));
+
+                    shead[i].Read(head, 0, 4);
+                    int currentHead = BitConverter.ToInt32(head, 0);
+                    decoderTails[i] = currentHead;
+                    shead[i].Seek(0, System.IO.SeekOrigin.Begin);
+                    sdata[i].Seek((currentHead * (sizeof(double) + 3 * sizeof(short))), System.IO.SeekOrigin.Begin);
+
                 }
+
+                FeatureExtractor.configuration = configuration;
+                //window counters and delimiters
+                next_window_end = 0;
+                total_window_count = 0;
+                num_feature_windows = 0;
+
+                //data quality variables
+                isAcceptableLossRate = true;
+                isAcceptableConsecutiveLoss = true;
+                unacceptable_window_count = 0;
+                unacceptable_consecutive_window_loss_count = 0;
+
+
+                //Upgrade to handle HR
+                extractorSensorCount = sensorCount;
+                inputRowSize = sensorCount * 3;
+                fftInterpolationPower = configuration._FFTInterpolatedPower;
+                fftMaximumFrequencies = configuration._FFTMaximumFrequencies;
+                inputColumnSize = (int)Math.Pow(2, configuration._FFTInterpolatedPower);
+
+                num_features = inputRowSize; // number of distances
+                num_features += 1; //total mean;
+                num_features += inputRowSize; // number of variances
+                num_features += inputRowSize; // number of ranges
+                num_features += 2 * configuration._FFTMaximumFrequencies * inputRowSize; // number of fft magnitudes and frequencies
+                num_features += inputRowSize; // number of energies
+                num_features += ((inputRowSize * inputRowSize) - inputRowSize) / 2; //correlation coefficients off-di
+
+
+                features = new double[num_features];
+                arffAttriburesLabels = new string[num_features];
+
+                standardized = new double[sensorCount * 3][];
+                for (int i = 0; (i < inputRowSize); i++)
+                    standardized[i] = new double[inputColumnSize];//input[0].Length];
+
+                means = new double[inputRowSize];
+
+                inputFFT = new int[inputColumnSize];
+                FFT.Initialize(configuration._FFTInterpolatedPower, configuration._FFTMaximumFrequencies);
+                //FeatureExtractor.wocketsController = wocketsController;
+
+                //Create the ARFF File header
+                string arffHeader = "@RELATION wockets\n\n" + GetArffHeader();//sannotation.Sensors.Count * 3, configuration.FFTMaximumFrequencies);
+                arffHeader += "@ATTRIBUTE activity {";
+                for (int i = 0; (i < activities.Count); i++)
+                    arffHeader += activities[i]._Name.Replace(' ', '_') + ",";
+                arffHeader += "unknown}\n";
+                arffHeader += "\n@DATA\n\n";
+
+
+                //total number of points per interpolated window
+                INTERPOLATED_SAMPLING_RATE_PER_WINDOW = (int)Math.Pow(2, configuration._FFTInterpolatedPower); //128;  
+
+                //space between interpolated samples
+                INTERPOLATED_SAMPLES_SPACING = (double)configuration._WindowTime / INTERPOLATED_SAMPLING_RATE_PER_WINDOW;
+
+
+                //EXPECTED_SAMPLING_RATES = new int[extractorSensorCount]; - Calculate during loading
+                EXPECTED_WINDOW_SIZES = new int[extractorSensorCount];
+                EXPECTED_GOOD_SAMPLING_RATES = new int[extractorSensorCount];
+                EXPECTED_SAMPLES_SPACING = new double[extractorSensorCount];
+
+                for (int i = 0; (i < sensorCount); i++)
+                {
+                    EXPECTED_WINDOW_SIZES[i] = (int)(samplingRate * (configuration._WindowTime / 1000.0));
+                    EXPECTED_GOOD_SAMPLING_RATES[i] = EXPECTED_WINDOW_SIZES[i] - (int)(configuration._MaximumNonconsecutiveFrameLoss * EXPECTED_WINDOW_SIZES[i]);
+                    EXPECTED_SAMPLES_SPACING[i] = (double)configuration._WindowTime / EXPECTED_WINDOW_SIZES[i];
+                }
+
+
+                //2 D array that stores Sensor axes + time stamps on each row  X expected WINDOW SIZE
+                data = new double[extractorSensorCount * 4][]; // 1 row for each axis
+
+                // 2D array that stores Sensor axes X INTERPOLATED WINDOW SIZE
+                interpolated_data = new double[extractorSensorCount * 3][];
+
+                // array to store the y location for each axes as data is received
+                // will be different for every sensor of course
+                y_index = new int[extractorSensorCount];
+
+
+                //Initialize expected data array
+                for (int i = 0; (i < sensorCount); i++)
+                {
+                    for (int j = 0; j < 4; j++)
+                    {
+                        data[(i * 4) + j] = new double[EXPECTED_WINDOW_SIZES[i]];
+                        for (int k = 0; (k < EXPECTED_WINDOW_SIZES[i]); k++)
+                            data[(i * 4) + j][k] = 0;
+                    }
+                }
+
+
+                //Here it is equal across all sensors, so we do not need to consider
+                //the sampling rate of each sensor separately
+                for (int i = 0; (i < (extractorSensorCount * 3)); i++)
+                {
+                    interpolated_data[i] = new double[INTERPOLATED_SAMPLING_RATE_PER_WINDOW];
+                    for (int j = 0; (j < INTERPOLATED_SAMPLING_RATE_PER_WINDOW); j++)
+                        interpolated_data[i][j] = 0;
+                }
+
+                tail = new int[extractorSensorCount];
+                tailUnixtimestamp = new double[extractorSensorCount];
+                //Initialize y index for each sensor
+                for (int i = 0; (i < extractorSensorCount); i++)
+                {
+                    y_index[i] = 0;
+                    tail[i] = 0;
+                    tailUnixtimestamp[i] = 0.0;
+                }
+
+
+                _Initialized = true;
             }
-
-
-            //Here it is equal across all sensors, so we do not need to consider
-            //the sampling rate of each sensor separately
-            for (int i = 0; (i < (extractorSensorCount * 3)); i++)
-            {
-                interpolated_data[i] = new double[INTERPOLATED_SAMPLING_RATE_PER_WINDOW];
-                for (int j = 0; (j < INTERPOLATED_SAMPLING_RATE_PER_WINDOW); j++)
-                    interpolated_data[i][j] = 0;
-            }
-
-            tail = new int[extractorSensorCount];
-            tailUnixtimestamp = new double[extractorSensorCount];
-            //Initialize y index for each sensor
-            for (int i = 0; (i < extractorSensorCount); i++)
-            {
-                y_index[i] = 0;
-                tail[i] = 0;
-                tailUnixtimestamp[i] = 0.0;
-            }
-
-
-
-
         }
 
 
         public static void Initialize(WocketsController wocketsController, ClassifierConfiguration configuration, ActivityList activities)
         {
-
-            FeatureExtractor.configuration = configuration;
-            //window counters and delimiters
-            next_window_end = 0;
-            total_window_count = 0;
-            num_feature_windows = 0;
-
-            //data quality variables
-            isAcceptableLossRate = true;
-            isAcceptableConsecutiveLoss = true;
-            unacceptable_window_count = 0;
-            unacceptable_consecutive_window_loss_count = 0;
-
-
-            //Upgrade to handle HR
-            extractorSensorCount = wocketsController._Sensors.Count;
-            inputRowSize = wocketsController._Sensors.Count * 3;
-            fftInterpolationPower = configuration._FFTInterpolatedPower;
-            fftMaximumFrequencies = configuration._FFTMaximumFrequencies;
-            inputColumnSize = (int)Math.Pow(2, configuration._FFTInterpolatedPower);
-
-            num_features = inputRowSize; // number of distances
-            num_features += 1; //total mean;
-            num_features += inputRowSize; // number of variances
-            num_features += inputRowSize; // number of ranges
-            num_features += 2 * configuration._FFTMaximumFrequencies * inputRowSize; // number of fft magnitudes and frequencies
-            num_features += inputRowSize; // number of energies
-            num_features += ((inputRowSize * inputRowSize) - inputRowSize) / 2; //correlation coefficients off-di
-
-
-            features = new double[num_features];
-            arffAttriburesLabels = new string[num_features];
-
-            standardized = new double[wocketsController._Sensors.Count * 3][];
-            for (int i = 0; (i < inputRowSize); i++)
-                standardized[i] = new double[inputColumnSize];//input[0].Length];
-
-            means = new double[inputRowSize];
-
-            inputFFT = new int[inputColumnSize];
-            FFT.Initialize(configuration._FFTInterpolatedPower, configuration._FFTMaximumFrequencies);
-            FeatureExtractor.wocketsController = wocketsController;
-
-            //Create the ARFF File header
-            string arffHeader = "@RELATION wockets\n\n" + GetArffHeader();//sannotation.Sensors.Count * 3, configuration.FFTMaximumFrequencies);
-            arffHeader += "@ATTRIBUTE activity {";
-            for (int i = 0; (i < activities.Count); i++)
-                arffHeader += activities[i]._Name.Replace(' ', '_') + ",";
-            arffHeader += "unknown}\n";
-            arffHeader += "\n@DATA\n\n";
-
-
-            //total number of points per interpolated window
-            INTERPOLATED_SAMPLING_RATE_PER_WINDOW = (int)Math.Pow(2, configuration._FFTInterpolatedPower); //128;  
-
-            //space between interpolated samples
-            INTERPOLATED_SAMPLES_SPACING = (double)configuration._WindowTime / INTERPOLATED_SAMPLING_RATE_PER_WINDOW;
-
-
-            //EXPECTED_SAMPLING_RATES = new int[extractorSensorCount]; - Calculate during loading
-            EXPECTED_WINDOW_SIZES = new int[extractorSensorCount];
-            EXPECTED_GOOD_SAMPLING_RATES = new int[extractorSensorCount];
-            EXPECTED_SAMPLES_SPACING = new double[extractorSensorCount];
-
-            for (int i = 0; (i < wocketsController._Sensors.Count); i++)
+            if (_Initialized)
             {
-                EXPECTED_WINDOW_SIZES[i] = (int)(wocketsController._Sensors[i]._SamplingRate * (configuration._WindowTime / 1000.0));
-                EXPECTED_GOOD_SAMPLING_RATES[i] = EXPECTED_WINDOW_SIZES[i] - (int)(configuration._MaximumNonconsecutiveFrameLoss * EXPECTED_WINDOW_SIZES[i]);
-                EXPECTED_SAMPLES_SPACING[i] = (double)configuration._WindowTime / EXPECTED_WINDOW_SIZES[i];
-            }
+                FeatureExtractor.configuration = configuration;
+                //window counters and delimiters
+                next_window_end = 0;
+                total_window_count = 0;
+                num_feature_windows = 0;
+
+                //data quality variables
+                isAcceptableLossRate = true;
+                isAcceptableConsecutiveLoss = true;
+                unacceptable_window_count = 0;
+                unacceptable_consecutive_window_loss_count = 0;
 
 
-            //2 D array that stores Sensor axes + time stamps on each row  X expected WINDOW SIZE
-            data = new double[extractorSensorCount * 4][]; // 1 row for each axis
+                //Upgrade to handle HR
+                extractorSensorCount = wocketsController._Sensors.Count;
+                inputRowSize = wocketsController._Sensors.Count * 3;
+                fftInterpolationPower = configuration._FFTInterpolatedPower;
+                fftMaximumFrequencies = configuration._FFTMaximumFrequencies;
+                inputColumnSize = (int)Math.Pow(2, configuration._FFTInterpolatedPower);
 
-            // 2D array that stores Sensor axes X INTERPOLATED WINDOW SIZE
-            interpolated_data = new double[extractorSensorCount * 3][];
+                num_features = inputRowSize; // number of distances
+                num_features += 1; //total mean;
+                num_features += inputRowSize; // number of variances
+                num_features += inputRowSize; // number of ranges
+                num_features += 2 * configuration._FFTMaximumFrequencies * inputRowSize; // number of fft magnitudes and frequencies
+                num_features += inputRowSize; // number of energies
+                num_features += ((inputRowSize * inputRowSize) - inputRowSize) / 2; //correlation coefficients off-di
 
-            // array to store the y location for each axes as data is received
-            // will be different for every sensor of course
-            y_index = new int[extractorSensorCount];
+
+                features = new double[num_features];
+                arffAttriburesLabels = new string[num_features];
+
+                standardized = new double[wocketsController._Sensors.Count * 3][];
+                for (int i = 0; (i < inputRowSize); i++)
+                    standardized[i] = new double[inputColumnSize];//input[0].Length];
+
+                means = new double[inputRowSize];
+
+                inputFFT = new int[inputColumnSize];
+                FFT.Initialize(configuration._FFTInterpolatedPower, configuration._FFTMaximumFrequencies);
+                FeatureExtractor.wocketsController = wocketsController;
+
+                //Create the ARFF File header
+                string arffHeader = "@RELATION wockets\n\n" + GetArffHeader();//sannotation.Sensors.Count * 3, configuration.FFTMaximumFrequencies);
+                arffHeader += "@ATTRIBUTE activity {";
+                for (int i = 0; (i < activities.Count); i++)
+                    arffHeader += activities[i]._Name.Replace(' ', '_') + ",";
+                arffHeader += "unknown}\n";
+                arffHeader += "\n@DATA\n\n";
 
 
-            //Initialize expected data array
-            for (int i = 0; (i < wocketsController._Sensors.Count); i++)
-            {
-                for (int j = 0; j < 4; j++)
+                //total number of points per interpolated window
+                INTERPOLATED_SAMPLING_RATE_PER_WINDOW = (int)Math.Pow(2, configuration._FFTInterpolatedPower); //128;  
+
+                //space between interpolated samples
+                INTERPOLATED_SAMPLES_SPACING = (double)configuration._WindowTime / INTERPOLATED_SAMPLING_RATE_PER_WINDOW;
+
+
+                //EXPECTED_SAMPLING_RATES = new int[extractorSensorCount]; - Calculate during loading
+                EXPECTED_WINDOW_SIZES = new int[extractorSensorCount];
+                EXPECTED_GOOD_SAMPLING_RATES = new int[extractorSensorCount];
+                EXPECTED_SAMPLES_SPACING = new double[extractorSensorCount];
+
+                for (int i = 0; (i < wocketsController._Sensors.Count); i++)
                 {
-                    data[(i*4)+j] = new double[EXPECTED_WINDOW_SIZES[i]];
-                    for (int k = 0; (k < EXPECTED_WINDOW_SIZES[i]); k++)
-                        data[(i * 4)+ j][k] = 0;
+                    EXPECTED_WINDOW_SIZES[i] = (int)(wocketsController._Sensors[i]._SamplingRate * (configuration._WindowTime / 1000.0));
+                    EXPECTED_GOOD_SAMPLING_RATES[i] = EXPECTED_WINDOW_SIZES[i] - (int)(configuration._MaximumNonconsecutiveFrameLoss * EXPECTED_WINDOW_SIZES[i]);
+                    EXPECTED_SAMPLES_SPACING[i] = (double)configuration._WindowTime / EXPECTED_WINDOW_SIZES[i];
                 }
+
+
+                //2 D array that stores Sensor axes + time stamps on each row  X expected WINDOW SIZE
+                data = new double[extractorSensorCount * 4][]; // 1 row for each axis
+
+                // 2D array that stores Sensor axes X INTERPOLATED WINDOW SIZE
+                interpolated_data = new double[extractorSensorCount * 3][];
+
+                // array to store the y location for each axes as data is received
+                // will be different for every sensor of course
+                y_index = new int[extractorSensorCount];
+
+
+                //Initialize expected data array
+                for (int i = 0; (i < wocketsController._Sensors.Count); i++)
+                {
+                    for (int j = 0; j < 4; j++)
+                    {
+                        data[(i * 4) + j] = new double[EXPECTED_WINDOW_SIZES[i]];
+                        for (int k = 0; (k < EXPECTED_WINDOW_SIZES[i]); k++)
+                            data[(i * 4) + j][k] = 0;
+                    }
+                }
+
+
+                //Here it is equal across all sensors, so we do not need to consider
+                //the sampling rate of each sensor separately
+                for (int i = 0; (i < (extractorSensorCount * 3)); i++)
+                {
+                    interpolated_data[i] = new double[INTERPOLATED_SAMPLING_RATE_PER_WINDOW];
+                    for (int j = 0; (j < INTERPOLATED_SAMPLING_RATE_PER_WINDOW); j++)
+                        interpolated_data[i][j] = 0;
+                }
+
+                tail = new int[extractorSensorCount];
+                tailUnixtimestamp = new double[extractorSensorCount];
+                //Initialize y index for each sensor
+                for (int i = 0; (i < extractorSensorCount); i++)
+                {
+                    y_index[i] = 0;
+                    tail[i] = 0;
+                    tailUnixtimestamp[i] = 0.0;
+                }
+
+
+                _Initialized = true;
             }
-
-
-            //Here it is equal across all sensors, so we do not need to consider
-            //the sampling rate of each sensor separately
-            for (int i = 0; (i < (extractorSensorCount * 3)); i++)
-            {
-                interpolated_data[i] = new double[INTERPOLATED_SAMPLING_RATE_PER_WINDOW];
-                for (int j = 0; (j < INTERPOLATED_SAMPLING_RATE_PER_WINDOW); j++)
-                    interpolated_data[i][j] = 0;
-            }
-
-            tail = new int[extractorSensorCount];
-            tailUnixtimestamp = new double[extractorSensorCount];
-            //Initialize y index for each sensor
-            for (int i = 0; (i < extractorSensorCount); i++)
-            {
-                y_index[i] = 0;
-                tail[i] = 0;
-                tailUnixtimestamp[i] = 0.0;
-            }
-
-           
-
-
         }
 
 
@@ -750,9 +754,11 @@ namespace Wockets.Data.Classifiers.Utils
 
         public static void Cleanup()
         {
-            FFT.Cleanup();
-            //for (int i = 0; (i < Extractor.sannotation.Sensors.Count); i++)            
-            //   spacingtws[i].Close();            
+            if (_Initialized)
+            {
+                FFT.Cleanup();
+                _Initialized = false;
+            }
         }
 
         public static string GetArffHeader()

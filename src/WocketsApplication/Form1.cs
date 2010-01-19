@@ -29,6 +29,12 @@ using WocketsApplication.Controls.Utils;
 
 namespace WocketsApplication
 {
+    public enum ActivityStatus
+    {
+        Measuring,
+        Annotating,
+        None
+    }
     public partial class Form1 : Form
     {
 
@@ -115,6 +121,53 @@ namespace WocketsApplication
         private TextWriter structureTW = null;
         private Thread mlThread = null;
 
+        private void InitializeML()
+        {
+
+            File.Copy(Constants.PATH + "Master\\Configuration.xml",
+             Core._StoragePath + "\\Configuration.xml");
+            this.configuration = new DTConfiguration();
+            this.configuration.FromXML(Core._StoragePath + "\\Configuration.xml");
+            FeatureExtractor.Initialize(selectedWockets.Count, 90, this.configuration, this.annotatedSession.OverlappingActivityLists[0]);
+            if (trainingTW == null)
+            {
+                string arffFileName = Core._StoragePath + "\\output" + DateTime.Now.ToString().Replace('/', '_').Replace(':', '_').Replace(' ', '_') + ".arff";
+                trainingTW = new StreamWriter(arffFileName);
+                trainingTW.WriteLine("@RELATION wockets");
+                string arffHeader = FeatureExtractor.GetArffHeader();
+                arffHeader += "\n@ATTRIBUTE activity {";
+                int i = 0;
+                for (i = 0; (i < ((this.annotatedSession.OverlappingActivityLists[0]).Count - 1)); i++)
+                    arffHeader += this.annotatedSession.OverlappingActivityLists[0][i]._Name.Replace(' ', '_') + ",";
+                arffHeader += this.annotatedSession.OverlappingActivityLists[0][i]._Name.Replace(' ', '_') + "}\n";
+                arffHeader += "\n@DATA\n\n";
+
+                trainingTW.WriteLine(arffHeader);
+                string structureArffFile = Core._StoragePath + "\\structure.arff";
+                structureTW = new StreamWriter(structureArffFile);
+                structureTW.WriteLine("@RELATION wockets");
+                structureTW.WriteLine(arffHeader);
+                mlThread = new Thread(new ThreadStart(MLThread));
+                mlThread.Start();
+            }
+
+        }
+
+        private void CleanupML()
+        {
+            if (mlThread != null)
+            {
+                mlThread.Abort();
+                mlThread = null;
+            }
+            if (trainingTW != null)
+            {
+                trainingTW.Flush();
+                trainingTW.Close();
+                trainingTW = null;
+            }
+            FeatureExtractor.Cleanup();
+        }
         private void KernelListener()
         {
             NamedEvents namedEvent = new NamedEvents();
@@ -141,6 +194,20 @@ namespace WocketsApplication
                    this.currentStatus = "Connected";
                    UpdateStatus();
 
+                    //if the activity protocol is already selected, copy it and load it after connecting
+                   if (this.selectedActivityProtocol != -1)
+                   {
+                       if (File.Exists(Constants.PATH + "ActivityProtocols\\" + this.aProtocols[this.selectedActivityProtocol]._FileName))
+                       {
+                           File.Copy(Constants.PATH + "ActivityProtocols\\" + this.aProtocols[this.selectedActivityProtocol]._FileName,
+                                  Core._StoragePath + "\\ActivityLabelsRealtime.xml");
+                           this.annotatedSession = new Session();
+                           annotatedSession.FromXML(Core._StoragePath + "\\ActivityLabelsRealtime.xml");
+
+                           if (this._SaveFeatures)
+                               InitializeML();
+                       }
+                   }
             
                 }
                 else if (response == ApplicationResponse.DISCONNECT_SUCCESS.ToString())
@@ -149,13 +216,9 @@ namespace WocketsApplication
                     this.selectedActivityProtocol = -1;
                     this.currentStatus = "Ready to connect";
                     UpdateStatus();
-                    if (mlThread!=null)
-                        mlThread.Abort();
-                    if (trainingTW != null)
-                    {
-                        trainingTW.Flush();
-                        trainingTW.Close();
-                    }
+                    if (this._SaveFeatures)
+                        CleanupML();
+                 
                 }
             
                 namedEvent.Reset();
@@ -277,9 +340,20 @@ namespace WocketsApplication
                 this.panels[panelID]._ButtonText[buttonID].ForeColor = Color.FromArgb(205, 183, 158);
                 this.panels[panelID]._ButtonText[buttonID].Allign = StringAlignment.Center;
                 this.panels[panelID]._ButtonText[buttonID].Visible = true;
-                this.panels[panelID]._ButtonText[buttonID].Font = new Font(FontFamily.GenericSerif,9.0f,FontStyle.Regular);
-                this.panels[panelID]._ButtonText[buttonID].Size = new Size(128, 30);
-                this.panels[panelID]._ButtonText[buttonID].Location = new Point(x , y + size + 2);
+                if (size == 128)
+                {
+                    this.panels[panelID]._ButtonText[buttonID].Font = new Font(FontFamily.GenericSerif, 9.0f, FontStyle.Regular);
+                    this.panels[panelID]._ButtonText[buttonID].Size = new Size(128, 40);
+                    this.panels[panelID]._ButtonText[buttonID].Allign = StringAlignment.Center;
+                    this.panels[panelID]._ButtonText[buttonID].Location = new Point(x, y + size + 2);
+                }
+                else if (size == 200)
+                {
+                    this.panels[panelID]._ButtonText[buttonID].Font = new Font(FontFamily.GenericSerif, 14.0f, FontStyle.Regular);
+                    this.panels[panelID]._ButtonText[buttonID].Size = new Size(500, 100);
+                    this.panels[panelID]._ButtonText[buttonID].Allign = StringAlignment.Center;
+                    this.panels[panelID]._ButtonText[buttonID].Location = new Point((Screen.PrimaryScreen.WorkingArea.Width-500)/2, y + size + 2);
+                }
             }
             
 
@@ -289,10 +363,9 @@ namespace WocketsApplication
             this.panels[panelID]._PressedButtonControls[buttonID].Image = AlphaImage.CreateFromFile(Constants.PATH + pressedFilename);
             this.panels[panelID]._PressedButtonControls[buttonID].Visible = false;
             this.panels[panelID]._PressedButtonControls[buttonID].Location = new Point(x, y);      
-            this.panels[panelID]._PressedButtonControls[buttonID].Click += new EventHandler(clickHandler);
-  
+            this.panels[panelID]._PressedButtonControls[buttonID].Click += new EventHandler(clickHandler);  
             this.panels[panelID]._ButtonType[buttonID] = type;
-
+            this.panels[panelID]._ButtonSize[buttonID] = size;
             if (type == ButtonType.Alternating)
             {
                 this.panels[panelID]._PressedButtonControls[buttonID].Enabled=false;
@@ -325,6 +398,10 @@ namespace WocketsApplication
         private AlphaLabel saveLabel;
         private CheckBox saveData;
         private CheckBox saveFeatures;
+
+
+        private AlphaLabel chooseActivityLabel;
+        private Button doneAnnotation;
         public void InitializeInterface()
         {
             //GdiplusStartupInput input = new GdiplusStartupInput();
@@ -346,6 +423,7 @@ namespace WocketsApplication
             this.numberButtons[ControlID.PLOTTER_PANEL] = ControlID.PLOTTER_PANEL_BUTTON_COUNT;
             this.numberButtons[ControlID.ANNOTATION_PROTCOLS_PANEL] = ControlID.ANNOTATION_PROTOCOLS_PANEL_BUTTON_COUNT;
             this.numberButtons[ControlID.ANNOTATION_BUTTON_PANEL] = ControlID.ANNOTATION_BUTTON_PANEL_BUTTON_COUNT;
+            this.numberButtons[ControlID.ACTIVITY_PANEL] = ControlID.ACTIVITY_PANEL_BUTTON_COUNT;
            
             for (int i = 0; (i < ControlID.NUMBER_PANELS); i++)
            {
@@ -367,6 +445,8 @@ namespace WocketsApplication
             this.panels[ControlID.ABOUT_PANEL]._BackgroundFile = Constants.PATH + "Backgrounds\\DottedBlack.png";
             this.panels[ControlID.SETTINGS_PANEL]._Background = (Bitmap)this.panels[ControlID.HOME_PANEL]._Background.Clone();
             this.panels[ControlID.SETTINGS_PANEL]._BackgroundFile = Constants.PATH + "Backgrounds\\DottedBlack.png";
+            this.panels[ControlID.ACTIVITY_PANEL]._Background = (Bitmap)this.panels[ControlID.HOME_PANEL]._Background.Clone();
+            this.panels[ControlID.ACTIVITY_PANEL]._BackgroundFile = Constants.PATH + "Backgrounds\\DottedBlack.png";
             //this.panels[ControlID.WOCKETS_PANEL]._Background = new Bitmap(Constants.PATH + "Backgrounds\\DottedBlack.png");
             //this.panels[ControlID.WOCKETS_PANEL]._BackgroundFile = Constants.PATH + "Backgrounds\\DottedBlack.png";
            // this.panels[ControlID.WOCKETS_CONFIGURATION_PANEL]._Background = new Bitmap(Constants.PATH + "Backgrounds\\DottedBlack.png");
@@ -380,24 +460,131 @@ namespace WocketsApplication
             this.panels[ControlID.ANNOTATION_BUTTON_PANEL].BackColor = Color.FromArgb(250, 237, 221);
             this.panels[ControlID.ANNOTATION_BUTTON_PANEL]._ClearCanvas = true;
 
+
+            #region Activity Panel
+            AddButton(ControlID.ACTIVITY_PANEL, ControlID.MEASURE_ACTIVITY_BUTTON, "Buttons\\MeasureActivityPressed-200.png", "Buttons\\MeasureActivityUnpressed-200.png", (Screen.PrimaryScreen.WorkingArea.Width-200)/2, 100 , 200, "Measure Activity", ButtonType.Fixed);
+            AddButton(ControlID.ACTIVITY_PANEL, ControlID.ANNOTATE_ACTIVITY_BUTTON, "Buttons\\AnnotatePressed-200.png", "Buttons\\AnnotateUnpressed-200.png", (Screen.PrimaryScreen.WorkingArea.Width - 200) / 2, 400, 200, "Annotate Activity", ButtonType.Fixed);
+            AddButton(ControlID.ACTIVITY_PANEL, ControlID.HOME_ACTIVITY_BUTTON, "Buttons\\HomePressed-128.png", "Buttons\\HomeUnpressed-128.png", 0, this.Height - 130, 128, null, ButtonType.Fixed);
+            #endregion Activity Panel
+
+            #region Annotation Protocols Panel
+            //Setup the annotation protcols list
+            annotationProtocolsList = new ListView();
+            annotationProtocolsList.Location = new System.Drawing.Point(72, 44);
+            annotationProtocolsList.View = View.List;
+            annotationProtocolsList.Name = "annotationProtocolsList";
+            annotationProtocolsList.Size = new System.Drawing.Size(100, 100);
+            annotationProtocolsList.TabIndex = 0;
+            annotationProtocolsList.SelectedIndexChanged += new EventHandler(annotationProtocolsList_SelectedIndexChanged);
+            //adjust top label size and location
+            annotationLabel = new Label();
+            annotationLabel.Width = (int)(Screen.PrimaryScreen.WorkingArea.Width * 0.90);
+            annotationLabel.Height = (int)(Screen.PrimaryScreen.WorkingArea.Width * 0.15);
+            annotationLabel.Location = new Point(2, 2);
+            //Load the activity protocols from the master directory
+            this.aProtocols = new AnnotationProtocolList();
+            this.aProtocols.FromXML(Constants.PATH + "Master\\ActivityProtocols.xml");
+            string longest_label = "";
+            for (int i = 0; (i < this.aProtocols.Count); i++)
+            {
+                annotationProtocolsList.Items.Add(new ListViewItem(this.aProtocols[i]._Name));
+                if (longest_label.Length < this.aProtocols[i]._Name.Length)
+                    longest_label = this.aProtocols[i]._Name;
+            }
+
+            //Listbox dynamic placement
+            annotationProtocolsList.Width = (int)(Screen.PrimaryScreen.WorkingArea.Width * 0.90);
+            annotationProtocolsList.Height = (int)(Screen.PrimaryScreen.WorkingArea.Height * 0.60);
+            annotationProtocolsList.Font = new Font(GUIHelper.FONT_FAMILY, 14F, this.Font.Style);
+            annotationProtocolsList.Location = new Point((int)(Screen.PrimaryScreen.WorkingArea.Width * 0.05), (int)annotationLabel.Location.Y + annotationLabel.Height + 2);
+            this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL].Controls.Add(annotationProtocolsList);
+
+            //add save features checkbox
+            saveFeatures = new CheckBox();
+            saveFeatures.Size = new Size(600, 50);
+            saveFeatures.Text = "Learn and Annotate";
+            saveFeatures.BackColor = Color.FromArgb(250, 237, 221); 
+            saveFeatures.ForeColor = Color.Black;
+            saveFeatures.Font = new Font(FontFamily.GenericSerif, 14.0f, FontStyle.Bold);
+            saveFeatures.Visible = true;
+            saveFeatures.Location = new Point(10, annotationProtocolsList.Location.Y + annotationProtocolsList.Height + 10);
+            saveFeatures.CheckState = CheckState.Checked;
+            saveFeatures.CheckStateChanged += new EventHandler(saveFeatures_CheckStateChanged);
+            this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL].Controls.Add(saveFeatures);
+
+            //add annotation label
+            annotationLabel.Size = new Size(Screen.PrimaryScreen.WorkingArea.Width, 50);
+            annotationLabel.Text = "Choose a protocol";
+            annotationLabel.BackColor = Color.FromArgb(250, 237, 221);
+            annotationLabel.Font = new Font(FontFamily.GenericSerif, 14.0f, FontStyle.Bold);
+            annotationLabel.Visible = true;
+            annotationLabel.Location = new Point((int)(Screen.PrimaryScreen.WorkingArea.Width * 0.05), 10);
+            this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL].Controls.Add(annotationLabel);
+
+            //add a button to start
+            startAnnnotationButton = new Button();
+            startAnnnotationButton.Size = new Size(400, 80);
+            startAnnnotationButton.Text = "Begin Annotation";
+            startAnnnotationButton.Font = new Font(FontFamily.GenericSerif, 14.0f, FontStyle.Bold);
+            startAnnnotationButton.Enabled = false;
+            startAnnnotationButton.Visible = true;
+            startAnnnotationButton.Click += new EventHandler(startAnnnotationButton_Click);
+            startAnnnotationButton.Location = new Point(Screen.PrimaryScreen.WorkingArea.Width / 2 - 200, saveFeatures.Location.Y + saveFeatures.Height + 10);
+            this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL].Controls.Add(startAnnnotationButton);
+
+            AddButton(ControlID.ANNOTATION_PROTCOLS_PANEL, ControlID.HOME_ANNOTATION_PROTOCOL_BUTTON, "Buttons\\HomePressed-128.png", "Buttons\\HomeUnpressed-128.png", 0, this.Height - 130, 128, null, ButtonType.Fixed);
+            #endregion Annotation Protocols Panel
+
+            #region Annotation Buttons Panel
+            this.panels[ControlID.ANNOTATION_BUTTON_PANEL].AutoScroll = true;
+            this.chooseActivityLabel = new AlphaLabel();
+            this.chooseActivityLabel.Size = new Size(500, 40);
+            this.chooseActivityLabel.Text = "Choose your activity";
+            this.chooseActivityLabel.ForeColor = Color.Black;
+            this.chooseActivityLabel.Font = new Font(FontFamily.GenericSerif, 10.0f, FontStyle.Bold);
+            this.chooseActivityLabel.Visible = true;
+            this.chooseActivityLabel.Location = new Point(1, 1);
+            this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Controls.Add(this.chooseActivityLabel);
+            doneAnnotation = new Button();
+            doneAnnotation.Size = new Size(300, 80);
+            doneAnnotation.Text = "Done Annotating";
+            doneAnnotation.Font = new Font(FontFamily.GenericSerif, 12.0f, FontStyle.Bold);
+            doneAnnotation.Enabled = true;
+            doneAnnotation.Visible = true;
+            doneAnnotation.Click += new EventHandler(doneAnnotation_Click);
+            doneAnnotation.Location = new Point(150, this.Height - 100);
+            this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Controls.Add(doneAnnotation);
+            
+            AddButton(ControlID.ANNOTATION_BUTTON_PANEL, ControlID.HOME_ANNOTATION_BUTTON_BUTTON, "Buttons\\HomePressed-128.png", "Buttons\\HomeUnpressed-128.png", 0, this.Height - 130, 128, null, ButtonType.Fixed);
+            //AddButton(ControlID.ANNOTATION_BUTTON_PANEL, ControlID.FINISH_ANNOTATION_BUTTON_BUTTON, "Buttons\\StopPressed-128.png", "Buttons\\StopUnpressed-128.png", 300, this.Height - 130, 128, null, ButtonType.Fixed);
+            #endregion Annotation Buttons Panel
             //Main Page
             //Home Screen Bottom  Buttons
+            //Line 1
             AddButton(ControlID.HOME_PANEL, ControlID.SETTINGS_BUTTON, "Buttons\\SettingsPressed.png", "Buttons\\SettingsUnpressed.png", 0, this.Height - 130, 128, null,ButtonType.Fixed);
             AddButton(ControlID.HOME_PANEL, ControlID.MINIMIZE_BUTTON, "Buttons\\MinimizePressed.png", "Buttons\\MinimizeUnpressed.png", 160, this.Height - 130, 128,  null, ButtonType.Fixed);
             AddButton(ControlID.HOME_PANEL, ControlID.RESET_BUTTON, "Buttons\\TurnOffPressed.png", "Buttons\\TurnOffUnpressed.png", 310, this.Height - 130, 128,  null, ButtonType.Fixed);
+            
+            
 
             //Home Screen Buttons
+            //Line 1
             AddButton(ControlID.HOME_PANEL, ControlID.LINE_CHART_BUTTON, "Buttons\\LineChartPressed.png", "Buttons\\LineChartUnpressed.png", 0, 50, 128, "Plot", ButtonType.Fixed);
-            AddButton(ControlID.HOME_PANEL, ControlID.BATTERY_BUTTON, "Buttons\\BatteryPressed.png", "Buttons\\BatteryUnpressed.png", 160, 50, 128,  "Power", ButtonType.Fixed);
-            AddButton(ControlID.HOME_PANEL, ControlID.GO_GREEN_BUTTON, "Buttons\\GoGreenPressed-128.png", "Buttons\\GoGreenUnpressed-128.png", 310, 50, 128, "Go Green", ButtonType.Fixed);
-
-
-            AddButton(ControlID.HOME_PANEL, ControlID.CONNECT_BUTTON, "Buttons\\ConnectPressed-128.png", "Buttons\\ConnectUnpressed-128.png", 0, 210, 128,  "Connect", ButtonType.Fixed);
-            AddButton(ControlID.HOME_PANEL, ControlID.DISCONNECT_BUTTON, "Buttons\\DisconnectPressed-128.png", "Buttons\\DisconnectUnpressed-128.png", 160, 210, 128,  "Disconnect", ButtonType.Fixed);
-
+            AddButton(ControlID.HOME_PANEL, ControlID.ACTIVITY_BUTTON, "Buttons\\ActivityPressed-128.png", "Buttons\\ActivityUnpressed-128.png", 160, 50, 128, "Activity", ButtonType.Fixed);
+            AddButton(ControlID.HOME_PANEL, ControlID.BATTERY_BUTTON, "Buttons\\BatteryPressed.png", "Buttons\\BatteryUnpressed.png", 310, 50, 128,  "Power", ButtonType.Fixed);
+            
+            //Line 2
+            AddButton(ControlID.HOME_PANEL, ControlID.GO_GREEN_BUTTON, "Buttons\\GoGreenPressed-128.png", "Buttons\\GoGreenUnpressed-128.png", 0, 210, 128, "Go Green", ButtonType.Fixed);
+            AddButton(ControlID.HOME_PANEL, ControlID.CONNECT_BUTTON, "Buttons\\DisconnectUnpressed-128.png", "Buttons\\ConnectUnpressed-128.png", 160, 210, 128, "Connect", ButtonType.Alternating);
             AddButton(ControlID.HOME_PANEL, ControlID.KERNEL_BUTTON, "Buttons\\StopKernelUnpressed-128.png", "Buttons\\StartKernelUnpressed-128.png", 310, 210, 128, "Start Kernel", ButtonType.Alternating);
-            AddButton(ControlID.HOME_PANEL, ControlID.ANNOTATION_BUTTON, "Buttons\\AnnotatePressed.png", "Buttons\\AnnotateUnpressed.png", 0, 370, 128, "Annotate", ButtonType.Fixed);
-            AddButton(ControlID.HOME_PANEL, ControlID.RECORD_BUTTON, "Buttons\\RecordPressed-128.png", "Buttons\\RecordUnpressed-128.png", 160, 370, 128, "Record", ButtonType.Fixed);
+
+
+           
+            //AddButton(ControlID.HOME_PANEL, ControlID.DISCONNECT_BUTTON, "Buttons\\DisconnectPressed-128.png", "Buttons\\DisconnectUnpressed-128.png", 160, 210, 128,  "Disconnect", ButtonType.Fixed);
+
+            
+            
+            //AddButton(ControlID.HOME_PANEL, ControlID.RECORD_BUTTON, "Buttons\\RecordPressed-128.png", "Buttons\\RecordUnpressed-128.png", 160, 370, 128, "Record", ButtonType.Fixed);
             //AddButton(ControlID.HOME_PANEL, ControlID.STOP_KERNEL_BUTTON, "Buttons\\StopKernelPressed-128.png", "Buttons\\StopKernelUnpressed-128.png", 0, 310, 128, "Stop", "Stop", ButtonType.Fixed);
 
 
@@ -427,8 +614,8 @@ namespace WocketsApplication
 
 
             //Annotation Bottom  Buttons
-            AddButton(ControlID.ANNOTATION_PROTCOLS_PANEL, ControlID.ANNOTATION_BACK_BUTTON, "Buttons\\BackPressed.png", "Buttons\\BackUnpressed.png", 310, this.Height - 130, 128, null, ButtonType.Fixed);
-            AddButton(ControlID.ANNOTATION_BUTTON_PANEL, ControlID.ANNOTATION_BUTTON_BACK_BUTTON, "Buttons\\BackPressed.png", "Buttons\\BackUnpressed.png", 310, this.Height - 130, 128, null, ButtonType.Fixed);
+           // AddButton(ControlID.ANNOTATION_PROTCOLS_PANEL, ControlID.ANNOTATION_BACK_BUTTON, "Buttons\\BackPressed.png", "Buttons\\BackUnpressed.png", 310, this.Height - 130, 128, null, ButtonType.Fixed);
+            //AddButton(ControlID.ANNOTATION_BUTTON_PANEL, ControlID.ANNOTATION_BUTTON_BACK_BUTTON, "Buttons\\BackPressed.png", "Buttons\\BackUnpressed.png", 310, this.Height - 130, 128, null, ButtonType.Fixed);
 
             //Settings Bottom  Buttons
             AddButton(ControlID.SETTINGS_PANEL, ControlID.BACK_BUTTON, "Buttons\\BackPressed.png", "Buttons\\BackUnpressed.png", 310, this.Height - 130, 128, null, ButtonType.Fixed);
@@ -437,7 +624,7 @@ namespace WocketsApplication
             AddButton(ControlID.SETTINGS_PANEL, ControlID.BLUETOOTH_BUTTON, "Buttons\\BluetoothPressed.png", "Buttons\\BluetoothUnpressed.png", 0, 50, 128,  "Wockets", ButtonType.Fixed);
             AddButton(ControlID.SETTINGS_PANEL, ControlID.SOUND_BUTTON, "Buttons\\SoundPressed.png", "Buttons\\SoundUnpressed.png", 160, 50, 128, "Sound",  ButtonType.Fixed);
 
-            saveLabel = new AlphaLabel();
+           /* saveLabel = new AlphaLabel();
             saveLabel.Size = new Size(600, 50);
             saveLabel.Text = "Data Settings";
             saveLabel.ForeColor = Color.FromArgb(250, 237, 221);
@@ -466,7 +653,7 @@ namespace WocketsApplication
             saveFeatures.Location = new Point(10, 480);
             saveFeatures.CheckStateChanged += new EventHandler(saveFeatures_CheckStateChanged);
             this.panels[ControlID.SETTINGS_PANEL].Controls.Add(saveFeatures);
-
+            */
 
             
 
@@ -546,62 +733,50 @@ namespace WocketsApplication
             this.Deactivate += new EventHandler(Form1_Deactivate);
             this.Activated += new EventHandler(Form1_Activated);
 
-            #region Annotation GUI
-            //Setup the annotation protcols list
-            annotationProtocolsList = new ListView();
-            annotationProtocolsList.Location = new System.Drawing.Point(72, 44);
-            annotationProtocolsList.View = View.List;
-            annotationProtocolsList.Name = "annotationProtocolsList";
-            annotationProtocolsList.Size = new System.Drawing.Size(100, 100);
-            annotationProtocolsList.TabIndex = 0;
-            annotationProtocolsList.SelectedIndexChanged += new EventHandler(annotationProtocolsList_SelectedIndexChanged);
-            //adjust top label size and location
-            annotationLabel= new Label();
-            annotationLabel.Width = (int)(Screen.PrimaryScreen.WorkingArea.Width * 0.90);
-            annotationLabel.Height = (int)(Screen.PrimaryScreen.WorkingArea.Width * 0.15);
-            annotationLabel.Location = new Point(2, 2);                
-            //Load the activity protocols from the master directory
-            this.aProtocols = new AnnotationProtocolList();
-            this.aProtocols.FromXML(Constants.PATH + "Master\\ActivityProtocols.xml");
-            string longest_label = "";
-            for (int i = 0; (i < this.aProtocols.Count); i++)
+
+
+
+
+
+
+
+
+
+
+
+        }
+
+        void doneAnnotation_Click(object sender, EventArgs e)
+        {
+            if (MessageBox.Show("Are you done annotating?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
             {
-                annotationProtocolsList.Items.Add(new ListViewItem(this.aProtocols[i]._Name));
-                if (longest_label.Length < this.aProtocols[i]._Name.Length)
-                    longest_label = this.aProtocols[i]._Name;
+                this.selectedActivityProtocol = -1;
+                this.activityStatus = ActivityStatus.None;
+
+                for (int i = 0; i < activityButtons.Count; i++)
+                {
+                    System.Windows.Forms.Button[] activityList = (System.Windows.Forms.Button[])activityButtons[i];
+                    for (int j = 0; j < activityList.Length; j++)
+                        this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Controls.Remove(activityList[j]);
+                }
+                activityButtons.Clear();
+                this.panels[ControlID.HOME_PANEL].Visible = true;
+                this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Visible = false;
+                if (this.saveFeatures.Checked)
+                    CleanupML();
+
+                this.currentPanel = ControlID.HOME_PANEL;
             }
+        }
 
-            //Listbox dynamic placement
-            annotationProtocolsList.Width = (int)(Screen.PrimaryScreen.WorkingArea.Width * 0.90);
-            annotationProtocolsList.Height = (int)(Screen.PrimaryScreen.WorkingArea.Height * 0.70);
-            annotationProtocolsList.Font = new Font(GUIHelper.FONT_FAMILY, 14F, this.Font.Style);
-            annotationProtocolsList.Location = new Point((int)(Screen.PrimaryScreen.WorkingArea.Width * 0.05), (int)annotationLabel.Location.Y + annotationLabel.Height + 2);
-            this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL].Controls.Add(annotationProtocolsList);
+        void annotateActivityButton_Click(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
+        }
 
-            //add annotation label
-            annotationLabel.Size = new Size(Screen.PrimaryScreen.WorkingArea.Width, 50);
-            annotationLabel.Text = "Choose a protocol";
-            annotationLabel.BackColor = Color.FromArgb(250, 237, 221);
-            annotationLabel.Font = new Font(FontFamily.GenericSerif, 14.0f, FontStyle.Bold);
-            annotationLabel.Visible = true;
-            annotationLabel.Location = new Point((int)(Screen.PrimaryScreen.WorkingArea.Width * 0.05), 10);
-            this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL].Controls.Add(annotationLabel);
-
-            //add a button to start
-            startAnnnotationButton = new Button();
-            startAnnnotationButton.Size = new Size(400, 50);
-            startAnnnotationButton.Text = "Begin Annotation";
-            //startAnnnotationButton.BackColor = Color.FromArgb(250, 237, 221);
-            startAnnnotationButton.Font = new Font(FontFamily.GenericSerif, 14.0f, FontStyle.Bold);
-            startAnnnotationButton.Enabled = false;
-            startAnnnotationButton.Visible = true;
-            startAnnnotationButton.Click += new EventHandler(startAnnnotationButton_Click);
-            startAnnnotationButton.Location = new Point(Screen.PrimaryScreen.WorkingArea.Width/2 - 200, annotationProtocolsList.Location.Y + annotationProtocolsList.Height+10);
-            this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL].Controls.Add(startAnnnotationButton);
-            
-            #endregion Annotation GUI
-            this.panels[ControlID.ANNOTATION_BUTTON_PANEL].AutoScroll = true;
-
+        void measureActivityButton_Click(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
 
@@ -611,13 +786,18 @@ namespace WocketsApplication
             _SaveData = ((CheckBox)sender).Checked;
         }
 
-        private bool _SaveFeatures = false;
+        private bool _SaveFeatures = true;
         void saveFeatures_CheckStateChanged(object sender, EventArgs e)
         {
+            if (((CheckBox)sender).Checked)
+                ((CheckBox)sender).Text = "Learn and Annotate";
+            else
+                ((CheckBox)sender).Text = "Annotate Only";
             _SaveFeatures = ((CheckBox)sender).Checked;
         }
         private Session annotatedSession;
         private int selectedActivityProtocol=-1;
+        private ActivityStatus activityStatus= ActivityStatus.None;
         private ArrayList activityButtons = new ArrayList();
 
         private const int BS_MULTILINE = 0x00002000;
@@ -690,6 +870,7 @@ namespace WocketsApplication
         ArrayList selectedButtons = new ArrayList();
         char[] delimiter = { '_' };
         private Annotation currentRecord = null;
+        private object annotationLock = new object();
         private void activityButton_Click(object sender, EventArgs e)
         {
             Button button = (Button)sender;
@@ -715,15 +896,20 @@ namespace WocketsApplication
 
             if (this.currentRecord != null)
             {
-
-                stopAnnotation();
+                lock (annotationLock)
+                {
+                    stopAnnotation();
+                }
                 TextWriter tw = new StreamWriter(Core._StoragePath + "\\AnnotationIntervals.xml");
                 tw.WriteLine(this.annotatedSession.ToXML());
                 tw.Close();
             }
             if (selectedButtons.Count > 0)
             {
-                startAnnotation();
+                lock (annotationLock)
+                {
+                    startAnnotation();
+                }
             }
         }
 
@@ -771,135 +957,192 @@ namespace WocketsApplication
 
         }
 
+
+     
+       
         void startAnnnotationButton_Click(object sender, EventArgs e)
         {
-            //Select an annotation file
-            if ((Core._Connected) && (this.selectedActivityProtocol==-1))
-            {               
-                //Copy the annotation file to the storage directory
-                this.selectedActivityProtocol = this.annotationProtocolsList.SelectedIndices[0];
-                if (File.Exists(Constants.PATH + "ActivityProtocols\\" + this.aProtocols[this.selectedActivityProtocol]._FileName))
-                {
-                    File.Copy(Constants.PATH + "ActivityProtocols\\" + this.aProtocols[this.selectedActivityProtocol]._FileName,
-                           Core._StoragePath + "\\ActivityLabelsRealtime.xml");
-                    this.annotatedSession = new Session();
-                    annotatedSession.FromXML(Core._StoragePath + "\\ActivityLabelsRealtime.xml");
-                }
+
+            //Copy the annotation file to the storage directory
+            this.selectedActivityProtocol = this.annotationProtocolsList.SelectedIndices[0];
+            this.annotatedSession = new Session();
+            this.annotatedSession.FromXML(Constants.PATH + "ActivityProtocols\\" + this.aProtocols[this.selectedActivityProtocol]._FileName);
 
 
-                //add buttons to the interface
-                this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Visible = true;
-                this.panels[currentPanel].Visible = false;
-                this.currentPanel = ControlID.ANNOTATION_BUTTON_PANEL;
+            //this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Controls.Add(this.chooseActivityLabel);
+            
+            
+            this.panels[ControlID.ANNOTATION_BUTTON_PANEL].AutoScroll = true;
+            int max_buttons_per_row = 3;
+            int act_button_width = 0;
+            int act_button_height = 0;
+            int numberOfButtons = 0;
+            float fontSize = 12F;
+            int act_button_x = 0;
+            int act_button_y = 0;
+            int marginHeight = 20;
+            int screenWidth = this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Width;
+            int screenHeight = this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Height;
+            int scrollbarWidth = 28;
 
-                this.panels[ControlID.ANNOTATION_BUTTON_PANEL].AutoScroll = true;
-                int max_buttons_per_row = 4;
-                int act_button_width = 0;
-                int act_button_height = 0;
-                int numberOfButtons = 0;
-                float fontSize = 7F;
-                int act_button_x = 0;
-                int act_button_y = 0;
-                int marginHeight = 20;
-                int screenWidth = this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Width;
-                int screenHeight = this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Height;
-                int scrollbarWidth = 28;
-
-                for (int i = 0; (i < this.annotatedSession.OverlappingActivityLists.Count); i++)
-                {
-                    Activity[] acts = this.annotatedSession.OverlappingActivityLists[i].ToArray();
-                    if (Platform.NativeMethods.GetPlatformType() == "PocketPC")
-                    {
-                        System.Windows.Forms.Button[] buttons = new System.Windows.Forms.Button[acts.Length];
-
-                        for (int j = 0; j < buttons.Length; j++)
-                        {
-                            buttons[j] = new System.Windows.Forms.Button();
-                            MakeButtonMultiline(buttons[j]);
-                            buttons[j].Name = i + "_" + j;
-                            buttons[j].Text = truncateText(acts[j]._Name);
-                            buttons[j].Click += new EventHandler(this.activityButton_Click);                            
-                            buttons[j].BackColor = Color.SkyBlue;
-                            numberOfButtons += 1;
-                        }
-                        activityButtons.Add(buttons);
-                    }
-                }
-
-                if (numberOfButtons > 12)
-                {
-                    screenWidth -= scrollbarWidth;
-                    act_button_width = act_button_height = screenWidth / max_buttons_per_row;
-                }
-                else if ((numberOfButtons <= 12) && (numberOfButtons > 8))
-                {
-                    act_button_width = screenWidth / max_buttons_per_row;
-                    act_button_height = act_button_width + (act_button_width / 3);
-                }
-                else if ((numberOfButtons <= 8) && (numberOfButtons > 3))
-                {
-                    int dBlockSize = (screenWidth - 2) / max_buttons_per_row;
-                    max_buttons_per_row = 2;
-                    act_button_width = dBlockSize * 2;
-                    int s = (int)Math.Ceiling(numberOfButtons / 2.0);
-                    act_button_height = ((dBlockSize * 4) + 22) / s;
-                    fontSize = 12F;
-                }
-                else
-                {
-                    int dBlockSize = screenWidth / max_buttons_per_row;
-                    max_buttons_per_row = 1;
-                    act_button_width = screenWidth - 2;
-                    act_button_height = (dBlockSize * 4) / numberOfButtons;
-                    fontSize = 14F;
-                }
-
+            for (int i = 0; (i < this.annotatedSession.OverlappingActivityLists.Count); i++)
+            {
+                Activity[] acts = this.annotatedSession.OverlappingActivityLists[i].ToArray();
                 if (Platform.NativeMethods.GetPlatformType() == "PocketPC")
                 {
-                    for (int i = 0; i < activityButtons.Count; i++)
+                    System.Windows.Forms.Button[] buttons = new System.Windows.Forms.Button[acts.Length];
+
+                    for (int j = 0; j < buttons.Length; j++)
                     {
-                        System.Windows.Forms.Button[] activityList = (System.Windows.Forms.Button[])activityButtons[i];
-                        int buttonsOnRow = 0;
-                        for (int j = 0; j < activityList.Length; j++)
-                        {
-
-                            activityList[j].Visible = true;
-                            activityList[j].Width = act_button_width;
-                            activityList[j].Height = act_button_height;
-                            activityList[j].Location = new System.Drawing.Point(act_button_x, act_button_y);
-                            activityList[j].Font = new System.Drawing.Font("Microsoft Sans Serif", fontSize, System.Drawing.FontStyle.Regular);
-                            ((Panel)this.panels[ControlID.ANNOTATION_BUTTON_PANEL]).Controls.Add(activityList[j]);
-                            buttonsOnRow += 1;
-
-                            if (buttonsOnRow == activityList.Length) //completed a category
-                            {
-                                act_button_x = 0;
-                                act_button_y += act_button_height + marginHeight;
-                                buttonsOnRow = 0;
-                            }
-                            else if (buttonsOnRow == max_buttons_per_row) //completed a row within a category
-                            {
-                                act_button_x = 0;
-                                act_button_y += act_button_height;
-                                buttonsOnRow = 0;
-                            }
-                            else //added a button within a row
-                                act_button_x += act_button_width;
-                        }
-
+                        buttons[j] = new System.Windows.Forms.Button();
+                        MakeButtonMultiline(buttons[j]);
+                        buttons[j].Name = i + "_" + j;
+                        buttons[j].Text = truncateText(acts[j]._Name);
+                        buttons[j].Click += new EventHandler(this.activityButton_Click);
+                        buttons[j].BackColor = Color.SkyBlue;
+                        numberOfButtons += 1;
                     }
-                }              
+                    activityButtons.Add(buttons);
+                }
+            }
+
+            if (numberOfButtons > 12)
+            {
+                screenWidth -= scrollbarWidth;
+                act_button_width = act_button_height = screenWidth / max_buttons_per_row;
+            }
+            else if ((numberOfButtons <= 12) && (numberOfButtons > 8))
+            {
+                act_button_width = screenWidth / max_buttons_per_row;
+                act_button_height = act_button_width + (act_button_width / 3);
+            }
+            else if ((numberOfButtons <= 8) && (numberOfButtons > 3))
+            {
+                int dBlockSize = (screenWidth - 2) / max_buttons_per_row;
+                max_buttons_per_row = 2;
+                act_button_width = dBlockSize * 2;
+                int s = (int)Math.Ceiling(numberOfButtons / 2.0);
+                act_button_height = ((dBlockSize * 4) + 22) / s;
+                fontSize = 12F;
             }
             else
-                MessageBox.Show("Please connect to wockets first before annotating", "Confirm", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);            
+            {
+                int dBlockSize = screenWidth / max_buttons_per_row;
+                max_buttons_per_row = 1;
+                act_button_width = screenWidth - 2;
+                act_button_height = (dBlockSize * 4) / numberOfButtons;
+                fontSize = 14F;
+            }
 
+            if (Platform.NativeMethods.GetPlatformType() == "PocketPC")
+            {
+                for (int i = 0; i < activityButtons.Count; i++)
+                {
+                    System.Windows.Forms.Button[] activityList = (System.Windows.Forms.Button[])activityButtons[i];
+                    int buttonsOnRow = 0;
+                    for (int j = 0; j < activityList.Length; j++)
+                    {
+
+                        activityList[j].Visible = true;
+                        activityList[j].Width = act_button_width;
+                        activityList[j].Height = act_button_height;
+                        activityList[j].Location = new System.Drawing.Point(act_button_x, act_button_y+40);
+                        activityList[j].Font = new System.Drawing.Font("Microsoft Sans Serif", fontSize, FontStyle.Regular | FontStyle.Bold);
+                        ((Panel)this.panels[ControlID.ANNOTATION_BUTTON_PANEL]).Controls.Add(activityList[j]);
+                        buttonsOnRow += 1;
+
+                        if (buttonsOnRow == activityList.Length) //completed a category
+                        {
+                            act_button_x = 0;
+                            act_button_y += act_button_height + marginHeight;
+                            buttonsOnRow = 0;
+                        }
+                        else if (buttonsOnRow == max_buttons_per_row) //completed a row within a category
+                        {
+                            act_button_x = 0;
+                            act_button_y += act_button_height;
+                            buttonsOnRow = 0;
+                        }
+                        else //added a button within a row
+                            act_button_x += act_button_width;
+                    }
+
+                }
+            }
+
+
+            //if already connected copy the activity protocol
+            if (Core._Connected)
+            {
+                if (File.Exists(Constants.PATH + "ActivityProtocols\\" + this.aProtocols[this.selectedActivityProtocol]._FileName))
+                {
+                    if (!File.Exists(Core._StoragePath + "\\ActivityLabelsRealtime.xml"))
+                    {
+
+                        File.Copy(Constants.PATH + "ActivityProtocols\\" + this.aProtocols[this.selectedActivityProtocol]._FileName,
+                               Core._StoragePath + "\\ActivityLabelsRealtime.xml");
+                        if (this.saveFeatures.Checked)
+                            InitializeML();
+                    }
+                    else
+                    {
+                        if (MessageBox.Show("There is an existing annotation, would you like to overwrite it?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
+                        {
+                            File.Copy(Constants.PATH + "ActivityProtocols\\" + this.aProtocols[this.selectedActivityProtocol]._FileName,
+                               Core._StoragePath + "\\ActivityLabelsRealtime.xml", true);
+                            this.annotatedSession = new Session();
+                            annotatedSession.FromXML(Core._StoragePath + "\\ActivityLabelsRealtime.xml");
+                            
+                        }
+                        else
+                        {
+                            this.selectedActivityProtocol = -1;
+                            this.annotatedSession = null;
+                            this.activityStatus = ActivityStatus.None;
+                            for (int i = 0; i < activityButtons.Count; i++)
+                            {
+                                System.Windows.Forms.Button[] activityList = (System.Windows.Forms.Button[])activityButtons[i];
+                                for (int j = 0; j < activityList.Length; j++)
+                                    this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Controls.Remove(activityList[j]);
+                            }
+                            activityButtons.Clear();
+                            return;
+                        }
+                    }
+                    
+                }
+            }
+
+            this.activityStatus = ActivityStatus.Annotating;
+            this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Visible = true;
+            this.panels[currentPanel].Visible = false;
+            this.currentPanel = ControlID.ANNOTATION_BUTTON_PANEL;
+
+            
+
+            /*if (File.Exists(Constants.PATH + "ActivityProtocols\\" + this.aProtocols[this.selectedActivityProtocol]._FileName))
+            {
+                File.Copy(Constants.PATH + "ActivityProtocols\\" + this.aProtocols[this.selectedActivityProtocol]._FileName,
+                       Core._StoragePath + "\\ActivityLabelsRealtime.xml");
+                this.annotatedSession = new Session();
+                annotatedSession.FromXML(Core._StoragePath + "\\ActivityLabelsRealtime.xml");
+            }*/
+
+
+            //add buttons to the interface
+
+
+            
 
         }
 
         void annotationProtocolsList_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (!startAnnnotationButton.Enabled)
+            this.selectedActivityProtocol = -1;
+            if ((!startAnnnotationButton.Enabled) && (((ListView)sender).SelectedIndices.Count == 1))
                 startAnnnotationButton.Enabled = true;
+            else
+                startAnnnotationButton.Enabled = false;
             //throw new NotImplementedException();
         }
 
@@ -1000,7 +1243,7 @@ namespace WocketsApplication
                     {
                         if ((this.panels[currentPanel]._ButtonType[i]== ButtonType.Fixed) && (!this.panels[currentPanel]._ButtonPressed[i]))
                         {
-                            this.panels[currentPanel]._PressedButtonControls[i].Size = new Size(128, 128);
+                            this.panels[currentPanel]._PressedButtonControls[i].Size = new Size(this.panels[currentPanel]._ButtonSize[i], this.panels[currentPanel]._ButtonSize[i]);
                                 this.panels[currentPanel]._PressedButtonControls[i].Visible = true;
                                 this.panels[currentPanel]._UnpressedButtonControls[i].Visible = false;
                                 this.panels[currentPanel]._ButtonPressed[i] = true;
@@ -1009,7 +1252,7 @@ namespace WocketsApplication
                     }
                     else if ((this.panels[currentPanel]._ButtonType[i]== ButtonType.Fixed) && (this.panels[currentPanel]._ButtonPressed[i]))
                     {
-                        this.panels[currentPanel]._UnpressedButtonControls[i].Size = new Size(128, 128);
+                        this.panels[currentPanel]._UnpressedButtonControls[i].Size = new Size(this.panels[currentPanel]._ButtonSize[i], this.panels[currentPanel]._ButtonSize[i]);
                         this.panels[currentPanel]._UnpressedButtonControls[i].Visible = true;
                         this.panels[currentPanel]._PressedButtonControls[i].Visible = false;                       
                         this.panels[currentPanel]._ButtonPressed[i] = false;
@@ -1054,7 +1297,58 @@ namespace WocketsApplication
 
 
             int name = Convert.ToInt32(p.Name);
-            if (currentPanel == ControlID.WOCKETS_PANEL)
+            #region Activity Panel
+            if (currentPanel == ControlID.ACTIVITY_PANEL)
+            {
+                if (name == ControlID.HOME_ACTIVITY_BUTTON)
+                {
+
+                    this.panels[ControlID.HOME_PANEL].Visible = true;
+                    this.panels[currentPanel].Visible = false;
+                    this.currentPanel = ControlID.HOME_PANEL;
+
+                }
+                else if (name == ControlID.MEASURE_ACTIVITY_BUTTON)
+                {
+                }
+                else if (name == ControlID.ANNOTATE_ACTIVITY_BUTTON)
+                {
+                    this.panels[currentPanel].Visible = false;
+                    this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL].Location = new Point(0, 0);
+                    this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL].BringToFront();
+                    this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL].Visible = true;
+                    this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL].Dock = DockStyle.None;
+                    this.currentPanel = ControlID.ANNOTATION_PROTCOLS_PANEL;
+                }
+            }
+            #endregion Activity Panel
+
+
+            #region Annotation Protocols Panel
+            else if (currentPanel == ControlID.ANNOTATION_PROTCOLS_PANEL)
+            {
+                if (name == ControlID.HOME_ANNOTATION_PROTOCOL_BUTTON)
+                {
+                    this.panels[ControlID.HOME_PANEL].Visible = true;
+                    this.panels[currentPanel].Visible = false;
+                    this.currentPanel = ControlID.HOME_PANEL;
+                }
+            }
+            #endregion Annotation Protocols Panel
+
+            #region Annotation Button Panel
+            else if (currentPanel == ControlID.ANNOTATION_BUTTON_PANEL)
+            {
+                if (name == ControlID.HOME_ANNOTATION_BUTTON_BUTTON)
+                {
+                    this.panels[ControlID.HOME_PANEL].Visible = true;
+                    this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Visible = false;
+                    this.currentPanel = ControlID.HOME_PANEL;
+                }
+            }
+            #endregion Annotation Button Panel
+
+            else if (currentPanel == ControlID.WOCKETS_PANEL)
             {
                 if (name == ControlID.WOCKETS_BACK_BUTTON)
                 {                    
@@ -1112,12 +1406,6 @@ namespace WocketsApplication
                         this.panels[currentPanel]._ButtonText[ControlID.KERNEL_BUTTON].Text = "Stop Kernel";
                         this.panels[currentPanel]._ButtonPressed[ControlID.KERNEL_BUTTON] = true;
                         this.Refresh();
-                       /* if (this.panels[currentPanel]._Background != null)
-                        {
-                            Graphics offscreen = Graphics.FromImage(this.panels[currentPanel]._Backbuffer);
-                            offscreen.DrawImage(this.panels[currentPanel]._Background, 0, 0);
-                        }*/
-
 
 
                         if (!Core._KernelStarted)
@@ -1165,6 +1453,17 @@ namespace WocketsApplication
                                 Core.Terminate();
 
                                 this.selectedActivityProtocol = -1;
+                                this.annotatedSession = null;
+                                this.activityStatus = ActivityStatus.None;
+                                for (int i = 0; i < activityButtons.Count; i++)
+                                {
+                                    System.Windows.Forms.Button[] activityList = (System.Windows.Forms.Button[])activityButtons[i];
+                                    for (int j = 0; j < activityList.Length; j++)
+                                        this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Controls.Remove(activityList[j]);
+                                }
+                                activityButtons.Clear();
+                                if (this._SaveFeatures)
+                                    CleanupML();
                                 this.panels[currentPanel]._UnpressedButtonControls[ControlID.KERNEL_BUTTON].Visible = true;
                                 this.panels[currentPanel]._PressedButtonControls[ControlID.KERNEL_BUTTON].Visible = false;
                                 this.panels[currentPanel]._ButtonText[ControlID.KERNEL_BUTTON].Text = "Start Kernel";
@@ -1183,6 +1482,27 @@ namespace WocketsApplication
                     if (Core._Connected)
                         Core.SetSniff(Core._KernelGuid, SleepModes.NoSleep);
                 }
+                else if (name == ControlID.ACTIVITY_BUTTON)
+                {
+                    if (this.activityStatus == ActivityStatus.Annotating)
+                    {
+                        this.panels[currentPanel].Visible = false;
+                        this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Location = new Point(0, 0);
+                        this.panels[ControlID.ANNOTATION_BUTTON_PANEL].BringToFront();
+                        this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Visible = true;
+                        this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Dock = DockStyle.None;
+                        this.currentPanel = ControlID.ANNOTATION_BUTTON_PANEL;
+                    }
+                    else
+                    {
+                        this.panels[currentPanel].Visible = false;
+                        this.panels[ControlID.ACTIVITY_PANEL].Location = new Point(0, 0);
+                        this.panels[ControlID.ACTIVITY_PANEL].BringToFront();
+                        this.panels[ControlID.ACTIVITY_PANEL].Visible = true;
+                        this.panels[ControlID.ACTIVITY_PANEL].Dock = DockStyle.None;
+                        this.currentPanel = ControlID.ACTIVITY_PANEL;
+                    }
+                }
                 else if (name == ControlID.GO_GREEN_BUTTON)
                 {
                     if (Core._Connected)
@@ -1196,6 +1516,20 @@ namespace WocketsApplication
                             Core.Unregister(Core._KernelGuid);
                         ScreenUtils.ShowTaskBar(true);
 
+
+                        this.selectedActivityProtocol = -1;
+                        this.annotatedSession = null;
+                        this.activityStatus = ActivityStatus.None;
+                        for (int i = 0; i < activityButtons.Count; i++)
+                        {
+                            System.Windows.Forms.Button[] activityList = (System.Windows.Forms.Button[])activityButtons[i];
+                            for (int j = 0; j < activityList.Length; j++)
+                                this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Controls.Remove(activityList[j]);
+                        }
+                        activityButtons.Clear();
+                        if (this._SaveFeatures)
+                            CleanupML();
+
                         //Terminate the kernel
                         if (Core._KernelGuid != null)
                             Core.Send(KernelCommand.TERMINATE, Core._KernelGuid);
@@ -1207,48 +1541,89 @@ namespace WocketsApplication
                 else if (name == ControlID.SETTINGS_BUTTON)
                 {
 
+
                     this.panels[currentPanel].Visible = false;
                     this.panels[ControlID.SETTINGS_PANEL].Location = new Point(0, 0);
                     this.panels[ControlID.SETTINGS_PANEL].BringToFront();
                     this.panels[ControlID.SETTINGS_PANEL].Visible = true;
                     this.panels[ControlID.SETTINGS_PANEL].Dock = DockStyle.None;
                     this.currentPanel = ControlID.SETTINGS_PANEL;
+
                 }
                 else if (name == ControlID.CONNECT_BUTTON)
                 {
-                    if (Core._Registered)
+                    if (Core._KernelStarted)
                     {
-                        if (selectedWockets.Count != 0)
+                        if (Core._Registered)
                         {
-                            if (!Core._Connected)
+                            if (selectedWockets.Count != 0)
                             {
-                                Core.Connect(Core._KernelGuid);
-                                statusLabel.Text = "Connecting...";
+
+                                if (!this.panels[currentPanel]._ButtonPressed[ControlID.CONNECT_BUTTON])
+                                {
+                                    Core.Connect(Core._KernelGuid);
+                                    statusLabel.Text = "Connecting...";
+
+                                    this.panels[currentPanel]._UnpressedButtonControls[ControlID.CONNECT_BUTTON].Enabled = false;
+                                    this.panels[currentPanel]._PressedButtonControls[ControlID.CONNECT_BUTTON].Size = new Size(128, 128);
+                                    this.panels[currentPanel]._PressedButtonControls[ControlID.CONNECT_BUTTON].Visible = true;
+                                    this.panels[currentPanel]._UnpressedButtonControls[ControlID.CONNECT_BUTTON].Visible = false;
+                                    this.panels[currentPanel]._ButtonText[ControlID.CONNECT_BUTTON].Text = "Disconnect";
+                                    this.panels[currentPanel]._ButtonPressed[ControlID.CONNECT_BUTTON] = true;
+                                    this.Refresh();
+                                    this.panels[currentPanel]._PressedButtonControls[ControlID.CONNECT_BUTTON].Enabled = true;
+                                    clickTime = WocketsTimer.GetUnixTime();
+                                }
+                                else
+                                {
+                                    if ((WocketsTimer.GetUnixTime() - clickTime) < 3000)
+                                        return;
+                                    if (MessageBox.Show("Are you sure you want to disconnect?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
+                                    {
+                                        if (Core._Connected)
+                                        {
+                                            statusLabel.Text = "Disconnecting...";
+                                            Core._Connected = false;
+                                            selectedWockets.Clear();
+                                            this.selectedActivityProtocol = -1;
+                                            this.activityStatus = ActivityStatus.None;
+
+                                            for (int i = 0; i < activityButtons.Count; i++)
+                                            {
+                                                System.Windows.Forms.Button[] activityList = (System.Windows.Forms.Button[])activityButtons[i];
+                                                for (int j = 0; j < activityList.Length; j++)
+                                                    this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Controls.Remove(activityList[j]);
+                                            }
+                                            activityButtons.Clear();
+                                            Core.Disconnect(Core._KernelGuid);
+                                            plotter = null;
+                                      
+                                            this.panels[currentPanel]._PressedButtonControls[ControlID.CONNECT_BUTTON].Enabled = false;
+                                            this.panels[currentPanel]._UnpressedButtonControls[ControlID.CONNECT_BUTTON].Size = new Size(128, 128);
+                                            this.panels[currentPanel]._UnpressedButtonControls[ControlID.CONNECT_BUTTON].Visible = true;
+                                            this.panels[currentPanel]._PressedButtonControls[ControlID.CONNECT_BUTTON].Visible = false;
+                                            this.panels[currentPanel]._ButtonText[ControlID.CONNECT_BUTTON].Text = "Connect";
+                                            this.panels[currentPanel]._ButtonPressed[ControlID.CONNECT_BUTTON] = false;
+                                            this.panels[currentPanel]._UnpressedButtonControls[ControlID.CONNECT_BUTTON].Enabled = true;
+                                            statusLabel.Text = "Ready to connect";
+                                        }
+                                                                  
+                                    }
+                                }
                             }
                             else
-                                MessageBox.Show("Wockets Already Connected!");
+                                MessageBox.Show("Please select wockets before connecting", "Confirm", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2);
                         }
                         else
-                            MessageBox.Show("Please select the wockets to connect to.", "Confirm", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
+                            MessageBox.Show("Application not registered with the kernel", "Confirm", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2);
                     }
                     else
-                        MessageBox.Show("Application not registered!");
-                }
-                else if (name == ControlID.DISCONNECT_BUTTON)
-                {
-                    if (Core._Connected)
-                    {
-                        Core.Disconnect(Core._KernelGuid);
-                        plotter = null;
-                        statusLabel.Text = "Disconnecting...";
-                    }
-                    else
-                        MessageBox.Show("Wockets Already Disconnected!");
+                        MessageBox.Show("Please start the kernel before connecting to the wockets", "Confirm", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2);
                 }
                 else if (name == ControlID.LINE_CHART_BUTTON)
                 {
                     if (Core._Connected)
-                    {                        
+                    {
                         //plotterTimer.Enabled = true;
                         this.panels[currentPanel].Visible = false;
                         this.panels[ControlID.PLOTTER_PANEL].Location = new Point(0, 0);
@@ -1264,9 +1639,10 @@ namespace WocketsApplication
                         MessageBox.Show("Cannot plot without connecting wockets!");
 
                 }
-                else if (name == ControlID.ANNOTATION_BUTTON)
+                else if (name == ControlID.ACTIVITY_BUTTON)
                 {
-                    if (Core._Connected)
+                    //Annotation Button 
+                    /*if (Core._Connected)
                     {
                         if (this.selectedActivityProtocol != -1)
                         {
@@ -1289,8 +1665,9 @@ namespace WocketsApplication
                     }
                     else
                         MessageBox.Show("Cannot annotate without connecting wockets!", "Confirm", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
+                     */
                 }
-                else if (name == ControlID.RECORD_BUTTON)
+               /* else if (name == ControlID.RECORD_BUTTON)
                 {
                     if (Core._Connected)
                     {
@@ -1329,7 +1706,7 @@ namespace WocketsApplication
                     }
                     else
                         MessageBox.Show("Cannot save features without connecting wockets!", "Confirm", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
-                }
+                }*/
             }
             else if (currentPanel == ControlID.SETTINGS_PANEL)
             {
@@ -1341,14 +1718,25 @@ namespace WocketsApplication
                 }
                 else if (name == ControlID.BLUETOOTH_BUTTON)
                 {
-                    this.panels[ControlID.SETTINGS_PANEL].Visible = false;
-                    this.panels[ControlID.WOCKETS_PANEL].Location = new Point(0, 0);
-                    //this.panels[ControlID.WOCKETS_PANEL].BringToFront();                   
-                    this.panels[ControlID.WOCKETS_PANEL].Visible = true;
-                    this.panels[ControlID.WOCKETS_PANEL].Dock = DockStyle.None;
-                    this.currentPanel = ControlID.WOCKETS_PANEL;
-                    selectedWockets.Clear();
-                    UpdatewWocketsList();
+                    if (!Core._KernelStarted)
+                        MessageBox.Show("Please start the kernel before selecting wockets", "Confirm", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
+                    else
+                    {
+                        if (Core._Connected)
+                            MessageBox.Show("Cannot change the wockets while connected", "Confirm", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
+                        else
+                        {
+
+                            this.panels[ControlID.SETTINGS_PANEL].Visible = false;
+                            this.panels[ControlID.WOCKETS_PANEL].Location = new Point(0, 0);
+                            //this.panels[ControlID.WOCKETS_PANEL].BringToFront();                   
+                            this.panels[ControlID.WOCKETS_PANEL].Visible = true;
+                            this.panels[ControlID.WOCKETS_PANEL].Dock = DockStyle.None;
+                            this.currentPanel = ControlID.WOCKETS_PANEL;
+                            selectedWockets.Clear();
+                            UpdatewWocketsList();
+                        }
+                    }
                 }
             }
             else if (currentPanel == ControlID.PLOTTER_PANEL)
@@ -1364,24 +1752,8 @@ namespace WocketsApplication
                     //Core.SetSniff(wocketsKernelGuid, SleepModes.Sleep1Second);
                 }
             }
-            else if (currentPanel == ControlID.ANNOTATION_PROTCOLS_PANEL)
-            {
-                if (name == ControlID.ANNOTATION_BACK_BUTTON)
-                {
-                    this.panels[ControlID.HOME_PANEL].Visible = true;
-                    this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL].Visible = false;
-                    this.currentPanel = ControlID.HOME_PANEL;                                        
-                }
-            }
-            else if (currentPanel == ControlID.ANNOTATION_BUTTON_PANEL)
-            {
-                if (name == ControlID.ANNOTATION_BUTTON_BACK_BUTTON)
-                {
-                    this.panels[ControlID.HOME_PANEL].Visible = true;
-                    this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Visible = false;
-                    this.currentPanel = ControlID.HOME_PANEL;
-                }
-            }
+      
+          
             this.Refresh();
         }
 
@@ -1390,12 +1762,16 @@ namespace WocketsApplication
             while (true)
             {
                 string current_activity = "unknown";
-                if (this.currentRecord != null)
+                lock (annotationLock)
+                {
+                    if (this.currentRecord != null)
+                        current_activity = this.currentRecord.Activities._CurrentActivity;
+                }
+                if (current_activity != "unknown")
                 {
                     double lastTimeStamp = FeatureExtractor.StoreWocketsWindow();
                     if (FeatureExtractor.GenerateFeatureVector(lastTimeStamp))
-                    {
-                        current_activity = this.currentRecord.Activities._CurrentActivity;
+                    {           
                         string arffSample = FeatureExtractor.toString() + "," + current_activity;
                         trainingTW.WriteLine(arffSample);
                         /*extractedVectors++;
