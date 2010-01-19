@@ -7,9 +7,9 @@ namespace WocketsApplication
 {
     public class ControlID
     {
-        public const int NUMBER_PANELS = 8;
+        public const int NUMBER_PANELS = 9;
         public const int HOME_PANEL = 0;
-        public const int HOME_PANEL_BUTTON_COUNT = 11;
+        public const int HOME_PANEL_BUTTON_COUNT = 9;
         public const int ABOUT_PANEL = 1;
         public const int ABOUT_PANEL_BUTTON_COUNT = 0;
         public const int SETTINGS_PANEL = 2;
@@ -20,28 +20,29 @@ namespace WocketsApplication
         public const int WOCKETS_CONFIGURATION_PANEL_BUTTON_COUNT = 6;
         public const int PLOTTER_PANEL = 5;
         public const int PLOTTER_PANEL_BUTTON_COUNT = 1;
-        public const int ANNOTATION_PROTCOLS_PANEL = 6;
-        public const int ANNOTATION_PROTOCOLS_PANEL_BUTTON_COUNT = 1;
-        public const int ANNOTATION_BUTTON_PANEL = 7;
-        public const int ANNOTATION_BUTTON_PANEL_BUTTON_COUNT = 1;
+
+
+        
 
 
         
 
         //Home Screen                
         public const int LINE_CHART_BUTTON = 0;
-        public const int BATTERY_BUTTON = 1;
-        public const int GO_GREEN_BUTTON = 2;
+        public const int ACTIVITY_BUTTON = 1;
+        public const int BATTERY_BUTTON = 2;
 
-        public const int CONNECT_BUTTON = 3;
-        public const int DISCONNECT_BUTTON = 4;
+        public const int GO_GREEN_BUTTON = 3;
 
-        public const int SETTINGS_BUTTON = 5;
-        public const int MINIMIZE_BUTTON = 6;
-        public const int RESET_BUTTON = 7;
-        public const int KERNEL_BUTTON = 8;
-        public const int ANNOTATION_BUTTON = 9;
-        public const int RECORD_BUTTON = 10;
+        public const int CONNECT_BUTTON = 4;
+        public const int KERNEL_BUTTON = 5;
+
+        public const int SETTINGS_BUTTON = 6;
+        public const int MINIMIZE_BUTTON = 7;
+        public const int RESET_BUTTON = 8;
+        
+//        public const int DISCONNECT_BUTTON = 4;
+  //      public const int RECORD_BUTTON = 10;
         //public const int STOP_KERNEL_BUTTON = 9;
 
 
@@ -58,7 +59,27 @@ namespace WocketsApplication
 
         public const int HEALTH_BUTTON = 11;
 
-      
+
+        #region ACTIVITY_PANEL
+        public const int ACTIVITY_PANEL = 8;
+        public const int ACTIVITY_PANEL_BUTTON_COUNT = 3;
+        public const int MEASURE_ACTIVITY_BUTTON = 0;
+        public const int ANNOTATE_ACTIVITY_BUTTON = 1;
+        public const int HOME_ACTIVITY_BUTTON = 2;
+        #endregion ACTIVITY_PANEL
+
+        #region ANNOTATION PROTOCOL PANEL
+        public const int ANNOTATION_PROTCOLS_PANEL = 6;
+        public const int ANNOTATION_PROTOCOLS_PANEL_BUTTON_COUNT = 1;
+        public const int HOME_ANNOTATION_PROTOCOL_BUTTON = 0;
+        #endregion ANNOTATION PROTOCOL PANEL
+
+        #region ANNOTATION BUTTON PANEL
+        public const int ANNOTATION_BUTTON_PANEL = 7;
+        public const int ANNOTATION_BUTTON_PANEL_BUTTON_COUNT = 1;
+        public const int HOME_ANNOTATION_BUTTON_BUTTON = 0;
+        public const int FINISH_ANNOTATION_BUTTON_BUTTON = 1;
+        #endregion ANNOTATION BUTTON PANEL
 
         //Settings Screen
        

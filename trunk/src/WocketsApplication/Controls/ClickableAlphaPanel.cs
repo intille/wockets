@@ -25,6 +25,7 @@ namespace WocketsApplication.Controls
         public AlphaPictureBox[] _UnpressedButtonControls;
         public ButtonType[] _ButtonType;
         public AlphaLabel[] _ButtonText;
+        public int[] _ButtonSize;
 
 
         public ClickableAlphaPanel()
@@ -37,6 +38,7 @@ namespace WocketsApplication.Controls
             this._ButtonPressed = new bool[NumButtons];
             this._ButtonType = new ButtonType[NumButtons];
             this._ButtonText = new AlphaLabel[NumButtons];
+            this._ButtonSize = new int[NumButtons];
 
         }
 
