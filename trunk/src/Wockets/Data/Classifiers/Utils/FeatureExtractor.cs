@@ -80,6 +80,7 @@ namespace Wockets.Data.Classifiers.Utils
             }
         }
 
+#if (PocketPC)
         private static MemoryMappedFileStream[] sdata = null;
         private static MemoryMappedFileStream[] shead = null;
         private static int sdataSize = 0;
@@ -87,6 +88,7 @@ namespace Wockets.Data.Classifiers.Utils
         private static byte[] timestamp = new byte[sizeof(double)];
         private static byte[] acc = new byte[sizeof(short)];
         private static int[] decoderTails;
+
         public static void Initialize(int sensorCount,int samplingRate,ClassifierConfiguration configuration, ActivityList activities)
         {
             if (!_Initialized)
@@ -234,7 +236,7 @@ namespace Wockets.Data.Classifiers.Utils
             }
         }
 
-
+#endif
         public static void Initialize(WocketsController wocketsController, ClassifierConfiguration configuration, ActivityList activities)
         {
             if (_Initialized)
@@ -357,7 +359,7 @@ namespace Wockets.Data.Classifiers.Utils
             }
         }
 
-
+#if (PocketPC)
         public static double StoreWocketsWindow()
         {
             double unixtimestamp = 0.0;
@@ -413,8 +415,8 @@ namespace Wockets.Data.Classifiers.Utils
             return unixtimestamp;
 
         }
-
-        /*
+#else
+       
         public static double StoreWocketsWindow()
         {
             double unixtimestamp = 0.0;
@@ -461,7 +463,7 @@ namespace Wockets.Data.Classifiers.Utils
             return unixtimestamp;
 
         }
-        */
+#endif        
         public static bool GenerateFeatureVector(double lastTimeStamp)
         {
 

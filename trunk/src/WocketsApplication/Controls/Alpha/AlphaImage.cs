@@ -151,7 +151,7 @@ namespace WocketsApplication.Controls.Alpha
             {
                 // Creates buffer on demand
                 if (_buffer == null)
-                    _buffer = new Bitmap((int)imgInfo.Width, (int)imgInfo.Height, PixelFormat.Format32bppRgb);
+                    _buffer = new Bitmap((int)imgInfo.Width, (int)imgInfo.Height, PixelFormat.Format16bppRgb555);
 
                 using (Graphics gxBuffer = Graphics.FromImage(_buffer))
                 {

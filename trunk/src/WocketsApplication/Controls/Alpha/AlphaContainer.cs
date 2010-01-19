@@ -54,7 +54,7 @@ namespace WocketsApplication.Controls.Alpha
                 _backBuffer.Dispose();
 
             // The bitmap needs to be created with the 32bpp pixel format for the IImage to do the right thing.
-            _backBuffer = new Bitmap(_control.ClientSize.Width, _control.ClientSize.Height, PixelFormat.Format32bppRgb);
+            _backBuffer = new Bitmap(_control.ClientSize.Width, _control.ClientSize.Height, PixelFormat.Format16bppRgb555);
         }
 
 
