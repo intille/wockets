@@ -65,6 +65,13 @@ namespace Wockets.Receivers
             }
         }
 
+        public override int CompareTo(object receiver)
+        {
+            if (receiver is RFCOMMReceiver)
+                return this._Address.CompareTo(((RFCOMMReceiver)receiver)._Address);
+            else
+                return base.CompareTo(receiver);
+        }
 
         public RFCOMMReceiver()
             : base(BUFFER_SIZE)

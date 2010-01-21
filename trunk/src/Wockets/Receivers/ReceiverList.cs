@@ -25,6 +25,16 @@ namespace Wockets.Receivers
             return xml;
         }
 
+        public void SortByAddress()
+        {
+            this.Sort();
+            int index=0;
+            for (int i = 0; (i < this.Count); i++)
+            {
+                this[i]._ID = index++;
+            }
+        }
+
         public void FromXML(string xml)
         {
             XmlDocument dom = new XmlDocument();
