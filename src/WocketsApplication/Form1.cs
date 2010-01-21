@@ -91,7 +91,7 @@ namespace WocketsApplication
                 }
                 else
                 {
-
+                    wocketsList._Location = 0;
                     wocketsList.Controls.Clear();                   
                     RegistryKey rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_DISCOVERED_SENSORS_PATH); 
 
@@ -699,7 +699,7 @@ namespace WocketsApplication
             this.panels[ControlID.CLASSIFICATION_PANEL].Controls.Add(this.bestGuessLabel);
             doneClassifying = new Button();
             doneClassifying.Size = new Size(300, 80);
-            doneClassifying.Text = "Done Measuring";
+            doneClassifying.Text = "Stop Measuring";
             doneClassifying.Font = new Font(FontFamily.GenericSerif, 12.0f, FontStyle.Bold);
             doneClassifying.Enabled = true;
             doneClassifying.Visible = true;
@@ -910,12 +910,17 @@ namespace WocketsApplication
                     for (int j = 0; j < activityList.Length; j++)
                         this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Controls.Remove(activityList[j]);
                 }
+                foreach (Label l in classifiedLabels.Values)
+                    this.panels[ControlID.CLASSIFICATION_PANEL].Controls.Remove(l);  
+
                 activityButtons.Clear();
                 this.panels[ControlID.HOME_PANEL].Visible = true;
                 this.panels[ControlID.CLASSIFICATION_PANEL].Visible = false;
                 this.currentPanel = ControlID.HOME_PANEL;
                 //if (this.saveFeatures.Checked)
                 CleanupML();
+                //remove all existing labels
+                
                 
             }
         }
@@ -924,8 +929,8 @@ namespace WocketsApplication
 
 
 
-        delegate void UpdateClassificationCallback(string activity,int color);
-        public void UpdateClassification(string activity,int color)
+        delegate void UpdateClassificationCallback(string activity,double intensity);
+        public void UpdateClassification(string activity,double color)
         {
             if (!disposed)
             {
@@ -938,15 +943,16 @@ namespace WocketsApplication
                     this.Invoke(d, new object[] {activity,color });
                 }
                 else
-                {                    
-                    ((Label)this.classifiedLabels[activity]).ForeColor = Color.FromArgb(250*color, 237*color, 221*color);                  
+                {
+                    ((Label)this.classifiedLabels[activity]).ForeColor = Color.FromArgb((int)(250 * color), (int)(237 * color), (int)(221 * color));
+                    ((Label)this.classifiedLabels[activity]).Invalidate();                  
                 }
             }
 
         }
 
         int[] labelCounters=null;
-        Classifier classifier = null;
+        J48 classifier = null;
         FastVector fvWekaAttributes;
         Instances instances=null;
         string[] activityLabels=null;
@@ -971,7 +977,7 @@ namespace WocketsApplication
                     labelCounters[currentIndex] = (int)labelCounters[currentIndex] + 1;
                     classificationCounter++;
 
-                    if (classificationCounter == 5)
+                    if (classificationCounter >= this.configuration._SmoothWindows)
                     {
                       
                         int mostCount = 0;
@@ -984,9 +990,9 @@ namespace WocketsApplication
                             //indicate = Color.FromArgb(level, level, level);
                             //this.ActGUIlabels[j].ForeColor = indicate;
                             //this.ActGUIlabels[j].Invalidate();
-                            double intensity=(1-(labelCounters[j] / classificationCounter));
+                            double intensity = (1.0-((double)labelCounters[j] /(double) this.configuration._SmoothWindows));
                             //((Label)this.classifiedLabels[activityLabels[j]]).ForeColor = Color.FromArgb((int) (250 *intensity) , (int)(237 * intensity), (int)(221 * intensity));
-                            UpdateClassification(activityLabels[j], (int) intensity);
+                            UpdateClassification(activityLabels[j], intensity);
                             if (labelCounters[j] > mostCount)
                             {
                                 mostActivity = activityLabels[j];
@@ -1030,6 +1036,8 @@ namespace WocketsApplication
            // this.annotatedSession = new Session();
            // this.annotatedSession.FromXML(Constants.PATH + "ActivityProtocols\\" + this.aProtocols[this.selectedActivityProtocol]._FileName);
             classifier = new J48();
+            classifier.set_MinNumObj(10);
+            classifier.set_ConfidenceFactor((float)0.25);
             if (!File.Exists(modelDirectory + "\\model.xml"))
             {
                 instances = new Instances(new StreamReader(this.aModels[this.selectedModel]._FileName));
@@ -1081,6 +1089,7 @@ namespace WocketsApplication
 
             //add the labels to the interface
             int yLocation=40;
+          
             classifiedLabels = new Hashtable();
             for (int i = 0; (i < instances.classAttribute().numValues()); i++)
             {
@@ -1102,6 +1111,7 @@ namespace WocketsApplication
             this.panels[ControlID.CLASSIFICATION_PANEL].Visible = true;
             this.panels[currentPanel].Visible = false;
             this.currentPanel = ControlID.CLASSIFICATION_PANEL;
+            classificationCounter = 0;
             classificationThread = new Thread(new ThreadStart(ClassificationThread));
             classificationThread.Start();
 
@@ -1778,6 +1788,8 @@ namespace WocketsApplication
                     wocketsList.MoveUp();
                 else if (name == ControlID.WOCKETS_RELOAD_BUTTON)
                 {
+                    wocketsList._Location = 0;
+                    wocketsList.Controls.Clear();     
                     wocketsList._Status = "Searching for Wockets...";
                     wocketsList.Refresh();
                     if (Core._KernelGuid != null)
@@ -1857,11 +1869,17 @@ namespace WocketsApplication
                             if (Core._KernelStarted)
                             {
 
+
+                         
+
+                                
+                                Core.Disconnect(Core._KernelGuid);
                                 Core._Connected = false;
                                 Core._Registered = false;
-                                selectedWockets.Clear();
+                                selectedWockets.Clear();                              
                                 Core.Terminate();
 
+                                plotter = null;
                                 this.selectedActivityProtocol = -1;
                                 this.annotatedSession = null;
                                 this.activityStatus = ActivityStatus.None;
@@ -1878,6 +1896,15 @@ namespace WocketsApplication
                                 this.panels[currentPanel]._PressedButtonControls[ControlID.KERNEL_BUTTON].Visible = false;
                                 this.panels[currentPanel]._ButtonText[ControlID.KERNEL_BUTTON].Text = "Start Kernel";
                                 this.panels[currentPanel]._ButtonPressed[ControlID.KERNEL_BUTTON] = false;
+
+                                this.panels[currentPanel]._PressedButtonControls[ControlID.CONNECT_BUTTON].Enabled = false;
+                                this.panels[currentPanel]._UnpressedButtonControls[ControlID.CONNECT_BUTTON].Size = new Size(128, 128);
+                                this.panels[currentPanel]._UnpressedButtonControls[ControlID.CONNECT_BUTTON].Visible = true;
+                                this.panels[currentPanel]._PressedButtonControls[ControlID.CONNECT_BUTTON].Visible = false;
+                                this.panels[currentPanel]._ButtonText[ControlID.CONNECT_BUTTON].Text = "Connect";
+                                this.panels[currentPanel]._ButtonPressed[ControlID.CONNECT_BUTTON] = false;
+                                this.panels[currentPanel]._UnpressedButtonControls[ControlID.CONNECT_BUTTON].Enabled = true;
+
                             }
                             this.panels[currentPanel]._UnpressedButtonControls[ControlID.KERNEL_BUTTON].Enabled = true;
                             statusLabel.Text = "Kernel Stopped";
@@ -2230,7 +2257,8 @@ namespace WocketsApplication
                             structureTW.WriteLine(arffSample);
                             structureFileExamples++;
                         }
-
+                        trainingExamples++;
+                        UpdateExamples();
                         if (prev_activity != current_activity)
                             trainingExamples = 0;
                     }

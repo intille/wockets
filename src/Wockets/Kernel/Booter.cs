@@ -170,6 +170,7 @@ namespace Wockets.Kernel
                                 }
                             }
 
+                            lwcontroller._Receivers.SortByAddress();
                             if (lwcontroller._Sensors.Count > 0)
                             {
                                 registryLock.WaitOne();

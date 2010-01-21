@@ -262,6 +262,85 @@ namespace MITesAnalysisApplication
             }
         }
 
+        static void GenerateCrossValidation10fold()
+        {
+            string[] activities = new string[11] { "sitting", "lying", "stand", "2mph", "3mph_0", "3mph_9", "jog", "25_watt", "50_watt", "20_rpm", "50_rpm" };
+            double[] mets = new double[11] {1.0,1.0,1.2,2.5,3.0,5.0,9.0,2.5,4.5,2.0,4.0};
+            Hashtable metvals = new Hashtable();
+           
+            string storage = @"C:\Users\albinali\Desktop";
+            int numFolds = 10;
+            TextWriter tw = new StreamWriter(storage + "\\results.csv");
+            Instances randomData = new Instances(new StreamReader(storage + "\\FilteredUnbalancedData.arff"));
+            randomData.ClassIndex = randomData.numAttributes() - 1;
+            for (int i = 0; (i < randomData.classAttribute().numValues()); i++)
+                  for (int j = 0; (j < activities.Length); j++)
+                      if (randomData.classAttribute().value_Renamed(i).Contains(activities[j]))
+                      {
+                          metvals.Add(randomData.classAttribute().value_Renamed(i), mets[j]);
+                          break;
+                      }
+                
+            for (int i = 1; (i <= numFolds); i++)
+            {
+                Console.WriteLine("Working on fold " + i);
+                RemoveFolds trainingFoldsFilter = new RemoveFolds();
+                trainingFoldsFilter.set_NumFolds(numFolds);
+                trainingFoldsFilter.set_InvertSelection(true);
+                trainingFoldsFilter.set_Fold(i);
+                trainingFoldsFilter.inputFormat(randomData);
+                Instances training = Filter.useFilter(randomData, trainingFoldsFilter);
+                training.ClassIndex = training.numAttributes() - 1;
+
+                weka.filters.supervised.instance.Resample resampler = new weka.filters.supervised.instance.Resample();
+                resampler.set_BiasToUniformClass(1.0); //balance the samples
+                resampler.set_RandomSeed(1);
+                resampler.set_SampleSizePercent(100.0);
+                resampler.setInputFormat(training);
+                Instances trainingOffline = Filter.useFilter(training, resampler);
+                trainingOffline.ClassIndex = trainingOffline.numAttributes() - 1;
+
+                RemoveFolds testFoldsFilter = new RemoveFolds();
+                testFoldsFilter.set_NumFolds(numFolds);
+                testFoldsFilter.set_InvertSelection(false);
+                testFoldsFilter.set_Fold(i);
+                testFoldsFilter.inputFormat(randomData);
+                Instances testOffline = Filter.useFilter(randomData, testFoldsFilter);
+
+                //Instances testOffline = Filter.useFilter(test, removeAttributeFilter);
+                testOffline.ClassIndex = testOffline.numAttributes() - 1;
+
+                //ready for training and testing
+                J48 tree = new J48(); // new instance of tree
+                tree.set_MinNumObj(10);
+                tree.set_ConfidenceFactor((float)0.25);
+                tree.buildClassifier(trainingOffline); // build classifier
+
+
+                for (int j = 0; (j < testOffline.numInstances()); j++)
+                {
+
+                    Instance newinstance = testOffline.instance(j);
+                    newinstance.Dataset = testOffline;
+                    int instanceID = (int)newinstance.value_Renamed(testOffline.numAttributes() - 2);
+
+
+                    int predicted = (int) tree.classifyInstance(newinstance);
+                    string predicted_activity = newinstance.dataset().classAttribute().value_Renamed((int)predicted);
+                    int trueActivity= (int)newinstance.classValue();
+                    string true_activity = newinstance.dataset().classAttribute().value_Renamed((int)trueActivity);
+
+                    double trueMet = (double)metvals[true_activity];
+                    double predictedMet = (double)metvals[predicted_activity];
+                    tw.WriteLine(trueActivity + "," + true_activity + "," + trueMet + "," + predicted + "," + predicted_activity + "," + predictedMet);
+
+
+                }
+
+            }
+
+            tw.Close();
+        }
 
         static void GenerateCrossValidationDecisionTrees()
         {
@@ -793,7 +872,8 @@ namespace MITesAnalysisApplication
 
         static void Main(string[] args)
         {
-            GenerateArff();
+            GenerateCrossValidation10fold();
+           // GenerateArff();
            // GenerateInterRateReliability();
 
             //GenerateCrossValidationDecisionTrees();

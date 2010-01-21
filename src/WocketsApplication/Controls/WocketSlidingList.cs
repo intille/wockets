@@ -19,6 +19,18 @@ namespace WocketsApplication.Controls
             //this.MouseUp += new MouseEventHandler(WocketSlidingList_MouseUp);
         }
 
+        public int _Location
+        {
+            get
+            {
+                return this.location;
+            }
+
+            set
+            {
+                this.location = value;
+            }
+        }
         public void MoveUp()
         {
             if (location != (this.Controls.Count-4))

@@ -1,4 +1,4 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -204,8 +204,14 @@
       <Link>Controls\RoundGauge.cs</Link>
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Controls\Utils\GUIHelper.cs" />
-    <Compile Include="Controls\Utils\Keyboard.cs" />
+    <Compile Include="..\..\src\WocketsApplication\Controls\Utils\GUIHelper.cs" >
+    <Link>Controls\Utils\GUIHelper.cs</Link>
+
+    </Compile>
+    <Compile Include="..\..\src\WocketsApplication\Controls\Utils\Keyboard.cs" >
+    <Link>Controls\Utils\Keyboard.cs</Link>
+
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\src\WocketsApplication\Properties\Resources\CosmosRed.jpg">
