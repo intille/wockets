@@ -15,16 +15,18 @@ using Wockets.Data.Commands;
 using Wockets.Data.Accelerometers;
 
 using Wockets.Data.Annotation;
-using Wockets.Data.Classifiers.Utils;
+
 using Wockets.Exceptions;
+
+using Wockets.Applications.Games.Escape;
 using WocketsWeka;
 using weka.classifiers;
-using Wockets.Applications.Games.Escape;
 using weka;
 using weka.core;
 using weka.classifiers.trees;
 using Wockets.Data.Classifiers;
 using Wockets.Data.Classifiers.Trees;
+using Wockets.Data.Classifiers.Utils;
 
 namespace Wockets
 {

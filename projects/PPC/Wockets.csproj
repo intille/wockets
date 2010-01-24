@@ -1,4 +1,4 @@
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -467,9 +467,10 @@
     <Compile Include="..\..\src\Wockets\Utils\ProcessCE.cs">
       <Link>Utils\ProcessCE.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Utils\Platform.cs" >
+    <Compile Include="..\..\src\Wockets\Utils\Platform.cs">
       <Link>Utils\Platform.cs</Link>
     </Compile>
+    <Compile Include="Utils\feedback\Sound.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="WocketsWeka.csproj">

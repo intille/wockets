@@ -9,6 +9,7 @@ using Wockets.Utils.network;
 using Wockets.Kernel.Types;
 using Wockets.IPC;
 using Wockets.Data.Commands;
+using Wockets.Sensors.Accelerometers;
 using Microsoft.Win32;
 using InTheHand.Net.Sockets;
 
@@ -171,6 +172,9 @@ namespace Wockets.Kernel
                             }
 
                             lwcontroller._Receivers.SortByAddress();
+                            for (int i = 0; (i < lwcontroller._Sensors.Count); i++)                            
+                                ((Wocket)lwcontroller._Sensors[i])._Receiver = lwcontroller._Receivers[i];                            
+
                             if (lwcontroller._Sensors.Count > 0)
                             {
                                 registryLock.WaitOne();

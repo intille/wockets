@@ -239,7 +239,7 @@ namespace Wockets.Data.Classifiers.Utils
 #endif
         public static void Initialize(WocketsController wocketsController, ClassifierConfiguration configuration, ActivityList activities)
         {
-            if (_Initialized)
+            if (!_Initialized)
             {
                 FeatureExtractor.configuration = configuration;
                 //window counters and delimiters

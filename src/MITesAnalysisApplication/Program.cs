@@ -270,7 +270,7 @@ namespace MITesAnalysisApplication
            
             string storage = @"C:\Users\albinali\Desktop";
             int numFolds = 10;
-            TextWriter tw = new StreamWriter(storage + "\\results.csv");
+            TextWriter tw = new StreamWriter(storage + "\\results3.csv");
             Instances randomData = new Instances(new StreamReader(storage + "\\FilteredUnbalancedData.arff"));
             randomData.ClassIndex = randomData.numAttributes() - 1;
             for (int i = 0; (i < randomData.classAttribute().numValues()); i++)
@@ -291,15 +291,17 @@ namespace MITesAnalysisApplication
                 trainingFoldsFilter.inputFormat(randomData);
                 Instances training = Filter.useFilter(randomData, trainingFoldsFilter);
                 training.ClassIndex = training.numAttributes() - 1;
-
-                weka.filters.supervised.instance.Resample resampler = new weka.filters.supervised.instance.Resample();
+                Instances trainingOffline = training;
+               
+              /*  weka.filters.supervised.instance.Resample resampler = new weka.filters.supervised.instance.Resample();
                 resampler.set_BiasToUniformClass(1.0); //balance the samples
                 resampler.set_RandomSeed(1);
                 resampler.set_SampleSizePercent(100.0);
                 resampler.setInputFormat(training);
                 Instances trainingOffline = Filter.useFilter(training, resampler);
                 trainingOffline.ClassIndex = trainingOffline.numAttributes() - 1;
-
+                */
+                
                 RemoveFolds testFoldsFilter = new RemoveFolds();
                 testFoldsFilter.set_NumFolds(numFolds);
                 testFoldsFilter.set_InvertSelection(false);
@@ -312,7 +314,7 @@ namespace MITesAnalysisApplication
 
                 //ready for training and testing
                 J48 tree = new J48(); // new instance of tree
-                tree.set_MinNumObj(10);
+                tree.set_MinNumObj(2);
                 tree.set_ConfidenceFactor((float)0.25);
                 tree.buildClassifier(trainingOffline); // build classifier
 
@@ -572,7 +574,7 @@ namespace MITesAnalysisApplication
         }
 
 
-        static void GenerateArff()
+        static void GenerateArff(string storage)
         {
             Classifier classifier;
             FastVector fvWekaAttributes;
@@ -581,7 +583,7 @@ namespace MITesAnalysisApplication
             Hashtable labelIndex;
             int[] labelCounters;
 
-            string storage = @"C:\Users\albinali\Desktop\wockets-Groden-12-11\InClassAfternoon130-220\naive\Session12-11-13-42-51\wockets\";
+            //string storage = @"C:\Users\albinali\Desktop\DataSessions\Session1-11-10-24-34\wockets\";
             WocketsController wc = new WocketsController("", "", "");
             wc.FromXML(storage + "SensorData.xml");
             int[] lostSeconds = new int[wc._Sensors.Count];
@@ -613,6 +615,7 @@ namespace MITesAnalysisApplication
 
             FeatureExtractor.Initialize(wc, classifierConfiguration, annotatedSession.OverlappingActivityLists[0]);
 
+            TextWriter twt = new StreamWriter(storage + "\\time.csv");
             TextWriter tw = new StreamWriter(storage + "\\output.arff");
             tw.WriteLine("@RELATION wockets");
             tw.WriteLine(FeatureExtractor.GetArffHeader());
@@ -700,8 +703,13 @@ namespace MITesAnalysisApplication
 
                             if (FeatureExtractor.GenerateFeatureVector(lastTimeStamp))
                             {
-                                string arffSample = FeatureExtractor.toString() ;
-                                tw.WriteLine(arffSample + "," + realtime_activity);
+                                DateTime dt = new DateTime();
+                                WocketsTimer.GetDateTime((long)lastTimeStamp, out dt);
+
+                                    string arffSample = FeatureExtractor.toString();
+                                    tw.WriteLine(arffSample + "," + realtime_activity);                                    
+                                    twt.WriteLine(dt.Day+","+dt.Hour+","+dt.Minute+","+dt.Second);
+                                //}
                             }
                         }
                     }
@@ -721,7 +729,7 @@ namespace MITesAnalysisApplication
             }
 
 
-
+            twt.Close();
             tw.Close();
 
         }
@@ -870,10 +878,236 @@ namespace MITesAnalysisApplication
 
         }
 
+        static void GenerateDT()
+        {
+            Instances training = new Instances(new StreamReader(@"C:\Users\albinali\Desktop\Session1-23-12-3-3\all-combined-orienations.arff"));
+            training.ClassIndex = training.numAttributes() - 1;
+
+
+            //ready for training and testing
+            J48 tree = new J48(); // new instance of tree
+            tree.set_MinNumObj(10);
+            tree.set_ConfidenceFactor((float)0.25);
+            tree.buildClassifier(training); // build classifier
+            TextWriter tw = new StreamWriter(@"C:\Users\albinali\Desktop\Session1-23-12-3-3\all-balanced.xml");
+            tree.toXML(tw);
+            tw.Close();
+
+        }
+
         static void Main(string[] args)
         {
-            GenerateCrossValidation10fold();
-           // GenerateArff();
+            GenerateDT();
+            //GenerateCrossValidation10fold();
+           // string root = @"C:\Users\albinali\Desktop\DataSessions\Session1-20-09-17-59\";
+           // GenerateArff(root);
+    
+ 
+/*            string trainingRoot = @"C:\Users\albinali\Desktop\DataSessions\training\";
+            string[] trainingdirectories = Directory.GetDirectories(trainingRoot, "*");
+            Instances data=null;
+            for (int i = 0; (i < trainingdirectories.Length); i++)
+            {
+                string[] trainingsubdirectories = Directory.GetDirectories(trainingdirectories[i], "*");
+                for (int m = 0; (m < trainingsubdirectories.Length); m++)
+                {
+                    string[] arffs = Directory.GetFiles(trainingsubdirectories[m], "*.arff");
+                    for (int j = 0; (j < arffs.Length); j++)
+                    {
+                        if (data == null)
+                            data = new Instances(new StreamReader(arffs[j]));
+                        else
+                        {
+                            Instances addeddata = new Instances(new StreamReader(arffs[j]));
+                            for (int k = 0; (k < addeddata.numInstances()); k++)
+                                data.add(addeddata.instance(k));
+                        }
+                    }
+                }
+            }
+
+            data.ClassIndex = data.numAttributes() - 1;
+             
+            weka.filters.supervised.instance.Resample resampler = new weka.filters.supervised.instance.Resample();
+            resampler.set_BiasToUniformClass(1.0); //balance the samples
+            resampler.set_RandomSeed(1);
+            resampler.set_SampleSizePercent(100.0);
+            resampler.setInputFormat(data);
+            Instances trainingOffline = Filter.useFilter(data, resampler);
+
+
+           
+
+            //ready for training and testing
+            J48 tree = new J48(); // new instance of tree
+            tree.set_MinNumObj(10);
+            tree.set_ConfidenceFactor((float)0.25);
+            tree.buildClassifier(trainingOffline); // build classifier
+
+
+            Instances dataFahd = new Instances(new StreamReader(@"C:\Users\albinali\Desktop\DataSessions\training\FahdSet\output.arff"));
+            dataFahd.ClassIndex = data.numAttributes() - 1;
+            J48 treeFahd = new J48();
+            treeFahd.set_MinNumObj(10);
+            treeFahd.set_ConfidenceFactor((float)0.25);
+            treeFahd.buildClassifier(dataFahd); // build classifier
+
+            Instances dataJason = new Instances(new StreamReader(@"C:\Users\albinali\Desktop\DataSessions\training\JasonSet\output.arff"));
+            dataJason.ClassIndex = data.numAttributes() - 1;
+            J48 treeJason = new J48();
+            treeJason.set_MinNumObj(10);
+            treeJason.set_ConfidenceFactor((float)0.25);
+            treeJason.buildClassifier(dataJason); // build classifier
+
+            string root = @"C:\Users\albinali\Desktop\DataSessions";
+            string[] directories = Directory.GetDirectories(root, "Session*");
+
+
+            int[] lastpredicted = new int[20];
+            int pindex = 0;
+
+            int[] mostIndex = new int[10];
+
+            int[] flastpredicted = new int[20];
+            int fpindex = 0;
+            int[] fmostIndex = new int[10];
+
+
+            int[] jlastpredicted = new int[20];
+            int jpindex = 0;
+            int[] jmostIndex = new int[10];
+
+            for (int i = 0; (i < 20); i++)
+            {
+                lastpredicted[i] = -1;
+                flastpredicted[i] = -1;
+                jlastpredicted[i] = -1;
+            }
+
+            TextWriter tw = new StreamWriter(root + "\\heatmap.csv");
+            string prevtime = "";
+            for (int i = 0; (i < directories.Length); i++)
+            {
+                TextWriter fahdtw = new StreamWriter(directories[i] + "\\heatmapFahd.csv");
+                TextWriter jasontw = new StreamWriter(directories[i] + "\\heatmapJason.csv");
+
+                Console.WriteLine("Processing" + directories[i]);
+                TextReader tr = new StreamReader(directories[i] + "\\time.csv");
+                Instances test = new Instances(new StreamReader(directories[i]+"\\output.arff"));
+                test.ClassIndex = test.numAttributes() - 1;
+
+                for (int j = 0; (j < test.numInstances()); j++)
+                {
+                    Instance newinstance = test.instance(j);
+                    newinstance.Dataset = test;
+
+                    string time = tr.ReadLine();
+                    int predicted = (int)tree.classifyInstance(newinstance);
+                    string predicted_activity = newinstance.dataset().classAttribute().value_Renamed((int)predicted);
+                    lastpredicted[pindex++] = predicted;
+                    pindex = pindex % 20;
+                    int mostPredicted = -1;
+                    int mostPredictedCount = 0;
+                    for (int k = 0; (k < 20); k++)
+                    {
+                        if (lastpredicted[k] != -1)
+                        {
+                            mostIndex[lastpredicted[k]] = mostIndex[lastpredicted[k]] + 1;
+                            if (mostIndex[lastpredicted[k]] > mostPredictedCount)
+                            {
+                                mostPredicted = lastpredicted[k];
+                                mostPredictedCount = mostIndex[lastpredicted[k]];
+                            }
+                        }
+                    }
+
+                    if (mostPredicted == -1)
+                        mostPredicted = predicted;
+
+                    string most_predicted_activity = newinstance.dataset().classAttribute().value_Renamed((int)mostPredicted);
+
+                    if (prevtime != time)
+                    {
+                        tw.WriteLine(time + "," + most_predicted_activity);
+                        //prevtime = time;
+                    }
+
+
+
+
+                    //Fahd
+                    
+                    predicted = (int)treeFahd.classifyInstance(newinstance);
+                    predicted_activity = newinstance.dataset().classAttribute().value_Renamed((int)predicted);
+                    flastpredicted[fpindex++] = predicted;
+                    fpindex = fpindex % 20;
+                    mostPredicted = -1;
+                    mostPredictedCount = 0;
+                    for (int k = 0; (k < 20); k++)
+                    {
+                        if (flastpredicted[k] != -1)
+                        {
+                            fmostIndex[flastpredicted[k]] = fmostIndex[flastpredicted[k]] + 1;
+                            if (fmostIndex[flastpredicted[k]] > mostPredictedCount)
+                            {
+                                mostPredicted = flastpredicted[k];
+                                mostPredictedCount = fmostIndex[flastpredicted[k]];
+                            }
+                        }
+                    }
+
+                    if (mostPredicted == -1)
+                        mostPredicted = predicted;
+
+                   most_predicted_activity = newinstance.dataset().classAttribute().value_Renamed((int)mostPredicted);
+
+                    if (prevtime != time)
+                        fahdtw.WriteLine(time + "," + most_predicted_activity);
+
+
+
+                    //Jason
+
+                    predicted = (int)treeJason.classifyInstance(newinstance);
+                    predicted_activity = newinstance.dataset().classAttribute().value_Renamed((int)predicted);
+                    jlastpredicted[jpindex++] = predicted;
+                    jpindex = jpindex % 20;
+                    mostPredicted = -1;
+                    mostPredictedCount = 0;
+                    for (int k = 0; (k < 20); k++)
+                    {
+                        if (jlastpredicted[k] != -1)
+                        {
+                            jmostIndex[jlastpredicted[k]] = jmostIndex[jlastpredicted[k]] + 1;
+                            if (jmostIndex[jlastpredicted[k]] > mostPredictedCount)
+                            {
+                                mostPredicted = jlastpredicted[k];
+                                mostPredictedCount = jmostIndex[jlastpredicted[k]];
+                            }
+                        }
+                    }
+
+                    if (mostPredicted == -1)
+                        mostPredicted = predicted;
+
+                    most_predicted_activity = newinstance.dataset().classAttribute().value_Renamed((int)mostPredicted);
+
+                    if (prevtime != time)
+                    {
+                        jasontw.WriteLine(time + "," + most_predicted_activity);
+                        prevtime = time;
+                    }
+                    
+
+                }
+         
+                fahdtw.Close();
+                jasontw.Close();
+            }
+            tw.Flush();
+            tw.Close();
+  */       
+           
            // GenerateInterRateReliability();
 
             //GenerateCrossValidationDecisionTrees();
