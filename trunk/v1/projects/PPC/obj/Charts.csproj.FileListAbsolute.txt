@@ -1,5 +1,0 @@
-C:\wockets\v1\bin\PPC\Charts.dll
-C:\wockets\v1\bin\PPC\Charts.pdb
-C:\wockets\v1\projects\PPC\obj\Debug\ResolveAssemblyReference.cache
-C:\wockets\v1\projects\PPC\obj\Debug\Charts.dll
-C:\wockets\v1\projects\PPC\obj\Debug\Charts.pdb

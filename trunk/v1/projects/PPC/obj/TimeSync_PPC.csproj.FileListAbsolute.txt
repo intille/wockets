@@ -1,8 +1,0 @@
-C:\wockets\v1\bin\PPC\TimeSync_PPC.exe
-C:\wockets\v1\bin\PPC\TimeSync_PPC.pdb
-C:\wockets\v1\projects\PPC\obj\Debug\ResolveAssemblyReference.cache
-C:\wockets\v1\projects\PPC\obj\Debug\TimeSync_Phone.Form1.resources
-C:\wockets\v1\projects\PPC\obj\Debug\TimeSync_PPC.Resources.resources
-C:\wockets\v1\projects\PPC\obj\Debug\TimeSync_PPC.csproj.GenerateResource.Cache
-C:\wockets\v1\projects\PPC\obj\Debug\TimeSync_PPC.exe
-C:\wockets\v1\projects\PPC\obj\Debug\TimeSync_PPC.pdb

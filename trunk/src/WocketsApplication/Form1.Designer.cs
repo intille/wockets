@@ -37,10 +37,11 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.AutoScroll = true;
+            this.ClientSize = new System.Drawing.Size(480, 640);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-            this.ClientSize = new System.Drawing.Size(480, 640);   
+            this.Location = new System.Drawing.Point(0, 0);
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = "Wockets App";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.ResumeLayout(false);
 

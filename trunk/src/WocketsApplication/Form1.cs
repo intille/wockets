@@ -32,11 +32,14 @@ using weka;
 using weka.core;
 using weka.classifiers.trees;
 using Wockets.Data.Classifiers;
+using Wockets.Utils.feedback;
 
 
 
 using WocketsApplication.Controls.Utils;
-
+#if (PocketPC)
+using Microsoft.ApplicationBlocks.MemoryMappedFile;
+#endif
 namespace WocketsApplication
 {
     public enum ActivityStatus
@@ -45,6 +48,7 @@ namespace WocketsApplication
         Annotating,
         None
     }
+
     public partial class Form1 : Form
     {
 
@@ -69,7 +73,9 @@ namespace WocketsApplication
        // private ClickableAlphaPanel[] buttonPanels = new ClickableAlphaPanel[9];
         //private Bitmap[] _buttonBackBuffers = new Bitmap[9];
 
- 
+         private Sound disconnectedAlert =null;
+         private Sound connectedAlert = null;
+
 
         private Thread kListenerThread;
 
@@ -123,6 +129,53 @@ namespace WocketsApplication
                 }
             }
 
+        }
+        private Thread soundThread = null;
+
+        private void SoundThread()
+        {
+
+            MemoryMappedFileStream[] shead = new MemoryMappedFileStream[selectedWockets.Count];
+            for (int i = 0; (i < selectedWockets.Count); i++)
+            {                
+                shead[i] = new MemoryMappedFileStream("\\Temp\\whead" + i + ".dat", "whead" + i, sizeof(int), MemoryProtection.PageReadWrite);
+                shead[i].MapViewToProcessMemory(0, sizeof(int));
+            }
+            byte[] head = new byte[4];
+            int[] prevHeads = new int[selectedWockets.Count];
+            bool[] disconnected=new bool[selectedWockets.Count];
+            for (int i = 0; (i < selectedWockets.Count); i++)
+                disconnected[i]=false;
+            while (true)
+            {
+                if (Core._Connected)
+                {                    
+                    for (int i = 0; (i < selectedWockets.Count); i++)
+                    {
+                        shead[i].Read(head, 0, 4);
+                        int currentHead = BitConverter.ToInt32(head, 0);
+
+                        if ((disconnected[i]) && (currentHead != prevHeads[i]))
+                        {
+                            disconnected[i] = false;
+                            connectedAlert.Play();
+                        }
+                        else if (currentHead == prevHeads[i])
+                            disconnected[i] = true;
+                        
+                        prevHeads[i] = currentHead;
+                        shead[i].Seek(0, System.IO.SeekOrigin.Begin);
+                    }
+
+                    for (int i=0;(i<selectedWockets.Count);i++)
+                        if (disconnected[i])
+                        {
+                            disconnectedAlert.Play();
+                            Thread.Sleep(200);
+                        }
+                }
+                Thread.Sleep(5000);
+            }
         }
 
         //private bool wocketsConnected = false;
@@ -260,6 +313,8 @@ namespace WocketsApplication
                                InitializeML();
                        }
                    }
+                   soundThread = new Thread(new ThreadStart(SoundThread));
+                   soundThread.Start();
             
                 }
                 else if (response == ApplicationResponse.DISCONNECT_SUCCESS.ToString())
@@ -271,6 +326,12 @@ namespace WocketsApplication
 
                     //if you disconnect stop and cleanup the ML and save any existing arff file
                     CleanupML();
+
+                    if (soundThread != null)
+                    {
+                        soundThread.Abort();
+                        soundThread = null;
+                    }
              
                  
                 }
@@ -477,7 +538,10 @@ namespace WocketsApplication
             Constants.PATH = System.IO.Path.GetDirectoryName(
                System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase)+"\\NeededFiles\\";
 
-
+                   
+            disconnectedAlert = new Sound(Constants.PATH+ "sounds\\Disconnected.wav");
+            connectedAlert = new Sound(Constants.PATH + "sounds\\Connected.wav");
+         
             this.AutoScroll = false;
             this.numberButtons[ControlID.HOME_PANEL] = ControlID.HOME_PANEL_BUTTON_COUNT;
             this.numberButtons[ControlID.ABOUT_PANEL] = ControlID.ABOUT_PANEL_BUTTON_COUNT;
@@ -662,22 +726,23 @@ namespace WocketsApplication
             this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Controls.Add(this.chooseActivityLabel);
 
             this.examplesLabel = new Label();
-            this.examplesLabel.Size = new Size(100, 40);
-            this.examplesLabel.Text = "O examples";
+            this.examplesLabel.Size = new Size(100, 30);
+            this.examplesLabel.Text = "00:00";
             this.examplesLabel.ForeColor = Color.Black;
             this.examplesLabel.Font = new Font(FontFamily.GenericSerif, 10.0f, FontStyle.Bold);
             this.examplesLabel.Visible = true;
-            this.examplesLabel.Location = new Point(120, this.Height - 100);
+            this.examplesLabel.Location = new Point(130, this.Height - 100);
             this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Controls.Add(this.examplesLabel);
 
             doneAnnotation = new Button();
+            MakeButtonMultiline(doneAnnotation);
             doneAnnotation.Size = new Size(200, 80);
-            doneAnnotation.Text = "Done Annotating";
+            doneAnnotation.Text = "Stop\nLearning";           
             doneAnnotation.Font = new Font(FontFamily.GenericSerif, 10.0f, FontStyle.Bold);
             doneAnnotation.Enabled = true;
             doneAnnotation.Visible = true;
             doneAnnotation.Click += new EventHandler(doneAnnotation_Click);
-            doneAnnotation.Location = new Point(250, this.Height - 100);
+            doneAnnotation.Location = new Point(250, this.Height - 110);
             this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Controls.Add(doneAnnotation);
             
             AddButton(ControlID.ANNOTATION_BUTTON_PANEL, ControlID.HOME_ANNOTATION_BUTTON_BUTTON, "Buttons\\HomePressed-128.png", "Buttons\\HomeUnpressed-128.png", 0, this.Height - 130, 128, null, ButtonType.Fixed);
@@ -884,15 +949,6 @@ namespace WocketsApplication
 
             this.Deactivate += new EventHandler(Form1_Deactivate);
             this.Activated += new EventHandler(Form1_Activated);
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1869,9 +1925,11 @@ namespace WocketsApplication
                             if (Core._KernelStarted)
                             {
 
-
-                         
-
+                                if (soundThread != null)
+                                {
+                                    soundThread.Abort();
+                                    soundThread = null;
+                                }
                                 
                                 Core.Disconnect(Core._KernelGuid);
                                 Core._Connected = false;
@@ -2031,6 +2089,12 @@ namespace WocketsApplication
                                     {
                                         if (Core._Connected)
                                         {
+
+                                            if (soundThread != null)
+                                            {
+                                                soundThread.Abort();
+                                                soundThread = null;
+                                            }
                                             statusLabel.Text = "Disconnecting...";
                                             Core._Connected = false;
                                             selectedWockets.Clear();
@@ -2225,17 +2289,22 @@ namespace WocketsApplication
                 }
                 else
                 {
-                    this.examplesLabel.Text = this.trainingExamples + " examples";
+                    int sec = (int) (this.trainingExamples * this.windowLength);
+                    int min = sec / 60;
+                    sec = sec % 60;
+                    this.examplesLabel.Text = min.ToString("00")+":"+sec.ToString("00");
                 }
             }
 
         }
 
         int trainingExamples = 0;
+        double windowLength = 0;
         private void MLThread()
         {
             int structureFileExamples = 0;
             string prev_activity = "";
+            windowLength = ((double)this.configuration._WindowTime * (1.0 - this.configuration._WindowOverlap))/1000.0;
             while (true)
             {
                 string current_activity = "unknown";
@@ -2258,11 +2327,11 @@ namespace WocketsApplication
                             structureFileExamples++;
                         }
                         trainingExamples++;
-                        UpdateExamples();
-                        if (prev_activity != current_activity)
-                            trainingExamples = 0;
+                        UpdateExamples();                     
                     }
 
+                    if (prev_activity != current_activity)
+                        trainingExamples = 0;
                     prev_activity = current_activity;
                 }
                 Thread.Sleep(100);
@@ -2279,6 +2348,11 @@ namespace WocketsApplication
             base.Refresh();
         }
         int m = 0;
+
+
+
+
+
         private void timeAnimation_Tick()
         {
             int prevPanelIndex = currentPanelIndex;
