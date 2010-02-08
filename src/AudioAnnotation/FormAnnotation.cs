@@ -3808,7 +3808,8 @@ namespace AudioAnnotation
                 { File.Delete(Folder_audioannotation + "AnnotationSummary.csv"); }
 
                 summary_file_csv = new StreamWriter(Folder_audioannotation + "AnnotationSummary.csv");
-
+                
+                summary_file_csv.WriteLine("Label,Time(hh:mm:ss)");
 
 
                 // ---------- Load labels to sessions 1 and 2------------------
@@ -3951,7 +3952,7 @@ namespace AudioAnnotation
                     //------------------------------------------
                     // Write the summary of results to file
                     //-------------------------------------------
-                    summary_file_csv.WriteLine("Annotated "+ category + "," + "Time(hh:mm:ss)");
+                    summary_file_csv.WriteLine("Annotated "+ category + ",");
                     summary_results = summary_results + "Annotated " + category + ":,," + "#" + ";";
 
                     int it = 0;
@@ -3983,7 +3984,7 @@ namespace AudioAnnotation
                     summary_file_csv.WriteLine("");
                     summary_results = summary_results + ";";
 
-                    summary_file_csv.WriteLine("Invalid " + category + "," + "Time(hh:mm:ss)");
+                    summary_file_csv.WriteLine("Invalid " + category + ",");
                     summary_results = summary_results + "Invalid " + category + ":,," + "#" + ";";
                     
                     it = 0;
@@ -4002,9 +4003,7 @@ namespace AudioAnnotation
                     summary_file_csv.WriteLine("Total Time Invalid " + category + "," + total_time_inv.ToString());
                     summary_file_csv.WriteLine("");
 
-                    summary_file_csv.WriteLine("*****************************************************");
-                    summary_file_csv.WriteLine("");
-
+                    
                     summary_results = summary_results + "Total Time Invalid " + category + "," + total_time_inv.ToString() + ",##;";
                     summary_results = summary_results + ";";
                     summary_results = summary_results + ",,*" + ";";
