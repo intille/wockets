@@ -1,4 +1,4 @@
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -57,6 +57,10 @@
       <SubType>Designer</SubType>
       <DependentUpon>PopUp_Message_Window.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="..\..\src\AudioAnnotation\PopUp_Result_Window.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>PopUp_Result_Window.cs</DependentUpon>
+    </EmbeddedResource>
     <Compile Include="..\..\src\AudioAnnotation\Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
@@ -78,6 +82,12 @@
       <DependentUpon>PopUp_Message_Window.cs</DependentUpon>
     </Compile>
     <Compile Include="..\..\src\AudioAnnotation\CompareFileInfoByDate.cs">
+    </Compile>
+    <Compile Include="..\..\src\AudioAnnotation\PopUp_Result_Window.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="..\..\src\AudioAnnotation\PopUp_Result_Window.Designer.cs">
+      <DependentUpon>PopUp_Result_Window.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>

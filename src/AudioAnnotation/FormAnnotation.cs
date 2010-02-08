@@ -947,7 +947,7 @@ namespace AudioAnnotation
 
         }
 
-
+        //Browse session button
         private void button_load_Click(object sender, EventArgs e)
         {
             try
@@ -3465,40 +3465,73 @@ namespace AudioAnnotation
         // It verifies that all the labels match
         // If the labels are correct, save the records to the appropiate xml format
         //----------------------------------------------------------------------------
-        private void GenerateActivityLabels()
+        private int GenerateActivityLabels(out string summary_results)
         {
+            int success = 0;
+            summary_results = "";
 
             try
             {
 
-                bool incorrect = false;
-                incorrect = CheckLabelsList();
-
-
-                if (incorrect == false)
+              
+                // Check if the labels list is incorrect,
+                // return true, if something is wrong
+                // return false, if all correct
+                if (CheckLabelsList() == false)
                 {
-                    // Load annotations
-                    if (LoadLabelsListToXml())
+                    success = 1;
+
+                    //check if labels are ok according to the Xml protocol
+                    // return true, if everything correct
+                    // return false, if an invalid value was found
+                    if (CheckLabelsListWithXml(out summary_results))
                     {
-                        label_play.Text = "The Xml annotation file has been generated.";
+                        success = 2;
+
+                        // Load annotations
+                        // return true, if the xml file was successfully generated
+                        if (LoadLabelsListToXml())
+                        {
+                            success = 3;
+                            label_play.Text = "The Xml annotation file has been generated.";
+                        }
+                        else
+                        {
+                            success = -3;
+                            label_play.Text = "There was a problem generating the Xml annotation file. Please save your session and try again.";
+                            
+                        }
                     }
                     else
-                    { label_play.Text = "There was a problem generating the Xml annotation file. Please save your session and try again."; }
-
+                    {
+                        success = -2;
+                        label_play.Text = "There are mismatches between your labels and the xml protocol. Please fix problems, save your session and try again.";   
+                    }
                 }
                 else
                 {
+                    success = -1;
                     label_play.Text = "There are label mismatches. Please check the fields highlighted in yellow. After corrections, click the 'Generate Xml' button.";
                 }
 
+                //check if this affects the repaint of cells
                 LabelsList_1.Clear();
                 LabelsList_2.Clear();
+
+                return success;
             }
             catch
             {
                 label_play.Text = "Problems generating the Xml annotation file.";
+                
+
+                return 0;
             }
+
+
         }
+
+
 
         private bool CheckLabelsList()
         {
@@ -3521,6 +3554,7 @@ namespace AudioAnnotation
                 File.Delete(DataSessionDir + "Data_Session.txt");
             }
 
+            //Create new output files
             TextWriter txw = new StreamWriter(DataSessionDir + "Data_Session.txt");
             txw.WriteLine(StartDate + ";" + EndDate + ";");
 
@@ -3532,6 +3566,7 @@ namespace AudioAnnotation
             // check that both columns labels are correct
             // If not, send the appropriate message to correct them
 
+            #region check labels open-close
             // there are two categories
             for (int c = 1; c <= 2; c++)
             {
@@ -3588,14 +3623,63 @@ namespace AudioAnnotation
                             { LabelsList_2.Add(record_string); }
 
 
+
+                            //Here possibly affecting the repaint of the cells
                             prev_cellStyle = dataGridView1.Rows[start_row].Cells[CINDEX.category_label].Style;
                             if (prev_cellStyle != null)
-                            { prev_cellStyle.BackColor = Color.White; }
-
+                            {
+                                if (c == 1)
+                                {
+                                    if (SessionPart == 1)
+                                    { prev_cellStyle.BackColor = Color.White;
+                                      prev_cellStyle.ForeColor = Color.Black; 
+                                    }
+                                    else
+                                    { prev_cellStyle.BackColor = Color.Gainsboro;
+                                      prev_cellStyle.ForeColor = Color.DimGray;
+                                    }
+                                }
+                                else if (c == 2)
+                                {
+                                    if (SessionPart == 1)
+                                    { prev_cellStyle.BackColor = Color.Gainsboro;
+                                      prev_cellStyle.ForeColor = Color.DimGray;
+                                    }
+                                    else
+                                    { prev_cellStyle.BackColor = Color.White;
+                                      prev_cellStyle.ForeColor = Color.Black; 
+                                    }
+                                }
+                            }
 
                             cur_cellStyle = dataGridView1.Rows[end_row].Cells[CINDEX.category_label].Style;
+
                             if (cur_cellStyle != null)
-                            { cur_cellStyle.BackColor = Color.White; }
+                            {
+
+                                if (c == 1)
+                                {
+                                    if (SessionPart == 1)
+                                    { cur_cellStyle.BackColor = Color.White;
+                                      cur_cellStyle.ForeColor = Color.Black;
+                                    }
+                                    else
+                                    { cur_cellStyle.BackColor = Color.Gainsboro;
+                                      cur_cellStyle.ForeColor = Color.DimGray;
+                                    }
+                                }
+                                else if (c == 2)
+                                {
+                                    if (SessionPart == 1)
+                                    { cur_cellStyle.BackColor = Color.Gainsboro;
+                                      cur_cellStyle.ForeColor = Color.DimGray;
+                                    }
+                                    else
+                                    { cur_cellStyle.BackColor = Color.White;
+                                      cur_cellStyle.ForeColor = Color.Black;
+                                    }
+                                }
+                            }
 
 
 
@@ -3615,6 +3699,7 @@ namespace AudioAnnotation
                             incorrect_records = true;
 
 
+                            // this probably affecting the repaint of cells
                             prev_cellStyle = dataGridView1.Rows[start_row].Cells[CINDEX.category_label].Style;
                             if (prev_cellStyle != null)
                             { prev_cellStyle.BackColor = Color.Yellow; }
@@ -3658,7 +3743,8 @@ namespace AudioAnnotation
 
 
 
-                    }
+                    } 
+                    // this is affecting the last row when there is not time label written
                     else if (start_row == end_row)
                     {
                         end_row = end_row + 1;
@@ -3674,6 +3760,11 @@ namespace AudioAnnotation
                 }
             }
 
+            #endregion 
+
+
+
+
             // Close the Data Session file
             txw.Flush();
             txw.Close();
@@ -3683,9 +3774,278 @@ namespace AudioAnnotation
 
         }
 
+
+
+       
+        private bool CheckLabelsListWithXml(out string summary_results)
+        {
+            TextWriter summary_file_csv = null;
+            bool Is_LabelsList_Valid = true;
+            summary_results = "";
+
+            try
+            {
+                string readline;
+
+                DateTime start_time, end_time;
+                TimeSpan ts, ts_start, ts_end, total_time, total_time_inv;
+                
+                string category, current_label;
+                
+
+
+                BindingList<string> List_Annotated = new BindingList<string>();
+                BindingList<string> List_NoAnnotated = new BindingList<string>();
+                BindingList<string> List_Invalid = new BindingList<string>();
+                BindingList<TimeSpan> List_Time = new BindingList<TimeSpan>();
+                BindingList<TimeSpan> List_Time_Inv = new BindingList<TimeSpan>();
+               
+                BindingList<string> List_Current_XML;
+
+
+                //Create the summary of results file
+                if (File.Exists(Folder_audioannotation + "AnnotationSummary.csv"))
+                { File.Delete(Folder_audioannotation + "AnnotationSummary.csv"); }
+
+                summary_file_csv = new StreamWriter(Folder_audioannotation + "AnnotationSummary.csv");
+
+
+
+                // ---------- Load labels to sessions 1 and 2------------------
+
+                int count = 0;
+                int index = 0;
+
+                for (int c = 1; c <= 2; c++)
+                {
+                    //Initialize lists
+                    List_Annotated.Clear();
+                    List_NoAnnotated.Clear();
+                    List_Invalid.Clear();
+                    List_Time.Clear();
+                    List_Time_Inv.Clear();
+
+                    total_time = TimeSpan.Zero;
+                    total_time_inv = TimeSpan.Zero;
+
+                    if (c == 1)
+                    {
+                        count = LabelsList_1.Count;
+                        List_Current_XML = list_category_1;
+                        category = "Postures";
+                    }
+                    else
+                    {
+                        count = LabelsList_2.Count;
+                        List_Current_XML = list_category_2;
+                        category = "Activities";
+                    }
+
+
+                    //Read each item from the list
+                    for (int i = 0; i < count; i++)
+                    {
+                        if (c == 1)
+                        { readline = LabelsList_1[i]; }
+                        else
+                        { readline = LabelsList_2[i]; }
+
+
+                        string[] tokens = readline.Split(';');
+
+                        if (tokens[0].CompareTo("ok") == 0)
+                        {
+                            current_label = tokens[5];
+                            
+                            //filter labels comming from blank rows
+                            if (current_label.Trim().CompareTo("") != 0)
+                            {
+                                //Check if the label is valid according to the Xml protocol list 
+                                //if not, flag the label as invalid
+                                if (List_Current_XML.Contains(current_label))
+                                {
+
+                                    //Start Time
+                                    start_time = DateTime.Parse(StartDate + " " + tokens[3]);
+                                    ts_start = (start_time - new DateTime(1970, 1, 1, 0, 0, 0));
+
+                                    //Stop Time
+                                    end_time = DateTime.Parse(EndDate + " " + tokens[4]);
+                                    ts_end = (end_time - new DateTime(1970, 1, 1, 0, 0, 0));
+
+                                    ts = ts_end.Subtract(ts_start);
+                                    total_time = total_time + ts;
+
+
+
+                                    if (!List_Annotated.Contains(current_label))
+                                    {
+                                        List_Annotated.Add(current_label);
+                                        List_Time.Add(ts);
+                                    }
+                                    else
+                                    {
+                                        index = List_Annotated.IndexOf(current_label);
+                                        ts_start = List_Time[index];
+                                        ts = ts + ts_start;
+                                        List_Time[index] = ts;
+                                    }
+                                  
+                                }
+                                // if label not found in xml protocol, flag as invalid
+                                else
+                                {
+
+                                    //Start Time
+                                    start_time = DateTime.Parse(StartDate + " " + tokens[3]);
+                                    ts_start = (start_time - new DateTime(1970, 1, 1, 0, 0, 0));
+
+                                    //Stop Time
+                                    end_time = DateTime.Parse(EndDate + " " + tokens[4]);
+                                    ts_end = (end_time - new DateTime(1970, 1, 1, 0, 0, 0));
+
+                                    ts = ts_end.Subtract(ts_start);
+
+                                    Is_LabelsList_Valid = false;
+
+                                    total_time_inv = total_time_inv + ts;
+
+                                    if (!List_Invalid.Contains(current_label))
+                                    {
+                                        List_Invalid.Add(current_label);
+                                        List_Time_Inv.Add(ts);
+                                    }
+                                    else
+                                    {
+                                        index = List_Invalid.IndexOf(current_label);
+                                        ts_start = List_Time_Inv[index];
+                                        ts = ts + ts_start;
+                                        List_Time_Inv[index] = ts;
+                                    }
+                                }
+
+                            }
+                            //else (if label == blank), do nothing
+                            
+                        }//if token ok
+
+                    }//for labels list per category
+
+
+                    //------------------------------------------
+                    //Compute the No-Annotated Labels
+                    //check for blank labels
+                    foreach(string ilabel in List_Current_XML)
+                    {
+                        if (ilabel.Trim().CompareTo("") != 0)
+                        {
+                            if (!List_Annotated.Contains(ilabel))
+                            {
+                                List_NoAnnotated.Add(ilabel);
+                            }
+                        }
+                        //else if(label == blank), do nothing
+                    }
+
+
+                    //------------------------------------------
+                    // Write the summary of results to file
+                    //-------------------------------------------
+                    summary_file_csv.WriteLine("Annotated "+ category + "," + "Time(hh:mm:ss)");
+                    summary_results = summary_results + "Annotated " + category + ":,," + "#" + ";";
+
+                    int it = 0;
+                    foreach (string clabel in List_Annotated)
+                    {
+                        ts = List_Time[it];
+
+                        // Save record to the correspondent session
+                        summary_file_csv.WriteLine(clabel + "," + ts.ToString());
+                        summary_results = summary_results + clabel + "," + ts.ToString() + ";";
+                        it++;
+                    }
+
+                    
+                    summary_file_csv.WriteLine("Total Time Annotated "+ category + "," + total_time.ToString());
+                    summary_file_csv.WriteLine("");
+
+                    summary_results = summary_results + "Total Time Annotated " + category + "," + total_time.ToString() + ",##;";
+                    summary_results = summary_results +";";
+                   
+
+                    summary_file_csv.WriteLine("No Annotated "+ category + " in Xml Protocol,");
+                    summary_results = summary_results + "No Annotated " + category + " in Xml Protocol:,,#" + ";";
+
+                    foreach (string jlabel in List_NoAnnotated)
+                    {   summary_file_csv.WriteLine(jlabel);
+                    summary_results = summary_results + jlabel + ";";
+                    }
+                    summary_file_csv.WriteLine("");
+                    summary_results = summary_results + ";";
+
+                    summary_file_csv.WriteLine("Invalid " + category + "," + "Time(hh:mm:ss)");
+                    summary_results = summary_results + "Invalid " + category + ":,," + "#" + ";";
+                    
+                    it = 0;
+                    foreach (string klabel in List_Invalid)
+                    {
+                        ts = List_Time_Inv[it];
+
+                        // Save record to the correspondent session
+                        summary_file_csv.WriteLine(klabel + "," + ts.ToString());
+                        summary_results = summary_results + klabel + "," + ts.ToString() + ";";
+
+                        it++;
+                    }
+
+
+                    summary_file_csv.WriteLine("Total Time Invalid " + category + "," + total_time_inv.ToString());
+                    summary_file_csv.WriteLine("");
+
+                    summary_file_csv.WriteLine("*****************************************************");
+                    summary_file_csv.WriteLine("");
+
+                    summary_results = summary_results + "Total Time Invalid " + category + "," + total_time_inv.ToString() + ",##;";
+                    summary_results = summary_results + ";";
+                    summary_results = summary_results + ",,*" + ";";
+                    summary_results = summary_results + ";";
+
+                   //--------------------------------------------
+
+                }//for each category label
+
+
+               
+                
+                // Close summary file
+                summary_file_csv.Flush();
+                summary_file_csv.Close();
+
+
+                return Is_LabelsList_Valid;
+            }
+            catch
+            {
+                Is_LabelsList_Valid = false;
+
+                if (summary_file_csv != null)
+                {
+                    summary_file_csv.Flush();
+                    summary_file_csv.Close();
+
+                }
+
+                
+                return Is_LabelsList_Valid;
+            }
+
+        }
+        
+
+
+
         //ArrayList records = new ArrayList();
         Annotation currentRecord;
-
         private bool LoadLabelsListToXml()
         {
             TextWriter intervals_file_xml = null;
@@ -3923,7 +4283,7 @@ namespace AudioAnnotation
 
         #region Load/Save buttons
 
-
+        //Start Session Button
         private void button_2_Click(object sender, EventArgs e)
         {
             // Check if the audio files path exist
@@ -3973,10 +4333,25 @@ namespace AudioAnnotation
             SaveCurrentSessionToFile();
         }
 
+
+        
         private void button_generate_Click(object sender, EventArgs e)
         {
+            //Check labels, make summary 
+            // and determine if the xml will be generated
+            string summary_results = "";
 
-            GenerateActivityLabels();
+            int success = GenerateActivityLabels(out summary_results);
+            
+            if( ((int)System.Math.Abs(success)) >= 2)
+            {
+                // show the summary of results in a new popup window
+                PopUp_Result_Window dlg_summary_results = new PopUp_Result_Window();
+                dlg_summary_results.fill_grid_summary(summary_results);
+
+                dlg_summary_results .ShowDialog();
+                
+            }
 
         }
 
@@ -4035,22 +4410,6 @@ namespace AudioAnnotation
             CCategory_1.FlatStyle = FlatStyle.Popup;
             CStartEnd_1.FlatStyle = FlatStyle.Popup;
 
-
-            cellStyle = CCategory_1.DefaultCellStyle;
-            if (cellStyle != null)
-            {
-                cellStyle.BackColor = Color.White;
-                cellStyle.ForeColor = Color.Black;
-            }
-
-            cellStyle = CStartEnd_1.DefaultCellStyle;
-            if (cellStyle != null)
-            {
-                cellStyle.BackColor = Color.White;
-                cellStyle.ForeColor = Color.Black;
-            }
-
-
             // Category 2
             CCategory_2.ReadOnly = true;
             CStartEnd_2.ReadOnly = true;
@@ -4058,22 +4417,47 @@ namespace AudioAnnotation
             CCategory_2.FlatStyle = FlatStyle.Flat;
             CStartEnd_2.FlatStyle = FlatStyle.Flat;
 
-            cellStyle = CCategory_2.DefaultCellStyle;
-            if (cellStyle != null)
+
+
+            for (int i = 0; i < dataGridView1.Rows.Count; i++)
             {
-                cellStyle.BackColor = Color.Gainsboro;
-                cellStyle.ForeColor = Color.DimGray;
+                //Category 1
+                cellStyle = dataGridView1.Rows[i].Cells[C1.category_label].Style;
+                if (cellStyle != null)
+                {
+                   cellStyle.BackColor = Color.White;
+                   cellStyle.ForeColor = Color.Black;
+                }
+
+                cellStyle = dataGridView1.Rows[i].Cells[C1.StartEnd].Style;
+                if (cellStyle != null)
+                {
+                    cellStyle.BackColor = Color.White;
+                    cellStyle.ForeColor = Color.Black;
+                }
+
+
+                //Category2
+                cellStyle = dataGridView1.Rows[i].Cells[C2.category_label].Style;
+                if (cellStyle != null)
+                {
+                    cellStyle.BackColor = Color.Gainsboro;
+                    cellStyle.ForeColor = Color.DimGray;
+                }
+
+                cellStyle = dataGridView1.Rows[i].Cells[C2.StartEnd].Style;
+                if (cellStyle != null)
+                {
+                    cellStyle.BackColor = Color.Gainsboro;
+                    cellStyle.ForeColor = Color.DimGray;
+                }
+
             }
 
-            cellStyle = CStartEnd_2.DefaultCellStyle;
-            if (cellStyle != null)
-            {
-                cellStyle.BackColor = Color.Gainsboro;
-                cellStyle.ForeColor = Color.DimGray;
-            }
-
-
+          
         }
+
+
 
 
         private void LoadSessionView_2()
@@ -4092,21 +4476,8 @@ namespace AudioAnnotation
             CCategory_1.FlatStyle = FlatStyle.Flat;
             CStartEnd_1.FlatStyle = FlatStyle.Flat;
 
-            cellStyle = CCategory_1.DefaultCellStyle;
-            if (cellStyle != null)
-            {
-                cellStyle.BackColor = Color.Gainsboro;
-                cellStyle.ForeColor = Color.DimGray;
-            }
 
-            cellStyle = CStartEnd_1.DefaultCellStyle;
-            if (cellStyle != null)
-            {
-                cellStyle.BackColor = Color.Gainsboro;
-                cellStyle.ForeColor = Color.DimGray;
-            }
-
-
+            
             // Category 2
             CCategory_2.ReadOnly = false;
             CStartEnd_2.ReadOnly = false;
@@ -4114,19 +4485,43 @@ namespace AudioAnnotation
             CCategory_2.FlatStyle = FlatStyle.Popup;
             CStartEnd_2.FlatStyle = FlatStyle.Popup;
 
-            cellStyle = CCategory_2.DefaultCellStyle;
-            if (cellStyle != null)
+
+
+            for (int i = 0; i < dataGridView1.Rows.Count; i++)
             {
-                cellStyle.BackColor = Color.White;
-                cellStyle.ForeColor = Color.Black;
+                //Category 1
+                cellStyle = dataGridView1.Rows[i].Cells[C1.category_label].Style;
+                if (cellStyle != null)
+                {
+                    cellStyle.BackColor = Color.Gainsboro;
+                    cellStyle.ForeColor = Color.DimGray;
+                }
+
+                cellStyle = dataGridView1.Rows[i].Cells[C1.StartEnd].Style;
+                if (cellStyle != null)
+                {
+                    cellStyle.BackColor = Color.Gainsboro;
+                    cellStyle.ForeColor = Color.DimGray;
+                }
+
+
+                //Category2
+                cellStyle = dataGridView1.Rows[i].Cells[C2.category_label].Style;
+                if (cellStyle != null)
+                {
+                    cellStyle.BackColor = Color.White;
+                    cellStyle.ForeColor = Color.Black;
+                }
+
+                cellStyle = dataGridView1.Rows[i].Cells[C2.StartEnd].Style;
+                if (cellStyle != null)
+                {
+                    cellStyle.BackColor = Color.White;
+                    cellStyle.ForeColor = Color.Black;
+                }
+
             }
 
-            cellStyle = CStartEnd_2.DefaultCellStyle;
-            if (cellStyle != null)
-            {
-                cellStyle.BackColor = Color.White;
-                cellStyle.ForeColor = Color.Black;
-            }
 
         }
 
@@ -4147,21 +4542,6 @@ namespace AudioAnnotation
             CStartEnd_1.FlatStyle = FlatStyle.Popup;
 
 
-            cellStyle = CCategory_1.DefaultCellStyle;
-            if (cellStyle != null)
-            {
-                cellStyle.BackColor = Color.White;
-                cellStyle.ForeColor = Color.Black;
-            }
-
-            cellStyle = CStartEnd_1.DefaultCellStyle;
-            if (cellStyle != null)
-            {
-                cellStyle.BackColor = Color.White;
-                cellStyle.ForeColor = Color.Black;
-            }
-
-
 
             // Category 2
             CCategory_2.ReadOnly = false;
@@ -4170,19 +4550,43 @@ namespace AudioAnnotation
             CCategory_2.FlatStyle = FlatStyle.Popup;
             CStartEnd_2.FlatStyle = FlatStyle.Popup;
 
-            cellStyle = CCategory_2.DefaultCellStyle;
-            if (cellStyle != null)
+
+
+            for (int i = 0; i < dataGridView1.Rows.Count; i++)
             {
-                cellStyle.BackColor = Color.White;
-                cellStyle.ForeColor = Color.Black;
+                //Category 1
+                cellStyle = dataGridView1.Rows[i].Cells[C1.category_label].Style;
+                if (cellStyle != null)
+                {
+                    cellStyle.BackColor = Color.White;
+                    cellStyle.ForeColor = Color.Black;
+                }
+
+                cellStyle = dataGridView1.Rows[i].Cells[C1.StartEnd].Style;
+                if (cellStyle != null)
+                {
+                    cellStyle.BackColor = Color.White;
+                    cellStyle.ForeColor = Color.Black;
+                }
+
+
+                //Category2
+                cellStyle = dataGridView1.Rows[i].Cells[C2.category_label].Style;
+                if (cellStyle != null)
+                {
+                    cellStyle.BackColor = Color.White;
+                    cellStyle.ForeColor = Color.Black;
+                }
+
+                cellStyle = dataGridView1.Rows[i].Cells[C2.StartEnd].Style;
+                if (cellStyle != null)
+                {
+                    cellStyle.BackColor = Color.White;
+                    cellStyle.ForeColor = Color.Black;
+                }
+
             }
 
-            cellStyle = CStartEnd_2.DefaultCellStyle;
-            if (cellStyle != null)
-            {
-                cellStyle.BackColor = Color.White;
-                cellStyle.ForeColor = Color.Black;
-            }
 
         }
 
