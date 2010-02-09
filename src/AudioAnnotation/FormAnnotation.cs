@@ -3588,10 +3588,10 @@ namespace AudioAnnotation
 
 
                 //------------------
-
+                // monitor this part because there is a potential problem
                 start_row = search_start_forward(start_row, nrows);
                 end_row = search_close_row_forward(start_row, nrows, start_row, true);
-
+                //------------------
 
 
                 while (end_row < nrows)
@@ -3813,6 +3813,8 @@ namespace AudioAnnotation
         private bool CheckLabelsListWithXml(out string summary_results)
         {
             TextWriter summary_file_csv = null;
+            TextWriter summary_file_html = null;
+
             bool Is_LabelsList_Valid = true;
             summary_results = "";
 
@@ -3834,12 +3836,27 @@ namespace AudioAnnotation
                 BindingList<string> List_Current_XML;
 
 
-                //Create the summary of results file
+                //Create the files for summarizing results
+                // Create the csv file
                 if (File.Exists(Folder_audioannotation + "AnnotationSummary.csv"))
                 { File.Delete(Folder_audioannotation + "AnnotationSummary.csv"); }
 
                 summary_file_csv = new StreamWriter(Folder_audioannotation + "AnnotationSummary.csv");
                 summary_file_csv.WriteLine("Label,Time(hh:mm:ss)");
+
+                // Create the html file
+                if (File.Exists(Folder_audioannotation + "AnnotationSummary.html"))
+                { File.Delete(Folder_audioannotation + "AnnotationSummary.html"); }
+
+                summary_file_html = new StreamWriter(Folder_audioannotation + "AnnotationSummary.html");
+               
+            
+                //summary_file_html.WriteLine("<html><h2><body>Summary Annotations</body></h2></html>");
+                //summary_file_html.WriteLine("<p>&nbsp;</p>\n");
+                //summary_file_html.WriteLine("<html><body><table border=\"1\">\n");
+                summary_file_html.WriteLine("<table border=\"1\">\n");
+                summary_file_html.WriteLine("<tr><td>Label</td><td>Time(hh:mm:ss)</td></tr>");
+
 
 
                 // ---------- Load labels ------------------
@@ -4068,9 +4085,17 @@ namespace AudioAnnotation
                     //------------------------------------------
                     // Write the summary of results to file
                     //-------------------------------------------
+                    string font_color_open = "";
+                    string font_color_close = "";
+
+                    // Annotatated List
                     summary_file_csv.WriteLine("Annotated "+ category + ",");
                     summary_results = summary_results + "Annotated " + category + ":,," + "#" + ";";
 
+                    summary_file_html.WriteLine("<tr bgcolor=\"#E6E6E6\">\n<td><strong>Annotated " + category + "</strong></td><td>&nbsp;</td></tr>");
+                    
+                    
+                  
                     int it = 0;
                     foreach (string clabel in List_Annotated)
                     {
@@ -4078,6 +4103,7 @@ namespace AudioAnnotation
 
                         // Save record to the correspondent session
                         summary_file_csv.WriteLine(clabel + "," + ts.ToString());
+                        summary_file_html.WriteLine("<tr>\n<td>" + clabel + "</td><td>" + ts.ToString()+"</td></tr>");
                         summary_results = summary_results + clabel + "," + ts.ToString() + ";";
                         it++;
                     }
@@ -4086,23 +4112,38 @@ namespace AudioAnnotation
                     summary_file_csv.WriteLine("Total Time Annotated "+ category + "," + total_time.ToString());
                     summary_file_csv.WriteLine("");
 
+                    font_color_open = "<strong><font color=\"#4E8975\">";
+                    font_color_close = "</font><strong>";
+                    summary_file_html.WriteLine("<tr>\n<td>"+ font_color_open +"Total Time Annotated " + category + font_color_close +"</td>" +
+                                                      "<td>"+ font_color_open + total_time.ToString() + font_color_close + "</td></tr>");
+                    summary_file_html.WriteLine("<tr>\n<td>&nbsp;</td><td>&nbsp;</td></tr>");
+
                     summary_results = summary_results + "Total Time Annotated " + category + "," + total_time.ToString() + ",##;";
                     summary_results = summary_results +";";
-                   
 
-                    summary_file_csv.WriteLine("No Annotated "+ category + " in Xml Protocol,");
+
+                    // No Annotated List
+                    summary_file_csv.WriteLine("No Annotated " + category + " in Xml Protocol,");
+                    summary_file_html.WriteLine("<tr bgcolor=\"#E6E6E6\">\n<td><strong>No Annotated " + category + " in Xml Protocol</strong></td><td>&nbsp;</td></tr>");
                     summary_results = summary_results + "No Annotated " + category + " in Xml Protocol:,,#" + ";";
 
                     foreach (string jlabel in List_NoAnnotated)
                     {   summary_file_csv.WriteLine(jlabel);
-                    summary_results = summary_results + jlabel + ";";
+                        summary_file_html.WriteLine("<tr>\n<td>" + jlabel + "</td><td>&nbsp;</td></tr>");
+                        summary_results = summary_results + jlabel + ";";
                     }
+
                     summary_file_csv.WriteLine("");
+                    summary_file_html.WriteLine("<tr>\n<td>&nbsp;</td><td>&nbsp;</td></tr>");
                     summary_results = summary_results + ";";
 
                     summary_file_csv.WriteLine("Invalid " + category + ",");
+                    summary_file_html.WriteLine("<tr bgcolor=\"#E6E6E6\">\n<td><strong> Invalid " + category + "</strong></td><td>&nbsp;</td></tr>");
                     summary_results = summary_results + "Invalid " + category + ":,," + "#" + ";";
-                    
+
+                    font_color_open = "<font color=\"#FA5858\">";
+                    font_color_close = "</font>";
+
                     it = 0;
                     foreach (string klabel in List_Invalid)
                     {
@@ -4110,6 +4151,8 @@ namespace AudioAnnotation
 
                         // Save record to the correspondent session
                         summary_file_csv.WriteLine(klabel + "," + ts.ToString());
+                        summary_file_html.WriteLine("<tr>\n<td>" + font_color_open + klabel + font_color_close + "</td>" + 
+                                                          "<td>" + font_color_open + ts.ToString() + font_color_close + "</td></tr>");
                         summary_results = summary_results + klabel + "," + ts.ToString() + ",###;";
 
                         it++;
@@ -4118,6 +4161,13 @@ namespace AudioAnnotation
 
                     summary_file_csv.WriteLine("Total Time Invalid " + category + "," + total_time_inv.ToString());
                     summary_file_csv.WriteLine("");
+
+
+                    font_color_open = "<strong><font color=\"#FA5858\">";
+                    font_color_close = "</font></strong>";
+                    summary_file_html.WriteLine("<tr>\n<td>"+ font_color_open + "Total Time Invalid " + category + font_color_close+"</td>" + 
+                                                "<td>"+ font_color_open + total_time_inv.ToString() + font_color_close + "</td></tr>");
+                    summary_file_html.WriteLine("<tr>\n<td>&nbsp;</td><td>&nbsp;</td></tr>");
 
                     
                     summary_results = summary_results + "Total Time Invalid " + category + "," + total_time_inv.ToString() + ",#-;";
@@ -4130,9 +4180,19 @@ namespace AudioAnnotation
 
                
                 
-                // Close summary file
+                // Close summary file csv
                 summary_file_csv.Flush();
                 summary_file_csv.Close();
+
+
+                // Close summary file csv
+                //summary_file_html.WriteLine("</table></body></html>");
+                summary_file_html.WriteLine("</table>");
+                summary_file_html.Flush();
+                summary_file_html.Close();
+
+
+
 
 
                 return Is_LabelsList_Valid;
@@ -4148,12 +4208,26 @@ namespace AudioAnnotation
 
                 }
 
+
+                if (summary_file_html != null)
+                {
+                    summary_file_html.Flush();
+                    summary_file_html.Close();
+
+                }
+
+
                 
                 return Is_LabelsList_Valid;
             }
 
         }
-        
+
+
+       
+
+
+
 
 
 
