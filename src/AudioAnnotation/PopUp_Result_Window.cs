@@ -15,26 +15,24 @@ namespace AudioAnnotation
         {
             InitializeComponent();
             
-            this.DialogResult = DialogResult.None;
-
-           
-
-                                      
+            //this.DialogResult = DialogResult.None;
 
         }
 
 
         private void button_continue_Click(object sender, EventArgs e)
         {
-            
-            this.Close();
 
+            this.Visible = false;
+            this.DataGridView_Summary.Rows.Clear();
         }
 
         public void fill_grid_summary(string summary_results)
         {
             //textBox_results.Text = summary_results; 
             int nrow = -1;
+            this.DataGridView_Summary.Rows.Clear();
+
             //DataGridViewCellStyle cellstyle_bold = new DataGridVie;
             Font Font1= new Font(FontFamily.GenericSansSerif, 9.0F,FontStyle.Bold);
             Font Font2 = new Font(FontFamily.GenericSansSerif, 8.5F, FontStyle.Bold);
@@ -61,12 +59,24 @@ namespace AudioAnnotation
                     if (value[2].CompareTo("#") == 0)
                     {
                         DataGridView_Summary.Rows[nrow].DefaultCellStyle.Font = Font1;
-                        //DataGridView_Summary.Rows[nrow].DefaultCellStyle.ForeColor = Color.DarkSeaGreen;
+                        DataGridView_Summary.Rows[nrow].DefaultCellStyle.BackColor= Color.DarkSeaGreen;
+                        DataGridView_Summary.Rows[nrow].DefaultCellStyle.ForeColor = Color.White;
+
+
                     }
                     else if (value[2].CompareTo("##") == 0)
                     {
                         DataGridView_Summary.Rows[nrow].DefaultCellStyle.Font = Font2;
-                        DataGridView_Summary.Rows[nrow].DefaultCellStyle.ForeColor = Color.OrangeRed;
+                        DataGridView_Summary.Rows[nrow].DefaultCellStyle.ForeColor = Color.Green;
+                    }
+                    else if (value[2].CompareTo("###") == 0)
+                    {
+                        DataGridView_Summary.Rows[nrow].DefaultCellStyle.Font = Font2;
+                        DataGridView_Summary.Rows[nrow].DefaultCellStyle.ForeColor = Color.Tomato;
+                    }
+                    else if (value[2].CompareTo("#-") == 0)
+                    {
+                        DataGridView_Summary.Rows[nrow].DefaultCellStyle.Font = Font1;
                     }
                     else if (value[2].CompareTo("*") == 0)
                     { DataGridView_Summary.Rows[nrow].DefaultCellStyle.BackColor = Color.Gainsboro; }
@@ -80,8 +90,8 @@ namespace AudioAnnotation
 
         private void PopUp_Result_Window_FormClosed(object sender, FormClosedEventArgs e)
         {
-            this.DialogResult = DialogResult.OK;
-            this.DataGridView_Summary.Rows.Clear();
+            //this.DialogResult = DialogResult.OK;
+            //this.DataGridView_Summary.Rows.Clear();
         }
 
     }
