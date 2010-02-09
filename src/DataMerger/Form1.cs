@@ -388,17 +388,26 @@ namespace DataMerger
             //Calculate Data Gaps
             WocketsController wc = new WocketsController("", "", "");
             wc.FromXML(aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY +"\\SensorData.xml");
-            
-            SXML.Reader sreader = new SXML.Reader(masterDirectory, aDataDirectory + "\\" + MITES_SUBDIRECTORY);
-            SXML.SensorAnnotation  sannotation = sreader.parse(maxControllers);
-            //remove the HR sensor
-            for(int i=0;(i<sannotation.Sensors.Count);i++)
-                if ((Convert.ToInt32(((SXML.Sensor)sannotation.Sensors[i]).ID) == 0))
-                {
-                    sannotation.Sensors.RemoveAt(i);
-                    break;
-                }
-                        
+
+
+            SXML.Reader sreader = null;            
+            SXML.SensorAnnotation sannotation = null;
+
+            try
+            {
+                sreader = new SXML.Reader(masterDirectory, aDataDirectory + "\\" + MITES_SUBDIRECTORY);
+                sannotation = sreader.parse(maxControllers);
+                //remove the HR sensor
+                for (int i = 0; (i < sannotation.Sensors.Count); i++)
+                    if ((Convert.ToInt32(((SXML.Sensor)sannotation.Sensors[i]).ID) == 0))
+                    {
+                        sannotation.Sensors.RemoveAt(i);
+                        break;
+                    }
+            }
+            catch
+            {
+            }
             Session session = new Session();
             session.FromXML(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\AnnotationIntervals.xml");
 
@@ -435,15 +444,18 @@ namespace DataMerger
             int[][] percentLostPostureSensorDistribution = new int[wc._Sensors.Count][];            
             int[][] percentLostPostureSensorCounter= new int[wc._Sensors.Count][];                       
 
-            int[] mitesSR= new int[sannotation.Sensors.Count];    
-            int[] trueMitesSR = new int[sannotation.Sensors.Count];
-            int[][] modeMITesSR = new int[sannotation.Sensors.Count][];
+            int mitesCount=0;
+            if (sannotation!=null)
+                mitesCount=sannotation.Sensors.Count;
+            int[] mitesSR= new int[mitesCount];
+            int[] trueMitesSR = new int[mitesCount];
+            int[][] modeMITesSR = new int[mitesCount][];
             Hashtable annotatedPostures=new Hashtable();
            
            // int[] wocketsCounter = new int[wc._Sensors.Count];
            // int[] mitesCounter = new int[sannotation.Sensors.Count];
             int numSeconds = 0;
-            for (int i = 0; (i < sannotation.Sensors.Count); i++)
+            for (int i = 0; (i < mitesCount); i++)
             {
                 mitesSR[i]=0;
                 trueMitesSR[i] = 0;
@@ -463,9 +475,13 @@ namespace DataMerger
                 percentLostPostureSensorDistribution[i] = new int[numPostures];
                 //timeLostPostureSensorCounter[i] = new int[numPostures];
             }
-           
 
-            int wocketsStartIndex = mitesStartIndex + (ACCELEROMETER_STATISTICS_LENGTH * sannotation.Sensors.Count);
+
+            int wocketsStartIndex = mitesStartIndex + (ACCELEROMETER_STATISTICS_LENGTH * mitesCount);
+
+            //no heart mites rate
+            if (mitesCount == 0)
+                wocketsStartIndex = wocketsStartIndex - 1;
 
             int numCategories = session.OverlappingActivityLists.Count;
             int currentAnnotation = 0;
@@ -513,7 +529,7 @@ namespace DataMerger
                 if ((currentTime >= startTime) && (currentTime <= endTime))
                 {
                     //mites SR
-                    for (int i = 0; (i < sannotation.Sensors.Count); i++)
+                    for (int i = 0; (i < mitesCount); i++)
                     {
 
                         int sr = Convert.ToInt32(tokens[mitesStartIndex + (ACCELEROMETER_STATISTICS_LENGTH * i)]);
@@ -587,9 +603,9 @@ namespace DataMerger
             int expectedWocketsSamples = WOCKETS_SR * totalSeconds;
             int expectedMITesSamples = MITES_SR * totalSeconds;
             int[] wocketsSecondsLost = new int[wc._Sensors.Count];
-            int[] mitesSecondsLost = new int[sannotation.Sensors.Count];
+            int[] mitesSecondsLost = new int[mitesCount];
             int[] wocketsPercentLost = new int[wc._Sensors.Count];
-            int[] mitesPercentLost = new int[sannotation.Sensors.Count];
+            int[] mitesPercentLost = new int[mitesCount];
             for (int i = 0; (i < wc._Sensors.Count); i++)
             {
                 if (wocketsSR[i] < expectedWocketsSamples)
@@ -648,7 +664,7 @@ namespace DataMerger
            #endregion MEAN and SD Calculation
 
            #region MITes Loss Calculation
-           for (int i = 0; (i < sannotation.Sensors.Count); i++)
+           for (int i = 0; (i < mitesCount); i++)
            {
                if (mitesSR[i] < expectedMITesSamples)
                    mitesSecondsLost[i] = (expectedMITesSamples - mitesSR[i]) / MITES_SR;
@@ -658,23 +674,32 @@ namespace DataMerger
             tr.Close();
 
 
-            int[] mitesMaxedOut = new int[sannotation.MaximumSensorID+1];
-            int[] mitesSamplesCount = new int[sannotation.MaximumSensorID+1];
-            MITesDecoder aMITesDecoder = new MITesDecoder();
-            MITesLoggerReader aMITesLoggerReader = new MITesLoggerReader(aMITesDecoder, aDataDirectory + "\\" + MITES_SUBDIRECTORY);
-            bool isData = true;
-            do
+            int[] mitesMaxedOut = null;
+            if (sannotation!=null)
+                mitesMaxedOut=new int[sannotation.MaximumSensorID + 1];
+            int[] mitesSamplesCount = null;
+            if (sannotation!=null)
+                mitesSamplesCount=new int[sannotation.MaximumSensorID + 1];
+            try
             {
-                //decode the frame
-                int i = aMITesDecoder.GetSomeMITesData()[0].channel;
-                int x = aMITesDecoder.GetSomeMITesData()[0].x;
-                int y = aMITesDecoder.GetSomeMITesData()[0].y;
-                int z = aMITesDecoder.GetSomeMITesData()[0].z;
-                mitesSamplesCount[i] = mitesSamplesCount[i] + 1;
-                if ((x >= 1023) || (y >= 1023) || (z >= 1023))
-                    mitesMaxedOut[i] = mitesMaxedOut[i] + 1;
+                MITesDecoder aMITesDecoder = new MITesDecoder();
+                MITesLoggerReader aMITesLoggerReader = new MITesLoggerReader(aMITesDecoder, aDataDirectory + "\\" + MITES_SUBDIRECTORY);
+                bool isData = true;
+                do
+                {
+                    //decode the frame
+                    int i = aMITesDecoder.GetSomeMITesData()[0].channel;
+                    int x = aMITesDecoder.GetSomeMITesData()[0].x;
+                    int y = aMITesDecoder.GetSomeMITesData()[0].y;
+                    int z = aMITesDecoder.GetSomeMITesData()[0].z;
+                    mitesSamplesCount[i] = mitesSamplesCount[i] + 1;
+                    if ((x >= 1023) || (y >= 1023) || (z >= 1023))
+                        mitesMaxedOut[i] = mitesMaxedOut[i] + 1;
 
-            } while (isData = aMITesLoggerReader.GetSensorData(10));
+                } while (isData = aMITesLoggerReader.GetSensorData(10));
+            }catch
+            {
+            }
 
             #region Percent Maxed Out Wockets
             int[] maxedOut = new int[wc._Sensors.Count];
@@ -708,8 +733,8 @@ namespace DataMerger
             }
             #endregion Percent Maxed Out Wockets
 
-            string summary = "<h2>Data Loss, Disconnections and Maxing out Statistics </h2><TABLE border=\"1\">\n";
-            int numRows=wc._Sensors.Count-1 + sannotation.Sensors.Count;
+            string summary = "<h2>MITes and Wockets Data Loss, Disconnections and Maxing out Statistics </h2><TABLE border=\"1\">\n";
+            int numRows = wc._Sensors.Count - 1 + mitesCount;
             string[] rows = new string[numRows];
             string header="<TR>\n";
             
@@ -720,8 +745,8 @@ namespace DataMerger
             
             header+="</TR>\n";
             summary+=header;
-            
-            for (int i = 0; (i < sannotation.Sensors.Count); i++)
+
+            for (int i = 0; (i < mitesCount); i++)
             {
                 string row="<TR>\n";
                 row += "<TD><div align=\"center\"><strong>MITes " + ((SXML.Sensor)sannotation.Sensors[i]).Location + "</strong></div></TD>\n";
@@ -737,7 +762,11 @@ namespace DataMerger
                     row += "<TD><div align=\"center\">" + mitesPercentLost[i].ToString() + "%" + "</div></TD>\n"; 
                 }
 
-                int percent = (int)(((double)mitesMaxedOut[Convert.ToInt32(((SXML.Sensor)sannotation.Sensors[i]).ID)] / (double)mitesSamplesCount[Convert.ToInt32(((SXML.Sensor)sannotation.Sensors[i]).ID)]) * 100.0);
+
+                int percent = 0;
+                
+                if (mitesSamplesCount[Convert.ToInt32(((SXML.Sensor)sannotation.Sensors[i]).ID)]>0)
+                    percent=(int)(((double)mitesMaxedOut[Convert.ToInt32(((SXML.Sensor)sannotation.Sensors[i]).ID)] / (double)mitesSamplesCount[Convert.ToInt32(((SXML.Sensor)sannotation.Sensors[i]).ID)]) * 100.0);
                 row += "<TD><div align=\"center\">" + "N/A" + "</div></TD>\n";
                 row += "<TD><div align=\"center\">" + "N/A" + "</div></TD>\n";
                 row += "<TD><div align=\"center\">" + "N/A" + "</div></TD>\n";
@@ -774,7 +803,10 @@ namespace DataMerger
                 else
                     row += "<TD><div align=\"center\">N/A</div></TD>\n";
                 row += "<TD><div align=\"center\">" + maxedOut[i].ToString() + "</div></TD>\n";
-                row += "<TD><div align=\"center\">" + ((int)(((double)maxedOut[i] / (double)samplesCount[i]) * 100.0)).ToString() + "% </div></TD>\n";
+                if (samplesCount[i]>0)
+                    row += "<TD><div align=\"center\">" + ((int)(((double)maxedOut[i] / (double)samplesCount[i]) * 100.0)).ToString() + "% </div></TD>\n";
+                else
+                    row += "<TD><div align=\"center\">0% </div></TD>\n";
                 row+="</TR>\n";                
                 summary+=row;
 
@@ -790,7 +822,7 @@ namespace DataMerger
             tw.WriteLine(summary);
            tw.WriteLine("\n<p>&nbsp;</p>\n");
 
-           summary = "<h2>Data Loss by Posture and Activity Statistics</h2><TABLE border=\"1\">\n";
+           summary = "<h2>Wockets Data Loss by Posture and Activity Statistics</h2><TABLE border=\"1\">\n";
             numRows =numPostures;
             rows = new string[numRows];
             header = "<TR>\n<td><div align=\"center\"><strong>Activity\\Placement</strong></div></td><td><strong>Total Seconds Annotated</strong></td>\n";
@@ -823,16 +855,85 @@ namespace DataMerger
 
 
             summary = "<h2>Other Sensors Statistics</h2><TABLE border=\"1\">\n";
-            header = "<TR>\n<td><div align=\"center\"><strong>Sensor Type</strong></div></td><td><strong>Data Present</strong></td><td><strong>Num Samples</strong></td>\n";
+            header = "<TR>\n<td><div align=\"center\"><strong>Sensor Type</strong></div></td><td><strong>Data Present</strong></td><td><strong>Num Samples</strong></td><td><strong>Percent Loss</strong></td></TR>\n";
             header += "</TR>\n";
             summary += header;
-            summary += "<TR>\n<td><div align=\"center\"><strong>Oxycon</strong></div></td><td>"+(hasOxycon?"Yes":"No")+"</td><td>"+oxyconRecords+"</td>\n";
-            summary += "<TR>\n<td><div align=\"center\"><strong>Sensewear</strong></div></td><td>" + (hasSensewear ? "Yes" : "No") + "</td><td>" + sensewearRecords + "</td>\n";
-            summary += "<TR>\n<td><div align=\"center\"><strong>Actigraph</strong></div></td><td>" + (hasActigraph ? "Yes" : "No") + "</td><td>" + actigraphRecords + "</td>\n";
-            summary += "<TR>\n<td><div align=\"center\"><strong>Zephyr</strong></div></td><td>" + (hasZephyr ? "Yes" : "No") + "</td><td>" + zephyrRecords + "</td>\n";
-            summary += "<TR>\n<td><div align=\"center\"><strong>RTI</strong></div></td><td>" + (hasRTI ? "Yes" : "No") + "</td><td>" + rtiRecords + "</td>\n";
-            summary += "<TR>\n<td><div align=\"center\"><strong>Columbia</strong></div></td><td>" + (hasColumbia ? "Yes" : "No") + "</td><td>" + columbiaRecords + "</td>\n";
-            summary += "</TABLE></HTML>";
+
+            int expectedOxyconRecords=totalSeconds/5;
+            double oxyconLoss=0;            
+            if (oxyconRecords<expectedOxyconRecords)
+                oxyconLoss = 100 - (((double)oxyconRecords / expectedOxyconRecords) * 100.0);
+
+            summary += "<TR>\n<td><div align=\"center\"><strong>Oxycon</strong></div></td><td>" + (hasOxycon ? "Yes" : "No") + "</td><td>" + oxyconRecords + "</td><td>" + oxyconLoss.ToString("0") + "%</td></TR>\n";
+
+            
+            double sensewearLoss = 0;
+            if (sensewearRecords < totalSeconds)
+                sensewearLoss = 100 - (((double)sensewearRecords / totalSeconds) * 100.0);
+
+            summary += "<TR>\n<td><div align=\"center\"><strong>Sensewear</strong></div></td><td>" + (hasSensewear ? "Yes" : "No") + "</td><td>" + sensewearRecords + "</td><td>" + sensewearLoss.ToString("0") + "%</td></TR>\n";
+
+
+
+            summary += "<TR>\n<td><div align=\"center\"><strong>Actigraph</strong></div></td><td>" + (hasActigraph ? "Yes" : "No") + "</td><td>";
+
+            for (int r = 0; (r < actigraphData.Length); r++)
+            {
+                summary += actigraphData[r].Count;
+                if (r != (actigraphData.Length - 1))
+                    summary += " | ";
+            }
+            summary += "</td><td>";
+
+            for (int r = 0; (r < actigraphData.Length); r++)                        
+            {
+                double actigraphLoss = 0;
+                if (actigraphData[r].Count < totalSeconds)
+                    actigraphLoss = 100 - (((double)actigraphData[r].Count / totalSeconds) * 100.0);
+                summary += actigraphLoss.ToString("0")+" %";
+                if (r != (actigraphData.Length - 1))
+                    summary += " | ";
+            }
+            summary += "</td></TR>\n";
+
+            double zephyrLoss = 0;
+            if (zephyrRecords < totalSeconds)
+                zephyrLoss = 100 - (((double)zephyrRecords / totalSeconds) * 100.0);
+            summary += "<TR>\n<td><div align=\"center\"><strong>Zephyr</strong></div></td><td>" + (hasZephyr ? "Yes" : "No") + "</td><td>" + zephyrRecords + "</td><td>" + zephyrLoss.ToString("0") + "%</td></TR>\n";
+
+            double rtiLoss = 0;
+            if (rtiRecords < totalSeconds)
+                rtiLoss = 100 - (((double)rtiRecords / totalSeconds) * 100.0);
+            summary += "<TR>\n<td><div align=\"center\"><strong>RTI</strong></div></td><td>" + (hasRTI ? "Yes" : "No") + "</td><td>" + rtiRecords + "</td><td>" + rtiLoss.ToString("0") + "%</td></TR>\n";
+
+            double columbiaLoss = 0;
+            if (columbiaRecords <  totalSeconds)
+                columbiaLoss = 100 - (((double)columbiaRecords / totalSeconds) * 100.0);
+            summary += "<TR>\n<td><div align=\"center\"><strong>Columbia</strong></div></td><td>" + (hasColumbia ? "Yes" : "No") + "</td><td>" + columbiaRecords + "</td><td>" + columbiaLoss.ToString("0") + "%</td></TR>\n";
+
+            double gpsLoss = 0;
+            if (gpsRecords < totalSeconds)
+                gpsLoss = 100 - (((double)gpsRecords / totalSeconds) * 100.0);
+            summary += "<TR>\n<td><div align=\"center\"><strong>GPS</strong></div></td><td>" + (hasGPS ? "Yes" : "No") + "</td><td>" + gpsRecords + "</td><td>" + gpsLoss.ToString("0") + "%</td></TR>\n";
+
+
+
+
+
+            summary += "</TABLE>\n";
+
+            summary += "<h2>Annotation Summary</h2>\n";
+
+            if (File.Exists(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\AnnotationSummary.html"))
+            {
+                TextReader ttr = new StreamReader(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\AnnotationSummary.html");
+                summary += ttr.ReadToEnd();
+                ttr.Close();
+            }
+
+                
+            summary +="</HTML>";
+
             tw.WriteLine(summary);
 
 
@@ -855,6 +956,7 @@ namespace DataMerger
         public static bool hasRTI = false;
         public static bool hasZephyr = false;
         public static bool hasColumbia = false;
+        public static bool hasGPS = false;
 
         public static int actigraphRecords = 0;
         public static int oxyconRecords = 0;
@@ -862,6 +964,13 @@ namespace DataMerger
         public static int rtiRecords = 0;
         public static int zephyrRecords = 0;
         public static int columbiaRecords = 0;
+        public static int gpsRecords = 0;
+
+
+        //Actigraph
+        static TextWriter[] actigraphCSV;
+        static Hashtable[] actigraphData;
+        static string[] actigraphType;
 
         public static void toCSV(string aDataDirectory, string masterDirectory, int maxControllers, string[] filter)
         {
@@ -953,10 +1062,7 @@ namespace DataMerger
             TextWriter masterCSV;      //Master CSV
             TextWriter hrCSV;       //HR CSV
 
-            //Actigraph
-            TextWriter[] actigraphCSV;
-            Hashtable[] actigraphData;
-            string[] actigraphType;
+            
 
 
 
@@ -1362,6 +1468,8 @@ namespace DataMerger
                     }
 
                     gpsFound = true;
+                    hasGPS = true;
+                    gpsRecords = gpsData.Count;
                 }
             }
             catch (Exception e)
