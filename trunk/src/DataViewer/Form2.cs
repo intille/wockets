@@ -1691,7 +1691,7 @@ namespace NESPDataViewer
                 string mac = "";
                 if (sensorinfo.Length >= 3)
                 {
-                    channel = sensorinfo[2];
+                    channel = sensorinfo[1];
                     if (wc._Receivers[Convert.ToInt32(channel)] is Wockets.Receivers.RFCOMMReceiver)
                     {
                         mac = ((Wockets.Receivers.RFCOMMReceiver)wc._Receivers[Convert.ToInt32(channel)])._Address;
