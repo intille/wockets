@@ -684,7 +684,7 @@ namespace Wockets
                                     if (batteryPoll[i] <= 0)
                                     {
                                         ((SerialReceiver)currentReceiver).Write(GET_BT_CMD._Bytes);
-                                        batteryPoll[i] = 6000 + i * 200;
+                                        batteryPoll[i] = 600 + i * 200;
                                     }
                                     #endregion Battery Query
 

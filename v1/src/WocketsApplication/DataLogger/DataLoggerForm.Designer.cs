@@ -725,11 +725,11 @@ namespace WocketsApplication.DataLogger
                 t.Font = textFont;
                 this.sensorLabels.Add("W" + this.wocketsController._Sensors[i]._ID, t);
                 this.sensorStatus.Add("W" + this.wocketsController._Sensors[i]._ID, p);
-                this.sensorBattery.Add("W" + this.wocketsController._Sensors[i]._ID, p2);
+                //this.sensorBattery.Add("W" + this.wocketsController._Sensors[i]._ID, p2);
 
                 ((Panel)this.panels[VISUALIZE_PANEL]).Controls.Add(t);
                 ((Panel)this.panels[VISUALIZE_PANEL]).Controls.Add(p);
-                ((Panel)this.panels[VISUALIZE_PANEL]).Controls.Add(p2);
+                //((Panel)this.panels[VISUALIZE_PANEL]).Controls.Add(p2);
                 p2.BringToFront();
                 if (currentTextX == leftTextX)
                     currentTextX = rightTextX;
