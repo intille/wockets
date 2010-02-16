@@ -379,6 +379,10 @@ namespace WocketsApplication.DataLogger
 
             #endregion Bluetooth reception channels initialization
 
+
+            foreach (Decoder d in this.wocketsController._Decoders)
+                d.Subscribe(SensorDataType.BATTERYLEVEL, new Response.ResponseHandler(this.BatteryCallback));            
+
             //aPlottingThread.Priority = ThreadPriority.AboveNormal;
             aPlottingThread.Start();
 
@@ -691,7 +695,7 @@ namespace WocketsApplication.DataLogger
 
                 int num_rows = (int)((this.wocketsController._Sensors.Count + 2) / 2); //additional row for HR and total sampling rate
                 int textBoxHeight = ((int)(0.40 * ((Panel)this.panels[VISUALIZE_PANEL]).ClientSize.Height) - ((this.wocketsController._Sensors.Count - 1) * Constants.WIDGET_SPACING)) / num_rows;
-                int textBoxWidth = ((((Panel)this.panels[VISUALIZE_PANEL]).ClientSize.Width - (3 * Constants.WIDGET_SPACING)) / 3);
+                int textBoxWidth = ((((Panel)this.panels[VISUALIZE_PANEL]).ClientSize.Width - (3 * Constants.WIDGET_SPACING)) / 2);
                 int currentTextY = (int)(((Panel)this.panels[VISUALIZE_PANEL]).ClientSize.Height * 0.60);
                 int leftTextX = Constants.WIDGET_SPACING + 32;
                 int rightTextX = ((Constants.WIDGET_SPACING + 32) * 2) + textBoxWidth;
@@ -1548,7 +1552,19 @@ namespace WocketsApplication.DataLogger
             else
             {
                 Wockets.Data.Commands.BatteryResponse br = (Wockets.Data.Commands.BatteryResponse)e._Response;
-                ((PictureBox)this.sensorBattery["W" + br.SensorID]).Image = this.batteryImg[(5*1024-5*br.BatteryLevel)/1024];                
+                int batteryPercent = 100;
+                if (br.BatteryLevel<725)
+                    batteryPercent = (int)((br.BatteryLevel / 725.0) * 100.0);
+                ((Label)this.sensorLabels["W" + br.SensorID]).Text = ((Label)this.sensorLabels["W" + br.SensorID]).Text.Substring(0,3) + " " + batteryPercent + "%";
+/*                if (br.BatteryLevel < 725)
+                {
+                    ((PictureBox)this.sensorBattery["W" + br.SensorID]).Image = this.batteryImg[5- (int)((br.BatteryLevel / 725.0) * 5)];
+                    
+                }
+                else
+                {
+                    ((PictureBox)this.sensorBattery["W" + br.SensorID]).Image = this.batteryImg[5];
+                }*/
                 updateCommand("Received Battery Response: "+br.BatteryLevel);
             }
         }
