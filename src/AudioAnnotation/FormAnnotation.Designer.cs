@@ -76,6 +76,7 @@ namespace AudioAnnotation
             this.label_panel1_1 = new System.Windows.Forms.Label();
             this.textBox_instructions_2 = new System.Windows.Forms.TextBox();
             this.openFileDialog_Session = new System.Windows.Forms.OpenFileDialog();
+            this.checkBox_visualize_all = new System.Windows.Forms.CheckBox();
             this.CID = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.CAutoStop_1 = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.CCategory_1 = new System.Windows.Forms.DataGridViewComboBoxColumn();
@@ -96,6 +97,8 @@ namespace AudioAnnotation
             this.CEndID_2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.CCombo_Type_2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.CCombo_Label_2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.CTime_LastWritten = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.CTime_Duration = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.CTime_MS = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.panel_controls_2.SuspendLayout();
@@ -170,6 +173,8 @@ namespace AudioAnnotation
             this.CEndID_2,
             this.CCombo_Type_2,
             this.CCombo_Label_2,
+            this.CTime_LastWritten,
+            this.CTime_Duration,
             this.CTime_MS});
             dataGridViewCellStyle10.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle10.BackColor = System.Drawing.SystemColors.Window;
@@ -217,7 +222,7 @@ namespace AudioAnnotation
             this.label_play.BackColor = System.Drawing.Color.White;
             this.label_play.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label_play.ForeColor = System.Drawing.Color.DarkSeaGreen;
-            this.label_play.Location = new System.Drawing.Point(54, 85);
+            this.label_play.Location = new System.Drawing.Point(54, 94);
             this.label_play.Name = "label_play";
             this.label_play.Size = new System.Drawing.Size(938, 23);
             this.label_play.TabIndex = 9;
@@ -276,7 +281,7 @@ namespace AudioAnnotation
             this.label_instructions_2.AutoSize = true;
             this.label_instructions_2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label_instructions_2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
-            this.label_instructions_2.Location = new System.Drawing.Point(7, 88);
+            this.label_instructions_2.Location = new System.Drawing.Point(7, 96);
             this.label_instructions_2.Name = "label_instructions_2";
             this.label_instructions_2.Size = new System.Drawing.Size(41, 15);
             this.label_instructions_2.TabIndex = 16;
@@ -379,7 +384,7 @@ namespace AudioAnnotation
             // 
             this.checkBox_SiglePassMode.AutoSize = true;
             this.checkBox_SiglePassMode.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
-            this.checkBox_SiglePassMode.Location = new System.Drawing.Point(9, 65);
+            this.checkBox_SiglePassMode.Location = new System.Drawing.Point(10, 63);
             this.checkBox_SiglePassMode.Name = "checkBox_SiglePassMode";
             this.checkBox_SiglePassMode.Size = new System.Drawing.Size(111, 17);
             this.checkBox_SiglePassMode.TabIndex = 26;
@@ -391,6 +396,7 @@ namespace AudioAnnotation
             // panel_controls_2
             // 
             this.panel_controls_2.BackColor = System.Drawing.Color.Transparent;
+            this.panel_controls_2.Controls.Add(this.checkBox_visualize_all);
             this.panel_controls_2.Controls.Add(this.label_exit_button);
             this.panel_controls_2.Controls.Add(this.label_generate_button);
             this.panel_controls_2.Controls.Add(this.label_save_button);
@@ -498,7 +504,7 @@ namespace AudioAnnotation
             // 
             this.checkBox_ExitWithoutSaving.AutoSize = true;
             this.checkBox_ExitWithoutSaving.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
-            this.checkBox_ExitWithoutSaving.Location = new System.Drawing.Point(9, 36);
+            this.checkBox_ExitWithoutSaving.Location = new System.Drawing.Point(10, 45);
             this.checkBox_ExitWithoutSaving.Name = "checkBox_ExitWithoutSaving";
             this.checkBox_ExitWithoutSaving.Size = new System.Drawing.Size(119, 17);
             this.checkBox_ExitWithoutSaving.TabIndex = 27;
@@ -557,6 +563,18 @@ namespace AudioAnnotation
             this.textBox_instructions_2.Size = new System.Drawing.Size(758, 194);
             this.textBox_instructions_2.TabIndex = 29;
             this.textBox_instructions_2.Text = resources.GetString("textBox_instructions_2.Text");
+            // 
+            // checkBox_visualize_all
+            // 
+            this.checkBox_visualize_all.AutoSize = true;
+            this.checkBox_visualize_all.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
+            this.checkBox_visualize_all.Location = new System.Drawing.Point(10, 27);
+            this.checkBox_visualize_all.Name = "checkBox_visualize_all";
+            this.checkBox_visualize_all.Size = new System.Drawing.Size(111, 17);
+            this.checkBox_visualize_all.TabIndex = 35;
+            this.checkBox_visualize_all.Text = "Visualize All Fields";
+            this.checkBox_visualize_all.UseVisualStyleBackColor = true;
+            this.checkBox_visualize_all.CheckedChanged += new System.EventHandler(this.checkBox_visualize_all_CheckedChanged);
             // 
             // CID
             // 
@@ -737,11 +755,26 @@ namespace AudioAnnotation
             this.CCombo_Label_2.Visible = false;
             this.CCombo_Label_2.Width = 106;
             // 
+            // CTime_LastWritten
+            // 
+            this.CTime_LastWritten.HeaderText = "Last Written";
+            this.CTime_LastWritten.Name = "CTime_LastWritten";
+            this.CTime_LastWritten.Visible = false;
+            this.CTime_LastWritten.Width = 89;
+            // 
+            // CTime_Duration
+            // 
+            this.CTime_Duration.HeaderText = "Duration";
+            this.CTime_Duration.Name = "CTime_Duration";
+            this.CTime_Duration.Visible = false;
+            this.CTime_Duration.Width = 72;
+            // 
             // CTime_MS
             // 
-            this.CTime_MS.HeaderText = "CreationTime_MS";
+            this.CTime_MS.HeaderText = "Time MS";
             this.CTime_MS.Name = "CTime_MS";
-            this.CTime_MS.Width = 116;
+            this.CTime_MS.Visible = false;
+            this.CTime_MS.Width = 74;
             // 
             // FormAnnotation
             // 
@@ -801,6 +834,7 @@ namespace AudioAnnotation
         private System.Windows.Forms.Label label_save_button;
         private System.Windows.Forms.Label label_exit_button;
         private System.Windows.Forms.Label label_generate_button;
+        private System.Windows.Forms.CheckBox checkBox_visualize_all;
         private System.Windows.Forms.DataGridViewTextBoxColumn CID;
         private System.Windows.Forms.DataGridViewCheckBoxColumn CAutoStop_1;
         private System.Windows.Forms.DataGridViewComboBoxColumn CCategory_1;
@@ -821,6 +855,8 @@ namespace AudioAnnotation
         private System.Windows.Forms.DataGridViewTextBoxColumn CEndID_2;
         private System.Windows.Forms.DataGridViewTextBoxColumn CCombo_Type_2;
         private System.Windows.Forms.DataGridViewTextBoxColumn CCombo_Label_2;
+        private System.Windows.Forms.DataGridViewTextBoxColumn CTime_LastWritten;
+        private System.Windows.Forms.DataGridViewTextBoxColumn CTime_Duration;
         private System.Windows.Forms.DataGridViewTextBoxColumn CTime_MS;
     }
 }

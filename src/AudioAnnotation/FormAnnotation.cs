@@ -39,7 +39,10 @@ namespace AudioAnnotation
 
             public int Status, StartID, EndID;
             public int Combo_Type, Combo_Label;
+            
             public int TimeMS;
+            public int TimeLastWrite;
+            public int TimeDuration;
 
             public COLUMN_INDEX(int category)
             {
@@ -47,7 +50,10 @@ namespace AudioAnnotation
                 Time = 7;
                 Time_Label = 8;
                 Notes = 9;
-                TimeMS = 20;
+                
+                TimeLastWrite = 20;
+                TimeDuration = 21;
+                TimeMS = 22;
 
                 if (category == 1)
                 {
@@ -85,7 +91,10 @@ namespace AudioAnnotation
                 Time = 7;
                 Time_Label = 8;
                 Notes = 9;
-                TimeMS = 20;
+
+                TimeLastWrite = 20;
+                TimeDuration = 21;
+                TimeMS = 22;
 
                 if (category == 1)
                 {
@@ -288,7 +297,17 @@ namespace AudioAnnotation
             //Time
             CTime.SortMode = DataGridViewColumnSortMode.NotSortable;
             CTimeLabel.SortMode = DataGridViewColumnSortMode.NotSortable;
+
+            //Time duration information
             CTime_MS.SortMode = DataGridViewColumnSortMode.NotSortable;
+            CTime_MS.Visible = false;
+
+            CTime_Duration.SortMode = DataGridViewColumnSortMode.NotSortable;
+            CTime_Duration.Visible = false;
+
+            CTime_LastWritten.SortMode = DataGridViewColumnSortMode.NotSortable;
+            CTime_LastWritten.Visible = false;
+            
 
 
 
@@ -574,8 +593,13 @@ namespace AudioAnnotation
                     //Load the time row in labels
                     dgview.Rows[n].Cells[C1.Time].Value = time.ToLongTimeString();  //time.Hour + ":" + time.Minute + ":" + time.Second; //+"."+time.Millisecond;
                     dgview.Rows[n].Cells[C1.Time_Label].Value = time.ToLongTimeString(); //time.Hour + ":" + time.Minute + ":" + time.Second; //+ "." + time.Millisecond;
-                    
+
+                    //Add milliseconds granularity
                     dgview.Rows[n].Cells[C1.TimeMS].Value = time.TimeOfDay.ToString().TrimEnd('0');
+                    
+                    //Add duration info
+                    dgview.Rows[n].Cells[C1.TimeLastWrite].Value = end_file_time.TimeOfDay.ToString().TrimEnd('0');
+                    dgview.Rows[n].Cells[C1.TimeDuration].Value = duration;
 
                     //--------------------------------------------------------
 
@@ -739,9 +763,6 @@ namespace AudioAnnotation
 
 
         #endregion
-
-
-
 
 
         #region Buttons
@@ -1269,6 +1290,10 @@ namespace AudioAnnotation
                 //Adding milliseconds granularity
                 dataGridView1.Rows[row].Cells[CINDEX.TimeMS].Value = dataGridView1.Rows[row_label_time].Cells[CINDEX.TimeMS].Value;
 
+                //Add duration info
+                dataGridView1.Rows[row].Cells[CINDEX.TimeLastWrite].Value = dataGridView1.Rows[row_label_time].Cells[CINDEX.TimeLastWrite].Value;
+                dataGridView1.Rows[row].Cells[CINDEX.TimeDuration].Value = dataGridView1.Rows[row_label_time].Cells[CINDEX.TimeDuration].Value;
+
             }
             else if (( (row-1) < dataGridView1.Rows.Count) && ( (row-1) > -1))
             {
@@ -1277,6 +1302,10 @@ namespace AudioAnnotation
                 
                 //Adding milliseconds granularity
                 dataGridView1.Rows[row].Cells[CINDEX.TimeMS].Value = dataGridView1.Rows[row - 1].Cells[CINDEX.TimeMS].Value;
+
+                //Add duration info
+                dataGridView1.Rows[row].Cells[CINDEX.TimeLastWrite].Value = dataGridView1.Rows[row - 1].Cells[CINDEX.TimeLastWrite].Value;
+                dataGridView1.Rows[row].Cells[CINDEX.TimeDuration].Value = dataGridView1.Rows[row - 1].Cells[CINDEX.TimeDuration].Value;
 
             }
 
@@ -1867,12 +1896,16 @@ namespace AudioAnnotation
                         
 
                         // if the time difference is equal zero or less than zero, the time stamp needs to be corrected
-                        if ( (time_diff.TotalSeconds == 0.0) || (time_diff.TotalSeconds < 0.0) )
+                        if ((time_diff.TotalSeconds == 0.0) || (time_diff.TotalSeconds < 0.0))
                         {
                             // compute the creation time
                             secs_duration = 0.0;
                             duration = GetDuration(files_wav[n].FullName, files_wav[n].Length, out secs_duration);
                             time = end_file_time.Subtract(TimeSpan.FromSeconds(secs_duration));
+                        }
+                        else
+                        {
+                            duration = time_diff.TotalSeconds.ToString();
                         }
                             
                     
@@ -1883,13 +1916,21 @@ namespace AudioAnnotation
                             { dataGridView1.Rows[row].Cells[i].Value = ""; }
 
                             dataGridView1.Rows[row].Cells[C1.Time_Label].Value = time.ToLongTimeString();
+                            
+                            //Add milliseconds granularity
                             dataGridView1.Rows[row].Cells[C1.TimeMS].Value = time.TimeOfDay.ToString().TrimEnd('0');
+                          
+                            //Add duration info
+                            dataGridView1.Rows[row].Cells[C1.TimeLastWrite].Value = end_file_time.TimeOfDay.ToString().TrimEnd('0');
+                            dataGridView1.Rows[row].Cells[C1.TimeDuration].Value = duration;
                           
                          
                         
                         //-------------------------------------------------------------------------
                 }
-                else if (  ((i == C1.Time_Label) || (i== C1.TimeMS))  && (check_time_stamp == true))
+                else if (  ( (i == C1.Time_Label)   || (i== C1.TimeMS) ||
+                             (i== C1.TimeLastWrite) || (i == C1.TimeDuration))  && 
+                           (check_time_stamp == true))
                 { 
                     //Do nothing, since the value was modified along with the previous field
                 }
@@ -4142,7 +4183,10 @@ namespace AudioAnnotation
                             if ((end_row + 1) < nrows)
                             {
                                 start_row = search_start_forward(end_row + 1, nrows);
+                                
+                                //Check if it is incorrect
                                 //end_row = search_close_row_forward(start_row + 1, nrows, start_row + 1, true);
+                                
                                 end_row = search_close_row_forward(start_row , nrows, start_row, true);
                             
                             }
@@ -4614,12 +4658,6 @@ namespace AudioAnnotation
         }
 
 
-       
-
-
-
-
-
 
         //ArrayList records = new ArrayList();
         Annotation currentRecord;
@@ -4854,6 +4892,8 @@ namespace AudioAnnotation
             }
 
         }
+
+
 
         #endregion
 
@@ -5201,6 +5241,22 @@ namespace AudioAnnotation
         }
 
 
+        private void checkBox_visualize_all_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBox_visualize_all.Checked)
+            {
+                CTime_MS.Visible = true;
+                CTime_Duration.Visible = true;
+                CTime_LastWritten.Visible = true;
+            }
+            else
+            {
+                CTime_MS.Visible = false;
+                CTime_Duration.Visible = false;
+                CTime_LastWritten.Visible = false;
+            }
+        }
+
         private void paintcells_view(int irow, int view)
         {
             DataGridViewCellStyle cellStyle;
@@ -5312,6 +5368,8 @@ namespace AudioAnnotation
         }
 
         #endregion
+
+       
 
        
 
