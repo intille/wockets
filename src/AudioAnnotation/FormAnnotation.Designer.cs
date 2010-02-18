@@ -30,43 +30,23 @@ namespace AudioAnnotation
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle13 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle14 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle22 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle23 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle24 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle15 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle16 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle17 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle18 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle19 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle20 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle21 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormAnnotation));
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
             this.button_1 = new System.Windows.Forms.Button();
             this.textBox_1 = new System.Windows.Forms.TextBox();
             this.label_date = new System.Windows.Forms.Label();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
-            this.CID = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.CAutoStop_1 = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            this.CCategory_1 = new System.Windows.Forms.DataGridViewComboBoxColumn();
-            this.CStartEnd_1 = new System.Windows.Forms.DataGridViewComboBoxColumn();
-            this.CAutoStop_2 = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            this.CCategory_2 = new System.Windows.Forms.DataGridViewComboBoxColumn();
-            this.CStartEnd_2 = new System.Windows.Forms.DataGridViewComboBoxColumn();
-            this.CTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.CTimeLabel = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.CNotes = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.CStatus_1 = new System.Windows.Forms.DataGridViewComboBoxColumn();
-            this.CStartID_1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.CEndID_1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.CCombo_Type_1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.CCombo_Label_1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.CStatus_2 = new System.Windows.Forms.DataGridViewComboBoxColumn();
-            this.CStartID_2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.CEndID_2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.CCombo_Type_2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.CCombo_Label_2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.label_play = new System.Windows.Forms.Label();
             this.button_add = new System.Windows.Forms.Button();
             this.button_remove = new System.Windows.Forms.Button();
@@ -96,6 +76,27 @@ namespace AudioAnnotation
             this.label_panel1_1 = new System.Windows.Forms.Label();
             this.textBox_instructions_2 = new System.Windows.Forms.TextBox();
             this.openFileDialog_Session = new System.Windows.Forms.OpenFileDialog();
+            this.CID = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.CAutoStop_1 = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.CCategory_1 = new System.Windows.Forms.DataGridViewComboBoxColumn();
+            this.CStartEnd_1 = new System.Windows.Forms.DataGridViewComboBoxColumn();
+            this.CAutoStop_2 = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.CCategory_2 = new System.Windows.Forms.DataGridViewComboBoxColumn();
+            this.CStartEnd_2 = new System.Windows.Forms.DataGridViewComboBoxColumn();
+            this.CTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.CTimeLabel = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.CNotes = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.CStatus_1 = new System.Windows.Forms.DataGridViewComboBoxColumn();
+            this.CStartID_1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.CEndID_1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.CCombo_Type_1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.CCombo_Label_1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.CStatus_2 = new System.Windows.Forms.DataGridViewComboBoxColumn();
+            this.CStartID_2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.CEndID_2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.CCombo_Type_2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.CCombo_Label_2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.CTime_MS = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.panel_controls_2.SuspendLayout();
             this.panel_controls_1.SuspendLayout();
@@ -133,21 +134,21 @@ namespace AudioAnnotation
             // dataGridView1
             // 
             this.dataGridView1.AccessibleRole = System.Windows.Forms.AccessibleRole.None;
-            dataGridViewCellStyle13.NullValue = null;
-            this.dataGridView1.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle13;
+            dataGridViewCellStyle1.NullValue = null;
+            this.dataGridView1.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
             this.dataGridView1.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.ColumnHeader;
             this.dataGridView1.BackgroundColor = System.Drawing.Color.YellowGreen;
             this.dataGridView1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.dataGridView1.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.Sunken;
             this.dataGridView1.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Sunken;
-            dataGridViewCellStyle14.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle14.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle14.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle14.ForeColor = System.Drawing.Color.Black;
-            dataGridViewCellStyle14.SelectionBackColor = System.Drawing.Color.DarkSeaGreen;
-            dataGridViewCellStyle14.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle14.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dataGridView1.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle14;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle2.ForeColor = System.Drawing.Color.Black;
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.Color.DarkSeaGreen;
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dataGridView1.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
             this.dataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.CID,
             this.CAutoStop_1,
@@ -168,15 +169,16 @@ namespace AudioAnnotation
             this.CStartID_2,
             this.CEndID_2,
             this.CCombo_Type_2,
-            this.CCombo_Label_2});
-            dataGridViewCellStyle22.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle22.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle22.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle22.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle22.SelectionBackColor = System.Drawing.Color.DarkSeaGreen;
-            dataGridViewCellStyle22.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle22.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dataGridView1.DefaultCellStyle = dataGridViewCellStyle22;
+            this.CCombo_Label_2,
+            this.CTime_MS});
+            dataGridViewCellStyle10.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle10.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle10.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle10.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle10.SelectionBackColor = System.Drawing.Color.DarkSeaGreen;
+            dataGridViewCellStyle10.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle10.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dataGridView1.DefaultCellStyle = dataGridViewCellStyle10;
             this.dataGridView1.EnableHeadersVisualStyles = false;
             this.dataGridView1.GridColor = System.Drawing.Color.LightGray;
             this.dataGridView1.ImeMode = System.Windows.Forms.ImeMode.NoControl;
@@ -184,17 +186,17 @@ namespace AudioAnnotation
             this.dataGridView1.MultiSelect = false;
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.RowHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
-            dataGridViewCellStyle23.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle23.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle23.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle23.ForeColor = System.Drawing.Color.White;
-            dataGridViewCellStyle23.SelectionBackColor = System.Drawing.Color.DarkSeaGreen;
-            dataGridViewCellStyle23.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle23.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dataGridView1.RowHeadersDefaultCellStyle = dataGridViewCellStyle23;
+            dataGridViewCellStyle11.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle11.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle11.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle11.ForeColor = System.Drawing.Color.White;
+            dataGridViewCellStyle11.SelectionBackColor = System.Drawing.Color.DarkSeaGreen;
+            dataGridViewCellStyle11.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle11.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dataGridView1.RowHeadersDefaultCellStyle = dataGridViewCellStyle11;
             this.dataGridView1.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders;
-            dataGridViewCellStyle24.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            this.dataGridView1.RowsDefaultCellStyle = dataGridViewCellStyle24;
+            dataGridViewCellStyle12.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            this.dataGridView1.RowsDefaultCellStyle = dataGridViewCellStyle12;
             this.dataGridView1.RowTemplate.DefaultCellStyle.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
             this.dataGridView1.RowTemplate.Resizable = System.Windows.Forms.DataGridViewTriState.False;
             this.dataGridView1.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
@@ -209,185 +211,6 @@ namespace AudioAnnotation
             this.dataGridView1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.dataGridView1_KeyDown);
             this.dataGridView1.CellEnter += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellEnter);
             this.dataGridView1.RowHeaderMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridView1_RowHeaderMouseDoubleClick_1);
-            // 
-            // CID
-            // 
-            dataGridViewCellStyle15.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
-            dataGridViewCellStyle15.NullValue = null;
-            dataGridViewCellStyle15.SelectionBackColor = System.Drawing.Color.DarkSeaGreen;
-            this.CID.DefaultCellStyle = dataGridViewCellStyle15;
-            this.CID.FillWeight = 80F;
-            this.CID.HeaderText = "Audio ID";
-            this.CID.Name = "CID";
-            this.CID.ReadOnly = true;
-            this.CID.Width = 73;
-            // 
-            // CAutoStop_1
-            // 
-            dataGridViewCellStyle16.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle16.NullValue = "False";
-            this.CAutoStop_1.DefaultCellStyle = dataGridViewCellStyle16;
-            this.CAutoStop_1.FillWeight = 50F;
-            this.CAutoStop_1.HeaderText = "Auto Stop";
-            this.CAutoStop_1.Name = "CAutoStop_1";
-            this.CAutoStop_1.Visible = false;
-            this.CAutoStop_1.Width = 60;
-            // 
-            // CCategory_1
-            // 
-            this.CCategory_1.DisplayStyle = System.Windows.Forms.DataGridViewComboBoxDisplayStyle.ComboBox;
-            this.CCategory_1.DisplayStyleForCurrentCellOnly = true;
-            this.CCategory_1.FillWeight = 200F;
-            this.CCategory_1.HeaderText = "Category";
-            this.CCategory_1.Name = "CCategory_1";
-            this.CCategory_1.Width = 55;
-            // 
-            // CStartEnd_1
-            // 
-            dataGridViewCellStyle17.BackColor = System.Drawing.Color.White;
-            this.CStartEnd_1.DefaultCellStyle = dataGridViewCellStyle17;
-            this.CStartEnd_1.DisplayStyle = System.Windows.Forms.DataGridViewComboBoxDisplayStyle.ComboBox;
-            this.CStartEnd_1.DisplayStyleForCurrentCellOnly = true;
-            this.CStartEnd_1.HeaderText = "Start/End Tag";
-            this.CStartEnd_1.Name = "CStartEnd_1";
-            this.CStartEnd_1.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.CStartEnd_1.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            // 
-            // CAutoStop_2
-            // 
-            this.CAutoStop_2.FillWeight = 50F;
-            this.CAutoStop_2.HeaderText = "Auto Stop 2";
-            this.CAutoStop_2.Name = "CAutoStop_2";
-            this.CAutoStop_2.Visible = false;
-            this.CAutoStop_2.Width = 69;
-            // 
-            // CCategory_2
-            // 
-            this.CCategory_2.DisplayStyle = System.Windows.Forms.DataGridViewComboBoxDisplayStyle.ComboBox;
-            this.CCategory_2.DisplayStyleForCurrentCellOnly = true;
-            this.CCategory_2.FillWeight = 200F;
-            this.CCategory_2.HeaderText = "Category II";
-            this.CCategory_2.Name = "CCategory_2";
-            this.CCategory_2.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.CCategory_2.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.CCategory_2.Width = 83;
-            // 
-            // CStartEnd_2
-            // 
-            this.CStartEnd_2.DisplayStyle = System.Windows.Forms.DataGridViewComboBoxDisplayStyle.ComboBox;
-            this.CStartEnd_2.DisplayStyleForCurrentCellOnly = true;
-            this.CStartEnd_2.HeaderText = "Start/End Tag";
-            this.CStartEnd_2.Name = "CStartEnd_2";
-            this.CStartEnd_2.Width = 81;
-            // 
-            // CTime
-            // 
-            dataGridViewCellStyle18.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle18.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
-            dataGridViewCellStyle18.Format = "T";
-            dataGridViewCellStyle18.SelectionBackColor = System.Drawing.Color.DarkSeaGreen;
-            this.CTime.DefaultCellStyle = dataGridViewCellStyle18;
-            this.CTime.HeaderText = "Creation Time";
-            this.CTime.Name = "CTime";
-            this.CTime.ReadOnly = true;
-            this.CTime.Width = 97;
-            // 
-            // CTimeLabel
-            // 
-            this.CTimeLabel.HeaderText = "Label Time";
-            this.CTimeLabel.Name = "CTimeLabel";
-            this.CTimeLabel.Width = 84;
-            // 
-            // CNotes
-            // 
-            dataGridViewCellStyle19.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            this.CNotes.DefaultCellStyle = dataGridViewCellStyle19;
-            this.CNotes.FillWeight = 150F;
-            this.CNotes.HeaderText = "Notes";
-            this.CNotes.Name = "CNotes";
-            this.CNotes.Width = 60;
-            // 
-            // CStatus_1
-            // 
-            this.CStatus_1.HeaderText = "Status";
-            this.CStatus_1.Name = "CStatus_1";
-            this.CStatus_1.ReadOnly = true;
-            this.CStatus_1.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.CStatus_1.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.CStatus_1.Visible = false;
-            this.CStatus_1.Width = 62;
-            // 
-            // CStartID_1
-            // 
-            dataGridViewCellStyle20.Format = "N0";
-            dataGridViewCellStyle20.NullValue = null;
-            this.CStartID_1.DefaultCellStyle = dataGridViewCellStyle20;
-            this.CStartID_1.HeaderText = "StartID";
-            this.CStartID_1.Name = "CStartID_1";
-            this.CStartID_1.ReadOnly = true;
-            this.CStartID_1.Visible = false;
-            this.CStartID_1.Width = 65;
-            // 
-            // CEndID_1
-            // 
-            dataGridViewCellStyle21.Format = "N0";
-            dataGridViewCellStyle21.NullValue = null;
-            this.CEndID_1.DefaultCellStyle = dataGridViewCellStyle21;
-            this.CEndID_1.HeaderText = "EndID";
-            this.CEndID_1.Name = "CEndID_1";
-            this.CEndID_1.ReadOnly = true;
-            this.CEndID_1.Visible = false;
-            this.CEndID_1.Width = 62;
-            // 
-            // CCombo_Type_1
-            // 
-            this.CCombo_Type_1.HeaderText = "Combo Type I";
-            this.CCombo_Type_1.Name = "CCombo_Type_1";
-            this.CCombo_Type_1.ReadOnly = true;
-            this.CCombo_Type_1.Visible = false;
-            this.CCombo_Type_1.Width = 98;
-            // 
-            // CCombo_Label_1
-            // 
-            this.CCombo_Label_1.HeaderText = "Combo Label I";
-            this.CCombo_Label_1.Name = "CCombo_Label_1";
-            this.CCombo_Label_1.ReadOnly = true;
-            this.CCombo_Label_1.Visible = false;
-            // 
-            // CStatus_2
-            // 
-            this.CStatus_2.HeaderText = "Status II";
-            this.CStatus_2.Name = "CStatus_2";
-            this.CStatus_2.Visible = false;
-            this.CStatus_2.Width = 52;
-            // 
-            // CStartID_2
-            // 
-            this.CStartID_2.HeaderText = "StartID II";
-            this.CStartID_2.Name = "CStartID_2";
-            this.CStartID_2.Visible = false;
-            this.CStartID_2.Width = 74;
-            // 
-            // CEndID_2
-            // 
-            this.CEndID_2.HeaderText = "EndID II";
-            this.CEndID_2.Name = "CEndID_2";
-            this.CEndID_2.Visible = false;
-            this.CEndID_2.Width = 71;
-            // 
-            // CCombo_Type_2
-            // 
-            this.CCombo_Type_2.HeaderText = "Combo Type II";
-            this.CCombo_Type_2.Name = "CCombo_Type_2";
-            this.CCombo_Type_2.Visible = false;
-            this.CCombo_Type_2.Width = 101;
-            // 
-            // CCombo_Label_2
-            // 
-            this.CCombo_Label_2.HeaderText = "Combo_Label II";
-            this.CCombo_Label_2.Name = "CCombo_Label_2";
-            this.CCombo_Label_2.Visible = false;
-            this.CCombo_Label_2.Width = 106;
             // 
             // label_play
             // 
@@ -735,6 +558,191 @@ namespace AudioAnnotation
             this.textBox_instructions_2.TabIndex = 29;
             this.textBox_instructions_2.Text = resources.GetString("textBox_instructions_2.Text");
             // 
+            // CID
+            // 
+            dataGridViewCellStyle3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
+            dataGridViewCellStyle3.NullValue = null;
+            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.Color.DarkSeaGreen;
+            this.CID.DefaultCellStyle = dataGridViewCellStyle3;
+            this.CID.FillWeight = 80F;
+            this.CID.HeaderText = "Audio ID";
+            this.CID.Name = "CID";
+            this.CID.ReadOnly = true;
+            this.CID.Width = 73;
+            // 
+            // CAutoStop_1
+            // 
+            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle4.NullValue = "False";
+            this.CAutoStop_1.DefaultCellStyle = dataGridViewCellStyle4;
+            this.CAutoStop_1.FillWeight = 50F;
+            this.CAutoStop_1.HeaderText = "Auto Stop";
+            this.CAutoStop_1.Name = "CAutoStop_1";
+            this.CAutoStop_1.Visible = false;
+            this.CAutoStop_1.Width = 60;
+            // 
+            // CCategory_1
+            // 
+            this.CCategory_1.DisplayStyle = System.Windows.Forms.DataGridViewComboBoxDisplayStyle.ComboBox;
+            this.CCategory_1.DisplayStyleForCurrentCellOnly = true;
+            this.CCategory_1.FillWeight = 200F;
+            this.CCategory_1.HeaderText = "Category";
+            this.CCategory_1.Name = "CCategory_1";
+            this.CCategory_1.Width = 55;
+            // 
+            // CStartEnd_1
+            // 
+            dataGridViewCellStyle5.BackColor = System.Drawing.Color.White;
+            this.CStartEnd_1.DefaultCellStyle = dataGridViewCellStyle5;
+            this.CStartEnd_1.DisplayStyle = System.Windows.Forms.DataGridViewComboBoxDisplayStyle.ComboBox;
+            this.CStartEnd_1.DisplayStyleForCurrentCellOnly = true;
+            this.CStartEnd_1.HeaderText = "Start/End Tag";
+            this.CStartEnd_1.Name = "CStartEnd_1";
+            this.CStartEnd_1.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.CStartEnd_1.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            // 
+            // CAutoStop_2
+            // 
+            this.CAutoStop_2.FillWeight = 50F;
+            this.CAutoStop_2.HeaderText = "Auto Stop 2";
+            this.CAutoStop_2.Name = "CAutoStop_2";
+            this.CAutoStop_2.Visible = false;
+            this.CAutoStop_2.Width = 69;
+            // 
+            // CCategory_2
+            // 
+            this.CCategory_2.DisplayStyle = System.Windows.Forms.DataGridViewComboBoxDisplayStyle.ComboBox;
+            this.CCategory_2.DisplayStyleForCurrentCellOnly = true;
+            this.CCategory_2.FillWeight = 200F;
+            this.CCategory_2.HeaderText = "Category II";
+            this.CCategory_2.Name = "CCategory_2";
+            this.CCategory_2.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.CCategory_2.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.CCategory_2.Width = 83;
+            // 
+            // CStartEnd_2
+            // 
+            this.CStartEnd_2.DisplayStyle = System.Windows.Forms.DataGridViewComboBoxDisplayStyle.ComboBox;
+            this.CStartEnd_2.DisplayStyleForCurrentCellOnly = true;
+            this.CStartEnd_2.HeaderText = "Start/End Tag";
+            this.CStartEnd_2.Name = "CStartEnd_2";
+            this.CStartEnd_2.Width = 81;
+            // 
+            // CTime
+            // 
+            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle6.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
+            dataGridViewCellStyle6.Format = "T";
+            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.Color.DarkSeaGreen;
+            this.CTime.DefaultCellStyle = dataGridViewCellStyle6;
+            this.CTime.HeaderText = "Creation Time";
+            this.CTime.Name = "CTime";
+            this.CTime.ReadOnly = true;
+            this.CTime.Width = 97;
+            // 
+            // CTimeLabel
+            // 
+            this.CTimeLabel.HeaderText = "Label Time";
+            this.CTimeLabel.Name = "CTimeLabel";
+            this.CTimeLabel.Width = 84;
+            // 
+            // CNotes
+            // 
+            dataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            this.CNotes.DefaultCellStyle = dataGridViewCellStyle7;
+            this.CNotes.FillWeight = 150F;
+            this.CNotes.HeaderText = "Notes";
+            this.CNotes.Name = "CNotes";
+            this.CNotes.Width = 60;
+            // 
+            // CStatus_1
+            // 
+            this.CStatus_1.HeaderText = "Status";
+            this.CStatus_1.Name = "CStatus_1";
+            this.CStatus_1.ReadOnly = true;
+            this.CStatus_1.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.CStatus_1.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.CStatus_1.Visible = false;
+            this.CStatus_1.Width = 62;
+            // 
+            // CStartID_1
+            // 
+            dataGridViewCellStyle8.Format = "N0";
+            dataGridViewCellStyle8.NullValue = null;
+            this.CStartID_1.DefaultCellStyle = dataGridViewCellStyle8;
+            this.CStartID_1.HeaderText = "StartID";
+            this.CStartID_1.Name = "CStartID_1";
+            this.CStartID_1.ReadOnly = true;
+            this.CStartID_1.Visible = false;
+            this.CStartID_1.Width = 65;
+            // 
+            // CEndID_1
+            // 
+            dataGridViewCellStyle9.Format = "N0";
+            dataGridViewCellStyle9.NullValue = null;
+            this.CEndID_1.DefaultCellStyle = dataGridViewCellStyle9;
+            this.CEndID_1.HeaderText = "EndID";
+            this.CEndID_1.Name = "CEndID_1";
+            this.CEndID_1.ReadOnly = true;
+            this.CEndID_1.Visible = false;
+            this.CEndID_1.Width = 62;
+            // 
+            // CCombo_Type_1
+            // 
+            this.CCombo_Type_1.HeaderText = "Combo Type I";
+            this.CCombo_Type_1.Name = "CCombo_Type_1";
+            this.CCombo_Type_1.ReadOnly = true;
+            this.CCombo_Type_1.Visible = false;
+            this.CCombo_Type_1.Width = 98;
+            // 
+            // CCombo_Label_1
+            // 
+            this.CCombo_Label_1.HeaderText = "Combo Label I";
+            this.CCombo_Label_1.Name = "CCombo_Label_1";
+            this.CCombo_Label_1.ReadOnly = true;
+            this.CCombo_Label_1.Visible = false;
+            // 
+            // CStatus_2
+            // 
+            this.CStatus_2.HeaderText = "Status II";
+            this.CStatus_2.Name = "CStatus_2";
+            this.CStatus_2.Visible = false;
+            this.CStatus_2.Width = 52;
+            // 
+            // CStartID_2
+            // 
+            this.CStartID_2.HeaderText = "StartID II";
+            this.CStartID_2.Name = "CStartID_2";
+            this.CStartID_2.Visible = false;
+            this.CStartID_2.Width = 74;
+            // 
+            // CEndID_2
+            // 
+            this.CEndID_2.HeaderText = "EndID II";
+            this.CEndID_2.Name = "CEndID_2";
+            this.CEndID_2.Visible = false;
+            this.CEndID_2.Width = 71;
+            // 
+            // CCombo_Type_2
+            // 
+            this.CCombo_Type_2.HeaderText = "Combo Type II";
+            this.CCombo_Type_2.Name = "CCombo_Type_2";
+            this.CCombo_Type_2.Visible = false;
+            this.CCombo_Type_2.Width = 101;
+            // 
+            // CCombo_Label_2
+            // 
+            this.CCombo_Label_2.HeaderText = "Combo_Label II";
+            this.CCombo_Label_2.Name = "CCombo_Label_2";
+            this.CCombo_Label_2.Visible = false;
+            this.CCombo_Label_2.Width = 106;
+            // 
+            // CTime_MS
+            // 
+            this.CTime_MS.HeaderText = "CreationTime_MS";
+            this.CTime_MS.Name = "CTime_MS";
+            this.CTime_MS.Width = 116;
+            // 
             // FormAnnotation
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -813,6 +821,7 @@ namespace AudioAnnotation
         private System.Windows.Forms.DataGridViewTextBoxColumn CEndID_2;
         private System.Windows.Forms.DataGridViewTextBoxColumn CCombo_Type_2;
         private System.Windows.Forms.DataGridViewTextBoxColumn CCombo_Label_2;
+        private System.Windows.Forms.DataGridViewTextBoxColumn CTime_MS;
     }
 }
 

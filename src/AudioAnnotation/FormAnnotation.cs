@@ -9,26 +9,27 @@ using System.Windows.Forms;
 using System.IO;
 using Wockets.Data.Annotation;
 using System.Reflection;
-
-
+using WMPLib;
 
 
 namespace AudioAnnotation
 {
+
     public partial class FormAnnotation : Form
     {
 
 
         #region  Declare variables
 
-
-        private DirectoryInfo folder;
+        //Audio Files
+        //private DirectoryInfo folder;
         private FileInfo[] files = null;
         private FileInfo[] files_wav = null;
         private FileInfo file_session = null;
-        private System.Media.SoundPlayer myPlayer;
+        private string NO_AUDIO_ROW_STR = "-----";
+        
 
-
+        //DataGridView
         private struct COLUMN_INDEX
         {
             public int ID;
@@ -38,6 +39,7 @@ namespace AudioAnnotation
 
             public int Status, StartID, EndID;
             public int Combo_Type, Combo_Label;
+            public int TimeMS;
 
             public COLUMN_INDEX(int category)
             {
@@ -45,7 +47,7 @@ namespace AudioAnnotation
                 Time = 7;
                 Time_Label = 8;
                 Notes = 9;
-
+                TimeMS = 20;
 
                 if (category == 1)
                 {
@@ -59,6 +61,7 @@ namespace AudioAnnotation
 
                     Combo_Type = 13;
                     Combo_Label = 14;
+                    
                 }
                 else
                 {
@@ -82,7 +85,7 @@ namespace AudioAnnotation
                 Time = 7;
                 Time_Label = 8;
                 Notes = 9;
-
+                TimeMS = 20;
 
                 if (category == 1)
                 {
@@ -228,7 +231,8 @@ namespace AudioAnnotation
 
         public FormAnnotation()
         {
-
+            
+           
             InitializeComponent();
 
 
@@ -281,6 +285,12 @@ namespace AudioAnnotation
             CStatus_2.SortMode = DataGridViewColumnSortMode.NotSortable;
             CStatus_2.Sorted = false;
 
+            //Time
+            CTime.SortMode = DataGridViewColumnSortMode.NotSortable;
+            CTimeLabel.SortMode = DataGridViewColumnSortMode.NotSortable;
+            CTime_MS.SortMode = DataGridViewColumnSortMode.NotSortable;
+
+
 
             // hide the row headers
             //dgview.RowHeadersVisible = false;
@@ -330,6 +340,7 @@ namespace AudioAnnotation
 
         #region Load Grid Data
 
+        //Load data to grid
         private bool LoadData()
         {
 
@@ -397,7 +408,7 @@ namespace AudioAnnotation
                                 }
 
 
-                                //if session name file not found
+                                //if session name file not found, create new session
                                 if (DataSessionName.CompareTo("") == 0)
                                 {
                                     DataSessionName = name;
@@ -414,25 +425,37 @@ namespace AudioAnnotation
                                     { is_data_loaded = true; }
 
                                 }
-                                else
+                                else  //if session file name found, load previous session
                                 {
-                                    // !note: this should return an OK value
-                                    LoadRowsToGrid(DataSessionName);
-                                    is_data_loaded = true;
-
+                                    //LoadAudioFiles
                                     if (files == null)
                                     {
                                         LoadAudioFiles();
+    
                                     }
 
+
+                                    //If audio files were found
                                     if (files != null)
                                     {
                                         if (files.Length > 0)
                                         {
                                             StartDate = files[0].LastWriteTime.ToShortDateString();
                                             EndDate = files[files.Length - 1].LastWriteTime.ToShortDateString();
+
+                                            // !note: this should return an OK value
+                                            LoadRowsToGrid(DataSessionName);
+                                            is_data_loaded = true;
+
                                         }
                                     }
+                                    else
+                                    {
+                                        label_play.Text = "No audio files were found. Please check the directory name.";
+                                        XmlSession = null;
+                                    }
+
+
 
                                 }
 
@@ -440,10 +463,7 @@ namespace AudioAnnotation
                             else
                             {
                                 DataSessionName = DataSessionDir + "annotation_session.txt";
-                                //"Session_" + DateTime.Now.Year.ToString() + "-" +
-                                //DateTime.Now.Month.ToString() + "-" +
-                                //DateTime.Now.Day.ToString() + ".txt";
-
+                                
                                 //Load list
                                 if (LoadList(dataGridView1) == false)
                                 {
@@ -495,19 +515,29 @@ namespace AudioAnnotation
             }
         }
 
+
         // Load Data from the DataSet into the ListView
         private bool LoadList(DataGridView dgview)
         {
-            DateTime time;
+            DateTime time, end_file_time;
             bool data_loaded = false;
+            double secs_duration = 0.0;
+            string duration = "";
 
+
+            //Clean previous entries
             DeleteAllRows();
 
+
+            //Load audio files
             if (files == null)
             {
                 LoadAudioFiles();
+                
             }
 
+
+            //If there are audio files, create/add rows
             if (files.Length > 0)
             {
 
@@ -534,12 +564,21 @@ namespace AudioAnnotation
                     dataGridView1.Rows[n].Cells[C2.category_label].Value = " ";
 
 
-                    // creation time
-                    time = files[n].LastWriteTime;
+                    //-------- Here compute the creation time ---------------
+                    end_file_time = files[n].LastWriteTime;
+                    secs_duration = 0.0;
+                    duration = GetDuration(files_wav[n].FullName, files_wav[n].Length, out secs_duration);
+                    time = end_file_time.Subtract(TimeSpan.FromSeconds(secs_duration));
+                    
 
+                    //Load the time row in labels
+                    dgview.Rows[n].Cells[C1.Time].Value = time.ToLongTimeString();  //time.Hour + ":" + time.Minute + ":" + time.Second; //+"."+time.Millisecond;
+                    dgview.Rows[n].Cells[C1.Time_Label].Value = time.ToLongTimeString(); //time.Hour + ":" + time.Minute + ":" + time.Second; //+ "." + time.Millisecond;
+                    
+                    dgview.Rows[n].Cells[C1.TimeMS].Value = time.TimeOfDay.ToString().TrimEnd('0');
 
-                    dgview.Rows[n].Cells[C1.Time].Value = time.Hour + ":" + time.Minute + ":" + time.Second; //+"."+time.Millisecond;
-                    dgview.Rows[n].Cells[C1.Time_Label].Value = time.Hour + ":" + time.Minute + ":" + time.Second; //+ "." + time.Millisecond;
+                    //--------------------------------------------------------
+
 
                     // Status
                     dgview.Rows[n].Cells[C1.Status].Value = " ";
@@ -702,30 +741,120 @@ namespace AudioAnnotation
         #endregion
 
 
+
+
+
         #region Buttons
 
-        // Play Audio Files
-        private void button_play_Click(object sender, EventArgs e)
+
+        //Browse session button
+        private void button_load_Click(object sender, EventArgs e)
         {
-            for (int i = 0; i < files_wav.Length; i++)
+            try
             {
-                label_play.Text = "Playing file: " + i.ToString() + "  Time:" +
-                                  files[i].LastWriteTime.ToLongDateString();
+
+                this.folderBrowserDialog.ShowNewFolderButton = false;
+
+                if (textBox_1.Text.Trim().CompareTo("") != 0)
+                {
+                    if (Directory.Exists(textBox_1.Text))
+                    { this.folderBrowserDialog.SelectedPath = textBox_1.Text.ToString(); }
+                    else
+                    { this.folderBrowserDialog.RootFolder = System.Environment.SpecialFolder.Desktop; }
+                }
+                else
+                {
+                    this.folderBrowserDialog.RootFolder = System.Environment.SpecialFolder.Desktop;
+                }
+
+                DialogResult result = this.folderBrowserDialog.ShowDialog();
 
 
-                Application.DoEvents();
+                if (result == DialogResult.OK)
+                {
+                    string fullPath = this.folderBrowserDialog.SelectedPath;
+                    textBox_1.Text = fullPath;
 
-                myPlayer.SoundLocation = files_wav[i].FullName;
-                myPlayer.PlaySync();
+                    if (textBox_1.Text.Trim().CompareTo("") == 0)
+                    {
+                        textBox_instructions_1.Text = "Please provide a valid path containing the session data, then click Start.";
+                    }
+                    else
+                    {
 
+                        #region commented
+                        //----------------------------------------------------------
+                        /*
+                        //read audio files
+                        folder = new DirectoryInfo(fullPath + "\\annotation\\voice\\");
+
+                    
+                        //files_wav = folder.GetFiles("*.wav");
+                        //files = folder.GetFiles("*.msv");
+
+                        files_wav = folder.GetFiles("*.mp3");
+                        files = folder.GetFiles("*.mp3");
+
+                        // sort the recorder audio files by creation time (Oct-22-2009)
+                        Array.Sort(files, new CompareFileInfoByDate());
+
+
+                        if (files_wav.Length != files.Length)
+                        { textBox_instructions_1.Text = "Warning: mistmatch between number of msv and wav files!"; }
+
+                        //----------------------------------------------------------------
+                        */
+                        #endregion
+
+                        DataAudioDir = fullPath + "\\annotation\\voice\\";
+
+                        if (Directory.Exists(DataAudioDir))
+                        {
+                            if (LoadAudioFiles())
+                            {
+                                if (files_wav.Length > 0)
+                                {
+                                    textBox_instructions_1.Text = "The audio files were loaded.";
+
+                                    #region commented
+                                    //DataAudioDir = files_wav[0].DirectoryName;
+
+                                    //if (textBox_1.Text.Trim().CompareTo("") == 0)
+                                    //{ textBox_instructions_1.Text = "Please provide a valid path for the audio files, then click Start."; }
+                                    //else
+                                    //{ textBox_instructions_1.Text = ""; }
+                                    #endregion
+
+                                }
+                                else
+                                {
+                                    textBox_instructions_1.Text = "No audio files were found. Please check you have the files in the directory: session\annotation\voice";
+                                }
+                            }
+                            else
+                            {
+                                textBox_instructions_1.Text = "No audio files were found. Please check you have the files in the directory: session\annotation\voice";
+                            }
+                        }
+                        else
+                        {
+                            textBox_instructions_1.Text = "The audio files directory was not found. Please check that the  \\annotation\\voice\\ folder exists.";
+                        }
+
+                    }
+                }
+
+
+            } // end try
+
+            catch (Exception err)
+            {
+                Console.WriteLine(err.Message);
             }
         }
 
 
-        // Browse for Audio Files
-
-
-
+       
         private void button_add_label_Click(object sender, EventArgs e)
         {
 
@@ -914,105 +1043,142 @@ namespace AudioAnnotation
 
         #region Audio Files
 
-
-        private void LoadAudioFiles()
+        //=======  Compute the sound length ==================
+       
+        private bool LoadAudioFiles()
         {
             try
             {
+                bool success = false;
+
 
                 DirectoryInfo dir = new DirectoryInfo(DataAudioDir);
 
                 if (dir.Exists)
                 {
 
+                    // read audio files
                     files_wav = dir.GetFiles("*.wav");
                     files = dir.GetFiles("*.msv");
 
-                    // sort the recorder audio files by creation time (Oct-22-2009)
-                    Array.Sort(files, new CompareFileInfoByDate());
+                    if (files.Length == 0)
+                    {
+                        files_wav = dir.GetFiles("*.mp3");
+                        files = dir.GetFiles("*.mp3");
+                    }
+
+                    if (files.Length > 0)
+                    {   // sort the recorder audio files by creation time (Oct-22-2009)
+                        Array.Sort(files, new CompareFileInfoByDate());
 
 
-                    if (files_wav.Length != files.Length)
-                    { label_play.Text = "Warning: mistmatch between number of msv and wav files!"; }
+                        if (files_wav.Length != files.Length)
+                        { label_play.Text = "Warning: mistmatch between number of msv and wav files!"; }
+                        else
+                        { success = true; }
+                    }
+                    else
+                    {
+                        label_play.Text = "No audio files found!";
+                    }
 
-
+                    
                 }
+
+                return success;
 
             } // end try
 
-            catch (Exception err)
+            catch
             {
-                Console.WriteLine(err.Message);
+                //Console.WriteLine(err.Message);
+                return false;
             }
 
         }
 
-        //Browse session button
-        private void button_load_Click(object sender, EventArgs e)
+
+        //private System.Media.SoundPlayer myPlayer = new System.Media.SoundPlayer();
+        private WindowsMediaPlayerClass wmp = new WindowsMediaPlayerClass();
+        private IWMPMedia mediainfo;
+
+        private int header = 44;
+        private int sample_rate = 44100;
+        private int bit_rate = 16;
+        private int num_channels = 2;
+
+        public string GetDuration(string path,long file_length ,out double secs_duration)
         {
             try
             {
+                string audio_duration = "-1";
+                mediainfo = null;
+                secs_duration = 0.0;
 
-                this.folderBrowserDialog.ShowNewFolderButton = false;
-
-                if (textBox_1.Text.Trim().CompareTo("") != 0)
+                if (File.Exists(path))
                 {
-                    if (Directory.Exists(textBox_1.Text))
-                    { this.folderBrowserDialog.SelectedPath = textBox_1.Text.ToString(); }
+                    if (path.Contains("mp3"))
+                    {
+                        mediainfo = wmp.newMedia(path);
+
+
+                        if (mediainfo.duration > 0.0)
+                        {
+                            audio_duration = mediainfo.durationString;
+                            secs_duration = mediainfo.duration;
+                        }
+                        
+                    }
+                    else if( path.Contains("wav"))
+                    {
+                        secs_duration = Math.Round( ((file_length - header) / (sample_rate * (bit_rate / 8.0)))/2.0 , 3);
+                        audio_duration = secs_duration.ToString();
+                        
+
+   
+                    }
                     else
-                    { this.folderBrowserDialog.RootFolder = System.Environment.SpecialFolder.Desktop; }
+                    {
+                        label_play.Text = ("Audio file extension not identified: " + path);
+                    }
+
                 }
                 else
                 {
-                    this.folderBrowserDialog.RootFolder = System.Environment.SpecialFolder.Desktop;
-                }
-
-                DialogResult result = this.folderBrowserDialog.ShowDialog();
-
-
-                if (result == DialogResult.OK)
-                {
-                    string fullPath = this.folderBrowserDialog.SelectedPath;
-                    textBox_1.Text = fullPath;
-
-                    folder = new DirectoryInfo(fullPath + "\\annotation\\voice\\");
-
-
-                    files_wav = folder.GetFiles("*.wav");
-                    files = folder.GetFiles("*.msv");
-
-                    // sort the recorder audio files by creation time (Oct-22-2009)
-                    Array.Sort(files, new CompareFileInfoByDate());
-
-
-                    if (files_wav.Length != files.Length)
-                    { textBox_instructions_1.Text = "Warning: mistmatch between number of msv and wav files!"; }
-
-                    if (files_wav.Length > 0)
-                    {
-                        DataAudioDir = files_wav[0].DirectoryName;
-
-                        if (textBox_1.Text.Trim().CompareTo("") == 0)
-                        { textBox_instructions_1.Text = "Please provide a valid path for the audio files, then click Start."; }
-                        else
-                        { textBox_instructions_1.Text = ""; }
-                    }
-                    else
-                    {
-                        textBox_instructions_1.Text = "No audio files were found. Please check you have the files in the directory: session\annotation\voice";
-                    }
-
+                    label_play.Text = ("Audio file not found: " + path);
                 }
 
 
-            } // end try
-
-            catch (Exception err)
+                return audio_duration;
+            }
+            catch
             {
-                Console.WriteLine(err.Message);
+                secs_duration = 0.0;
+                return "-1";
+
             }
         }
 
+
+
+
+        // Play Audio Files
+        private void button_play_Click(object sender, EventArgs e)
+        {
+            for (int i = 0; i < files_wav.Length; i++)
+            {
+                label_play.Text = "Playing audio file: " + i.ToString();
+                                  
+
+                Application.DoEvents();
+
+               
+               PlayAudio(i);
+                
+            }
+        }
+
+        
 
         private void PlayFile(int index)
         {
@@ -1040,17 +1206,22 @@ namespace AudioAnnotation
 
         private void PlayAudio(int index)
         {
-            if (files != null)
+            if (files_wav != null)
             {
-                if (files.Length > 0)
+                if (files_wav.Length > 0)
                 {
                     try
                     {
-                        myPlayer.SoundLocation = files_wav[index].FullName;
-                        myPlayer.PlaySync();
+                        //myPlayer.SoundLocation = files_wav[index].FullName;
+                        //myPlayer.PlaySync();
+                        wmp.currentMedia = wmp.newMedia(files_wav[index].FullName);
+                        wmp.controls.play();
+
+                        //double secs_duration = 0.0;
+                        //string audio_str = GetDuration(files_wav[index].FullName, files_wav[index].Length, out secs_duration);
                     }
                     catch
-                    {   // console error
+                    {   // error playing file
                     }
                 }
             }
@@ -1058,7 +1229,10 @@ namespace AudioAnnotation
         }
 
 
+
         #endregion
+
+
 
 
         #region Row Operations
@@ -1067,7 +1241,7 @@ namespace AudioAnnotation
         {
 
             // initialize values
-            dataGridView1.Rows[row].Cells[CINDEX.ID].Value = "-----";
+            dataGridView1.Rows[row].Cells[CINDEX.ID].Value = NO_AUDIO_ROW_STR;  //"-----";
 
             // initialize locks
             dataGridView1.Rows[row].Cells[C1.Lock].Value = true;
@@ -1086,12 +1260,26 @@ namespace AudioAnnotation
             }
 
 
-            //check is not the end of the list, if end of the list leave it blank
+            //check is not the end of the list, if end of the list set the time of the previous row
             if ((row_label_time < dataGridView1.Rows.Count) && (row_label_time > -1))
             {
                 //obtain what the next row has in its label_time field
                 dataGridView1.Rows[row].Cells[CINDEX.Time_Label].Value = dataGridView1.Rows[row_label_time].Cells[CINDEX.Time_Label].Value;
+
+                //Adding milliseconds granularity
+                dataGridView1.Rows[row].Cells[CINDEX.TimeMS].Value = dataGridView1.Rows[row_label_time].Cells[CINDEX.TimeMS].Value;
+
             }
+            else if (( (row-1) < dataGridView1.Rows.Count) && ( (row-1) > -1))
+            {
+                //set the time label according to previous row label available
+                dataGridView1.Rows[row].Cells[CINDEX.Time_Label].Value = dataGridView1.Rows[row -1 ].Cells[CINDEX.Time_Label].Value;
+                
+                //Adding milliseconds granularity
+                dataGridView1.Rows[row].Cells[CINDEX.TimeMS].Value = dataGridView1.Rows[row - 1].Cells[CINDEX.TimeMS].Value;
+
+            }
+
 
             // Status
             // check if I need to setup the parameters according with previous row
@@ -1103,6 +1291,23 @@ namespace AudioAnnotation
             dataGridView1.Rows[row].Cells[C2.StartID].Value = -1;
             dataGridView1.Rows[row].Cells[C2.EndID].Value = -1;
 
+            
+            //Paint the cells according with the appropriate view
+            if( checkBox_SiglePassMode.Checked )
+            {   
+                //load single view
+                paintcells_view(row,3);
+            }
+            else if (SessionPart == 2)
+            {
+                //load view 2
+                paintcells_view(row, 2);
+            }
+            else if (SessionPart == 1)
+            {
+                //load view 1
+                paintcells_view(row, 1);
+            }
 
         }
 
@@ -1301,6 +1506,7 @@ namespace AudioAnnotation
                         { value = "S"; }
 
 
+                        #region commented
                         /*if (SessionPart == 1)
                         {
                             if ( (cellComboBox.Items.Count == list_category_1.Count) ||
@@ -1318,6 +1524,7 @@ namespace AudioAnnotation
                             { value = "S"; }
                         }
                        */
+                        #endregion 
 
                     }
                     else
@@ -1385,7 +1592,7 @@ namespace AudioAnnotation
 
         }
 
-
+        private int previous_row_audio_file = 0;
         private bool LoadRowsToGrid(string fname)
         {
 
@@ -1393,60 +1600,69 @@ namespace AudioAnnotation
 
             try
             {
-
-                string row_string = "";
-
-                file_session = new FileInfo(fname);
-
-                if (file_session.Exists == false)
+                if (files != null)
                 {
-                    label_play.Text = "Session file was not found. A new session file will be created.";
-
-                }
-                else
-                {
-
-                    DeleteAllRows();
-
-
-                    // Set End-Start
-                    CStartEnd_1.Items.Add(" ");
-                    CStartEnd_1.Items.Add("End");
-                    CStartEnd_1.Items.Add("Start");
-
-                    CStartEnd_2.Items.Add(" ");
-                    CStartEnd_2.Items.Add("End");
-                    CStartEnd_2.Items.Add("Start");
-
-                    tr = new StreamReader(fname);
-                    row_string = tr.ReadLine();
-
-
-                    if (row_string != null)
+                    if (files.Length > 0)
                     {
+                        string row_string = "";
+                        
+                        file_session = new FileInfo(fname);
 
-                        string[] ncells = row_string.Split(';');
-                        StartDate = ncells[0];
-                        EndDate = ncells[1];
+                        if (file_session.Exists == false)
+                        {
+                            label_play.Text = "Session file was not found. A new session file will be created.";
 
-                        row_string = tr.ReadLine();
+                        }
+                        else
+                        {
+
+                            DeleteAllRows();
+
+
+                            // Set End-Start
+                            CStartEnd_1.Items.Add(" ");
+                            CStartEnd_1.Items.Add("End");
+                            CStartEnd_1.Items.Add("Start");
+
+                            CStartEnd_2.Items.Add(" ");
+                            CStartEnd_2.Items.Add("End");
+                            CStartEnd_2.Items.Add("Start");
+
+                            tr = new StreamReader(fname);
+                            row_string = tr.ReadLine();
+
+
+                            if (row_string != null)
+                            {
+
+                                string[] ncells = row_string.Split(';');
+                                StartDate = ncells[0];
+                                EndDate = ncells[1];
+
+                                row_string = tr.ReadLine();
+                            }
+
+
+                            previous_row_audio_file = 0;
+
+                            while (row_string != null)
+                            {
+                                //ReadRow(row_string);
+                                ReadRow(row_string, true);
+
+                                row_string = tr.ReadLine();
+                            }
+
+
+                            tr.Close();
+
+                            label_play.Text = "The Session has been loaded.";
+                            data_loaded = true;
+                        }
+
                     }
-
-
-
-                    while (row_string != null)
-                    {
-                        ReadRow(row_string);
-
-                        row_string = tr.ReadLine();
-                    }
-
-
-                    tr.Close();
-
-                    label_play.Text = "The Session has been loaded.";
-                    data_loaded = true;
                 }
+
             }
             catch
             { }
@@ -1456,10 +1672,8 @@ namespace AudioAnnotation
         }
 
 
-
-
-
-
+        //Read a row from previous saved session
+        //Check if it is necessary to correct the time stamp
         private void ReadRow(string st)
         {
             string[] ncells = st.Split(';');
@@ -1520,6 +1734,177 @@ namespace AudioAnnotation
 
 
         }
+
+
+        //Read a row from previous saved session
+        //Check if it is necessary to correct the time stamp
+        private void ReadRow(string st, bool check_time_stamp)
+        {
+
+            int n = 0;
+            DateTime end_file_time, time;
+            TimeSpan time_diff;
+            string duration;
+            double secs_duration;
+
+            
+            bool ID_value_set = false;
+            bool Time_value_set = false;
+            bool is_audio_row = false;
+
+
+            string[] ncells = st.Split(';');
+
+            int row = dataGridView1.Rows.Add();
+            int nCellsLenght = ncells.Length - 1;
+
+            for (int i = 0; i < nCellsLenght; i++)
+            {
+
+                if (i == C1.Lock)
+                {
+                    if (ncells[i].CompareTo("True") == 0)
+                    { dataGridView1.Rows[row].Cells[i].Value = true; }
+                    else
+                    { dataGridView1.Rows[row].Cells[i].Value = false; }
+                }
+                else if (i == C2.Lock)
+                {
+                    if (ncells[i].CompareTo("True") == 0)
+                    { dataGridView1.Rows[row].Cells[i].Value = true; }
+                    else
+                    { dataGridView1.Rows[row].Cells[i].Value = false; }
+                }
+                else if ((i == C1.category_label) || (i == C2.category_label))
+                {
+                    // Do nothing
+                }
+                else if (i == C1.Combo_Label)
+                {
+                    dataGridView1.Rows[row].Cells[i].Value = ncells[i];
+
+                    if (dataGridView1.Rows[row].Cells[C1.Combo_Type].Value.ToString().CompareTo("S") == 0)
+                    { set_ComboBox(cellComboBox, row, C1.category_label, 1, ncells[i]); }
+                    else
+                    { set_ComboBox(cellComboBox, row, C1.category_label, 2, ncells[i]); }
+
+                    dataGridView1.Rows[row].Cells[C1.category_label].Value = ncells[C1.category_label];
+                }
+                else if (i == C2.Combo_Label)
+                {
+                    dataGridView1.Rows[row].Cells[i].Value = ncells[i];
+
+                    if (dataGridView1.Rows[row].Cells[C2.Combo_Type].Value.ToString().CompareTo("S") == 0)
+                    { set_ComboBox(cellComboBox, row, C2.category_label, 1, ncells[i]); }
+                    else
+                    { set_ComboBox(cellComboBox, row, C2.category_label, 2, ncells[i]); }
+
+                    dataGridView1.Rows[row].Cells[C2.category_label].Value = ncells[C2.category_label];
+               
+                }
+                // C1.ID and C2.ID have the same values, so compare only one of them
+                else if( i== C1.ID )
+                {
+                    
+                        dataGridView1.Rows[row].Cells[i].Value = ncells[i];
+                        ID_value_set = true;
+
+                        if (ncells[i].CompareTo(NO_AUDIO_ROW_STR) != 0)
+                        {
+                            is_audio_row = true;
+                        }
+                        else
+                        { is_audio_row = false; }
+                    
+
+                }
+                // C1.Time and C2.Time have the same values, so compare only one
+                else if( (i == C1.Time) && (check_time_stamp == true))
+                {
+
+                        //If the row has an audio file, read id from file
+                        if (is_audio_row == true)
+                        {
+                            n = Int32.Parse(ncells[C1.ID]);
+                            
+                            //update the last seen audio file row value
+                            previous_row_audio_file = n;
+
+                            end_file_time = files[n].LastWriteTime;
+
+                            if (C1.TimeMS < nCellsLenght)
+                            { time = DateTime.Parse(end_file_time.ToShortDateString() + " " + ncells[C1.TimeMS]); }
+                            else
+                            { time = DateTime.Parse(end_file_time.ToShortDateString() + " " + ncells[i]); }
+
+                        }
+                        // if the row doesn't have an audio file, assign the time stamp 
+                        // according to the last seen audio row
+                        else
+                        {
+                            if (previous_row_audio_file < files.Length - 1)
+                            { n = previous_row_audio_file + 1; }
+                            else
+                            { n = previous_row_audio_file;  }
+
+                            end_file_time = files[n].LastWriteTime;
+
+                            if (C1.TimeMS < nCellsLenght)
+                            { time = DateTime.Parse(end_file_time.ToShortDateString() + " " + ncells[C1.TimeMS]); }
+                            else
+                            { time = DateTime.Parse(end_file_time.ToShortDateString() + " " + ncells[i + 1]); }
+
+                            
+
+                        }
+
+
+
+                        //-------- Here compute the creation time ---------------
+                       
+                        //substract creation time from the end time
+                        time_diff = end_file_time.Subtract(time);
+                        
+
+                        // if the time difference is equal zero or less than zero, the time stamp needs to be corrected
+                        if ( (time_diff.TotalSeconds == 0.0) || (time_diff.TotalSeconds < 0.0) )
+                        {
+                            // compute the creation time
+                            secs_duration = 0.0;
+                            duration = GetDuration(files_wav[n].FullName, files_wav[n].Length, out secs_duration);
+                            time = end_file_time.Subtract(TimeSpan.FromSeconds(secs_duration));
+                        }
+                            
+                    
+                        //write the creation time to the "creation time" and "label time" columns
+                            if (is_audio_row == true)
+                            { dataGridView1.Rows[row].Cells[i].Value = time.ToLongTimeString(); }
+                            else
+                            { dataGridView1.Rows[row].Cells[i].Value = ""; }
+
+                            dataGridView1.Rows[row].Cells[C1.Time_Label].Value = time.ToLongTimeString();
+                            dataGridView1.Rows[row].Cells[C1.TimeMS].Value = time.TimeOfDay.ToString().TrimEnd('0');
+                          
+                         
+                        
+                        //-------------------------------------------------------------------------
+                }
+                else if (  ((i == C1.Time_Label) || (i== C1.TimeMS))  && (check_time_stamp == true))
+                { 
+                    //Do nothing, since the value was modified along with the previous field
+                }
+                else
+                {
+                    dataGridView1.Rows[row].Cells[i].Value = ncells[i];
+                }
+
+            }
+
+
+
+        }
+
+
 
         private void DeleteAllRows()
         {
@@ -1666,8 +2051,8 @@ namespace AudioAnnotation
 
                 while (row_string != null)
                 {
-                    ReadRow(row_string);
-
+                    //ReadRow(row_string);
+                    ReadRow(row_string, true);
                     row_string = tr.ReadLine();
 
                 }
@@ -1692,9 +2077,9 @@ namespace AudioAnnotation
             PopUp_Message_Window dlg = new PopUp_Message_Window();
 
             this.Enabled = false;
-            //textBox_instructions.ForeColor = Color.Gainsboro;
-            //label_files_path.ForeColor = Color.Gainsboro;
-            //label_protocol_path.ForeColor = Color.Gainsboro;
+            //textBox_instructions.ForeColor = System.Drawing.Color.Gainsboro;
+            //label_files_path.ForeColor = System.Drawing.Color.Gainsboro;
+            //label_protocol_path.ForeColor = System.Drawing.Color.Gainsboro;
 
 
             DialogResult dlg_res = dlg.ShowDialog();
@@ -1708,8 +2093,8 @@ namespace AudioAnnotation
                 SessionStarted = true;
                 is_started = 0;
 
-                //this.BackColor = Color.DimGray;
-                //textBox_instructions.BackColor = Color.YellowGreen;
+                //this.BackColor = System.Drawing.Color.DimGray;
+                //textBox_instructions.BackColor = System.Drawing.Color.YellowGreen;
                 this.Enabled = true;
 
             } // if load session was selected
@@ -1720,8 +2105,8 @@ namespace AudioAnnotation
                 SessionStarted = true;
                 is_started = 1;
 
-                //this.BackColor = Color.DimGray;
-                //textBox_instructions.BackColor = Color.YellowGreen;
+                //this.BackColor = System.Drawing.Color.DimGray;
+                //textBox_instructions.BackColor = System.Drawing.Color.YellowGreen;
                 this.Enabled = true;
 
             }// if session selection was canceled
@@ -1731,8 +2116,8 @@ namespace AudioAnnotation
                 XmlSession = null;
 
 
-                //this.BackColor = Color.DimGray;
-                //textBox_instructions.BackColor = Color.YellowGreen;
+                //this.BackColor = System.Drawing.Color.DimGray;
+                //textBox_instructions.BackColor = System.Drawing.Color.YellowGreen;
                 this.Enabled = true;
 
                 label_play.Text = "To create or load a previous session must be selected. Otherwise, the annotation program cannot start.";
@@ -1751,10 +2136,7 @@ namespace AudioAnnotation
             string fname;
             string fname_bk;
 
-            // Backup previous session files
-            //fname = DataSessionDir + "session_p1.txt";
-            //fname_bk = DataSessionDir + "session_backup.txt";
-
+            
             fname = DataSessionName;
             fname_bk = DataSessionDir + "bk_" + SessionFileName;
 
@@ -1768,20 +2150,6 @@ namespace AudioAnnotation
                 File.Delete(fname);
             }
 
-            /*
-            // Backup previous session files
-            fname = DataSessionDir + "session_p2.txt";
-            fname_bk = DataSessionDir + "session_p2_backup.txt";
-
-            if (File.Exists(fname))
-            {
-                if (File.Exists(fname_bk))
-                { File.Delete(fname_bk); }
-
-                File.Copy(fname, fname_bk);
-                File.Delete(fname);
-            }
-            */
 
 
         }
@@ -2115,7 +2483,7 @@ namespace AudioAnnotation
                         for (int j = 0; j < list_category_1.Count; j++)
                         { combo.Items.Add(list_category_1[j]); }
 
-
+                        #region commented 
                         /*
                          * if (SessionPart == 1)
                         {
@@ -2128,6 +2496,8 @@ namespace AudioAnnotation
                             { combo.Items.Add(list_category_2[j]); }
                         }
                          */
+                        #endregion 
+
 
                     }
                     else if (index_label == C2.category_label)
@@ -2467,14 +2837,14 @@ namespace AudioAnnotation
 
                 if (prev_cellStyle != null)
                 {
-                    prev_cellStyle.SelectionBackColor = Color.DarkSeaGreen;
+                    prev_cellStyle.SelectionBackColor = System.Drawing.Color.DarkSeaGreen;
                 }
 
 
                 cur_cellStyle = dataGridView1.Columns[e.ColumnIndex].DefaultCellStyle;
                 if (cur_cellStyle != null)
                 {
-                    cur_cellStyle.SelectionBackColor = Color.Orange;
+                    cur_cellStyle.SelectionBackColor = System.Drawing.Color.Orange;
                 }
 
                 current_column = e.ColumnIndex;
@@ -2551,7 +2921,7 @@ namespace AudioAnnotation
             this.dataGridView1.Height = this.Height - panel_controls_2.Height - 100;
 
             //textBox_instructions_2.Text = "Please provide a valid path for the audio and protocol files, then click Start. \n If the session file field is left blank, an annotation session file will be created automatically. \n An existing session file can be provided or a new session file name can be specified. ";
-            //textBox_instructions_1.ForeColor = Color.YellowGreen;
+            //textBox_instructions_1.ForeColor = System.Drawing.Color.YellowGreen;
         }
 
 
@@ -3599,8 +3969,11 @@ namespace AudioAnnotation
                     label_start = dataGridView1.Rows[start_row].Cells[CINDEX.category_label].Value.ToString();
                     label_end = dataGridView1.Rows[end_row].Cells[CINDEX.category_label].Value.ToString();
 
-                    start_time = dataGridView1.Rows[start_row].Cells[CINDEX.Time_Label].Value.ToString();
-                    end_time = dataGridView1.Rows[end_row].Cells[CINDEX.Time_Label].Value.ToString();
+                    //start_time = dataGridView1.Rows[start_row].Cells[CINDEX.Time_Label].Value.ToString();
+                    //end_time = dataGridView1.Rows[end_row].Cells[CINDEX.Time_Label].Value.ToString();
+                    start_time = dataGridView1.Rows[start_row].Cells[CINDEX.TimeMS].Value.ToString();
+                    end_time = dataGridView1.Rows[end_row].Cells[CINDEX.TimeMS].Value.ToString();
+
 
                     // check if row seq. is correct
                     if (start_row < end_row)
@@ -3649,57 +4022,64 @@ namespace AudioAnnotation
                                 {
                                     if (c == 1)
                                     {
-                                        if (SessionPart == 1)
+                                        if (checkBox_SiglePassMode.Checked == false)
                                         {
-                                            prev_cellStyle.BackColor = Color.White;
-                                            prev_cellStyle.ForeColor = Color.Black;
+                                            if (SessionPart == 1)
+                                            {
+                                                prev_cellStyle.BackColor = System.Drawing.Color.White;
+                                                prev_cellStyle.ForeColor = System.Drawing.Color.Black;
 
-                                            cur_cellStyle.BackColor = Color.White;
-                                            cur_cellStyle.ForeColor = Color.Black;
-                                        }
-                                        else if (SessionPart == 2)
-                                        {
-                                            prev_cellStyle.BackColor = Color.Gainsboro;
-                                            prev_cellStyle.ForeColor = Color.DimGray;
+                                                cur_cellStyle.BackColor = System.Drawing.Color.White;
+                                                cur_cellStyle.ForeColor = System.Drawing.Color.Black;
+                                            }
+                                            else if (SessionPart == 2)
+                                            {
+                                                prev_cellStyle.BackColor = System.Drawing.Color.Gainsboro;
+                                                prev_cellStyle.ForeColor = System.Drawing.Color.DimGray;
 
-                                            cur_cellStyle.BackColor = Color.Gainsboro;
-                                            cur_cellStyle.ForeColor = Color.DimGray;
+                                                cur_cellStyle.BackColor = System.Drawing.Color.Gainsboro;
+                                                cur_cellStyle.ForeColor = System.Drawing.Color.DimGray;
+                                            }
                                         }
                                         else
                                         {
-                                            prev_cellStyle.BackColor = Color.White;
-                                            prev_cellStyle.ForeColor = Color.Black;
+                                            prev_cellStyle.BackColor = System.Drawing.Color.White;
+                                            prev_cellStyle.ForeColor = System.Drawing.Color.Black;
 
-                                            cur_cellStyle.BackColor = Color.White;
-                                            cur_cellStyle.ForeColor = Color.Black;
+                                            cur_cellStyle.BackColor = System.Drawing.Color.White;
+                                            cur_cellStyle.ForeColor = System.Drawing.Color.Black;
                                         }
 
                                     }
                                     else if (c == 2)
                                     {
-                                        if (SessionPart == 1)
-                                        {
-                                            prev_cellStyle.BackColor = Color.Gainsboro;
-                                            prev_cellStyle.ForeColor = Color.DimGray;
 
-                                            cur_cellStyle.BackColor = Color.Gainsboro;
-                                            cur_cellStyle.ForeColor = Color.DimGray;
-                                        }
-                                        else if (SessionPart == 2)
+                                        if (checkBox_SiglePassMode.Checked == false)
                                         {
-                                            prev_cellStyle.BackColor = Color.White;
-                                            prev_cellStyle.ForeColor = Color.Black;
+                                            if (SessionPart == 1)
+                                            {
+                                                prev_cellStyle.BackColor = System.Drawing.Color.Gainsboro;
+                                                prev_cellStyle.ForeColor = System.Drawing.Color.DimGray;
 
-                                            cur_cellStyle.BackColor = Color.White;
-                                            cur_cellStyle.ForeColor = Color.Black;
+                                                cur_cellStyle.BackColor = System.Drawing.Color.Gainsboro;
+                                                cur_cellStyle.ForeColor = System.Drawing.Color.DimGray;
+                                            }
+                                            else if (SessionPart == 2)
+                                            {
+                                                prev_cellStyle.BackColor = System.Drawing.Color.White;
+                                                prev_cellStyle.ForeColor = System.Drawing.Color.Black;
+
+                                                cur_cellStyle.BackColor = System.Drawing.Color.White;
+                                                cur_cellStyle.ForeColor = System.Drawing.Color.Black;
+                                            }
                                         }
                                         else
                                         {
-                                            prev_cellStyle.BackColor = Color.White;
-                                            prev_cellStyle.ForeColor = Color.Black;
+                                            prev_cellStyle.BackColor = System.Drawing.Color.White;
+                                            prev_cellStyle.ForeColor = System.Drawing.Color.Black;
 
-                                            cur_cellStyle.BackColor = Color.White;
-                                            cur_cellStyle.ForeColor = Color.Black;
+                                            cur_cellStyle.BackColor = System.Drawing.Color.White;
+                                            cur_cellStyle.ForeColor = System.Drawing.Color.Black;
                                         }
                                     }
                                 }
@@ -3733,12 +4113,12 @@ namespace AudioAnnotation
                             // this probably affecting the repaint of cells
                             prev_cellStyle = dataGridView1.Rows[start_row].Cells[CINDEX.category_label].Style;
                             if (prev_cellStyle != null)
-                            { prev_cellStyle.BackColor = Color.Plum; }
+                            { prev_cellStyle.BackColor = System.Drawing.Color.Plum; }
 
 
                             cur_cellStyle = dataGridView1.Rows[end_row].Cells[CINDEX.category_label].Style;
                             if (cur_cellStyle != null)
-                            { cur_cellStyle.BackColor = Color.Plum; }
+                            { cur_cellStyle.BackColor = System.Drawing.Color.Plum; }
 
 
 
@@ -3817,6 +4197,8 @@ namespace AudioAnnotation
 
             bool Is_LabelsList_Valid = true;
             summary_results = "";
+
+            string[] str_temp;
 
             try
             {
@@ -3913,13 +4295,16 @@ namespace AudioAnnotation
                                 //if not, flag the label as invalid
                                 if (List_Current_XML.Contains(current_label))
                                 {
-
                                     //Start Time
-                                    start_time = DateTime.Parse(StartDate + " " + tokens[3]);
+                                    str_temp = tokens[3].Split('.');
+
+                                    start_time = DateTime.Parse(StartDate + " " + str_temp[0]);
                                     ts_start = (start_time - new DateTime(1970, 1, 1, 0, 0, 0));
 
                                     //Stop Time
-                                    end_time = DateTime.Parse(EndDate + " " + tokens[4]);
+                                    str_temp = tokens[4].Split('.');
+                                   
+                                    end_time = DateTime.Parse(EndDate + " " + str_temp[0]);
                                     ts_end = (end_time - new DateTime(1970, 1, 1, 0, 0, 0));
 
                                     ts = ts_end.Subtract(ts_start);
@@ -3967,19 +4352,19 @@ namespace AudioAnnotation
 
                                            if (c == 1)
                                            {
-                                                dataGridView1.Rows[irow].Cells[C1.category_label].Style.BackColor = Color.Khaki;
-                                                dataGridView1.Rows[irow].Cells[C1.category_label].Style.ForeColor = Color.DimGray;
+                                                dataGridView1.Rows[irow].Cells[C1.category_label].Style.BackColor = System.Drawing.Color.Khaki;
+                                                dataGridView1.Rows[irow].Cells[C1.category_label].Style.ForeColor = System.Drawing.Color.DimGray;
 
-                                                dataGridView1.Rows[irow].Cells[C1.StartEnd].Style.BackColor = Color.Khaki;
-                                                dataGridView1.Rows[irow].Cells[C1.StartEnd].Style.ForeColor = Color.DimGray;
+                                                dataGridView1.Rows[irow].Cells[C1.StartEnd].Style.BackColor = System.Drawing.Color.Khaki;
+                                                dataGridView1.Rows[irow].Cells[C1.StartEnd].Style.ForeColor = System.Drawing.Color.DimGray;
                                            }
                                             else if (c == 2)
                                             {
-                                                dataGridView1.Rows[irow].Cells[C2.category_label].Style.BackColor = Color.Khaki;
-                                                dataGridView1.Rows[irow].Cells[C2.category_label].Style.BackColor = Color.DimGray;
+                                                dataGridView1.Rows[irow].Cells[C2.category_label].Style.BackColor = System.Drawing.Color.Khaki;
+                                                dataGridView1.Rows[irow].Cells[C2.category_label].Style.BackColor = System.Drawing.Color.DimGray;
 
-                                                dataGridView1.Rows[irow].Cells[C2.StartEnd].Style.BackColor = Color.Khaki;
-                                                dataGridView1.Rows[irow].Cells[C2.StartEnd].Style.ForeColor = Color.DimGray;
+                                                dataGridView1.Rows[irow].Cells[C2.StartEnd].Style.BackColor = System.Drawing.Color.Khaki;
+                                                dataGridView1.Rows[irow].Cells[C2.StartEnd].Style.ForeColor = System.Drawing.Color.DimGray;
                                             }
                                         
                                         }
@@ -3998,19 +4383,19 @@ namespace AudioAnnotation
 
                                     if (c == 1)
                                     {
-                                        dataGridView1.Rows[irow].Cells[C1.category_label].Style.BackColor = Color.Tomato;
-                                        dataGridView1.Rows[irow].Cells[C1.category_label].Style.ForeColor = Color.White;
+                                        dataGridView1.Rows[irow].Cells[C1.category_label].Style.BackColor = System.Drawing.Color.Tomato;
+                                        dataGridView1.Rows[irow].Cells[C1.category_label].Style.ForeColor = System.Drawing.Color.White;
 
-                                        dataGridView1.Rows[irow].Cells[C1.StartEnd].Style.BackColor = Color.Tomato;
-                                        dataGridView1.Rows[irow].Cells[C1.StartEnd].Style.ForeColor = Color.White;
+                                        dataGridView1.Rows[irow].Cells[C1.StartEnd].Style.BackColor = System.Drawing.Color.Tomato;
+                                        dataGridView1.Rows[irow].Cells[C1.StartEnd].Style.ForeColor = System.Drawing.Color.White;
                                     }
                                     else if (c == 2)
                                     {
-                                        dataGridView1.Rows[irow].Cells[C2.category_label].Style.BackColor = Color.Tomato;
-                                        dataGridView1.Rows[irow].Cells[C2.category_label].Style.BackColor = Color.White;
+                                        dataGridView1.Rows[irow].Cells[C2.category_label].Style.BackColor = System.Drawing.Color.Tomato;
+                                        dataGridView1.Rows[irow].Cells[C2.category_label].Style.BackColor = System.Drawing.Color.White;
 
-                                        dataGridView1.Rows[irow].Cells[C2.StartEnd].Style.BackColor = Color.Tomato;
-                                        dataGridView1.Rows[irow].Cells[C2.StartEnd].Style.ForeColor = Color.White;
+                                        dataGridView1.Rows[irow].Cells[C2.StartEnd].Style.BackColor = System.Drawing.Color.Tomato;
+                                        dataGridView1.Rows[irow].Cells[C2.StartEnd].Style.ForeColor = System.Drawing.Color.White;
                                     }
                                     
                                     
@@ -4018,28 +4403,33 @@ namespace AudioAnnotation
                                     irow = Int32.Parse(tokens[2]);
                                     if (c == 1)
                                     {
-                                        dataGridView1.Rows[irow].Cells[C1.category_label].Style.BackColor = Color.Tomato;
-                                        dataGridView1.Rows[irow].Cells[C1.category_label].Style.ForeColor = Color.White;
+                                        dataGridView1.Rows[irow].Cells[C1.category_label].Style.BackColor = System.Drawing.Color.Tomato;
+                                        dataGridView1.Rows[irow].Cells[C1.category_label].Style.ForeColor = System.Drawing.Color.White;
 
-                                        dataGridView1.Rows[irow].Cells[C1.StartEnd].Style.BackColor = Color.Tomato;
-                                        dataGridView1.Rows[irow].Cells[C1.StartEnd].Style.ForeColor = Color.White;
+                                        dataGridView1.Rows[irow].Cells[C1.StartEnd].Style.BackColor = System.Drawing.Color.Tomato;
+                                        dataGridView1.Rows[irow].Cells[C1.StartEnd].Style.ForeColor = System.Drawing.Color.White;
                                     }
                                     else if (c == 2)
                                     {
-                                        dataGridView1.Rows[irow].Cells[C2.category_label].Style.BackColor = Color.Tomato;
-                                        dataGridView1.Rows[irow].Cells[C2.category_label].Style.ForeColor = Color.White;
+                                        dataGridView1.Rows[irow].Cells[C2.category_label].Style.BackColor = System.Drawing.Color.Tomato;
+                                        dataGridView1.Rows[irow].Cells[C2.category_label].Style.ForeColor = System.Drawing.Color.White;
 
-                                        dataGridView1.Rows[irow].Cells[C2.StartEnd].Style.BackColor = Color.Tomato;
-                                        dataGridView1.Rows[irow].Cells[C2.StartEnd].Style.BackColor = Color.White;
+                                        dataGridView1.Rows[irow].Cells[C2.StartEnd].Style.BackColor = System.Drawing.Color.Tomato;
+                                        dataGridView1.Rows[irow].Cells[C2.StartEnd].Style.BackColor = System.Drawing.Color.White;
                                     }
 
                                     //Start Time
-                                    start_time = DateTime.Parse(StartDate + " " + tokens[3]);
+                                    str_temp = tokens[3].Split('0');
+
+                                    start_time = DateTime.Parse(StartDate + " " + str_temp[0]);
                                     ts_start = (start_time - new DateTime(1970, 1, 1, 0, 0, 0));
 
                                     //Stop Time
-                                    end_time = DateTime.Parse(EndDate + " " + tokens[4]);
+                                    str_temp = tokens[4].Split('0');
+
+                                    end_time = DateTime.Parse(EndDate + " " + str_temp[0]);
                                     ts_end = (end_time - new DateTime(1970, 1, 1, 0, 0, 0));
+
 
                                     ts = ts_end.Subtract(ts_start);
                                     total_time_inv = total_time_inv + ts;
@@ -4103,7 +4493,7 @@ namespace AudioAnnotation
 
                         // Save record to the correspondent session
                         summary_file_csv.WriteLine(clabel + "," + ts.ToString());
-                        summary_file_html.WriteLine("<tr>\n<td>" + clabel + "</td><td>" + ts.ToString()+"</td></tr>");
+                        summary_file_html.WriteLine("<tr>\n<td>" + clabel + "</td><td>" + ts.ToString() + "</td></tr>");
                         summary_results = summary_results + clabel + "," + ts.ToString() + ";";
                         it++;
                     }
@@ -4338,7 +4728,7 @@ namespace AudioAnnotation
                             currentRecord._StartHour = start_time.Hour;
                             currentRecord._StartMinute = start_time.Minute;
                             currentRecord._StartSecond = start_time.Second;
-                            currentRecord._StartMillisecond = 0;
+                            currentRecord._StartMillisecond = start_time.Millisecond;
 
                             ts = (start_time - new DateTime(1970, 1, 1, 0, 0, 0));
                             currentRecord._StartUnix = ts.TotalSeconds;
@@ -4350,7 +4740,7 @@ namespace AudioAnnotation
                             currentRecord._EndHour = end_time.Hour;
                             currentRecord._EndMinute = end_time.Minute;
                             currentRecord._EndSecond = end_time.Second;
-                            currentRecord._EndMillisecond = 0;
+                            currentRecord._EndMillisecond = end_time.Millisecond;
 
                             ts = (end_time - new DateTime(1970, 1, 1, 0, 0, 0));
                             currentRecord._EndUnix = ts.TotalSeconds;
@@ -4488,7 +4878,7 @@ namespace AudioAnnotation
                     LoadSessionView_1();
 
                     // create a player to be used in the application
-                    myPlayer = new System.Media.SoundPlayer();
+                    //myPlayer = new System.Media.SoundPlayer();
 
                     is_data_grid_loaded = true;
                 }
@@ -4535,8 +4925,17 @@ namespace AudioAnnotation
             if( ((int)System.Math.Abs(success)) >= 2)
             {
                 // show the summary of results in a new popup window
-                dlg_summary_results.fill_grid_summary(summary_results);
-                dlg_summary_results.Show();
+                if (dlg_summary_results.fill_grid_summary(summary_results))
+                { dlg_summary_results.Show(); }
+                else
+                {
+                    dlg_summary_results.Close();
+                    
+                    dlg_summary_results = new PopUp_Result_Window();
+                    
+                    if (dlg_summary_results.fill_grid_summary(summary_results))
+                    { dlg_summary_results.Show(); }
+                }
                 this.Focus();
                 
             }
@@ -4549,9 +4948,16 @@ namespace AudioAnnotation
             if (checkBox_ExitWithoutSaving.Checked == false)
             { SaveCurrentSessionToFile(); }
 
+           
+            wmp.close();
+            
+            
+
             Application.Exit();
         }
 
+        
+        
         private void button_session_part_Click(object sender, EventArgs e)
         {
             button_category_select.Enabled = false;
@@ -4579,6 +4985,8 @@ namespace AudioAnnotation
             label_category_button.Enabled = true;
 
         }
+
+
 
 
         private void LoadSessionView_1()
@@ -4614,15 +5022,15 @@ namespace AudioAnnotation
                 cellStyle = dataGridView1.Rows[i].Cells[C1.category_label].Style;
                 if (cellStyle != null)
                 {
-                   cellStyle.BackColor = Color.White;
-                   cellStyle.ForeColor = Color.Black;
+                   cellStyle.BackColor = System.Drawing.Color.White;
+                   cellStyle.ForeColor = System.Drawing.Color.Black;
                 }
 
                 cellStyle = dataGridView1.Rows[i].Cells[C1.StartEnd].Style;
                 if (cellStyle != null)
                 {
-                    cellStyle.BackColor = Color.White;
-                    cellStyle.ForeColor = Color.Black;
+                    cellStyle.BackColor = System.Drawing.Color.White;
+                    cellStyle.ForeColor = System.Drawing.Color.Black;
                 }
 
 
@@ -4630,21 +5038,23 @@ namespace AudioAnnotation
                 cellStyle = dataGridView1.Rows[i].Cells[C2.category_label].Style;
                 if (cellStyle != null)
                 {
-                    cellStyle.BackColor = Color.Gainsboro;
-                    cellStyle.ForeColor = Color.DimGray;
+                    cellStyle.BackColor = System.Drawing.Color.Gainsboro;
+                    cellStyle.ForeColor = System.Drawing.Color.DimGray;
                 }
 
                 cellStyle = dataGridView1.Rows[i].Cells[C2.StartEnd].Style;
                 if (cellStyle != null)
                 {
-                    cellStyle.BackColor = Color.Gainsboro;
-                    cellStyle.ForeColor = Color.DimGray;
+                    cellStyle.BackColor = System.Drawing.Color.Gainsboro;
+                    cellStyle.ForeColor = System.Drawing.Color.DimGray;
                 }
 
             }
 
           
         }
+
+
 
 
         private void LoadSessionView_2()
@@ -4680,15 +5090,15 @@ namespace AudioAnnotation
                 cellStyle = dataGridView1.Rows[i].Cells[C1.category_label].Style;
                 if (cellStyle != null)
                 {
-                    cellStyle.BackColor = Color.Gainsboro;
-                    cellStyle.ForeColor = Color.DimGray;
+                    cellStyle.BackColor = System.Drawing.Color.Gainsboro;
+                    cellStyle.ForeColor = System.Drawing.Color.DimGray;
                 }
 
                 cellStyle = dataGridView1.Rows[i].Cells[C1.StartEnd].Style;
                 if (cellStyle != null)
                 {
-                    cellStyle.BackColor = Color.Gainsboro;
-                    cellStyle.ForeColor = Color.DimGray;
+                    cellStyle.BackColor = System.Drawing.Color.Gainsboro;
+                    cellStyle.ForeColor = System.Drawing.Color.DimGray;
                 }
 
 
@@ -4696,15 +5106,15 @@ namespace AudioAnnotation
                 cellStyle = dataGridView1.Rows[i].Cells[C2.category_label].Style;
                 if (cellStyle != null)
                 {
-                    cellStyle.BackColor = Color.White;
-                    cellStyle.ForeColor = Color.Black;
+                    cellStyle.BackColor = System.Drawing.Color.White;
+                    cellStyle.ForeColor = System.Drawing.Color.Black;
                 }
 
                 cellStyle = dataGridView1.Rows[i].Cells[C2.StartEnd].Style;
                 if (cellStyle != null)
                 {
-                    cellStyle.BackColor = Color.White;
-                    cellStyle.ForeColor = Color.Black;
+                    cellStyle.BackColor = System.Drawing.Color.White;
+                    cellStyle.ForeColor = System.Drawing.Color.Black;
                 }
 
             }
@@ -4745,15 +5155,15 @@ namespace AudioAnnotation
                 cellStyle = dataGridView1.Rows[i].Cells[C1.category_label].Style;
                 if (cellStyle != null)
                 {
-                    cellStyle.BackColor = Color.White;
-                    cellStyle.ForeColor = Color.Black;
+                    cellStyle.BackColor = System.Drawing.Color.White;
+                    cellStyle.ForeColor = System.Drawing.Color.Black;
                 }
 
                 cellStyle = dataGridView1.Rows[i].Cells[C1.StartEnd].Style;
                 if (cellStyle != null)
                 {
-                    cellStyle.BackColor = Color.White;
-                    cellStyle.ForeColor = Color.Black;
+                    cellStyle.BackColor = System.Drawing.Color.White;
+                    cellStyle.ForeColor = System.Drawing.Color.Black;
                 }
 
 
@@ -4761,15 +5171,15 @@ namespace AudioAnnotation
                 cellStyle = dataGridView1.Rows[i].Cells[C2.category_label].Style;
                 if (cellStyle != null)
                 {
-                    cellStyle.BackColor = Color.White;
-                    cellStyle.ForeColor = Color.Black;
+                    cellStyle.BackColor = System.Drawing.Color.White;
+                    cellStyle.ForeColor = System.Drawing.Color.Black;
                 }
 
                 cellStyle = dataGridView1.Rows[i].Cells[C2.StartEnd].Style;
                 if (cellStyle != null)
                 {
-                    cellStyle.BackColor = Color.White;
-                    cellStyle.ForeColor = Color.Black;
+                    cellStyle.BackColor = System.Drawing.Color.White;
+                    cellStyle.ForeColor = System.Drawing.Color.Black;
                 }
 
             }
@@ -4790,6 +5200,116 @@ namespace AudioAnnotation
             }
         }
 
+
+        private void paintcells_view(int irow, int view)
+        {
+            DataGridViewCellStyle cellStyle;
+
+
+            if (view == 1)
+            {
+                //Paint Category 1
+                cellStyle = dataGridView1.Rows[irow].Cells[C1.category_label].Style;
+                if (cellStyle != null)
+                {
+                    cellStyle.BackColor = System.Drawing.Color.White;
+                    cellStyle.ForeColor = System.Drawing.Color.Black;
+                }
+
+                cellStyle = dataGridView1.Rows[irow].Cells[C1.StartEnd].Style;
+                if (cellStyle != null)
+                {
+                    cellStyle.BackColor = System.Drawing.Color.White;
+                    cellStyle.ForeColor = System.Drawing.Color.Black;
+                }
+
+
+                //Paint Category2
+                cellStyle = dataGridView1.Rows[irow].Cells[C2.category_label].Style;
+                if (cellStyle != null)
+                {
+                    cellStyle.BackColor = System.Drawing.Color.Gainsboro;
+                    cellStyle.ForeColor = System.Drawing.Color.DimGray;
+                }
+
+                cellStyle = dataGridView1.Rows[irow].Cells[C2.StartEnd].Style;
+                if (cellStyle != null)
+                {
+                    cellStyle.BackColor = System.Drawing.Color.Gainsboro;
+                    cellStyle.ForeColor = System.Drawing.Color.DimGray;
+                }
+            }
+            else if (view == 2)
+            {
+                //Paint Category 1
+                cellStyle = dataGridView1.Rows[irow].Cells[C1.category_label].Style;
+                if (cellStyle != null)
+                {
+                    cellStyle.BackColor = System.Drawing.Color.Gainsboro;
+                    cellStyle.ForeColor = System.Drawing.Color.DimGray;
+                }
+
+                cellStyle = dataGridView1.Rows[irow].Cells[C1.StartEnd].Style;
+                if (cellStyle != null)
+                {
+                    cellStyle.BackColor = System.Drawing.Color.Gainsboro;
+                    cellStyle.ForeColor = System.Drawing.Color.DimGray;
+                }
+
+
+                //Paint Category2
+                cellStyle = dataGridView1.Rows[irow].Cells[C2.category_label].Style;
+                if (cellStyle != null)
+                {
+                    cellStyle.BackColor = System.Drawing.Color.White;
+                    cellStyle.ForeColor = System.Drawing.Color.Black;
+                }
+
+                cellStyle = dataGridView1.Rows[irow].Cells[C2.StartEnd].Style;
+                if (cellStyle != null)
+                {
+                    cellStyle.BackColor = System.Drawing.Color.White;
+                    cellStyle.ForeColor = System.Drawing.Color.Black;
+                }
+
+            }
+            else if (view == 3)
+            {
+                //Paint Category 1
+                cellStyle = dataGridView1.Rows[irow].Cells[C1.category_label].Style;
+                if (cellStyle != null)
+                {
+                    cellStyle.BackColor = System.Drawing.Color.White;
+                    cellStyle.ForeColor = System.Drawing.Color.Black;
+                }
+
+                cellStyle = dataGridView1.Rows[irow].Cells[C1.StartEnd].Style;
+                if (cellStyle != null)
+                {
+                    cellStyle.BackColor = System.Drawing.Color.White;
+                    cellStyle.ForeColor = System.Drawing.Color.Black;
+                }
+
+
+                //Paint Category2
+                cellStyle = dataGridView1.Rows[irow].Cells[C2.category_label].Style;
+                if (cellStyle != null)
+                {
+                    cellStyle.BackColor = System.Drawing.Color.White;
+                    cellStyle.ForeColor = System.Drawing.Color.Black;
+                }
+
+                cellStyle = dataGridView1.Rows[irow].Cells[C2.StartEnd].Style;
+                if (cellStyle != null)
+                {
+                    cellStyle.BackColor = System.Drawing.Color.White;
+                    cellStyle.ForeColor = System.Drawing.Color.Black;
+                }
+            }
+
+
+
+        }
 
         #endregion
 
