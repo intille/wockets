@@ -18,7 +18,7 @@ namespace Wockets.Data.Annotation
         public const string ENDTIME_ATTRIBUTE = "ENDTIME";
         public const string LABEL_ATTRIBUTE = "LABEL";
         public const string CATEGORY_ATTRIBUTE = "CATEGORY";
-
+        
         private ActivityList activities;
         private int start_month=-1;
         private int start_day=-1;
@@ -38,6 +38,7 @@ namespace Wockets.Data.Annotation
         private int end_second=-1;
         private int end_millisecond=-1;
         private double end_unix=-1;
+
 
 
 

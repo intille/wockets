@@ -1626,7 +1626,267 @@ namespace NESPDataViewer
 
 
         }
+
+        #region commented
+        /*
+        private void CreateDiaryGraph(GraphPane gp, string filepath,string filepath_colors, string title, int y, string type)
+        {
+            gp.BarSettings.Base = BarBase.Y;
+            gp.BarSettings.Type = BarType.Overlay;
+
+            PointPairList labelList = new PointPairList();
+
+            string[] values = FileReadWrite.ReadLinesFromFile(filepath);
+
+
+            for (int i = 0; i < values.Length; i++)
+            {
+                try
+                {
+                    string[] split = values[i].Split(',');
+                    string[] datetime = split[0].Split(' ');
+                    string[] startDate = datetime[0].Split('-');
+                    string[] startTime = datetime[1].Split('-')[0].Split(':');
+
+                    DateTime dtStart = new DateTime(Convert.ToInt32(startDate[0]), Convert.ToInt32(startDate[1]), Convert.ToInt32(startDate[2]), Convert.ToInt32(startTime[0]), Convert.ToInt32(startTime[1]), Convert.ToInt32(startTime[2]));//DateTime.Parse(split[0]);
+                    double startx = (double)new XDate(dtStart);
+                    if (split[1].Length > 0)
+                    {
+                        #region END DATE
+                        string[] enddatetime = split[1].Split(' ');
+                        string[] endDate = enddatetime[0].Split('-');
+                        string[] endTime = enddatetime[1].Split('-')[0].Split(':');
+
+                        DateTime dtEnd = new DateTime(Convert.ToInt32(endDate[0]), Convert.ToInt32(endDate[1]), Convert.ToInt32(endDate[2]), Convert.ToInt32(endTime[0]), Convert.ToInt32(endTime[1]), Convert.ToInt32(endTime[2]));//DateTime.Parse(split[0]);
+                        //DateTime dtEnd = DateTime.Parse(split[1]);
+                        double endx = (double)new XDate(dtEnd);
+                        #endregion
+
+                        #region COLOR OF BAR
+                        string color = "black";
+                        bool isSolid = false;
+                        if ((split.Length > 2) && (split[2].Length > 0))
+                        {
+                            color = split[2];
+                            isSolid = true;
+                        }
+                        #endregion
+                        
+
+                        #region LABEL AND POINT
+                        string label = "";
+                        for (int c = 3; c < split.Length; c++)
+                        {
+                            label += split[c].Replace("_", ", ").Replace("-", " ").Trim(',',' ') + "\n ";
+                        }
+                        labelList = new PointPairList();
+                        labelList.Add(endx, y, startx, String.Format("{3} {0}-{1}\n,{2}",dtStart.ToShortTimeString(),dtEnd.ToShortTimeString(),label,title));
+                        #endregion
+
+                        #region ADD BAR
+                        HiLowBarItem myBar = gp.AddHiLowBar(title, labelList, Color.FromName(color));
+                        if (isSolid) myBar.Bar.Fill.Type = FillType.Solid;
+                        else myBar.Bar.Fill.Type = FillType.None;
+                        #endregion
+                    }
+                }
+                catch { }
+            }
+
+        }
+  */
         #endregion
+
+
+        #region labels colors on bar
+        
+        private void CreateDiaryGraph(GraphPane gp, string filepath, string dirpath_colors, 
+                                      string title, int yoffset, string type)
+        {
+            gp.BarSettings.Base = BarBase.Y;
+            gp.BarSettings.ClusterScaleWidth = 200.0;
+            gp.BarSettings.Type = BarType.Overlay;
+
+            PointPairList labelList = new PointPairList();
+            string[] values = FileReadWrite.ReadLinesFromFile(filepath);
+
+            bool is_category_1 = false;
+            bool is_category_2 = false;
+
+            string[] lines_read = null;
+            string[] label_color = null;
+            BindingList<string[]> labels_color_list_1 = null; 
+            BindingList<string[]> labels_color_list_2 = null; 
+
+
+
+            #region read colors files
+
+            if (type.CompareTo("posture") == 0)
+            {
+                is_category_1 = true;
+
+                if (File.Exists(dirpath_colors + "ActivityLabelsColors_1.csv"))
+                {
+                    labels_color_list_1 = new BindingList<string[]>();
+                    lines_read = FileReadWrite.ReadLinesFromFile(dirpath_colors + "ActivityLabelsColors_1.csv");
+
+                    foreach (string line in lines_read)
+                    {
+                        label_color = line.Split(',');
+                        labels_color_list_1.Add(label_color);
+                    }
+                }
+            }
+            else if (type.CompareTo("activity") == 0)
+            {
+                is_category_2 = true;
+
+                if (File.Exists(dirpath_colors + "ActivityLabelsColors_2.csv"))
+                {
+                    labels_color_list_2 = new BindingList<string[]>();
+                    lines_read = FileReadWrite.ReadLinesFromFile(dirpath_colors + "ActivityLabelsColors_2.csv");
+
+                    foreach (string line in lines_read)
+                    {
+                        label_color = line.Split(',');
+                        labels_color_list_2.Add(label_color);
+                    }
+                }
+            }
+
+            #endregion
+
+
+            for (int i = 0; i < values.Length; i++)
+            {
+                try
+                {
+                    string[] split = values[i].Split(',');
+                    string[] datetime = split[0].Split(' ');
+                    string[] startDate = datetime[0].Split('-');
+                    string[] startTime = datetime[1].Split('-')[0].Split(':');
+
+                    DateTime dtStart = new DateTime(Convert.ToInt32(startDate[0]), Convert.ToInt32(startDate[1]), Convert.ToInt32(startDate[2]), Convert.ToInt32(startTime[0]), Convert.ToInt32(startTime[1]), Convert.ToInt32(startTime[2]));//DateTime.Parse(split[0]);
+                    double startx = (double)new XDate(dtStart);
+                    if (split[1].Length > 0)
+                    {
+                        #region END DATE
+                        string[] enddatetime = split[1].Split(' ');
+                        string[] endDate = enddatetime[0].Split('-');
+                        string[] endTime = enddatetime[1].Split('-')[0].Split(':');
+
+                        DateTime dtEnd = new DateTime(Convert.ToInt32(endDate[0]), Convert.ToInt32(endDate[1]), Convert.ToInt32(endDate[2]), Convert.ToInt32(endTime[0]), Convert.ToInt32(endTime[1]), Convert.ToInt32(endTime[2]));//DateTime.Parse(split[0]);
+                        //DateTime dtEnd = DateTime.Parse(split[1]);
+                        double endx = (double)new XDate(dtEnd);
+                        #endregion
+
+
+
+                        #region COLOR OF BAR
+                            string color = "white";
+                            bool isSolid = false;
+
+                            string clabel = "";
+
+
+                            #region Match color with label 
+                            
+                            //determine colors according to the graph type
+                            if ( is_category_1 )
+                            {
+                                //if log contains postures
+                                if ((split.Length > 2) && (split[3].Length > 0))
+                                {
+                                    clabel = split[3];
+
+                                    for (int j = 0; j < labels_color_list_1.Count; j++)
+                                    {
+                                        if (labels_color_list_1[j][1].CompareTo(clabel) == 0)
+                                        {
+                                            color = labels_color_list_1[j][3];
+                                            isSolid = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            else if (is_category_2)
+                            {
+                                //if log contains activities
+                                if ((split.Length > 2) && (split[4].Length > 0))
+                                {
+                                    clabel = split[4];
+
+                                    for (int j = 0; j < labels_color_list_2.Count; j++)
+                                    {
+                                        if (labels_color_list_2[j][1].CompareTo(clabel) == 0)
+                                        {
+                                            color = labels_color_list_2[j][3];
+                                            isSolid = true;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                            }
+                            
+                            #endregion
+
+
+                            #region commented
+                            /*if ((split.Length > 2) && (split[2].Length > 0))
+                            {
+                                color = split[2];
+                                isSolid = true;
+                            }
+                            */
+                            #endregion
+
+
+                        #endregion Color of bar
+
+
+                        #region LABEL AND POINT
+
+                        string label = "";
+                        for (int c = 3; c < split.Length; c++)
+                        {
+                            label += split[c].Replace("_", ", ").Replace("-", " ").Trim(',',' ') + "\n ";
+                        }
+
+                        labelList = new PointPairList();
+                        labelList.Add(endx, yoffset, startx, String.Format("{3}: {0}  -  {1}\n {2}",dtStart.ToLongTimeString(),dtEnd.ToLongTimeString(),label,title));
+ 
+                        #endregion
+
+                        #region ADD BAR
+
+
+                        //HiLowBarItem myBar = gp.AddHiLowBar(title, labelList, Color.FromName(color
+                        HiLowBarItem myBar = gp.AddHiLowBar(title, labelList, Color.FromArgb(Int32.Parse(color)) );
+                        
+
+                        if (isSolid) myBar.Bar.Fill.Type = FillType.Solid;
+                        else myBar.Bar.Fill.Type = FillType.None;
+
+                        #endregion
+                    }
+                }
+                catch { }
+            }
+
+
+
+
+        }
+        
+       #endregion
+
+
+        #endregion
+
+
 
         #region PHOTOS and SURVEYS
         private void CreatePhotoGraph(GraphPane gp, string filepath, string imagedir)
@@ -1893,6 +2153,13 @@ namespace NESPDataViewer
 
         #endregion
 
+
+
+        #endregion Chart content
+
+
+
+
         Hashtable paneOrders;
         // Build the Chart
         private void BuildCharts(string path)
@@ -2052,10 +2319,12 @@ namespace NESPDataViewer
             }
             #endregion Sensewear
 
-            #region COMBINED DATATYPE GRAPH - USUALLY HAS HEART RATE + 1 or more of GPS data, Annotation labels, or Survey responses
+
             GraphPane hPane = null;
             string filepath = "";
 
+            #region COMBINED DATATYPE GRAPH - USUALLY HAS HEART RATE + 1 or more of GPS data, Annotation labels, or Survey responses
+            
             files = Directory.GetFiles(path + "\\merged\\", "HeartRate*");
             if (files.Length > 0)
             {
@@ -2087,6 +2356,10 @@ namespace NESPDataViewer
                 _doesShowHover = false;
             }
             
+            #endregion
+
+
+            #region Annotations
 
             if (hPane != null)
             {
@@ -2112,15 +2385,32 @@ namespace NESPDataViewer
                 //add audio annotations
                 if (Directory.Exists(path + "\\annotation\\audioannotation\\"))
                 {
+                    #region commented 
+                    /*
                     files = Directory.GetFiles(path + "\\annotation\\audioannotation\\", "AnnotationIntervals.csv");
                     for (int i = 0; i < files.Length; i++)
                     {
                         string name = Path.GetFileNameWithoutExtension(files[i]);
                         CreateDiaryGraph(aPane, files[i], name, 10 + 20 * i);
                     }
+                     */
+                    #endregion
+ 
+
+                    string file_annotations = path + "\\annotation\\audioannotation\\" + "AnnotationIntervals.csv";
+                    string path_annotations_color = path + "\\annotation\\audioannotation\\";
+
+                    if (File.Exists(file_annotations))
+                    {
+                        CreateDiaryGraph(aPane, file_annotations, path_annotations_color, "Time: ", 20, "activity");
+                        CreateDiaryGraph(aPane, file_annotations, path_annotations_color, "Time:", 130, "posture");
+                    }
+                     
+
                 }
 
                 //add phone annotations
+                #region Phone Annotations
                 if (Directory.Exists(path + "\\annotation\\phoneannotation\\"))
                 {
                     filepath = Path.Combine(path + "\\annotation\\phoneannotation\\", "photos.csv");
@@ -2136,6 +2426,8 @@ namespace NESPDataViewer
                     if (files.Length > 0)
                         CreateAgreementGraph(hPane, files);
                 }
+                #endregion
+
 
             }
             #endregion
@@ -2171,7 +2463,7 @@ namespace NESPDataViewer
             return isMatch;
             
         }
-        #endregion
+        
 
         #region INTERACTION
 
@@ -2342,7 +2634,10 @@ namespace NESPDataViewer
                 zedGraphControl1.MasterPane.PaneList.Remove(gp);
 
         }
+        
         #endregion       
+
+
 
         #region HOVER
         PointPair ppHover = null;
@@ -2372,6 +2667,8 @@ namespace NESPDataViewer
                 this.Refresh();
             }
         }
+        
+        
         string zedGraphControl1_PointValueEvent(ZedGraphControl sender, GraphPane pane, CurveItem curve, int iPt)
         {
 
@@ -2392,7 +2689,7 @@ namespace NESPDataViewer
                     pictureBox1.Visible = true;
                     return split[0];
                 }
-                else if (curve.Label.Text.StartsWith("Anno"))
+                else if (curve.Label.Text.StartsWith("Time"))
                 {
                     HighlightGraphs(curve[iPt].Z, curve[iPt].X - curve[iPt].Z);
                 }
