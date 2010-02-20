@@ -4843,10 +4843,16 @@ namespace AudioAnnotation
                 intervals_file_csv.Flush();
                 intervals_file_csv.Close();
 
+                //Save Labels Colors File
+                SaveLabelsColorsToFile();
+
                 return true;
             }
             catch
             {
+
+                #region Close Files
+
                 if (intervals_file_xml != null)
                 {
                     intervals_file_xml.Flush();
@@ -4887,11 +4893,252 @@ namespace AudioAnnotation
                     intervals_file_csv_2.Close();
                 }
 
+                #endregion
+
+
 
                 return false;
             }
 
         }
+
+
+
+        private void SaveLabelsColorsToFile()
+        {
+            //Category 1
+            if (File.Exists(Folder_audioannotation + "ActivityLabelsColors_1.csv"))
+            { File.Delete(Folder_audioannotation + "ActivityLabelsColors_1.csv"); }
+
+            TextWriter labels_colors_csv_1 = new StreamWriter(Folder_audioannotation + "ActivityLabelsColors_1.csv");
+            
+
+            //Category 2
+            if (File.Exists(Folder_audioannotation + "ActivityLabelsColors_2.csv"))
+            { File.Delete(Folder_audioannotation + "ActivityLabelsColors_2.csv"); }
+
+            TextWriter labels_colors_csv_2 = new StreamWriter(Folder_audioannotation + "ActivityLabelsColors_2.csv");
+            
+
+            //Write headers
+            labels_colors_csv_1.WriteLine("Category,Label,Color,ARGB");
+            labels_colors_csv_2.WriteLine("Category,Label,Color,ARGB");
+
+
+            string label = "";
+            string csv = "";
+            string color = "";
+            string argb = "";
+
+            for (int i = 0; i < XmlSession.OverlappingActivityLists.Count; i++)
+            { 
+               //Only two categories can be loaded
+               if ( i == 0)
+               {   
+                   //load postures
+                   for (int j = 0; j < list_category_1.Count; j++)
+                   {
+                       label = list_category_1[j];
+
+                       csv = "";
+                       color = "";
+                       argb = "";
+
+                       if (label.Trim().CompareTo("") != 0)
+                       {
+                           csv = list_category_name[i] + "," + label + ",";
+
+
+                           if (label.Contains("unknown"))
+                           {
+                               color = Color.Gainsboro.Name;
+                               argb =  Color.Gainsboro.ToArgb().ToString();
+                               
+                           }
+                           else if (label.Contains("kneeling:-on-knees"))
+                           {
+                               color = Color.Plum.Name;
+                               argb = Color.Plum.ToArgb().ToString();
+                               
+                           }
+                           else if (label.Contains("lying"))
+                           {
+                               color = Color.LightBlue.Name;
+                               argb = Color.FromArgb(50,Color.Blue).ToArgb().ToString();
+                              
+                           }
+                           else if (label.Contains("sitting"))
+                           {
+                               color = Color.LightBlue.Name;
+                               argb = Color.FromArgb(100,Color.DarkCyan).ToArgb().ToString();
+                               
+                           }
+                           else if (label.Contains("standing:-still"))
+                           {
+                               color = Color.Blue.Name;
+                               argb = Color.FromArgb(100,Color.Blue).ToArgb().ToString();
+                               
+                           }
+                            else if (label.Contains("standing-carrying-load:-still"))
+                           {
+                               color = Color.Blue.Name;
+                               argb = Color.FromArgb(255,Color.Orchid).ToArgb().ToString();
+                               
+                            }
+                           else if (label.Contains("standing-carrying-load"))
+                           {
+                               color = Color.YellowGreen.Name;
+                               argb = Color.FromArgb(230,Color.Tomato).ToArgb().ToString();
+                               
+                           }
+                           else if (label.Contains("standing"))
+                           {
+                               color = Color.YellowGreen.Name;
+                               argb = Color.FromArgb(180,Color.YellowGreen).ToArgb().ToString();
+                               
+                           }
+                           else if (label.Contains("picking-up"))
+                           {
+                               color = Color.Violet.Name;
+                               argb = Color.Violet.ToArgb().ToString();
+                               
+                           }
+                           else if (label.Contains("bending-over"))
+                           {
+                               color = Color.Violet.Name;
+                               argb = Color.Violet.ToArgb().ToString();
+                               
+                           }
+                           else if (label.Contains("upright:-other"))
+                           {
+                               color = Color.Turquoise.Name;
+                               argb = Color.Turquoise.ToArgb().ToString();
+                               
+                           }
+
+
+                           labels_colors_csv_1.WriteLine(csv + color + "," + argb);
+
+                       }
+                   }
+
+               }
+               else if (i == 1)
+               {
+                   //load activities
+                   for (int k = 0; k < list_category_2.Count; k++)
+                   {
+                       label = list_category_2[k];
+                       csv = "";
+
+                       if (label.Trim().CompareTo("") != 0)
+                       {
+                           csv = list_category_name[i] + "," + label + ",";
+
+                           
+                           if (label.Contains("unknown"))
+                           {
+                               color = Color.Gainsboro.Name;
+                               argb = Color.Gainsboro.ToArgb().ToString();
+
+                           }
+                           else if (label.Contains("moving"))
+                           {
+                               color = Color.Orange.Name;
+                               argb = Color.FromArgb(255, Color.Yellow).ToArgb().ToString();
+
+                           }
+                           else if (label.Contains("jumping-jacks"))
+                           {
+                               color = Color.Orange.Name;
+                               argb = Color.FromArgb(255, Color.Orange).ToArgb().ToString();
+
+                           }
+                           else if (label.Contains("lifting-10-pound-box"))
+                           {
+                               color = Color.Violet.Name;
+                               argb = Color.FromArgb(200, Color.Violet).ToArgb().ToString();
+
+                           }
+                           else if (label.Contains("walking"))
+                           {
+                               color = Color.Green.Name;
+                               argb = Color.FromArgb(200, Color.Aquamarine).ToArgb().ToString();
+
+                           }
+                            else if (label.Contains("treadmill"))
+                           {
+                               color = Color.Green.Name;
+                               argb = Color.FromArgb(255, Color.Green).ToArgb().ToString();
+
+                           }
+                            else if (label.Contains("cycling"))
+                           {
+                               color = Color.Green.Name;
+                               argb = Color.FromArgb(230, Color.GreenYellow).ToArgb().ToString();
+
+                           }
+                           else if (label.Contains("carrying-load"))
+                           {
+                               color = Color.Tomato.Name;
+                               argb = Color.FromArgb(230, Color.Red).ToArgb().ToString();
+
+                           }
+                            else if (label.Contains("stairs"))
+                           {
+                               color = Color.Tomato.Name;
+                               argb = Color.FromArgb(150, Color.Brown).ToArgb().ToString();
+
+                           }
+                            else if (label.Contains("sweeping"))
+                           {
+                               color = Color.Tomato.Name;
+                               argb = Color.FromArgb(200, Color.Coral).ToArgb().ToString();
+
+                           }
+                           else if (label.Contains("painting"))
+                           {
+                               color = Color.Tomato.Name;
+                               argb = Color.FromArgb(100, Color.Coral).ToArgb().ToString();
+
+                           }
+                           else if (label.Contains("elevator"))
+                           {
+                               color = Color.Blue.Name;
+                               argb = Color.FromArgb(250, Color.SteelBlue).ToArgb().ToString();
+
+                           }
+                           else if (label.Contains("sitting"))
+                           {
+                               color = Color.Blue.Name;
+                               argb = Color.FromArgb(200, Color.Blue).ToArgb().ToString();
+
+                           }
+                           else if (label.Contains("sorting"))
+                           {
+                               color = Color.Blue.Name;
+                               argb = Color.FromArgb(200, Color.DeepSkyBlue).ToArgb().ToString();
+
+                           }
+                           
+                           labels_colors_csv_2.WriteLine(csv + color + "," + argb);
+                       }
+                   }
+               }
+               
+            }
+                
+
+            //Close files
+            labels_colors_csv_1.Flush();
+            labels_colors_csv_1.Close();
+
+            labels_colors_csv_2.Flush();
+            labels_colors_csv_2.Close();
+            
+        
+        }
+
 
 
 
