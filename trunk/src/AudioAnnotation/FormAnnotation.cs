@@ -465,6 +465,7 @@ namespace AudioAnnotation
                                             // !note: this should return an OK value
                                             LoadRowsToGrid(DataSessionName);
                                             is_data_loaded = true;
+                                            
 
                                         }
                                     }
@@ -1126,7 +1127,7 @@ namespace AudioAnnotation
         private int header = 44;
         private int sample_rate = 44100;
         private int bit_rate = 16;
-        private int num_channels = 2;
+        //private int num_channels = 2;
 
         public string GetDuration(string path,long file_length ,out double secs_duration)
         {
@@ -1621,11 +1622,18 @@ namespace AudioAnnotation
 
         }
 
+        
+        
+        
+        
         private int previous_row_audio_file = 0;
+        private string previous_time_audio_file = "";
+        
         private bool LoadRowsToGrid(string fname)
         {
 
             bool data_loaded = false;
+          
 
             try
             {
@@ -1673,20 +1681,38 @@ namespace AudioAnnotation
 
 
                             previous_row_audio_file = 0;
+                            //int correction_made = 0;
+                            //int needed_correction = 0;
 
                             while (row_string != null)
                             {
                                 //ReadRow(row_string);
+                                //needed_correction = ReadRow(row_string, true);
+                                //if( (correction_made == 0) && (needed_correction >0))
+                                //{
+                                //    correction_made = needed_correction;
+                                //}
                                 ReadRow(row_string, true);
-
                                 row_string = tr.ReadLine();
                             }
 
 
                             tr.Close();
 
-                            label_play.Text = "The Session has been loaded.";
                             data_loaded = true;
+
+
+                            //output_str = "The Session has been loaded.";
+                      
+                            //if a correction was made, check which type and notify 
+                            //if (correction_made == 1)
+                            //{ output_str = output_str + "Time stamps were corrected:the file duration was computed."; }
+                            //else if (correction_made == 2)
+                            //{ output_str = output_str + "Time stamps were corrected:the time duration was corrupted."; }
+                            
+                    
+
+                            
                         }
 
                     }
@@ -1767,7 +1793,7 @@ namespace AudioAnnotation
 
         //Read a row from previous saved session
         //Check if it is necessary to correct the time stamp
-        private void ReadRow(string st, bool check_time_stamp)
+        private int ReadRow(string st, bool check_time_stamp)
         {
 
             int n = 0;
@@ -1787,54 +1813,59 @@ namespace AudioAnnotation
             int row = dataGridView1.Rows.Add();
             int nCellsLenght = ncells.Length - 1;
 
-            for (int i = 0; i < nCellsLenght; i++)
+            int needed_correction = 0;
+
+
+            try
             {
+                for (int i = 0; i < nCellsLenght; i++)
+                {
 
-                if (i == C1.Lock)
-                {
-                    if (ncells[i].CompareTo("True") == 0)
-                    { dataGridView1.Rows[row].Cells[i].Value = true; }
-                    else
-                    { dataGridView1.Rows[row].Cells[i].Value = false; }
-                }
-                else if (i == C2.Lock)
-                {
-                    if (ncells[i].CompareTo("True") == 0)
-                    { dataGridView1.Rows[row].Cells[i].Value = true; }
-                    else
-                    { dataGridView1.Rows[row].Cells[i].Value = false; }
-                }
-                else if ((i == C1.category_label) || (i == C2.category_label))
-                {
-                    // Do nothing
-                }
-                else if (i == C1.Combo_Label)
-                {
-                    dataGridView1.Rows[row].Cells[i].Value = ncells[i];
+                    if (i == C1.Lock)
+                    {
+                        if (ncells[i].CompareTo("True") == 0)
+                        { dataGridView1.Rows[row].Cells[i].Value = true; }
+                        else
+                        { dataGridView1.Rows[row].Cells[i].Value = false; }
+                    }
+                    else if (i == C2.Lock)
+                    {
+                        if (ncells[i].CompareTo("True") == 0)
+                        { dataGridView1.Rows[row].Cells[i].Value = true; }
+                        else
+                        { dataGridView1.Rows[row].Cells[i].Value = false; }
+                    }
+                    else if ((i == C1.category_label) || (i == C2.category_label))
+                    {
+                        // Do nothing
+                    }
+                    else if (i == C1.Combo_Label)
+                    {
+                        dataGridView1.Rows[row].Cells[i].Value = ncells[i];
 
-                    if (dataGridView1.Rows[row].Cells[C1.Combo_Type].Value.ToString().CompareTo("S") == 0)
-                    { set_ComboBox(cellComboBox, row, C1.category_label, 1, ncells[i]); }
-                    else
-                    { set_ComboBox(cellComboBox, row, C1.category_label, 2, ncells[i]); }
+                        if (dataGridView1.Rows[row].Cells[C1.Combo_Type].Value.ToString().CompareTo("S") == 0)
+                        { set_ComboBox(cellComboBox, row, C1.category_label, 1, ncells[i]); }
+                        else
+                        { set_ComboBox(cellComboBox, row, C1.category_label, 2, ncells[i]); }
 
-                    dataGridView1.Rows[row].Cells[C1.category_label].Value = ncells[C1.category_label];
-                }
-                else if (i == C2.Combo_Label)
-                {
-                    dataGridView1.Rows[row].Cells[i].Value = ncells[i];
+                        dataGridView1.Rows[row].Cells[C1.category_label].Value = ncells[C1.category_label];
+                    }
+                    else if (i == C2.Combo_Label)
+                    {
+                        dataGridView1.Rows[row].Cells[i].Value = ncells[i];
 
-                    if (dataGridView1.Rows[row].Cells[C2.Combo_Type].Value.ToString().CompareTo("S") == 0)
-                    { set_ComboBox(cellComboBox, row, C2.category_label, 1, ncells[i]); }
-                    else
-                    { set_ComboBox(cellComboBox, row, C2.category_label, 2, ncells[i]); }
+                        if (dataGridView1.Rows[row].Cells[C2.Combo_Type].Value.ToString().CompareTo("S") == 0)
+                        { set_ComboBox(cellComboBox, row, C2.category_label, 1, ncells[i]); }
+                        else
+                        { set_ComboBox(cellComboBox, row, C2.category_label, 2, ncells[i]); }
 
-                    dataGridView1.Rows[row].Cells[C2.category_label].Value = ncells[C2.category_label];
-               
-                }
-                // C1.ID and C2.ID have the same values, so compare only one of them
-                else if( i== C1.ID )
-                {
-                    
+                        dataGridView1.Rows[row].Cells[C2.category_label].Value = ncells[C2.category_label];
+
+                    }
+                    // C1.ID and C2.ID have the same values, so compare only one of them
+                    else if (i == C1.ID)
+                    {
+
                         dataGridView1.Rows[row].Cells[i].Value = ncells[i];
                         ID_value_set = true;
 
@@ -1844,18 +1875,24 @@ namespace AudioAnnotation
                         }
                         else
                         { is_audio_row = false; }
-                    
 
-                }
-                // C1.Time and C2.Time have the same values, so compare only one
-                else if( (i == C1.Time) && (check_time_stamp == true))
-                {
+
+                    }
+                    // C1.Time and C2.Time have the same values, so compare only one
+                    else if ((i == C1.Time) && (check_time_stamp == true))
+                    {
+
+
+
+                        time = DateTime.Parse("00:00:00.0");
 
                         //If the row has an audio file, read id from file
                         if (is_audio_row == true)
                         {
                             n = Int32.Parse(ncells[C1.ID]);
-                            
+
+                          
+
                             //update the last seen audio file row value
                             previous_row_audio_file = n;
 
@@ -1864,7 +1901,13 @@ namespace AudioAnnotation
                             if (C1.TimeMS < nCellsLenght)
                             { time = DateTime.Parse(end_file_time.ToShortDateString() + " " + ncells[C1.TimeMS]); }
                             else
-                            { time = DateTime.Parse(end_file_time.ToShortDateString() + " " + ncells[i]); }
+                            {
+                                if (ncells[i].Trim().CompareTo("") != 0)
+                                {
+                                    time = DateTime.Parse(end_file_time.ToShortDateString() + " " + ncells[i]);
+                                }
+                                
+                            }
 
                         }
                         // if the row doesn't have an audio file, assign the time stamp 
@@ -1874,75 +1917,111 @@ namespace AudioAnnotation
                             if (previous_row_audio_file < files.Length - 1)
                             { n = previous_row_audio_file + 1; }
                             else
-                            { n = previous_row_audio_file;  }
+                            { n = previous_row_audio_file; }
+
+
+                            if (n == 11)
+                            { }
 
                             end_file_time = files[n].LastWriteTime;
 
                             if (C1.TimeMS < nCellsLenght)
                             { time = DateTime.Parse(end_file_time.ToShortDateString() + " " + ncells[C1.TimeMS]); }
                             else
-                            { time = DateTime.Parse(end_file_time.ToShortDateString() + " " + ncells[i + 1]); }
+                            {
+                                if (ncells[i+1].Trim().CompareTo("") != 0)
+                                { time = DateTime.Parse(end_file_time.ToShortDateString() + " " + ncells[i + 1]); }
+                                else
+                                {
+                                    time = DateTime.Parse(end_file_time.ToShortDateString() + " " + previous_time_audio_file);
+                                }
+                            }
 
-                            
 
                         }
 
 
 
                         //-------- Here compute the creation time ---------------
-                       
+
                         //substract creation time from the end time
                         time_diff = end_file_time.Subtract(time);
-                        
 
-                        // if the time difference is equal zero or less than zero, the time stamp needs to be corrected
+
+                        // if the time difference is equal zero or less than zero, 
+                        // greater than 1 hr.
+                        //the time stamp needs to be corrected
                         if ((time_diff.TotalSeconds == 0.0) || (time_diff.TotalSeconds < 0.0))
                         {
                             // compute the creation time
                             secs_duration = 0.0;
                             duration = GetDuration(files_wav[n].FullName, files_wav[n].Length, out secs_duration);
                             time = end_file_time.Subtract(TimeSpan.FromSeconds(secs_duration));
+
+                            needed_correction = 1;
+
+                        }
+                        else if (time_diff.TotalSeconds >= 3600)
+                        {
+                            // compute the creation time
+                            time = end_file_time.Subtract(time_diff);
+
+                            secs_duration = 0.0;
+                            duration = GetDuration(files_wav[n].FullName, files_wav[n].Length, out secs_duration);
+                            time = time.Subtract(TimeSpan.FromSeconds(secs_duration));
+
+                 
+                            needed_correction = 2;
                         }
                         else
                         {
                             duration = time_diff.TotalSeconds.ToString();
                         }
-                            
-                    
+
+
                         //write the creation time to the "creation time" and "label time" columns
-                            if (is_audio_row == true)
-                            { dataGridView1.Rows[row].Cells[i].Value = time.ToLongTimeString(); }
-                            else
-                            { dataGridView1.Rows[row].Cells[i].Value = ""; }
+                        if (is_audio_row == true)
+                        { dataGridView1.Rows[row].Cells[i].Value = time.ToLongTimeString(); }
+                        else
+                        { dataGridView1.Rows[row].Cells[i].Value = ""; }
 
-                            dataGridView1.Rows[row].Cells[C1.Time_Label].Value = time.ToLongTimeString();
-                            
-                            //Add milliseconds granularity
-                            dataGridView1.Rows[row].Cells[C1.TimeMS].Value = time.TimeOfDay.ToString().TrimEnd('0');
-                          
-                            //Add duration info
-                            dataGridView1.Rows[row].Cells[C1.TimeLastWrite].Value = end_file_time.TimeOfDay.ToString().TrimEnd('0');
-                            dataGridView1.Rows[row].Cells[C1.TimeDuration].Value = duration;
-                          
-                         
-                        
+                        dataGridView1.Rows[row].Cells[C1.Time_Label].Value = time.ToLongTimeString();
+
+                        //Add milliseconds granularity
+                        if( time.TimeOfDay.TotalMilliseconds == 0.0 )
+                        { dataGridView1.Rows[row].Cells[C1.TimeMS].Value = time.TimeOfDay.ToString();}
+                        else {dataGridView1.Rows[row].Cells[C1.TimeMS].Value = time.TimeOfDay.ToString().Trim('0');}
+
+                        //Add duration info
+                        dataGridView1.Rows[row].Cells[C1.TimeLastWrite].Value = end_file_time.TimeOfDay.ToString().TrimEnd('0');
+                        dataGridView1.Rows[row].Cells[C1.TimeDuration].Value = duration;
+
+
+                        //save previous audio time
+                        previous_time_audio_file = dataGridView1.Rows[row].Cells[C1.TimeMS].Value.ToString();
+
                         //-------------------------------------------------------------------------
-                }
-                else if (  ( (i == C1.Time_Label)   || (i== C1.TimeMS) ||
-                             (i== C1.TimeLastWrite) || (i == C1.TimeDuration))  && 
-                           (check_time_stamp == true))
-                { 
-                    //Do nothing, since the value was modified along with the previous field
-                }
-                else
-                {
-                    dataGridView1.Rows[row].Cells[i].Value = ncells[i];
+                    }
+                    else if (((i == C1.Time_Label) || (i == C1.TimeMS) ||
+                                 (i == C1.TimeLastWrite) || (i == C1.TimeDuration)) &&
+                               (check_time_stamp == true))
+                    {
+                        //Do nothing, since the value was modified along with the previous field
+                    }
+                    else
+                    {
+                        dataGridView1.Rows[row].Cells[i].Value = ncells[i];
+                    }
+
                 }
 
+
+                return needed_correction;
             }
-
-
-
+            catch
+            {
+                return -1;
+            }
         }
 
 
@@ -2188,7 +2267,8 @@ namespace AudioAnnotation
                 { File.Delete(fname_bk); }
 
                 File.Copy(fname, fname_bk);
-                File.Delete(fname);
+                File.Delete(fname); 
+              
             }
 
 
@@ -2968,7 +3048,7 @@ namespace AudioAnnotation
 
         private void FormAnnotation_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (panel_controls_2.Visible && checkBox_ExitWithoutSaving.Checked)
+            if (panel_controls_2.Visible && !checkBox_ExitWithoutSaving.Checked)
             { SaveCurrentSessionToFile(); }
         }
 
@@ -3916,7 +3996,7 @@ namespace AudioAnnotation
                     else
                     {
                         success = -2;
-                        label_play.Text = "There are mismatches between your labels and the xml protocol. Please check the labels highlighted. Red=Mistmatch --- Yellow=Problematic.";   
+                        label_play.Text = "There are mismatches between your labels and the xml protocol. Please check the labels and end times highlighted. Red=Mistmatch --- Yellow=Problematic.";   
                     }
                 }
                 else
@@ -4277,9 +4357,6 @@ namespace AudioAnnotation
                 summary_file_html = new StreamWriter(Folder_audioannotation + "AnnotationSummary.html");
                
             
-                //summary_file_html.WriteLine("<html><h2><body>Summary Annotations</body></h2></html>");
-                //summary_file_html.WriteLine("<p>&nbsp;</p>\n");
-                //summary_file_html.WriteLine("<html><body><table border=\"1\">\n");
                 summary_file_html.WriteLine("<table border=\"1\">\n");
                 summary_file_html.WriteLine("<tr><td>Label</td><td>Time(hh:mm:ss)</td></tr>");
 
@@ -4328,13 +4405,17 @@ namespace AudioAnnotation
 
                         string[] tokens = readline.Split(';');
 
+                        //Check the row has valid start/end times
                         if (tokens[0].CompareTo("ok") == 0)
                         {
                             current_label = tokens[5];
                             
+
                             //filter labels comming from blank rows
                             if (current_label.Trim().CompareTo("") != 0)
                             {
+
+
                                 //Check if the label is valid according to the Xml protocol list 
                                 //if not, flag the label as invalid
                                 if (List_Current_XML.Contains(current_label))
@@ -4377,6 +4458,8 @@ namespace AudioAnnotation
                                     {
                                         Is_LabelsList_Valid = false;
 
+                                        #region  highlight label in yellow
+
                                         int iloop = 0;
                                         int irow = 0;
 
@@ -4410,8 +4493,12 @@ namespace AudioAnnotation
                                                 dataGridView1.Rows[irow].Cells[C2.StartEnd].Style.BackColor = System.Drawing.Color.Khaki;
                                                 dataGridView1.Rows[irow].Cells[C2.StartEnd].Style.ForeColor = System.Drawing.Color.DimGray;
                                             }
-                                        
+
                                         }
+
+                                        #endregion
+
+
 
                                     }
                                     
@@ -4422,54 +4509,53 @@ namespace AudioAnnotation
                                 {
                                     Is_LabelsList_Valid = false;
 
-                                    //Highlight Start Row
-                                    int irow = Int32.Parse(tokens[1]);
+                                    #region higlight row in red
+                                        int iloop = 0;
+                                        int irow = 0;
 
-                                    if (c == 1)
-                                    {
-                                        dataGridView1.Rows[irow].Cells[C1.category_label].Style.BackColor = System.Drawing.Color.Tomato;
-                                        dataGridView1.Rows[irow].Cells[C1.category_label].Style.ForeColor = System.Drawing.Color.White;
+                                        while (iloop < 2)
+                                        {
+                                            if (iloop == 0)
+                                            {   //Highlight Start Row
+                                                irow = Int32.Parse(tokens[1]);
+                                            }
+                                            else if (iloop == 1)
+                                            {    //Highlight End Row
+                                                irow = Int32.Parse(tokens[2]);
+                                            }
 
-                                        dataGridView1.Rows[irow].Cells[C1.StartEnd].Style.BackColor = System.Drawing.Color.Tomato;
-                                        dataGridView1.Rows[irow].Cells[C1.StartEnd].Style.ForeColor = System.Drawing.Color.White;
-                                    }
-                                    else if (c == 2)
-                                    {
-                                        dataGridView1.Rows[irow].Cells[C2.category_label].Style.BackColor = System.Drawing.Color.Tomato;
-                                        dataGridView1.Rows[irow].Cells[C2.category_label].Style.BackColor = System.Drawing.Color.White;
+                                            iloop++;
 
-                                        dataGridView1.Rows[irow].Cells[C2.StartEnd].Style.BackColor = System.Drawing.Color.Tomato;
-                                        dataGridView1.Rows[irow].Cells[C2.StartEnd].Style.ForeColor = System.Drawing.Color.White;
-                                    }
-                                    
-                                    
-                                    //Highlight End Row
-                                    irow = Int32.Parse(tokens[2]);
-                                    if (c == 1)
-                                    {
-                                        dataGridView1.Rows[irow].Cells[C1.category_label].Style.BackColor = System.Drawing.Color.Tomato;
-                                        dataGridView1.Rows[irow].Cells[C1.category_label].Style.ForeColor = System.Drawing.Color.White;
+                                            if (c == 1)
+                                            {
+                                                dataGridView1.Rows[irow].Cells[C1.category_label].Style.BackColor = System.Drawing.Color.Tomato;
+                                                dataGridView1.Rows[irow].Cells[C1.category_label].Style.ForeColor = System.Drawing.Color.White;
 
-                                        dataGridView1.Rows[irow].Cells[C1.StartEnd].Style.BackColor = System.Drawing.Color.Tomato;
-                                        dataGridView1.Rows[irow].Cells[C1.StartEnd].Style.ForeColor = System.Drawing.Color.White;
-                                    }
-                                    else if (c == 2)
-                                    {
-                                        dataGridView1.Rows[irow].Cells[C2.category_label].Style.BackColor = System.Drawing.Color.Tomato;
-                                        dataGridView1.Rows[irow].Cells[C2.category_label].Style.ForeColor = System.Drawing.Color.White;
+                                                dataGridView1.Rows[irow].Cells[C1.StartEnd].Style.BackColor = System.Drawing.Color.Tomato;
+                                                dataGridView1.Rows[irow].Cells[C1.StartEnd].Style.ForeColor = System.Drawing.Color.White;
+                                            }
+                                            else if (c == 2)
+                                            {
+                                                dataGridView1.Rows[irow].Cells[C2.category_label].Style.BackColor = System.Drawing.Color.Tomato;
+                                                dataGridView1.Rows[irow].Cells[C2.category_label].Style.BackColor = System.Drawing.Color.White;
 
-                                        dataGridView1.Rows[irow].Cells[C2.StartEnd].Style.BackColor = System.Drawing.Color.Tomato;
-                                        dataGridView1.Rows[irow].Cells[C2.StartEnd].Style.BackColor = System.Drawing.Color.White;
-                                    }
+                                                dataGridView1.Rows[irow].Cells[C2.StartEnd].Style.BackColor = System.Drawing.Color.Tomato;
+                                                dataGridView1.Rows[irow].Cells[C2.StartEnd].Style.ForeColor = System.Drawing.Color.White;
+                                            }
+
+                                        }
+
+                                    #endregion
+
 
                                     //Start Time
-                                    str_temp = tokens[3].Split('0');
+                                    str_temp = tokens[3].Split('.');
 
                                     start_time = DateTime.Parse(StartDate + " " + str_temp[0]);
                                     ts_start = (start_time - new DateTime(1970, 1, 1, 0, 0, 0));
 
                                     //Stop Time
-                                    str_temp = tokens[4].Split('0');
+                                    str_temp = tokens[4].Split('.');
 
                                     end_time = DateTime.Parse(EndDate + " " + str_temp[0]);
                                     ts_end = (end_time - new DateTime(1970, 1, 1, 0, 0, 0));
@@ -4620,7 +4706,6 @@ namespace AudioAnnotation
 
 
                 // Close summary file csv
-                //summary_file_html.WriteLine("</table></body></html>");
                 summary_file_html.WriteLine("</table>");
                 summary_file_html.Flush();
                 summary_file_html.Close();
