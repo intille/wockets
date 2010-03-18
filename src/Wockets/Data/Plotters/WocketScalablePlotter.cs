@@ -73,9 +73,9 @@ namespace Wockets.Data.Plotters
 
             for (int i = 0; (i < numSensors); i++)
             {
-                this.currentColumns[i] = 0;
+                this.currentColumns[i] = this.plotAreaSize.Width - 1;
                 this.firstColumn[i] = 999999;
-                this.lastColumn[i] = 0;
+                this.lastColumn[i] = this.plotAreaSize.Width - 1;
                 this.decoderTails[i] = 0;
                 this.lastUnixTimestamps[i] = 0;
                 this.pointsToPlot[i] = 0;
@@ -128,7 +128,8 @@ namespace Wockets.Data.Plotters
             p[0] = new Pen(System.Drawing.Color.Orange);
             p[1] = new Pen(System.Drawing.Color.Red);
             p[2] = new Pen(System.Drawing.Color.Blue);
-
+            requiresFullRedraw = true;
+            aPanel.Invalidate();
         }
 
         byte[] head = new byte[4];

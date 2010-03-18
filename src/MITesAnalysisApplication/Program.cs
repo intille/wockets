@@ -31,7 +31,7 @@ namespace MITesAnalysisApplication
             string destination = @"C:\DataAnalysis\Stanford-Analysis\";
             if (Directory.Exists(destination))
             {
-                for (int id = 15; (id <= 15); id++)
+                for (int id = 5; (id <= 5); id++)
                 {
                     destination = @"C:\DataAnalysis\Stanford-Analysis\";
                     string storage = @"C:\DataAnalysis\Stanford-MITes\Subject" + id;
@@ -350,7 +350,7 @@ namespace MITesAnalysisApplication
             string[] subdirectories = null;
             if (Directory.Exists(destination))
             {
-                for (int id = 7; (id <= 7); id++)
+                for (int id = 5; (id <= 5); id++)
                 {
                     string storage = @"C:\DataAnalysis\Stanford-Analysis\Subject" + id;
 
@@ -880,7 +880,7 @@ namespace MITesAnalysisApplication
 
         static void GenerateDT()
         {
-            Instances training = new Instances(new StreamReader(@"C:\Users\albinali\Desktop\Session1-23-12-3-3\all-combined-orienations.arff"));
+            Instances training = new Instances(new StreamReader(@"C:\Users\albinali\Desktop\Session1-23-12-3-4\wockets\output.arff"));
             training.ClassIndex = training.numAttributes() - 1;
 
 
@@ -889,7 +889,7 @@ namespace MITesAnalysisApplication
             tree.set_MinNumObj(10);
             tree.set_ConfidenceFactor((float)0.25);
             tree.buildClassifier(training); // build classifier
-            TextWriter tw = new StreamWriter(@"C:\Users\albinali\Desktop\Session1-23-12-3-3\all-balanced.xml");
+            TextWriter tw = new StreamWriter(@"C:\Users\albinali\Desktop\Session1-23-12-3-4\wockets\all-balanced.xml");
             tree.toXML(tw);
             tw.Close();
 
@@ -897,7 +897,9 @@ namespace MITesAnalysisApplication
 
         static void Main(string[] args)
         {
-            GenerateDT();
+            GenerateTrainingCSVFiles();
+            GenerateCrossValidationDecisionTrees();
+            //GenerateDT();
             //GenerateCrossValidation10fold();
            // string root = @"C:\Users\albinali\Desktop\DataSessions\Session1-20-09-17-59\";
            // GenerateArff(root);

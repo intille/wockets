@@ -204,7 +204,8 @@ namespace Wockets.Receivers
             int backoff = random.Next(1000);
             int reconnections = 0;
             Thread.Sleep(10000);
-                 
+            
+            //Thread.Sleep(19000);
             //battery drained situation
             while ((this.bluetoothStream == null) || (this.bluetoothStream._Status != BluetoothStatus.Connected))
             {

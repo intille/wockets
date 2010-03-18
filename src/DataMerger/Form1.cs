@@ -192,6 +192,10 @@ namespace DataMerger
                     }
 
 
+                    if (File.Exists(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY + "\\RTITime.txt"))
+                    {
+                        this.progressForm.AppendLog("RTI Synchronization File .....................Found\r\n");
+                    }
                     // check oxycon files from MITES directory
                     if (File.Exists(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY + "\\OxyconSyncronizationTime.txt"))
                     {
@@ -323,7 +327,12 @@ namespace DataMerger
             try
             {
                 toCSV(this.textBox1.Text, "..\\NeededFiles\\Master\\", 3, filter);
-                toQualityHTML(this.textBox1.Text, "..\\NeededFiles\\Master\\", 3, filter);
+                try
+                {
+                    toQualityHTML(this.textBox1.Text, "..\\NeededFiles\\Master\\", 3, filter);
+                }catch
+                {
+                }
             }
             catch (Exception e)
             {
@@ -825,7 +834,7 @@ namespace DataMerger
            summary = "<h2>Wockets Data Loss by Posture and Activity Statistics</h2><TABLE border=\"1\">\n";
             numRows =numPostures;
             rows = new string[numRows];
-            header = "<TR>\n<td><div align=\"center\"><strong>Activity\\Placement</strong></div></td><td><strong>Total Seconds Annotated</strong></td>\n";
+            header = "<TR>\n<td><div align=\"center\"><strong>Activity</strong></div></td><td><div align=\"center\"><strong>Posture</strong></div></td><td><strong>Total Seconds Annotated</strong></td>\n";
             for (int j = 0; (j < wc._Sensors.Count-1); j++)
                 header += "<TD><div align=\"center\"><strong>" + wc._Sensors[j]._Location + "</br>(Seconds Lost|% Lost)</strong></div></TD>\n";
             header += "</TR>\n";
@@ -838,7 +847,7 @@ namespace DataMerger
                     if (annotatedPostures.ContainsKey(session.OverlappingActivityLists[1][i]._Name + "_" + session.OverlappingActivityLists[0][j]._Name))
                     {
                         string row = "<TR>\n";
-                        row += "<TD><div align=\"center\"><strong>" + session.OverlappingActivityLists[1][i]._Name + "_" + session.OverlappingActivityLists[0][j]._Name + "</strong></div></TD>\n";
+                        row += "<TD><div align=\"center\"><strong>" + session.OverlappingActivityLists[1][i]._Name + "</strong></div></TD><TD><div align=\"center\"><strong>" + session.OverlappingActivityLists[0][j]._Name + "</strong></div></TD>\n";
                         row += "<TD><div>" + (int)annotatedPostures[session.OverlappingActivityLists[1][i]._Name + "_" + session.OverlappingActivityLists[0][j]._Name] + "</TD>\n";
                         for (int r = 0; (r < wc._Sensors.Count - 1); r++)
                             if (percentLostPostureSensorDistribution[r][m] > 20)
@@ -855,7 +864,7 @@ namespace DataMerger
 
 
             summary = "<h2>Other Sensors Statistics</h2><TABLE border=\"1\">\n";
-            header = "<TR>\n<td><div align=\"center\"><strong>Sensor Type</strong></div></td><td><strong>Data Present</strong></td><td><strong>Num Samples</strong></td><td><strong>Percent Loss</strong></td></TR>\n";
+            header = "<TR>\n<td><div align=\"center\"><strong>Sensor Type</strong></div></td><td><div align=\"center\"><strong>Start Time</strong></div></td><td><strong>Data Present</strong></td><td><strong>Num Samples</strong></td><td><strong>Percent Loss</strong></td></TR>\n";
             header += "</TR>\n";
             summary += header;
 
@@ -864,18 +873,18 @@ namespace DataMerger
             if (oxyconRecords<expectedOxyconRecords)
                 oxyconLoss = 100 - (((double)oxyconRecords / expectedOxyconRecords) * 100.0);
 
-            summary += "<TR>\n<td><div align=\"center\"><strong>Oxycon</strong></div></td><td>" + (hasOxycon ? "Yes" : "No") + "</td><td>" + oxyconRecords + "</td><td>" + oxyconLoss.ToString("0") + "%</td></TR>\n";
+            summary += "<TR>\n<td><div align=\"center\"><strong>Oxycon</strong></div></td><td>"+(oxyconStart==null?"&nbsp;":oxyconStart)+"</td><td>" + (hasOxycon ? "Yes" : "No") + "</td><td>" + oxyconRecords + "</td><td>" + oxyconLoss.ToString("0") + "%</td></TR>\n";
 
             
             double sensewearLoss = 0;
             if (sensewearRecords < totalSeconds)
                 sensewearLoss = 100 - (((double)sensewearRecords / totalSeconds) * 100.0);
 
-            summary += "<TR>\n<td><div align=\"center\"><strong>Sensewear</strong></div></td><td>" + (hasSensewear ? "Yes" : "No") + "</td><td>" + sensewearRecords + "</td><td>" + sensewearLoss.ToString("0") + "%</td></TR>\n";
+            summary += "<TR>\n<td><div align=\"center\"><strong>Sensewear</strong></div></td><td>" + (sensewearStart == null ? "&nbsp;" : sensewearStart) + "</td><td>" + (hasSensewear ? "Yes" : "No") + "</td><td>" + sensewearRecords + "</td><td>" + sensewearLoss.ToString("0") + "%</td></TR>\n";
 
 
 
-            summary += "<TR>\n<td><div align=\"center\"><strong>Actigraph</strong></div></td><td>" + (hasActigraph ? "Yes" : "No") + "</td><td>";
+            summary += "<TR>\n<td><div align=\"center\"><strong>Actigraph</strong></div></td><td>" + (actigraphStart == null ? "&nbsp;" : actigraphStart) + "</td><td>" + (hasActigraph ? "Yes" : "No") + "</td><td>";
 
             for (int r = 0; (r < actigraphData.Length); r++)
             {
@@ -899,22 +908,22 @@ namespace DataMerger
             double zephyrLoss = 0;
             if (zephyrRecords < totalSeconds)
                 zephyrLoss = 100 - (((double)zephyrRecords / totalSeconds) * 100.0);
-            summary += "<TR>\n<td><div align=\"center\"><strong>Zephyr</strong></div></td><td>" + (hasZephyr ? "Yes" : "No") + "</td><td>" + zephyrRecords + "</td><td>" + zephyrLoss.ToString("0") + "%</td></TR>\n";
+            summary += "<TR>\n<td><div align=\"center\"><strong>Zephyr</strong></div></td><td>" + (zephyrStart == null ? "&nbsp;" : zephyrStart) + "</td><td>" + (hasZephyr ? "Yes" : "No") + "</td><td>" + zephyrRecords + "</td><td>" + zephyrLoss.ToString("0") + "%</td></TR>\n";
 
             double rtiLoss = 0;
             if (rtiRecords < totalSeconds)
                 rtiLoss = 100 - (((double)rtiRecords / totalSeconds) * 100.0);
-            summary += "<TR>\n<td><div align=\"center\"><strong>RTI</strong></div></td><td>" + (hasRTI ? "Yes" : "No") + "</td><td>" + rtiRecords + "</td><td>" + rtiLoss.ToString("0") + "%</td></TR>\n";
+            summary += "<TR>\n<td><div align=\"center\"><strong>RTI</strong></div></td><td>" + (rtiStart == null ? "&nbsp;" : rtiStart) + "</td><td>" + (hasRTI ? "Yes" : "No") + "</td><td>" + rtiRecords + "</td><td>" + rtiLoss.ToString("0") + "%</td></TR>\n";
 
             double columbiaLoss = 0;
             if (columbiaRecords <  totalSeconds)
                 columbiaLoss = 100 - (((double)columbiaRecords / totalSeconds) * 100.0);
-            summary += "<TR>\n<td><div align=\"center\"><strong>Columbia</strong></div></td><td>" + (hasColumbia ? "Yes" : "No") + "</td><td>" + columbiaRecords + "</td><td>" + columbiaLoss.ToString("0") + "%</td></TR>\n";
+            summary += "<TR>\n<td><div align=\"center\"><strong>Columbia</strong></div></td><td>" + (columbiaStart == null ? "&nbsp;" : columbiaStart) + "</td><td>" + (hasColumbia ? "Yes" : "No") + "</td><td>" + columbiaRecords + "</td><td>" + columbiaLoss.ToString("0") + "%</td></TR>\n";
 
             double gpsLoss = 0;
             if (gpsRecords < totalSeconds)
                 gpsLoss = 100 - (((double)gpsRecords / totalSeconds) * 100.0);
-            summary += "<TR>\n<td><div align=\"center\"><strong>GPS</strong></div></td><td>" + (hasGPS ? "Yes" : "No") + "</td><td>" + gpsRecords + "</td><td>" + gpsLoss.ToString("0") + "%</td></TR>\n";
+            summary += "<TR>\n<td><div align=\"center\"><strong>GPS</strong></div></td><td>" + (gpsStart == null ? "&nbsp;" : gpsStart) + "</td><td>" + (hasGPS ? "Yes" : "No") + "</td><td>" + gpsRecords + "</td><td>" + gpsLoss.ToString("0") + "%</td></TR>\n";
 
 
 
@@ -965,6 +974,16 @@ namespace DataMerger
         public static int zephyrRecords = 0;
         public static int columbiaRecords = 0;
         public static int gpsRecords = 0;
+
+
+
+        public static string actigraphStart = null;
+        public static string oxyconStart = null;
+        public static string sensewearStart = null;
+        public static string rtiStart = null;
+        public static string zephyrStart = null;
+        public static string columbiaStart = null;
+        public static string gpsStart = null;
 
 
         //Actigraph
@@ -1206,6 +1225,9 @@ namespace DataMerger
             #region Read RTI data
             string[] file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*-rti*.csv");
 
+            
+
+
            string rti_line = "";
             try
             {
@@ -1214,6 +1236,22 @@ namespace DataMerger
                     if (CSVProgress == "")
                         CSVProgress = "Processing RTI Data";
                     rtiReader = new StreamReader(file[0]);
+
+
+                    TextReader rtiOriginTR = new StreamReader(aDataDirectory + "\\" + OTHER_SUBDIRECTORY + "\\RTISynchronizationTime.txt");
+                    string originRTI = rtiOriginTR.ReadLine();
+                    DateTime rtiOriginTime = new DateTime();
+                    try
+                    {
+                        tokens = originRTI.Split(',');
+                        tokens = tokens[0].Split('.');
+                        rtiOriginTR.Close();
+                        UnixTime.GetDateTime(Convert.ToInt64(tokens[0]), out rtiOriginTime);
+                    }
+                    catch (Exception e)
+                    {
+                        throw new Exception("RTI Synchronization: Parsing failed " + e.Message);
+                    }
 
                     //skip first 25 lines
                     for (int k = 0; (k < 7); k++)
@@ -1229,15 +1267,15 @@ namespace DataMerger
                     int rtiCount = 0;
                     int rtiPrevIndex = 0;
                     int runningMeanSize = 0;
-
+                    int rti_sample_counter=0;
+                    rtiTime=rtiOriginTime;
                     while ((rti_line = rtiReader.ReadLine()) != null)
                     {
                         tokens = rti_line.Split(',');
                         if (tokens.Length >= 4)
                         {
 
-                            string[] dateTokens = tokens[0].Split(new char[] { ' ', '\t' });
-                            //bool isPM = (dateTokens[2] == "PM");
+                            /*string[] dateTokens = tokens[0].Split(new char[] { ' ', '\t' });                            
                             string[] timeTokens=null;
                             if (dateTokens[1].Contains("/"))
                                 timeTokens = dateTokens[0].Split('.');
@@ -1253,7 +1291,16 @@ namespace DataMerger
                                 dateTokens = dateTokens[0].Split('/');
                             if (dateTokens[2].Length == 2)
                                 dateTokens[2] = "20" + dateTokens[2];
-                            rtiTime = new DateTime(Convert.ToInt32(dateTokens[2]), Convert.ToInt32(dateTokens[0]), Convert.ToInt32(dateTokens[1]), Convert.ToInt32(timeTokens[0]), Convert.ToInt32(timeTokens[1]), Convert.ToInt32(timeTokens[2]),mseconds);
+                            rtiTime = new DateTime(Convert.ToInt32(dateTokens[2]), Convert.ToInt32(dateTokens[0]), Convert.ToInt32(dateTokens[1]), Convert.ToInt32(timeTokens[0]), Convert.ToInt32(timeTokens[1]), Convert.ToInt32(timeTokens[2]),mseconds);*/
+
+                            if (rti_sample_counter == 20)
+                            {
+                                rtiTime = rtiTime.AddSeconds(1.0);
+                                rti_sample_counter = 0;
+                            }
+                            rti_sample_counter++;
+                            
+                            
                             //if (isPM)
                             //    rtiTime.AddHours(12.0);
 
@@ -1261,7 +1308,8 @@ namespace DataMerger
                             rtiUnixTime = UnixTime.GetUnixTime(rtiTime);
                             string rtiKey = rtiTime.Year + "-" + rtiTime.Month + "-" + rtiTime.Day + "-" + rtiTime.Hour + "-" + rtiTime.Minute + "-" + rtiTime.Second;
                             string rtiLine = "";
-
+                            if (rtiStart == null)
+                                rtiStart = rtiTime.Year + "/" + rtiTime.Month + "/" + rtiTime.Day + " " + rtiTime.Hour + ":" + rtiTime.Minute + ":" + rtiTime.Second;
 
                             if (prevRTIKey == "")
                                 prevRTIKey = rtiKey;
@@ -1387,6 +1435,9 @@ namespace DataMerger
                             string columbiaKey = columbiaTime.Year + "-" + columbiaTime.Month + "-" + columbiaTime.Day + "-" + columbiaTime.Hour + "-" + columbiaTime.Minute + "-" + columbiaTime.Second;
                             string columbiaLine = "";
 
+                            if (columbiaStart == null)
+                                columbiaStart = columbiaTime.Year + "/" + columbiaTime.Month + "/" + columbiaTime.Day + " " + columbiaTime.Hour + ":" + columbiaTime.Minute + ":" + columbiaTime.Second;
+
                             if (tokens[3].Length > 0)
                                 columbiaLine += Convert.ToDouble(tokens[3]);
                             columbiaLine += ",";
@@ -1448,6 +1499,9 @@ namespace DataMerger
                             gpsUnixTime = UnixTime.GetUnixTime(gpsTime);
                             string gpsKey = gpsTime.Year + "-" + gpsTime.Month + "-" + gpsTime.Day + "-" + gpsTime.Hour + "-" + gpsTime.Minute + "-" + gpsTime.Second;
                             string gpsLine = "";
+
+                            if (gpsStart == null)
+                                gpsStart = gpsTime.Year + "/" + gpsTime.Month + "/" + gpsTime.Day + " " + gpsTime.Hour + ":" + gpsTime.Minute + ":" + gpsTime.Second;
 
                             if (tokens[3].Length > 0)
                                 gpsLine += Convert.ToDouble(tokens[3]);
@@ -1563,6 +1617,8 @@ namespace DataMerger
                                 actigraphTime = new DateTime(Convert.ToInt32("20" + m1.Groups[3].Value), Convert.ToInt32(m1.Groups[1].Value), Convert.ToInt32(m1.Groups[2].Value), Convert.ToInt32(m2.Groups[1].Value), Convert.ToInt32(m2.Groups[2].Value), Convert.ToInt32(m2.Groups[3].Value));
                                 actigraphUnixTime = UnixTime.GetUnixTime(actigraphTime);
                                 string actigraphKey = actigraphTime.Year + "-" + actigraphTime.Month + "-" + actigraphTime.Day + "-" + actigraphTime.Hour + "-" + actigraphTime.Minute + "-" + actigraphTime.Second;
+                                if (actigraphStart == null)
+                                    actigraphStart = actigraphTime.Year + "/" + actigraphTime.Month + "/" + actigraphTime.Day + " " + actigraphTime.Hour + ":" + actigraphTime.Minute + ":" + actigraphTime.Second;
                                 string actigraphLine = "" + Convert.ToInt32(tokens[2]);
                                 actigraphData[i].Add(actigraphKey, actigraphLine);
                             }
@@ -1610,6 +1666,8 @@ namespace DataMerger
                                 actigraphUnixTime = UnixTime.GetUnixTime(actigraphTime);
                                 string actigraphKey = actigraphTime.Year + "-" + actigraphTime.Month + "-" + actigraphTime.Day + "-" + actigraphTime.Hour + "-" + actigraphTime.Minute + "-" + actigraphTime.Second;
                                 string actigraphLine = Convert.ToInt32(tokens[0]) + "," + Convert.ToInt32(tokens[1]);
+                                if (actigraphStart == null)
+                                    actigraphStart = actigraphTime.Year + "/" + actigraphTime.Month + "/" + actigraphTime.Day + " " + actigraphTime.Hour + ":" + actigraphTime.Minute + ":" + actigraphTime.Second;
                                 actigraphData[i].Add(actigraphKey, actigraphLine);
                                 actigraphTime = actigraphTime.AddSeconds(1.0);
 
@@ -1661,6 +1719,8 @@ namespace DataMerger
                                 actigraphUnixTime = UnixTime.GetUnixTime(actigraphTime);
                                 string actigraphKey = actigraphTime.Year + "-" + actigraphTime.Month + "-" + actigraphTime.Day + "-" + actigraphTime.Hour + "-" + actigraphTime.Minute + "-" + actigraphTime.Second;
                                 string actigraphLine = Convert.ToInt32(tokens[0]) + "," + Convert.ToInt32(tokens[1]) + "," + Convert.ToInt32(tokens[2]);
+                                if (actigraphStart == null)
+                                    actigraphStart = actigraphTime.Year + "-" + actigraphTime.Month + "-" + actigraphTime.Day + " " + actigraphTime.Hour + ":" + actigraphTime.Minute + ":" + actigraphTime.Second;
                                 actigraphData[i].Add(actigraphKey, actigraphLine);
                                 actigraphTime = actigraphTime.AddSeconds(1.0);
                             }
@@ -1708,6 +1768,8 @@ namespace DataMerger
                             zephyrUnixTime = UnixTime.GetUnixTime(zephyrTime);
                             string zephyrKey = zephyrTime.Year + "-" + zephyrTime.Month + "-" + zephyrTime.Day + "-" + zephyrTime.Hour + "-" + zephyrTime.Minute + "-" + zephyrTime.Second;
                             string zephyrLine = "";
+                            if (zephyrStart == null)
+                                zephyrStart = zephyrTime.Year + "/" + zephyrTime.Month + "/" + zephyrTime.Day + " " + zephyrTime.Hour + ":" + zephyrTime.Minute + ":" + zephyrTime.Second;
 
                             if (tokens[1].Length > 0)
                                 zephyrLine += Convert.ToInt32(tokens[1]);
@@ -2012,6 +2074,9 @@ namespace DataMerger
                                     oxyconUnixTime = UnixTime.GetUnixTime(oxyconTime);
                                     string oxyconKey = oxyconTime.Year + "-" + oxyconTime.Month + "-" + oxyconTime.Day + "-" + oxyconTime.Hour + "-" + oxyconTime.Minute + "-" + oxyconTime.Second;
                                     string oxyconLine = "";
+
+                                    if (oxyconStart == null)
+                                        oxyconStart = oxyconTime.Year + "/" + oxyconTime.Month + "/" + oxyconTime.Day + " " + oxyconTime.Hour + ":" + oxyconTime.Minute + ":" + oxyconTime.Second;
                                     //if (oxyconTime.Day >= 10)
                                       //  Console.Write("");
                                     if ((tokens[1].Length > 0) && (tokens[1] != "-"))
@@ -2130,6 +2195,9 @@ namespace DataMerger
                                     string oxyconKey = oxyconTime.Year + "-" + oxyconTime.Month + "-" + oxyconTime.Day + "-" + oxyconTime.Hour + "-" + oxyconTime.Minute + "-" + oxyconTime.Second;
                                     string oxyconLine = "";
 
+                                    if (oxyconStart == null)
+                                        oxyconStart = oxyconTime.Year + "/" + oxyconTime.Month + "/" + oxyconTime.Day + " " + oxyconTime.Hour + ":" + oxyconTime.Minute + ":" + oxyconTime.Second;
+
                                     if ((tokens[1].Length > 0) && (tokens[1] != "-"))
                                         oxyconLine += Convert.ToInt32(tokens[1]);
                                     oxyconLine += ",";
@@ -2247,6 +2315,10 @@ namespace DataMerger
                                     oxyconUnixTime = UnixTime.GetUnixTime(oxyconTime);
                                     string oxyconKey = oxyconTime.Year + "-" + oxyconTime.Month + "-" + oxyconTime.Day + "-" + oxyconTime.Hour + "-" + oxyconTime.Minute + "-" + oxyconTime.Second;
                                     string oxyconLine = "";
+                                    if (oxyconStart == null)
+                                        oxyconStart = oxyconTime.Year + "/" + oxyconTime.Month + "/" + oxyconTime.Day + " " + oxyconTime.Hour + ":" + oxyconTime.Minute + ":" + oxyconTime.Second;
+                                    if (oxyconStart == null)
+                                        oxyconStart = oxyconTime.Year + "/" + oxyconTime.Month + "/" + oxyconTime.Day + " " + oxyconTime.Hour + ":" + oxyconTime.Minute + ":" + oxyconTime.Second;
 
                                     if ((tokens[1].Length > 0) && (tokens[1] != "-"))
                                         oxyconLine += Convert.ToInt32(tokens[1]);
@@ -2338,6 +2410,8 @@ namespace DataMerger
                             UnixTime.GetDateTime((long)sensewearUnixTime, out sensewearTime);
                         }
 
+                        if (sensewearStart == null)
+                            sensewearStart = sensewearTime.Year + "/" + sensewearTime.Month + "/" + sensewearTime.Day + " " + sensewearTime.Hour + ":" + sensewearTime.Minute + ":" + sensewearTime.Second;
 
                         if (sensewearFound)
                         {
@@ -2354,7 +2428,7 @@ namespace DataMerger
                             }
                             else
                             {
-                                string time = prevSensewearTime.Year + "-" + prevSensewearTime.Month + "-" + prevSensewearTime.Day + "-" + prevSensewearTime.Hour + "-" + prevSensewearTime.Minute + "-" + prevSensewearTime.Second;
+                                string time = prevSensewearTime.Year + "-" + prevSensewearTime.Month + "-" + prevSensewearTime.Day + "-" + prevSensewearTime.Hour + "-" + prevSensewearTime.Minute + "-" + prevSensewearTime.Second;                               
                                 SSR.Add(time, sensewearSR);
                                 STrans.Add(time, sensewearTrans);
                                 SLong.Add(time, sensewearLong);
@@ -2435,6 +2509,9 @@ namespace DataMerger
 
                         //Entry,Date,Time,Total Calories,Activity Calories,VM,Start Flag,Stop Flag,ActCntsX,ActCntsY,ActCntsZ
                         string time = rt3Time.Year + "-" + rt3Time.Month + "-" + rt3Time.Day + "-" + rt3Time.Hour + "-" + rt3Time.Minute + "-" + rt3Time.Second;
+
+
+
                         rt3SR = 1;
                         rt3_dataline = rt3SR + ",";
                         rt3_dataline += tokens[3] + ",";
@@ -3258,7 +3335,7 @@ namespace DataMerger
             {
                 wocketsTR1 = new TextReader[wcontroller._Sensors.Count];
                 for (int k = 0; (k < wcontroller._Sensors.Count); k++)
-                    wocketsTR1[k] = new StreamReader(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "Wocket_" + wcontroller._Sensors[k]._ID.ToString("00") + "_RawCorrectedData_" + wcontroller._Sensors[k]._Location.Replace(' ', '-') + ".csv");
+                    wocketsTR1[k] = new StreamReader(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "Wocket_" + wcontroller._Sensors[k]._ID.ToString("00") + "_RawData_" + wcontroller._Sensors[k]._Location.Replace(' ', '-') + ".csv");
             }
             while (((TimeSpan)endDateTime.Subtract(currentDateTime)).TotalSeconds >= 0)
             {

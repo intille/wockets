@@ -337,7 +337,7 @@ namespace Wockets.Kernel
                 for (int i = 0; (i < devices.Length); i++)
                 {
                     //if the device is a wocket
-                    if (((devices[i].DeviceName.IndexOf("Wocket") >= 0) || (devices[i].DeviceName.IndexOf("FireFly") >= 0)) && (wocketCount < 100))
+                    if (((devices[i].DeviceName.IndexOf("WKT") >= 0) || (devices[i].DeviceName.IndexOf("Wocket") >= 0) || (devices[i].DeviceName.IndexOf("FireFly") >= 0)) && (wocketCount < 100))
                     {
                         string hex = "";
                         //byte[] address = devices[i].DeviceAddress.ToByteArray();
