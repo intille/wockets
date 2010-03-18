@@ -9,7 +9,7 @@ namespace WocketsApplication
     {
         public const int NUMBER_PANELS = 11;
         public const int HOME_PANEL = 0;
-        public const int HOME_PANEL_BUTTON_COUNT = 9;
+        public const int HOME_PANEL_BUTTON_COUNT = 7;
         public const int ABOUT_PANEL = 1;
         public const int ABOUT_PANEL_BUTTON_COUNT = 0;
         public const int SETTINGS_PANEL = 2;
@@ -30,16 +30,16 @@ namespace WocketsApplication
         //Home Screen                
         public const int LINE_CHART_BUTTON = 0;
         public const int ACTIVITY_BUTTON = 1;
-        public const int BATTERY_BUTTON = 2;
+        public const int BATTERY_BUTTON = 10;
 
-        public const int GO_GREEN_BUTTON = 3;
+        public const int GO_GREEN_BUTTON = 11;
 
-        public const int CONNECT_BUTTON = 4;
-        public const int KERNEL_BUTTON = 5;
+        public const int CONNECT_BUTTON = 2;
+        public const int KERNEL_BUTTON = 3;
 
-        public const int SETTINGS_BUTTON = 6;
-        public const int MINIMIZE_BUTTON = 7;
-        public const int RESET_BUTTON = 8;
+        public const int SETTINGS_BUTTON = 4;
+        public const int MINIMIZE_BUTTON = 5;
+        public const int RESET_BUTTON = 6;
         
 //        public const int DISCONNECT_BUTTON = 4;
   //      public const int RECORD_BUTTON = 10;

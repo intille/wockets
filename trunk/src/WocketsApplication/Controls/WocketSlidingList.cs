@@ -33,10 +33,10 @@ namespace WocketsApplication.Controls
         }
         public void MoveUp()
         {
-            if (location != (this.Controls.Count-4))
+            if (((location + 3) < this.Controls.Count) && ((location+4)<this.Controls.Count))
             {
                 for (int i = 0; (i < 5); i++)
-                    this.Controls[location + i].Location = new Point(this.Location.X, this.Controls[location + i].Height * (i-1));                
+                    this.Controls[location + i].Location = new Point(this.Location.X, this.Controls[location + i].Height * (i - 1));
                 location++;
             }
             this.Refresh();
@@ -47,12 +47,16 @@ namespace WocketsApplication.Controls
         {
             if (location != 0)
             {
-                for (int i = 0; (i < 5); i++)                
-                    this.Controls[location + i - 1].Location = new Point(this.Location.X, this.Controls[location + i - 1].Height * i);                
-                location--;
+                if (this.Controls.Count > 0)
+                {
+                    for (int i = 0; (i < 5); i++)
+                        this.Controls[location + i - 1].Location = new Point(this.Location.X, this.Controls[location + i - 1].Height * i);
+                    location--;
+                }
             }
             this.Refresh();
-}
+        }
+
         private void slideList()
         {
             if (this.currentTransition == Transitions.DOWN_TO_UP)

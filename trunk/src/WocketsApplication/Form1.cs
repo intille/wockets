@@ -87,10 +87,10 @@ namespace WocketsApplication
         {
             if (!disposed)
             {
+                if (wocketsList.InvokeRequired)
                 // InvokeRequired required compares the thread ID of the
                 // calling thread to the thread ID of the creating thread.
                 // If these threads are different, it returns true.
-                if (wocketsList.InvokeRequired)
                 {
                     UpdatewWocketsListCallback d = new UpdatewWocketsListCallback(UpdatewWocketsList);
                     this.Invoke(d, new object[] { });
@@ -98,38 +98,48 @@ namespace WocketsApplication
                 else
                 {
                     wocketsList._Location = 0;
-                    wocketsList.Controls.Clear();                   
-                    RegistryKey rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_DISCOVERED_SENSORS_PATH); 
+                    wocketsList.Controls.Clear();
+                    RegistryKey rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_DISCOVERED_SENSORS_PATH);
 
-                    //BUG crashing
-                    string[] sensors = rk.GetSubKeyNames();
-                    rk.Close();
-                    if (sensors.Length > 0)
+                    if (rk != null)
                     {
-                        wocketsList._Status = "";
-                        for (int i = 0; (i < sensors.Length); i++)
+                        //BUG crashing
+                        string[] sensors = rk.GetSubKeyNames();
+                        rk.Close();
+                        if (sensors.Length > 0)
                         {
+                            wocketsList._Status = "";
+                            for (int i = 0; (i < sensors.Length); i++)
+                            {
 
-                            rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_DISCOVERED_SENSORS_PATH + "\\" + sensors[i]); ;
-                            WocketListItem wi = new WocketListItem((string)rk.GetValue("Name"), (string)rk.GetValue("MacAddress"),i+1);
-                            rk.Close();
-                            wi.Index = i;
-                            wi.Name = wi.Index.ToString();
-                            wi.Location = new Point(0, wi.Height * i);
-                            wi.Click += new EventHandler(wocketClickHandler);
-                            wocketsList.Controls.Add(wi);
+                                rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_DISCOVERED_SENSORS_PATH + "\\" + sensors[i]); ;
+                                WocketListItem wi = new WocketListItem((string)rk.GetValue("Name"), (string)rk.GetValue("MacAddress"), i + 1);
+                                rk.Close();
+                                wi.Index = i;
+                                wi.Name = wi.Index.ToString();
+                                wi.Location = new Point(0, wi.Height * i);
+                                wi.Click += new EventHandler(wocketClickHandler);
+                                wocketsList.Controls.Add(wi);
+                            }
+                            wocketsList._Status = "";
                         }
-                        wocketsList._Status = "";
+                        else
+                        {
+                            wocketsList._Status = "No Wockets Found...";
+                        }
                     }
                     else
                     {
-                        wocketsList._Status = "No Wockets Found...";                        
+                        wocketsList._Status = "No Wockets Found...";
                     }
                     wocketsList.Refresh();
+
+
                 }
             }
-
         }
+
+        
         private Thread soundThread = null;
 
         private void SoundThread()
@@ -313,8 +323,8 @@ namespace WocketsApplication
                                InitializeML();
                        }
                    }
-                   soundThread = new Thread(new ThreadStart(SoundThread));
-                   soundThread.Start();
+                  soundThread = new Thread(new ThreadStart(SoundThread));
+                  soundThread.Start();
             
                 }
                 else if (response == ApplicationResponse.DISCONNECT_SUCCESS.ToString())
@@ -392,6 +402,7 @@ namespace WocketsApplication
                     plotter = new WocketsScalablePlotter(plotterPanel, selectedWockets.Count);
                     plotterPanel.Visible = true;
                     plotterTimer.Enabled = true;
+                    
                         
                 }
             }
@@ -527,6 +538,11 @@ namespace WocketsApplication
         private AlphaLabel bestGuessLabel;
         private Button doneClassifying;
 
+
+        [DllImport("coredll.dll")]
+        static extern int ShowWindow(IntPtr hWnd, int nCmdShow);
+        const int SW_MINIMIZED = 6;
+
         public void InitializeInterface()
         {
             //GdiplusStartupInput input = new GdiplusStartupInput();
@@ -603,6 +619,8 @@ namespace WocketsApplication
             //Setup the annotation protcols list
             annotationProtocolsList = new ListView();
             annotationProtocolsList.Location = new System.Drawing.Point(72, 44);
+            annotationProtocolsList.BackColor = Color.White;
+            annotationProtocolsList.ForeColor = Color.Black;
             annotationProtocolsList.View = View.List;
             annotationProtocolsList.Name = "annotationProtocolsList";
             annotationProtocolsList.Size = new System.Drawing.Size(100, 100);
@@ -657,6 +675,8 @@ namespace WocketsApplication
             startAnnnotationButton = new Button();
             startAnnnotationButton.Size = new Size(400, 80);
             startAnnnotationButton.Text = "Begin Annotation";
+            startAnnnotationButton.BackColor = Color.LightGray;
+            startAnnnotationButton.ForeColor = Color.Black;
             startAnnnotationButton.Font = new Font(FontFamily.GenericSerif, 14.0f, FontStyle.Bold);
             startAnnnotationButton.Enabled = false;
             startAnnnotationButton.Visible = true;
@@ -673,6 +693,8 @@ namespace WocketsApplication
             modelsList.Location = new System.Drawing.Point(72, 44);
             modelsList.View = View.List;
             modelsList.Name = "modelsList";
+            modelsList.BackColor = Color.White;
+            modelsList.ForeColor = Color.Black;
             modelsList.Size = new System.Drawing.Size(100, 100);
             modelsList.TabIndex = 0;
             modelsList.SelectedIndexChanged += new EventHandler(modelsList_SelectedIndexChanged);
@@ -704,6 +726,8 @@ namespace WocketsApplication
             startMeasuringButton = new Button();
             startMeasuringButton.Size = new Size(400, 80);
             startMeasuringButton.Text = "Begin Measuring";
+            startMeasuringButton.BackColor = Color.LightGray;
+            startMeasuringButton.ForeColor = Color.Black;
             startMeasuringButton.Font = new Font(FontFamily.GenericSerif, 14.0f, FontStyle.Bold);
             startMeasuringButton.Enabled = false;
             startMeasuringButton.Visible = true;
@@ -788,12 +812,12 @@ namespace WocketsApplication
             //Line 1
             AddButton(ControlID.HOME_PANEL, ControlID.LINE_CHART_BUTTON, "Buttons\\LineChartPressed.png", "Buttons\\LineChartUnpressed.png", 0, 50, 128, "Plot", ButtonType.Fixed);
             AddButton(ControlID.HOME_PANEL, ControlID.ACTIVITY_BUTTON, "Buttons\\ActivityPressed-128.png", "Buttons\\ActivityUnpressed-128.png", 160, 50, 128, "Activity", ButtonType.Fixed);
-            AddButton(ControlID.HOME_PANEL, ControlID.BATTERY_BUTTON, "Buttons\\BatteryPressed.png", "Buttons\\BatteryUnpressed.png", 310, 50, 128,  "Power", ButtonType.Fixed);
+            //AddButton(ControlID.HOME_PANEL, ControlID.BATTERY_BUTTON, "Buttons\\BatteryPressed.png", "Buttons\\BatteryUnpressed.png", 310, 50, 128,  "Power", ButtonType.Fixed);
             
             //Line 2
-            AddButton(ControlID.HOME_PANEL, ControlID.GO_GREEN_BUTTON, "Buttons\\GoGreenPressed-128.png", "Buttons\\GoGreenUnpressed-128.png", 0, 210, 128, "Go Green", ButtonType.Fixed);
-            AddButton(ControlID.HOME_PANEL, ControlID.CONNECT_BUTTON, "Buttons\\DisconnectUnpressed-128.png", "Buttons\\ConnectUnpressed-128.png", 160, 210, 128, "Connect", ButtonType.Alternating);
-            AddButton(ControlID.HOME_PANEL, ControlID.KERNEL_BUTTON, "Buttons\\StopKernelUnpressed-128.png", "Buttons\\StartKernelUnpressed-128.png", 310, 210, 128, "Start Kernel", ButtonType.Alternating);
+            //AddButton(ControlID.HOME_PANEL, ControlID.GO_GREEN_BUTTON, "Buttons\\GoGreenPressed-128.png", "Buttons\\GoGreenUnpressed-128.png", 0, 210, 128, "Go Green", ButtonType.Fixed);
+            AddButton(ControlID.HOME_PANEL, ControlID.CONNECT_BUTTON, "Buttons\\DisconnectUnpressed-128.png", "Buttons\\ConnectUnpressed-128.png", 310, 50, 128, "Connect", ButtonType.Alternating);
+            AddButton(ControlID.HOME_PANEL, ControlID.KERNEL_BUTTON, "Buttons\\StopKernelUnpressed-128.png", "Buttons\\StartKernelUnpressed-128.png", 0, 210, 128, "Start Kernel", ButtonType.Alternating);
 
 
            
@@ -1001,7 +1025,8 @@ namespace WocketsApplication
                 else
                 {
                     ((Label)this.classifiedLabels[activity]).ForeColor = Color.FromArgb((int)(250 * color), (int)(237 * color), (int)(221 * color));
-                    ((Label)this.classifiedLabels[activity]).Invalidate();                  
+                    ((Label)this.classifiedLabels[activity]).Invalidate();
+                    this.panels[ControlID.CLASSIFICATION_PANEL].Refresh();
                 }
             }
 
@@ -1078,6 +1103,8 @@ namespace WocketsApplication
                 return; 
             }
 
+
+            this.startMeasuringButton.Enabled = false;
             modelDirectory = this.aModels[this.selectedModel]._FileName.Substring(0, this.aModels[this.selectedModel]._FileName.LastIndexOf('\\'));
                 
             this.annotatedSession = new Session();
@@ -1151,17 +1178,17 @@ namespace WocketsApplication
             {
                 string activity= instances.classAttribute().value_Renamed(i);
                 Label label = new Label();
-                label.Size = new Size(500, 40);
+                label.Size = new Size(500, 60);
                 label.Text = activity;
                 label.BackColor = Color.FromArgb(250, 237, 221);
                 label.ForeColor = Color.FromArgb(250, 237, 221);
-                label.Font = new Font(FontFamily.GenericSerif, 10.0f, FontStyle.Bold);
+                label.Font = new Font(FontFamily.GenericSerif, 16.0f, FontStyle.Bold);
                 label.Visible = true;
                 label.Location = new Point(10,yLocation );
 
                 classifiedLabels.Add(activity, label);
                 this.panels[ControlID.CLASSIFICATION_PANEL].Controls.Add(label);
-                yLocation += 40;
+                yLocation += 70;
             }
             this.activityStatus = ActivityStatus.Measuring;
             this.panels[ControlID.CLASSIFICATION_PANEL].Visible = true;
@@ -1437,6 +1464,7 @@ namespace WocketsApplication
                         buttons[j].Text = truncateText(acts[j]._Name);
                         buttons[j].Click += new EventHandler(this.activityButton_Click);
                         buttons[j].BackColor = Color.SkyBlue;
+                        buttons[j].ForeColor= Color.Black;
                         numberOfButtons += 1;
                     }
                     activityButtons.Add(buttons);
@@ -1717,13 +1745,13 @@ namespace WocketsApplication
                 selectedWockets.Remove(wi);
                 wi.BackColor = Color.FromArgb(245, 219, 186);
             }
-            else                        
+           /* else                        
             {
                 bluetoothName.Text = wi._Name;                
                 this.panels[ControlID.WOCKETS_CONFIGURATION_PANEL].Visible = true;
                 this.panels[ControlID.WOCKETS_PANEL].Visible = false;
                 currentPanel = ControlID.WOCKETS_CONFIGURATION_PANEL;
-            }
+            }*/
         }
         public delegate void ClickHandler(object sender, EventArgs e);
         private double clickTime = 0;
@@ -1828,9 +1856,10 @@ namespace WocketsApplication
             {
                 if (name == ControlID.WOCKETS_BACK_BUTTON)
                 {                    
-                    this.panels[ControlID.SETTINGS_PANEL].Visible = true;
+                    //this.panels[ControlID.SETTINGS_PANEL].Visible = true;
+                    this.panels[ControlID.HOME_PANEL].Visible = true;
                     this.panels[ControlID.WOCKETS_PANEL].Visible = false;
-                    currentPanel = ControlID.SETTINGS_PANEL;
+                    currentPanel = ControlID.HOME_PANEL;
                     ArrayList s = new ArrayList();
                     for (int i = 0; (i < selectedWockets.Count); i++)
                     {
@@ -1869,7 +1898,11 @@ namespace WocketsApplication
 
             else if (currentPanel == ControlID.HOME_PANEL)
             {
-                if (name == ControlID.KERNEL_BUTTON)
+                if (name == ControlID.MINIMIZE_BUTTON)
+                {
+                    ShowWindow(this.Handle, SW_MINIMIZED);
+                }
+                else if (name == ControlID.KERNEL_BUTTON)
                 {
                     if (!this.panels[currentPanel]._ButtonPressed[ControlID.KERNEL_BUTTON])
                     {
@@ -2009,8 +2042,9 @@ namespace WocketsApplication
                 }
                 else if (name == ControlID.GO_GREEN_BUTTON)
                 {
-                    if (Core._Connected)
+                   /* if (Core._Connected)
                         Core.SetSniff(Core._KernelGuid, SleepModes.Sleep1Second);
+                    */
                 }
                 else if (name == ControlID.RESET_BUTTON)
                 {
@@ -2049,12 +2083,32 @@ namespace WocketsApplication
                 {
 
 
-                    this.panels[currentPanel].Visible = false;
+                    /*this.panels[currentPanel].Visible = false;
                     this.panels[ControlID.SETTINGS_PANEL].Location = new Point(0, 0);
                     this.panels[ControlID.SETTINGS_PANEL].BringToFront();
                     this.panels[ControlID.SETTINGS_PANEL].Visible = true;
                     this.panels[ControlID.SETTINGS_PANEL].Dock = DockStyle.None;
-                    this.currentPanel = ControlID.SETTINGS_PANEL;
+                    this.currentPanel = ControlID.SETTINGS_PANEL;*/
+
+                    if (!Core._KernelStarted)
+                        MessageBox.Show("Please start the kernel before changing the settings", "Confirm", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
+                    else
+                    {
+                        if (Core._Connected)
+                            MessageBox.Show("Cannot change the settings while connected", "Confirm", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
+                        else
+                        {
+
+                            this.panels[ControlID.HOME_PANEL].Visible = false;
+                            this.panels[ControlID.WOCKETS_PANEL].Location = new Point(0, 0);
+                            //this.panels[ControlID.WOCKETS_PANEL].BringToFront();                   
+                            this.panels[ControlID.WOCKETS_PANEL].Visible = true;
+                            this.panels[ControlID.WOCKETS_PANEL].Dock = DockStyle.None;
+                            this.currentPanel = ControlID.WOCKETS_PANEL;
+                            selectedWockets.Clear();
+                            UpdatewWocketsList();
+                        }
+                    }
 
                 }
                 else if (name == ControlID.CONNECT_BUTTON)

@@ -110,7 +110,9 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
         private int totalBytes = 0;
         private int sentBytes = 0;
         private static object socketLock = new object();
-
+        
+        /*private  static int allbytesreceived=0;
+        private static int mycounter=0;*/
         public override void Process()
         {
             byte[] sendByte = new byte[1];                        
@@ -165,6 +167,26 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
 
                             bytesReceived = socket.Receive(singleReadBuffer, LOCAL_BUFFER_SIZE, SocketFlags.None);
                             totalBytes += bytesReceived;
+
+                           
+                             /*if (totalBytes>=2610)
+                             {
+                              mycounter++;
+                              if (mycounter>=100)
+                              {
+                               System.IO.TextWriter ttw=new System.IO.StreamWriter("samplesreceived.txt",true);
+                               ttw.WriteLine(WocketsTimer.GetUnixTime()+","+allbytesreceived);
+                               ttw.Close();
+                                mycounter=0;
+                              }
+                             
+                              allbytesreceived=totalBytes;
+                              totalBytes=0;
+                              //NetworkStacks._BluetoothStack.Dispose();
+                                 throw new Exception();
+                             }*/
+                             
+                             
                             /*if (logCounter>lastReceiveCounter)
                             {
                                 int diff=logCounter - lastReceiveCounter;

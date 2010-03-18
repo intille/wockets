@@ -17,7 +17,7 @@ namespace WocketsApplication.Controls
         public Label Status;
         public int Index;
         private AlphaPictureBox backBox;
-        private AlphaPictureBox commandButton;
+        //private AlphaPictureBox commandButton;
         private AlphaPictureBox addButton;
         private AlphaPictureBox removeButton;
 
@@ -58,7 +58,7 @@ namespace WocketsApplication.Controls
         {
             this.Width = Screen.PrimaryScreen.WorkingArea.Width;
             this.Height = Screen.PrimaryScreen.WorkingArea.Height / 4;
-            this.BackColor = Color.FromArgb(245, 219, 186);
+            this.BackColor = Color.FromArgb(245, 219, 186);           
             this._ClearCanvas = true;
             _MacAddress = mac;
             _Name = name;
@@ -68,10 +68,12 @@ namespace WocketsApplication.Controls
             Mac = new Label();
             Status = new Label();
             Title.Text =  index +". "+ name;
+            Title.ForeColor = Color.Black;
             Title.Font = new Font(FontFamily.GenericSansSerif, 10.0f, FontStyle.Bold);
             Title.Location = new Point(10, 10);
-            Title.Size = new Size(250,30);
+            Title.Size = new Size(450,30);
             Mac.Text = mac;
+            Mac.ForeColor = Color.Black;
             Mac.Font = new Font(FontFamily.GenericSansSerif, 8.0f, FontStyle.Regular);
             Mac.Location = new Point(10, 40);
             Mac.Size = new Size(250, 30);
@@ -79,6 +81,7 @@ namespace WocketsApplication.Controls
             Status.Font = new Font(FontFamily.GenericSansSerif, 8.0f, FontStyle.Bold | FontStyle.Italic);
             Status.Location = new Point(350, 10);
             Status.Size = new Size(150, 30);
+            Status.ForeColor = Color.Black;
 
             backBox = new AlphaPictureBox();            
             backBox.Size = new Size(400,60);
@@ -88,17 +91,17 @@ namespace WocketsApplication.Controls
             backBox.Alpha = 255;
            
 
-            commandButton = new AlphaPictureBox();
+            /*commandButton = new AlphaPictureBox();
             commandButton.Size = new Size(48, 48);
             commandButton.Image = AlphaImage.CreateFromFile(Constants.PATH + "Buttons\\CommandUnpressed.png");
             commandButton.Visible = true;
-            commandButton.Location = new Point(200, 80);
+            commandButton.Location = new Point(200, 80);*/
 
             addButton = new AlphaPictureBox();
             addButton.Size = new Size(48, 48);           
             addButton.Image = AlphaImage.CreateFromFile(Constants.PATH + "Buttons\\AddUnpressed.png");
             addButton.Visible = true;
-            addButton.Location=  new Point(300, 80);
+            addButton.Location=  new Point(200, 80);
 
 
             removeButton = new AlphaPictureBox();
@@ -116,7 +119,7 @@ namespace WocketsApplication.Controls
             this.Controls.Add(Title);
             this.Controls.Add(Mac);
             this.Controls.Add(Status);
-            this.Controls.Add(commandButton);
+            //this.Controls.Add(commandButton);
             this.Controls.Add(addButton);
             this.Controls.Add(removeButton);
             this.Controls.Add(backBox);                      
