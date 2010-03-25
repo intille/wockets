@@ -64,7 +64,9 @@ namespace Wockets
         private Classifier classifier;
         private string storageDirectory;
         private Session annotatedSession;
-        
+
+        private ManualResetEvent paused;
+        public bool _Paused = false;
         public double StartTime = 0;
         //public Escape _Escape = new Escape();
 
@@ -144,6 +146,7 @@ namespace Wockets
 
         public WocketsController(string name, string filename, string description)
         {
+            this.paused = new ManualResetEvent(false);
             this.decoders = new DecoderList();
             this.receivers = new ReceiverList();
             this.sensors = new SensorList();
@@ -239,6 +242,35 @@ namespace Wockets
             }
         }
 
+
+        public void InitAgain()
+        {
+            for (int i = 0; (i < this._Sensors.Count); i++)
+            {
+                Sensor sensor = this._Sensors[i];
+                Receiver currentReceiver = sensor._Receiver;
+                try
+                {
+                    currentReceiver.Update();
+                }
+                catch
+                {
+                }
+            }
+        }
+
+        public void Unpause()
+        {
+            _Paused = false;
+            this.paused.Set();          
+        }
+
+        public void Pause()
+        {
+            this.paused.Reset();
+            _Paused = true;
+        }
+
         public void Initialize()
         {
             //NetworkStacks._BluetoothStack.Initialize();
@@ -265,10 +297,10 @@ namespace Wockets
            aSavingThread.Priority = ThreadPriority.Highest;
             aPollingThread = new Thread(new ThreadStart(Poll));
             aPollingThread.Priority = ThreadPriority.Highest;
-            aClassifyingThread = new Thread(new ThreadStart(Classify));
+            //aClassifyingThread = new Thread(new ThreadStart(Classify));
             aPollingThread.Start();
             aSavingThread.Start();
-            aClassifyingThread.Start();
+            //aClassifyingThread.Start();
 
 
 
@@ -317,9 +349,11 @@ namespace Wockets
         }
 
         private void Save()
-        {
+        {            
             while (saving)
             {
+                if (_Paused)
+                    this.paused.WaitOne();
 
                 for (int i = 0; (i < this._Sensors.Count); i++)
                 {
@@ -327,7 +361,15 @@ namespace Wockets
                     {
 
                         this._Sensors[i].Save();
-                        Thread.Sleep(1000);
+                        Thread.Sleep(1000);     
+                  
+                        //FOR power efficient
+                        //if (this._Sensors[i].SavedPackets == 2400) 
+                       // {
+                        //    this._Sensors[i].SavedPackets = 0;
+                           //NamedEvents namedEvents = new NamedEvents();
+                            //namedEvents.Send("DisconnectEvent");
+                        //}
                     }
                     catch (Exception ee)
                     {
@@ -635,6 +677,9 @@ namespace Wockets
 
             while (polling)
             {
+                if (_Paused)
+                    this.paused.WaitOne();
+
                 allWocketsDisconnected = true;
                 pollCounter++;
 
@@ -684,7 +729,7 @@ namespace Wockets
                                     if (batteryPoll[i] <= 0)
                                     {
                                         ((SerialReceiver)currentReceiver).Write(GET_BT_CMD._Bytes);
-                                        batteryPoll[i] = 600 + i * 200;
+                                        batteryPoll[i] = 6000 + i * 200;
                                     }
                                     #endregion Battery Query
 

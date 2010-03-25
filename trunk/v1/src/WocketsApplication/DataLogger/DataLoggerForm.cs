@@ -842,11 +842,15 @@ namespace WocketsApplication.DataLogger
 
         private void startAnnotation()
         {
+            double now = WocketsTimer.GetUnixTime();
+            DateTime nowDT = new DateTime();
+            WocketsTimer.GetDateTime((long)now, out nowDT);
             this.currentRecord = new Annotation();
-            this.currentRecord._StartDate = DateTime.Now.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ssK");
-            this.currentRecord._StartHour = DateTime.Now.Hour;
-            this.currentRecord._StartMinute = DateTime.Now.Minute;
-            this.currentRecord._StartSecond = DateTime.Now.Second;
+            this.currentRecord._StartDate = nowDT.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ss'.'fffK");
+            this.currentRecord._StartHour = nowDT.Hour;
+            this.currentRecord._StartMinute = nowDT.Minute;
+            this.currentRecord._StartSecond = nowDT.Second;
+            this.currentRecord._StartMillisecond = nowDT.Millisecond;
             TimeSpan ts = (DateTime.Now - new DateTime(1970, 1, 1, 0, 0, 0));
             this.currentRecord._StartUnix = ts.TotalSeconds;
 
@@ -877,10 +881,14 @@ namespace WocketsApplication.DataLogger
 
         private void stopAnnotation()
         {
-            this.currentRecord._EndDate = DateTime.Now.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ssK");
-            this.currentRecord._EndHour = DateTime.Now.Hour;
-            this.currentRecord._EndMinute = DateTime.Now.Minute;
-            this.currentRecord._EndSecond = DateTime.Now.Second;
+            double now = WocketsTimer.GetUnixTime();
+            DateTime nowDT = new DateTime();
+            WocketsTimer.GetDateTime((long)now, out nowDT);
+            this.currentRecord._EndDate = nowDT.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ss'.'fffK");
+            this.currentRecord._EndHour = nowDT.Hour;
+            this.currentRecord._EndMinute = nowDT.Minute;
+            this.currentRecord._EndSecond = nowDT.Second;
+            this.currentRecord._EndMillisecond = nowDT.Millisecond;
             TimeSpan ts = (DateTime.Now - new DateTime(1970, 1, 1, 0, 0, 0));
             this.currentRecord._EndUnix = ts.TotalSeconds;
             this.annotatedSession.Annotations.Add(this.currentRecord);

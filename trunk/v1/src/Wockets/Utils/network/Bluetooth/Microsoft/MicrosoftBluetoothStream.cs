@@ -5,6 +5,7 @@ using Wockets.Utils.network.Bluetooth;
 using Wockets;
 using System.Net.Sockets;
 using System.Threading;
+using System.Runtime.InteropServices;
 
 namespace Wockets.Utils.network.Bluetooth.Microsoft
 {
@@ -63,7 +64,10 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
             }
 
         }
-        
+        [DllImport("btdrt.dll", SetLastError = true)]
+        public static extern int BthReadRSSI(byte[] pbt, out ushort pbRSSI);
+
+
         public static BluetoothStream Open(CircularBuffer buffer,CircularBuffer sbuffer, byte[] address, string pin)
         {
             //os shuts it down so make sure it is open
@@ -88,7 +92,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                 btStream.processingThread = new Thread(new ThreadStart(btStream.Process));
                 btStream.processingThread.Priority = ThreadPriority.AboveNormal;
                 btStream.processingThread.Start();
-                Logger.Debug("Microsoft Open:Reconnection for receiver " + btStream.hexAddress + " success spawned process thread");
+                Logger.Debug("Microsoft Open:Reconnection for receiver " + btStream.hexAddress + " success spawned process thread ");
 
             }
             catch (Exception e)
@@ -109,7 +113,12 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
         private int totalBytes = 0;
         private int sentBytes = 0;
         private static object socketLock = new object();
+        private ushort rssi;
+        private int rssi_count = 0;
+        private int rssi_sum = 0;
 
+                //BthReadRSSI(btStream._RemoteEP.Address, out rssi);
+                  
         public override void Process()
         {
             byte[] sendByte = new byte[1];                        
@@ -140,7 +149,20 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
 
                                     return;
                                 }
+
+
                             }
+
+                            BthReadRSSI(address, out rssi);
+                            if (rssi > rssi_sum)
+                                rssi_sum = rssi;
+                            rssi_count++;
+                            if (rssi_count > 10)
+                            {
+                                rssi_sum = 0;
+                                rssi_count = 0;
+                            }
+
                             sentBytes++;
 
                             if (this.sbuffer._Head >= (this.sbuffer._Bytes.Length - 1))
@@ -165,13 +187,19 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
 
                             totalBytes += bytesReceived;
                             // timestamp = WocketsTimer.GetUnixTime();
+
+
+                            /*if (totalBytes >= 12000)
+                            {
+                                totalBytes = 0;
+                            }*/
                         }
                     }
                     Thread.Sleep(30);
                     if (logCounter > 500)
                     {
                         Logger.Debug("Receiver " + this._HexAddress + ",sent:" + sentBytes + ",received:" + totalBytes);
-                        logCounter = 0;
+                        logCounter = 0; 
                     }
 
                     if (bytesReceived > 0)                       
