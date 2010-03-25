@@ -382,8 +382,11 @@
     <Compile Include="..\..\src\Wockets\Applications\Games\Escape\Sounds.cs">
       <Link>Applications\Games\Escape\Sounds.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Utils\Battery.cs" >
+    <Compile Include="..\..\src\Wockets\Utils\Battery.cs">
       <Link>Utils\Battery.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\NamedEvents.cs" >
+      <Link>Utils\NamedEvents.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
