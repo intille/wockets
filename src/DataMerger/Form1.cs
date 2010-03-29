@@ -7,11 +7,14 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO;
 using System.Threading;
+using System.Globalization;
+
 using HousenCS.MITes;
 using System.Collections;
 using System.Text.RegularExpressions;
 using Wockets.Data.Annotation;
 using Wockets;
+
 
 namespace DataMerger
 {
@@ -1229,6 +1232,7 @@ namespace DataMerger
 
 
            string rti_line = "";
+            
             try
             {
                 if (file.Length == 1)
@@ -1236,22 +1240,27 @@ namespace DataMerger
                     if (CSVProgress == "")
                         CSVProgress = "Processing RTI Data";
                     rtiReader = new StreamReader(file[0]);
+                     DateTime rtiOriginTime = new DateTime();
+                     bool rtiOriginFound = false;
+                     if (File.Exists(aDataDirectory + "\\" + OTHER_SUBDIRECTORY + "\\RTISynchronizationTime.txt"))
+                     {
+                         TextReader rtiOriginTR = new StreamReader(aDataDirectory + "\\" + OTHER_SUBDIRECTORY + "\\RTISynchronizationTime.txt");
+                         string originRTI = rtiOriginTR.ReadLine();
 
+                         try
+                         {
+                             tokens = originRTI.Split(',');
+                             tokens = tokens[0].Split('.');
+                             rtiOriginTR.Close();
+                             UnixTime.GetDateTime(Convert.ToInt64(tokens[0]), out rtiOriginTime);
+                         }
+                         catch (Exception e)
+                         {
+                             throw new Exception("RTI Synchronization: Parsing failed " + e.Message);
+                         }
 
-                    TextReader rtiOriginTR = new StreamReader(aDataDirectory + "\\" + OTHER_SUBDIRECTORY + "\\RTISynchronizationTime.txt");
-                    string originRTI = rtiOriginTR.ReadLine();
-                    DateTime rtiOriginTime = new DateTime();
-                    try
-                    {
-                        tokens = originRTI.Split(',');
-                        tokens = tokens[0].Split('.');
-                        rtiOriginTR.Close();
-                        UnixTime.GetDateTime(Convert.ToInt64(tokens[0]), out rtiOriginTime);
-                    }
-                    catch (Exception e)
-                    {
-                        throw new Exception("RTI Synchronization: Parsing failed " + e.Message);
-                    }
+                         rtiOriginFound = true;
+                     }
 
                     //skip first 25 lines
                     for (int k = 0; (k < 7); k++)
@@ -1275,25 +1284,27 @@ namespace DataMerger
                         if (tokens.Length >= 4)
                         {
 
-                            /*string[] dateTokens = tokens[0].Split(new char[] { ' ', '\t' });                            
-                            string[] timeTokens=null;
-                            if (dateTokens[1].Contains("/"))
-                                timeTokens = dateTokens[0].Split('.');
-                            else
-                                timeTokens = dateTokens[1].Split('.');
+                            if (!rtiOriginFound)
+                            {
+                                string[] dateTokens = tokens[0].Split(new char[] { ' ', '\t' });                            
+                                string[] timeTokens=null;
+                                if (dateTokens[1].Contains("/"))
+                                    timeTokens = dateTokens[0].Split('.');
+                                else
+                                    timeTokens = dateTokens[1].Split('.');
 
-                            int mseconds = Convert.ToInt32(timeTokens[1]);
-                            timeTokens = timeTokens[0].Split(':');
+                                int mseconds = Convert.ToInt32(timeTokens[1]);
+                                timeTokens = timeTokens[0].Split(':');
 
-                            if (dateTokens[1].Contains("/"))
-                                dateTokens = dateTokens[1].Split('/');
-                            else
-                                dateTokens = dateTokens[0].Split('/');
-                            if (dateTokens[2].Length == 2)
-                                dateTokens[2] = "20" + dateTokens[2];
-                            rtiTime = new DateTime(Convert.ToInt32(dateTokens[2]), Convert.ToInt32(dateTokens[0]), Convert.ToInt32(dateTokens[1]), Convert.ToInt32(timeTokens[0]), Convert.ToInt32(timeTokens[1]), Convert.ToInt32(timeTokens[2]),mseconds);*/
-
-                            if (rti_sample_counter == 20)
+                                if (dateTokens[1].Contains("/"))
+                                    dateTokens = dateTokens[1].Split('/');
+                                else
+                                    dateTokens = dateTokens[0].Split('/');
+                                if (dateTokens[2].Length == 2)
+                                    dateTokens[2] = "20" + dateTokens[2];
+                                rtiTime = new DateTime(Convert.ToInt32(dateTokens[2]), Convert.ToInt32(dateTokens[0]), Convert.ToInt32(dateTokens[1]), Convert.ToInt32(timeTokens[0]), Convert.ToInt32(timeTokens[1]), Convert.ToInt32(timeTokens[2]),mseconds);
+                            }
+                            if ((rtiOriginFound) && (rti_sample_counter == 20))
                             {
                                 rtiTime = rtiTime.AddSeconds(1.0);
                                 rti_sample_counter = 0;
@@ -1379,12 +1390,12 @@ namespace DataMerger
                             }
 
 
-                            xRTI += (Convert.ToDouble(tokens[1])+1.5)*1000.0;
-                            yRTI += (Convert.ToDouble(tokens[2]) + 1.5) * 1000.0;
-                            zRTI += (Convert.ToDouble(tokens[3]) + 1.5) * 1000.0;
-                            xAUCRTI += Math.Abs(((Convert.ToDouble(tokens[1]) + 1.5) * 1000.0) - rtiRMX);
-                            yAUCRTI += Math.Abs(((Convert.ToDouble(tokens[2]) + 1.5) * 1000.0) - rtiRMY);
-                            zAUCRTI += Math.Abs(((Convert.ToDouble(tokens[3]) + 1.5) * 1000.0) - rtiRMZ);
+                            xRTI += Convert.ToDouble(tokens[1]);
+                            yRTI += Convert.ToDouble(tokens[2]);
+                            zRTI += Convert.ToDouble(tokens[3]);
+                            xAUCRTI += Math.Abs(Convert.ToDouble(tokens[1]) - rtiRMX);
+                            yAUCRTI += Math.Abs(Convert.ToDouble(tokens[2]) - rtiRMY);
+                            zAUCRTI += Math.Abs(Convert.ToDouble(tokens[3]) - rtiRMZ);
                             rtiCount++;
                             prevRTIKey = rtiKey;
                         }
@@ -1398,6 +1409,7 @@ namespace DataMerger
             {
                 throw new Exception("RTI: Parsing failed " + e.Message);
             }
+
 
             hasRTI = (rtiData.Count > 0);
             rtiRecords = rtiData.Count ;
@@ -1514,7 +1526,7 @@ namespace DataMerger
                             gpsLine += ",";
                             if (tokens[6].Length > 0)
                                 gpsLine += Convert.ToDouble(tokens[6]);
-                            gpsLine += ",";
+                           // gpsLine += ",";
 
                             if (gpsData.Contains(gpsKey) == false)
                                 gpsData.Add(gpsKey, gpsLine);
@@ -2105,7 +2117,7 @@ namespace DataMerger
                                     oxyconLine += ",";
                                     if ((tokens[8].Length > 0) && (tokens[8] != "-"))
                                         oxyconLine += Convert.ToDouble(tokens[8]);
-                                    oxyconLine += ",";
+                                    //oxyconLine += ",";
                                     if (oxyconData.ContainsKey(oxyconKey) == false)
                                         oxyconData.Add(oxyconKey, oxyconLine);
                                 }
@@ -2224,7 +2236,7 @@ namespace DataMerger
                                     oxyconLine += ",";
                                     if ((tokens[8].Length > 0) && (tokens[8] != "-"))
                                         oxyconLine += Convert.ToDouble(tokens[8]);
-                                    oxyconLine += ",";
+                                    //oxyconLine += ",";
                                     if (oxyconData.ContainsKey(oxyconKey) == false)
                                         oxyconData.Add(oxyconKey, oxyconLine);
                                 }
@@ -2346,7 +2358,7 @@ namespace DataMerger
                                     oxyconLine += ",";
                                     if ((tokens[8].Length > 0) && (tokens[8] != "-"))
                                         oxyconLine += Convert.ToDouble(tokens[8]);
-                                    oxyconLine += ",";
+                                   // oxyconLine += ",";
                                     if (oxyconData.ContainsKey(oxyconKey) == false)
                                         oxyconData.Add(oxyconKey, oxyconLine);
                                 }
@@ -2406,7 +2418,15 @@ namespace DataMerger
                         }
                         else
                         { //unix time
-                            sensewearUnixTime = Convert.ToInt64(tokens[0].Trim()) - (8 * 60 * 60 * 1000);
+                            TimeZone localZone = TimeZone.CurrentTimeZone;
+                            DaylightTime daylight = localZone.GetDaylightChanges(DateTime.Now.Year);
+                            sensewearUnixTime = Convert.ToInt64(tokens[0].Trim()) - (8 * 60 * 60 * 1000);                            
+                            UnixTime.GetDateTime((long)sensewearUnixTime, out sensewearTime);
+                            if (!TimeZone.IsDaylightSavingTime(new DateTime(sensewearTime.Year,sensewearTime.Month,sensewearTime.Day), daylight))          
+                                sensewearUnixTime = Convert.ToInt64(tokens[0].Trim()) - (8 * 60 * 60 * 1000);
+                            else
+                                sensewearUnixTime = Convert.ToInt64(tokens[0].Trim()) - (7 * 60 * 60 * 1000);
+
                             UnixTime.GetDateTime((long)sensewearUnixTime, out sensewearTime);
                         }
 
