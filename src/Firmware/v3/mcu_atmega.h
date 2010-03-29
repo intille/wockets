@@ -17,8 +17,8 @@
 
 /* Constants and preprocessor directives */
 
-// CPU Frequency 1 MHz
-//#define F_CPU 1000000UL
+// CPU Frequency 8 MHz
+#define F_CPU 7372800UL
 
 #define CPU_CLK_PRESCALAR_NONE 0
 #define CPU_CLK_PRESCALAR_8 1
@@ -147,6 +147,7 @@ void _atmega_finalize(void);
 void _atmega_initialize_uart0(unsigned int baud, unsigned char mode);
 void _atmega_initialize_uart1(unsigned int baud, unsigned char mode);
 unsigned short _atmega_a2dConvert10bit(unsigned char channel);
+void _atmega_reset(void);
 
 
 /* LED Specific Functions */
@@ -160,6 +161,12 @@ unsigned char _is_yellowled_on(void);
 
 /* Bluetooth Specific Functions */
 
+unsigned char _bluetooth_initialize(unsigned baudrate);
+unsigned char _bluetooth_enter_command_mode(void);
+unsigned char _bluetooth_exit_command_mode(void);
+void _bluetooth_reset(void);
+unsigned char _bluetooth_get_baud_rate();
+unsigned char _bluetooth_set_baud_rate(unsigned char baudrate);
 void _bluetooth_turn_on(void);
 void _bluetooth_turn_off(void);
 unsigned char _is_bluetooth_on(void);

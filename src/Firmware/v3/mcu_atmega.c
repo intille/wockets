@@ -23,11 +23,12 @@
 #include <avr/wdt.h>
 #include <stdlib.h>
 #include "mcu_atmega.h"
+#include  <util/delay.h>
+#include <avr/eeprom.h> 
 
 /* Local Function Definitions */
 
 
-/* ADC Conversion Functions */
 
 void _atmega_set_adc_clock(unsigned char prescalar){
         if (prescalar==ADC_PRESCALAR_2){
@@ -55,6 +56,7 @@ void _atmega_set_adc_clock(unsigned char prescalar){
 
 void _atmega_adc_turn_on()
 {
+
 	sbi(ADCSRA,ADEN);
 }
 
@@ -160,7 +162,7 @@ void _atmega_initialize_uart0(unsigned int baud, unsigned char mode)
         UCSR0C = (3<<UCSZ00);  //change 1 to 0 and &
 }
 
-/* 
+/** 
 	Function Name:_atmega_initialize_uart1
 	Parameters: None
 	
@@ -277,6 +279,14 @@ void _atmega_disable_timer2(void)
 
 
 
+void _atmega_reset(void)
+{               
+        cli(); //irq's off
+        wdt_enable(WDTO_15MS); //wd on,15ms
+        while(1); //loop 
+}
+
+
 /* 
 	Function Name: _atmega_disable_watchdog
 	Parameters: None
@@ -302,6 +312,12 @@ void _atmega_disable_watchdog(void)
 */
 void _atmega_initialize(unsigned char timer_prescalar)
 {
+
+	unsigned char prev_osccal=OSCCAL;
+
+	//Turn on yellow LED while initializing		
+	_yellowled_turn_on();
+	
 
 	//Set wocket status to off	
 	wocket_status=0x00;
@@ -338,7 +354,7 @@ void _atmega_initialize(unsigned char timer_prescalar)
 	// Setup Port C pins as input to minimize power consumption
 	cbi(DDRC,FLOAT_PC0);	
 	cbi(DDRC,OUT_LED_GN_PC1);	
-	cbi(DDRC,OUT_LED_YE_PC2);	
+	//cbi(DDRC,OUT_LED_YE_PC2);	
 	cbi(DDRC,FLOAT_PC3);	
 	cbi(DDRC,FLOAT_PC4);	
 	cbi(DDRC,FLOAT_PC5);	
@@ -357,21 +373,53 @@ void _atmega_initialize(unsigned char timer_prescalar)
 
 	/* Set peripherials to the lowest power states */
 	_bluetooth_turn_on();
-	_greenled_turn_off();
-	_yellowled_turn_off();
+	_accelerometer_turn_on();
+	_accelerometer_set_sensitivity(_4G);
 
 	/* Set UART */
+
+
+	//First check if the radio is set at the correct baud rate
+	//if the wocket yellow light does not go off, the wocket has not been
+	
 	_atmega_initialize_uart0(ATMEGA_BAUD_38400, TX_RX_UART_MODE);
+	if ((_bluetooth_enter_command_mode()))
+	{	
+		_yellowled_turn_off();
+		if (_bluetooth_get_baud_rate()==ATMEGA_BAUD_38400)
+				_yellowled_turn_off();
+	}else{
 
-	/* Set ADC for conversion */	
-	//Set ADC reference to AVCC
-	ADMUX |=(1 << REFS0);
-	//Set the ADC conversion clock prescalar       
+		// To run at 115K, we need to set the OSCCAL as follows, the value was
+		// determined experimentally by trying different values
+		OSCCAL=0x5A;
+		// To deal with a radio firmware bug, we are making sure the radio is set at the
+		// correct baud rate of 38.4K
+		_atmega_initialize_uart0(ATMEGA_BAUD_115200, TX_RX_UART_MODE);
+		if ((_bluetooth_enter_command_mode()))
+		{	
+			if (_bluetooth_set_baud_rate(ATMEGA_BAUD_38400))
+			{
+				_bluetooth_reset();	
+				_atmega_initialize_uart0(ATMEGA_BAUD_38400, TX_RX_UART_MODE);						
+				_yellowled_turn_off();
+			}
+		}
+		OSCCAL= prev_osccal;	
+	}
+
+
+	/* Set ADC for conversion */    
+    //Set ADC reference to AVCC
+     ADMUX |=(1 << REFS0);
+     //Set the ADC conversion clock prescalar       
      _atmega_set_adc_clock(ADC_PRESCALAR_64);
-	 _atmega_adc_turn_on();
+     _atmega_adc_turn_on();
 
-	/* Enable Timer 2 */
-	_atmega_enable_timer2(timer_prescalar);
+     /* Enable Timer 2 */
+      _atmega_enable_timer2(timer_prescalar);
+
+
 }
 
 
@@ -407,6 +455,9 @@ void _atmega_finalize(void)
 	//Disable watchdog
 	wdt_disable();
 
+	//Disable ADC Conversion
+	_atmega_adc_turn_off();
+
 
 	// Disable pull-ups
   	MCUCR |= (1u << PUD); 
@@ -431,6 +482,256 @@ void _atmega_finalize(void)
 
 
 /* Bluetooth Functions */
+
+unsigned char _bluetooth_enter_command_mode(void)
+{
+	unsigned char attempts=0;
+	unsigned char aByte=0;
+	unsigned char count=0;
+
+	while(1)  
+	{   
+		//for (int i=0;(i<255);i++)        
+		_bluetooth_transmit_uart0_byte('$');	
+		_delay_ms(5);	
+		_bluetooth_transmit_uart0_byte('$');		
+		_delay_ms(5);
+		_bluetooth_transmit_uart0_byte('$');		
+		_delay_ms(5);
+		//_bluetooth_transmit_uart0_byte('$');		
+		
+		//for (int i=0;(i<10);i++)        		
+		
+		
+		_bluetooth_transmit_uart0_byte(13);
+		_bluetooth_transmit_uart0_byte(13);
+		/*_bluetooth_transmit_uart0_byte(13);
+		_bluetooth_transmit_uart0_byte(13);
+		_bluetooth_transmit_uart0_byte(13);*/
+
+		attempts++;
+
+		if (_bluetooth_receive_uart0_byte(&aByte))
+		{		
+				if (aByte=='C'){					
+					_bluetooth_transmit_uart0_byte(13);						
+					for (int i=0;(i<10);i++)        		
+						_bluetooth_transmit_uart0_byte(13);
+					return 1;	
+				}
+		}
+
+ 		if (attempts>=255) 
+			break;				
+	}
+
+	
+	return 0;
+}
+
+
+unsigned char _bluetooth_exit_command_mode(void)
+{
+	unsigned char attempts=0;
+	unsigned char aByte=0;
+
+	while(1)  
+	{           
+		_bluetooth_transmit_uart0_byte('-');		
+		_delay_ms(5);
+		_bluetooth_transmit_uart0_byte('-');		
+		_delay_ms(5);
+		_bluetooth_transmit_uart0_byte('-');		
+		_delay_ms(5);
+				
+		_bluetooth_transmit_uart0_byte(13);
+		_bluetooth_transmit_uart0_byte(13);
+		attempts++;
+
+ 		if ((attempts>=255) || (_bluetooth_receive_uart0_byte(&aByte)==0))
+			break;				
+	}
+
+	// succeeded in entering command mode
+	if (attempts<255)
+		return 1;
+	
+	return 0;
+}
+
+
+void _bluetooth_reset(void)
+{
+	_bluetooth_turn_off();
+	_delay_ms(5);
+	_bluetooth_turn_on();
+
+}
+
+unsigned char _bluetooth_set_baud_rate(unsigned char baudrate)
+{
+	unsigned char attempts=0;
+	unsigned char aByte=0;
+
+	while(1)  
+	{   
+		for (int i=0;(i<100);i++)
+			_bluetooth_receive_uart0_byte(&aByte);
+
+		_bluetooth_transmit_uart0_byte(13);
+		_delay_ms(5);
+		_bluetooth_transmit_uart0_byte(13);
+
+		_bluetooth_transmit_uart0_byte('S');
+		_delay_ms(5);
+		_bluetooth_transmit_uart0_byte('U');
+		_delay_ms(5);
+		_bluetooth_transmit_uart0_byte(',');
+		_delay_ms(5);
+		switch(baudrate){
+			case ATMEGA_BAUD_2400:
+				_bluetooth_transmit_uart0_byte('2');
+				_bluetooth_transmit_uart0_byte('4');
+				break;
+			case ATMEGA_BAUD_4800:
+				_bluetooth_transmit_uart0_byte('4');
+				_bluetooth_transmit_uart0_byte('8');
+				break;
+			case ATMEGA_BAUD_9600:
+				_bluetooth_transmit_uart0_byte('9');
+				_bluetooth_transmit_uart0_byte('6');
+				break;
+			case ATMEGA_BAUD_19200:
+				_bluetooth_transmit_uart0_byte('1');
+				_bluetooth_transmit_uart0_byte('9');
+				break;
+			case ATMEGA_BAUD_28800:
+				_bluetooth_transmit_uart0_byte('2');
+				_bluetooth_transmit_uart0_byte('8');
+				break;
+			case ATMEGA_BAUD_38400:
+				_bluetooth_transmit_uart0_byte('3');
+				_delay_ms(5);
+				_bluetooth_transmit_uart0_byte('8');
+				_delay_ms(5);
+				break;
+			case ATMEGA_BAUD_57600:
+				_bluetooth_transmit_uart0_byte('5');
+				_bluetooth_transmit_uart0_byte('7');
+				break;
+			case ATMEGA_BAUD_115200:
+				_bluetooth_transmit_uart0_byte('1');
+				_bluetooth_transmit_uart0_byte('1');
+				break;
+			case ATMEGA_BAUD_230000:
+				_bluetooth_transmit_uart0_byte('2');
+				_bluetooth_transmit_uart0_byte('3');
+				break;
+			case ATMEGA_BAUD_460000:
+				_bluetooth_transmit_uart0_byte('4');
+				_bluetooth_transmit_uart0_byte('6');
+				break;
+			default:
+			_bluetooth_transmit_uart0_byte('3');
+			_bluetooth_transmit_uart0_byte('8');
+		}
+
+		_bluetooth_transmit_uart0_byte(13);
+		_delay_ms(5);
+		_bluetooth_transmit_uart0_byte(13);
+		_delay_ms(5);
+
+		attempts++;
+		if (_bluetooth_receive_uart0_byte(&aByte))
+		{
+			if (aByte=='A')			
+				return 1;					
+		}
+		if (attempts>=255)
+			break;
+	}
+	
+	// succeeded in entering command mode
+
+	return 0;
+}
+
+
+unsigned char _bluetooth_get_baud_rate()
+{
+	unsigned char attempts=0;
+	unsigned char baudrate=0;
+	unsigned char aByte=0;
+
+	while(1)  
+	{            
+
+
+		//for (int i=0;(i<100);i++)
+		//	_bluetooth_receive_uart0_byte(&aByte);
+
+		_bluetooth_transmit_uart0_byte(13);
+		_delay_ms(5);
+		_bluetooth_transmit_uart0_byte(13);
+
+
+		_bluetooth_transmit_uart0_byte('G');
+		_delay_ms(5);
+		_bluetooth_transmit_uart0_byte('U');		
+		_delay_ms(5);
+		_bluetooth_transmit_uart0_byte(13);
+		_delay_ms(5);
+		_bluetooth_transmit_uart0_byte(13);
+		_delay_ms(5);
+
+
+		attempts++;
+ 		if ((attempts>=255) || (_bluetooth_receive_uart0_byte(&baudrate)==0))
+			break;
+
+	}
+	if (attempts<255)
+	{	
+		switch(baudrate)
+		{
+			case '2':
+				baudrate=ATMEGA_BAUD_2400;
+				break;
+			case '4':
+				baudrate=ATMEGA_BAUD_4800;
+				break;
+			case '9':
+				baudrate=ATMEGA_BAUD_9600;
+				break;
+			case '1':
+				baudrate=ATMEGA_BAUD_115200;
+				break;
+			case '5':
+				baudrate=ATMEGA_BAUD_57600;
+				break;
+			default:
+				baudrate=ATMEGA_BAUD_38400;
+				break;
+			}
+	}
+	
+	return baudrate;
+}
+
+/*unsigned char _bluetooth_initialize(unsigned baudrate)
+{
+	if (_bluetooth_enter_command_mode()){
+		_greenled_turn_on();
+		if (_bluetooth_set_baud_rate(baudrate))
+		{
+			_bluetooth_reset();	
+			return 1;
+		}
+	}
+
+	return 0;
+
+}*/
 /* 
 	Function Name: _rn41_on
 	Parameters: None
@@ -508,13 +809,13 @@ unsigned char _bluetooth_receive_uart0_byte(unsigned char *data)
   	int count=0;
    while ( !(UCSR0A &  (1<<RXC0)) )
    {
-   		if (count++==1) return 1; //timed out
+   		if (count++==1) return 0; //timed out
    		//	_delay_ms(1);
    }     /*  Wait for incoming data   */
 
    *data=UDR0;
 
-   return 0;/* Return success*/
+   return 1;/* Return success*/
   }
 
 
@@ -564,6 +865,8 @@ unsigned char _accelerometer_set_sensitivity(unsigned char level){
 */
 void _accelerometer_turn_on(void)
 {
+	sbi(DDRB,OUT_ACCEL_SEL1_PB0);	
+	sbi(DDRB,OUT_ACCEL_SEL2_PB1);
 	sbi(DDRB,OUT_ACCEL_SLEEP_N_PB3);
 	sbi(PORTB,OUT_ACCEL_SLEEP_N_PB3);	 
 	 			
@@ -581,6 +884,8 @@ void _accelerometer_turn_on(void)
 void _accelerometer_turn_off(void)
 {
 	 _accelerometer_set_sensitivity(_1_5G);
+	 cbi(DDRB,OUT_ACCEL_SEL1_PB0);	
+	 cbi(DDRB,OUT_ACCEL_SEL2_PB1);
 	 sbi(DDRB,OUT_ACCEL_SLEEP_N_PB3); //sleep pin in output mode
 	 cbi(PORTB,OUT_ACCEL_SLEEP_N_PB3); //clear the pin	 
 	 

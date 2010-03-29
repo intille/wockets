@@ -53,40 +53,63 @@ unsigned int seconds_passed=0;
 unsigned int counter=0;
 
 unsigned char skip_interrupt_counter=0;
+unsigned char connected=0;
+unsigned int seconds_disconnected=0;
+
+unsigned char configurationTimer=0;
+unsigned char 
 
 
 ISR(TIMER2_OVF_vect){ 
 
 		TCNT2=170;	
 		
-	if (!_bluetooth_is_connected())
+	if (!_bluetooth_is_connected()){
+			
+		if (seconds_disconnected<2400)
+			seconds_disconnected++;
+		else if (seconds_disconnected==2400)
 		{
-			// Turn off peripherals that are not needed
-		/*	_accelerometer_turn_off();
-			_greenled_turn_off();
-			_yellowled_turn_off();
-			skip_interrupt_counter=0;*/
-			return;
+			_bluetooth_turn_on();
+			//_atmega_reset();
+			seconds_disconnected=2401;			
 		}
-		
-		
-		skip_interrupt_counter++;
+		return;	
 
-		if (skip_interrupt_counter<num_skipped_timer_interrupts)
-			return;
+	}
 		
-		skip_interrupt_counter=0;					
+		connected=1;
+		//parse and process any received bytes
 
-		//unsigned short x=_atmega_a2dConvert10bit(ADC3);
-		//unsigned short y=_atmega_a2dConvert10bit(ADC2);
-		//unsigned short z=_atmega_a2dConvert10bit(ADC1);
-		_transmit_packet(_encode_packet(400,300,600));
+		//if (seconds_passed==0){
+			//_receive_data();
+			//_send_data();
+
+			seconds_passed=0;
+			while (seconds_passed<400)
+			{
+				_delay_ms(5);
+				seconds_passed++;
+
+			}
+			//_bluetooth_turn_off();
+			seconds_disconnected=0;
+
+
+
+
+	//	}
+		//skip_interrupt_counter++;
+
+		//if (skip_interrupt_counter<num_skipped_timer_interrupts)
+			//retu  rn;
+		
+		//skip_interrupt_counter=0;					
 
 		
-
-		if (seconds_passed<20)
+		/* (seconds_passed<400)
 		{
-			seconds_passed++;			
+			seconds_passed++;						
 			return;
 		}
 		
@@ -95,8 +118,14 @@ ISR(TIMER2_OVF_vect){
 			_greenled_turn_off();
 		else
 			_greenled_turn_on();
+		_bluetooth_turn_off();
+		seconds_disconnected=0;*/
+		/*counter++;
 
-				
+
+		if (counter>30)
+			_atmega_finalize();*/
+							
 		/*if (_bluetooth_off)					
 			_bluetooth_turn_on();								
 		else					
