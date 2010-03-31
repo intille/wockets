@@ -39,6 +39,14 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="Wockets, Version=1.0.3631.37072, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\src\WocketConfigurationApp\Libraries\Wockets.dll</HintPath>
+    </Reference>
+    <Reference Include="WocketsWeka, Version=1.0.3628.23057, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\src\WocketConfigurationApp\Libraries\WocketsWeka.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\src\WocketConfigurationApp\Form1.cs">
@@ -82,18 +90,13 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="BTWocketPC.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\bin\NeededFiles\Buttons\add-32.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\bin\NeededFiles\Buttons\delete32.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\PC\Wockets.csproj">
-      <Project>{16986364-6B54-443E-B1F3-A6F17F0523B2}</Project>
-      <Name>Wockets</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
