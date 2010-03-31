@@ -28,84 +28,123 @@ namespace WocketConfigurationApp
         /// </summary>
         private void InitializeComponent()
         {
-            this.button1 = new System.Windows.Forms.Button();
+            this.button_search = new System.Windows.Forms.Button();
             this.listBox1 = new System.Windows.Forms.ListBox();
             this.textBox1 = new System.Windows.Forms.TextBox();
-            this.button2 = new System.Windows.Forms.Button();
-            this.button3 = new System.Windows.Forms.Button();
-            this.button4 = new System.Windows.Forms.Button();
+            this.button_configure = new System.Windows.Forms.Button();
+            this.button_select_wocket = new System.Windows.Forms.Button();
+            this.button_unselect_wocket = new System.Windows.Forms.Button();
+            this.textBox_info = new System.Windows.Forms.TextBox();
+            this.label_status = new System.Windows.Forms.Label();
+            this.button_connect = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
-            // button1
+            // button_search
             // 
-            this.button1.Font = new System.Drawing.Font("Microsoft Sans Serif", 26.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button1.Location = new System.Drawing.Point(39, 159);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(184, 98);
-            this.button1.TabIndex = 0;
-            this.button1.Text = "Search";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.button_search.BackColor = System.Drawing.Color.DimGray;
+            this.button_search.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.button_search.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button_search.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.button_search.Location = new System.Drawing.Point(73, 67);
+            this.button_search.Name = "button_search";
+            this.button_search.Size = new System.Drawing.Size(168, 63);
+            this.button_search.TabIndex = 0;
+            this.button_search.Text = "Search";
+            this.button_search.UseVisualStyleBackColor = false;
+            this.button_search.Click += new System.EventHandler(this.button_search_Click);
             // 
             // listBox1
             // 
             this.listBox1.BackColor = System.Drawing.Color.YellowGreen;
-            this.listBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.listBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.listBox1.ForeColor = System.Drawing.Color.White;
             this.listBox1.FormattingEnabled = true;
-            this.listBox1.ItemHeight = 24;
-            this.listBox1.Location = new System.Drawing.Point(339, 30);
+            this.listBox1.ItemHeight = 20;
+            this.listBox1.Location = new System.Drawing.Point(339, 16);
+            this.listBox1.MultiColumn = true;
             this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(410, 196);
+            this.listBox1.Size = new System.Drawing.Size(410, 204);
             this.listBox1.TabIndex = 1;
             // 
             // textBox1
             // 
             this.textBox1.BackColor = System.Drawing.Color.DimGray;
             this.textBox1.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 21.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.textBox1.ForeColor = System.Drawing.Color.Orange;
-            this.textBox1.Location = new System.Drawing.Point(39, 30);
+            this.textBox1.Location = new System.Drawing.Point(24, 3);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
             this.textBox1.ReadOnly = true;
-            this.textBox1.Size = new System.Drawing.Size(254, 108);
+            this.textBox1.Size = new System.Drawing.Size(280, 60);
             this.textBox1.TabIndex = 2;
-            this.textBox1.Text = "Select a wocket to configure or click search";
+            this.textBox1.Text = "Select a wocket to configure or click search to discover devices.";
             // 
-            // button2
+            // button_configure
             // 
-            this.button2.Enabled = false;
-            this.button2.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button2.Location = new System.Drawing.Point(581, 232);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(168, 37);
-            this.button2.TabIndex = 3;
-            this.button2.Text = "Configure >>";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
+            this.button_configure.Enabled = false;
+            this.button_configure.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button_configure.Location = new System.Drawing.Point(581, 235);
+            this.button_configure.Name = "button_configure";
+            this.button_configure.Size = new System.Drawing.Size(168, 63);
+            this.button_configure.TabIndex = 3;
+            this.button_configure.Text = "Configure";
+            this.button_configure.UseVisualStyleBackColor = true;
+            this.button_configure.Click += new System.EventHandler(this.button2_Click);
             // 
-            // button3
+            // button_select_wocket
             // 
-            this.button3.BackgroundImage = global::WocketConfigurationApp.Resources.add_32;
-            this.button3.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
-            this.button3.Cursor = System.Windows.Forms.Cursors.No;
-            this.button3.Location = new System.Drawing.Point(755, 30);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(42, 42);
-            this.button3.TabIndex = 4;
-            this.button3.UseVisualStyleBackColor = true;
-            this.button3.Click += new System.EventHandler(this.button3_Click);
+            this.button_select_wocket.BackgroundImage = global::WocketConfigurationApp.Resources.add_32;
+            this.button_select_wocket.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
+            this.button_select_wocket.Cursor = System.Windows.Forms.Cursors.No;
+            this.button_select_wocket.Enabled = false;
+            this.button_select_wocket.Location = new System.Drawing.Point(755, 17);
+            this.button_select_wocket.Name = "button_select_wocket";
+            this.button_select_wocket.Size = new System.Drawing.Size(42, 42);
+            this.button_select_wocket.TabIndex = 4;
+            this.button_select_wocket.UseVisualStyleBackColor = true;
+            this.button_select_wocket.Click += new System.EventHandler(this.button_select_wocket_Click);
             // 
-            // button4
+            // button_unselect_wocket
             // 
-            this.button4.BackgroundImage = global::WocketConfigurationApp.Resources.delete32;
-            this.button4.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
-            this.button4.Location = new System.Drawing.Point(755, 78);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(42, 42);
-            this.button4.TabIndex = 5;
-            this.button4.UseVisualStyleBackColor = true;
-            this.button4.Click += new System.EventHandler(this.button4_Click);
+            this.button_unselect_wocket.BackgroundImage = global::WocketConfigurationApp.Resources.delete32;
+            this.button_unselect_wocket.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
+            this.button_unselect_wocket.Enabled = false;
+            this.button_unselect_wocket.Location = new System.Drawing.Point(755, 78);
+            this.button_unselect_wocket.Name = "button_unselect_wocket";
+            this.button_unselect_wocket.Size = new System.Drawing.Size(42, 42);
+            this.button_unselect_wocket.TabIndex = 5;
+            this.button_unselect_wocket.UseVisualStyleBackColor = true;
+            this.button_unselect_wocket.Click += new System.EventHandler(this.button_unselect_wocket_Click);
+            // 
+            // textBox_info
+            // 
+            this.textBox_info.Location = new System.Drawing.Point(339, 274);
+            this.textBox_info.Name = "textBox_info";
+            this.textBox_info.Size = new System.Drawing.Size(236, 20);
+            this.textBox_info.TabIndex = 6;
+            // 
+            // label_status
+            // 
+            this.label_status.AutoSize = true;
+            this.label_status.ForeColor = System.Drawing.Color.White;
+            this.label_status.Location = new System.Drawing.Point(336, 258);
+            this.label_status.Name = "label_status";
+            this.label_status.Size = new System.Drawing.Size(108, 13);
+            this.label_status.TabIndex = 8;
+            this.label_status.Text = "Waiting for wocket ...";
+            // 
+            // button_connect
+            // 
+            this.button_connect.Enabled = false;
+            this.button_connect.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button_connect.Location = new System.Drawing.Point(73, 157);
+            this.button_connect.Name = "button_connect";
+            this.button_connect.Size = new System.Drawing.Size(168, 63);
+            this.button_connect.TabIndex = 9;
+            this.button_connect.Text = "Connect";
+            this.button_connect.UseVisualStyleBackColor = true;
+            this.button_connect.Click += new System.EventHandler(this.button_connect_Click);
             // 
             // Form1
             // 
@@ -113,14 +152,18 @@ namespace WocketConfigurationApp
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.DimGray;
             this.ClientSize = new System.Drawing.Size(831, 306);
-            this.Controls.Add(this.button4);
-            this.Controls.Add(this.button3);
-            this.Controls.Add(this.button2);
+            this.Controls.Add(this.button_connect);
+            this.Controls.Add(this.label_status);
+            this.Controls.Add(this.textBox_info);
+            this.Controls.Add(this.button_unselect_wocket);
+            this.Controls.Add(this.button_select_wocket);
+            this.Controls.Add(this.button_configure);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.listBox1);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.button_search);
             this.Name = "Form1";
             this.Text = "Wocket Configuration App";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -128,12 +171,16 @@ namespace WocketConfigurationApp
 
         #endregion
 
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button button_search;
         private System.Windows.Forms.ListBox listBox1;
         private System.Windows.Forms.TextBox textBox1;
-        private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.Button button3;
-        private System.Windows.Forms.Button button4;
+        private System.Windows.Forms.Button button_configure;
+        private System.Windows.Forms.Button button_select_wocket;
+        private System.Windows.Forms.Button button_unselect_wocket;
+        private System.Windows.Forms.TextBox textBox_info;
+        
+        private System.Windows.Forms.Label label_status;
+        private System.Windows.Forms.Button button_connect;
     }
 }
 

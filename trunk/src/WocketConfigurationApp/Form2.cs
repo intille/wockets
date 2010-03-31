@@ -28,17 +28,27 @@ namespace WocketConfigurationApp
 
 
             //Set BT Device Address
-            blt_address = address;// BluetoothAddress.Parse(macaddress);
+            //blt_address = address;// BluetoothAddress.Parse(macaddress);
             // Create a connection channel specifying the Bluetooth-Serial end-points 
-            blt_endPoint = new BluetoothEndPoint((BluetoothAddress)blt_address, service);
+                    //comented //blt_endPoint = new BluetoothEndPoint((BluetoothAddress)blt_address, service);
+            
+            //added by selene
+            blt_endPoint = new BluetoothEndPoint((BluetoothAddress)blt_address, BluetoothService.SerialPort);
+            
+            //Set BT Device Address
+            blt_address = BluetoothAddress.Parse("0006660250da");
+
+            //Set BT Device Pin
+            BluetoothSecurity.SetPin((BluetoothAddress)blt_address, "1234");
+
 
 
             bc = new BluetoothClient();
             try
             {
-                BluetoothSecurity.RemoveDevice(address);
-                if (BluetoothSecurity.PairRequest(address, "1234"))
-                //bc.Connect(blt_endPoint);
+                //BluetoothSecurity.RemoveDevice(address);
+                //if (BluetoothSecurity.PairRequest(address, "1234"))
+                //commented//bc.Connect(blt_endPoint);
                     bc.Client.Connect(blt_endPoint);
             }
             catch ( Exception e)
