@@ -140,7 +140,7 @@ int main()
 	TIMSK2=0;	
 	_atmega324p_yellow_led_off();
 	_atmega324p_green_led_off();
-	_rn41_off();	
+	//_rn41_off();	
 	_mma7260qt_sleep();	
 	sleep_enable();	
 	set_sleep_mode(SLEEP_MODE_PWR_SAVE);

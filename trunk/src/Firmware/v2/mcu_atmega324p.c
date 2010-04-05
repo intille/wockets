@@ -417,7 +417,7 @@ void _atmega_initialize(unsigned char timer_prescalar)
 		OSCCAL= prev_osccal;	
 	}
 
-
+	_atmega_initialize_uart0(ATMEGA_BAUD_38400, TX_RX_UART_MODE);
 	/* Set ADC for conversion */    
     //Set ADC reference to AVCC
      ADMUX |=(1 << REFS0);
