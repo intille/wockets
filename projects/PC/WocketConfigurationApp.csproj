@@ -90,7 +90,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="BTWocketPC.cs" />
+    <Compile Include="..\..\src\WocketConfigurationApp\BTWocketPC.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\bin\NeededFiles\Buttons\add-32.png" />
