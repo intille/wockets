@@ -68,6 +68,7 @@ int main()
 	//disable watchdog to avoid reset
 	MCUSR = 0;
 	wdt_disable();
+	_atmega_initialize(CPU_CLK_PRESCALAR_1024);
 	
 	word=eeprom_read_word((uint16_t *)((uint16_t)BAUD_RATE_ADDRESS));
 	if (word==BAUD_9600)
@@ -127,6 +128,8 @@ int main()
 	 
 	}  
 
+
+	_atmega_finalize();
 	//shutdown to minimize power
 	//_atmega324p_reset();
 	//make sure watchdog timer is disabled
@@ -392,9 +395,13 @@ ISR(TIMER2_OVF_vect){
 					alive_timer++;					
 					if (alive_timer>=2730) //if no acks for approx 30 seconds, reset radio
 					{
-					//_atmega324p_green_led_on();
-					//_delay_ms(5000);
-						_atmega324p_reset();
+					
+						//NEVER RESET						
+						//_atmega324p_reset();
+						_bluetooth_turn_off();
+						for (int zz=0;(zz<100);zz++)
+							_delay_ms(5);
+						_bluetooth_turn_on();
 						alive_timer=0;					
 					}
 					 					
@@ -418,7 +425,14 @@ ISR(TIMER2_OVF_vect){
 				paused=0;
 				//reset the radio once
 				if (disconnected_reset==0){
-					_atmega324p_reset();
+
+					// DON'T RESET 
+					//_atmega324p_reset();
+
+					_bluetooth_turn_off();
+					for (int zz=0;(zz<100);zz++)
+						_delay_ms(5);
+					_bluetooth_turn_on();
 					disconnected_reset=1;
 				}
 

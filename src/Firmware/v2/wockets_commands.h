@@ -16,6 +16,7 @@
 
 
 
+
 #define HEADER_PACKET 0x80
 
 /* Wockets Command Opcodes */
