@@ -92,7 +92,7 @@ void _wocket_initialize(void)
 	_wocket_set_slave_mode();	
 
 //	F_CPU/PRESCALAR
-	_atmega_adc_turn_on();
+	//_atmega_adc_turn_on();
 }
 
 /* 
@@ -282,10 +282,10 @@ void _receive_data(void)
                             aBuffer[2]=m_BATTERY_LEVEL_BYTE2(word);
                             processed_counter=command_counter;
                             response_length=3;
-							if (_is_greenled_on())
+							/*if (_is_greenled_on())
 								_greenled_turn_off();
 							else
-								_greenled_turn_on();                                                                              
+								_greenled_turn_on();                                                                              */
                             break;
                     case (unsigned char) SET_BAUD_RATE:
                             if (_atmega_a2dConvert10bit(ADC4)<350)
