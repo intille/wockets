@@ -33,13 +33,13 @@ int main()
 		
 	while(1){
 	
-	/*	set_sleep_mode(SLEEP_MODE_PWR_SAVE);
+		set_sleep_mode(SLEEP_MODE_PWR_SAVE);
     	sleep_enable();
     	sleep_bod_disable();
     	sei();
     	sleep_cpu();
-    	sleep_disable();*/
-		_delay_ms(10);
+    	sleep_disable();
+		//_delay_ms(10);
 
 	}
 
@@ -56,14 +56,73 @@ unsigned char skip_interrupt_counter=0;
 unsigned char connected=0;
 unsigned int seconds_disconnected=0;
 
-unsigned char configurationTimer=0;
-unsigned char 
+unsigned short configurationTimer=1;
+unsigned char interrupts_passed=0;
 
 
-ISR(TIMER2_OVF_vect){ 
+ISR(TIMER2_OVF_vect)
+{ 
 
-		TCNT2=170;	
 		
+	TCNT2=170;	
+
+	/* For the first 30 seconds, a wocket remains in configuration mode */
+	/*if ((configurationTimer) && (configurationTimer<2401))
+	{
+		//attempt to receive configuration data
+		if (_bluetooth_is_connected())
+		{
+			_receive_data();
+
+			//blink yellow while being configured
+			interrupts_passed++;
+			if ((interrupts_passed %15)==0)
+			{
+				if (_is_yellowled_on())
+					_yellowled_turn_off();
+				else
+					_yellowled_turn_on();	
+				interrupts_passed=0;		
+			}
+
+		}
+		else		
+		{
+			//otherwise add to timeout
+			configurationTimer++;
+			if (configurationTimer==2401)
+			{
+				//if timed out, turn off yellow LED and reset bluetooth to avoid race conditions
+				_yellowled_turn_off();
+				_bluetooth_turn_off();
+				seconds_passed=0;
+				while (seconds_passed<400)
+				{
+					_delay_ms(5);
+					seconds_passed++;
+
+				}
+				_bluetooth_turn_on();
+				configurationTimer=0;
+			}
+				//if did not timeout, blink every 300 mseconds
+			else if ((configurationTimer %24)==0)
+			{
+				if (_is_yellowled_on())
+					_yellowled_turn_off();
+				else
+					_yellowled_turn_on();			
+			}
+		}
+
+		return;
+	}*/
+
+
+
+
+
+
 	if (!_bluetooth_is_connected()){
 			
 		if (seconds_disconnected<2400)
@@ -78,12 +137,13 @@ ISR(TIMER2_OVF_vect){
 
 	}
 		
+		_atmega_adc_turn_on();
 		connected=1;
 		//parse and process any received bytes
 
 		//if (seconds_passed==0){
-			//_receive_data();
-			//_send_data();
+			_receive_data();
+			 _send_data();
 
 			seconds_passed=0;
 			while (seconds_passed<400)
@@ -92,7 +152,10 @@ ISR(TIMER2_OVF_vect){
 				seconds_passed++;
 
 			}
-			//_bluetooth_turn_off();
+			
+			
+			_bluetooth_turn_off();
+			_atmega_adc_turn_off();
 			seconds_disconnected=0;
 
 

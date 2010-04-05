@@ -316,7 +316,7 @@ void _atmega_initialize(unsigned char timer_prescalar)
 	unsigned char prev_osccal=OSCCAL;
 
 	//Turn on yellow LED while initializing		
-	_yellowled_turn_on();
+	//_yellowled_turn_on();
 	
 
 	//Set wocket status to off	
@@ -373,8 +373,8 @@ void _atmega_initialize(unsigned char timer_prescalar)
 
 	/* Set peripherials to the lowest power states */
 	_bluetooth_turn_on();
-	_accelerometer_turn_on();
-	_accelerometer_set_sensitivity(_4G);
+	//_accelerometer_turn_on();
+	//_accelerometer_set_sensitivity(_4G);
 
 	/* Set UART */
 
@@ -383,7 +383,7 @@ void _atmega_initialize(unsigned char timer_prescalar)
 	//if the wocket yellow light does not go off, the wocket has not been
 	
 	_atmega_initialize_uart0(ATMEGA_BAUD_38400, TX_RX_UART_MODE);
-	if ((_bluetooth_enter_command_mode()))
+	/*if ((_bluetooth_enter_command_mode()))
 	{	
 		_yellowled_turn_off();
 		if (_bluetooth_get_baud_rate()==ATMEGA_BAUD_38400)
@@ -392,7 +392,11 @@ void _atmega_initialize(unsigned char timer_prescalar)
 
 		// To run at 115K, we need to set the OSCCAL as follows, the value was
 		// determined experimentally by trying different values
-		OSCCAL=0x5A;
+
+		for (int j=0x50;(j<0xfe);j++){
+		OSCCAL=j;
+
+		for(int i=0;(i<10);i++){
 		// To deal with a radio firmware bug, we are making sure the radio is set at the
 		// correct baud rate of 38.4K
 		_atmega_initialize_uart0(ATMEGA_BAUD_115200, TX_RX_UART_MODE);
@@ -403,21 +407,24 @@ void _atmega_initialize(unsigned char timer_prescalar)
 				_bluetooth_reset();	
 				_atmega_initialize_uart0(ATMEGA_BAUD_38400, TX_RX_UART_MODE);						
 				_yellowled_turn_off();
+				break;
 			}
+		}
+		}
 		}
 		OSCCAL= prev_osccal;	
 	}
 
-
+*/
 	/* Set ADC for conversion */    
     //Set ADC reference to AVCC
      ADMUX |=(1 << REFS0);
      //Set the ADC conversion clock prescalar       
      _atmega_set_adc_clock(ADC_PRESCALAR_64);
-     _atmega_adc_turn_on();
+     //_atmega_adc_turn_on();
 
      /* Enable Timer 2 */
-      _atmega_enable_timer2(timer_prescalar);
+     _atmega_enable_timer2(timer_prescalar);
 
 
 }
