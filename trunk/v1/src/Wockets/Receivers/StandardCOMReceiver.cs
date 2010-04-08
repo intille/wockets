@@ -10,7 +10,7 @@ using System.IO.Ports;
 
 namespace Wockets.Receivers
 {
-    public sealed class StandardCOMReceiver:SerialReceiver
+    public sealed class StandardCOMReceiver : SerialReceiver
     {
         #region Serialization Constants
         private const string StandardCOM_TYPE = "StandardCOM";
@@ -19,7 +19,7 @@ namespace Wockets.Receivers
         //Standard COM Configuration
         private const bool USE_PARITY = false;
         private const bool USE_STOP_BIT = true;
-        private const int BAUD_RATE=57600;
+        private const int BAUD_RATE = 57600;
         private const int BUFFER_SIZE = 4096;
         private const int SEND_BUFFER_SIZE = 256;
         private const int MAXIMUM_SAMPLING_RATE = 180;
@@ -35,7 +35,7 @@ namespace Wockets.Receivers
         }
 
 
- 
+
 
 
         public override bool Initialize()
@@ -44,7 +44,7 @@ namespace Wockets.Receivers
 
             SerialPort spc = new SerialPort();
             Thread.Sleep(1000);
-            spc.BaudRate=BAUD_RATE;
+            spc.BaudRate = BAUD_RATE;
             spc.PortName = "COM" + this.portNumber;
             if (this._Parity)
                 spc.Parity = Parity.Odd;
@@ -65,7 +65,7 @@ namespace Wockets.Receivers
                 isValid = false;
             }
 
-        
+
 
             if (isValid)
             {
@@ -75,13 +75,13 @@ namespace Wockets.Receivers
                 // Loop for 1 second and wait for a DD 
                 while ((Environment.TickCount - startTime) < 1000)
                 {
-                    int j = spc.Read(someData,0,someData.Length);
+                    int j = spc.Read(someData, 0, someData.Length);
                     //Console.WriteLine ("Data: " + someData.Length);
                     if (j > 1)
                         for (int i = 0; i < j - 1; i++)
                             if ((someData[i] == (int)68) &&
                                 (someData[i + 1] == (int)68))
-                                isValid = true;                    
+                                isValid = true;
                     Thread.Sleep(100);
                 }
             }
@@ -99,7 +99,7 @@ namespace Wockets.Receivers
         {
         }
 
-        
+
         public override bool Dispose()
         {
             try
@@ -109,16 +109,16 @@ namespace Wockets.Receivers
                 this._Status = ReceiverStatus.Disposed;
                 return true;
             }
-            catch(Exception)
+            catch (Exception)
             {
                 return false;
             }
         }
 
         public override void Write(byte[] data)
-        {    
+        {
         }
-    
+
         //Optimization
         //Get rid of the buffer created with spc and used in port_DataReceived()
         //Get rid of the decoding happening at initialization
@@ -129,7 +129,7 @@ namespace Wockets.Receivers
             string xml = "<" + StandardCOMReceiver.RECEIVER_ELEMENT + " ";
             xml += StandardCOMReceiver.ID_ATTRIBUTE + "=\"" + this._ID + "\" ";
             xml += StandardCOMReceiver.TYPE_ATTRIBUTE + "=\"" + StandardCOMReceiver.StandardCOM_TYPE + "\" ";
-            xml += StandardCOMReceiver.PORT_NUMBER_ATTRIBUTE+ "=\"" + this._PortNumber + "\" ";
+            xml += StandardCOMReceiver.PORT_NUMBER_ATTRIBUTE + "=\"" + this._PortNumber + "\" ";
             xml += StandardCOMReceiver.PARITY_ATTRIBUTE + "=\"" + this._Parity + "\" ";
             xml += StandardCOMReceiver.STOPBIT_ATTRIBUTE + "=\"" + this._StopBit + "\" ";
             xml += StandardCOMReceiver.BAUD_RATE_ATTRIBUTE + "=\"" + this._BaudRate + "\" ";
@@ -145,7 +145,7 @@ namespace Wockets.Receivers
             dom.LoadXml(xml);
             XmlNode xNode = dom.DocumentElement;
 
-            if ((xNode.Name == StandardCOMReceiver.RECEIVER_ELEMENT) )
+            if ((xNode.Name == StandardCOMReceiver.RECEIVER_ELEMENT))
             {
                 foreach (XmlAttribute xAttribute in xNode.Attributes)
                 {

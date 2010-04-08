@@ -26,7 +26,11 @@ namespace Wockets.Utils.network.Bluetooth
             {
                 //Determine the type of Bluetooth Stack
                 RegistryKey rk = Registry.LocalMachine.OpenSubKey("Software\\Microsoft\\Bluetooth\\");
-                if (rk != null)
+                RegistryKey rk2 = Registry.LocalMachine.OpenSubKey("Software\\WIDCOMM\\");
+                if (rk2 != null)
+                    type = BluetoothStackTypes.Widcomm;
+
+                else if (rk != null)
                     type = BluetoothStackTypes.Microsoft;
                 else
                 {
@@ -35,7 +39,7 @@ namespace Wockets.Utils.network.Bluetooth
                     if (rk != null)
                         type = BluetoothStackTypes.Widcomm;
                     else
-                        type = BluetoothStackTypes.Unknown;
+                        type = BluetoothStackTypes.Microsoft;
                 }
                 return type;
             }

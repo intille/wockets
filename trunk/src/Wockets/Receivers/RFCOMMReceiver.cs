@@ -17,14 +17,6 @@ using Wockets.Utils.network.Bluetooth;
 using Wockets.Utils.network.Bluetooth.Microsoft;
 using Wockets.Utils.network.Bluetooth.Widcomm;
 
-/*
-#if (PocketPC)
-using InTheHand.Net;
-using InTheHand.Net.Sockets;
-using InTheHand.Net.Bluetooth;
-using InTheHand.Net.Ports;
-#endif
-*/
 
 namespace Wockets.Receivers
 {
@@ -102,8 +94,16 @@ namespace Wockets.Receivers
             {
                 this.address = value;
                 this.address_bytes = new byte[MAC_SIZE];
-                for (int i = 0; (i < MAC_SIZE); i++)
-                    this.address_bytes[i] = (byte)(System.Int32.Parse(address.Substring(i * 2, 2), System.Globalization.NumberStyles.AllowHexSpecifier) & 0xff);
+                if (!BitConverter.IsLittleEndian)
+                {
+                    for (int i = 0; (i < MAC_SIZE); i++)
+                        this.address_bytes[i] = (byte)(System.Int32.Parse(address.Substring(i * 2, 2), System.Globalization.NumberStyles.AllowHexSpecifier) & 0xff);
+                }
+                else
+                {
+                    for (int i = 0; (i < MAC_SIZE); i++)
+                        this.address_bytes[MAC_SIZE-i-1] = (byte)(System.Int32.Parse(address.Substring(i * 2, 2), System.Globalization.NumberStyles.AllowHexSpecifier) & 0xff);
+                }
             }
         }
         public string _PIN

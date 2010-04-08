@@ -4,10 +4,11 @@ using System.Text;
 
 namespace Wockets.Receivers
 {
-    class GenericReceiver: Receiver
+    class GenericReceiver : Receiver
     {
 
-        public GenericReceiver():base(1)
+        public GenericReceiver()
+            : base(1)
         {
         }
 
@@ -23,7 +24,7 @@ namespace Wockets.Receivers
 
         public override void Update()
         {
-            
+
         }
         public override string ToXML()
         {
@@ -35,13 +36,13 @@ namespace Wockets.Receivers
 
         }
 
-     
+
 
         public override int CompareTo(object o)
         {
             return 0;
         }
 
- 
+
     }
 }

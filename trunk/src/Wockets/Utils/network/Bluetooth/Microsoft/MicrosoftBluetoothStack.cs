@@ -5,11 +5,20 @@ using System.Collections;
 using System.Runtime.InteropServices;
 using Wockets.Utils.network.Bluetooth;
 
+#if (!PocketPC)
+
+// 32.feet.NET references
+using InTheHand.Net;
+using InTheHand.Net.Sockets;
+using InTheHand.Net.Bluetooth;
+
+#endif
+
 namespace Wockets.Utils.network.Bluetooth.Microsoft
 {
     public class MicrosoftBluetoothStack : BluetoothStack
     {
-
+#if (PocketPC)
         public enum RadioMode
         {
             /// <summary>
@@ -26,17 +35,21 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
             Discoverable,
         }
 
+        
         [DllImport("BthUtil.dll", SetLastError = true)]
         public static extern int BthSetMode(RadioMode dwMode);
 
         [DllImport("BthUtil.dll", SetLastError = true)]
         public static extern int BthGetMode(out RadioMode dwMode);
+#endif
+
 
         public RadioMode Mode
         {
             get
             {
 
+#if (PocketPC)
 				RadioMode val;
 				int result = BthGetMode(out val);
 				if(result!=0)
@@ -44,16 +57,22 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
 					throw new System.ComponentModel.Win32Exception(result, "Error getting BluetoothRadio mode");
 				}
 				return val;
+#else            
+                return BluetoothRadio.PrimaryRadio.Mode;
+#endif
 
             }
             set
             {
-
+#if (PocketPC)
 				int result = BthSetMode(value);
 				if(result!=0)
 				{
 					throw new System.ComponentModel.Win32Exception(result, "Error setting BluetoothRadio mode");
 				}
+#else
+                BluetoothRadio.PrimaryRadio.Mode = value;
+#endif
 
             }
         }

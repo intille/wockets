@@ -91,6 +91,8 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
                 else
                     return BluetoothStatus.Error;
             }
+
+           
         }
         public override bool Initialize()
         {           

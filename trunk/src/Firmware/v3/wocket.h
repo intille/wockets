@@ -6,18 +6,10 @@
 /* Wockets commands constants */
 
 /* baud rates */
-#define BAUD_1200 	0b0000
-#define BAUD_2400 	0b0001
-#define BAUD_4800 	0b0010
-#define BAUD_9600 	0b0011
-#define BAUD_19200 	0b0100
-#define BAUD_28800	0b0101
-#define BAUD_38400 	0b0110
-#define BAUD_57600	0b0111
-#define BAUD_115200	0b1000
-#define BAUD_230000	0b1001
-#define BAUD_460000	0b1010
-#define BAUD_921000	0b1011
+#define BAUD_9600 	1
+#define BAUD_19200 	2
+#define BAUD_38400 	0
+#define BAUD_57600	3
 
 /* Reserved Wockets EEPROM Locations */
 
@@ -27,7 +19,7 @@
 #define Y1NG_ADDRESS 0x06
 #define Z1G_ADDRESS 0x08
 #define Z1NG_ADDRESS 0x0A
-#define BAUD_RATE_ADDRESS 0x0C
+#define WOCKET_STATUS_ADDRESS 0x0C
 
 #define PERFECT_SAMPLING_FREQUENCY 90
 
@@ -161,6 +153,10 @@
 
 
 
+#define BIT0_MASTERSLAVE_STATUS 0
+#define BIT1_BURSTY_STATUS 1
+#define BIT2_BIT3_BAUD_RATE 2
+
 
 typedef struct{
 	unsigned char byte1; //sync bit, 2 bits packet type, 3 bits sensitivity, 2 bits MSB X
@@ -171,16 +167,23 @@ typedef struct{
 } wockets_uncompressed_packet;
 
 unsigned char num_skipped_timer_interrupts;
+unsigned char wocket_status;
 
 void _wocket_initialize(void);
 void _wocket_set_master_mode(void);
 void _wocket_set_slave_mode(void);
 unsigned char _wocket_is_master(void);
+
+
+void _wocket_set_bursty_mode(void);
+void _wocket_set_continuous_mode(void);
+unsigned char _wocket_is_bursty(void);
+
 void _send_data(void);
 void _receive_data(void);
 
-unsigned short _wocket_read_baudrate(void);
-void _wocket_write_baudrate(unsigned short baudrate);
+unsigned char _wocket_get_baudrate(void);
+void _wocket_set_baudrate(unsigned char baudrate);
 wockets_uncompressed_packet _encode_packet(unsigned short x, unsigned short y, unsigned short z);
 void _transmit_packet(wockets_uncompressed_packet packet);
 

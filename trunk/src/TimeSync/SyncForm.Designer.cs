@@ -1,3 +1,4 @@
+using Wockets;
 namespace TimeSync_PC
 {
     partial class SyncForm
@@ -77,7 +78,7 @@ namespace TimeSync_PC
             this.Controls.Add(this.button1);
             this.ForeColor = System.Drawing.Color.Black;
             this.Name = "SyncForm";
-            this.Text = "SyncTime";
+            this.Text = "SyncTime - Version " + CurrentWockets._Version + " " + CurrentWockets._Date;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.SyncForm_FormClosing);
             this.ResumeLayout(false);
             this.PerformLayout();

@@ -78,6 +78,20 @@ namespace WocketsApplication {
             }
         }
         
+        internal static System.Drawing.Bitmap DottedBlack_640 {
+            get {
+                object obj = ResourceManager.GetObject("DottedBlack_640", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap DottedBlack_800_480 {
+            get {
+                object obj = ResourceManager.GetObject("DottedBlack_800_480", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
         internal static System.Drawing.Bitmap GraphiteBlue {
             get {
                 object obj = ResourceManager.GetObject("GraphiteBlue", resourceCulture);
@@ -95,13 +109,6 @@ namespace WocketsApplication {
         internal static System.Drawing.Bitmap NaturalBlack {
             get {
                 object obj = ResourceManager.GetObject("NaturalBlack", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        internal static System.Drawing.Bitmap SpiderBlack {
-            get {
-                object obj = ResourceManager.GetObject("SpiderBlack", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

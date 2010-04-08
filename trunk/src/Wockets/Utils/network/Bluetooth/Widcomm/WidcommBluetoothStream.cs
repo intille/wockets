@@ -9,14 +9,14 @@ using Microsoft.Win32;
 
 namespace Wockets.Utils.network.Bluetooth.Widcomm
 {
-    public class WidcommBluetoothStream: BluetoothStream
+    public class WidcommBluetoothStream : BluetoothStream
     {
         private int comPort = 0;
-        private SerialPort spp=null;
+        private SerialPort spp = null;
         private IntPtr wdStack;
         private static int x = 0;
-        public WidcommBluetoothStream(CircularBuffer buffer,CircularBuffer sbuffer, byte[] address, string pin)
-            : base(buffer,sbuffer,address,pin)
+        public WidcommBluetoothStream(CircularBuffer buffer, CircularBuffer sbuffer, byte[] address, string pin)
+            : base(buffer, sbuffer, address, pin)
         {
             //this.wdStack = WidcommAPI.CreateWidcommStack();
             //WidcommAPI.SetAutoReconnect(this.wdStack);  
@@ -35,48 +35,52 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
                     //comPort = ((WidcommBluetoothStack)NetworkStacks._BluetoothStack).OpenSPP(bt_address);
                     //spp = new SerialPort("COM" + comPort, 38400, Parity.None, 8, StopBits.One);
                     //spp.Open();
-                   // int r=WidcommAPI.Bond(((WidcommBluetoothStack)NetworkStacks._BluetoothStack)._Reference, bt_address, "1234");
+                    // int r=WidcommAPI.Bond(((WidcommBluetoothStack)NetworkStacks._BluetoothStack)._Reference, bt_address, "1234");
                     //Hashtable h=((WidcommBluetoothStack)NetworkStacks._BluetoothStack).Search();
 
-                    RegistryKey rk=Registry.LocalMachine.OpenSubKey("SOFTWARE\\WIDCOMM\\BTConfig\\Applications\\0001",true);
+                    //RegistryKey rk = Registry.LocalMachine.OpenSubKey("SOFTWARE\\WIDCOMM\\BTConfig\\Applications\\0001", true);
                     //rk.ge
-                   // if (x == 0)
-                        rk.SetValue("ComPortNumber", 7, RegistryValueKind.DWord);                    
+                    // if (x == 0)
+                    //rk.SetValue("ComPortNumber", 7, RegistryValueKind.DWord);
                     //else
-                      //  rk.SetValue("ComPortNumber", 9, RegistryValueKind.DWord);
-                    rk.Close();
+                    //  rk.SetValue("ComPortNumber", 9, RegistryValueKind.DWord);
+                    //rk.Close();
                     //this.wdStack = WidcommAPI.CreateWidcommStack();
-                   // WidcommAPI.SetAutoReconnect(this.wdStack);
+                    // WidcommAPI.SetAutoReconnect(this.wdStack);
                     int r = WidcommAPI.SppCreateConnection(((WidcommBluetoothStack)NetworkStacks._BluetoothStack)._Reference, (byte)1, bt_address);
                     int retry = 0;
-                    /*
+                    
                     while (retry < 5)
                     {
                         System.Threading.Thread.Sleep(500);
                         comPort = WidcommAPI.SppComPort(((WidcommBluetoothStack)NetworkStacks._BluetoothStack)._Reference);
+                        if (comPort > 0)
+                            break;
                         retry++;
-                    }*/
+                    }
+
                     //string[] s=System.IO.Ports.SerialPort.GetPortNames();
-                    do
+                    /*do
                     {
                         comPort = WidcommAPI.SppComPort(((WidcommBluetoothStack)NetworkStacks._BluetoothStack)._Reference);
 
-                    } while (comPort <= 0);
+                    } while (comPort <= 0);*/
 
-                   // comPort = 9;ju
 
-                   // if (x == 0)
+                   //comPort = 9;
+
+                    // if (x == 0)
                     //{
-                        spp = new SerialPort("COM" + comPort, 38400, Parity.None, 8, StopBits.One);
-                        if (!spp.IsOpen)
-                            spp.Open();
-                        this.status = BluetoothStatus.Connected;
-                        //start the processing thread
-                        processingThread = new Thread(new ThreadStart(Process));
-                        processingThread.Start();
-                        x++;
+                    spp = new SerialPort("COM" + comPort, 38400, Parity.None, 8, StopBits.One);
+                    if (!spp.IsOpen)
+                        spp.Open();
+                    this.status = BluetoothStatus.Connected;
+                    //start the processing thread
+                    processingThread = new Thread(new ThreadStart(Process));
+                    processingThread.Start();
+                    x++;
                     //}
-                    
+
                 }
             }
             catch (Exception e)
@@ -87,12 +91,14 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
             }
             return true;
         }
+
+        private const int LOCAL_BUFFER_SIZE = 2048;
         public override void Process()
         {
             int sendTimer = 0;
             byte[] sendByte = new byte[1];
             sendByte[0] = 0xbb;
-
+            byte[] singleReadBuffer = new byte[LOCAL_BUFFER_SIZE];
             while (this.status == BluetoothStatus.Connected)
             {
                 int bytesReceived = 0;
@@ -100,9 +106,9 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
                 try
                 {
 
-                    if (sendTimer > 200)
+                    if (sendTimer > 100)
                     {
-                        spp.Write(sendByte, 0, 1);                        
+                        spp.Write(sendByte, 0, 1);
                         sendTimer = 0;
                         Thread.Sleep(50);
                     }
@@ -112,6 +118,7 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
                     if (availableBytes > 0)
                     {
                         bytesReceived = 0;
+                        bytesReceived = spp.Read(singleReadBuffer, 0, LOCAL_BUFFER_SIZE);
                         //if we will pass the end of buffer receive till the end then receive the rest
                         /*if ((tail + availableBytes) > this.buffer._Bytes.Length)
                         {
@@ -137,6 +144,16 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
                         }
 
                     }
+
+                    int ii;
+                    int mytail = this.buffer._Tail;
+                    for (ii = 0; ii < bytesReceived; ii++)
+                    {
+                        // this.buffer._Timestamp[this.buffer._Tail] = timestamp;
+                        this.buffer._Bytes[mytail++] = singleReadBuffer[ii];
+                        mytail %= this.buffer._Bytes.Length;
+                    }
+                    this.buffer._Tail = mytail;
                 }
                 catch (Exception e)
                 {
@@ -144,11 +161,11 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
                 }
             }
         }
-        public  bool Close()
+        public bool Close()
         {
             try
             {
-                if (this.spp!=null)
+                if (this.spp != null)
                     this.spp.Close();
             }
             catch (Exception e)
@@ -160,4 +177,5 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
             return true;
         }
     }
+
 }

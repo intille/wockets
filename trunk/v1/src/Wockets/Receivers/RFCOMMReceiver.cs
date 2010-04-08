@@ -57,16 +57,16 @@ namespace Wockets.Receivers
         private int sniffTime = 0;
         private bool sniffMode;
         public CircularBuffer _SBuffer;
-
+        public bool _Bursty = false;
 
         public RFCOMMReceiver()
             : base(BUFFER_SIZE)
         {
             this.type = ReceiverTypes.RFCOMM;
-            this._SBuffer = new CircularBuffer(SEND_BUFFER_SIZE);        
+            this._SBuffer = new CircularBuffer(SEND_BUFFER_SIZE);
         }
 
-   
+
 
 
         #region Access Properties
@@ -116,16 +116,16 @@ namespace Wockets.Receivers
                 this.isRunning = value;
             }
         }
-   
-        
+
+
         public override void Update()
         {
             lock (this)
             {
                 if ((this.bluetoothStream != null) && (this.bluetoothStream._Status == BluetoothStatus.Disconnected))
                 {
-                    
-                    this.bluetoothStream = null;                    
+
+                    this.bluetoothStream = null;
                     this.status = ReceiverStatus.Disconnected;
                     this._SBuffer._Head = 0;//ignore all pending send bytes
                     this.ndisc++;
@@ -154,7 +154,7 @@ namespace Wockets.Receivers
                     }
                     Logger.Debug("Update:Connected with receiver receiver " + this._ID);
                     this.status = ReceiverStatus.Connected;
-                    if (this.disconnectionTime!=0)                    
+                    if (this.disconnectionTime != 0)
                         this.disconTime += (int)((WocketsTimer.GetUnixTime() - this.disconnectionTime) / 1000);
                 }
             }
@@ -181,8 +181,11 @@ namespace Wockets.Receivers
             Random random = new Random();
             int backoff = random.Next(1000);
             int reconnections = 0;
-            Thread.Sleep(10000);
-                 
+            
+            
+            if (!_Bursty)
+                Thread.Sleep(10000);
+
             //battery drained situation
             while ((this.bluetoothStream == null) || (this.bluetoothStream._Status != BluetoothStatus.Connected))
             {
@@ -205,18 +208,18 @@ namespace Wockets.Receivers
 
         public override bool Initialize()
         {
-            
+
             try
             {
                 this._Buffer = new CircularBuffer(this._Buffer._Bytes.Length);
                 this.head = 0;
-                this._SBuffer = new CircularBuffer(SEND_BUFFER_SIZE);  
+                this._SBuffer = new CircularBuffer(SEND_BUFFER_SIZE);
 
                 Logger.Debug("Attempting reconnection for receiver " + this._ID);
-                this.bluetoothStream = NetworkStacks._BluetoothStack.Connect(this._Buffer,this._SBuffer , this.address_bytes, this.pin);              
+                this.bluetoothStream = NetworkStacks._BluetoothStack.Connect(this._Buffer, this._SBuffer, this.address_bytes, this.pin);
                 if (this.bluetoothStream == null)
                     return false;
-                
+
                 return true;
             }
             catch (Exception e)
@@ -242,7 +245,7 @@ namespace Wockets.Receivers
                 Buffer.BlockCopy(data, data.Length - availableBytes, this._SBuffer._Bytes, this._SBuffer._Tail, availableBytes);
                 this._SBuffer._Tail += availableBytes;
             }
-            
+
         }
 
         public override bool Dispose()

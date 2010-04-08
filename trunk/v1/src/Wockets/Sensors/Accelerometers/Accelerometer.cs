@@ -370,7 +370,10 @@ namespace Wockets.Sensors.Accelerometers
                     data = ((AccelerationData)this._Decoder._Data[tail]);
 
 
-                }                    
+                }
+
+                //for power efficient
+                bw.Flush();    
             }
         }
 

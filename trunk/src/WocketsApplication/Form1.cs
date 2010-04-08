@@ -21,8 +21,7 @@ using Wockets.Utils;
 using Wockets.Kernel;
 using Wockets.Data.Annotation;
 using Wockets.Data.Plotters;
-using Wockets.Data.Classifiers.Trees;
-using Wockets.Data.Classifiers.Utils;
+
 //using OpenNETCF.GDIPlus;
 using OpenNETCF.Windows.Forms;
 
@@ -31,15 +30,14 @@ using weka.classifiers;
 using weka;
 using weka.core;
 using weka.classifiers.trees;
-using Wockets.Data.Classifiers;
+using Wockets.Data.Features;
 using Wockets.Utils.feedback;
-
-
-
+using Wockets.Data.Configuration;
 using WocketsApplication.Controls.Utils;
 #if (PocketPC)
 using Microsoft.ApplicationBlocks.MemoryMappedFile;
 #endif
+
 namespace WocketsApplication
 {
     public enum ActivityStatus
@@ -189,7 +187,9 @@ namespace WocketsApplication
         }
 
         //private bool wocketsConnected = false;
-        private DTConfiguration configuration;
+        //private DTConfiguration configuration;
+        private WocketsConfiguration configuration;
+       
         private TextWriter trainingTW = null;
         private TextWriter structureTW = null;
         private Thread mlThread = null;
@@ -199,15 +199,15 @@ namespace WocketsApplication
 
             File.Copy(Constants.PATH + "Master\\Configuration.xml",
              Core._StoragePath + "\\Configuration.xml");
-            this.configuration = new DTConfiguration();
+            this.configuration = new WocketsConfiguration();// new DTConfiguration();
             this.configuration.FromXML(Core._StoragePath + "\\Configuration.xml");
-            FeatureExtractor.Initialize(selectedWockets.Count, 90, this.configuration, this.annotatedSession.OverlappingActivityLists[0]);
+            FullFeatureExtractor.Initialize(selectedWockets.Count, 90, this.configuration, this.annotatedSession.OverlappingActivityLists[0]);
             if (trainingTW == null)
             {
                 arffFileName = Core._StoragePath + "\\output" + DateTime.Now.ToString().Replace('/', '_').Replace(':', '_').Replace(' ', '_') + ".arff";
                 trainingTW = new StreamWriter(arffFileName);
                 trainingTW.WriteLine("@RELATION wockets");
-                string arffHeader = FeatureExtractor.GetArffHeader();
+                string arffHeader = FullFeatureExtractor.GetArffHeader();
                 arffHeader += "\n@ATTRIBUTE activity {";
                 int i = 0;
                 for (i = 0; (i < ((this.annotatedSession.OverlappingActivityLists[0]).Count - 1)); i++)
@@ -253,7 +253,7 @@ namespace WocketsApplication
                 structureTW.Close();
                 structureTW = null;
             }
-            FeatureExtractor.Cleanup();
+            FullFeatureExtractor.Cleanup();
 
             //Save any existing arff files
             if ((this._SaveFeatures) && (arffFileName != ""))
@@ -399,7 +399,7 @@ namespace WocketsApplication
                         plotterTimer.Enabled = false;
                         plotter.Dispose();
                     }
-                    plotter = new WocketsScalablePlotter(plotterPanel, selectedWockets.Count);
+                    plotter = new WocketsScalablePlotter(plotterPanel);//, selectedWockets.Count);
                     plotterPanel.Visible = true;
                     plotterTimer.Enabled = true;
                     
@@ -1044,13 +1044,13 @@ namespace WocketsApplication
         {
             while (true)
             {
-                double lastTimeStamp = FeatureExtractor.StoreWocketsWindow();
-                if (FeatureExtractor.GenerateFeatureVector(lastTimeStamp))
+                double lastTimeStamp = FullFeatureExtractor.StoreWocketsWindow();
+                if (FullFeatureExtractor.GenerateFeatureVector(lastTimeStamp))
                 {
                     Instance newinstance = new Instance(instances.numAttributes());
                     newinstance.Dataset = instances;
-                    for (int i = 0; (i < FeatureExtractor.Features.Length); i++)
-                        newinstance.setValue(instances.attribute(i), FeatureExtractor.Features[i]);
+                    for (int i = 0; (i < FullFeatureExtractor.Features.Length); i++)
+                        newinstance.setValue(instances.attribute(i), FullFeatureExtractor.Features[i]);
                     double predicted = classifier.classifyInstance(newinstance);
                     string predicted_activity = newinstance.dataset().classAttribute().value_Renamed((int)predicted);
 
@@ -1058,7 +1058,7 @@ namespace WocketsApplication
                     labelCounters[currentIndex] = (int)labelCounters[currentIndex] + 1;
                     classificationCounter++;
 
-                    if (classificationCounter >= this.configuration._SmoothWindows)
+                    if (classificationCounter >= this.configuration._SmoothWindowCount)
                     {
                       
                         int mostCount = 0;
@@ -1071,7 +1071,7 @@ namespace WocketsApplication
                             //indicate = Color.FromArgb(level, level, level);
                             //this.ActGUIlabels[j].ForeColor = indicate;
                             //this.ActGUIlabels[j].Invalidate();
-                            double intensity = (1.0-((double)labelCounters[j] /(double) this.configuration._SmoothWindows));
+                            double intensity = (1.0-((double)labelCounters[j] /(double) this.configuration._SmoothWindowCount));
                             //((Label)this.classifiedLabels[activityLabels[j]]).ForeColor = Color.FromArgb((int) (250 *intensity) , (int)(237 * intensity), (int)(221 * intensity));
                             UpdateClassification(activityLabels[j], intensity);
                             if (labelCounters[j] > mostCount)
@@ -1109,12 +1109,12 @@ namespace WocketsApplication
                 
             this.annotatedSession = new Session();
             this.annotatedSession.FromXML(modelDirectory + "\\ActivityLabelsRealtime.xml");
-            this.configuration = new DTConfiguration();
+            this.configuration = new WocketsConfiguration();//new DTConfiguration();
             this.configuration.FromXML(modelDirectory + "\\Configuration.xml");
             Wockets.WocketsController wc = new Wockets.WocketsController("", "", "");
             wc.FromXML(modelDirectory + "\\SensorData.xml");
 
-            FeatureExtractor.Initialize(wc._Sensors.Count, 90, this.configuration, this.annotatedSession.OverlappingActivityLists[0]);
+            FullFeatureExtractor.Initialize(wc._Sensors.Count, 90, this.configuration, this.annotatedSession.OverlappingActivityLists[0]);
 
            // this.annotatedSession = new Session();
            // this.annotatedSession.FromXML(Constants.PATH + "ActivityProtocols\\" + this.aProtocols[this.selectedActivityProtocol]._FileName);
@@ -1124,7 +1124,7 @@ namespace WocketsApplication
             if (!File.Exists(modelDirectory + "\\model.xml"))
             {
                 instances = new Instances(new StreamReader(this.aModels[this.selectedModel]._FileName));
-                instances.Class = instances.attribute(FeatureExtractor.ArffAttributeLabels.Length);
+                instances.Class = instances.attribute(FullFeatureExtractor.ArffAttributeLabels.Length);
                 classifier.buildClassifier(instances);
                 TextWriter tc = new StreamWriter(modelDirectory + "\\model.xml");
                 classifier.toXML(tc);
@@ -1134,14 +1134,14 @@ namespace WocketsApplication
             else
             {
                 instances = new Instances(new StreamReader(modelDirectory + "\\structure.arff"));
-                instances.Class = instances.attribute(FeatureExtractor.ArffAttributeLabels.Length);
+                instances.Class = instances.attribute(FullFeatureExtractor.ArffAttributeLabels.Length);
                 classifier.buildClassifier(modelDirectory + "\\model.xml", instances);
             }
 
 
-            fvWekaAttributes = new FastVector(FeatureExtractor.ArffAttributeLabels.Length + 1);
-            for (int i = 0; (i < FeatureExtractor.ArffAttributeLabels.Length); i++)
-                fvWekaAttributes.addElement(new weka.core.Attribute(FeatureExtractor.ArffAttributeLabels[i]));
+            fvWekaAttributes = new FastVector(FullFeatureExtractor.ArffAttributeLabels.Length + 1);
+            for (int i = 0; (i < FullFeatureExtractor.ArffAttributeLabels.Length); i++)
+                fvWekaAttributes.addElement(new weka.core.Attribute(FullFeatureExtractor.ArffAttributeLabels[i]));
 
             FastVector fvClassVal = new FastVector();
             labelCounters = new int[this.annotatedSession.OverlappingActivityLists[0].Count];
@@ -2247,13 +2247,13 @@ namespace WocketsApplication
                                 Core._StoragePath + "\\Configuration.xml");
                             this.configuration = new DTConfiguration();
                             this.configuration.FromXML(Core._StoragePath + "\\Configuration.xml");
-                            FeatureExtractor.Initialize(selectedWockets.Count, 90, this.configuration, this.annotatedSession.OverlappingActivityLists[0]);
+                            FullFeatureExtractor.Initialize(selectedWockets.Count, 90, this.configuration, this.annotatedSession.OverlappingActivityLists[0]);
                             if (trainingTW == null)
                             {
                                 string arffFileName = Core._StoragePath + "\\output" + DateTime.Now.ToString().Replace('/', '_').Replace(':', '_').Replace(' ', '_') + ".arff";
                                 trainingTW = new StreamWriter(arffFileName);
                                 trainingTW.WriteLine("@RELATION wockets");
-                                string arffHeader = FeatureExtractor.GetArffHeader();
+                                string arffHeader = FullFeatureExtractor.GetArffHeader();
                                 arffHeader += "\n@ATTRIBUTE activity {";
                                 int i = 0;
                                 for (i = 0; (i < ((this.annotatedSession.OverlappingActivityLists[0]).Count - 1)); i++)
@@ -2358,7 +2358,7 @@ namespace WocketsApplication
         {
             int structureFileExamples = 0;
             string prev_activity = "";
-            windowLength = ((double)this.configuration._WindowTime * (1.0 - this.configuration._WindowOverlap))/1000.0;
+            windowLength = ((double)this.configuration._FeatureWindowSize * (1.0 - this.configuration._FeatureWindowOverlap))/1000.0;
             while (true)
             {
                 string current_activity = "unknown";
@@ -2370,10 +2370,10 @@ namespace WocketsApplication
                 if (current_activity != "unknown")
                 {
                     
-                    double lastTimeStamp = FeatureExtractor.StoreWocketsWindow();
-                    if (FeatureExtractor.GenerateFeatureVector(lastTimeStamp))
+                    double lastTimeStamp = FullFeatureExtractor.StoreWocketsWindow();
+                    if (FullFeatureExtractor.GenerateFeatureVector(lastTimeStamp))
                     {           
-                        string arffSample = FeatureExtractor.toString() + "," + current_activity;
+                        string arffSample = FullFeatureExtractor.toString() + "," + current_activity;
                         trainingTW.WriteLine(arffSample);                  
                         if (structureFileExamples < 10)
                         {

@@ -11,16 +11,16 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
 {
 
 
-    public class MicrosoftBluetoothStream : BluetoothStream,IDisposable
+    public class MicrosoftBluetoothStream : BluetoothStream, IDisposable
     {
 
         public Socket socket;
-        public NetworkStream nstream;        
+        public NetworkStream nstream;
         public MicrosoftBluetoothEndPoint _RemoteEP;
         private bool disposed = false;
 
         public MicrosoftBluetoothStream(CircularBuffer buffer, CircularBuffer sbuffer, byte[] address, string pin)
-            : base(buffer,sbuffer, address, pin)
+            : base(buffer, sbuffer, address, pin)
         {
 
             try
@@ -33,11 +33,11 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                 this.status = BluetoothStatus.Error;
             }
         }
-        
-          
+
+
         ~MicrosoftBluetoothStream()
         {
-           Dispose();
+            Dispose();
         }
 
 
@@ -64,15 +64,22 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
             }
 
         }
-        [DllImport("btdrt.dll", SetLastError = true)]
+       /* [DllImport("btdrt.dll", SetLastError = true)]
         public static extern int BthReadRSSI(byte[] pbt, out ushort pbRSSI);
+        */
 
-
-        public static BluetoothStream Open(CircularBuffer buffer,CircularBuffer sbuffer, byte[] address, string pin)
+        public static BluetoothStream Open(CircularBuffer buffer, CircularBuffer sbuffer, byte[] address, string pin)
         {
             //os shuts it down so make sure it is open
-            NetworkStacks._BluetoothStack.Initialize();
-            MicrosoftBluetoothStream btStream = new MicrosoftBluetoothStream(buffer,sbuffer, address, pin);
+            try
+            {
+                NetworkStacks._BluetoothStack.Initialize();
+            }
+            catch
+            {
+                return null;
+            }
+            MicrosoftBluetoothStream btStream = new MicrosoftBluetoothStream(buffer, sbuffer, address, pin);
             btStream._Status = BluetoothStatus.Reconnecting;
             try
             {
@@ -97,7 +104,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
             }
             catch (Exception e)
             {
-                Logger.Debug("Microsoft Open:Reconnection for receiver " + btStream.hexAddress + " failed."+ e.ToString());
+                Logger.Debug("Microsoft Open:Reconnection for receiver " + btStream.hexAddress + " failed." + e.ToString());
                 btStream = null;
             }
             return btStream;
@@ -105,7 +112,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
 
 
 
-     
+
         //this is the buffer used to read asynchonously from the socket. When
         //the asynchronous read returns, this is copied into the localBuffer.   
         private const int LOCAL_BUFFER_SIZE = 2048;
@@ -113,22 +120,22 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
         private int totalBytes = 0;
         private int sentBytes = 0;
         private static object socketLock = new object();
-        private ushort rssi;
+        /*private ushort rssi;
         private int rssi_count = 0;
-        private int rssi_sum = 0;
+        private int rssi_sum = 0;*/
 
-                //BthReadRSSI(btStream._RemoteEP.Address, out rssi);
-                  
+        //BthReadRSSI(btStream._RemoteEP.Address, out rssi);
+
         public override void Process()
         {
-            byte[] sendByte = new byte[1];                        
+            byte[] sendByte = new byte[1];
             this.status = BluetoothStatus.Connected;
             byte[] singleReadBuffer = new byte[LOCAL_BUFFER_SIZE];
             double timestamp = 0.0;
             logCounter = 0;
             Logger.Debug("Microsoft Process:Processing thread started for receiver " + this._HexAddress + " status:" + this.status.ToString());
-            while (this.status== BluetoothStatus.Connected)
-            {            
+            while (this.status == BluetoothStatus.Connected)
+            {
                 int bytesReceived = 0;
                 logCounter++;
                 try
@@ -153,7 +160,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
 
                             }
 
-                            BthReadRSSI(address, out rssi);
+                           /* BthReadRSSI(address, out rssi);
                             if (rssi > rssi_sum)
                                 rssi_sum = rssi;
                             rssi_count++;
@@ -161,7 +168,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                             {
                                 rssi_sum = 0;
                                 rssi_count = 0;
-                            }
+                            }*/
 
                             sentBytes++;
 
@@ -199,19 +206,19 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                     if (logCounter > 500)
                     {
                         Logger.Debug("Receiver " + this._HexAddress + ",sent:" + sentBytes + ",received:" + totalBytes);
-                        logCounter = 0; 
+                        logCounter = 0;
                     }
 
-                    if (bytesReceived > 0)                       
-                        disconnectionCounter = 0;                    
+                    if (bytesReceived > 0)
+                        disconnectionCounter = 0;
                     else
                     {
                         disconnectionCounter++;
                         if (disconnectionCounter > MAX_DISCONNECTION_COUNTER)
                         {
                             Logger.Debug("Receiver " + this._HexAddress + " disconnected timeout, tail=" + this.buffer._Tail + ",head=" + this.buffer._Head);
-                            this.status= BluetoothStatus.Disconnected;
-                            return;                          
+                            this.status = BluetoothStatus.Disconnected;
+                            return;
                         }
                     }
 
@@ -232,13 +239,13 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                 int mytail = this.buffer._Tail;
                 for (ii = 0; ii < bytesReceived; ii++)
                 {
-                   // this.buffer._Timestamp[this.buffer._Tail] = timestamp;
+                    // this.buffer._Timestamp[this.buffer._Tail] = timestamp;
                     this.buffer._Bytes[mytail++] = singleReadBuffer[ii];
-                    mytail %= this.buffer._Bytes.Length;                                       
+                    mytail %= this.buffer._Bytes.Length;
                 }
-                this.buffer._Tail =mytail;
+                this.buffer._Tail = mytail;
             }
 
-        }   
+        }
     }
 }

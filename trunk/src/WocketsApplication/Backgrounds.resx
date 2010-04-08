@@ -119,24 +119,27 @@
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="CoolBlue" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\CoolBlue.jpg;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>..\..\projects\PPC\Resources\CoolBlue.jpg;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="CosmosRed" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\CosmosRed.jpg;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>..\..\projects\PPC\Resources\CosmosRed.jpg;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="DottedBlack" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\..\projects\PPC\Resources\DottedBlack.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="DottedBlack_640" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\..\projects\PPC\Resources\DottedBlack-640.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="DottedBlack_800_480" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\..\projects\PPC\Resources\DottedBlack-800-480.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="GraphiteBlue" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\GraphiteBlue.jpg;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>..\..\projects\PPC\Resources\GraphiteBlue.jpg;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Leather" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Leather.jpg;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>..\..\projects\PPC\Resources\Leather.jpg;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="NaturalBlack" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\NaturalBlack.jpg;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="SpiderBlack" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\SpiderBlack.jpg;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>..\..\projects\PPC\Resources\NaturalBlack.jpg;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

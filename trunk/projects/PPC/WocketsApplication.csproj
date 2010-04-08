@@ -1,4 +1,4 @@
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -13,7 +13,7 @@
     <PlatformFamilyName>PocketPC</PlatformFamilyName>
     <PlatformID>3C41C503-53EF-4c2a-8DD4-A8217CAD115E</PlatformID>
     <OSVersion>4.20</OSVersion>
-    <DeployDirSuffix>WocketsApplication</DeployDirSuffix>
+    <DeployDirSuffix>Wockets</DeployDirSuffix>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <NativePlatformName>Pocket PC 2003</NativePlatformName>
     <FormFactorID>
@@ -204,13 +204,11 @@
       <Link>Controls\RoundGauge.cs</Link>
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="..\..\src\WocketsApplication\Controls\Utils\GUIHelper.cs" >
-    <Link>Controls\Utils\GUIHelper.cs</Link>
-
+    <Compile Include="..\..\src\WocketsApplication\Controls\Utils\GUIHelper.cs">
+      <Link>Controls\Utils\GUIHelper.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsApplication\Controls\Utils\Keyboard.cs" >
-    <Link>Controls\Utils\Keyboard.cs</Link>
-
+    <Compile Include="..\..\src\WocketsApplication\Controls\Utils\Keyboard.cs">
+      <Link>Controls\Utils\Keyboard.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -459,33 +457,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\src\WocketsApplication\Resources\CoolBlue.jpg">
-      <Link>Resources\CoolBlue.jpg</Link>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\src\WocketsApplication\Resources\CosmosRed.jpg">
-      <Link>Resources\CosmosRed.jpg</Link>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="..\..\src\WocketsApplication\Resources\DottedBlack.xcf">
       <Link>Resources\DottedBlack.xcf</Link>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\src\WocketsApplication\Resources\GraphiteBlue.jpg">
-      <Link>Resources\GraphiteBlue.jpg</Link>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\src\WocketsApplication\Resources\Leather.jpg">
-      <Link>Resources\Leather.jpg</Link>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\src\WocketsApplication\Resources\NaturalBlack.jpg">
-      <Link>Resources\NaturalBlack.jpg</Link>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -732,7 +705,6 @@
     <None Include="..\..\src\WocketsApplication\Resources\BluetoothUnpressed-48.png">
       <Link>Resources\BluetoothUnpressed-48.png</Link>
     </None>
-    <None Include="ClassDiagram1.cd" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Wockets.csproj">
@@ -746,6 +718,27 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\DottedBlack.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\CoolBlue.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\CosmosRed.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\DottedBlack-640.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\DottedBlack-800-480.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\GraphiteBlue.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Leather.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\NaturalBlack.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />
   <ProjectExtensions>

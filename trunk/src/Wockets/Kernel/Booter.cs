@@ -59,7 +59,7 @@ namespace Wockets.Kernel
             Directory.CreateDirectory(rootStorageDirectory);
             
             wcontroller = new WocketsController("", "", "");           
-            wcontroller.FromXML(path+"//NeededFiles//SensorConfigurations//SensorData43.xml");
+            wcontroller.FromXML(path+"//NeededFiles//Master//SensorData.xml");
             Logger.InitLogger(rootStorageDirectory + "kernellog\\");
             Logger.Debug2("Time,Time,PowerPercent,Voltage,Current,Temperature\n");
 
@@ -139,7 +139,7 @@ namespace Wockets.Kernel
 
                             //load local wockets controller
                             lwcontroller = new WocketsController("", "", "");
-                            lwcontroller.FromXML(path + "//NeededFiles//SensorConfigurations//SensorData43.xml");
+                            lwcontroller.FromXML(path + "//NeededFiles//Master//SensorData.xml");
                             int index=0;
                             for (int i = 0; (i < Booter.wcontroller._Sensors.Count); i++)
                             {

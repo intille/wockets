@@ -445,10 +445,24 @@ namespace WocketConfigurationApp
         }
 
 
+        public bool WriteData(byte[] data)
+        {
+            try
+            {
+                ns.Write(data, 0, data.Length);
+                return false;
+            }
+            catch (Exception e)
+            {
+                status = e.ToString();
+                return false;
+            }
+
+        }
 
         public bool ReadData(out string out_value)
         {
-            bool is_data_available = false;
+            bool is_data_available = true;
             out_value = "---";
 
 
@@ -791,11 +805,13 @@ namespace WocketConfigurationApp
                         isconnected = ReadData(out value);
                         _LastValue = value;
 
-                        if (BT_TYPE == ALIVE_PCKG)
+                        /*if (BT_TYPE == ALIVE_PCKG)
                         {
                             if (WriteAlive())
                                 _LastValue = "writing to wocket";
-                        }
+                        }*/
+
+                       // WriteData(byte[] data)
 
 
                         if (OnNewReading != null)

@@ -644,6 +644,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_9600F1A6609440B29962602768B94015"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_98ADA2FB79AF47B3A71476C2141F64AB"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -657,6 +663,12 @@
         "Entry"
         {
         "MsmKey" = "8:_9B61EAF7F1164FA1A328ED9817AC22F5"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_9C545E7261B1459F86A0F6A52C562EBA"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -2276,6 +2288,24 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_9600F1A6609440B29962602768B94015"
+            {
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\SensorConfigurations\\SensorDataStanford4.xml"
+            "TargetName" = "8:SensorDataStanford4.xml"
+            "Tag" = "8:"
+            "Folder" = "8:_05B898494F744346AD86F63F4445EF71"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{BA458234-9B71-4F46-8107-E91156377184}:_98ADA2FB79AF47B3A71476C2141F64AB"
             {
             "SourcePath" = "8:..\\..\\bin\\NeededFiles\\SensorConfigurations\\SensorDataStanford2.xml"
@@ -2318,6 +2348,24 @@
             "TargetName" = "8:log-2008-04-20.txt"
             "Tag" = "8:"
             "Folder" = "8:_7E8F29DA565044C394E0D32C76A38A88"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_9C545E7261B1459F86A0F6A52C562EBA"
+            {
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\SensorConfigurations\\SensorDataStanford3.xml"
+            "TargetName" = "8:SensorDataStanford3.xml"
+            "Tag" = "8:"
+            "Folder" = "8:_05B898494F744346AD86F63F4445EF71"
             "Condition" = "8:"
             "Vital" = "11:TRUE"
             "ReadOnly" = "11:FALSE"
