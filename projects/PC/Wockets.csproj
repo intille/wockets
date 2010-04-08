@@ -18,6 +18,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -28,6 +29,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="InTheHand.Net.Personal, Version=2.3.0.0, Culture=neutral, PublicKeyToken=ea38caa273134499, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\bin\NeededFiles\dlls\PC\InTheHand.Net.Personal.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -350,13 +355,26 @@
     <Compile Include="..\..\src\Wockets\Utils\network\Bluetooth\TSniff.cs">
       <Link>Utils\network\Bluetooth\TSniff.cs</Link>
     </Compile>
-    <Compile Include="Data\Commands\GET_BR.cs" />
+    <Compile Include="..\..\src\Wockets\CurrentWockets.cs">
+      <Link>CurrentWockets.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Configuration\MemoryConfiguration.cs">
+      <Link>Data\Configuration\MemoryConfiguration.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Configuration\SoftwareConfiguration.cs">
+      <Link>Data\Configuration\SoftwareConfiguration.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Configuration\WocketsConfiguration.cs">
+      <Link>Data\Configuration\WocketsConfiguration.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Features\FFT.cs">
+      <Link>Data\Features\FFT.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Features\FullFeatureExtractor.cs">
+      <Link>Data\Features\FullFeatureExtractor.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="SerialIO.csproj">
-      <Project>{26831A48-F3A8-4019-8C62-842D3B8D2A6F}</Project>
-      <Name>SerialIO</Name>
-    </ProjectReference>
     <ProjectReference Include="WocketsWeka.csproj">
       <Project>{E5BB25A9-1913-4C1A-BBCF-51F2554D0C42}</Project>
       <Name>WocketsWeka</Name>

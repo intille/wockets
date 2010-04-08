@@ -66,57 +66,7 @@ ISR(TIMER2_OVF_vect)
 		
 	TCNT2=170;	
 
-	/* For the first 30 seconds, a wocket remains in configuration mode */
-	/*if ((configurationTimer) && (configurationTimer<2401))
-	{
-		//attempt to receive configuration data
-		if (_bluetooth_is_connected())
-		{
-			_receive_data();
 
-			//blink yellow while being configured
-			interrupts_passed++;
-			if ((interrupts_passed %15)==0)
-			{
-				if (_is_yellowled_on())
-					_yellowled_turn_off();
-				else
-					_yellowled_turn_on();	
-				interrupts_passed=0;		
-			}
-
-		}
-		else		
-		{
-			//otherwise add to timeout
-			configurationTimer++;
-			if (configurationTimer==2401)
-			{
-				//if timed out, turn off yellow LED and reset bluetooth to avoid race conditions
-				_yellowled_turn_off();
-				_bluetooth_turn_off();
-				seconds_passed=0;
-				while (seconds_passed<400)
-				{
-					_delay_ms(5);
-					seconds_passed++;
-
-				}
-				_bluetooth_turn_on();
-				configurationTimer=0;
-			}
-				//if did not timeout, blink every 300 mseconds
-			else if ((configurationTimer %24)==0)
-			{
-				if (_is_yellowled_on())
-					_yellowled_turn_off();
-				else
-					_yellowled_turn_on();			
-			}
-		}
-
-		return;
-	}*/
 
 
 
@@ -129,7 +79,7 @@ ISR(TIMER2_OVF_vect)
 			seconds_disconnected++;
 		else if (seconds_disconnected==2400)
 		{
-			_bluetooth_turn_on();
+		//	_bluetooth_turn_on();
 			//_atmega_reset();
 			seconds_disconnected=2401;			
 		}
@@ -142,8 +92,8 @@ ISR(TIMER2_OVF_vect)
 		//parse and process any received bytes
 
 		//if (seconds_passed==0){
-			_receive_data();
-			 _send_data();
+		//	_receive_data();
+		//	 _send_data();
 
 			seconds_passed=0;
 			while (seconds_passed<400)
@@ -154,69 +104,11 @@ ISR(TIMER2_OVF_vect)
 			}
 			
 			
-			_bluetooth_turn_off();
+			//_bluetooth_turn_off();
 			_atmega_adc_turn_off();
 			seconds_disconnected=0;
 
 
-
-
-	//	}
-		//skip_interrupt_counter++;
-
-		//if (skip_interrupt_counter<num_skipped_timer_interrupts)
-			//retu  rn;
-		
-		//skip_interrupt_counter=0;					
-
-		
-		/* (seconds_passed<400)
-		{
-			seconds_passed++;						
-			return;
-		}
-		
-		seconds_passed=0;
-		if (_is_greenled_on())
-			_greenled_turn_off();
-		else
-			_greenled_turn_on();
-		_bluetooth_turn_off();
-		seconds_disconnected=0;*/
-		/*counter++;
-
-
-		if (counter>30)
-			_atmega_finalize();*/
-							
-		/*if (_bluetooth_off)					
-			_bluetooth_turn_on();								
-		else					
-			_bluetooth_turn_off();*/
-
-		/*if (_is_accelerometer_on())
-		{
-			_accelerometer_set_sensitivity(_4G);
-			_accelerometer_turn_on();
-		}
-		else
-			_accelerometer_turn_off();
-			*/
-		/*if (_is_greenled_on())
-			_greenled_turn_off();
-		else
-			_greenled_turn_on(); */
-
-		/*if (_is_yellowled_on())
-			_yellowled_turn_off();
-		else
-			_yellowled_turn_on();
-	
-
-		seconds_passed=0;	
-
-		if (counter>5)
-			_atmega_finalize();*/
 }
 
 

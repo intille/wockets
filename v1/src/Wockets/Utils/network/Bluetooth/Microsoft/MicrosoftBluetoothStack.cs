@@ -37,23 +37,23 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
             get
             {
 
-				RadioMode val;
-				int result = BthGetMode(out val);
-				if(result!=0)
-				{
-					throw new System.ComponentModel.Win32Exception(result, "Error getting BluetoothRadio mode");
-				}
-				return val;
+                RadioMode val;
+                int result = BthGetMode(out val);
+                if (result != 0)
+                {
+                    throw new System.ComponentModel.Win32Exception(result, "Error getting BluetoothRadio mode");
+                }
+                return val;
 
             }
             set
             {
 
-				int result = BthSetMode(value);
-				if(result!=0)
-				{
-					throw new System.ComponentModel.Win32Exception(result, "Error setting BluetoothRadio mode");
-				}
+                int result = BthSetMode(value);
+                if (result != 0)
+                {
+                    throw new System.ComponentModel.Win32Exception(result, "Error setting BluetoothRadio mode");
+                }
 
             }
         }
@@ -61,11 +61,11 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
 
         public MicrosoftBluetoothStack()
         {
-            this.Mode= RadioMode.PowerOff;
+            this.Mode = RadioMode.PowerOff;
             this.Mode = RadioMode.Connectable;
         }
 
-       
+
         public override bool Initialize()
         {
             this.Mode = RadioMode.Connectable;
@@ -73,26 +73,26 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
         }
 
 
-        public override BluetoothStream Connect(CircularBuffer buffer,CircularBuffer sbuffer,byte[] address, string pin)
+        public override BluetoothStream Connect(CircularBuffer buffer, CircularBuffer sbuffer, byte[] address, string pin)
         {
             try
             {
                 lock (this)
                 {
-                    return MicrosoftBluetoothStream.Open(buffer,sbuffer, address, pin);
-                }                               
+                    return MicrosoftBluetoothStream.Open(buffer, sbuffer, address, pin);
+                }
             }
             catch (Exception e)
             {
                 return null;
-            }            
+            }
         }
 
         public override BluetoothStatus _Status
         {
             get
             {
-                
+
                 if (this.Mode == RadioMode.Connectable)
                     this.status = BluetoothStatus.Up;
                 else if (this.Mode == RadioMode.PowerOff)

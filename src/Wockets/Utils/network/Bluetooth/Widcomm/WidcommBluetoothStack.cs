@@ -57,7 +57,7 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
 
     public class WidcommBluetoothStack : BluetoothStack
     {
-        private IntPtr wdStack;
+        private IntPtr wdStack= IntPtr.Zero;
         private bool m_bDisposed = false;
 
         public WidcommBluetoothStack()
@@ -75,6 +75,10 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
             get
             {
                 return this.wdStack;
+            }
+            set
+            {
+                this.wdStack = value;
             }
         }
         public override BluetoothStatus _Status

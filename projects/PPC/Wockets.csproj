@@ -1,4 +1,4 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -13,7 +13,7 @@
     <PlatformFamilyName>PocketPC</PlatformFamilyName>
     <PlatformID>3C41C503-53EF-4c2a-8DD4-A8217CAD115E</PlatformID>
     <OSVersion>4.20</OSVersion>
-    <DeployDirSuffix>wockets</DeployDirSuffix>
+    <DeployDirSuffix>Wockets</DeployDirSuffix>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FormFactorID>
     </FormFactorID>
@@ -36,6 +36,7 @@
     <FileAlignment>512</FileAlignment>
     <WarningLevel>4</WarningLevel>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -50,11 +51,11 @@
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="CustomMarshalers" />
     <Reference Include="InTheHand.Net.Personal, Version=2.4.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\bin\NeededFiles\dlls\InTheHand.Net.Personal.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="Microsoft.WindowsMobile, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\bin\NeededFiles\dlls\Microsoft.WindowsMobile.dll</HintPath>
@@ -65,6 +66,10 @@
     </Reference>
     <Reference Include="mscorlib">
       <HintPath>..\..\..\..\..\..\..\..\..\..\Program Files (x86)\Microsoft Visual Studio 8\SmartDevices\SDK\CompactFramework\2.0\v2.0\WindowsCE\mscorlib.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenNETCF.WindowsCE, Version=2.0.0.0, Culture=neutral, PublicKeyToken=e60dbea84bb431b7, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\bin\NeededFiles\dlls\OpenNETCF.WindowsCE.dll</HintPath>
     </Reference>
     <Reference Include="System">
       <HintPath>..\..\..\..\..\..\..\..\..\..\Program Files (x86)\Microsoft Visual Studio 8\SmartDevices\SDK\CompactFramework\2.0\v2.0\WindowsCE\System.dll</HintPath>
@@ -89,9 +94,6 @@
     <Compile Include="..\..\src\Wockets\Data\Accelerometers\SparkfunAccelerationData.cs">
       <Link>Data\Accelerometers\SparkfunAccelerationData.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Classifiers\ClassifierConfiguration.cs">
-      <Link>Data\Classifiers\ClassifierConfiguration.cs</Link>
-    </Compile>
     <Compile Include="..\..\src\Wockets\Data\Annotation\Activity.cs">
       <Link>Data\Annotation\Activity.cs</Link>
     </Compile>
@@ -115,15 +117,6 @@
     </Compile>
     <Compile Include="..\..\src\Wockets\Data\Annotation\Session.cs">
       <Link>Data\Annotation\Session.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Classifiers\Trees\DTClassifier.cs">
-      <Link>Data\Classifiers\Trees\DTClassifier.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Classifiers\Trees\DTConfiguration.cs">
-      <Link>Data\Classifiers\Trees\DTConfiguration.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Classifiers\Utils\FeatureExtractor.cs">
-      <Link>Data\Classifiers\Utils\FeatureExtractor.cs</Link>
     </Compile>
     <Compile Include="..\..\src\Wockets\Data\Converter\ArffConverter.cs">
       <Link>Data\Converter\ArffConverter.cs</Link>
@@ -241,18 +234,6 @@
     </Compile>
     <Compile Include="..\..\src\Wockets\WocketsControllerList.cs">
       <Link>WocketsControllerList.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Summary\Activity.cs">
-      <Link>Data\Summary\Activity.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Summary\ActivityList.cs">
-      <Link>Data\Summary\ActivityList.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Summary\Constants.cs">
-      <Link>Data\Summary\Constants.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Summary\Reader.cs">
-      <Link>Data\Summary\Reader.cs</Link>
     </Compile>
     <Compile Include="..\..\src\Wockets\Data\Commands\CommandTypes.cs">
       <Link>Data\Commands\CommandTypes.cs</Link>
@@ -377,21 +358,6 @@
     <Compile Include="..\..\src\Wockets\Utils\network\Bluetooth\Microsoft\MicrosoftBluetoothEndpoint.cs">
       <Link>Utils\network\Bluetooth\Microsoft\MicrosoftBluetoothEndpoint.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Applications\Games\Escape\Actions.cs">
-      <Link>Applications\Games\Escape\Actions.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Applications\Games\Escape\Audio.cs">
-      <Link>Applications\Games\Escape\Audio.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Applications\Games\Escape\Escape.cs">
-      <Link>Applications\Games\Escape\Escape.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Applications\Games\Escape\Player.cs">
-      <Link>Applications\Games\Escape\Player.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Applications\Games\Escape\Sounds.cs">
-      <Link>Applications\Games\Escape\Sounds.cs</Link>
-    </Compile>
     <Compile Include="..\..\src\Wockets\IPC\MMF\MemoryMappedFileHelper.cs">
       <Link>IPC\MMF\MemoryMappedFileHelper.cs</Link>
     </Compile>
@@ -470,7 +436,30 @@
     <Compile Include="..\..\src\Wockets\Utils\Platform.cs">
       <Link>Utils\Platform.cs</Link>
     </Compile>
-    <Compile Include="Utils\feedback\Sound.cs" />
+    <Compile Include="..\..\src\Wockets\Utils\feedback\Sound.cs">
+      <Link>Utils\feedback\Sound.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\CurrentWockets.cs">
+      <Link>CurrentWockets.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Configuration\MemoryConfiguration.cs" >
+      <Link>Data\Configuration\MemoryConfiguration.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Configuration\SoftwareConfiguration.cs" >
+      <Link>Data\Configuration\SoftwareConfiguration.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Configuration\WocketsConfiguration.cs" >
+      <Link>Data\Configuration\WocketsConfiguration.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Features\FFT.cs" >
+      <Link>Data\Features\FFT.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Features\FullFeatureExtractor.cs" >
+      <Link>Data\Features\FullFeatureExtractor.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\feedback\Vibrator.cs" >
+      <Link>Utils\feedback\Vibrator.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="WocketsWeka.csproj">

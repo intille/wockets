@@ -5,7 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-
+using Wockets;
 using System.Collections; //ArrayList
 using System.IO;
 
@@ -2192,8 +2192,12 @@ namespace NESPDataViewer
             #region WOCKETS ACCELEROMETER GRAPHS
             if ((Directory.Exists(path + "\\wockets\\")) && (Directory.GetFiles(path + "\\wockets\\").Length > 0))
             {
+                CurrentWockets._Configuration = new Wockets.Data.Configuration.WocketsConfiguration();
+                CurrentWockets._Configuration.FromXML(path + "\\wockets\\Configuration.xml");
                 Wockets.WocketsController wc = new Wockets.WocketsController("", "", "");
                 wc.FromXML(path + "\\wockets\\SensorData.xml");
+                CurrentWockets._Controller = wc;
+                
                 files = Directory.GetFiles(path + "\\merged\\", "Wocket*RawMean*");
                 for (int i = 0; i < files.Length; i++)
                 {

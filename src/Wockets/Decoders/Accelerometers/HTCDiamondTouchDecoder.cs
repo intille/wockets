@@ -22,13 +22,22 @@ namespace Wockets.Decoders.Accelerometers
 
         public HTCDiamondTouchDecoder()
             : base(BUFFER_SIZE, HTCDiamondTouchAccelerationData.NUM_RAW_BYTES)
-        {
-
-            for (int i = 0; (i < this._Data.Length); i++)
-                this._Data[i] = new HTCDiamondTouchAccelerationData();
+        {     
+           
             this.packetPosition = 0;
             this.headerSeen = false;
             this.type = DecoderTypes.HTCDiamondTouch;
+        }
+
+        public override bool Initialize()
+        {
+            base.Initialize();
+            if (CurrentWockets._Configuration._MemoryMode == Wockets.Data.Configuration.MemoryConfiguration.NON_SHARED)
+            {
+                for (int i = 0; (i < this._Data.Length); i++)
+                    this._Data[i] = new HTCDiamondTouchAccelerationData();
+            }
+            return true;
         }
         /*
         public override bool IsValid(SensorData data)

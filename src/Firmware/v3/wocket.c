@@ -25,6 +25,21 @@ unsigned short y=0;
 unsigned short z=0;
 
 
+
+unsigned char _wocket_get_baudrate(void)
+{
+	return ((wocket_status>>BIT2_BIT3_BAUD_RATE) & 0x03);
+}
+
+void _wocket_set_baudrate(unsigned char baudrate)
+{
+	if ((baudrate!=BAUD_9600)&&(baudrate!=BAUD_19200)&&(baudrate!=BAUD_38400)&&(baudrate!=BAUD_57600))
+		return;
+
+	wocket_status=(wocket_status & 0xF3) | (baudrate<< BIT2_BIT3_BAUD_RATE);		
+	_wocket_write_status(wocket_status);
+}
+
 /* 
 	Function Name: _wocket_get_baudrate
 	Parameters: None
@@ -34,28 +49,9 @@ unsigned short z=0;
 	
 */
 
-unsigned short _wocket_read_baudrate(void)
+unsigned char _wocket_read_status(void)
 {
-	unsigned short baudrate=eeprom_read_word((uint16_t *)((uint16_t)BAUD_RATE_ADDRESS));
-
-	switch(baudrate)
-	{
-		case BAUD_9600:
-			return ATMEGA_BAUD_9600;
-		case BAUD_19200:
-			return ATMEGA_BAUD_19200;
-		case BAUD_28800:
-			return ATMEGA_BAUD_28800;
-		case BAUD_38400:
-			return ATMEGA_BAUD_38400;
-		case BAUD_57600:
-			return ATMEGA_BAUD_57600;
-		default:
-			break;
-
-	}
-	eeprom_write_word((uint16_t *)BAUD_RATE_ADDRESS,BAUD_38400);
-	return ATMEGA_BAUD_38400;
+	return eeprom_read_byte((uint8_t *)((uint8_t)WOCKET_STATUS_ADDRESS));
 }
 
 /* 
@@ -65,10 +61,9 @@ unsigned short _wocket_read_baudrate(void)
 	Description: This function sets the baud rate for the wocket to one of the following values 9600, 19200, 28800, 38400 and 57600
 	
 */
-void _wocket_write_baudrate(unsigned short baudrate)
+void _wocket_write_status(unsigned char status)
 {
-	if ((baudrate==BAUD_9600) || (baudrate==BAUD_19200) || (baudrate==BAUD_28800)|| (baudrate==BAUD_38400)|| (baudrate==BAUD_57600))
-		eeprom_write_word((uint16_t *)BAUD_RATE_ADDRESS,baudrate);		
+		eeprom_write_byte((uint8_t *)WOCKET_STATUS_ADDRESS,status);	
 }
 
 /* 
@@ -86,12 +81,13 @@ void _wocket_initialize(void)
 	num_skipped_timer_interrupts=10;//(F_CPU/1024)/PERFECT_SAMPLING_FREQUENCY;
 
 	//read the baud rate from the eeprom
-	unsigned short baudrate=_wocket_read_baudrate();
+	//unsigned short baudrate=_wocket_read_baudrate();
 	
-	//By default initialize the wocket to slave mode
-	_wocket_set_slave_mode();	
+	//read wocket status byte
+	wocket_status=_wocket_read_status();
 
-//	F_CPU/PRESCALAR
+
+	//	F_CPU/PRESCALAR
 	//_atmega_adc_turn_on();
 }
 
@@ -105,7 +101,7 @@ void _wocket_initialize(void)
 void _wocket_set_master_mode(void)
 {
 	// Set the status of the master mode to true
-	sbi(wocket_status, BIT4_MASTERSLAVE_STATUS);
+	sbi(wocket_status, BIT0_MASTERSLAVE_STATUS);
 }
 
 
@@ -119,7 +115,7 @@ void _wocket_set_master_mode(void)
 void _wocket_set_slave_mode(void)
 {
 	// Set the status of the master mode to true
-	cbi(wocket_status, BIT4_MASTERSLAVE_STATUS);
+	cbi(wocket_status, BIT0_MASTERSLAVE_STATUS);
 }
 
 
@@ -134,7 +130,51 @@ void _wocket_set_slave_mode(void)
 unsigned char _wocket_is_master(void)
 {
 	// Set the status of the master mode to true
-	return ((wocket_status>>BIT4_MASTERSLAVE_STATUS) & 0x01);
+	return ((wocket_status>>BIT0_MASTERSLAVE_STATUS) & 0x01);
+}
+
+
+
+/* 
+	Function Name:  _wocket_set_bursty_mode
+	Parameters: None
+	
+	Description: This function sets the wocket into bursty mode
+	
+*/
+void _wocket_set_bursty_mode(void)
+{
+	// Set the status of the master mode to true
+	sbi(wocket_status, BIT1_BURSTY_STATUS);
+}
+
+
+/* 
+	Function Name:  _wocket_set_continuous_mode
+	Parameters: None
+	
+	Description: This function sets the wocket into continuous mode
+	
+*/
+void _wocket_set_continuous_mode(void)
+{
+	// Set the status of the master mode to true
+	cbi(wocket_status, BIT1_BURSTY_STATUS);
+}
+
+
+
+/* 
+	Function Name:  _wocket_is_bursty
+	Parameters: None
+	
+	Description: Tests if the wocket is a master
+	
+*/
+unsigned char _wocket_is_bursty(void)
+{
+	// Check if the wocket is in bursty mode
+	return ((wocket_status>>BIT1_BURSTY_STATUS) & 0x01);
 }
 
 wockets_uncompressed_packet _encode_packet(unsigned short x, unsigned short y, unsigned short z)
@@ -172,7 +212,7 @@ void _transmit_packet(wockets_uncompressed_packet packet)
 	
 }
 
-void _send_data(void)
+void _send_data_bufferred(void)
 {
 	
 		if (paused==0)
@@ -180,7 +220,8 @@ void _send_data(void)
  			alive_timer++;                                  
             if (alive_timer>=2730) //if no acks for approx 30 seconds, reset radio
             {
-            	_atmega_reset();
+            	//_atmega_reset();
+				_bluetooth_reset();
             	alive_timer=0;                                  
             }
 			//unsigned short x=_atmega_a2dConvert10bit(ADC3);
@@ -201,6 +242,26 @@ void _send_data(void)
 		}
 }
 
+
+
+
+void _send_data(void)
+{	
+	if (paused==0)
+	{
+ 		alive_timer++;                                  
+        if (alive_timer>=2730) //if no acks for approx 30 seconds, reset radio
+        {
+           //	_atmega_reset();
+		   _bluetooth_reset();
+           	alive_timer=0;                                  
+        }
+		unsigned short x=_atmega_a2dConvert10bit(ADC3);
+		unsigned short y=_atmega_a2dConvert10bit(ADC2);
+		unsigned short z=_atmega_a2dConvert10bit(ADC1);
+		_transmit_packet(_encode_packet(x,y,z));				
+	}
+}
 void _receive_data(void)
 {
 	unsigned char aByte;
@@ -288,21 +349,21 @@ void _receive_data(void)
 								_greenled_turn_on();                                                                              */
                             break;
                     case (unsigned char) SET_BAUD_RATE:
-                            if (_atmega_a2dConvert10bit(ADC4)<350)
+                           /* if (_atmega_a2dConvert10bit(ADC4)<350)
                                     break;
                             else if (eeprom_is_ready())
                             {
                                     word=m_BAUD_RATE_BYTE2_TO_BR(aBuffer[1]);
                                     eeprom_write_word((uint16_t *)BAUD_RATE_ADDRESS,word);
                                     processed_counter=command_counter;
-                            }
+                            }*/
                             break;
                     case (unsigned char) GET_BAUD_RATE:
-                            word=eeprom_read_word((uint16_t *)((uint16_t)BAUD_RATE_ADDRESS));
+                            /*word=eeprom_read_word((uint16_t *)((uint16_t)BAUD_RATE_ADDRESS));
                             aBuffer[0]=m_BAUD_RATE_BYTE0;
                             aBuffer[1]=m_BAUD_RATE_BYTE1(word);                             
                             processed_counter=command_counter;
-                            response_length=2;                                                                              
+                            response_length=2; */
                             break;
                     case (unsigned char) SET_CALIBRATION_VALUES:                                                                    
                             if (eeprom_is_ready())

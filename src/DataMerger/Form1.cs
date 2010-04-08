@@ -14,6 +14,7 @@ using System.Collections;
 using System.Text.RegularExpressions;
 using Wockets.Data.Annotation;
 using Wockets;
+using Wockets.Data.Configuration;
 
 
 namespace DataMerger
@@ -274,6 +275,7 @@ namespace DataMerger
 
                     //MITes
 
+            
                     //configuration files
                     if (File.Exists(this.textBox1.Text + "\\" + MITES_SUBDIRECTORY + "\\Configuration.xml"))
                         this.progressForm.AppendLog("Configuration.xml File .....................Found\r\n");
@@ -308,6 +310,16 @@ namespace DataMerger
                             else
                                 throw new Exception("Old Format: More than 1 file ....................manual fix needed\r\n");
                         }
+                    }
+
+
+                    try
+                    {
+                        if (File.Exists("Configuration.xml"))
+                            File.Copy("Configuration.xml", this.textBox1.Text + "\\" + WOCKETS_SUBDIRECTORY + "\\Configuration.xml", true);
+                    }
+                    catch
+                    {
                     }
 
                 }
@@ -399,7 +411,10 @@ namespace DataMerger
             
             //Calculate Data Gaps
             WocketsController wc = new WocketsController("", "", "");
+            CurrentWockets._Controller = wc;
             wc.FromXML(aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY +"\\SensorData.xml");
+            for (int r = 0; (r < wc._Decoders.Count); r++)
+                wc._Decoders[r].Initialize();
 
 
             SXML.Reader sreader = null;            
@@ -1222,7 +1237,16 @@ namespace DataMerger
             bool rt3Found=false;
 
 
-
+            WocketsConfiguration configuration = new WocketsConfiguration();
+            try
+            {
+                configuration.FromXML(aDataDirectory + "\\wockets\\Configuration.xml");
+            }
+            catch
+            {                
+             //   configuration.FromXML(aDataDirectory + "\\Configuration.xml");
+            }
+            CurrentWockets._Configuration = configuration;
 
 
             #region Read RTI data
@@ -2767,7 +2791,10 @@ namespace DataMerger
             if ((Directory.Exists(aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY)) && (Directory.GetFiles(aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY).Length>0))
             {
                 wcontroller = new WocketsController("", "", "");
+                CurrentWockets._Controller = wcontroller;
                 wcontroller.FromXML(aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY + "\\SensorData.xml");
+                for (int r = 0; (r < wcontroller._Decoders.Count); r++)
+                    wcontroller._Decoders[r].Initialize();
                 wunixtimestamp = new double[wcontroller._Sensors.Count];
 
                 for (int i = 0; (i < wcontroller._Sensors.Count); i++)
@@ -2788,7 +2815,10 @@ namespace DataMerger
 
                 /* Write Wockets raw data to csv files */
                 WocketsController wc = new WocketsController("", "", "");
+                CurrentWockets._Controller = wc;
                 wc.FromXML(aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY + "\\SensorData.xml");
+                for (int r = 0; (r < wc._Decoders.Count); r++)
+                    wc._Decoders[r].Initialize();
                 int[] wocketsSR = new int[wcontroller._Sensors.Count];
                 
 
@@ -3753,11 +3783,7 @@ namespace DataMerger
                             wrawData[wcontroller._Sensors[i]._ID, 2, whead[wcontroller._Sensors[i]._ID]] = Convert.ToInt32(wocketsTokens[3]);
                             wtimeData[wcontroller._Sensors[i]._ID, whead[wcontroller._Sensors[i]._ID]] = (long)Convert.ToDouble(wocketsTokens[0]);
                             wunixtimestamp[i] = Convert.ToDouble(wocketsTokens[0]);
-                            if (current_activity.Contains("treadmill"))
-
-                            {
-                                Console.WriteLine();
-                            }
+               
                             /*
                             if (wcontroller._Sensors[i]._Decoder._Head == 0)
                                 lastDecodedIndex[i] = wcontroller._Sensors[i]._Decoder._Data.Length - 1;

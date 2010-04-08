@@ -69,6 +69,12 @@
     </Compile>
     <Compile Include="..\..\src\TimeSync\SNTPClient.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="Wockets.csproj">
+      <Project>{16986364-6B54-443E-B1F3-A6F17F0523B2}</Project>
+      <Name>Wockets</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -121,10 +121,10 @@ WMAPI int __stdcall Bond(void* wdStack,ULONGLONG p_bda,wchar_t* pin)
 	bda[5] = ((address >> 40) & 0xff);
 
 	WCHAR pp[4];
-	pp[3]='4';
-	pp[2]='3';
-	pp[1]='2';
-	pp[0]='1';
+	pp[3]='1';
+	pp[2]='2';
+	pp[1]='3';
+	pp[0]='4';
 	return pwdStack->Bond(bda,pp);
 }
 WMAPI int __stdcall SppCreateConnection(void* wdStack, UINT8 scn, ULONGLONG p_bda)

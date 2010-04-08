@@ -68,6 +68,7 @@ namespace Wockets
         private ManualResetEvent paused;
         public bool _Paused = false;
         public double StartTime = 0;
+        public bool _Bursty = false;
         //public Escape _Escape = new Escape();
 
 
@@ -146,6 +147,7 @@ namespace Wockets
 
         public WocketsController(string name, string filename, string description)
         {
+           
             this.paused = new ManualResetEvent(false);
             this.decoders = new DecoderList();
             this.receivers = new ReceiverList();
@@ -262,7 +264,7 @@ namespace Wockets
         public void Unpause()
         {
             _Paused = false;
-            this.paused.Set();          
+            this.paused.Set();
         }
 
         public void Pause()
@@ -279,6 +281,9 @@ namespace Wockets
                 try
                 {
                     this._Receivers[i].Initialize();
+                    if (this._Receivers[i]._Type == ReceiverTypes.RFCOMM)
+                        ((RFCOMMReceiver)this._Receivers[i])._Bursty = this._Bursty;
+                       
                     //this._Receivers[i].
                     //Thread.Sleep(2000);
 
@@ -290,16 +295,23 @@ namespace Wockets
             }
 
             polling = true;
-            saving = true;
+
+            if (!_Bursty)
+            {
+                saving = true;
+                aSavingThread = new Thread(new ThreadStart(Save));
+                aSavingThread.Priority = ThreadPriority.Highest;
+                aSavingThread.Start();
+            }
+
             //classifying = true;
             //Priorities are very critical to avoid buffer overflow
-            aSavingThread = new Thread(new ThreadStart(Save));           
-           aSavingThread.Priority = ThreadPriority.Highest;
+      
             aPollingThread = new Thread(new ThreadStart(Poll));
             aPollingThread.Priority = ThreadPriority.Highest;
             //aClassifyingThread = new Thread(new ThreadStart(Classify));
             aPollingThread.Start();
-            aSavingThread.Start();
+            
             //aClassifyingThread.Start();
 
 
@@ -343,16 +355,17 @@ namespace Wockets
             for (int i = 0; (i < this._Sensors.Count); i++)
                 this._Sensors[i].Dispose();
 
-            
+
             //NetworkStacks._BluetoothStack.Dispose();
 
         }
 
         private void Save()
-        {            
+        {
             while (saving)
             {
-                if (_Paused)
+
+                if ((_Bursty) && (_Paused))
                     this.paused.WaitOne();
 
                 for (int i = 0; (i < this._Sensors.Count); i++)
@@ -361,14 +374,14 @@ namespace Wockets
                     {
 
                         this._Sensors[i].Save();
-                        Thread.Sleep(1000);     
-                  
+                        Thread.Sleep(1000);
+
                         //FOR power efficient
                         //if (this._Sensors[i].SavedPackets == 2400) 
-                       // {
+                        // {
                         //    this._Sensors[i].SavedPackets = 0;
-                           //NamedEvents namedEvents = new NamedEvents();
-                            //namedEvents.Send("DisconnectEvent");
+                        //NamedEvents namedEvents = new NamedEvents();
+                        //namedEvents.Send("DisconnectEvent");
                         //}
                     }
                     catch (Exception ee)
@@ -485,12 +498,12 @@ namespace Wockets
             //FeatureExtractor.Initialize(this.wocketsController, configuration, this.annotatedSession.OverlappingActivityLists[0]);
             TextWriter trainingTW = null;
             TextWriter structureTW = null;
-            int[] labelCounters=null;
+            int[] labelCounters = null;
             Classifier classifier = null;
             FastVector fvWekaAttributes;
-            Instances instances=null;
-            string[] activityLabels=null;
-            Hashtable labelIndex = new Hashtable(); 
+            Instances instances = null;
+            string[] activityLabels = null;
+            Hashtable labelIndex = new Hashtable();
             string arffFileName;
             int classificationCounter = 0;
 
@@ -500,7 +513,7 @@ namespace Wockets
 
                 if (classifying)
                 {
-               
+
                     if (classifier == null)
                     {
                         classifier = new J48();
@@ -570,7 +583,7 @@ namespace Wockets
                                 //int level;
                                 for (int j = 0; (j < labelCounters.Length); j++)
                                 {
-                                   // level = 240 - 240 * labelCounters[j] / configuration._SmoothWindows;
+                                    // level = 240 - 240 * labelCounters[j] / configuration._SmoothWindows;
                                     //indicate = Color.FromArgb(level, level, level);
                                     //this.ActGUIlabels[j].ForeColor = indicate;
                                     //this.ActGUIlabels[j].Invalidate();
@@ -594,7 +607,7 @@ namespace Wockets
                     //create arff file
                     if (trainingTW == null)
                     {
-                        arffFileName ="output" + DateTime.Now.ToString().Replace('/', '_').Replace(':', '_').Replace(' ', '_') + ".arff";
+                        arffFileName = "output" + DateTime.Now.ToString().Replace('/', '_').Replace(':', '_').Replace(' ', '_') + ".arff";
                         trainingTW = new StreamWriter(arffFileName);
                         trainingTW.WriteLine("@RELATION wockets");
                         string arffHeader = FeatureExtractor.GetArffHeader();
@@ -672,13 +685,22 @@ namespace Wockets
             GET_BT GET_BT_CMD = new GET_BT();
             ALIVE ALIVE_CMD = new ALIVE();
             int pollCounter = 0;
-            Logger.Warn("Version 1.15 October 28,2009");
+            Logger.Warn("Version 1.29 April,2010");
             this.StartTime = WocketsTimer.GetUnixTime();
 
             while (polling)
             {
-                if (_Paused)
+                if  ((_Bursty) && (_Paused))
+                {
+                    for (int i = 0; (i < this._Sensors.Count); i++)
+                    {
+                        //this._Sensors[i].Save();
+                        this._Sensors[i].Packets = 0;
+                        this._Sensors[i].SavedPackets = 0;
+                        this._Receivers[i]._Status = Wockets.Receivers.ReceiverStatus.Disconnected;
+                    }
                     this.paused.WaitOne();
+                }
 
                 allWocketsDisconnected = true;
                 pollCounter++;
@@ -689,7 +711,16 @@ namespace Wockets
                     currentReceiver = sensor._Receiver;
                     try
                     {
-                        currentReceiver.Update();
+                        //comment for new code
+                        if (_Bursty)
+                        {
+                            if (sensor.Packets < 2400)
+                                currentReceiver.Update();
+                            else
+                                continue;
+                        }else
+                            currentReceiver.Update();
+
 
 
                         if (currentReceiver._Status == ReceiverStatus.Connected)
@@ -716,13 +747,13 @@ namespace Wockets
                             if (dataLength > 0)
                             {
                                 if (currentReceiver._Type == ReceiverTypes.HTCDiamond)
-                                {                             
-                                    numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer, head,tail);
+                                {
+                                    numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer, head, tail);
                                     sensor.Packets += numDecodedPackets;
                                 }
                                 else if (sensor._Class == SensorClasses.Wockets)
                                 {
-                                   
+
                                     #region Write Data
                                     #region Battery Query
                                     batteryPoll[i] -= 1;
@@ -746,23 +777,23 @@ namespace Wockets
 
                                     #region Read Data
 
-                                    numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer,head,tail); //((RFCOMMReceiver)currentReceiver).bluetoothStream._Buffer, head, tail);
+                                    numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer, head, tail); //((RFCOMMReceiver)currentReceiver).bluetoothStream._Buffer, head, tail);
                                     currentReceiver._Buffer._Head = tail;//((RFCOMMReceiver)currentReceiver)._Head = tail;
                                     sensor.Packets += numDecodedPackets;
                                     #endregion Read Data
                                 }
 
-                           //     if (numDecodedPackets>0)
-                            //        sensor.Save();
+                                //     if (numDecodedPackets>0)
+                                //        sensor.Save();
 
                             }
 
                             if (pollCounter > 2000)
                             {
-                               
+
 
 #if (PocketPC)
-                                Logger.Warn("Receiver "+ sensor._Receiver._ID + " decoded:"+sensor.Packets +",saved:"+sensor.SavedPackets +", tail=" + tail + ",head=" + head);
+                                Logger.Warn("Receiver " + sensor._Receiver._ID + " decoded:" + sensor.Packets + ",saved:" + sensor.SavedPackets + ", tail=" + tail + ",head=" + head);
                                 SYSTEM_POWER_STATUS_EX2 bpower = Battery.GetSystemPowerStatus();
                                 Logger.Debug2(bpower.BatteryLifePercent + "," + bpower.BatteryVoltage + "," + bpower.BatteryCurrent + "," + bpower.BatteryTemperature);
 #endif
@@ -770,26 +801,32 @@ namespace Wockets
 
                                 pollCounter = 0;
                             }
-                            
+
                         }
 
                     }
 
                     catch (Exception ex)
                     {
-                        Logger.Error(ex.Message+ " \nTrace:"+ex.StackTrace);
-                        
+                        Logger.Error(ex.Message + " \nTrace:" + ex.StackTrace);
+
                         currentReceiver.Dispose();
                     }
                 }
 
                 //reset bluetooth stack once if all wockets are disconnected
-                if ((!bluetoothIsReset) && (allWocketsDisconnected)) 
+                
+                if ((!_Bursty)&& (!bluetoothIsReset) && (allWocketsDisconnected))
                 {
-                    Logger.Debug("All Wockets Disconnected. BT Reset.");
-                    NetworkStacks._BluetoothStack.Dispose();
-                    NetworkStacks._BluetoothStack.Initialize();
-                    bluetoothIsReset = true;
+                    try
+                    {
+                        Logger.Debug("All Wockets Disconnected. BT Reset.");
+                        NetworkStacks._BluetoothStack.Dispose();
+                        NetworkStacks._BluetoothStack.Initialize();
+                        bluetoothIsReset = true;
+                    }catch
+                    {
+                    }
                 }
 
                 Thread.Sleep(10);

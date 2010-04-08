@@ -1,3 +1,4 @@
+using Wockets;
 namespace DataMerger
 {
     partial class Form1
@@ -102,7 +103,7 @@ namespace DataMerger
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.label1);
             this.Name = "Form1";
-            this.Text = "Wockets Conversion Software - Version 1.29 March 29,2010";
+            this.Text = "Wockets Conversion Software - Version " + CurrentWockets._Version + " " + CurrentWockets._Date;
             this.ResumeLayout(false);
             this.PerformLayout();
 

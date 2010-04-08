@@ -231,3 +231,20 @@ extern "C" _declspec(dllexport) OMX_S32 WINAPI FixedAdd(OMX_S32 a, OMX_S32 b)
 
 	return armSatAdd_S32(a,b);
 }
+
+extern "C" _declspec(dllexport) int WINAPI IsLittleEndian()
+{
+
+	union
+	{
+		int testWord;
+		char testByte[sizeof(int)];
+	} endianTest;
+
+	endianTest.testWord=1;
+
+	if (endianTest.testByte[0]==1)
+		return 1;	//little endian
+	return 0; //big endian
+
+}

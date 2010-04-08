@@ -4,7 +4,8 @@ using System.Text;
 using WocketsWeka.core;
 using WocketsWeka.Utils;
 using Wockets;
-using Wockets.Data.Classifiers;
+using Wockets.Data.Configuration;
+using Wockets.Data;
 using Wockets.Data.Annotation;
 using Wockets.Data.Accelerometers;
 #if (PocketPC)
@@ -30,7 +31,7 @@ namespace Wockets.Data.Classifiers.Utils
         private static string[] arffAttriburesLabels;
 
         private static WocketsController wocketsController;
-        private static ClassifierConfiguration configuration;
+        private static WocketsConfiguration configuration;
 
         //total number of points per interpolated window
         private static int INTERPOLATED_SAMPLING_RATE_PER_WINDOW;
@@ -89,7 +90,7 @@ namespace Wockets.Data.Classifiers.Utils
         private static byte[] acc = new byte[sizeof(short)];
         private static int[] decoderTails;
 
-        public static void Initialize(int sensorCount,int samplingRate,ClassifierConfiguration configuration, ActivityList activities)
+        public static void Initialize(int sensorCount,int samplingRate,WocketsConfiguration configuration, ActivityList activities)
         {
             if (!_Initialized)
             {
@@ -134,9 +135,9 @@ namespace Wockets.Data.Classifiers.Utils
                 //Upgrade to handle HR
                 extractorSensorCount = sensorCount;
                 inputRowSize = sensorCount * 3;
-                fftInterpolationPower = configuration._FFTInterpolatedPower;
+                fftInterpolationPower = configuration._FFTInterpolationPower;
                 fftMaximumFrequencies = configuration._FFTMaximumFrequencies;
-                inputColumnSize = (int)Math.Pow(2, configuration._FFTInterpolatedPower);
+                inputColumnSize = (int)Math.Pow(2, configuration._FFTInterpolationPower);
 
                 num_features = inputRowSize; // number of distances
                 num_features += 1; //total mean;
@@ -157,7 +158,7 @@ namespace Wockets.Data.Classifiers.Utils
                 means = new double[inputRowSize];
 
                 inputFFT = new int[inputColumnSize];
-                FFT.Initialize(configuration._FFTInterpolatedPower, configuration._FFTMaximumFrequencies);
+                FFT.Initialize(configuration._FFTInterpolationPower, configuration._FFTMaximumFrequencies);
                 //FeatureExtractor.wocketsController = wocketsController;
 
                 //Create the ARFF File header
@@ -170,10 +171,10 @@ namespace Wockets.Data.Classifiers.Utils
 
 
                 //total number of points per interpolated window
-                INTERPOLATED_SAMPLING_RATE_PER_WINDOW = (int)Math.Pow(2, configuration._FFTInterpolatedPower); //128;  
+                INTERPOLATED_SAMPLING_RATE_PER_WINDOW = (int)Math.Pow(2, configuration._FFTInterpolationPower); //128;  
 
                 //space between interpolated samples
-                INTERPOLATED_SAMPLES_SPACING = (double)configuration._WindowTime / INTERPOLATED_SAMPLING_RATE_PER_WINDOW;
+                INTERPOLATED_SAMPLES_SPACING = (double)configuration._FeatureWindowSize / INTERPOLATED_SAMPLING_RATE_PER_WINDOW;
 
 
                 //EXPECTED_SAMPLING_RATES = new int[extractorSensorCount]; - Calculate during loading
@@ -183,9 +184,9 @@ namespace Wockets.Data.Classifiers.Utils
 
                 for (int i = 0; (i < sensorCount); i++)
                 {
-                    EXPECTED_WINDOW_SIZES[i] = (int)(samplingRate * (configuration._WindowTime / 1000.0));
-                    EXPECTED_GOOD_SAMPLING_RATES[i] = EXPECTED_WINDOW_SIZES[i] - (int)(configuration._MaximumNonconsecutiveFrameLoss * EXPECTED_WINDOW_SIZES[i]);
-                    EXPECTED_SAMPLES_SPACING[i] = (double)configuration._WindowTime / EXPECTED_WINDOW_SIZES[i];
+                    EXPECTED_WINDOW_SIZES[i] = (int)(samplingRate * (configuration._FeatureWindowSize / 1000.0));
+                    EXPECTED_GOOD_SAMPLING_RATES[i] = EXPECTED_WINDOW_SIZES[i] - (int)(configuration._MaximumNonconsecutivePacketLoss * EXPECTED_WINDOW_SIZES[i]);
+                    EXPECTED_SAMPLES_SPACING[i] = (double)configuration._FeatureWindowSize / EXPECTED_WINDOW_SIZES[i];
                 }
 
 
@@ -237,7 +238,7 @@ namespace Wockets.Data.Classifiers.Utils
         }
 
 #endif
-        public static void Initialize(WocketsController wocketsController, ClassifierConfiguration configuration, ActivityList activities)
+        public static void Initialize(WocketsController wocketsController, WocketsConfiguration configuration, ActivityList activities)
         {
             if (!_Initialized)
             {
@@ -257,9 +258,9 @@ namespace Wockets.Data.Classifiers.Utils
                 //Upgrade to handle HR
                 extractorSensorCount = wocketsController._Sensors.Count;
                 inputRowSize = wocketsController._Sensors.Count * 3;
-                fftInterpolationPower = configuration._FFTInterpolatedPower;
+                fftInterpolationPower = configuration._FFTInterpolationPower;
                 fftMaximumFrequencies = configuration._FFTMaximumFrequencies;
-                inputColumnSize = (int)Math.Pow(2, configuration._FFTInterpolatedPower);
+                inputColumnSize = (int)Math.Pow(2, configuration._FFTInterpolationPower);
 
                 num_features = inputRowSize; // number of distances
                 num_features += 1; //total mean;
@@ -280,7 +281,7 @@ namespace Wockets.Data.Classifiers.Utils
                 means = new double[inputRowSize];
 
                 inputFFT = new int[inputColumnSize];
-                FFT.Initialize(configuration._FFTInterpolatedPower, configuration._FFTMaximumFrequencies);
+                FFT.Initialize(configuration._FFTInterpolationPower, configuration._FFTMaximumFrequencies);
                 FeatureExtractor.wocketsController = wocketsController;
 
                 //Create the ARFF File header
@@ -293,10 +294,10 @@ namespace Wockets.Data.Classifiers.Utils
 
 
                 //total number of points per interpolated window
-                INTERPOLATED_SAMPLING_RATE_PER_WINDOW = (int)Math.Pow(2, configuration._FFTInterpolatedPower); //128;  
+                INTERPOLATED_SAMPLING_RATE_PER_WINDOW = (int)Math.Pow(2, configuration._FFTInterpolationPower); //128;  
 
                 //space between interpolated samples
-                INTERPOLATED_SAMPLES_SPACING = (double)configuration._WindowTime / INTERPOLATED_SAMPLING_RATE_PER_WINDOW;
+                INTERPOLATED_SAMPLES_SPACING = (double)configuration._FeatureWindowSize / INTERPOLATED_SAMPLING_RATE_PER_WINDOW;
 
 
                 //EXPECTED_SAMPLING_RATES = new int[extractorSensorCount]; - Calculate during loading
@@ -306,9 +307,9 @@ namespace Wockets.Data.Classifiers.Utils
 
                 for (int i = 0; (i < wocketsController._Sensors.Count); i++)
                 {
-                    EXPECTED_WINDOW_SIZES[i] = (int)(wocketsController._Sensors[i]._SamplingRate * (configuration._WindowTime / 1000.0));
-                    EXPECTED_GOOD_SAMPLING_RATES[i] = EXPECTED_WINDOW_SIZES[i] - (int)(configuration._MaximumNonconsecutiveFrameLoss * EXPECTED_WINDOW_SIZES[i]);
-                    EXPECTED_SAMPLES_SPACING[i] = (double)configuration._WindowTime / EXPECTED_WINDOW_SIZES[i];
+                    EXPECTED_WINDOW_SIZES[i] = (int)(wocketsController._Sensors[i]._SamplingRate * (configuration._FeatureWindowSize / 1000.0));
+                    EXPECTED_GOOD_SAMPLING_RATES[i] = EXPECTED_WINDOW_SIZES[i] - (int)(configuration._MaximumNonconsecutivePacketLoss * EXPECTED_WINDOW_SIZES[i]);
+                    EXPECTED_SAMPLES_SPACING[i] = (double)configuration._FeatureWindowSize / EXPECTED_WINDOW_SIZES[i];
                 }
 
 
@@ -477,11 +478,11 @@ namespace Wockets.Data.Classifiers.Utils
             // At this point, we have a complete window ready for feature calculation
 
             //compute the boundaries for the current window
-            double window_start_time = lastTimeStamp - configuration._WindowTime;
+            double window_start_time = lastTimeStamp - configuration._FeatureWindowSize;
             double window_end_time = lastTimeStamp;
             double current_time = window_end_time;
             //compute the end of the next overlapping window
-            next_window_end = window_end_time + (configuration._WindowTime * configuration._WindowOverlap);
+            next_window_end = window_end_time + (configuration._FeatureWindowSize * configuration._FeatureWindowOverlap);
 
             #region sensors window grabbing and interpolation
 
@@ -610,7 +611,7 @@ namespace Wockets.Data.Classifiers.Utils
                     //create 2 arrays with the exact size of the data points for interpolation
                     double[] admissible_xvals = new double[distinct_data_points];
                     double[] admissible_yvals = new double[distinct_data_points];
-                    double expectedSpacing = configuration._WindowTime / (double)distinct_data_points;
+                    double expectedSpacing = configuration._FeatureWindowSize/ (double)distinct_data_points;
                     double startTime = 0.0;
                     for (int k = 0; (k < distinct_data_points); k++)
                     {

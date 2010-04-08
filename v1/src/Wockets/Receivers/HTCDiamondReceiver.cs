@@ -9,7 +9,7 @@ using Microsoft.WindowsMobile.Status;
 using Wockets.Data;
 using Wockets.Utils;
 using System.Threading;
-using Microsoft.Win32; 
+using Microsoft.Win32;
 
 namespace Wockets.Receivers
 {
@@ -108,7 +108,7 @@ namespace Wockets.Receivers
 
     #endregion  HTC Diamond Objects
 
-    public class HTCDiamondReceiver : Receiver , IGSensor
+    public class HTCDiamondReceiver : Receiver, IGSensor
     {
 
         #region Serialization Constants
@@ -211,7 +211,7 @@ namespace Wockets.Receivers
             this.type = ReceiverTypes.HTCDiamond;
             this.lastTS = WocketsTimer.GetUnixTime();
             this.sampleTimeSpace = 1000 / MAXIMUM_SAMPLING_RATE;
-            
+
         }
 
 
@@ -224,10 +224,10 @@ namespace Wockets.Receivers
             }
         }
 
- 
+
         public override bool Initialize()
         {
-            
+
 #if (PocketPC)
 
             IntPtr hEvent = CreateEvent(IntPtr.Zero, true, false, "HTC_GSENSOR_SERVICESTART");
@@ -324,13 +324,13 @@ namespace Wockets.Receivers
         public override void Update()
         {
         }
-        public  void Write(byte[] data, int length)
+        public void Write(byte[] data, int length)
         {
             throw new Exception("HTC Diamond Touch: writing to this data source is not implemented");
         }
         public override bool Dispose()
         {
-            #if (PocketPC)
+#if (PocketPC)
 
             this._Status = ReceiverStatus.Disconnected;
             if (myHandle != IntPtr.Zero)
@@ -351,7 +351,7 @@ namespace Wockets.Receivers
             // Once it hits 0, the service is stopped.
             IntPtr hEvent = CreateEvent(IntPtr.Zero, true, false, "HTC_GSENSOR_SERVICESTOP");
             SetEvent(hEvent);
-            CloseHandle(hEvent);  
+            CloseHandle(hEvent);
 #endif
 
             return true;

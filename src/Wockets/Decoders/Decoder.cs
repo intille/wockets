@@ -23,7 +23,7 @@ namespace Wockets.Decoders
         //full time stamp (4 bytes), X (2 bytes), Y (2 bytes), Z (2 bytes)
         
 
-        private SensorData[] data;
+        public SensorData[] _Data;
         private SensorData[] response;
         private int size;                
         protected byte[] packet;
@@ -65,7 +65,8 @@ namespace Wockets.Decoders
         }
         public Decoder(int bufferSize,int packetSize)
         {
-            this.data = new SensorData[bufferSize];
+
+
             this.response = new SensorData[10];
             this.size = 0;
             this.packet = new byte[packetSize];
@@ -123,13 +124,7 @@ namespace Wockets.Decoders
             }
         }
 
-        public SensorData[] _Data
-        {
-            get
-            {
-                return this.data;
-            }
-        }
+
 
           public SensorData[] _Response
         {
@@ -171,10 +166,12 @@ namespace Wockets.Decoders
 
         public abstract int Decode(int sensorID,byte[] data, int length);
         public abstract int Decode(int sensorID, CircularBuffer data, int start,int end);
-        public bool Initialize()
+        public virtual bool Initialize()
         {
+            if (CurrentWockets._Configuration._MemoryMode == Wockets.Data.Configuration.MemoryConfiguration.NON_SHARED)            
+                this._Data = new SensorData[this._BufferSize];  
 #if (PocketPC)
-            if (this.sdata == null)
+            else if (this.sdata == null)
             {
                 this.sdata = new MemoryMappedFileStream("\\Temp\\wocket" + this._ID + ".dat", "wocket" + this._ID, (_DUSize * (uint)this._BufferSize), MemoryProtection.PageReadWrite);
                 this.shead = new MemoryMappedFileStream("\\Temp\\whead" + this._ID + ".dat", "whead" + this._ID, sizeof(int), MemoryProtection.PageReadWrite);
@@ -190,10 +187,13 @@ namespace Wockets.Decoders
         public bool Dispose()
         {
 #if (PocketPC)
-            if (this.sdata!=null)
-                this.sdata.Close();
-            if (this.shead!=null)
-                this.shead.Close();
+            if (CurrentWockets._Configuration._MemoryMode == Wockets.Data.Configuration.MemoryConfiguration.SHARED)
+            {
+                if (this.sdata != null)
+                    this.sdata.Close();
+                if (this.shead != null)
+                    this.shead.Close();
+            }
 #endif
             return true;
         }

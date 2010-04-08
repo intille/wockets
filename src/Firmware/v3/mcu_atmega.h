@@ -133,7 +133,7 @@
 #define BIT1_ACCELEROMETER_STATUS 1
 #define BIT2_GREENLED_STATUS 2
 #define BIT3_YELLOWLED_STATUS 3
-#define BIT4_MASTERSLAVE_STATUS 4
+
 
 /* Exported Function Prototypes */
 
@@ -185,7 +185,7 @@ unsigned char _is_accelerometer_on(void);
 /* Variables */
 
 //The variable stores the status for different wocket priephrals
-unsigned char wocket_status;
+unsigned char atmega_status;
 unsigned char atmega_clock_prescalar;
 
 

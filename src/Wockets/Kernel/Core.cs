@@ -36,8 +36,12 @@ namespace Wockets.Kernel
             {
                 registryLock.WaitOne();
                 RegistryKey rk = Registry.LocalMachine.OpenSubKey(REGISTRY_KERNEL_PATH);
-                int status = (int)rk.GetValue("Status");
-                rk.Close();
+                int status =0;
+                if (rk != null)
+                {
+                    status = (int)rk.GetValue("Status");
+                    rk.Close();
+                }
                 registryLock.Release();
                 return (status == 1);
             }

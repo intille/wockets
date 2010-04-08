@@ -43,7 +43,7 @@ namespace Wockets.Utils.network.Bluetooth
         }
         public abstract BluetoothStatus _Status
         {
-            get;
+            get;            
         }
 
 

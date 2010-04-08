@@ -6,6 +6,12 @@ using Wockets;
 using System.Net.Sockets;
 using System.Threading;
 
+#if (!PocketPC)
+using InTheHand.Net;
+using InTheHand.Net.Sockets;
+using InTheHand.Net.Bluetooth;
+#endif
+
 namespace Wockets.Utils.network.Bluetooth.Microsoft
 {
 
@@ -15,7 +21,11 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
 
         public Socket socket;
         public NetworkStream nstream;        
+#if (PocketPC)
         public MicrosoftBluetoothEndPoint _RemoteEP;
+#else
+        public BluetoothEndPoint _RemoteEP;
+#endif
         private bool disposed = false;
 
 
@@ -25,7 +35,21 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
 
             try
             {
+#if (PocketPC)
                 _RemoteEP = new MicrosoftBluetoothEndPoint(this.address, BluetoothStream._SerialPort);
+#else
+                BluetoothAddress btaddress = new BluetoothAddress(address);
+                //Set BT Device Address
+                
+
+                //Set BT Device Pin
+                BluetoothSecurity.SetPin((BluetoothAddress)btaddress, "1234");
+
+
+                // Create a connection channel specifying the Bluetooth-Serial end-points 
+                _RemoteEP = new BluetoothEndPoint((BluetoothAddress)btaddress, BluetoothService.SerialPort);
+#endif
+
             }
             catch (Exception e)
             {
@@ -111,8 +135,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
         private int sentBytes = 0;
         private static object socketLock = new object();
         
-        /*private  static int allbytesreceived=0;
-        private static int mycounter=0;*/
+   
         public override void Process()
         {
             byte[] sendByte = new byte[1];                        
@@ -167,38 +190,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
 
                             bytesReceived = socket.Receive(singleReadBuffer, LOCAL_BUFFER_SIZE, SocketFlags.None);
                             totalBytes += bytesReceived;
-
-                           
-                             /*if (totalBytes>=2610)
-                             {
-                              mycounter++;
-                              if (mycounter>=100)
-                              {
-                               System.IO.TextWriter ttw=new System.IO.StreamWriter("samplesreceived.txt",true);
-                               ttw.WriteLine(WocketsTimer.GetUnixTime()+","+allbytesreceived);
-                               ttw.Close();
-                                mycounter=0;
-                              }
-                             
-                              allbytesreceived=totalBytes;
-                              totalBytes=0;
-                              //NetworkStacks._BluetoothStack.Dispose();
-                                 throw new Exception();
-                             }*/
-                             
-                             
-                            /*if (logCounter>lastReceiveCounter)
-                            {
-                                int diff=logCounter - lastReceiveCounter;
-                                if (diff > 40)
-                                    _Tsniff = TSniff.Sniff2Seconds;
-                                else if (diff > 10)
-                                    _Tsniff = TSniff.Sniff1Second;
-                                else
-                                    _Tsniff = TSniff.Continuous;
-                            }*/
                             lastReceiveCounter = logCounter;
-                            // timestamp = WocketsTimer.GetUnixTime();
                         }
                     }
 
@@ -209,16 +201,19 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                         logCounter = 0;
                     }
 
-                    if (bytesReceived > 0)                       
-                        disconnectionCounter = 0;                    
-                    else
+                    if (_TimeoutEnabled)
                     {
-                        disconnectionCounter++;
-                        if (disconnectionCounter > MAX_DISCONNECTION_COUNTER)
+                        if (bytesReceived > 0)
+                            disconnectionCounter = 0;
+                        else
                         {
-                            Logger.Debug("Receiver " + this._HexAddress + " disconnected timeout, tail=" + this.buffer._Tail + ",head=" + this.buffer._Head);
-                            this.status= BluetoothStatus.Disconnected;
-                            return;                          
+                            disconnectionCounter++;
+                            if (disconnectionCounter > MAX_DISCONNECTION_COUNTER)
+                            {
+                                Logger.Debug("Receiver " + this._HexAddress + " disconnected timeout, tail=" + this.buffer._Tail + ",head=" + this.buffer._Head);
+                                this.status = BluetoothStatus.Disconnected;
+                                return;
+                            }
                         }
                     }
 

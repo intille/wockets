@@ -6,6 +6,7 @@ using System.Threading;
 using System.IO;
 using Wockets;
 using Wockets.Utils;
+using Wockets.Utils.network;
 
 namespace DataCollectionApp
 {
@@ -56,10 +57,12 @@ namespace DataCollectionApp
             wc._storageDirectory = storageDirectory;
             wc.FromXML("\\Program Files\\wockets\\NeededFiles\\SensorConfigurations\\SensorDataFahd.xml");
             for (int i = 0; (i < wc._Sensors.Count); i++)
-                wc._Sensors[i]._RootStorageDirectory = storageDirectory + "\\data\\raw\\PLFormat\\"; 
+                wc._Sensors[i]._RootStorageDirectory = storageDirectory + "\\data\\raw\\PLFormat\\";
+            wc._Bursty = true;
             wc.Initialize();
             //default is local memory
             interfaceActivityThread = new Thread(new ThreadStart(InterfaceActivityTracker));
+            interfaceActivityThread.Priority = ThreadPriority.Highest;
             dataCollectionThread = new Thread(new ThreadStart(DataCollection));
             interfaceActivityThread.Start();
             dataCollectionThread.Start();
@@ -70,28 +73,66 @@ namespace DataCollectionApp
         static void InterfaceActivityTracker()
         {
 
+            int k = 0;
+            int[] dataSavedSeconds = new int[wc._Sensors.Count];
+            bool[] countSeconds = new bool[wc._Sensors.Count];
+            for (int i = 0; (i < wc._Sensors.Count); i++)
+            {
+                dataSavedSeconds[i] = 0;
+                countSeconds[i] = false;
+            }
             while (true)
             {
                 if (connecting)
                 {
                     SystemIdleTimerReset();
-                    if ((wc != null) && (wc._Sensors.Count>0))
+                    if ((wc != null) && (wc._Sensors.Count > 0))
                     {
                         bool dataReceived = true;
                         for (int i = 0; (i < wc._Sensors.Count); i++)
-                            if (wc._Sensors[i].SavedPackets != 2400)
-                                dataReceived = false;
-                        if (dataReceived)
                         {
-                            connecting = false;
-                            wc.Pause();
+                            //wc._Sensors[i].Save();
+                            if (wc._Sensors[i].Packets < 2400)
+                                dataReceived = false;
+
+                            // if connected once start counting seconds   
+                            if (wc._Receivers[i]._Status == Wockets.Receivers.ReceiverStatus.Connected)
+                                countSeconds[i] = true;
+
+                            if (countSeconds[i])       
+                                dataSavedSeconds[i] = dataSavedSeconds[i] + 1;                            
+                            
+                        }
+                        bool timeoutexpired = true;
+                        for (int i = 0; (i < wc._Sensors.Count); i++)
+                            if (dataSavedSeconds[i] < 20)
+                                timeoutexpired = false;
+                        if ((dataReceived) || (timeoutexpired))
+                        {
+                        //    NetworkStacks._BluetoothStack.Dispose();                    
+                            TextWriter tw = new StreamWriter("test.csv", true);
+                            SYSTEM_POWER_STATUS_EX2 bpower = Battery.GetSystemPowerStatus();
+                            tw.Write(++k + "," + DateTime.Now.ToLongTimeString() + "," + bpower.BatteryLifePercent + "," + bpower.BatteryVoltage + "," + bpower.BatteryCurrent + "," + bpower.BatteryTemperature);
+
+
                             for (int i = 0; (i < wc._Sensors.Count); i++)
                             {
-                                //wc._Sensors[i].Save();
+                                tw.Write("," + wc._Sensors[i].Packets);
+                                dataSavedSeconds[i] = 0;
+                                countSeconds[i] = false;
+                               //wc._Sensors[i].Save();
+                               /* wc._Sensors[i].Packets = 0;
                                 wc._Sensors[i].SavedPackets = 0;
-                                wc._Receivers[i]._Status = Wockets.Receivers.ReceiverStatus.Disconnected;
+                                wc._Receivers[i]._Status = Wockets.Receivers.ReceiverStatus.Disconnected;*/
                             }
-                            //wc.Dispose();           
+                            tw.WriteLine();
+                            connecting = false;
+                            wc.Pause();
+                            //wc.Dispose();    
+                            tw.Close();
+                            
+                            SetSystemPowerState(null, POWER_STATE_SUSPEND, POWER_FORCE);
+                         
                         }
                     }
                 }
@@ -172,6 +213,35 @@ namespace DataCollectionApp
         [DllImport("CoreDll.dll")]
         public static extern void SystemIdleTimerReset();
 
+        [DllImport("coredll.dll", SetLastError = true)]
+        static extern int SetSystemPowerState(string psState, int StateFlags, int Options);
+
+
+        const int POWER_STATE_ON = 0x00010000;
+        const int POWER_STATE_OFF = 0x00020000;
+        const int POWER_STATE_IDLE = 0x00100000;
+        const int POWER_STATE_SUSPEND = 0x00200000;
+        const int POWER_FORCE = 4096;
+        const int POWER_STATE_RESET = 0x00800000;
+
+        public enum PPNMessage
+        {
+            PPN_REEVALUATESTATE = 1,
+            PPN_POWERCHANGE = 2,
+            PPN_UNATTENDEDMODE = 3,
+            PPN_SUSPENDKEYPRESSED = 4,
+            PPN_POWERBUTTONPRESSED = 4,
+            PPN_SUSPENDKEYRELEASED = 5,
+            PPN_APPBUTTONPRESSED = 6,
+
+        }
+
+        [DllImport("CoreDLL")]
+        public static extern int PowerPolicyNotify(
+          PPNMessage dwMessage,
+            int option
+            //    DevicePowerFlags);
+        );
         static void DataCollection()
         {
             NamedEvents namedEvent = new NamedEvents();
@@ -182,7 +252,7 @@ namespace DataCollectionApp
             //wc.InitAgain();
             while (true)
             {
-         
+
                 //on receive a disconnect, insert an event and wakeup after 1 minute
                 string appName = "\\\\.\\Notifications\\NamedEvents\\MyTestEvent" + k;
                 string args = "";
@@ -198,21 +268,20 @@ namespace DataCollectionApp
                 IntPtr notificationHandle = CeSetUserNotificationEx(IntPtr.Zero, notificationTrigger, null);
 
 
-                namedEvent.Receive("MyTestEvent" + k);                
+                namedEvent.Receive("MyTestEvent" + k);
+                //PowerPolicyNotify(PPNMessage.PPN_UNATTENDEDMODE, -1);               
+                //SetSystemPowerState(null,POWER_STATE_ON, POWER_FORCE);
                 connecting = true;
                 wc.Unpause();
-   
 
+                k++;
                 //on wakeup, attempt to reconnect
                 //connect to the wocket
                 //save the data
 
 
-                //PowerPolicyNotify(PPNMessage.PPN_UNATTENDEDMODE, -1);               
-                TextWriter tw = new StreamWriter("test.csv", true);
-                SYSTEM_POWER_STATUS_EX2 bpower = Battery.GetSystemPowerStatus();
-                tw.WriteLine(++k + "," + DateTime.Now.ToLongTimeString() + "," + bpower.BatteryLifePercent + "," + bpower.BatteryVoltage + "," + bpower.BatteryCurrent + "," + bpower.BatteryTemperature);
-                tw.Close();
+                
+              
 
 
                 namedEvent.Reset();

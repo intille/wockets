@@ -315,12 +315,11 @@ void _atmega_initialize(unsigned char timer_prescalar)
 
 	unsigned char prev_osccal=OSCCAL;
 
-	//Turn on yellow LED while initializing		
-	//_yellowled_turn_on();
-	
+	atmega_status=0x00;
 
-	//Set wocket status to off	
-	wocket_status=0x00;
+	//Turn on yellow LED while initializing		
+	_yellowled_turn_on();
+		
 
 	//Disable watchdog timer
 	//_atmega_disable_watchdog();
@@ -373,8 +372,8 @@ void _atmega_initialize(unsigned char timer_prescalar)
 
 	/* Set peripherials to the lowest power states */
 	_bluetooth_turn_on();
-	//_accelerometer_turn_on();
-	//_accelerometer_set_sensitivity(_4G);
+	_accelerometer_turn_on();
+	_accelerometer_set_sensitivity(_4G);
 
 	/* Set UART */
 
@@ -383,7 +382,7 @@ void _atmega_initialize(unsigned char timer_prescalar)
 	//if the wocket yellow light does not go off, the wocket has not been
 	
 	_atmega_initialize_uart0(ATMEGA_BAUD_38400, TX_RX_UART_MODE);
-	/*if ((_bluetooth_enter_command_mode()))
+	if ((_bluetooth_enter_command_mode()))
 	{	
 		_yellowled_turn_off();
 		if (_bluetooth_get_baud_rate()==ATMEGA_BAUD_38400)
@@ -393,29 +392,31 @@ void _atmega_initialize(unsigned char timer_prescalar)
 		// To run at 115K, we need to set the OSCCAL as follows, the value was
 		// determined experimentally by trying different values
 
-		for (int j=0x50;(j<0xfe);j++){
-		OSCCAL=j;
+		for (int j=0x50;(j<0xfe);j++)
+		{
+			OSCCAL=j;
 
-		for(int i=0;(i<10);i++){
-		// To deal with a radio firmware bug, we are making sure the radio is set at the
-		// correct baud rate of 38.4K
-		_atmega_initialize_uart0(ATMEGA_BAUD_115200, TX_RX_UART_MODE);
-		if ((_bluetooth_enter_command_mode()))
-		{	
-			if (_bluetooth_set_baud_rate(ATMEGA_BAUD_38400))
-			{
-				_bluetooth_reset();	
-				_atmega_initialize_uart0(ATMEGA_BAUD_38400, TX_RX_UART_MODE);						
-				_yellowled_turn_off();
-				break;
+			for(int i=0;(i<10);i++){
+			// To deal with a radio firmware bug, we are making sure the radio is set at the
+			// correct baud rate of 38.4K
+				_atmega_initialize_uart0(ATMEGA_BAUD_115200, TX_RX_UART_MODE);
+				if ((_bluetooth_enter_command_mode()))
+				{	
+					if (_bluetooth_set_baud_rate(ATMEGA_BAUD_38400))
+					{
+						_bluetooth_reset();	
+						_atmega_initialize_uart0(ATMEGA_BAUD_38400, TX_RX_UART_MODE);									
+						break;
+					}
+				}
 			}
-		}
-		}
 		}
 		OSCCAL= prev_osccal;	
 	}
+	
+	_yellowled_turn_off();
+	_atmega_initialize_uart0(ATMEGA_BAUD_38400, TX_RX_UART_MODE);
 
-*/
 	/* Set ADC for conversion */    
     //Set ADC reference to AVCC
      ADMUX |=(1 << REFS0);
@@ -570,7 +571,8 @@ unsigned char _bluetooth_exit_command_mode(void)
 void _bluetooth_reset(void)
 {
 	_bluetooth_turn_off();
-	_delay_ms(5);
+	for (unsigned char i=0;(i<255);i++)
+		_delay_ms(5);
 	_bluetooth_turn_on();
 
 }
@@ -760,7 +762,7 @@ void _bluetooth_turn_on(void)
 	cbi(PORTB,OUT_BT_SW_N_PB4);
 
 	// Set the status of the bluetooth to true
-	sbi(wocket_status, BIT0_BLUETOOTH_STATUS);
+	sbi(atmega_status, BIT0_BLUETOOTH_STATUS);
 }
 
 /* 
@@ -778,7 +780,7 @@ void _bluetooth_turn_off(void)
 	cbi(DDRB,OUT_BT_SW_N_PB4);		 
 
 	// Set the status of bluetooth to false
-	cbi(wocket_status, BIT0_BLUETOOTH_STATUS);
+	cbi(atmega_status, BIT0_BLUETOOTH_STATUS);
 }
 
 
@@ -792,7 +794,7 @@ void _bluetooth_turn_off(void)
 
 unsigned char _is_bluetooth_on(void)
 {
-	return ((wocket_status>>BIT0_BLUETOOTH_STATUS) & 0x01);
+	return ((atmega_status>>BIT0_BLUETOOTH_STATUS) & 0x01);
 }
 
 
@@ -878,7 +880,7 @@ void _accelerometer_turn_on(void)
 	sbi(PORTB,OUT_ACCEL_SLEEP_N_PB3);	 
 	 			
 	// Set the status of the accelerometer to true
-	sbi(wocket_status, BIT1_ACCELEROMETER_STATUS);
+	sbi(atmega_status, BIT1_ACCELEROMETER_STATUS);
 }
 
 /* 
@@ -897,7 +899,7 @@ void _accelerometer_turn_off(void)
 	 cbi(PORTB,OUT_ACCEL_SLEEP_N_PB3); //clear the pin	 
 	 
 	 // Set the status of the accelerometer to false
-	 cbi(wocket_status, BIT1_ACCELEROMETER_STATUS);
+	 cbi(atmega_status, BIT1_ACCELEROMETER_STATUS);
 }
 
 /* 
@@ -910,7 +912,7 @@ void _accelerometer_turn_off(void)
 
 unsigned char _is_accelerometer_on(void)
 {
-	return ((wocket_status>>BIT1_ACCELEROMETER_STATUS) & 0x01);
+	return ((atmega_status>>BIT1_ACCELEROMETER_STATUS) & 0x01);
 }
 /* LED Control Functions */
 
@@ -929,7 +931,7 @@ void _greenled_turn_on(void)
 	sbi(PORTC,OUT_LED_GN_PC1);
 	
 	// Set the status of the green led to true
-	sbi(wocket_status, BIT2_GREENLED_STATUS); 
+	sbi(atmega_status, BIT2_GREENLED_STATUS); 
 }
 
 
@@ -948,7 +950,7 @@ void _greenled_turn_off(void)
 	cbi(DDRC,OUT_LED_GN_PC1);
 	
 	// Set the status of the green led to false
-	cbi(wocket_status, BIT2_GREENLED_STATUS);
+	cbi(atmega_status, BIT2_GREENLED_STATUS);
 
 }
 
@@ -961,7 +963,7 @@ void _greenled_turn_off(void)
 */
 unsigned char _is_greenled_on(void)
 {
-	return ((wocket_status>>BIT2_GREENLED_STATUS) & 0x01);
+	return ((atmega_status>>BIT2_GREENLED_STATUS) & 0x01);
 }
 
 
@@ -978,7 +980,7 @@ void _yellowled_turn_on(void)
 	sbi(PORTC,OUT_LED_YE_PC2);
 
 	// Set the status of the yellow led to true
-	sbi(wocket_status, BIT3_YELLOWLED_STATUS);
+	sbi(atmega_status, BIT3_YELLOWLED_STATUS);
 }
 
 /* 
@@ -996,7 +998,7 @@ void _yellowled_turn_off(void)
 	cbi(DDRC,OUT_LED_YE_PC2);	
 	
 	// Set the status of the yellow led to false
-	cbi(wocket_status, BIT3_YELLOWLED_STATUS);
+	cbi(atmega_status, BIT3_YELLOWLED_STATUS);
 }
 
 /* 
@@ -1008,5 +1010,5 @@ void _yellowled_turn_off(void)
 */
 unsigned char _is_yellowled_on(void)
 {
-	return ((wocket_status>>BIT3_YELLOWLED_STATUS) & 0x01);
+	return ((atmega_status>>BIT3_YELLOWLED_STATUS) & 0x01);
 }

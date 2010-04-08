@@ -23,12 +23,12 @@ namespace Wockets.Receivers
         private int maximumSamplingRate;
         private int id;
         protected ReceiverTypes type;
-        protected Thread reconnectionThread=null;
-        protected int disconTime=0;
+        protected Thread reconnectionThread = null;
+        protected int disconTime = 0;
         protected double disconnectionTime = 0;
         protected long lastTime;
         protected int ndisc = 0;
-        protected int disconCount=0;
+        protected int disconCount = 0;
 
 
         public Receiver(int bufferSize)
@@ -93,7 +93,7 @@ namespace Wockets.Receivers
         }
 
 
-    
+
         /*public byte[] _Buffer
         {
             get
@@ -105,7 +105,7 @@ namespace Wockets.Receivers
                 this.buffer = value;
             }
         }*/
-        
+
         public virtual bool _Running
         {
             get
@@ -185,7 +185,7 @@ namespace Wockets.Receivers
         #endregion Access Properties
 
 
-        public abstract bool Initialize();        
+        public abstract bool Initialize();
         public abstract bool Dispose();
         public abstract void Update();
 
@@ -196,6 +196,6 @@ namespace Wockets.Receivers
 
 
         public abstract int CompareTo(object receiver);
-        
+
     }
 }
