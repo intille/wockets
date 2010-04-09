@@ -12,6 +12,7 @@ using System.IO;
 using ZedGraph;
 using MobiRnD_RDT.Utilities;//FileReadWrite
 using MobiRnD_RDT.Logging; //Logger
+using Wockets;
 
 
 namespace NESPDataViewer
@@ -528,7 +529,7 @@ namespace NESPDataViewer
             else
                 AddAccelerationCurve(mac, location, listX, listY, listZ);
 
-            paneOrders.Add(type + " " + channel + " " + location, paneOrder);
+            paneOrders.Add(mac, paneOrder);
             WidenDatesIfNeeded(listX);
         }
 
@@ -1696,7 +1697,31 @@ namespace NESPDataViewer
                     {
                         mac = ((Wockets.Receivers.RFCOMMReceiver)wc._Receivers[Convert.ToInt32(channel)])._Address;
                         mac = mac.Substring(mac.Length - 2, 2);
-                        mac = "Wocket " + mac;
+                       // mac = "Wocket " + mac;
+                        string loc = wc._Sensors[Convert.ToInt32(channel)]._Location;
+                        switch (loc)
+                        {
+                            case "Dominant Hip":
+                                loc = "DHP";
+                                break;
+                            case "Dominant Ankle":
+                                loc = "DAK";
+                                break;
+                            case "Dominant Upper Arm":
+                                loc = "DUA";
+                                break;
+                            case "Dominant Wrist":
+                                loc = "DW";
+                                break;
+                            case "Dominant Thigh":
+                                loc = "DT";
+                                break;
+                            default:
+                                loc = "lOC";
+                                break;
+                        }
+
+                        mac = "WKT-" + loc + "-" + mac;
                     }
                     else
                         mac = "Internal";
