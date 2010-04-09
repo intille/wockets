@@ -643,11 +643,36 @@ namespace NESPDataViewer
             else
             {
                 AddAccelerationCurve(mac, location, listX, listY, listZ, listActivityCounts, listSampleRates, listAUCs, listVMAGs);
-                if (mac != "Internal")
+                /* if (mac != "Internal")
                 {
-                    mac = mac.Substring(mac.Length - 2, 2);
-                    mac = "Wocket " + mac;
-                }
+                    //mac = mac.Substring(mac.Length - 2, 2);
+                    //mac = "Wocket " + mac;
+                    //string loc = wc._Sensors[Convert.ToInt32(channel)]._Location;
+                   string loc = "";
+                    switch (location)
+                    {
+                        case "Dominant-Hip":
+                            loc = "DHP";
+                            break;
+                        case "Dominant-Ankle":
+                            loc = "DAK";
+                            break;
+                        case "Dominant-Upper-Arm":
+                            loc = "DUA";
+                            break;
+                        case "Dominant-Wrist":
+                            loc = "DW";
+                            break;
+                        case "Dominant-Thigh":
+                            loc = "DT";
+                            break;
+                        default:
+                            loc = "lOC";
+                            break;
+                    }
+                    
+                    //mac = "WKT-" + loc + "-" + mac;
+                }*/
                 paneOrders.Add(mac, paneOrder);
             }
 
@@ -2211,7 +2236,30 @@ namespace NESPDataViewer
                         {
                             mac = ((Wockets.Receivers.RFCOMMReceiver)wc._Receivers[Convert.ToInt32(channel)])._Address;
                             mac = mac.Substring(mac.Length - 2, 2);
-                            mac = "Wocket " + mac;
+                            string loc = wc._Sensors[Convert.ToInt32(channel)]._Location;
+                            switch(loc)
+                            {
+                                case "Dominant Hip":
+                                    loc = "DHP";
+                                    break;
+                                case "Dominant Ankle":
+                                    loc = "DAK";
+                                    break;
+                                case "Dominant Upper Arm":
+                                    loc = "DUA";
+                                    break;
+                                case "Dominant Wrist":
+                                    loc = "DW";
+                                    break;
+                                case "Dominant Thigh":
+                                    loc = "DT";
+                                    break;
+                                default:
+                                    loc = "lOC";
+                                    break;
+                            }
+
+                            mac = "WKT-"+loc+"-" + mac;
                         }
                         else
                             mac = "Internal";

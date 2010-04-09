@@ -15,11 +15,17 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
         private SerialPort spp = null;
         private IntPtr wdStack;
         private static int x = 0;
+        public string _COMPORT = "";
         public WidcommBluetoothStream(CircularBuffer buffer, CircularBuffer sbuffer, byte[] address, string pin)
             : base(buffer, sbuffer, address, pin)
         {
+            
             //this.wdStack = WidcommAPI.CreateWidcommStack();
             //WidcommAPI.SetAutoReconnect(this.wdStack);  
+            if (this._HexAddress.IndexOf("A0") >= 0)
+                _COMPORT = "BTC3";
+            else
+                _COMPORT = "BTC2";
         }
 
         public bool Open()
@@ -59,19 +65,13 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
                         retry++;
                     }
 
-                    //string[] s=System.IO.Ports.SerialPort.GetPortNames();
-                    /*do
-                    {
-                        comPort = WidcommAPI.SppComPort(((WidcommBluetoothStack)NetworkStacks._BluetoothStack)._Reference);
+                    
 
-                    } while (comPort <= 0);*/
-
-
-                   //comPort = 9;
+                   comPort = 3;
 
                     // if (x == 0)
                     //{
-                    spp = new SerialPort("COM" + comPort, 38400, Parity.None, 8, StopBits.One);
+                   spp = new SerialPort(_COMPORT, 38400, Parity.None, 8, StopBits.One);                    
                     if (!spp.IsOpen)
                         spp.Open();
                     this.status = BluetoothStatus.Connected;
