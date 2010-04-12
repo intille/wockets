@@ -5,11 +5,12 @@ using System.Xml;
 using Wockets.Data;
 using Wockets.Data.Accelerometers;
 using Wockets.Data.Commands;
+using Wockets.Data.Responses;
 using Wockets.Utils;
 using Wockets.Exceptions;
 
 #if (PocketPC)
-using Microsoft.ApplicationBlocks.MemoryMappedFile;
+using Wockets.Utils.IPC.MMF;
 #endif
 
 namespace Wockets.Decoders.Accelerometers
@@ -54,82 +55,109 @@ namespace Wockets.Decoders.Accelerometers
             int rawDataIndex = start;
             int numDecodedPackets = 0;
             //int bufferHead = this.head;
-            
 
-            while (rawDataIndex !=end)
+
+            while (rawDataIndex != end)
             {
-
-                if ((data._Bytes[rawDataIndex] & 0x80) != 0) //grab the next 6 bytes
+                if (this._Mode == DecoderModes.Command)
                 {
-                    this.packetPosition = 0;
-                    this.headerSeen = true;
-                    int headerByte = ((byte)(((byte)data._Bytes[rawDataIndex]) << 1)) >> 6;
-                    this.timestamp = data._Timestamp[rawDataIndex];
-                    if (headerByte == 0)
+                    int plen=this.packet.Length;
+                    this.packetPosition = (this.packetPosition+1)%plen;
+                    this.packet[this.packetPosition] = data._Bytes[rawDataIndex];                        
+                    rawDataIndex = (rawDataIndex + 1) % data._Bytes.Length;
+
+                    if ((this.packet[this.packetPosition] == 'D') &&
+                         (this.packet[((this.packetPosition-1+plen) % plen)] == 'M') &&
+                         (this.packet[((this.packetPosition-2+plen) % plen)] == 'C'))
                     {
-                        bytesToRead = WocketsAccelerationData.NUM_RAW_BYTES;
-                        packetType = SensorDataType.ACCEL;
-                    }
-                    else if (headerByte == 2)
-                    {
-
-                        int opcode = (((byte)data._Bytes[rawDataIndex]) & 0x1f);
-                        if (opcode == 0)
+                        CommandModeEnterResponse response = new CommandModeEnterResponse(this._ID);
+                        Response.ResponseArgs e = new Response.ResponseArgs();
+                        e._Response = response;
+                        FireEvent(e);                         
+                    }else if ((this.packet[this.packetPosition] == '8') &&
+                      (this.packet[((this.packetPosition - 1 + plen) % plen)] == '3') )
                         {
-                            bytesToRead = 3;
-                            packetType = SensorDataType.BATTERYLEVEL;
-                        }
-                        else if (opcode == 0x04)
-                        {
-                            bytesToRead = 10;
-                            packetType = SensorDataType.CALIBRATION_VALUES;
+                            BaudRateResponse response = new BaudRateResponse(this._ID);
+                            response._BaudRate = "38.4";
+                            Response.ResponseArgs e = new Response.ResponseArgs();
+                            e._Response = response;
+                            FireEvent(e);
                         }
 
-
-                    }
                 }
-
-                if ((this.headerSeen == true) && (this.packetPosition < bytesToRead))
-                    this.packet[this.packetPosition] = data._Bytes[rawDataIndex];
-                    
-                this.packetPosition++;
-                rawDataIndex=(rawDataIndex+1)%data._Bytes.Length;
-
-
-                if ((this.packetPosition == bytesToRead)) //a full packet was received
+                else if (this._Mode == DecoderModes.Data)
                 {
-                    if (packetType == SensorDataType.ACCEL)
+                    if ((data._Bytes[rawDataIndex] & 0x80) != 0) //grab the next 6 bytes
                     {
-                                                
-                        short x = (short)((((short)(this.packet[0] & 0x03)) << 8) | (((short)(this.packet[1] & 0x7f)) << 1) | (((short)(this.packet[2] & 0x40)) >> 6));
-                        short y = (short)((((short)(this.packet[2] & 0x3f)) << 4) | (((short)(this.packet[3] & 0x78)) >> 3));
-                        short z = (short)((((short)(this.packet[3] & 0x07)) << 7) | ((short)(this.packet[4] & 0x7f)));
-                        double ts = WocketsTimer.GetUnixTime();
-
-                        if (CurrentWockets._Configuration._MemoryMode == Wockets.Data.Configuration.MemoryConfiguration.NON_SHARED)
+                        this.packetPosition = 0;
+                        this.headerSeen = true;
+                        int headerByte = ((byte)(((byte)data._Bytes[rawDataIndex]) << 1)) >> 6;
+                        this.timestamp = data._Timestamp[rawDataIndex];
+                        if (headerByte == 0)
                         {
-                            int bufferHead = this.head;
-                            WocketsAccelerationData datum = ((WocketsAccelerationData)this._Data[bufferHead]);
-                            datum.Reset();
-                            datum.UnixTimeStamp = ts;
-
-                            //copy raw bytes
-                            for (int i = 0; (i < bytesToRead); i++)
-                                datum.RawBytes[i] = this.packet[i];
-                            datum.Type = SensorDataType.ACCEL;
-                            //datum.RawBytes[0] = (byte)(((datum.RawBytes[0])&0xc7)|(sourceSensor<<3));
-                            datum.SensorID = (byte)sourceSensor;
-                            datum.X = x;
-                            datum.Y = y;
-                            datum.Z = z;
-
-
-                            if (bufferHead >= (BUFFER_SIZE - 1))
-                                bufferHead = 0;
-                            else
-                                bufferHead++;
-                            this.head = bufferHead;
+                            bytesToRead = WocketsAccelerationData.NUM_RAW_BYTES;
+                            packetType = SensorDataType.ACCEL;
                         }
+                        else if (headerByte == 2)
+                        {
+
+                            int opcode = (((byte)data._Bytes[rawDataIndex]) & 0x1f);
+                            if (opcode == 0)
+                            {
+                                bytesToRead = 3;
+                                packetType = SensorDataType.BATTERYLEVEL;
+                            }
+                            else if (opcode == 0x04)
+                            {
+                                bytesToRead = 10;
+                                packetType = SensorDataType.CALIBRATION_VALUES;
+                            }
+
+
+                        }
+                    }
+
+                    if ((this.headerSeen == true) && (this.packetPosition < bytesToRead))
+                        this.packet[this.packetPosition] = data._Bytes[rawDataIndex];
+
+                    this.packetPosition++;
+                    rawDataIndex = (rawDataIndex + 1) % data._Bytes.Length;
+
+
+                    if ((this.packetPosition == bytesToRead)) //a full packet was received
+                    {
+                        if (packetType == SensorDataType.ACCEL)
+                        {
+
+                            short x = (short)((((short)(this.packet[0] & 0x03)) << 8) | (((short)(this.packet[1] & 0x7f)) << 1) | (((short)(this.packet[2] & 0x40)) >> 6));
+                            short y = (short)((((short)(this.packet[2] & 0x3f)) << 4) | (((short)(this.packet[3] & 0x78)) >> 3));
+                            short z = (short)((((short)(this.packet[3] & 0x07)) << 7) | ((short)(this.packet[4] & 0x7f)));
+                            double ts = WocketsTimer.GetUnixTime();
+
+                            if (CurrentWockets._Configuration._MemoryMode == Wockets.Data.Configuration.MemoryConfiguration.NON_SHARED)
+                            {
+                                int bufferHead = this.head;
+                                WocketsAccelerationData datum = ((WocketsAccelerationData)this._Data[bufferHead]);
+                                datum.Reset();
+                                datum.UnixTimeStamp = ts;
+
+                                //copy raw bytes
+                                for (int i = 0; (i < bytesToRead); i++)
+                                    datum.RawBytes[i] = this.packet[i];
+                                datum.Type = SensorDataType.ACCEL;
+                                //datum.RawBytes[0] = (byte)(((datum.RawBytes[0])&0xc7)|(sourceSensor<<3));
+                                datum.SensorID = (byte)sourceSensor;
+                                datum.X = x;
+                                datum.Y = y;
+                                datum.Z = z;
+
+
+                                if (bufferHead >= (BUFFER_SIZE - 1))
+                                    bufferHead = 0;
+                                else
+                                    bufferHead++;
+                                this.head = bufferHead;
+                            }
 #if (PocketPC)
                         else if (CurrentWockets._Configuration._MemoryMode == Wockets.Data.Configuration.MemoryConfiguration.SHARED)
                         {
@@ -157,46 +185,46 @@ namespace Wockets.Decoders.Accelerometers
                         }
 #endif
 
-                       // this.head++;
-                       
+                            // this.head++;
 
 
-                        numDecodedPackets++;
 
-                        this.packetPosition = 0;
-                        this.headerSeen = false;
+                            numDecodedPackets++;
 
-                        
-                        lastTimestamp = ts;
-                    }
-                    else if (packetType == SensorDataType.BATTERYLEVEL)
-                    {
+                            this.packetPosition = 0;
+                            this.headerSeen = false;
 
-                        BatteryResponse br = new BatteryResponse(this._ID);
-                        for (int i = 0; (i < bytesToRead); i++)
-                            br.RawBytes[i] = this.packet[i];
-                        br.BatteryLevel = (((int)this.packet[1]) << 3) | ((this.packet[2] >> 4) & 0x07);
-                        Logger.Warn("BT," + br.SensorID + "," + br.BatteryLevel);
-                        Response.ResponseArgs e = new Response.ResponseArgs();
-                        e._Response = br;
-                        FireEvent(e);
 
-                    }
-                    else if (packetType == SensorDataType.CALIBRATION_VALUES)
-                    {
+                            lastTimestamp = ts;
+                        }
+                        else if (packetType == SensorDataType.BATTERYLEVEL)
+                        {
 
-                        int x1g = ((this.packet[1] & 0x7f) << 3) | ((this.packet[2] & 0x70) >> 4);
-                        int x1ng = ((this.packet[2] & 0x0f) << 6) | ((this.packet[3] & 0x7e) >> 1);
-                        int y1g = ((this.packet[3] & 0x01) << 9) | ((this.packet[4] & 0x7f) << 2) | ((this.packet[5] & 0x60) >> 5);
-                        int y1ng = ((this.packet[5] & 0x1f) << 5) | ((this.packet[6] & 0x7c) >> 2);
-                        int z1g = ((this.packet[6] & 0x03) << 8) | ((this.packet[7] & 0x7f) << 1) | ((this.packet[8] & 0x40) >> 6);
-                        int z1ng = ((this.packet[8] & 0x3f) << 4) | ((this.packet[9] & 0x78) >> 3);
+                            BatteryResponse br = new BatteryResponse(this._ID);
+                            for (int i = 0; (i < bytesToRead); i++)
+                                br.RawBytes[i] = this.packet[i];
+                            br.BatteryLevel = (((int)this.packet[1]) << 3) | ((this.packet[2] >> 4) & 0x07);
+                            Logger.Warn("BT," + br.SensorID + "," + br.BatteryLevel);
+                            Response.ResponseArgs e = new Response.ResponseArgs();
+                            e._Response = br;
+                            FireEvent(e);
+
+                        }
+                        else if (packetType == SensorDataType.CALIBRATION_VALUES)
+                        {
+
+                            int x1g = ((this.packet[1] & 0x7f) << 3) | ((this.packet[2] & 0x70) >> 4);
+                            int x1ng = ((this.packet[2] & 0x0f) << 6) | ((this.packet[3] & 0x7e) >> 1);
+                            int y1g = ((this.packet[3] & 0x01) << 9) | ((this.packet[4] & 0x7f) << 2) | ((this.packet[5] & 0x60) >> 5);
+                            int y1ng = ((this.packet[5] & 0x1f) << 5) | ((this.packet[6] & 0x7c) >> 2);
+                            int z1g = ((this.packet[6] & 0x03) << 8) | ((this.packet[7] & 0x7f) << 1) | ((this.packet[8] & 0x40) >> 6);
+                            int z1ng = ((this.packet[8] & 0x3f) << 4) | ((this.packet[9] & 0x78) >> 3);
+                        }
+
                     }
 
                 }
-
             }
-           
             return numDecodedPackets;
         }
         public override int Decode(int sourceSensor,byte[] data, int length)       

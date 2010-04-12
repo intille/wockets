@@ -164,9 +164,11 @@ namespace Wockets.Utils
                 current_time = (double)(referenceTime + ((double)System.Environment.TickCount - referenceCounter));
                 if (current_time < previousTime)
                 {
-                    Logger.Debug("Timer reset -  prevTime: " + previousTime + " currentTime: " + current_time + " reference: " + referenceTime);
+                    if (CurrentWockets._Configuration._SoftwareMode == Wockets.Data.Configuration.SoftwareConfiguration.DEBUG)
+                        Logger.Debug("Timer reset -  prevTime: " + previousTime + " currentTime: " + current_time + " reference: " + referenceTime);
                     current_time = previousTime + 2.0;
-                    Logger.Debug("Timer reset -  prevTime: " + previousTime + " currentTime: " + current_time + " reference: " + referenceTime);
+                    if (CurrentWockets._Configuration._SoftwareMode == Wockets.Data.Configuration.SoftwareConfiguration.DEBUG)
+                        Logger.Debug("Timer reset -  prevTime: " + previousTime + " currentTime: " + current_time + " reference: " + referenceTime);
                 }
                 else if (current_time == previousTime)
                 {

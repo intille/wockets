@@ -28,6 +28,7 @@ namespace WocketConfigurationApp
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.label1 = new System.Windows.Forms.Label();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
@@ -68,6 +69,13 @@ namespace WocketConfigurationApp
             this.label26 = new System.Windows.Forms.Label();
             this.comboBox5 = new System.Windows.Forms.ComboBox();
             this.label_status = new System.Windows.Forms.Label();
+            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.pToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.plotToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.label27 = new System.Windows.Forms.Label();
+            this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
@@ -75,7 +83,7 @@ namespace WocketConfigurationApp
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label1.ForeColor = System.Drawing.Color.Orange;
-            this.label1.Location = new System.Drawing.Point(12, 19);
+            this.label1.Location = new System.Drawing.Point(12, 73);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(140, 24);
             this.label1.TabIndex = 0;
@@ -85,7 +93,7 @@ namespace WocketConfigurationApp
             // textBox1
             // 
             this.textBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBox1.Location = new System.Drawing.Point(214, 19);
+            this.textBox1.Location = new System.Drawing.Point(214, 73);
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(231, 26);
             this.textBox1.TabIndex = 1;
@@ -95,7 +103,7 @@ namespace WocketConfigurationApp
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label2.ForeColor = System.Drawing.Color.Orange;
-            this.label2.Location = new System.Drawing.Point(12, 70);
+            this.label2.Location = new System.Drawing.Point(12, 124);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(87, 24);
             this.label2.TabIndex = 2;
@@ -104,7 +112,7 @@ namespace WocketConfigurationApp
             // textBox2
             // 
             this.textBox2.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBox2.Location = new System.Drawing.Point(214, 68);
+            this.textBox2.Location = new System.Drawing.Point(214, 122);
             this.textBox2.Name = "textBox2";
             this.textBox2.ReadOnly = true;
             this.textBox2.Size = new System.Drawing.Size(231, 26);
@@ -115,7 +123,7 @@ namespace WocketConfigurationApp
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label3.ForeColor = System.Drawing.Color.Orange;
-            this.label3.Location = new System.Drawing.Point(12, 126);
+            this.label3.Location = new System.Drawing.Point(12, 180);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(166, 24);
             this.label3.TabIndex = 4;
@@ -135,17 +143,18 @@ namespace WocketConfigurationApp
             "38400",
             "57600",
             "115200"});
-            this.comboBox1.Location = new System.Drawing.Point(214, 126);
+            this.comboBox1.Location = new System.Drawing.Point(214, 179);
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(231, 28);
             this.comboBox1.TabIndex = 5;
+            this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
             // 
             // label4
             // 
             this.label4.AutoSize = true;
             this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label4.ForeColor = System.Drawing.Color.Orange;
-            this.label4.Location = new System.Drawing.Point(507, 21);
+            this.label4.Location = new System.Drawing.Point(507, 75);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(109, 24);
             this.label4.TabIndex = 6;
@@ -154,7 +163,7 @@ namespace WocketConfigurationApp
             // button1
             // 
             this.button1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button1.Location = new System.Drawing.Point(787, 19);
+            this.button1.Location = new System.Drawing.Point(787, 73);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(127, 33);
             this.button1.TabIndex = 7;
@@ -166,7 +175,7 @@ namespace WocketConfigurationApp
             this.label5.AutoSize = true;
             this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label5.ForeColor = System.Drawing.Color.Orange;
-            this.label5.Location = new System.Drawing.Point(514, 64);
+            this.label5.Location = new System.Drawing.Point(514, 118);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(37, 24);
             this.label5.TabIndex = 8;
@@ -177,7 +186,7 @@ namespace WocketConfigurationApp
             this.label6.AutoSize = true;
             this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label6.ForeColor = System.Drawing.Color.Orange;
-            this.label6.Location = new System.Drawing.Point(547, 64);
+            this.label6.Location = new System.Drawing.Point(547, 118);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(57, 24);
             this.label6.TabIndex = 9;
@@ -189,7 +198,7 @@ namespace WocketConfigurationApp
             this.label7.AutoSize = true;
             this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label7.ForeColor = System.Drawing.Color.Orange;
-            this.label7.Location = new System.Drawing.Point(547, 101);
+            this.label7.Location = new System.Drawing.Point(547, 155);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(58, 24);
             this.label7.TabIndex = 10;
@@ -200,7 +209,7 @@ namespace WocketConfigurationApp
             this.label8.AutoSize = true;
             this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label8.ForeColor = System.Drawing.Color.Orange;
-            this.label8.Location = new System.Drawing.Point(667, 64);
+            this.label8.Location = new System.Drawing.Point(667, 118);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(35, 24);
             this.label8.TabIndex = 11;
@@ -211,7 +220,7 @@ namespace WocketConfigurationApp
             this.label9.AutoSize = true;
             this.label9.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label9.ForeColor = System.Drawing.Color.Orange;
-            this.label9.Location = new System.Drawing.Point(697, 101);
+            this.label9.Location = new System.Drawing.Point(697, 155);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(58, 24);
             this.label9.TabIndex = 13;
@@ -222,7 +231,7 @@ namespace WocketConfigurationApp
             this.label10.AutoSize = true;
             this.label10.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label10.ForeColor = System.Drawing.Color.Orange;
-            this.label10.Location = new System.Drawing.Point(697, 64);
+            this.label10.Location = new System.Drawing.Point(697, 118);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(57, 24);
             this.label10.TabIndex = 12;
@@ -233,7 +242,7 @@ namespace WocketConfigurationApp
             this.label11.AutoSize = true;
             this.label11.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label11.ForeColor = System.Drawing.Color.Orange;
-            this.label11.Location = new System.Drawing.Point(855, 101);
+            this.label11.Location = new System.Drawing.Point(855, 155);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(58, 24);
             this.label11.TabIndex = 15;
@@ -244,7 +253,7 @@ namespace WocketConfigurationApp
             this.label12.AutoSize = true;
             this.label12.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label12.ForeColor = System.Drawing.Color.Orange;
-            this.label12.Location = new System.Drawing.Point(856, 64);
+            this.label12.Location = new System.Drawing.Point(856, 118);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(57, 24);
             this.label12.TabIndex = 14;
@@ -255,7 +264,7 @@ namespace WocketConfigurationApp
             this.label13.AutoSize = true;
             this.label13.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label13.ForeColor = System.Drawing.Color.Orange;
-            this.label13.Location = new System.Drawing.Point(822, 64);
+            this.label13.Location = new System.Drawing.Point(822, 118);
             this.label13.Name = "label13";
             this.label13.Size = new System.Drawing.Size(35, 24);
             this.label13.TabIndex = 16;
@@ -266,7 +275,7 @@ namespace WocketConfigurationApp
             this.label14.AutoSize = true;
             this.label14.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label14.ForeColor = System.Drawing.Color.Orange;
-            this.label14.Location = new System.Drawing.Point(551, 138);
+            this.label14.Location = new System.Drawing.Point(551, 191);
             this.label14.Name = "label14";
             this.label14.Size = new System.Drawing.Size(55, 24);
             this.label14.TabIndex = 17;
@@ -277,7 +286,7 @@ namespace WocketConfigurationApp
             this.label15.AutoSize = true;
             this.label15.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label15.ForeColor = System.Drawing.Color.Orange;
-            this.label15.Location = new System.Drawing.Point(699, 138);
+            this.label15.Location = new System.Drawing.Point(699, 191);
             this.label15.Name = "label15";
             this.label15.Size = new System.Drawing.Size(55, 24);
             this.label15.TabIndex = 18;
@@ -288,7 +297,7 @@ namespace WocketConfigurationApp
             this.label16.AutoSize = true;
             this.label16.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label16.ForeColor = System.Drawing.Color.Orange;
-            this.label16.Location = new System.Drawing.Point(862, 138);
+            this.label16.Location = new System.Drawing.Point(862, 191);
             this.label16.Name = "label16";
             this.label16.Size = new System.Drawing.Size(55, 24);
             this.label16.TabIndex = 19;
@@ -299,7 +308,7 @@ namespace WocketConfigurationApp
             this.label17.AutoSize = true;
             this.label17.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label17.ForeColor = System.Drawing.Color.Orange;
-            this.label17.Location = new System.Drawing.Point(523, 365);
+            this.label17.Location = new System.Drawing.Point(523, 418);
             this.label17.Name = "label17";
             this.label17.Size = new System.Drawing.Size(131, 24);
             this.label17.TabIndex = 20;
@@ -310,7 +319,7 @@ namespace WocketConfigurationApp
             this.label18.AutoSize = true;
             this.label18.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label18.ForeColor = System.Drawing.Color.Orange;
-            this.label18.Location = new System.Drawing.Point(702, 365);
+            this.label18.Location = new System.Drawing.Point(702, 418);
             this.label18.Name = "label18";
             this.label18.Size = new System.Drawing.Size(61, 24);
             this.label18.TabIndex = 21;
@@ -319,7 +328,7 @@ namespace WocketConfigurationApp
             // button2
             // 
             this.button2.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button2.Location = new System.Drawing.Point(803, 361);
+            this.button2.Location = new System.Drawing.Point(803, 414);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(127, 33);
             this.button2.TabIndex = 22;
@@ -329,7 +338,7 @@ namespace WocketConfigurationApp
             // button3
             // 
             this.button3.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button3.Location = new System.Drawing.Point(627, 419);
+            this.button3.Location = new System.Drawing.Point(627, 472);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(127, 33);
             this.button3.TabIndex = 23;
@@ -341,7 +350,7 @@ namespace WocketConfigurationApp
             this.label19.AutoSize = true;
             this.label19.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label19.ForeColor = System.Drawing.Color.Orange;
-            this.label19.Location = new System.Drawing.Point(12, 224);
+            this.label19.Location = new System.Drawing.Point(12, 277);
             this.label19.Name = "label19";
             this.label19.Size = new System.Drawing.Size(176, 24);
             this.label19.TabIndex = 24;
@@ -354,7 +363,7 @@ namespace WocketConfigurationApp
             this.comboBox2.Items.AddRange(new object[] {
             "Slave (Default)",
             "Master"});
-            this.comboBox2.Location = new System.Drawing.Point(214, 224);
+            this.comboBox2.Location = new System.Drawing.Point(214, 277);
             this.comboBox2.Name = "comboBox2";
             this.comboBox2.Size = new System.Drawing.Size(231, 28);
             this.comboBox2.TabIndex = 25;
@@ -364,7 +373,7 @@ namespace WocketConfigurationApp
             this.label20.AutoSize = true;
             this.label20.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label20.ForeColor = System.Drawing.Color.Orange;
-            this.label20.Location = new System.Drawing.Point(12, 275);
+            this.label20.Location = new System.Drawing.Point(12, 328);
             this.label20.Name = "label20";
             this.label20.Size = new System.Drawing.Size(193, 24);
             this.label20.TabIndex = 26;
@@ -377,7 +386,7 @@ namespace WocketConfigurationApp
             this.comboBox3.Items.AddRange(new object[] {
             "Continuous (Default)",
             "Bursty (1min)"});
-            this.comboBox3.Location = new System.Drawing.Point(214, 275);
+            this.comboBox3.Location = new System.Drawing.Point(214, 328);
             this.comboBox3.Name = "comboBox3";
             this.comboBox3.Size = new System.Drawing.Size(231, 28);
             this.comboBox3.TabIndex = 27;
@@ -387,7 +396,7 @@ namespace WocketConfigurationApp
             this.checkBox1.AutoSize = true;
             this.checkBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.checkBox1.ForeColor = System.Drawing.Color.Orange;
-            this.checkBox1.Location = new System.Drawing.Point(18, 361);
+            this.checkBox1.Location = new System.Drawing.Point(18, 414);
             this.checkBox1.Name = "checkBox1";
             this.checkBox1.Size = new System.Drawing.Size(150, 28);
             this.checkBox1.TabIndex = 28;
@@ -399,7 +408,7 @@ namespace WocketConfigurationApp
             this.label21.AutoSize = true;
             this.label21.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label21.ForeColor = System.Drawing.Color.Orange;
-            this.label21.Location = new System.Drawing.Point(14, 322);
+            this.label21.Location = new System.Drawing.Point(14, 375);
             this.label21.Name = "label21";
             this.label21.Size = new System.Drawing.Size(199, 24);
             this.label21.TabIndex = 29;
@@ -417,7 +426,7 @@ namespace WocketConfigurationApp
             "-5 dBM",
             "-10 dBM",
             "-20 dBM (Minimum)"});
-            this.comboBox4.Location = new System.Drawing.Point(214, 322);
+            this.comboBox4.Location = new System.Drawing.Point(214, 375);
             this.comboBox4.Name = "comboBox4";
             this.comboBox4.Size = new System.Drawing.Size(231, 28);
             this.comboBox4.TabIndex = 30;
@@ -427,7 +436,7 @@ namespace WocketConfigurationApp
             this.label22.AutoSize = true;
             this.label22.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label22.ForeColor = System.Drawing.Color.Orange;
-            this.label22.Location = new System.Drawing.Point(510, 187);
+            this.label22.Location = new System.Drawing.Point(510, 240);
             this.label22.Name = "label22";
             this.label22.Size = new System.Drawing.Size(220, 24);
             this.label22.TabIndex = 31;
@@ -438,7 +447,7 @@ namespace WocketConfigurationApp
             this.label23.AutoSize = true;
             this.label23.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label23.ForeColor = System.Drawing.Color.Orange;
-            this.label23.Location = new System.Drawing.Point(799, 235);
+            this.label23.Location = new System.Drawing.Point(799, 288);
             this.label23.Name = "label23";
             this.label23.Size = new System.Drawing.Size(61, 24);
             this.label23.TabIndex = 32;
@@ -449,7 +458,7 @@ namespace WocketConfigurationApp
             this.label24.AutoSize = true;
             this.label24.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label24.ForeColor = System.Drawing.Color.Orange;
-            this.label24.Location = new System.Drawing.Point(513, 275);
+            this.label24.Location = new System.Drawing.Point(513, 328);
             this.label24.Name = "label24";
             this.label24.Size = new System.Drawing.Size(170, 24);
             this.label24.TabIndex = 33;
@@ -460,7 +469,7 @@ namespace WocketConfigurationApp
             this.label25.AutoSize = true;
             this.label25.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label25.ForeColor = System.Drawing.Color.Orange;
-            this.label25.Location = new System.Drawing.Point(802, 328);
+            this.label25.Location = new System.Drawing.Point(802, 381);
             this.label25.Name = "label25";
             this.label25.Size = new System.Drawing.Size(61, 24);
             this.label25.TabIndex = 34;
@@ -469,7 +478,7 @@ namespace WocketConfigurationApp
             // button4
             // 
             this.button4.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button4.Location = new System.Drawing.Point(790, 184);
+            this.button4.Location = new System.Drawing.Point(790, 237);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(127, 33);
             this.button4.TabIndex = 35;
@@ -479,7 +488,7 @@ namespace WocketConfigurationApp
             // button5
             // 
             this.button5.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button5.Location = new System.Drawing.Point(790, 275);
+            this.button5.Location = new System.Drawing.Point(790, 328);
             this.button5.Name = "button5";
             this.button5.Size = new System.Drawing.Size(127, 33);
             this.button5.TabIndex = 36;
@@ -491,7 +500,7 @@ namespace WocketConfigurationApp
             this.label26.AutoSize = true;
             this.label26.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label26.ForeColor = System.Drawing.Color.Orange;
-            this.label26.Location = new System.Drawing.Point(14, 171);
+            this.label26.Location = new System.Drawing.Point(14, 224);
             this.label26.Name = "label26";
             this.label26.Size = new System.Drawing.Size(157, 24);
             this.label26.TabIndex = 37;
@@ -510,7 +519,7 @@ namespace WocketConfigurationApp
             "38400",
             "57600",
             "115200"});
-            this.comboBox5.Location = new System.Drawing.Point(214, 171);
+            this.comboBox5.Location = new System.Drawing.Point(214, 224);
             this.comboBox5.Name = "comboBox5";
             this.comboBox5.Size = new System.Drawing.Size(231, 28);
             this.comboBox5.TabIndex = 38;
@@ -520,17 +529,68 @@ namespace WocketConfigurationApp
             this.label_status.AutoSize = true;
             this.label_status.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label_status.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.label_status.Location = new System.Drawing.Point(146, 432);
+            this.label_status.Location = new System.Drawing.Point(146, 485);
             this.label_status.Name = "label_status";
             this.label_status.Size = new System.Drawing.Size(0, 20);
             this.label_status.TabIndex = 39;
+            // 
+            // menuStrip1
+            // 
+            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.pToolStripMenuItem});
+            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip1.Name = "menuStrip1";
+            this.menuStrip1.Size = new System.Drawing.Size(945, 24);
+            this.menuStrip1.TabIndex = 40;
+            this.menuStrip1.Text = "menuStrip1";
+            // 
+            // pToolStripMenuItem
+            // 
+            this.pToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.plotToolStripMenuItem,
+            this.saveToolStripMenuItem});
+            this.pToolStripMenuItem.Name = "pToolStripMenuItem";
+            this.pToolStripMenuItem.Size = new System.Drawing.Size(43, 20);
+            this.pToolStripMenuItem.Text = "Data";
+            this.pToolStripMenuItem.Click += new System.EventHandler(this.pToolStripMenuItem_Click);
+            // 
+            // plotToolStripMenuItem
+            // 
+            this.plotToolStripMenuItem.Name = "plotToolStripMenuItem";
+            this.plotToolStripMenuItem.Size = new System.Drawing.Size(98, 22);
+            this.plotToolStripMenuItem.Text = "Plot";
+            this.plotToolStripMenuItem.Click += new System.EventHandler(this.plotToolStripMenuItem_Click);
+            // 
+            // saveToolStripMenuItem
+            // 
+            this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(98, 22);
+            this.saveToolStripMenuItem.Text = "Save";
+            // 
+            // label27
+            // 
+            this.label27.AutoSize = true;
+            this.label27.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label27.ForeColor = System.Drawing.Color.Lime;
+            this.label27.Location = new System.Drawing.Point(176, 459);
+            this.label27.Name = "label27";
+            this.label27.Size = new System.Drawing.Size(141, 24);
+            this.label27.TabIndex = 41;
+            this.label27.Text = "Connecting ...";
+            // 
+            // timer1
+            // 
+            this.timer1.Enabled = true;
+            this.timer1.Interval = 1000;
+            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // Form2
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.DimGray;
-            this.ClientSize = new System.Drawing.Size(945, 464);
+            this.ClientSize = new System.Drawing.Size(945, 507);
+            this.Controls.Add(this.label27);
             this.Controls.Add(this.label_status);
             this.Controls.Add(this.comboBox5);
             this.Controls.Add(this.label26);
@@ -571,10 +631,13 @@ namespace WocketConfigurationApp
             this.Controls.Add(this.label2);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.label1);
+            this.Controls.Add(this.menuStrip1);
+            this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form2";
             this.Text = "Wocket (MAC)";
             this.Load += new System.EventHandler(this.Form2_Load);
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form2_FormClosing);
+            this.menuStrip1.ResumeLayout(false);
+            this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -622,5 +685,11 @@ namespace WocketConfigurationApp
         private System.Windows.Forms.Label label26;
         private System.Windows.Forms.ComboBox comboBox5;
         private System.Windows.Forms.Label label_status;
+        private System.Windows.Forms.MenuStrip menuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem pToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem plotToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem;
+        private System.Windows.Forms.Label label27;
+        private System.Windows.Forms.Timer timer1;
     }
 }

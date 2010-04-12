@@ -119,7 +119,7 @@ namespace WocketConfigurationApp
             this.label_status.AutoSize = true;
             this.label_status.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label_status.ForeColor = System.Drawing.Color.White;
-            this.label_status.Location = new System.Drawing.Point(335, 262);
+            this.label_status.Location = new System.Drawing.Point(149, 262);
             this.label_status.Name = "label_status";
             this.label_status.Size = new System.Drawing.Size(182, 24);
             this.label_status.TabIndex = 8;
@@ -139,7 +139,7 @@ namespace WocketConfigurationApp
             this.Controls.Add(this.listBox1);
             this.Controls.Add(this.button_search);
             this.Name = "Form1";
-            this.Text = "Wocket Configuration App";           
+            this.Text = "Wocket Configuration App";
             this.ResumeLayout(false);
             this.PerformLayout();
 

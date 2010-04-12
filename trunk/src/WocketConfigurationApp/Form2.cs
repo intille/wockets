@@ -8,18 +8,24 @@ using System.Windows.Forms;
 using InTheHand.Net;
 using InTheHand.Net.Sockets;
 using InTheHand.Net.Bluetooth;
+using Wockets;
+using Wockets.Data.Configuration;
+using Wockets.Decoders;
+using Wockets.Decoders.Accelerometers;
 using Wockets.Receivers;
+using Wockets.Sensors;
+using Wockets.Sensors.Accelerometers;
 using Wockets.Data.Commands;
+
 
 namespace WocketConfigurationApp
 {
     public partial class Form2 : Form
     {
         BluetoothDeviceInfo wocket;
-        BtWocketPC bt_wocket = null;
         private delegate void updateTextDelegate_Wocket();
         private delegate void updateSearchDelegate_Wocket();
-        RFCOMMReceiver receiver;
+        WocketsController wc;
         public Form2(BluetoothDeviceInfo wocket)
         {
             InitializeComponent();
@@ -30,24 +36,33 @@ namespace WocketConfigurationApp
         }
 
         private void Form2_Load(object sender, EventArgs e)
-        {
-            this.label_status.Text = "Connecting...";
+        {            
+
+            WocketsConfiguration configuration = new WocketsConfiguration();
+            CurrentWockets._Configuration = configuration;
             
-         
-            this.receiver = new RFCOMMReceiver();           
-            this.receiver._Address = this.wocket.DeviceAddress.ToString();
-            if (this.receiver.Initialize())
-            {
-                this.receiver.bluetoothStream._TimeoutEnabled = false;
-                this.label_status.Text = "Connected...";
-            }
 
-            for (int i=0;(i<10);i++)
-                this.receiver.Write(new EnterCommandMode()._Bytes);
-            //this.receiver.Write(new GET_BR()._Bytes);
+            wc = new WocketsController("", "", "");
+            CurrentWockets._Controller = wc;  
+            wc._Receivers = new ReceiverList();
+            wc._Decoders = new DecoderList();           
+            wc._Sensors = new SensorList();
+            wc._Receivers.Add(new RFCOMMReceiver());
+            wc._Decoders.Add(new WocketsDecoder());
+            wc._Sensors.Add(new Wocket());
 
-
-  
+            ((RFCOMMReceiver)wc._Receivers[0])._Address = this.wocket.DeviceAddress.ToString();      
+            wc._Receivers[0]._ID = 0;
+            wc._Decoders[0]._ID = 0;
+            wc._Sensors[0]._Receiver = wc._Receivers[0];
+            ((RFCOMMReceiver)wc._Receivers[0])._TimeoutEnabled = false;
+            wc._Sensors[0]._Decoder = wc._Decoders[0];
+            ((Accelerometer)wc._Sensors[0])._Max = 1024;
+            ((Accelerometer)wc._Sensors[0])._Min = 0;
+            wc._Sensors[0]._Loaded = true;
+            wc._Decoders[0].Subscribe(Wockets.Data.SensorDataType.COMMAND_MODE_ENTERED, new Response.ResponseHandler(this.CommandCallback));
+            wc._Decoders[0].Subscribe(Wockets.Data.SensorDataType.BAUD_RATE, new Response.ResponseHandler(this.CommandCallback));
+            wc.Initialize();  
         }
 
         private void label1_Click(object sender, EventArgs e)
@@ -66,37 +81,96 @@ namespace WocketConfigurationApp
         }
         private string latestReading;
 
-        private string mac_address = ""; //"0006660250da";
-        void OnNewReading_Wocket(object sender, EventArgs e)
-        {
+ 
 
-            latestReading = bt_wocket.LastValue.ToString();
-            updateText_Wocket();
+
+
+
+        private void pToolStripMenuItem_Click(object sender, EventArgs e)
+        {
 
         }
 
-        private void updateText_Wocket()
+        Form3 plotterForm = null;
+        private void plotToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (CurrentWockets._Controller != null)
+            {
+                if (!plotToolStripMenuItem.Checked)
+                {
+                    if ((plotterForm == null) || (!plotterForm.Visible))
+                        plotterForm = new Form3();
+                    if (!plotterForm.Visible)
+                        plotterForm.Show();
+
+                }
+                else
+                {
+                    plotterForm.Close();
+                    plotterForm = null;
+                }
+            }
+            
+        }
+
+        delegate void UpdateCommandCallback(object sender, Wockets.Decoders.Response.ResponseArgs e);
+
+        private void CommandCallback(object sender, Wockets.Decoders.Response.ResponseArgs e)
         {
             if (this.InvokeRequired)
-            { this.BeginInvoke(new updateTextDelegate_Wocket(updateText_Wocket)); }
+            {
+                UpdateCommandCallback d = new UpdateCommandCallback(CommandCallback);
+                this.Invoke(d, new object[] { sender, e });
+            }
             else
             {
-                //update_text_fields(2);
-                // textBox_info.Text = latestReading;
+                if (e._Response.Type == Wockets.Data.SensorDataType.COMMAND_MODE_ENTERED)
+                {
+                    CurrentWockets._Controller._Sensors[0]._Mode = SensorModes.Command;
+                    ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(new byte[3] { 13, 13, 13 });
+                    this.label27.Text = "Connected: Command Mode";
 
-                //find a better way to do this
-                if (bt_wocket.IsConnected())
-                    label_status.Text = "Connected to " +this.wocket.DeviceAddress.ToString().Substring(7) + " ...";
-                else
-                    label_status.Text = "Disconnected from " + this.wocket.DeviceAddress.ToString().Substring(7) + " ...";
+                }
+                else if (e._Response.Type == Wockets.Data.SensorDataType.BAUD_RATE)
+                {
+                    if (((Wockets.Data.Responses.BaudRateResponse)e._Response)._BaudRate == "38.4")
+                        this.comboBox1.SelectedIndex = 5;
+                }
+                this.Refresh();
             }
         }
-
-
-        private void Form2_FormClosing(object sender, FormClosingEventArgs e)
+        private void timer1_Tick(object sender, EventArgs e)
         {
-            if (bt_wocket != null)
-                bt_wocket.Stop();
+            
+            if (CurrentWockets._Controller._Receivers[0]._Status == ReceiverStatus.Disconnected)
+                this.label27.Text = "Disconnected";
+            else if (CurrentWockets._Controller._Receivers[0]._Status == ReceiverStatus.Reconnecting)
+                this.label27.Text = "Reconnecting";
+            else
+            {
+
+                if (CurrentWockets._Controller._Sensors[0]._Mode == SensorModes.Data)
+                {
+                    this.label27.Text = "Connected: Data Mode";
+                    CurrentWockets._Controller._Decoders[0]._Mode = DecoderModes.Command;
+                    Command c = new EnterCommandMode();
+                    ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(c._Bytes);
+
+                }
+                else               
+                    this.label27.Text = "Connected: Command Mode";
+                
+            }
+           
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (CurrentWockets._Controller._Sensors[0]._Mode == SensorModes.Command)
+            {
+                Command c = new GET_BR();
+                ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(c._Bytes);               
+            }
         }
     }
 }

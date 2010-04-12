@@ -44,6 +44,19 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
 #endif
 
 
+
+        /// <summary>
+        /// The constructor intializes the state of the Bluetooth stack to On
+        /// </summary>
+        public MicrosoftBluetoothStack()
+        {
+            this.Mode = RadioMode.PowerOff;
+            this.Mode = RadioMode.Connectable;
+        }
+
+        /// <summary>
+        /// Change the status of the Bluetooth stack, connectable, discoverable or off
+        /// </summary>
         public RadioMode Mode
         {
             get
@@ -78,20 +91,32 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
         }
 
 
-        public MicrosoftBluetoothStack()
-        {
-            this.Mode= RadioMode.PowerOff;
-            this.Mode = RadioMode.Connectable;
-        }
-
-       
+        /// <summary>
+        /// Initialize the status of the Bluetooth stack to connectable
+        /// </summary>
+        /// <returns>True if connected, otherwise false</returns>
         public override bool Initialize()
         {
-            this.Mode = RadioMode.Connectable;
+            try
+            {     
+                this.Mode = RadioMode.Connectable;
+            }
+            catch
+            {
+                return false;
+            }
             return true;
         }
 
 
+        /// <summary>
+        /// Open a serial connection to a remote device
+        /// </summary>
+        /// <param name="buffer">A handle to a circular receive buffer</param>
+        /// <param name="sbuffer">A handle to a circular send buffer</param>
+        /// <param name="address">A machine independent address of the remote bluetooth device</param>
+        /// <param name="pin">A pin for the remote bluetooth device</param>
+        /// <returns>A bluetooth stream on success, otherwise null</returns>
         public override BluetoothStream Connect(CircularBuffer buffer,CircularBuffer sbuffer,byte[] address, string pin)
         {
             try
@@ -101,35 +126,29 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                     return MicrosoftBluetoothStream.Open(buffer,sbuffer, address, pin);
                 }                               
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return null;
             }            
         }
 
-        public override BluetoothStatus _Status
-        {
-            get
-            {
-                
-                if (this.Mode == RadioMode.Connectable)
-                    this.status = BluetoothStatus.Up;
-                else if (this.Mode == RadioMode.PowerOff)
-                    this.status = BluetoothStatus.Down;
-                else
-                    this.status = BluetoothStatus.Error;
-
-                return this.status;
-            }
-        }
-        public override Hashtable Search()
-        {
-            return null;
-        }
+        /// <summary>
+        /// Shuts down the bluetooth stack
+        /// </summary>
         public override void Dispose()
         {
             this.Mode = RadioMode.PowerOff;
         }
+ 
+        /// <summary>
+        /// Not implemented at the moement
+        /// </summary>
+        /// <returns></returns>
+        public override Hashtable Search()
+        {
+            return null;
+        }
+      
 
 
     }

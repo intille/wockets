@@ -4,7 +4,7 @@ using System.Text;
 using Wockets.Data;
 using Wockets.Utils;
 #if (PocketPC)
-using Microsoft.ApplicationBlocks.MemoryMappedFile;
+using Wockets.Utils.IPC.MMF;
 #endif
 
 namespace Wockets.Decoders
@@ -21,8 +21,8 @@ namespace Wockets.Decoders
         
         //format in the MMF file will be as follows
         //full time stamp (4 bytes), X (2 bytes), Y (2 bytes), Z (2 bytes)
-        
 
+        public DecoderModes _Mode = DecoderModes.Data;
         public SensorData[] _Data;
         private SensorData[] response;
         private int size;                

@@ -28,10 +28,11 @@ namespace DataMerger
             InitializeComponent();
             progressForm = new ProgressForm();
             progressForm.Show();
+   
 
         }
 
-
+        private static Form2 f;
         private void button2_Click(object sender, EventArgs e)
         {
             DialogResult result = this.folderBrowserDialog1.ShowDialog();
@@ -322,6 +323,9 @@ namespace DataMerger
                     {
                     }
 
+                    f= new Form2(this.textBox1.Text);
+                    f.Show();
+
                 }
                 catch (Exception ex)
                 {
@@ -376,6 +380,7 @@ namespace DataMerger
             this.timer1.Enabled = true;
             aConversionThread = new Thread(new ThreadStart(ConversionThread));
             aConversionThread.Start();
+            
 
 
         }
@@ -1235,7 +1240,17 @@ namespace DataMerger
             bool gpsFound = false;
             bool rtiFound = false;
             bool rt3Found=false;
+            double actigraphOffset = 0;
+            double sensewearOffset = 0;
+            double zephyrOffset = 0;
+            double columbiaOffset = 0;
+            double rtiOffset = 0;
 
+            actigraphOffset = f._ActigraphSeconds;
+            sensewearOffset = f._SensewearSeconds;
+            zephyrOffset = f._ZephyrSeconds;
+            columbiaOffset = f._ColumbiaSeconds;
+            rtiOffset = f._RTISeconds;
 
             WocketsConfiguration configuration = new WocketsConfiguration();
             try
@@ -1339,7 +1354,7 @@ namespace DataMerger
                             //if (isPM)
                             //    rtiTime.AddHours(12.0);
 
-                            
+                            rtiTime=rtiTime.AddSeconds(rtiOffset);
                             rtiUnixTime = UnixTime.GetUnixTime(rtiTime);
                             string rtiKey = rtiTime.Year + "-" + rtiTime.Month + "-" + rtiTime.Day + "-" + rtiTime.Hour + "-" + rtiTime.Minute + "-" + rtiTime.Second;
                             string rtiLine = "";
@@ -1467,6 +1482,10 @@ namespace DataMerger
                             string[] dateTokens = tokens[1].Split('/');
                             string[] timeTokens = tokens[2].Split(':');
                             columbiaTime = new DateTime(Convert.ToInt32("20"+dateTokens[2]), Convert.ToInt32(dateTokens[0]), Convert.ToInt32(dateTokens[1]), Convert.ToInt32(timeTokens[0]), Convert.ToInt32(timeTokens[1]), Convert.ToInt32(timeTokens[2]));
+
+                           // if (columbiaOffset > 0)
+                             columbiaTime=columbiaTime.AddSeconds(columbiaOffset);
+
                             columbiaUnixTime = UnixTime.GetUnixTime(columbiaTime);
                             string columbiaKey = columbiaTime.Year + "-" + columbiaTime.Month + "-" + columbiaTime.Day + "-" + columbiaTime.Hour + "-" + columbiaTime.Minute + "-" + columbiaTime.Second;
                             string columbiaLine = "";
@@ -1641,6 +1660,8 @@ namespace DataMerger
                         Match m1 = Regex.Match(tokens[0].Trim(), "([0-9]+)/([0-9]+)/([0-9]+)");
                         Match m2 = Regex.Match(tokens[1].Trim(), "([0-9]+):([0-9]+):([0-9]+)");
                         actigraphTime = new DateTime(Convert.ToInt32("20" + m1.Groups[3].Value), Convert.ToInt32(m1.Groups[1].Value), Convert.ToInt32(m1.Groups[2].Value), Convert.ToInt32(m2.Groups[1].Value), Convert.ToInt32(m2.Groups[2].Value), Convert.ToInt32(m2.Groups[3].Value));
+                        //if (actigraphOffset > 0)
+                          actigraphTime = actigraphTime.AddSeconds(actigraphOffset);
                         actigraphUnixTime = UnixTime.GetUnixTime(actigraphTime);
 
                         do
@@ -1651,6 +1672,8 @@ namespace DataMerger
                                 m1 = Regex.Match(tokens[0], "([0-9]+)/([0-9]+)/([0-9]+)");
                                 m2 = Regex.Match(tokens[1], "([0-9]+):([0-9]+):([0-9]+)");
                                 actigraphTime = new DateTime(Convert.ToInt32("20" + m1.Groups[3].Value), Convert.ToInt32(m1.Groups[1].Value), Convert.ToInt32(m1.Groups[2].Value), Convert.ToInt32(m2.Groups[1].Value), Convert.ToInt32(m2.Groups[2].Value), Convert.ToInt32(m2.Groups[3].Value));
+                                //if (actigraphOffset > 0)
+                                    actigraphTime = actigraphTime.AddSeconds(actigraphOffset);
                                 actigraphUnixTime = UnixTime.GetUnixTime(actigraphTime);
                                 string actigraphKey = actigraphTime.Year + "-" + actigraphTime.Month + "-" + actigraphTime.Day + "-" + actigraphTime.Hour + "-" + actigraphTime.Minute + "-" + actigraphTime.Second;
                                 if (actigraphStart == null)
@@ -1692,6 +1715,8 @@ namespace DataMerger
                         //Match m1 = Regex.Match(tokens[0].Trim(), "([0-9]+)/([0-9]+)/([0-9]+)");
                         //Match m2 = Regex.Match(tokens[1].Trim(), "([0-9]+):([0-9]+):([0-9]+)");
                         actigraphTime = new DateTime(actiyear, actimonth, actiday, actihour, actiminute, actisecond);//(Convert.ToInt32("20" + m1.Groups[3].Value), Convert.ToInt32(m1.Groups[1].Value), Convert.ToInt32(m1.Groups[2].Value), Convert.ToInt32(m2.Groups[1].Value), Convert.ToInt32(m2.Groups[2].Value), Convert.ToInt32(m2.Groups[3].Value));
+                       // if (actigraphOffset > 0)
+                            actigraphTime = actigraphTime.AddSeconds(actigraphOffset);
                         actigraphUnixTime = UnixTime.GetUnixTime(actigraphTime);
 
                         do
@@ -1745,6 +1770,8 @@ namespace DataMerger
                         //Match m1 = Regex.Match(tokens[0].Trim(), "([0-9]+)/([0-9]+)/([0-9]+)");
                         //Match m2 = Regex.Match(tokens[1].Trim(), "([0-9]+):([0-9]+):([0-9]+)");
                         actigraphTime = new DateTime(actiyear, actimonth, actiday, actihour, actiminute, actisecond);//(Convert.ToInt32("20" + m1.Groups[3].Value), Convert.ToInt32(m1.Groups[1].Value), Convert.ToInt32(m1.Groups[2].Value), Convert.ToInt32(m2.Groups[1].Value), Convert.ToInt32(m2.Groups[2].Value), Convert.ToInt32(m2.Groups[3].Value));
+                       //if (actigraphOffset > 0)
+                            actigraphTime = actigraphTime.AddSeconds(actigraphOffset);
                         actigraphUnixTime = UnixTime.GetUnixTime(actigraphTime);
 
                         do
@@ -1801,6 +1828,10 @@ namespace DataMerger
                             string[] dateTokens = tokens1[0].Split('/');
                             string[] timeTokens = (tokens1[1].Split('.'))[0].Split(':');
                             zephyrTime = new DateTime(Convert.ToInt32(dateTokens[0]), Convert.ToInt32(dateTokens[1]), Convert.ToInt32(dateTokens[2]), Convert.ToInt32(timeTokens[0]), Convert.ToInt32(timeTokens[1]), Convert.ToInt32(timeTokens[2]));
+
+                           // if (zephyrOffset > 0)
+                                zephyrTime=zephyrTime.AddSeconds(zephyrOffset);
+
                             zephyrUnixTime = UnixTime.GetUnixTime(zephyrTime);
                             string zephyrKey = zephyrTime.Year + "-" + zephyrTime.Month + "-" + zephyrTime.Day + "-" + zephyrTime.Hour + "-" + zephyrTime.Minute + "-" + zephyrTime.Second;
                             string zephyrLine = "";
@@ -2438,6 +2469,8 @@ namespace DataMerger
                             string[] timeTokens = tsTokens[1].Split('.');
                             timeTokens = timeTokens[0].Split(':');
                             sensewearTime = new DateTime(Convert.ToInt32(dateTokens[0]), Convert.ToInt32(dateTokens[1]), Convert.ToInt32(dateTokens[2]), Convert.ToInt32(timeTokens[0]), Convert.ToInt32(timeTokens[1]), Convert.ToInt32(timeTokens[2]));
+                            //if (sensewearOffset > 0)
+                                sensewearTime=sensewearTime.AddSeconds(sensewearOffset);
                             sensewearUnixTime = UnixTime.GetUnixTime(sensewearTime);
                         }
                         else
@@ -2446,11 +2479,14 @@ namespace DataMerger
                             DaylightTime daylight = localZone.GetDaylightChanges(DateTime.Now.Year);
                             sensewearUnixTime = Convert.ToInt64(tokens[0].Trim()) - (8 * 60 * 60 * 1000);                            
                             UnixTime.GetDateTime((long)sensewearUnixTime, out sensewearTime);
+
                             if (!TimeZone.IsDaylightSavingTime(new DateTime(sensewearTime.Year,sensewearTime.Month,sensewearTime.Day), daylight))          
                                 sensewearUnixTime = Convert.ToInt64(tokens[0].Trim()) - (8 * 60 * 60 * 1000);
                             else
                                 sensewearUnixTime = Convert.ToInt64(tokens[0].Trim()) - (7 * 60 * 60 * 1000);
 
+                            //if (sensewearOffset > 0)
+                                sensewearTime = sensewearTime.AddSeconds(sensewearOffset);
                             UnixTime.GetDateTime((long)sensewearUnixTime, out sensewearTime);
                         }
 

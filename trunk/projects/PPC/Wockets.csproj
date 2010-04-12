@@ -1,4 +1,4 @@
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -175,9 +175,6 @@
     <Compile Include="..\..\src\Wockets\Sensors\Accelerometers\Wocket.cs">
       <Link>Sensors\Accelerometers\Wocket.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Sensors\HeartRate\HeartRateSensor.cs">
-      <Link>Sensors\HeartRate\HeartRateSensor.cs</Link>
-    </Compile>
     <Compile Include="..\..\src\Wockets\Sensors\Sensor.cs">
       <Link>Sensors\Sensor.cs</Link>
     </Compile>
@@ -256,20 +253,14 @@
     <Compile Include="..\..\src\Wockets\Utils\ByteWriter.cs">
       <Link>Utils\ByteWriter.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Utils\FileReader.cs">
-      <Link>Utils\FileReader.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Utils\FileWriter.cs">
-      <Link>Utils\FileWriter.cs</Link>
-    </Compile>
     <Compile Include="..\..\src\Wockets\Data\Responses\BatteryResponse.cs">
       <Link>Data\Responses\BatteryResponse.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Utils\Barrier.cs">
-      <Link>Utils\Barrier.cs</Link>
+    <Compile Include="..\..\src\Wockets\Utils\IPC\Barrier.cs">
+      <Link>Utils\IPC\Barrier.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Utils\MonitorEx.cs">
-      <Link>Utils\MonitorEx.cs</Link>
+    <Compile Include="..\..\src\Wockets\Utils\IPC\MonitorEx.cs">
+      <Link>Utils\IPC\MonitorEx.cs</Link>
     </Compile>
     <Compile Include="..\..\src\Wockets\Utils\network\Bluetooth\BluetoothStack.cs">
       <Link>Utils\network\Bluetooth\BluetoothStack.cs</Link>
@@ -358,17 +349,17 @@
     <Compile Include="..\..\src\Wockets\Utils\network\Bluetooth\Microsoft\MicrosoftBluetoothEndpoint.cs">
       <Link>Utils\network\Bluetooth\Microsoft\MicrosoftBluetoothEndpoint.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\IPC\MMF\MemoryMappedFileHelper.cs">
-      <Link>IPC\MMF\MemoryMappedFileHelper.cs</Link>
+    <Compile Include="..\..\src\Wockets\Utils\IPC\MMF\MemoryMappedFileHelper.cs">
+      <Link>Utils\IPC\MMF\MemoryMappedFileHelper.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\IPC\MMF\MemoryMappedFileStream.cs">
-      <Link>IPC\MMF\MemoryMappedFileStream.cs</Link>
+    <Compile Include="..\..\src\Wockets\Utils\IPC\MMF\MemoryMappedFileStream.cs">
+      <Link>Utils\IPC\MMF\MemoryMappedFileStream.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\IPC\NamedEvents.cs">
-      <Link>IPC\NamedEvents.cs</Link>
+    <Compile Include="..\..\src\Wockets\Utils\IPC\NamedEvents.cs">
+      <Link>Utils\IPC\NamedEvents.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\IPC\Semaphore.cs">
-      <Link>IPC\Semaphore.cs</Link>
+    <Compile Include="..\..\src\Wockets\Utils\IPC\Semaphore.cs">
+      <Link>Utils\IPC\Semaphore.cs</Link>
     </Compile>
     <Compile Include="..\..\src\Wockets\Kernel\Types\ApplicationResponse.cs">
       <Link>Kernel\Types\ApplicationResponse.cs</Link>
@@ -442,24 +433,31 @@
     <Compile Include="..\..\src\Wockets\CurrentWockets.cs">
       <Link>CurrentWockets.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Configuration\MemoryConfiguration.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Configuration\MemoryConfiguration.cs">
       <Link>Data\Configuration\MemoryConfiguration.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Configuration\SoftwareConfiguration.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Configuration\SoftwareConfiguration.cs">
       <Link>Data\Configuration\SoftwareConfiguration.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Configuration\WocketsConfiguration.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Configuration\WocketsConfiguration.cs">
       <Link>Data\Configuration\WocketsConfiguration.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Features\FFT.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Features\FFT.cs">
       <Link>Data\Features\FFT.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Features\FullFeatureExtractor.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Features\FullFeatureExtractor.cs">
       <Link>Data\Features\FullFeatureExtractor.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Utils\feedback\Vibrator.cs" >
+    <Compile Include="..\..\src\Wockets\Utils\feedback\Vibrator.cs">
       <Link>Utils\feedback\Vibrator.cs</Link>
     </Compile>
+    <Compile Include="..\..\src\Wockets\Exceptions\ErrorCodes.cs">
+      <Link>Exceptions\ErrorCodes.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\CommandModeEnterResponse.cs">
+      <Link>Data\Responses\CommandModeEnterResponse.cs</Link>
+    </Compile>
+    <Compile Include="Decoders\DecoderModes.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="WocketsWeka.csproj">

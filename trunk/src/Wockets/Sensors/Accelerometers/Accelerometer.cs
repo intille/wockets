@@ -7,285 +7,264 @@ using Wockets.Sensors;
 using Wockets.Decoders;
 using Wockets.Receivers;
 using Wockets.Utils;
+using Wockets.Data.Configuration;
 #if (PocketPC)
-using Microsoft.ApplicationBlocks.MemoryMappedFile;
+using Wockets.Utils.IPC.MMF;
 #endif
 
 namespace Wockets.Sensors.Accelerometers
 {
+    /// <summary>
+    /// An abstract class that represents a 3-axis accelerometer and includes the main methods to process
+    /// accelerometer data
+    /// </summary>
     public abstract class Accelerometer : Sensor
     {
 
         #region Serialization Constants
-
+        
+        /// <summary>
+        /// The XML element that stores calibration data
+        /// </summary>
         protected const string CALIBRATION_ELEMENT = "CALIBRATION";
+        
+        /// <summary>
+        /// The accelerometer range
+        /// </summary>
         protected const string RANGE_ELEMENT = "RANGE";
-
-
+        
+        /// <summary>
+        /// The maximum value of the accelerometer, 1023 for wockets
+        /// </summary>
         protected const string MAX_ATTRIBUTE = "max";
+        
+        /// <summary>
+        /// The minimum value of the accelerometer, 0 for wockets
+        /// </summary>
         protected const string MIN_ATTRIBUTE = "min";
+
+        /// <summary>
+        /// The attribute for the x-axis accelerometer value at 1G
+        /// </summary>
         protected const string X1G_ATTRIBUTE = "x1g";
+
+        /// <summary>
+        /// The attribute for the x-axis accelerometer value at -1G
+        /// </summary>
         protected const string XN1G_ATTRIBUTE = "xn1g";
+
+        /// <summary>
+        /// The attribute for the y-axis accelerometer value at 1G
+        /// </summary>
         protected const string Y1G_ATTRIBUTE = "y1g";
+
+        /// <summary>
+        /// The attribute for the y-axis accelerometer value at -1G
+        /// </summary>
         protected const string YN1G_ATTRIBUTE = "yn1g";
+
+        /// <summary>
+        /// The attribute for the z-axis accelerometer value at 1G
+        /// </summary>
         protected const string Z1G_ATTRIBUTE = "z1g";
+
+        /// <summary>
+        /// The attribute for the z-axis accelerometer value at -1G
+        /// </summary>
         protected const string ZN1G_ATTRIBUTE = "zn1g";
 
+        /// <summary>
+        /// The attribute for the x-axis standard deviation
+        /// </summary>
         protected const string XSTD_ATTRIBUTE = "xstd";
+
+        /// <summary>
+        /// The attribute for the y-axis standard deviation
+        /// </summary>
         protected const string YSTD_ATTRIBUTE = "ystd";
+
+        /// <summary>
+        /// The attribute for the z-axis standard deviation
+        /// </summary>
         protected const string ZSTD_ATTRIBUTE = "zstd";
         #endregion Serialization Constants
 
-
         #region calibration data
-        private double x1g;
-        private double xn1g;
-        private double y1g;
-        private double yn1g;
-        private double z1g;
-        private double zn1g;
-        private double xstd;
-        private double ystd;
-        private double zstd;
-        private double min;
-        private double max;
+   
+        /// <summary>
+        /// The x axis value at 1G
+        /// </summary>
+        public double _X1g;
+
+        /// <summary>
+        /// The x axis value at -1G
+        /// </summary>
+        public double _Xn1g;
+
+        /// <summary>
+        /// The y axis value at 1G
+        /// </summary>
+        public double _Y1g;
+
+        /// <summary>
+        /// The y axis value at -1G
+        /// </summary>
+        public double _Yn1g;
+
+        /// <summary>
+        /// The z axis value at 1G
+        /// </summary>
+        public double _Z1g;
+
+        /// <summary>
+        /// The z axis value at -1G
+        /// </summary>
+        public double _Zn1g;
+
+        /// <summary>
+        /// The x axis standard deviation
+        /// </summary>
+        public double _XStd;
+
+        /// <summary>
+        /// The y axis standard deviation
+        /// </summary>
+        public double _YStd;
+
+        /// <summary>
+        /// The z axis standard deviation
+        /// </summary>
+        public double _ZStd;
+
+        /// <summary>
+        /// The minimum value on an axis
+        /// </summary>
+        public double _Min;
+
+        /// <summary>
+        /// The maximum value on an axis
+        /// </summary>
+        public double _Max;
         #endregion calibration data
 
         #region IO storage variables
+        
+        /// <summary>
+        /// Specifies the current hour
+        /// </summary>
         private int presentHour = -1;
+
+        /// <summary>
+        /// Specifies the storage path to the day
+        /// </summary>
         private string dayPath = "";
+
+        /// <summary>
+        /// A reference to the current data writer
+        /// </summary>
         private ByteWriter bw = null;
+
+        /// <summary>
+        /// The full path to the current data file
+        /// </summary>
         private string currentDataFile = "";
+
+        /// <summary>
+        /// A prefix of the data file
+        /// </summary>
         private const string FILE_TYPE_PREFIX = "WocketsAccelBytes";
+
+        /// <summary>
+        /// A suffix of the data file
+        /// </summary>
         private const string FILE_EXT = "PLFormat";
+
+        /// <summary>
+        /// The maximum value between writing full timestamps to the file
+        /// </summary>
         private static int TIMESTAMP_AFTER_SAMPLES = 200;
 
+        /// <summary>
+        /// A counter to determine the next time to save a full timestamp
+        /// </summary>
         private int timeSaveCount = TIMESTAMP_AFTER_SAMPLES;
+
+        /// <summary>
+        /// Stores the current packet timestamp
+        /// </summary>
         private double aUnixTime = 0;
+
+        /// <summary>
+        /// Stores the previous packet timestamp
+        /// </summary>
         private double lastUnixTime = 0;
+
+        /// <summary>
+        /// True if a full timestamp need to be written
+        /// </summary>
         private bool isForceTimestampSave = true;
+
+
+        /// <summary>
+        /// A counter that stores the time relative to the previous flush
+        /// </summary>
         private int flushTimer = 0;        
-        public static int MAX_FLUSH_TIME = 2000;
+
+        /// <summary>
+        /// Specifies the maximum time between flushes
+        /// </summary>
+        private static int MAX_FLUSH_TIME = 2000;
 
         #endregion IO storage variables
 
+        #region Memory Mapped File Definitions
 #if (PocketPC)
-        private MemoryMappedFileStream sdata = null;
-        private MemoryMappedFileStream shead = null;
-#endif
-        private int sdataSize = 0;
-        byte[] head = new byte[4];
-        public Accelerometer(SensorClasses sensorclass):base(SensorTypes.ACCEL,sensorclass)
-        {
-
-        }
-
-
-
-        public double _Min
-        {
-            get
-            {
-                return this.min;
-            }
-
-            set
-            {
-                this.min = value;
-            }
-        }
-
-        public double _Max
-        {
-            get
-            {
-                return this.max;
-            }
-
-            set
-            {
-                this.max = value;
-            }
-        }
-        public double _XSTD
-        {
-            get
-            {
-                return this.xstd;
-            }
-            set
-            {
-                this.xstd = value;
-            }
-        }
-
-        public double _YSTD
-        {
-            get
-            {
-                return this.ystd;
-            }
-            set
-            {
-                this.ystd = value;
-            }
-        }
-
-        public double _ZSTD
-        {
-            get
-            {
-                return this.zstd;
-            }
-            set
-            {
-                this.zstd = value;
-            }
-        }
-
-
-        public double _X1G
-        {
-            get
-            {
-                return this.x1g;
-            }
-            set
-            {
-                this.x1g = value;
-            }
-        }
-
-        public double _XN1G
-        {
-            get
-            {
-                return this.xn1g;
-            }
-            set
-            {
-                this.xn1g = value;
-            }
-        }
-
-
-        public double _Y1G
-        {
-            get
-            {
-                return this.y1g;
-            }
-            set
-            {
-                this.y1g = value;
-            }
-        }
-
-        public double _YN1G
-        {
-            get
-            {
-                return this.yn1g;
-            }
-            set
-            {
-                this.yn1g = value;
-            }
-        }
-
-
-        public double _Z1G
-        {
-            get
-            {
-                return this.z1g;
-            }
-            set
-            {
-                this.z1g = value;
-            }
-        }
-
-        public double _ZN1G
-        {
-            get
-            {
-                return this.zn1g;
-            }
-            set
-            {
-                this.zn1g = value;
-            }
-        }
-
-        #region File Storage Methods
         /// <summary>
-        /// Determine and create the directory where the raw data is saved in 1-hour chunks. 
+        /// For shared memory mode, a reference to the memory mapped file associated with this sensor
         /// </summary>
-        private void DetermineFilePath()
-        {
-            if (presentHour != DateTime.Now.Hour)
-            {
-                if (bw != null)
-                    bw.CloseFile();
-                presentHour = DateTime.Now.Hour;
-                // Need to create a new directory and switch the file name
-                dayPath = DirectoryStructure.DayDirectoryToUse(this._RootStorageDirectory);
+        private MemoryMappedFileStream sdata = null;
 
-                // Make sure hour directory exists 
-                currentDataFile =  dayPath + "\\" + presentHour + "\\";
-                if (!System.IO.Directory.Exists(currentDataFile))
-                    System.IO.Directory.CreateDirectory(currentDataFile);
+        /// <summary>
+        /// For shared memory mode, a reference to the file that stores the head pointer of the memory mapped file
+        /// </summary>
+        private MemoryMappedFileStream shead = null;
 
-                currentDataFile = currentDataFile + FILE_TYPE_PREFIX + "." +
-                               DirectoryStructure.GetDate() + "." + this._ID + "." + FILE_EXT;
+        /// <summary>
+        /// Specifies the size in bytes of the data memory mapped file
+        /// </summary>
+        private int sdataSize = 0;
 
-                bw = new ByteWriter(currentDataFile, true);
-                bw.OpenFile();
+        /// <summary>
+        /// A byte buffer to read the data pointer from the memory mapped file
+        /// </summary>
+        private byte[] head = new byte[4];
+#endif
+        #endregion Memory Mapped File Definitions
 
-                // Ensure that the first data point in the new file will start
-                // with the full, rather than differential, timecode info. 
-                isForceTimestampSave = true;
-            }
 
-        }
+        #region File Storage Definitions
 
         private int diffMS = 0;
         private byte diffMSByte = 0;
-
-        private void WriteTimeDiff(double aUnixTime, double lastUnixTime, bool isForceTimeCodeSave)
-        {
-
-            diffMS = (int)(aUnixTime - lastUnixTime);
-
-            // Save a full timestamp if forced
-            // or time is > than 255 ms
-            if (isForceTimeCodeSave || (diffMS > 254))
-            {
-                //if (diffMS >= 254)
-                //    Console.WriteLine("Warning; Max on MS diff: " + diffMS);
-                diffMSByte = (byte)255;
-                bw.WriteByte(diffMSByte);
-                WriteTimeStampPLFormat(aUnixTime, bw);
-            }
-            else // diff MS in range and no forced timestamp save
-            {
-                diffMSByte = (byte)diffMS;
-                bw.WriteByte(diffMSByte);
-            }
-
-        }
-
         private byte[] retBytes = new byte[6];
-        private void WriteTimeStampPLFormat(double unixTime, ByteWriter byteWriter)
-        {
-            WocketsTimer.GetUnixTimeBytes(unixTime, retBytes);
-            byteWriter.WriteBytes(retBytes, 6);
-        }
-        #endregion File Storage Methods
-        int tail=0;
-        double tailUnixTimestamp=0;
+        private int tail = 0;
+        private double tailUnixTimestamp = 0;
+        AccelerationData data = new WocketsAccelerationData();
+        byte[] timestamp = new byte[sizeof(double)];
+        byte[] acc = new byte[sizeof(short)];
+        #endregion File Storage Definitions
 
+        /// <summary>
+        /// A constructor that intializes an accelerometer
+        /// </summary>
+        /// <param name="sensorclass">Specifies the class of the sensor (e.g. wocket, MITes)</param>
+        public Accelerometer(SensorClasses sensorclass):base(SensorTypes.ACCEL,sensorclass)
+        {
+        }
+
+        /// <summary>
+        /// Releases any allocated resources and closes references to files
+        /// </summary>
         public override void Dispose()
         {
 
@@ -306,34 +285,19 @@ namespace Wockets.Sensors.Accelerometers
             
         }
 
-       
-        private int lastHead = 0;
-        AccelerationData prevdata = null;
-        AccelerationData data = new WocketsAccelerationData();
-        byte[] timestamp = new byte[sizeof(double)];
-        byte[] acc = new byte[sizeof(short)];
+ 
+        /// <summary>
+        /// Saves data to a binary file
+        /// </summary>
         public override void Save()
         {
 #if (PocketPC)           
             if (_Saving)
             {
-                if (sdata == null)
-                {
-                    this.sdataSize = (int)Decoder._DUSize * Wockets.Decoders.Accelerometers.WocketsDecoder.BUFFER_SIZE;
-                    sdata = new MemoryMappedFileStream("\\Temp\\wocket" + this._ID + ".dat", "wocket" + this._ID, (uint)this.sdataSize, MemoryProtection.PageReadWrite);
-                    shead = new MemoryMappedFileStream("\\Temp\\whead" + this._ID + ".dat", "whead" + this._ID, sizeof(int), MemoryProtection.PageReadWrite);
 
-                    sdata.MapViewToProcessMemory(0, this.sdataSize);
-                    shead.MapViewToProcessMemory(0, sizeof(int));
-                    shead.Read(head, 0, 4);
-                    int lastHead = BitConverter.ToInt32(head, 0);
-                    tail = lastHead;
-                    shead.Seek(0, System.IO.SeekOrigin.Begin);
-                    sdata.Seek((lastHead * (sizeof(double) + 3 * sizeof(short))), System.IO.SeekOrigin.Begin);
-                }
-
+                #region Check if the data file need to be flushed
                 flushTimer++;
-                if (flushTimer >= MAX_FLUSH_TIME)
+                if ((flushTimer >= MAX_FLUSH_TIME) && (bw!=null))
                 {
                     bw.Flush();
                     bw.CloseFile();
@@ -341,80 +305,130 @@ namespace Wockets.Sensors.Accelerometers
                     bw.OpenFile(false);
                     flushTimer = 0;
                 }
+                #endregion Check if the data file need to be flushed
 
-                shead.Read(head, 0, 4);
-                int currentHead = BitConverter.ToInt32(head, 0);
-                shead.Seek(0, System.IO.SeekOrigin.Begin);
-               
-               /*if ((currentHead==0) || (((tail <= currentHead) && ((currentHead - tail) < (this._Decoder._Data.Length / 6))) ||
-                    ((tail>currentHead) && ((this._Decoder._Data.Length -tail +currentHead)<(this._Decoder._Data.Length / 6)))))
-                    return;
-                else //save up to where the head points
-                    currentHead--;
-               
-                 */              
-
-                DetermineFilePath();
-                
-
- 
-                //AccelerationData data = ((AccelerationData)this._Decoder._Data[tail]);
-                while (tail != currentHead)// && (data.UnixTimeStamp > 0))
+                #region Determine the head of the data buffer
+                int currentHead = -1;
+                if (CurrentWockets._Configuration._MemoryMode == MemoryConfiguration.SHARED)
                 {
-
-
-                    sdata.Read(timestamp, 0, sizeof(double));
-                    data.UnixTimeStamp = BitConverter.ToDouble(timestamp, 0);
-                    sdata.Read(acc, 0, sizeof(short));
-                    data.X = BitConverter.ToInt16(acc, 0);
-                    sdata.Read(acc, 0, sizeof(short));
-                    data.Y = BitConverter.ToInt16(acc, 0);
-                    sdata.Read(acc, 0, sizeof(short));
-                    data.Z = BitConverter.ToInt16(acc, 0);
-
-                    aUnixTime = data.UnixTimeStamp;
-
-                    if (aUnixTime < lastUnixTime)
+                    if (sdata == null)
                     {
-                        string s = "Data overwritten without saving Accelerometer.cs Save " + this._ID + " " + aUnixTime + " " + lastUnixTime;
-                        Logger.Error(s);
-                        break;
+                        this.sdataSize = (int)Decoder._DUSize * Wockets.Decoders.Accelerometers.WocketsDecoder.BUFFER_SIZE;
+                        sdata = new MemoryMappedFileStream("\\Temp\\wocket" + this._ID + ".dat", "wocket" + this._ID, (uint)this.sdataSize, MemoryProtection.PageReadWrite);
+                        shead = new MemoryMappedFileStream("\\Temp\\whead" + this._ID + ".dat", "whead" + this._ID, sizeof(int), MemoryProtection.PageReadWrite);
+
+                        sdata.MapViewToProcessMemory(0, this.sdataSize);
+                        shead.MapViewToProcessMemory(0, sizeof(int));
+                        shead.Read(head, 0, 4);
+                        int lastHead = BitConverter.ToInt32(head, 0);
+                        tail = lastHead;
+                        shead.Seek(0, System.IO.SeekOrigin.Begin);
+                        sdata.Seek((lastHead * (sizeof(double) + 3 * sizeof(short))), System.IO.SeekOrigin.Begin);
                     }
-        
 
-                    // Roughly once per second save full timestamp, no matter what
-                    if (isForceTimestampSave || (timeSaveCount == TIMESTAMP_AFTER_SAMPLES))
+                    shead.Read(head, 0, 4);
+                    currentHead = BitConverter.ToInt32(head, 0);
+                    shead.Seek(0, System.IO.SeekOrigin.Begin);
+                }
+                else
+                    currentHead = this._Decoder._Head;
+                #endregion Determine the head of the data buffer
+
+                #region Check if a new binary file need to be created
+                if (presentHour != DateTime.Now.Hour)
+                {
+                    if (bw != null)
+                        bw.CloseFile();
+                    presentHour = DateTime.Now.Hour;
+                    // Need to create a new directory and switch the file name
+                    dayPath = DirectoryStructure.DayDirectoryToUse(this._RootStorageDirectory);
+
+                    // Make sure hour directory exists 
+                    currentDataFile = dayPath + "\\" + presentHour + "\\";
+                    if (!System.IO.Directory.Exists(currentDataFile))
+                        System.IO.Directory.CreateDirectory(currentDataFile);
+
+                    currentDataFile = currentDataFile + FILE_TYPE_PREFIX + "." +
+                                   DirectoryStructure.GetDate() + "." + this._ID + "." + FILE_EXT;
+
+                    bw = new ByteWriter(currentDataFile, true);
+                    bw.OpenFile();
+
+                    // Ensure that the first data point in the new file will start
+                    // with the full, rather than differential, timecode info. 
+                    isForceTimestampSave = true;
+                }
+                #endregion Check if a new binary file need to be created
+
+
+                // Write data as long as the tail is not equal to the head
+                while (tail != currentHead)
+                {
+                    #region Populate the acceleration data that need to be written
+                    if (CurrentWockets._Configuration._MemoryMode == MemoryConfiguration.SHARED)
                     {
-                        WriteTimeDiff(aUnixTime, lastUnixTime, true); // Force save
-                        timeSaveCount = 0;
+                        sdata.Read(timestamp, 0, sizeof(double));
+                        data.UnixTimeStamp = BitConverter.ToDouble(timestamp, 0);
+                        sdata.Read(acc, 0, sizeof(short));
+                        data.X = BitConverter.ToInt16(acc, 0);
+                        sdata.Read(acc, 0, sizeof(short));
+                        data.Y = BitConverter.ToInt16(acc, 0);
+                        sdata.Read(acc, 0, sizeof(short));
+                        data.Z = BitConverter.ToInt16(acc, 0);
                     }
                     else
-                    {
-                        WriteTimeDiff(aUnixTime, lastUnixTime, false);
-                        timeSaveCount++;
+                        data = ((AccelerationData)this._Decoder._Data[tail]);
+                    #endregion Populate the acceleration data that need to be written
+
+                    #region Check for timestamp errors
+                    aUnixTime = data.UnixTimeStamp;
+                    if (aUnixTime < lastUnixTime)
+                    {      
+                        Logger.Error("Accelerometer: Save: Data overwritten without saving Accelerometer.cs Save " + this._ID + " " + aUnixTime + " " + lastUnixTime);
+                        break;
                     }
+                    #endregion Check for timestamp errors
 
-                    isForceTimestampSave = false;
-
-                    // Save Raw Bytes                        
+                    #region Write Data
                     if (bw != null)
+                    {
+                        #region Write Timestamp
+                        diffMS = (int)(aUnixTime - lastUnixTime);
+                        if (isForceTimestampSave || (diffMS > 254) || (timeSaveCount == TIMESTAMP_AFTER_SAMPLES))
+                        {
+                            bw.WriteByte(255);
+                            WocketsTimer.GetUnixTimeBytes(aUnixTime, retBytes);
+                            bw.WriteBytes(retBytes, 6);
+                            timeSaveCount = 0;
+                            isForceTimestampSave = false;
+                        }
+                        else
+                        {
+                            bw.WriteByte(diffMSByte);
+                            timeSaveCount++;
+                        }
+                        #endregion Write Timestamp
+
+                        #region Write Raw Data
                         for (int j = 0; j < data.NumRawBytes; j++)
                             bw.WriteByte(data.RawBytes[j]);
+                        #endregion Write Raw Data
+                    }
+                    #endregion Write Data
 
+                    #region Update Pointers, statistics and time stamps
                     lastUnixTime = aUnixTime;
-
-                    this.tailUnixTimestamp = aUnixTime;
-                    prevdata = data;
+                    this.tailUnixTimestamp = aUnixTime;    
                     if (tail >= this._Decoder._Data.Length - 1)
                     {
                         tail = 0;
-                        sdata.Seek(0, System.IO.SeekOrigin.Begin);
+                        if (CurrentWockets._Configuration._MemoryMode == MemoryConfiguration.SHARED)
+                            sdata.Seek(0, System.IO.SeekOrigin.Begin);
                     }
                     else
                         tail++;
-                    this.SavedPackets++;
-                    //data = ((AccelerationData)this._Decoder._Data[tail]);
-
+                    this._SavedPackets++;
+                    #endregion Update Pointers, statistics and time stamps
 
                 }                    
             }
@@ -423,7 +437,10 @@ namespace Wockets.Sensors.Accelerometers
 
         ArrayList someBinaryFiles = new ArrayList();
         private ByteReader br;
-        private double dTimeStamp = 0;
+
+        /// <summary>
+        /// Generates a list of binary files to load the data from
+        /// </summary>
         private void GenerateBinaryFileList()
         {
 
@@ -446,17 +463,18 @@ namespace Wockets.Sensors.Accelerometers
         }
 
 
+        /// <summary>
+        /// Sets up the next binary file to read the data from
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
         private bool SetupNextFiles(int index)
         {
-            dTimeStamp = 0;
-
 
             if (br != null)
                 br.CloseFile();
 
-
             br = null;
-
             string f = ((string)someBinaryFiles[index]);
 
             if (f != "")
@@ -476,7 +494,11 @@ namespace Wockets.Sensors.Accelerometers
         private int fileIndex = 0;
         private byte[] b6 = new byte[6];
         private byte[] b = new byte[1];
-        //Populates the decoder with the data read from the binary files
+        
+        /// <summary>
+        /// Loads one data packet at a time
+        /// </summary>
+        /// <returns>true if data is loaded, otherwise false</returns>
         public override bool Load()
         {
             //double lastUnixTime = aLastUnixTime; 
@@ -541,7 +563,7 @@ namespace Wockets.Sensors.Accelerometers
                     else //failed to decode a packet... check if this ever happens
                         return false;
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     //if the data ended return false
                     if (!((++fileIndex < someBinaryFiles.Count) && SetupNextFiles(fileIndex)))
@@ -551,23 +573,27 @@ namespace Wockets.Sensors.Accelerometers
 
             return true;
         }
+
         protected string ToXML(string innerXML)
         {
             innerXML += "<" + CALIBRATION_ELEMENT + " " + X1G_ATTRIBUTE +
-                "=\"" + this.x1g.ToString("0.00") + "\" " + XN1G_ATTRIBUTE + "=\"" + this.xn1g.ToString("0.00") +
-                "\" " + Y1G_ATTRIBUTE + "=\"" + this.y1g.ToString("0.00") + "\" " +
-                YN1G_ATTRIBUTE + "=\"" + this.yn1g.ToString("0.00") + "\" " +
-                Z1G_ATTRIBUTE + "=\"" + this.z1g.ToString("0.00") + "\" " +
-                ZN1G_ATTRIBUTE + "=\"" + this.zn1g.ToString("0.00") + "\" " +
-                XSTD_ATTRIBUTE + "=\"" + this.xstd.ToString("0.00") + "\" " +
-                YSTD_ATTRIBUTE + "=\"" + this.ystd.ToString("0.00") + "\" " +
-                ZSTD_ATTRIBUTE + "=\"" + this.zstd.ToString("0.00") + "\" />\n";
+                "=\"" + this._X1g.ToString("0.00") + "\" " + XN1G_ATTRIBUTE + "=\"" + this._Xn1g.ToString("0.00") +
+                "\" " + Y1G_ATTRIBUTE + "=\"" + this._Y1g.ToString("0.00") + "\" " +
+                YN1G_ATTRIBUTE + "=\"" + this._Yn1g.ToString("0.00") + "\" " +
+                Z1G_ATTRIBUTE + "=\"" + this._Z1g.ToString("0.00") + "\" " +
+                ZN1G_ATTRIBUTE + "=\"" + this._Zn1g.ToString("0.00") + "\" " +
+                XSTD_ATTRIBUTE + "=\"" + this._XStd.ToString("0.00") + "\" " +
+                YSTD_ATTRIBUTE + "=\"" + this._YStd.ToString("0.00") + "\" " +
+                ZSTD_ATTRIBUTE + "=\"" + this._ZStd.ToString("0.00") + "\" />\n";
             innerXML += "<" + RANGE_ELEMENT + " " + MAX_ATTRIBUTE +
-                "=\"" + this.max.ToString("0.00") + "\" " + MIN_ATTRIBUTE + "=\"" + this.min.ToString("0.00") + "\" />\n";
+                "=\"" + this._Max.ToString("0.00") + "\" " + MIN_ATTRIBUTE + "=\"" + this._Min.ToString("0.00") + "\" />\n";
             return base.ToXML(innerXML);
         }
 
-
+        /// <summary>
+        /// Loads an accelerometer object from an XML string
+        /// </summary>
+        /// <param name="xml">An XML string that defines an accelerometer</param>
         public override void FromXML(string xml)
         {
             base.FromXML(xml);
@@ -581,23 +607,23 @@ namespace Wockets.Sensors.Accelerometers
                     foreach (XmlAttribute jAttribute in jNode.Attributes)
                     {                     
                         if ((jNode.Name == CALIBRATION_ELEMENT) && (jAttribute.Name == X1G_ATTRIBUTE))
-                            this.x1g = Convert.ToDouble(jAttribute.Value);
+                            this._X1g = Convert.ToDouble(jAttribute.Value);
                         else if ((jNode.Name == CALIBRATION_ELEMENT) && (jAttribute.Name == XN1G_ATTRIBUTE))
-                            this.xn1g = Convert.ToDouble(jAttribute.Value);
+                            this._Xn1g= Convert.ToDouble(jAttribute.Value);
                         else if ((jNode.Name == CALIBRATION_ELEMENT) && (jAttribute.Name == Y1G_ATTRIBUTE))
-                            this.y1g = Convert.ToDouble(jAttribute.Value);
+                            this._Y1g = Convert.ToDouble(jAttribute.Value);
                         else if ((jNode.Name == CALIBRATION_ELEMENT) && (jAttribute.Name == YN1G_ATTRIBUTE))
-                            this.yn1g = Convert.ToDouble(jAttribute.Value);
+                            this._Yn1g = Convert.ToDouble(jAttribute.Value);
                         else if ((jNode.Name == CALIBRATION_ELEMENT) && (jAttribute.Name == Z1G_ATTRIBUTE))
-                            this.z1g = Convert.ToDouble(jAttribute.Value);
+                            this._Z1g = Convert.ToDouble(jAttribute.Value);
                         else if ((jNode.Name == CALIBRATION_ELEMENT) && (jAttribute.Name == ZN1G_ATTRIBUTE))
-                            this.zn1g = Convert.ToDouble(jAttribute.Value);
+                            this._Zn1g = Convert.ToDouble(jAttribute.Value);
                         else if ((jNode.Name == CALIBRATION_ELEMENT) && (jAttribute.Name == XSTD_ATTRIBUTE))
-                            this.xstd = Convert.ToDouble(jAttribute.Value);
+                            this._XStd = Convert.ToDouble(jAttribute.Value);
                         else if ((jNode.Name == CALIBRATION_ELEMENT) && (jAttribute.Name == YSTD_ATTRIBUTE))
-                            this.ystd = Convert.ToDouble(jAttribute.Value);
+                            this._YStd = Convert.ToDouble(jAttribute.Value);
                         else if ((jNode.Name == CALIBRATION_ELEMENT) && (jAttribute.Name == ZSTD_ATTRIBUTE))
-                            this.zstd = Convert.ToDouble(jAttribute.Value);
+                            this._ZStd = Convert.ToDouble(jAttribute.Value);
                         else if ((jNode.Name == RANGE_ELEMENT) && (jAttribute.Name == MIN_ATTRIBUTE))
                             this._Min = Convert.ToDouble(jAttribute.Value);
                         else if ((jNode.Name == RANGE_ELEMENT) && (jAttribute.Name == MAX_ATTRIBUTE))

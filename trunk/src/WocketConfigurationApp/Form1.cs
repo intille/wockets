@@ -36,10 +36,13 @@ namespace WocketConfigurationApp
         private void button_search_Click(object sender, EventArgs e)
         {
 
-            #region
-            /*BluetoothRadio.PrimaryRadio.Mode = RadioMode.Connectable;
+            this.label_status.Text = "Please wait... searching for wockets";
+            this.Refresh();
+            this.button_search.Enabled = false;
+            this.listBox1.Items.Clear();
+            BluetoothRadio.PrimaryRadio.Mode = RadioMode.Connectable;
             BluetoothClient btc = new BluetoothClient();
-            
+
             devices = btc.DiscoverDevices(60, false, true, true);
             int wocketCount = 0;
             for (int i = 0; (i < devices.Length); i++)
@@ -47,7 +50,7 @@ namespace WocketConfigurationApp
                 //if the device is a wocket
                 if (((devices[i].DeviceName.IndexOf("Wocket") >= 0) || (devices[i].DeviceName.IndexOf("WKT") >= 0) || (devices[i].DeviceName.IndexOf("FireFly") >= 0)) && (wocketCount < 100))
                 {
-                    string hex = "";     
+                    string hex = "";
                     hex = devices[i].DeviceAddress.ToString();
                     if (this.listBox1.Items.IndexOf(hex) < 0)
                     {
@@ -59,58 +62,10 @@ namespace WocketConfigurationApp
             }
             btc.Dispose();
             btc.Close();
-             */
 
-
-            /*
             if (this.listBox1.Items.Count > 0)
-                this.button2.Enabled = true;
-             */
-            #endregion
-
-            this.listBox1.Items.Clear();
-            macaddresses.Clear();
-            button_search.BackColor = Color.DarkGray;
-            button_search.Enabled = false;
-            label_status.Text = "searching ...";
-
-            Application.DoEvents();
-
-            BtWocketPC bt_wocket_search = new BtWocketPC();
-            System.Threading.Thread.Sleep(500);
-
-            
-            if (bt_wocket_search.Search())
-            {
-                devices = bt_wocket_search.GetDevicesFound();
-                int wocketCount = 0;
-                for (int i = 0; (i < devices.Length); i++)
-                {
-                    //if the device is a wocket
-                    if (((devices[i].DeviceName.IndexOf("Wocket") >= 0) || (devices[i].DeviceName.IndexOf("WKT") >= 0) || (devices[i].DeviceName.IndexOf("FireFly") >= 0)) && (wocketCount < 100))
-                    {
-                        string hex = "";
-                        hex = devices[i].DeviceAddress.ToString();
-                        if (this.listBox1.Items.IndexOf(hex) < 0)
-                        {
-                            this.listBox1.Items.Add(devices[i].DeviceName + " (" + hex + ")");
-                            macaddresses.Add(hex);
-                        }
-                        wocketCount++;
-                    }
-                }
-
-                button_select_wocket.Enabled = true;
-                button_unselect_wocket.Enabled = false;
-
-            }
-
-            bt_wocket_search.Stop();
-
-
-            button_search.BackColor = Color.Gainsboro;
-            button_search.Enabled = true;
-            label_status.Text = "Waiting for wocket...";
+                this.button_configure.Enabled = true;
+            this.button_search.Enabled = true;
         }
 
 

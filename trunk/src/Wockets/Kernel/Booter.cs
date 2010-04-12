@@ -7,11 +7,12 @@ using Wockets.Utils;
 using Wockets.Receivers;
 using Wockets.Utils.network;
 using Wockets.Kernel.Types;
-using Wockets.IPC;
+using Wockets.Utils.IPC;
 using Wockets.Data.Commands;
 using Wockets.Sensors.Accelerometers;
 using Microsoft.Win32;
 using InTheHand.Net.Sockets;
+
 
 namespace Wockets.Kernel
 {

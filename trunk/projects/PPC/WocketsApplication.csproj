@@ -1,4 +1,4 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -169,6 +169,7 @@
       <Link>Backgrounds.resx</Link>
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Backgrounds.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="..\..\src\WocketsApplication\Tabs.resx">
       <Link>Tabs.resx</Link>
@@ -717,28 +718,44 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\DottedBlack.png" />
+    <None Include="..\..\src\WocketsApplication\Resources\DottedBlack.png" >
+      <Link>Resources\DottedBlack.png</Link>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\CoolBlue.jpg" />
+    <None Include="..\..\src\WocketsApplication\Resources\CoolBlue.jpg" >
+      <Link>Resources\CoolBlue.jpg</Link>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\CosmosRed.jpg" />
+    <None Include="..\..\src\WocketsApplication\Resources\CosmosRed.jpg" >
+      <Link>Resources\CosmosRed.jpg</Link>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\DottedBlack-640.png" />
+    <None Include="..\..\src\WocketsApplication\Resources\DottedBlack-640.png" >
+      <Link>Resources\DottedBlack-640.png</Link>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\DottedBlack-800-480.png" />
+    <None Include="..\..\src\WocketsApplication\Resources\DottedBlack-800-480.png" >
+      <Link>Resources\DottedBlack-800-480.png</Link>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\GraphiteBlue.jpg" />
+    <None Include="..\..\src\WocketsApplication\Resources\GraphiteBlue.jpg" >
+      <Link>Resources\GraphiteBlue.jpg</Link>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Leather.jpg" />
+    <None Include="..\..\src\WocketsApplication\Resources\Leather.jpg" >
+      <Link>Resources\Leather.jpg</Link>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\NaturalBlack.jpg" />
+    <None Include="..\..\src\WocketsApplication\Resources\NaturalBlack.jpg" >
+      <Link>Resources\NaturalBlack.jpg</Link>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />
   <ProjectExtensions>

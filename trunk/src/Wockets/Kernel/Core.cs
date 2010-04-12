@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Threading;
 using System.Diagnostics;
-using Wockets.IPC;
+using Wockets.Utils.IPC;
 using Wockets.Kernel.Types;
 using Wockets.Utils;
 using Microsoft.Win32;

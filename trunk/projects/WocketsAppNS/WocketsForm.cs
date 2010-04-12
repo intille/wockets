@@ -100,8 +100,8 @@ namespace WocketsAppNS
 
             //copy sensor file
 
-            if (File.Exists(Constants.SENSOR_CONFIGURATIONS_DIRECTORY + wocketsController._FileName))
-                File.Copy(Constants.SENSOR_CONFIGURATIONS_DIRECTORY + wocketsController._FileName,
+            if (File.Exists(Constants.SENSOR_CONFIGURATIONS_DIRECTORY + wocketsController._Filename))
+                File.Copy(Constants.SENSOR_CONFIGURATIONS_DIRECTORY + wocketsController._Filename,
                     this.storageDirectory + "\\SensorData.xml");
             else
                 throw new Exception("Error: Sensor configuration file not found");
@@ -129,7 +129,8 @@ namespace WocketsAppNS
             try
             {
                 classifierConfiguration = new WocketsConfiguration();
-                classifierConfiguration.FromXML(this.storageDirectory + "\\Configuration.xml");                
+                classifierConfiguration.FromXML(this.storageDirectory + "\\Configuration.xml");
+                CurrentWockets._Configuration = classifierConfiguration;
             }
             catch (Exception e)
             {

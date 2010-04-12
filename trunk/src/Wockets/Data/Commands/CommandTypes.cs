@@ -36,6 +36,7 @@ namespace Wockets.Data
         SET_SM,
         BT_RST,
         GET_SEN,
+        GET_BR,
 
 
 

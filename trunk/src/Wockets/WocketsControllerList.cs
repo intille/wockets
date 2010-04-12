@@ -29,7 +29,7 @@ namespace Wockets
                 xml += "<" + WOCKETCONTROLLER_ELEMENT + ">\n";
                 xml += "<" + NAME_ELEMENT + ">" + controller._Name + "<" + NAME_ELEMENT + ">\n";
                 xml += "<" + DESCRIPTION_ELEMENT + ">" + controller._Description + "<" + DESCRIPTION_ELEMENT + ">\n";
-                xml += "<" + FILE_ELEMENT + ">" + controller._FileName+ "<" + FILE_ELEMENT + ">\n";
+                xml += "<" + FILE_ELEMENT + ">" + controller._Filename+ "<" + FILE_ELEMENT + ">\n";
                 xml += "</" + WOCKETCONTROLLER_ELEMENT + ">\n";
 
             }
