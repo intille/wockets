@@ -6,7 +6,7 @@ using Wockets.Data.Accelerometers;
 using Wockets.Sensors.Accelerometers;
 using System.Windows.Forms;
 #if (PocketPC)
-using Microsoft.ApplicationBlocks.MemoryMappedFile;
+using Wockets.Utils.IPC.MMF;
 #endif
 
 namespace Wockets.Data.Plotters

@@ -1,4 +1,4 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -139,9 +139,6 @@
     <Compile Include="..\..\src\Wockets\Sensors\Accelerometers\Wocket.cs">
       <Link>Sensors\Accelerometers\Wocket.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Sensors\HeartRate\HeartRateSensor.cs">
-      <Link>Sensors\HeartRate\HeartRateSensor.cs</Link>
-    </Compile>
     <Compile Include="..\..\src\Wockets\Sensors\Sensor.cs">
       <Link>Sensors\Sensor.cs</Link>
     </Compile>
@@ -241,10 +238,10 @@
     <Compile Include="..\..\src\Wockets\Data\Responses\BatteryResponse.cs">
       <Link>Data\Responses\BatteryResponse.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Utils\Barrier.cs">
+    <Compile Include="..\..\src\Wockets\Utils\IPC\Barrier.cs">
       <Link>Utils\Barrier.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Utils\MonitorEx.cs">
+    <Compile Include="..\..\src\Wockets\Utils\IPC\MonitorEx.cs">
       <Link>Utils\MonitorEx.cs</Link>
     </Compile>
     <Compile Include="..\..\src\Wockets\Utils\network\Bluetooth\BluetoothStack.cs">
@@ -372,6 +369,24 @@
     </Compile>
     <Compile Include="..\..\src\Wockets\Data\Features\FullFeatureExtractor.cs">
       <Link>Data\Features\FullFeatureExtractor.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_BR.cs" >
+      <Link>Data\Commands\GET_BR.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\BaudRateResponse.cs" >
+      <Link>Data\Responses\BaudRateResponse.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\CommandModeEnterResponse.cs" >
+      <Link>Data\Responses\CommandModeEnterResponse.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Decoders\DecoderModes.cs" >
+      <Link>Decoders\DecoderModes.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Exceptions\ErrorCodes.cs" >
+      <Link>Exceptions\ErrorCodes.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Sensors\SensorModes.cs" >
+      <Link>Sensors\SensorModes.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>

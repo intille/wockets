@@ -74,7 +74,7 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
                    spp = new SerialPort(_COMPORT, 38400, Parity.None, 8, StopBits.One);                    
                     if (!spp.IsOpen)
                         spp.Open();
-                    this.status = BluetoothStatus.Connected;
+                    this._Status = BluetoothStatus.Connected;
                     //start the processing thread
                     processingThread = new Thread(new ThreadStart(Process));
                     processingThread.Start();
@@ -85,8 +85,10 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
             }
             catch (Exception e)
             {
-                this.errorMessage = "MicrosoftBluetoothStream failed at Open() " + this._HexAddress;
-                this.status = BluetoothStatus.Disconnected;
+                CurrentWockets._LastError = Wockets.Exceptions.ErrorCodes.CONNECTION_FAILED_TO_OPEN;
+                CurrentWockets._LastErrorMessage = "MicrosoftBluetoothStream failed at Open() " + this._HexAddress;
+
+                this._Status = BluetoothStatus.Disconnected;
                 return false;
             }
             return true;
@@ -99,7 +101,7 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
             byte[] sendByte = new byte[1];
             sendByte[0] = 0xbb;
             byte[] singleReadBuffer = new byte[LOCAL_BUFFER_SIZE];
-            while (this.status == BluetoothStatus.Connected)
+            while (this._Status == BluetoothStatus.Connected)
             {
                 int bytesReceived = 0;
 
@@ -133,14 +135,15 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
                     Thread.Sleep(30);
 
                     if (bytesReceived > 0)
-                        disconnectionCounter = 0;
+                        timeoutIterationsCounter = 0;
                     else
                     {
-                        disconnectionCounter++;
-                        if (disconnectionCounter > MAX_DISCONNECTION_COUNTER)
+                        timeoutIterationsCounter++;
+                        if (timeoutIterationsCounter > iterationsToTimeout)
                         {
-                            this.errorMessage = "MicrosoftBluetoothStream failed at Process(). Disconnection timeout to " + this._HexAddress;
-                            this.status = BluetoothStatus.Disconnected;
+                            CurrentWockets._LastError = Wockets.Exceptions.ErrorCodes.CONNECTION_TIMEOUT;
+                            //this.errorMessage = "MicrosoftBluetoothStream failed at Process(). Disconnection timeout to " + this._HexAddress;
+                            this._Status = BluetoothStatus.Disconnected;
                         }
 
                     }
@@ -157,7 +160,7 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
                 }
                 catch (Exception e)
                 {
-                    this.status = BluetoothStatus.Disconnected;
+                    this._Status = BluetoothStatus.Disconnected;
                 }
             }
         }
@@ -170,8 +173,9 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
             }
             catch (Exception e)
             {
-                this.errorMessage = "MicrosoftBluetoothStream failed at Close() " + this._HexAddress;
-                this.status = BluetoothStatus.Disconnected;
+                CurrentWockets._LastError = Wockets.Exceptions.ErrorCodes.CONNECTION_FAILED_TO_CLOSE;
+                //this.errorMessage = "MicrosoftBluetoothStream failed at Close() " + this._HexAddress;
+                this._Status = BluetoothStatus.Disconnected;
                 return false;
             }
             return true;

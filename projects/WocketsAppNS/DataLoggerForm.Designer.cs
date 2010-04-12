@@ -327,7 +327,7 @@ namespace WocketsAppNS
             // 
             // readDataTimer
             // 
-            this.readDataTimer.Enabled = true;
+            this.readDataTimer.Enabled = false;
             this.readDataTimer.Interval = 30;
             this.readDataTimer.Tick += new System.EventHandler(this.readDataTimer_Tick);
             // 

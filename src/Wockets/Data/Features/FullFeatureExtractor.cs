@@ -7,7 +7,7 @@ using Wockets.Data.Configuration;
 using Wockets.Data.Annotation;
 using Wockets.Data.Accelerometers;
 #if (PocketPC)
-using Microsoft.ApplicationBlocks.MemoryMappedFile;
+using Wockets.Utils.IPC.MMF;
 #endif
 
 namespace Wockets.Data.Features

@@ -112,5 +112,12 @@ namespace WocketsApplication {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+        
+        internal static System.Drawing.Bitmap SpiderBlack {
+            get {
+                object obj = ResourceManager.GetObject("SpiderBlack", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }

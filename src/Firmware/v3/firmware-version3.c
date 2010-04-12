@@ -33,13 +33,13 @@ int main()
 		
 	while(1){
 	
-		set_sleep_mode(SLEEP_MODE_PWR_SAVE);
+	/*	set_sleep_mode(SLEEP_MODE_PWR_SAVE);
     	sleep_enable();
     	sleep_bod_disable();
     	sei();
     	sleep_cpu();
-    	sleep_disable();
-		//_delay_ms(10);
+    	sleep_disable();*/
+		_delay_ms(10);
 
 	}
 
@@ -73,40 +73,41 @@ ISR(TIMER2_OVF_vect)
 
 
 
-	if (!_bluetooth_is_connected()){
+	/*if (!_bluetooth_is_connected()){
 			
 		if (seconds_disconnected<2400)
 			seconds_disconnected++;
 		else if (seconds_disconnected==2400)
 		{
-		//	_bluetooth_turn_on();
-			//_atmega_reset();
+			//_bluetooth_turn_on();
+			_atmega_reset();
 			seconds_disconnected=2401;			
 		}
 		return;	
 
-	}
+	}*/
 		
-		_atmega_adc_turn_on();
-		connected=1;
+
+		//connected=1;
 		//parse and process any received bytes
 
 		//if (seconds_passed==0){
-		//	_receive_data();
-		//	 _send_data();
+		_receive_data();
+	    _send_data();
+		//_send_data_bufferred();
 
-			seconds_passed=0;
+		/*	seconds_passed=0;
 			while (seconds_passed<400)
 			{
 				_delay_ms(5);
 				seconds_passed++;
 
 			}
-			
+		*/	
 			
 			//_bluetooth_turn_off();
-			_atmega_adc_turn_off();
-			seconds_disconnected=0;
+		 //_atmega_adc_turn_off();
+			//seconds_disconnected=0;
 
 
 }

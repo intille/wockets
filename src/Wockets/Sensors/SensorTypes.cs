@@ -4,6 +4,9 @@ using System.Text;
 
 namespace Wockets.Sensors
 {
+    /// <summary>
+    /// An enumeration that defines the different types of sensors - Only accelerometers are supported
+    /// </summary>
     public enum SensorTypes : byte
     {
 

@@ -8,18 +8,39 @@ using Wockets.Sensors.Accelerometers;
 
 namespace Wockets.Sensors
 {
+    /// <summary>
+    /// A class that arranges sensors into lists
+    /// </summary>
     public sealed class SensorList: List<Sensor>,XMLSerializable
     {
         #region Serialization Constants
+        /// <summary>
+        /// An XML element that describes a list
+        /// </summary>
         public const string SENSORS_ELEMENT = "SENSORS";
+
+        /// <summary>
+        /// A class attribute - unused
+        /// </summary>
         private const string CLASS_ATTRIBUTE = "class";
+
+        /// <summary>
+        /// The type of the list - unused
+        /// </summary>
         private const string TYPE_ATTRIBUTE = "type";
         #endregion Serialization Constants
 
+        /// <summary>
+        /// A constructor that initializes a sensor list
+        /// </summary>
         public SensorList()
         {
         }
 
+        /// <summary>
+        /// Serializes the sensort list into an xml string
+        /// </summary>
+        /// <returns></returns>
         public string ToXML()
         {
             string xml = "<" + SENSORS_ELEMENT + ">\n";
@@ -29,6 +50,10 @@ namespace Wockets.Sensors
             return xml;
         }
 
+        /// <summary>
+        /// Loads the sensor list from an xml string
+        /// </summary>
+        /// <param name="xml">An input string for an xml sensor list</param>
         public void FromXML(string xml)
         {
             XmlDocument dom = new XmlDocument();

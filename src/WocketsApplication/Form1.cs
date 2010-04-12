@@ -16,7 +16,7 @@ using System.Diagnostics;
 using System.IO;
 using  Microsoft.Win32;
 using Wockets.Kernel.Types;
-using Wockets.IPC;
+using Wockets.Utils.IPC;
 using Wockets.Utils;
 using Wockets.Kernel;
 using Wockets.Data.Annotation;
@@ -35,7 +35,7 @@ using Wockets.Utils.feedback;
 using Wockets.Data.Configuration;
 using WocketsApplication.Controls.Utils;
 #if (PocketPC)
-using Microsoft.ApplicationBlocks.MemoryMappedFile;
+using Wockets.Utils.IPC.MMF;
 #endif
 
 namespace WocketsApplication

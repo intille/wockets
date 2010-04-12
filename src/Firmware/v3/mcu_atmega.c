@@ -424,6 +424,10 @@ void _atmega_initialize(unsigned char timer_prescalar)
      _atmega_set_adc_clock(ADC_PRESCALAR_64);
      //_atmega_adc_turn_on();
 
+
+	//Turn on ADC conversion
+	 _atmega_adc_turn_on();
+
      /* Enable Timer 2 */
      _atmega_enable_timer2(timer_prescalar);
 

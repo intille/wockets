@@ -6,10 +6,12 @@ using System.Xml;
 using System.IO;
 using System.Net.Sockets;
 using System.IO.Ports;
+using System.Diagnostics;
 //using HousenCS.SerialIO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Wockets.Utils;
+using Wockets.Data.Configuration;
 using System.Net;
 using Microsoft.Win32;
 using Wockets.Utils.network;
@@ -49,13 +51,9 @@ namespace Wockets.Receivers
         private int sniffTime = 0;
         private bool sniffMode;
         public CircularBuffer _SBuffer;
-        public TSniff _Tsniff
-        {
-            get
-            {
-                return this.bluetoothStream._Tsniff;
-            }
-        }
+        public bool _Bursty = false;
+        public bool _TimeoutEnabled = false;
+
 
         public override int CompareTo(object receiver)
         {
@@ -76,6 +74,8 @@ namespace Wockets.Receivers
 
 
         #region Access Properties
+
+
         public byte[] _AddressBytes
         {
             get
@@ -144,37 +144,39 @@ namespace Wockets.Receivers
         {
             lock (this)
             {
+                /// If a disconnection is detected for the bluetooth stream, update the status of the
+                /// receiver and flush the send buffer and delete references to the bluetooth stream
                 if ((this.bluetoothStream != null) && (this.bluetoothStream._Status == BluetoothStatus.Disconnected))
                 {
                     
                     this.bluetoothStream = null;                    
                     this.status = ReceiverStatus.Disconnected;
-                    this._SBuffer._Head = 0;//ignore all pending send bytes
+                    this._SBuffer._Head = 0;
                     this.ndisc++;
                     this.disconnectionTime = WocketsTimer.GetUnixTime();
-                    Logger.Debug("Update:Detected disconnection for receiver " + this._ID);
                 }
 
-                //ideas - delay reconnection
-                // ideas - create a bluetooth reconnector
+                // If the bluetooth stream is null or the receiver is not reconnecting
+                // then instantiate a thread to reconnect
                 if ((this.bluetoothStream == null) && (this.status != ReceiverStatus.Reconnecting))
                 {
                     this.status = ReceiverStatus.Reconnecting;
                     reconnectionThread = new Thread(new ThreadStart(this.Reconnect));
                     reconnectionThread.Start();
-                    Logger.Debug("Update:Spwaned reconnection thread for receiver " + this._ID);
+                    if (CurrentWockets._Configuration._SoftwareMode == SoftwareConfiguration.DEBUG)
+                        Logger.Debug("RFCOMMReceiver: Update: Spawning a reconnection thread for "+ this._Address);
                 }
 
                 if ((this.status != ReceiverStatus.Connected) && (this.bluetoothStream != null) && (this.bluetoothStream._Status == BluetoothStatus.Connected))
                 {
                     if (this.status == ReceiverStatus.Reconnecting)
-                    {
-                        Logger.Debug("Update:Waiting on Join for receiver " + this._ID);
+                    {                        
                         reconnectionThread.Join();
                         reconnectionThread.Abort();
-                        reconnectionThread = null;
+                        reconnectionThread = null;            
                     }
-                    Logger.Debug("Update:Connected with receiver receiver " + this._ID);
+                   if (CurrentWockets._Configuration._SoftwareMode == SoftwareConfiguration.DEBUG)                           
+                       Logger.Debug("RFCOMMReceiver: Update: Reconnection successful for "+ this._Address);
                     this.status = ReceiverStatus.Connected;
                     if (this.disconnectionTime!=0)                    
                         this.disconTime += (int)((WocketsTimer.GetUnixTime() - this.disconnectionTime) / 1000);
@@ -203,7 +205,8 @@ namespace Wockets.Receivers
             Random random = new Random();
             int backoff = random.Next(1000);
             int reconnections = 0;
-            Thread.Sleep(10000);
+            if (!_Bursty)
+                Thread.Sleep(10000);
             
             //Thread.Sleep(19000);
             //battery drained situation
@@ -211,7 +214,10 @@ namespace Wockets.Receivers
             {
                 Thread.Sleep(backoff);
                 if (this.Initialize())
-                    Wockets.Utils.Logger.Debug("Reconnection succeeded " + this._Address);
+                {
+                    if (CurrentWockets._Configuration._SoftwareMode == SoftwareConfiguration.DEBUG)
+                        Logger.Debug("RFCOMMReceiver: Reconnect: Reconnection succeeded " + this._Address);
+                }
                 else
                 {
                     if (reconnections == 5) //after 20 attempts
@@ -233,13 +239,15 @@ namespace Wockets.Receivers
             {
                 this._Buffer = new CircularBuffer(this._Buffer._Bytes.Length);
                 this.head = 0;
-                this._SBuffer = new CircularBuffer(SEND_BUFFER_SIZE);  
+                this._SBuffer = new CircularBuffer(SEND_BUFFER_SIZE);
 
-                Logger.Debug("Attempting reconnection for receiver " + this._ID);
+                if (CurrentWockets._Configuration._SoftwareMode == Wockets.Data.Configuration.SoftwareConfiguration.DEBUG)
+                    Logger.Debug("RFCOMMReceiver: Initialize: Attempting reconnection for receiver " + this._Address);
                 this.bluetoothStream = NetworkStacks._BluetoothStack.Connect(this._Buffer,this._SBuffer , this.address_bytes, this.pin);              
                 if (this.bluetoothStream == null)
                     return false;
-                
+               
+                this.bluetoothStream._TimeoutEnabled = this._TimeoutEnabled;                
                 return true;
             }
             catch (Exception e)

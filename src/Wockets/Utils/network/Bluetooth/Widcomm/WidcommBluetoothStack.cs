@@ -81,21 +81,7 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
                 this.wdStack = value;
             }
         }
-        public override BluetoothStatus _Status
-        {
-            get
-            {
-                int widcomstatus=WidcommAPI.GetStackStatus(this.wdStack);
-                if (widcomstatus == 0)
-                    return BluetoothStatus.Down;
-                else if (widcomstatus == 1)
-                    return BluetoothStatus.Up;
-                else if (widcomstatus == 3)
-                    return BluetoothStatus.Unloaded;
-                else
-                    return BluetoothStatus.Error;
-            }
-        }
+
         public override bool Initialize()
         {           
             //create Widcomm stack object

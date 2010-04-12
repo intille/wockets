@@ -10,8 +10,10 @@ namespace Wockets.Data
         /// <summary>
         /// Mobile Sensor accelerometer data. 
         /// </summary>
+        COMMAND_MODE_ENTERED,
         ACCEL,
         CALIBRATION_VALUES,
+        BAUD_RATE
 
     }
 }
