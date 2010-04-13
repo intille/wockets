@@ -1,4 +1,4 @@
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -331,21 +331,6 @@
     <Compile Include="..\..\src\Wockets\Utils\network\Bluetooth\Microsoft\MicrosoftBluetoothEndpoint.cs">
       <Link>Utils\network\Bluetooth\Microsoft\MicrosoftBluetoothEndpoint.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Applications\Games\Escape\Actions.cs">
-      <Link>Applications\Games\Escape\Actions.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Applications\Games\Escape\Audio.cs">
-      <Link>Applications\Games\Escape\Audio.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Applications\Games\Escape\Escape.cs">
-      <Link>Applications\Games\Escape\Escape.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Applications\Games\Escape\Player.cs">
-      <Link>Applications\Games\Escape\Player.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Applications\Games\Escape\Sounds.cs">
-      <Link>Applications\Games\Escape\Sounds.cs</Link>
-    </Compile>
     <Compile Include="..\..\src\Wockets\Utils\QuickSort.cs">
       <Link>Utils\QuickSort.cs</Link>
     </Compile>
@@ -370,24 +355,22 @@
     <Compile Include="..\..\src\Wockets\Data\Features\FullFeatureExtractor.cs">
       <Link>Data\Features\FullFeatureExtractor.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\GET_BR.cs" >
-      <Link>Data\Commands\GET_BR.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Responses\BaudRateResponse.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Responses\BaudRateResponse.cs">
       <Link>Data\Responses\BaudRateResponse.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Responses\CommandModeEnterResponse.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Responses\CommandModeEnterResponse.cs">
       <Link>Data\Responses\CommandModeEnterResponse.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Decoders\DecoderModes.cs" >
+    <Compile Include="..\..\src\Wockets\Decoders\DecoderModes.cs">
       <Link>Decoders\DecoderModes.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Exceptions\ErrorCodes.cs" >
+    <Compile Include="..\..\src\Wockets\Exceptions\ErrorCodes.cs">
       <Link>Exceptions\ErrorCodes.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Sensors\SensorModes.cs" >
+    <Compile Include="..\..\src\Wockets\Sensors\SensorModes.cs">
       <Link>Sensors\SensorModes.cs</Link>
     </Compile>
+    <Compile Include="Data\Commands\GET_BR.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="WocketsWeka.csproj">
