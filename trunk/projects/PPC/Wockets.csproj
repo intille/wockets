@@ -457,7 +457,9 @@
     <Compile Include="..\..\src\Wockets\Data\Responses\CommandModeEnterResponse.cs">
       <Link>Data\Responses\CommandModeEnterResponse.cs</Link>
     </Compile>
+    <Compile Include="Data\Responses\BaudRateResponse.cs" />
     <Compile Include="Decoders\DecoderModes.cs" />
+    <Compile Include="Sensors\SensorModes.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="WocketsWeka.csproj">
