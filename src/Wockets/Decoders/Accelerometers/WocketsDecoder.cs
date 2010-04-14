@@ -27,6 +27,8 @@ namespace Wockets.Decoders.Accelerometers
         private int bytesToRead = 0;
         private SensorDataType packetType;
         private double lastTimestamp;
+        public int _ExpectedPacketCount = 0;
+        public double _ReferenceTime = 0;
 
         public WocketsDecoder()
             : base(BUFFER_SIZE, (WocketsAccelerationData.NUM_RAW_BYTES > Wockets.Data.Responses.Response.MAX_RAW_BYTES) ? WocketsAccelerationData.NUM_RAW_BYTES : Wockets.Data.Responses.Response.MAX_RAW_BYTES)
@@ -102,18 +104,24 @@ namespace Wockets.Decoders.Accelerometers
                         {
 
                             int opcode = (((byte)data._Bytes[rawDataIndex]) & 0x1f);
-                            if (opcode == 0)
+                            switch (opcode)
                             {
-                                bytesToRead = 3;
-                                packetType = SensorDataType.BATTERYLEVEL;
+                                case 0:
+                                    bytesToRead = 3;
+                                    packetType = SensorDataType.BATTERYLEVEL;
+                                    break;
+                                case 0x04:
+                                    bytesToRead = 10;
+                                    packetType = SensorDataType.CALIBRATION_VALUES;
+                                    break;
+                                case 0x01:
+                                    bytesToRead = 4;
+                                    packetType = SensorDataType.PACKET_COUNT;
+                                    break;
+                                default:
+                                    break;
                             }
-                            else if (opcode == 0x04)
-                            {
-                                bytesToRead = 10;
-                                packetType = SensorDataType.CALIBRATION_VALUES;
-                            }
-
-
+                          
                         }
                     }
 
@@ -132,7 +140,16 @@ namespace Wockets.Decoders.Accelerometers
                             short x = (short)((((short)(this.packet[0] & 0x03)) << 8) | (((short)(this.packet[1] & 0x7f)) << 1) | (((short)(this.packet[2] & 0x40)) >> 6));
                             short y = (short)((((short)(this.packet[2] & 0x3f)) << 4) | (((short)(this.packet[3] & 0x78)) >> 3));
                             short z = (short)((((short)(this.packet[3] & 0x07)) << 7) | ((short)(this.packet[4] & 0x7f)));
-                            double ts = WocketsTimer.GetUnixTime();
+                            double ts = 0;
+                            ///if (this._ExpectedPacketCount == 0)
+                                ts = WocketsTimer.GetUnixTime();
+                            /*else
+                            {
+                                if (this._ReferenceTime<1)                                
+                                    this._ReferenceTime=((Receivers.RFCOMMReceiver)CurrentWockets._Controller._Receivers[this._ID])._ConnectionTime-(25.0*2401.0);
+                                ts = this._ReferenceTime + 25.0;
+                            }*/
+                            
 
                             if (CurrentWockets._Configuration._MemoryMode == Wockets.Data.Configuration.MemoryConfiguration.NON_SHARED)
                             {
@@ -220,7 +237,15 @@ namespace Wockets.Decoders.Accelerometers
                             int z1g = ((this.packet[6] & 0x03) << 8) | ((this.packet[7] & 0x7f) << 1) | ((this.packet[8] & 0x40) >> 6);
                             int z1ng = ((this.packet[8] & 0x3f) << 4) | ((this.packet[9] & 0x78) >> 3);
                         }
-
+                        else if (packetType == SensorDataType.PACKET_COUNT)
+                        {
+                            //#define m_PACKET_COUNT_BYTE1(count)		(count>>9)
+//#define m_PACKET_COUNT_BYTE2(count)		((count>>2) & 0x7f)
+//#define m_PACKET_COUNT_BYTE3(count)		((count & 0x03)<<5)
+                            this._ExpectedPacketCount= 0;
+                            this._ExpectedPacketCount = ((this.packet[1] & 0x7f) << 9) | ((this.packet[2] & 0x7f) << 2) |
+                                ((this.packet[3] & 0x60) >> 5);
+                        }
                     }
 
                 }

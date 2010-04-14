@@ -97,8 +97,11 @@ namespace Wockets.Utils.network.Bluetooth
         /// <summary>
         /// Specifies if the connection should timeout
         /// </summary>
-        public bool _TimeoutEnabled = true;                
-        
+        public bool _TimeoutEnabled = true;
+
+
+        public double _ConnectionTime = 0;
+
 
         /// <summary>
         /// A class bound lock for critical sections

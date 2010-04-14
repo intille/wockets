@@ -88,6 +88,11 @@
 #define m_BATTERY_LEVEL_BYTE1(level)		(level>>3)
 #define m_BATTERY_LEVEL_BYTE2(level)		((level & 0x07)<<4)
 
+/* Packet Count Level Macros */
+#define m_PACKET_COUNT_BYTE0			RESPONSE_HEADER(PACKET_COUNT_RESPONSE)
+#define m_PACKET_COUNT_BYTE1(count)		(count>>9)
+#define m_PACKET_COUNT_BYTE2(count)		((count>>2) & 0x7f)
+#define m_PACKET_COUNT_BYTE3(count)		((count & 0x03)<<5)
 
 
 /* Calibration Macros */

@@ -13,7 +13,8 @@ namespace Wockets.Data
         COMMAND_MODE_ENTERED,
         ACCEL,
         CALIBRATION_VALUES,
-        BAUD_RATE
+        BAUD_RATE,
+        PACKET_COUNT
 
     }
 }

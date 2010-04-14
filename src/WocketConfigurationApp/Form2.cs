@@ -55,7 +55,6 @@ namespace WocketConfigurationApp
             wc._Receivers[0]._ID = 0;
             wc._Decoders[0]._ID = 0;
             wc._Sensors[0]._Receiver = wc._Receivers[0];
-            ((RFCOMMReceiver)wc._Receivers[0])._TimeoutEnabled = false;
             wc._Sensors[0]._Decoder = wc._Decoders[0];
             ((Accelerometer)wc._Sensors[0])._Max = 1024;
             ((Accelerometer)wc._Sensors[0])._Min = 0;
@@ -149,17 +148,10 @@ namespace WocketConfigurationApp
             else
             {
 
-                if (CurrentWockets._Controller._Sensors[0]._Mode == SensorModes.Data)
-                {
-                    this.label27.Text = "Connected: Data Mode";
-                    CurrentWockets._Controller._Decoders[0]._Mode = DecoderModes.Command;
-                    Command c = new EnterCommandMode();
-                    ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(c._Bytes);
-
-                }
-                else               
-                    this.label27.Text = "Connected: Command Mode";
-                
+                if (CurrentWockets._Controller._Sensors[0]._Mode == SensorModes.Data)                
+                    this.label27.Text = "Connected: Data Mode";                                   
+                else                
+                    this.label27.Text = "Connected: Command Mode";                                 
             }
            
         }
@@ -171,6 +163,28 @@ namespace WocketConfigurationApp
                 Command c = new GET_BR();
                 ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(c._Bytes);               
             }
+        }
+
+        private void commandToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (CurrentWockets._Controller._Sensors[0]._Mode == SensorModes.Data)
+            {
+                ((RFCOMMReceiver)wc._Receivers[0])._TimeoutEnabled = false;
+                CurrentWockets._Controller._Decoders[0]._Mode = DecoderModes.Command;
+                Command c = new EnterCommandMode();
+                ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(c._Bytes);
+            }
+        }
+
+        private void dataToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (CurrentWockets._Controller._Sensors[0]._Mode == SensorModes.Command)
+            {
+                CurrentWockets._Controller._Decoders[0]._Mode = DecoderModes.Data;
+                Command c = new ExitCommandMode();
+                ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(c._Bytes);
+            }
+
         }
     }
 }

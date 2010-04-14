@@ -28,6 +28,8 @@ namespace Wockets.Data
         /// </summary>
         RESET,
 
+        CARRIAGE_RETURN,
+
 
         SET_LED,               
         GET_BT,

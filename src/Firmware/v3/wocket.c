@@ -212,6 +212,18 @@ void _transmit_packet(wockets_uncompressed_packet packet)
 	
 }
 
+
+void _send_packet_count(unsigned short count)
+{
+ 
+    aBuffer[0]=m_PACKET_COUNT_BYTE0;
+    aBuffer[1]=m_PACKET_COUNT_BYTE1(count);
+    aBuffer[2]=m_PACKET_COUNT_BYTE2(count);
+	aBuffer[3]=m_PACKET_COUNT_BYTE3(count);
+	for (int i=0;(i<4);i++)                                                                                       
+       	_bluetooth_transmit_uart0_byte(aBuffer[i]); 
+ 
+}
 void _send_data_bufferred(void)
 {
 	

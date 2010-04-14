@@ -52,8 +52,9 @@ namespace Wockets.Receivers
         private bool sniffMode;
         public CircularBuffer _SBuffer;
         public bool _Bursty = false;
-        public bool _TimeoutEnabled = false;
-
+        public bool _TimeoutEnabled = true;
+        public double _ConnectionTime = 0;
+     
 
         public override int CompareTo(object receiver)
         {
@@ -247,7 +248,8 @@ namespace Wockets.Receivers
                 if (this.bluetoothStream == null)
                     return false;
                
-                this.bluetoothStream._TimeoutEnabled = this._TimeoutEnabled;                
+                this.bluetoothStream._TimeoutEnabled = this._TimeoutEnabled;
+                this._ConnectionTime = this.bluetoothStream._ConnectionTime;
                 return true;
             }
             catch (Exception e)

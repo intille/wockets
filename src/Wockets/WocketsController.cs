@@ -134,7 +134,7 @@ namespace Wockets
                 return this.polling;
             }
             set
-            {
+            {               
                 this.polling = value;
                 if (value)
                     this.pollingEvent.Set();
@@ -624,22 +624,30 @@ namespace Wockets
             while (true)
             {
 
-/*                if ((_Bursty) && (_Paused))
+              /* if ((_Bursty) && (_Paused))
                 {
                     for (int i = 0; (i < this._Sensors.Count); i++)
                     {
                         //this._Sensors[i].Save();
-                        this._Sensors[i].Packets = 0;
-                        this._Sensors[i].SavedPackets = 0;
+                        this._Sensors[i]._ReceivedPackets = 0;
+                        this._Sensors[i]._SavedPackets = 0;
                         this._Receivers[i]._Status = Wockets.Receivers.ReceiverStatus.Disconnected;
                     }
                     this.paused.WaitOne();
-                }
-                */
+                }*/
+               
 
                 if (!polling)
                 {
+
+
                     this.waitToPollEvent.Set();
+                    for (int i = 0; (i < this._Sensors.Count); i++)
+                    {
+                        this._Sensors[i]._ReceivedPackets = 0;
+                        this._Sensors[i]._SavedPackets = 0;
+                        this._Receivers[i]._Status = Wockets.Receivers.ReceiverStatus.Disconnected;
+                    }
                     this.pollingEvent.WaitOne();
                 }
 
