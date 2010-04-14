@@ -22,3 +22,27 @@ public class CompareFileInfoByDate:IComparer
 
 	
 }
+
+
+
+class CompareFileInfoByName : IComparer
+{
+    public int Compare(object x, object y)
+    {
+        FileInfo file = (FileInfo)x;
+        FileInfo file2 = (FileInfo)y;
+        return String.Compare(file.FullName, file2.FullName);
+    }
+}
+
+
+class CompareFileInfoBySize : IComparer
+{
+    public int Compare(object x, object y)
+    {
+        FileInfo file = (FileInfo)x;
+        FileInfo file2 = (FileInfo)y;
+        return Decimal.Compare(file.Length, file2.Length);
+    }
+}
+
