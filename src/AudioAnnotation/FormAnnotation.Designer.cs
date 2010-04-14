@@ -36,7 +36,6 @@ namespace AudioAnnotation
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormAnnotation));
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
@@ -44,40 +43,11 @@ namespace AudioAnnotation
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormAnnotation));
             this.button_1 = new System.Windows.Forms.Button();
             this.textBox_1 = new System.Windows.Forms.TextBox();
             this.label_date = new System.Windows.Forms.Label();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
-            this.label_play = new System.Windows.Forms.Label();
-            this.button_add = new System.Windows.Forms.Button();
-            this.button_remove = new System.Windows.Forms.Button();
-            this.label_instructions_1 = new System.Windows.Forms.Label();
-            this.label_instructions_2 = new System.Windows.Forms.Label();
-            this.button_save = new System.Windows.Forms.Button();
-            this.button_2 = new System.Windows.Forms.Button();
-            this.button_generate = new System.Windows.Forms.Button();
-            this.button_exit = new System.Windows.Forms.Button();
-            this.textBox_instructions_1 = new System.Windows.Forms.TextBox();
-            this.button_category_select = new System.Windows.Forms.Button();
-            this.label_files_path = new System.Windows.Forms.Label();
-            this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
-            this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
-            this.checkBox_SiglePassMode = new System.Windows.Forms.CheckBox();
-            this.panel_controls_2 = new System.Windows.Forms.Panel();
-            this.label_exit_button = new System.Windows.Forms.Label();
-            this.label_generate_button = new System.Windows.Forms.Label();
-            this.label_save_button = new System.Windows.Forms.Label();
-            this.label_category_button = new System.Windows.Forms.Label();
-            this.label_add_button = new System.Windows.Forms.Label();
-            this.label_remove_button = new System.Windows.Forms.Label();
-            this.label_instructions_3 = new System.Windows.Forms.Label();
-            this.checkBox_ExitWithoutSaving = new System.Windows.Forms.CheckBox();
-            this.panel_controls_1 = new System.Windows.Forms.Panel();
-            this.label_panel1_2 = new System.Windows.Forms.Label();
-            this.label_panel1_1 = new System.Windows.Forms.Label();
-            this.textBox_instructions_2 = new System.Windows.Forms.TextBox();
-            this.openFileDialog_Session = new System.Windows.Forms.OpenFileDialog();
-            this.checkBox_visualize_all = new System.Windows.Forms.CheckBox();
             this.CID = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.CAutoStop_1 = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.CCategory_1 = new System.Windows.Forms.DataGridViewComboBoxColumn();
@@ -101,6 +71,36 @@ namespace AudioAnnotation
             this.CTime_LastWritten = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.CTime_Duration = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.CTime_MS = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.label_play = new System.Windows.Forms.Label();
+            this.button_add = new System.Windows.Forms.Button();
+            this.button_remove = new System.Windows.Forms.Button();
+            this.label_instructions_1 = new System.Windows.Forms.Label();
+            this.label_instructions_2 = new System.Windows.Forms.Label();
+            this.button_save = new System.Windows.Forms.Button();
+            this.button_2 = new System.Windows.Forms.Button();
+            this.button_generate = new System.Windows.Forms.Button();
+            this.button_exit = new System.Windows.Forms.Button();
+            this.textBox_instructions_1 = new System.Windows.Forms.TextBox();
+            this.button_category_select = new System.Windows.Forms.Button();
+            this.label_files_path = new System.Windows.Forms.Label();
+            this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
+            this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
+            this.checkBox_SiglePassMode = new System.Windows.Forms.CheckBox();
+            this.panel_controls_2 = new System.Windows.Forms.Panel();
+            this.checkBox_visualize_all = new System.Windows.Forms.CheckBox();
+            this.label_exit_button = new System.Windows.Forms.Label();
+            this.label_generate_button = new System.Windows.Forms.Label();
+            this.label_save_button = new System.Windows.Forms.Label();
+            this.label_category_button = new System.Windows.Forms.Label();
+            this.label_add_button = new System.Windows.Forms.Label();
+            this.label_remove_button = new System.Windows.Forms.Label();
+            this.label_instructions_3 = new System.Windows.Forms.Label();
+            this.checkBox_ExitWithoutSaving = new System.Windows.Forms.CheckBox();
+            this.panel_controls_1 = new System.Windows.Forms.Panel();
+            this.label_panel1_2 = new System.Windows.Forms.Label();
+            this.label_panel1_1 = new System.Windows.Forms.Label();
+            this.textBox_instructions_2 = new System.Windows.Forms.TextBox();
+            this.openFileDialog_Session = new System.Windows.Forms.OpenFileDialog();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.panel_controls_2.SuspendLayout();
             this.panel_controls_1.SuspendLayout();
@@ -217,6 +217,206 @@ namespace AudioAnnotation
             this.dataGridView1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.dataGridView1_KeyDown);
             this.dataGridView1.CellEnter += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellEnter);
             this.dataGridView1.RowHeaderMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridView1_RowHeaderMouseDoubleClick_1);
+            // 
+            // CID
+            // 
+            dataGridViewCellStyle3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
+            dataGridViewCellStyle3.NullValue = null;
+            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.Color.DarkSeaGreen;
+            this.CID.DefaultCellStyle = dataGridViewCellStyle3;
+            this.CID.FillWeight = 80F;
+            this.CID.HeaderText = "Audio ID";
+            this.CID.Name = "CID";
+            this.CID.ReadOnly = true;
+            this.CID.Width = 73;
+            // 
+            // CAutoStop_1
+            // 
+            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle4.NullValue = "False";
+            this.CAutoStop_1.DefaultCellStyle = dataGridViewCellStyle4;
+            this.CAutoStop_1.FillWeight = 50F;
+            this.CAutoStop_1.HeaderText = "Auto Stop";
+            this.CAutoStop_1.Name = "CAutoStop_1";
+            this.CAutoStop_1.Visible = false;
+            this.CAutoStop_1.Width = 60;
+            // 
+            // CCategory_1
+            // 
+            this.CCategory_1.DisplayStyle = System.Windows.Forms.DataGridViewComboBoxDisplayStyle.ComboBox;
+            this.CCategory_1.DisplayStyleForCurrentCellOnly = true;
+            this.CCategory_1.FillWeight = 200F;
+            this.CCategory_1.HeaderText = "Category";
+            this.CCategory_1.Name = "CCategory_1";
+            this.CCategory_1.Width = 55;
+            // 
+            // CStartEnd_1
+            // 
+            dataGridViewCellStyle5.BackColor = System.Drawing.Color.White;
+            this.CStartEnd_1.DefaultCellStyle = dataGridViewCellStyle5;
+            this.CStartEnd_1.DisplayStyle = System.Windows.Forms.DataGridViewComboBoxDisplayStyle.ComboBox;
+            this.CStartEnd_1.DisplayStyleForCurrentCellOnly = true;
+            this.CStartEnd_1.HeaderText = "Start/End Tag";
+            this.CStartEnd_1.Name = "CStartEnd_1";
+            this.CStartEnd_1.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.CStartEnd_1.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            // 
+            // CAutoStop_2
+            // 
+            this.CAutoStop_2.FillWeight = 50F;
+            this.CAutoStop_2.HeaderText = "Auto Stop 2";
+            this.CAutoStop_2.Name = "CAutoStop_2";
+            this.CAutoStop_2.Visible = false;
+            this.CAutoStop_2.Width = 69;
+            // 
+            // CCategory_2
+            // 
+            this.CCategory_2.DisplayStyle = System.Windows.Forms.DataGridViewComboBoxDisplayStyle.ComboBox;
+            this.CCategory_2.DisplayStyleForCurrentCellOnly = true;
+            this.CCategory_2.FillWeight = 200F;
+            this.CCategory_2.HeaderText = "Category II";
+            this.CCategory_2.Name = "CCategory_2";
+            this.CCategory_2.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.CCategory_2.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.CCategory_2.Width = 83;
+            // 
+            // CStartEnd_2
+            // 
+            this.CStartEnd_2.DisplayStyle = System.Windows.Forms.DataGridViewComboBoxDisplayStyle.ComboBox;
+            this.CStartEnd_2.DisplayStyleForCurrentCellOnly = true;
+            this.CStartEnd_2.HeaderText = "Start/End Tag";
+            this.CStartEnd_2.Name = "CStartEnd_2";
+            this.CStartEnd_2.Width = 81;
+            // 
+            // CTime
+            // 
+            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle6.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
+            dataGridViewCellStyle6.Format = "T";
+            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.Color.DarkSeaGreen;
+            this.CTime.DefaultCellStyle = dataGridViewCellStyle6;
+            this.CTime.HeaderText = "Creation Time";
+            this.CTime.Name = "CTime";
+            this.CTime.ReadOnly = true;
+            this.CTime.Width = 97;
+            // 
+            // CTimeLabel
+            // 
+            this.CTimeLabel.HeaderText = "Label Time";
+            this.CTimeLabel.Name = "CTimeLabel";
+            this.CTimeLabel.Width = 84;
+            // 
+            // CNotes
+            // 
+            dataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            this.CNotes.DefaultCellStyle = dataGridViewCellStyle7;
+            this.CNotes.FillWeight = 150F;
+            this.CNotes.HeaderText = "Notes";
+            this.CNotes.Name = "CNotes";
+            this.CNotes.Width = 60;
+            // 
+            // CStatus_1
+            // 
+            this.CStatus_1.HeaderText = "Status";
+            this.CStatus_1.Name = "CStatus_1";
+            this.CStatus_1.ReadOnly = true;
+            this.CStatus_1.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.CStatus_1.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.CStatus_1.Visible = false;
+            this.CStatus_1.Width = 62;
+            // 
+            // CStartID_1
+            // 
+            dataGridViewCellStyle8.Format = "N0";
+            dataGridViewCellStyle8.NullValue = null;
+            this.CStartID_1.DefaultCellStyle = dataGridViewCellStyle8;
+            this.CStartID_1.HeaderText = "StartID";
+            this.CStartID_1.Name = "CStartID_1";
+            this.CStartID_1.ReadOnly = true;
+            this.CStartID_1.Visible = false;
+            this.CStartID_1.Width = 65;
+            // 
+            // CEndID_1
+            // 
+            dataGridViewCellStyle9.Format = "N0";
+            dataGridViewCellStyle9.NullValue = null;
+            this.CEndID_1.DefaultCellStyle = dataGridViewCellStyle9;
+            this.CEndID_1.HeaderText = "EndID";
+            this.CEndID_1.Name = "CEndID_1";
+            this.CEndID_1.ReadOnly = true;
+            this.CEndID_1.Visible = false;
+            this.CEndID_1.Width = 62;
+            // 
+            // CCombo_Type_1
+            // 
+            this.CCombo_Type_1.HeaderText = "Combo Type I";
+            this.CCombo_Type_1.Name = "CCombo_Type_1";
+            this.CCombo_Type_1.ReadOnly = true;
+            this.CCombo_Type_1.Visible = false;
+            this.CCombo_Type_1.Width = 98;
+            // 
+            // CCombo_Label_1
+            // 
+            this.CCombo_Label_1.HeaderText = "Combo Label I";
+            this.CCombo_Label_1.Name = "CCombo_Label_1";
+            this.CCombo_Label_1.ReadOnly = true;
+            this.CCombo_Label_1.Visible = false;
+            // 
+            // CStatus_2
+            // 
+            this.CStatus_2.HeaderText = "Status II";
+            this.CStatus_2.Name = "CStatus_2";
+            this.CStatus_2.Visible = false;
+            this.CStatus_2.Width = 52;
+            // 
+            // CStartID_2
+            // 
+            this.CStartID_2.HeaderText = "StartID II";
+            this.CStartID_2.Name = "CStartID_2";
+            this.CStartID_2.Visible = false;
+            this.CStartID_2.Width = 74;
+            // 
+            // CEndID_2
+            // 
+            this.CEndID_2.HeaderText = "EndID II";
+            this.CEndID_2.Name = "CEndID_2";
+            this.CEndID_2.Visible = false;
+            this.CEndID_2.Width = 71;
+            // 
+            // CCombo_Type_2
+            // 
+            this.CCombo_Type_2.HeaderText = "Combo Type II";
+            this.CCombo_Type_2.Name = "CCombo_Type_2";
+            this.CCombo_Type_2.Visible = false;
+            this.CCombo_Type_2.Width = 101;
+            // 
+            // CCombo_Label_2
+            // 
+            this.CCombo_Label_2.HeaderText = "Combo_Label II";
+            this.CCombo_Label_2.Name = "CCombo_Label_2";
+            this.CCombo_Label_2.Visible = false;
+            this.CCombo_Label_2.Width = 106;
+            // 
+            // CTime_LastWritten
+            // 
+            this.CTime_LastWritten.HeaderText = "Last Written";
+            this.CTime_LastWritten.Name = "CTime_LastWritten";
+            this.CTime_LastWritten.Visible = false;
+            this.CTime_LastWritten.Width = 89;
+            // 
+            // CTime_Duration
+            // 
+            this.CTime_Duration.HeaderText = "Duration";
+            this.CTime_Duration.Name = "CTime_Duration";
+            this.CTime_Duration.Visible = false;
+            this.CTime_Duration.Width = 72;
+            // 
+            // CTime_MS
+            // 
+            this.CTime_MS.HeaderText = "Time MS";
+            this.CTime_MS.Name = "CTime_MS";
+            this.CTime_MS.Visible = false;
+            this.CTime_MS.Width = 74;
             // 
             // label_play
             // 
@@ -423,6 +623,18 @@ namespace AudioAnnotation
             this.panel_controls_2.TabIndex = 27;
             this.panel_controls_2.Visible = false;
             // 
+            // checkBox_visualize_all
+            // 
+            this.checkBox_visualize_all.AutoSize = true;
+            this.checkBox_visualize_all.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
+            this.checkBox_visualize_all.Location = new System.Drawing.Point(10, 27);
+            this.checkBox_visualize_all.Name = "checkBox_visualize_all";
+            this.checkBox_visualize_all.Size = new System.Drawing.Size(111, 17);
+            this.checkBox_visualize_all.TabIndex = 35;
+            this.checkBox_visualize_all.Text = "Visualize All Fields";
+            this.checkBox_visualize_all.UseVisualStyleBackColor = true;
+            this.checkBox_visualize_all.CheckedChanged += new System.EventHandler(this.checkBox_visualize_all_CheckedChanged);
+            // 
             // label_exit_button
             // 
             this.label_exit_button.AutoSize = true;
@@ -564,218 +776,6 @@ namespace AudioAnnotation
             this.textBox_instructions_2.Size = new System.Drawing.Size(758, 194);
             this.textBox_instructions_2.TabIndex = 29;
             this.textBox_instructions_2.Text = resources.GetString("textBox_instructions_2.Text");
-            // 
-            // checkBox_visualize_all
-            // 
-            this.checkBox_visualize_all.AutoSize = true;
-            this.checkBox_visualize_all.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
-            this.checkBox_visualize_all.Location = new System.Drawing.Point(10, 27);
-            this.checkBox_visualize_all.Name = "checkBox_visualize_all";
-            this.checkBox_visualize_all.Size = new System.Drawing.Size(111, 17);
-            this.checkBox_visualize_all.TabIndex = 35;
-            this.checkBox_visualize_all.Text = "Visualize All Fields";
-            this.checkBox_visualize_all.UseVisualStyleBackColor = true;
-            this.checkBox_visualize_all.CheckedChanged += new System.EventHandler(this.checkBox_visualize_all_CheckedChanged);
-            // 
-            // CID
-            // 
-            dataGridViewCellStyle3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
-            dataGridViewCellStyle3.NullValue = null;
-            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.Color.DarkSeaGreen;
-            this.CID.DefaultCellStyle = dataGridViewCellStyle3;
-            this.CID.FillWeight = 80F;
-            this.CID.HeaderText = "Audio ID";
-            this.CID.Name = "CID";
-            this.CID.ReadOnly = true;
-            this.CID.Width = 73;
-            // 
-            // CAutoStop_1
-            // 
-            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle4.NullValue = "False";
-            this.CAutoStop_1.DefaultCellStyle = dataGridViewCellStyle4;
-            this.CAutoStop_1.FillWeight = 50F;
-            this.CAutoStop_1.HeaderText = "Auto Stop";
-            this.CAutoStop_1.Name = "CAutoStop_1";
-            this.CAutoStop_1.Visible = false;
-            this.CAutoStop_1.Width = 60;
-            // 
-            // CCategory_1
-            // 
-            this.CCategory_1.DisplayStyle = System.Windows.Forms.DataGridViewComboBoxDisplayStyle.ComboBox;
-            this.CCategory_1.DisplayStyleForCurrentCellOnly = true;
-            this.CCategory_1.FillWeight = 200F;
-            this.CCategory_1.HeaderText = "Category";
-            this.CCategory_1.Name = "CCategory_1";
-            this.CCategory_1.Width = 55;
-            // 
-            // CStartEnd_1
-            // 
-            dataGridViewCellStyle5.BackColor = System.Drawing.Color.White;
-            this.CStartEnd_1.DefaultCellStyle = dataGridViewCellStyle5;
-            this.CStartEnd_1.DisplayStyle = System.Windows.Forms.DataGridViewComboBoxDisplayStyle.ComboBox;
-            this.CStartEnd_1.DisplayStyleForCurrentCellOnly = true;
-            this.CStartEnd_1.HeaderText = "Start/End Tag";
-            this.CStartEnd_1.Name = "CStartEnd_1";
-            this.CStartEnd_1.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.CStartEnd_1.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            // 
-            // CAutoStop_2
-            // 
-            this.CAutoStop_2.FillWeight = 50F;
-            this.CAutoStop_2.HeaderText = "Auto Stop 2";
-            this.CAutoStop_2.Name = "CAutoStop_2";
-            this.CAutoStop_2.Visible = false;
-            this.CAutoStop_2.Width = 69;
-            // 
-            // CCategory_2
-            // 
-            this.CCategory_2.DisplayStyle = System.Windows.Forms.DataGridViewComboBoxDisplayStyle.ComboBox;
-            this.CCategory_2.DisplayStyleForCurrentCellOnly = true;
-            this.CCategory_2.FillWeight = 200F;
-            this.CCategory_2.HeaderText = "Category II";
-            this.CCategory_2.Name = "CCategory_2";
-            this.CCategory_2.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.CCategory_2.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.CCategory_2.Width = 83;
-            // 
-            // CStartEnd_2
-            // 
-            this.CStartEnd_2.DisplayStyle = System.Windows.Forms.DataGridViewComboBoxDisplayStyle.ComboBox;
-            this.CStartEnd_2.DisplayStyleForCurrentCellOnly = true;
-            this.CStartEnd_2.HeaderText = "Start/End Tag";
-            this.CStartEnd_2.Name = "CStartEnd_2";
-            this.CStartEnd_2.Width = 81;
-            // 
-            // CTime
-            // 
-            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle6.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
-            dataGridViewCellStyle6.Format = "T";
-            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.Color.DarkSeaGreen;
-            this.CTime.DefaultCellStyle = dataGridViewCellStyle6;
-            this.CTime.HeaderText = "Creation Time";
-            this.CTime.Name = "CTime";
-            this.CTime.ReadOnly = true;
-            this.CTime.Width = 97;
-            // 
-            // CTimeLabel
-            // 
-            this.CTimeLabel.HeaderText = "Label Time";
-            this.CTimeLabel.Name = "CTimeLabel";
-            this.CTimeLabel.Width = 84;
-            // 
-            // CNotes
-            // 
-            dataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            this.CNotes.DefaultCellStyle = dataGridViewCellStyle7;
-            this.CNotes.FillWeight = 150F;
-            this.CNotes.HeaderText = "Notes";
-            this.CNotes.Name = "CNotes";
-            this.CNotes.Width = 60;
-            // 
-            // CStatus_1
-            // 
-            this.CStatus_1.HeaderText = "Status";
-            this.CStatus_1.Name = "CStatus_1";
-            this.CStatus_1.ReadOnly = true;
-            this.CStatus_1.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.CStatus_1.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.CStatus_1.Visible = false;
-            this.CStatus_1.Width = 62;
-            // 
-            // CStartID_1
-            // 
-            dataGridViewCellStyle8.Format = "N0";
-            dataGridViewCellStyle8.NullValue = null;
-            this.CStartID_1.DefaultCellStyle = dataGridViewCellStyle8;
-            this.CStartID_1.HeaderText = "StartID";
-            this.CStartID_1.Name = "CStartID_1";
-            this.CStartID_1.ReadOnly = true;
-            this.CStartID_1.Visible = false;
-            this.CStartID_1.Width = 65;
-            // 
-            // CEndID_1
-            // 
-            dataGridViewCellStyle9.Format = "N0";
-            dataGridViewCellStyle9.NullValue = null;
-            this.CEndID_1.DefaultCellStyle = dataGridViewCellStyle9;
-            this.CEndID_1.HeaderText = "EndID";
-            this.CEndID_1.Name = "CEndID_1";
-            this.CEndID_1.ReadOnly = true;
-            this.CEndID_1.Visible = false;
-            this.CEndID_1.Width = 62;
-            // 
-            // CCombo_Type_1
-            // 
-            this.CCombo_Type_1.HeaderText = "Combo Type I";
-            this.CCombo_Type_1.Name = "CCombo_Type_1";
-            this.CCombo_Type_1.ReadOnly = true;
-            this.CCombo_Type_1.Visible = false;
-            this.CCombo_Type_1.Width = 98;
-            // 
-            // CCombo_Label_1
-            // 
-            this.CCombo_Label_1.HeaderText = "Combo Label I";
-            this.CCombo_Label_1.Name = "CCombo_Label_1";
-            this.CCombo_Label_1.ReadOnly = true;
-            this.CCombo_Label_1.Visible = false;
-            // 
-            // CStatus_2
-            // 
-            this.CStatus_2.HeaderText = "Status II";
-            this.CStatus_2.Name = "CStatus_2";
-            this.CStatus_2.Visible = false;
-            this.CStatus_2.Width = 52;
-            // 
-            // CStartID_2
-            // 
-            this.CStartID_2.HeaderText = "StartID II";
-            this.CStartID_2.Name = "CStartID_2";
-            this.CStartID_2.Visible = false;
-            this.CStartID_2.Width = 74;
-            // 
-            // CEndID_2
-            // 
-            this.CEndID_2.HeaderText = "EndID II";
-            this.CEndID_2.Name = "CEndID_2";
-            this.CEndID_2.Visible = false;
-            this.CEndID_2.Width = 71;
-            // 
-            // CCombo_Type_2
-            // 
-            this.CCombo_Type_2.HeaderText = "Combo Type II";
-            this.CCombo_Type_2.Name = "CCombo_Type_2";
-            this.CCombo_Type_2.Visible = false;
-            this.CCombo_Type_2.Width = 101;
-            // 
-            // CCombo_Label_2
-            // 
-            this.CCombo_Label_2.HeaderText = "Combo_Label II";
-            this.CCombo_Label_2.Name = "CCombo_Label_2";
-            this.CCombo_Label_2.Visible = false;
-            this.CCombo_Label_2.Width = 106;
-            // 
-            // CTime_LastWritten
-            // 
-            this.CTime_LastWritten.HeaderText = "Last Written";
-            this.CTime_LastWritten.Name = "CTime_LastWritten";
-            this.CTime_LastWritten.Visible = false;
-            this.CTime_LastWritten.Width = 89;
-            // 
-            // CTime_Duration
-            // 
-            this.CTime_Duration.HeaderText = "Duration";
-            this.CTime_Duration.Name = "CTime_Duration";
-            this.CTime_Duration.Visible = false;
-            this.CTime_Duration.Width = 72;
-            // 
-            // CTime_MS
-            // 
-            this.CTime_MS.HeaderText = "Time MS";
-            this.CTime_MS.Name = "CTime_MS";
-            this.CTime_MS.Visible = false;
-            this.CTime_MS.Width = 74;
             // 
             // FormAnnotation
             // 
