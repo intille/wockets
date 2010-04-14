@@ -370,6 +370,7 @@
     <Compile Include="..\..\src\Wockets\Sensors\SensorModes.cs">
       <Link>Sensors\SensorModes.cs</Link>
     </Compile>
+    <Compile Include="Data\Commands\CR.cs" />
     <Compile Include="Data\Commands\GET_BR.cs" />
   </ItemGroup>
   <ItemGroup>

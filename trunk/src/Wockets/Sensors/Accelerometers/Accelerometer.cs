@@ -291,6 +291,7 @@ namespace Wockets.Sensors.Accelerometers
         /// </summary>
         public override void Save()
         {
+            int localflushtimer = 0;
 #if (PocketPC)           
             if (_Saving)
             {
@@ -396,7 +397,8 @@ namespace Wockets.Sensors.Accelerometers
                         diffMS = (int)(aUnixTime - lastUnixTime);
                         if (isForceTimestampSave || (diffMS > 254) || (timeSaveCount == TIMESTAMP_AFTER_SAMPLES))
                         {
-                            bw.WriteByte(255);
+                           
+                            bw.WriteByte((byte)255);
                             WocketsTimer.GetUnixTimeBytes(aUnixTime, retBytes);
                             bw.WriteBytes(retBytes, 6);
                             timeSaveCount = 0;
@@ -404,7 +406,7 @@ namespace Wockets.Sensors.Accelerometers
                         }
                         else
                         {
-                            bw.WriteByte(diffMSByte);
+                            bw.WriteByte((byte)diffMSByte);
                             timeSaveCount++;
                         }
                         #endregion Write Timestamp
@@ -413,9 +415,23 @@ namespace Wockets.Sensors.Accelerometers
                         for (int j = 0; j < data.NumRawBytes; j++)
                             bw.WriteByte(data.RawBytes[j]);
                         #endregion Write Raw Data
+
+                        if ((this._Flush) && (localflushtimer > 200))
+                        {
+                            bw.Flush();
+                            bw.CloseFile();
+                            bw = new ByteWriter(currentDataFile, false);
+                            bw.OpenFile(false);
+                            localflushtimer = 0;
+                        }
+                        else
+                            localflushtimer++;
                     }
                     #endregion Write Data
 
+
+                   
+                   
                     #region Update Pointers, statistics and time stamps
                     lastUnixTime = aUnixTime;
                     this.tailUnixTimestamp = aUnixTime;    
@@ -430,7 +446,15 @@ namespace Wockets.Sensors.Accelerometers
                     this._SavedPackets++;
                     #endregion Update Pointers, statistics and time stamps
 
-                }                    
+                }
+
+                if ((bw != null) && (this._Flush))
+                {
+                    bw.Flush();
+                    bw.CloseFile();
+                    bw = new ByteWriter(currentDataFile, false);
+                    bw.OpenFile(false);
+                }           
             }
 #endif
         }

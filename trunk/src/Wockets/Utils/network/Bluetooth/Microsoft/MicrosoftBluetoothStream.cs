@@ -66,6 +66,8 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
         /// </summary>
         private static object socketLock = new object();
 
+       
+
         /// <summary>
         /// The constructor sets up a Bluetooth stream object with refrences to the send and receive buffers
         /// </summary>
@@ -167,6 +169,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                     btStream.socket = new Socket(BluetoothStream._AddressFamily, SocketType.Stream, BluetoothStream._ProtocolType);
                     btStream.socket.Blocking = true;
                     btStream.socket.Connect(btStream._RemoteEP);
+                    btStream._ConnectionTime = WocketsTimer.GetUnixTime();
                     btStream.nstream = new NetworkStream(btStream.socket, true);
                 }
 

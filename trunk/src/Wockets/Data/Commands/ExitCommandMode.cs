@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Wockets.Data.Commands
 {
-    internal class ExitCommandMode:Command
+    public class ExitCommandMode:Command
     {
         public ExitCommandMode()
         {

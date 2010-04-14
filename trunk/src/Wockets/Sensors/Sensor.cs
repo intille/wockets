@@ -114,6 +114,8 @@ namespace Wockets.Sensors
         public int _SamplingRate;
 
 
+        public bool _Flush=false;
+
         /// <summary>
         /// Specifies if the sensor is saving data or not. True means it should save, false means it shouldnt
         /// </summary>

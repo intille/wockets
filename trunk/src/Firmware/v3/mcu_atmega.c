@@ -425,7 +425,7 @@ void _atmega_initialize(unsigned char timer_prescalar)
      //_atmega_adc_turn_on();
 
 
-	//Turn on ADC conversion
+	//Turn on ADC conversion_send_data_bufferred
 	 _atmega_adc_turn_on();
 
      /* Enable Timer 2 */
