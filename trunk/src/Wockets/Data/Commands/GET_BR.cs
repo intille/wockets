@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Wockets.Data.Commands
 {
-    public class GET_BR
+    public class GET_BR : Command
     {
 
         public GET_BR()
