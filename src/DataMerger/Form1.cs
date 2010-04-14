@@ -1245,12 +1245,14 @@ namespace DataMerger
             double zephyrOffset = 0;
             double columbiaOffset = 0;
             double rtiOffset = 0;
+            double oxyconOffset = 0;
 
             actigraphOffset = f._ActigraphSeconds;
             sensewearOffset = f._SensewearSeconds;
             zephyrOffset = f._ZephyrSeconds;
             columbiaOffset = f._ColumbiaSeconds;
             rtiOffset = f._RTISeconds;
+            oxyconOffset = f._OxyconSeconds;
 
             WocketsConfiguration configuration = new WocketsConfiguration();
             try
@@ -1298,6 +1300,7 @@ namespace DataMerger
                              throw new Exception("RTI Synchronization: Parsing failed " + e.Message);
                          }
 
+                         rtiOriginTime = rtiOriginTime.AddSeconds(rtiOffset);
                          rtiOriginFound = true;
                      }
 
@@ -1342,6 +1345,7 @@ namespace DataMerger
                                 if (dateTokens[2].Length == 2)
                                     dateTokens[2] = "20" + dateTokens[2];
                                 rtiTime = new DateTime(Convert.ToInt32(dateTokens[2]), Convert.ToInt32(dateTokens[0]), Convert.ToInt32(dateTokens[1]), Convert.ToInt32(timeTokens[0]), Convert.ToInt32(timeTokens[1]), Convert.ToInt32(timeTokens[2]),mseconds);
+                                rtiTime = rtiTime.AddSeconds(rtiOffset);
                             }
                             if ((rtiOriginFound) && (rti_sample_counter == 20))
                             {
@@ -1354,7 +1358,7 @@ namespace DataMerger
                             //if (isPM)
                             //    rtiTime.AddHours(12.0);
 
-                            rtiTime=rtiTime.AddSeconds(rtiOffset);
+                         
                             rtiUnixTime = UnixTime.GetUnixTime(rtiTime);
                             string rtiKey = rtiTime.Year + "-" + rtiTime.Month + "-" + rtiTime.Day + "-" + rtiTime.Hour + "-" + rtiTime.Minute + "-" + rtiTime.Second;
                             string rtiLine = "";
@@ -2137,7 +2141,7 @@ namespace DataMerger
 
 
                                     oxyconTime = oxyconTime.AddSeconds(-1.0 * oxyconAdjustment);
-
+                                    oxyconTime = oxyconTime.AddSeconds(oxyconOffset);
                                     oxyconUnixTime = UnixTime.GetUnixTime(oxyconTime);
                                     string oxyconKey = oxyconTime.Year + "-" + oxyconTime.Month + "-" + oxyconTime.Day + "-" + oxyconTime.Hour + "-" + oxyconTime.Minute + "-" + oxyconTime.Second;
                                     string oxyconLine = "";
@@ -2259,6 +2263,7 @@ namespace DataMerger
 
 
                                     oxyconUnixTime = UnixTime.GetUnixTime(oxyconTime);
+                                    oxyconTime = oxyconTime.AddSeconds(oxyconOffset);
                                     string oxyconKey = oxyconTime.Year + "-" + oxyconTime.Month + "-" + oxyconTime.Day + "-" + oxyconTime.Hour + "-" + oxyconTime.Minute + "-" + oxyconTime.Second;
                                     string oxyconLine = "";
 
@@ -2380,6 +2385,7 @@ namespace DataMerger
 
 
                                     oxyconUnixTime = UnixTime.GetUnixTime(oxyconTime);
+                                    oxyconTime = oxyconTime.AddSeconds(oxyconOffset);
                                     string oxyconKey = oxyconTime.Year + "-" + oxyconTime.Month + "-" + oxyconTime.Day + "-" + oxyconTime.Hour + "-" + oxyconTime.Minute + "-" + oxyconTime.Second;
                                     string oxyconLine = "";
                                     if (oxyconStart == null)
@@ -2470,7 +2476,7 @@ namespace DataMerger
                             timeTokens = timeTokens[0].Split(':');
                             sensewearTime = new DateTime(Convert.ToInt32(dateTokens[0]), Convert.ToInt32(dateTokens[1]), Convert.ToInt32(dateTokens[2]), Convert.ToInt32(timeTokens[0]), Convert.ToInt32(timeTokens[1]), Convert.ToInt32(timeTokens[2]));
                             //if (sensewearOffset > 0)
-                                sensewearTime=sensewearTime.AddSeconds(sensewearOffset);
+                           sensewearTime=sensewearTime.AddSeconds(sensewearOffset);
                             sensewearUnixTime = UnixTime.GetUnixTime(sensewearTime);
                         }
                         else
@@ -2485,9 +2491,9 @@ namespace DataMerger
                             else
                                 sensewearUnixTime = Convert.ToInt64(tokens[0].Trim()) - (7 * 60 * 60 * 1000);
 
-                            //if (sensewearOffset > 0)
-                                sensewearTime = sensewearTime.AddSeconds(sensewearOffset);
+                            //if (sensewearOffset > 0)                           
                             UnixTime.GetDateTime((long)sensewearUnixTime, out sensewearTime);
+                            sensewearTime = sensewearTime.AddSeconds(sensewearOffset);
                         }
 
                         if (sensewearStart == null)

@@ -94,12 +94,6 @@
         "Entry"
         {
         "MsmKey" = "8:_BCD3F189F0B02D607CE6D1F7A459F4A2"
-        "OwnerKey" = "8:_C2385F9BF98C4E8EA5BE4C99902B1882"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_BCD3F189F0B02D607CE6D1F7A459F4A2"
         "OwnerKey" = "8:_9684725F82234F07AB6709C3A60600DE"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -113,6 +107,12 @@
         {
         "MsmKey" = "8:_BCD3F189F0B02D607CE6D1F7A459F4A2"
         "OwnerKey" = "8:_CCCF234C77174EC49130BB4AD39C0B4F"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_BCD3F189F0B02D607CE6D1F7A459F4A2"
+        "OwnerKey" = "8:_C2385F9BF98C4E8EA5BE4C99902B1882"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -136,12 +136,6 @@
         "Entry"
         {
         "MsmKey" = "8:_C9AEA5512F464AD322FDBF45198CB7A9"
-        "OwnerKey" = "8:_C2385F9BF98C4E8EA5BE4C99902B1882"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_C9AEA5512F464AD322FDBF45198CB7A9"
         "OwnerKey" = "8:_9684725F82234F07AB6709C3A60600DE"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -155,6 +149,12 @@
         {
         "MsmKey" = "8:_C9AEA5512F464AD322FDBF45198CB7A9"
         "OwnerKey" = "8:_CCCF234C77174EC49130BB4AD39C0B4F"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_C9AEA5512F464AD322FDBF45198CB7A9"
+        "OwnerKey" = "8:_C2385F9BF98C4E8EA5BE4C99902B1882"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -203,12 +203,6 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_C2385F9BF98C4E8EA5BE4C99902B1882"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_C077AA43C2BA4A1FBCA015E182B1DF80"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -268,6 +262,18 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_C077AA43C2BA4A1FBCA015E182B1DF80"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_9684725F82234F07AB6709C3A60600DE"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_BCD3F189F0B02D607CE6D1F7A459F4A2"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -281,12 +287,6 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_C9AEA5512F464AD322FDBF45198CB7A9"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_9684725F82234F07AB6709C3A60600DE"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -388,11 +388,11 @@
                 {
                     "_1B00A3972DC1D47C8A032C7728B55B0C"
                     {
-                    "Name" = "8:WocketsWeka.DLL"
+                    "Name" = "8:WocketsWeka.dll"
                     "Attributes" = "3:512"
                     }
                 }
-            "SourcePath" = "8:WocketsWeka.DLL"
+            "SourcePath" = "8:WocketsWeka.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_45D43034C6CA4CE79DC31D031DA107F1"
@@ -567,7 +567,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:Wockets, Version=1.0.3751.17923, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:Wockets, Version=1.0.3756.23743, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
                     "_BCD3F189F0B02D607CE6D1F7A459F4A2"
@@ -815,14 +815,14 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:WocketsInstaller"
-        "ProductCode" = "8:{8A677EC0-924A-47F0-80B4-60148AF95FBA}"
-        "PackageCode" = "8:{340218F6-D462-4EC1-BEB4-9BF7AD1979C7}"
+        "ProductCode" = "8:{FE4B57BC-EEAB-49AB-94C0-F8DBB37A9CDF}"
+        "PackageCode" = "8:{1203D9D9-3A14-4254-A802-EBBB086F513E}"
         "UpgradeCode" = "8:{C469586D-4266-4E79-8F41-3937F5A8F09F}"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:1.35.0"
+        "ProductVersion" = "8:1.36.0"
         "Manufacturer" = "8:MIT"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"

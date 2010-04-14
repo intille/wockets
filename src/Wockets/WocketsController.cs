@@ -272,16 +272,18 @@ namespace Wockets
 
         public void Dispose()
         {
-            _Saving = false;
-            polling = false;
+
+
             if (aPollingThread != null)
             {
+                polling = false;
                 aPollingThread.Join();
                 aPollingThread.Abort();
             }
 
             if (aSavingThread != null)
             {
+                _Saving = false;
                 aSavingThread.Join();
                 aSavingThread.Abort();
             }

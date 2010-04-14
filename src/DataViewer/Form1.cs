@@ -598,7 +598,7 @@ namespace NESPDataViewer
                         DateTime dt = DateTime.Parse(split[1]);
                         double x = (double)new XDate(dt);
                         double value = (Convert.ToDouble(split[2]) + Convert.ToDouble(split[3]) + Convert.ToDouble(split[4]))/20;
-                        string label = String.Format("Area Under Curve {0} at {1}", value, dt.ToLongTimeString());
+                        string label = String.Format("Area Under Curve {0}, {1} at {2}", location, value, dt.ToLongTimeString());
                         if (_isUsingLabels) listAUCs.Add(x, value, label);
                         else listAUCs.Add(x, value);
                     }
@@ -625,7 +625,7 @@ namespace NESPDataViewer
                         DateTime dt = DateTime.Parse(split[1]);
                         double x = (double)new XDate(dt);
                         double value = Convert.ToDouble(split[2]);
-                        string label = String.Format("Vector Magnitude {0} at {1}", value, dt.ToLongTimeString());
+                        string label = String.Format("Vector Magnitude {0}, {1} at {2}", location, value, dt.ToLongTimeString());
                         if (_isUsingLabels) listVMAGs.Add(x, value, label);
                         else listVMAGs.Add(x, value);
                     }
@@ -706,18 +706,18 @@ namespace NESPDataViewer
 
                         double x = (double)new XDate(dt);
                         double value = Convert.ToDouble(split[2]);
-                        string label = String.Format("X-axis,\n{0} {1}", dt.ToLongTimeString(), value);
+                        string label = String.Format("Columbia X-axis,\n{0} {1}", dt.ToLongTimeString(), value);
 
                         if (_isUsingLabels) listX.Add(x, value, label);
                         else listX.Add(x, value);
 
                         value = Convert.ToDouble(split[3]);
-                        label = String.Format("Y-axis,\n{0} {1}", dt.ToLongTimeString(), value);
+                        label = String.Format("Columbia Y-axis,\n{0} {1}", dt.ToLongTimeString(), value);
                         if (_isUsingLabels) listY.Add(x, value, label);
                         else listY.Add(x, value);
 
                         value = Convert.ToDouble(split[4]);
-                        label = label = String.Format("Z-axis,\n{0} {1}", dt.ToLongTimeString(), value);
+                        label = label = String.Format("Columbia Z-axis,\n{0} {1}", dt.ToLongTimeString(), value);
                         if (_isUsingLabels) listZ.Add(x, value, label);
                         else listZ.Add(x, value);
                     }
@@ -783,38 +783,38 @@ namespace NESPDataViewer
 
                         double x = (double)new XDate(dt);
                         double value = Convert.ToDouble(split[2]);
-                        string label = String.Format("X-axis,\n{0} {1}", dt.ToLongTimeString(), value);
+                        string label = String.Format("RTI X-axis,\n{0} {1}", dt.ToLongTimeString(), value);
 
                         if (_isUsingLabels) listX.Add(x, value * 1000.0, label);
                         else listX.Add(x * 1000.0, value);
 
                         value = Convert.ToDouble(split[3]);
-                        label = String.Format("Y-axis,\n{0} {1}", dt.ToLongTimeString(), value);
+                        label = String.Format("RTI Y-axis,\n{0} {1}", dt.ToLongTimeString(), value);
                         if (_isUsingLabels) listY.Add(x, value * 1000.0, label);
                         else listY.Add(x, value * 1000.0);
 
                         value = Convert.ToDouble(split[4]);
-                        label = String.Format("Z-axis,\n{0} {1}", dt.ToLongTimeString(), value);
+                        label = String.Format("RTI Z-axis,\n{0} {1}", dt.ToLongTimeString(), value);
                         if (_isUsingLabels) listZ.Add(x, value * 1000.0, label);
                         else listZ.Add(x, value * 1000.0);
 
                         value = Convert.ToDouble(split[5]) ;
-                        label = String.Format("X-AUC,\n{0} {1}", dt.ToLongTimeString(), value);
+                        label = String.Format("RTI X-AUC,\n{0} {1}", dt.ToLongTimeString(), value);
                         if (_isUsingLabels) listAUCX.Add(x, value * 1000.0, label);
                         else listAUCX.Add(x, value * 1000.0);
 
                         value = Convert.ToDouble(split[6]);
-                        label = String.Format("Y-AUC,\n{0} {1}", dt.ToLongTimeString(), value);
+                        label = String.Format("RTI Y-AUC,\n{0} {1}", dt.ToLongTimeString(), value);
                         if (_isUsingLabels) listAUCY.Add(x, value * 1000.0, label);
                         else listAUCY.Add(x, value * 1000.0);
 
                         value = Convert.ToDouble(split[7]);
-                        label = String.Format("Z-AUC,\n{0} {1}", dt.ToLongTimeString(), value);
+                        label = String.Format("RTI Z-AUC,\n{0} {1}", dt.ToLongTimeString(), value);
                         if (_isUsingLabels) listAUCZ.Add(x, value * 1000.0, label);
                         else listAUCZ.Add(x, value * 1000.0);
 
                         value = Convert.ToDouble(split[8]) ;
-                        label = String.Format("XYZ-AUC,\n{0} {1}", dt.ToLongTimeString(), value);
+                        label = String.Format("RTI XYZ-AUC,\n{0} {1}", dt.ToLongTimeString(), value);
                         if (_isUsingLabels) listAUCXYZ.Add(x, value * 1000.0, label);
                         else listAUCXYZ.Add(x, value * 1000.0);
                     }
