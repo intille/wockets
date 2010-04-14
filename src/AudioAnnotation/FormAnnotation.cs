@@ -27,7 +27,9 @@ namespace AudioAnnotation
         private FileInfo[] files_wav = null;
         private FileInfo file_session = null;
         private string NO_AUDIO_ROW_STR = "-----";
-        
+        private string file_offset = "audio_offset.txt";
+        private TimeSpan AudioOffset = new TimeSpan(0, 0, 0);
+        private Int16 IsOffsetApplied = 0;
 
         //DataGridView
         private struct COLUMN_INDEX
@@ -586,24 +588,39 @@ namespace AudioAnnotation
 
                     //-------- Here compute the creation time ---------------
                     end_file_time = files[n].LastWriteTime;
+
+                    //If there is an offset add it, to the creation time
+                    //If there is an offset add it, to the current time
+                    if ((Math.Abs(AudioOffset.TotalSeconds) > 0.0) &&
+                        ((IsOffsetApplied == 0) || (IsOffsetApplied == 2)))
+                    {
+                        //time = time.Add(AudioOffset);
+                        end_file_time = end_file_time.Add(AudioOffset);
+                    }
+                            
+
                     secs_duration = 0.0;
-                    duration = GetDuration(files_wav[n].FullName, files_wav[n].Length, out secs_duration);
-                    time = end_file_time.Subtract(TimeSpan.FromSeconds(secs_duration));
                     
+                    duration = GetDuration(files_wav[n].FullName, files_wav[n].Length, out secs_duration);
+                    //duration = GetDuration(files[n].FullName, files[n].Length, out secs_duration);
+                    
+                    time = end_file_time.Subtract(TimeSpan.FromSeconds(secs_duration));
+
+                   
 
                     //Load the time row in labels
                     dgview.Rows[n].Cells[C1.Time].Value = time.ToLongTimeString();  //time.Hour + ":" + time.Minute + ":" + time.Second; //+"."+time.Millisecond;
                     dgview.Rows[n].Cells[C1.Time_Label].Value = time.ToLongTimeString(); //time.Hour + ":" + time.Minute + ":" + time.Second; //+ "." + time.Millisecond;
 
                     //Add milliseconds granularity
-                    dgview.Rows[n].Cells[C1.TimeMS].Value = time.TimeOfDay.ToString().TrimEnd('0');
-                    
+                    dgview.Rows[n].Cells[C1.TimeMS].Value = String.Format("{0:HH:mm:ss.fff}", time);
+
                     //Add duration info
-                    dgview.Rows[n].Cells[C1.TimeLastWrite].Value = end_file_time.TimeOfDay.ToString().TrimEnd('0');
+                    dgview.Rows[n].Cells[C1.TimeLastWrite].Value = String.Format("{0:HH:mm:ss.fff}", end_file_time);
+
                     dgview.Rows[n].Cells[C1.TimeDuration].Value = duration;
 
                     //--------------------------------------------------------
-
 
                     // Status
                     dgview.Rows[n].Cells[C1.Status].Value = " ";
@@ -614,7 +631,11 @@ namespace AudioAnnotation
                     dgview.Rows[n].Cells[C2.StartID].Value = -1;
                     dgview.Rows[n].Cells[C2.EndID].Value = -1;
 
+                    
+
                 }
+
+                
 
                 time = files[0].LastWriteTime;
                 StartDate = time.Year + "-" + time.Month + "-" + time.Day;
@@ -1080,25 +1101,70 @@ namespace AudioAnnotation
                 {
 
                     // read audio files
-                    files_wav = dir.GetFiles("*.wav");
                     files = dir.GetFiles("*.msv");
 
-                    if (files.Length == 0)
+                    if (files.Length > 0)
+                    {
+                        files_wav = dir.GetFiles("*.wav");
+                    }
+                    else if (files.Length == 0)
                     {
                         files_wav = dir.GetFiles("*.mp3");
+                        DirectoryInfo dir_labels = new DirectoryInfo(DataAudioDir+"voice_time_labels\\");
                         files = dir.GetFiles("*.mp3");
                     }
 
+
                     if (files.Length > 0)
-                    {   // sort the recorder audio files by creation time (Oct-22-2009)
+                    {   
+                        // sort the recorder audio files by creation time (Oct-22-2009)
                         Array.Sort(files, new CompareFileInfoByDate());
+                        FileInfo[] array_files_output;
+                        CompareInfoOrder(files, files_wav, out array_files_output);
+
+                       if (array_files_output != null)
+                       {
 
 
-                        if (files_wav.Length != files.Length)
-                        { label_play.Text = "Warning: mistmatch between number of msv and wav files!"; }
-                        else
-                        { success = true; }
-                    }
+                           files_wav = array_files_output;
+
+
+                           if (files_wav.Length != files.Length)
+                           { label_play.Text = "Warning: mistmatch between number of msv and wav files!"; }
+                           else
+                           {
+                               success = true;
+                               IsOffsetApplied = 0;
+
+                               if (File.Exists(DataAudioDir + file_offset))
+                               {
+                                   //ReadOffset
+                                   TextReader txr = new StreamReader(DataAudioDir + file_offset);
+                                   string str_offset = txr.ReadLine();
+                                   AudioOffset = TimeSpan.Parse(str_offset);
+
+                                   IsOffsetApplied = Int16.Parse(txr.ReadLine());
+
+                                   txr.Close();
+                                   txr.Dispose();
+
+                                   //WriteOffset
+                                   if (IsOffsetApplied == 0)
+                                   {
+                                       TextWriter txw = new StreamWriter(DataAudioDir + file_offset);
+                                       txw.WriteLine(str_offset);
+                                       txw.WriteLine("1");
+                                       txw.Close();
+                                       txw.Dispose();
+                                   }
+
+                               }// if offset file exist
+
+                           }// if the size of files is the same
+
+                       }// if the wav files were ordered
+
+                    }//if the length of the files is > than zero
                     else
                     {
                         label_play.Text = "No audio files found!";
@@ -1120,7 +1186,59 @@ namespace AudioAnnotation
         }
 
 
-        //private System.Media.SoundPlayer myPlayer = new System.Media.SoundPlayer();
+  public  void CompareInfoOrder(FileInfo[] array_order, FileInfo[] array_src, out FileInfo[] array_output)
+    {
+        
+        array_output = null;
+
+        if (array_order.Length > 0 && array_src.Length > 0)
+        {
+            if (array_order.Length == array_src.Length)
+            {
+                
+
+                string[] fname;
+                bool is_name_equal = false;
+                int[] indexes = new int[array_order.Length];
+                array_output = new FileInfo[array_order.Length];
+
+
+
+                for (int j = 0; j < indexes.Length; j++)
+                { indexes[j] = 0; }
+
+
+                for (int i = 0; i < array_order.Length; i++)
+                {
+                    fname = array_order[i].Name.Split('.');
+                    is_name_equal = false;
+
+
+                    for (int k = 0; k < array_src.Length; k++)
+                    {
+                        if (indexes[k] == 0)
+                        {
+                            is_name_equal = array_src[k].Name.Contains(fname[0]);
+
+                            if (is_name_equal)
+                            {
+                                array_output[i] = array_src[k];
+                                indexes[k] = 1;
+                                break;
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
+
+       
+    }
+
+
+
+
         private WindowsMediaPlayerClass wmp = new WindowsMediaPlayerClass();
         private IWMPMedia mediainfo;
 
@@ -1139,19 +1257,21 @@ namespace AudioAnnotation
 
                 if (File.Exists(path))
                 {
-                    if (path.Contains("mp3"))
+                    if (path.ToUpper().Contains("MP3"))
                     {
                         mediainfo = wmp.newMedia(path);
 
 
                         if (mediainfo.duration > 0.0)
                         {
-                            audio_duration = mediainfo.durationString;
+                            //audio_duration = mediainfo.durationString;
+                            audio_duration = mediainfo.duration.ToString();
                             secs_duration = mediainfo.duration;
                         }
+
                         
                     }
-                    else if( path.Contains("wav"))
+                    else if( path.ToUpper().Contains("WAV"))
                     {
                         secs_duration = Math.Round( ((file_length - header) / (sample_rate * (bit_rate / 8.0)))/2.0 , 3);
                         audio_duration = secs_duration.ToString();
@@ -1812,15 +1932,17 @@ namespace AudioAnnotation
 
             int row = dataGridView1.Rows.Add();
             int nCellsLenght = ncells.Length - 1;
-
             int needed_correction = 0;
+
+            int i = 0;
 
 
             try
             {
-                for (int i = 0; i < nCellsLenght; i++)
+                for (i = 0; i < nCellsLenght; i++)
                 {
 
+                  
                     if (i == C1.Lock)
                     {
                         if (ncells[i].CompareTo("True") == 0)
@@ -1835,10 +1957,6 @@ namespace AudioAnnotation
                         else
                         { dataGridView1.Rows[row].Cells[i].Value = false; }
                     }
-                    else if ((i == C1.category_label) || (i == C2.category_label))
-                    {
-                        // Do nothing
-                    }
                     else if (i == C1.Combo_Label)
                     {
                         dataGridView1.Rows[row].Cells[i].Value = ncells[i];
@@ -1848,7 +1966,12 @@ namespace AudioAnnotation
                         else
                         { set_ComboBox(cellComboBox, row, C1.category_label, 2, ncells[i]); }
 
+
                         dataGridView1.Rows[row].Cells[C1.category_label].Value = ncells[C1.category_label];
+
+                        DataGridViewComboBoxCell combo = (DataGridViewComboBoxCell)dataGridView1.Rows[row].Cells[2];
+                        
+                    
                     }
                     else if (i == C2.Combo_Label)
                     {
@@ -1860,6 +1983,11 @@ namespace AudioAnnotation
                         { set_ComboBox(cellComboBox, row, C2.category_label, 2, ncells[i]); }
 
                         dataGridView1.Rows[row].Cells[C2.category_label].Value = ncells[C2.category_label];
+
+                    }
+                    else if ((i == C1.category_label) || (i == C2.category_label))
+                    {  
+                        // do nothing 
 
                     }
                     // C1.ID and C2.ID have the same values, so compare only one of them
@@ -1882,36 +2010,47 @@ namespace AudioAnnotation
                     else if ((i == C1.Time) && (check_time_stamp == true))
                     {
 
-
-
                         time = DateTime.Parse("00:00:00.0");
 
-                        //If the row has an audio file, read id from file
+
+                        #region Compute Time
+
+                        //--------------- Check the Audio File ------------------
+
+                                //If the row has an audio file, read id from file
                         if (is_audio_row == true)
                         {
                             n = Int32.Parse(ncells[C1.ID]);
-
-                          
-
+                            
                             //update the last seen audio file row value
                             previous_row_audio_file = n;
-
                             end_file_time = files[n].LastWriteTime;
+
+
+                            //----If there is an offset add it, to the current end time -----
+                            if ((Math.Abs(AudioOffset.TotalSeconds) > 0.0) &&
+                                ((IsOffsetApplied == 0) || (IsOffsetApplied == 2)))
+                            {
+                                //time = time.Add(AudioOffset);
+                                end_file_time = end_file_time.Add(AudioOffset);
+                            }
+                            
+                         
+
 
                             if (C1.TimeMS < nCellsLenght)
                             { time = DateTime.Parse(end_file_time.ToShortDateString() + " " + ncells[C1.TimeMS]); }
                             else
-                            {
-                                if (ncells[i].Trim().CompareTo("") != 0)
-                                {
-                                    time = DateTime.Parse(end_file_time.ToShortDateString() + " " + ncells[i]);
+                            {   if (ncells[i].Trim().CompareTo("") != 0)
+                                {  time = DateTime.Parse(end_file_time.ToShortDateString() + " " + ncells[i]);
                                 }
-                                
                             }
 
-                        }
-                        // if the row doesn't have an audio file, assign the time stamp 
-                        // according to the last seen audio row
+
+                         }
+                                // if the row doesn't have an audio file, assign the time stamp 
+                                // according to the last seen audio row
+                                // Becareful, this can easily mess up things when the labels have been modified
                         else
                         {
                             if (previous_row_audio_file < files.Length - 1)
@@ -1920,10 +2059,18 @@ namespace AudioAnnotation
                             { n = previous_row_audio_file; }
 
 
-                            if (n == 11)
-                            { }
 
-                            end_file_time = files[n].LastWriteTime;
+                             end_file_time = files[n].LastWriteTime;
+
+
+                             //----If there is an offset add it, to the current end time -----
+                             if ((Math.Abs(AudioOffset.TotalSeconds) > 0.0) &&
+                                 ((IsOffsetApplied == 0) || (IsOffsetApplied == 2)))
+                             {
+                                 //time = time.Add(AudioOffset);
+                                 end_file_time = end_file_time.Add(AudioOffset);
+                             }
+                            
 
                             if (C1.TimeMS < nCellsLenght)
                             { time = DateTime.Parse(end_file_time.ToShortDateString() + " " + ncells[C1.TimeMS]); }
@@ -1932,8 +2079,7 @@ namespace AudioAnnotation
                                 if (ncells[i+1].Trim().CompareTo("") != 0)
                                 { time = DateTime.Parse(end_file_time.ToShortDateString() + " " + ncells[i + 1]); }
                                 else
-                                {
-                                    time = DateTime.Parse(end_file_time.ToShortDateString() + " " + previous_time_audio_file);
+                                {  time = DateTime.Parse(end_file_time.ToShortDateString() + " " + previous_time_audio_file);
                                 }
                             }
 
@@ -1942,58 +2088,97 @@ namespace AudioAnnotation
 
 
 
-                        //-------- Here compute the creation time ---------------
+                        //-------- Compute the creation time ---------------
 
-                        //substract creation time from the end time
-                        time_diff = end_file_time.Subtract(time);
-
-
-                        // if the time difference is equal zero or less than zero, 
-                        // greater than 1 hr.
-                        //the time stamp needs to be corrected
-                        if ((time_diff.TotalSeconds == 0.0) || (time_diff.TotalSeconds < 0.0))
-                        {
-                            // compute the creation time
-                            secs_duration = 0.0;
-                            duration = GetDuration(files_wav[n].FullName, files_wav[n].Length, out secs_duration);
-                            time = end_file_time.Subtract(TimeSpan.FromSeconds(secs_duration));
-
-                            needed_correction = 1;
-
-                        }
-                        else if (time_diff.TotalSeconds >= 3600)
-                        {
-                            // compute the creation time
-                            time = end_file_time.Subtract(time_diff);
-
-                            secs_duration = 0.0;
-                            duration = GetDuration(files_wav[n].FullName, files_wav[n].Length, out secs_duration);
-                            time = time.Subtract(TimeSpan.FromSeconds(secs_duration));
-
-                 
-                            needed_correction = 2;
-                        }
-                        else
-                        {
-                            duration = time_diff.TotalSeconds.ToString();
-                        }
+                           //substract creation time from the end time
+                            time_diff = end_file_time.Subtract(time);
 
 
-                        //write the creation time to the "creation time" and "label time" columns
+                            // if the time difference is equal zero or less than zero, less 30min
+                            // greater than 30 min
+                            // the time stamp needs to be corrected
+                            if ((time_diff.TotalSeconds == 0.0) ||
+                                ((time_diff.TotalSeconds < 0.0) && (Math.Abs(time_diff.TotalSeconds) < 1800) ) &&
+                                ((IsOffsetApplied == 1) || (IsOffsetApplied == 0)))
+                            {
+                                // compute the creation time
+                                secs_duration = 0.0;
+                                duration = GetDuration(files_wav[n].FullName, files_wav[n].Length, out secs_duration);
+                                time = end_file_time.Subtract(TimeSpan.FromSeconds(secs_duration));
+
+                                needed_correction = 1;
+
+                            }
+                            else if(IsOffsetApplied == 2) 
+                            {
+                                // compute the creation time
+                                time = end_file_time;
+
+                                secs_duration = 0.0;
+                                duration = GetDuration(files_wav[n].FullName, files_wav[n].Length, out secs_duration);
+
+                                time = time.Subtract(TimeSpan.FromSeconds(secs_duration)); 
+
+
+                                needed_correction = 2;
+                            }
+                            else if ((Math.Abs(time_diff.TotalSeconds) >= 3000) && (IsOffsetApplied == 3))
+                            {
+                                // compute the creation time
+                                time = end_file_time.Subtract(time_diff);
+
+                                secs_duration = 0.0;
+                                duration = GetDuration(files_wav[n].FullName, files_wav[n].Length, out secs_duration);
+                                time = time.Subtract(TimeSpan.FromSeconds(secs_duration));
+
+                     
+                                needed_correction = 3;
+                            }
+                            else if (IsOffsetApplied == 4)
+                            {
+                                // compute the creation time
+                                time = end_file_time;
+
+                                secs_duration = 0.0;
+                                duration = GetDuration(files_wav[n].FullName, files_wav[n].Length, out secs_duration);
+                                time = time.Subtract(TimeSpan.FromSeconds(secs_duration));
+
+
+                                needed_correction = 4;
+                            }
+                            else
+                            {
+                                duration = time_diff.TotalSeconds.ToString();
+                            }
+
+
+                       
+
+                        #endregion
+
+
+                        //------------------  Write Results To Table  -------------------------
+                       //write the creation time to the "creation time" and "label time" columns
                         if (is_audio_row == true)
-                        { dataGridView1.Rows[row].Cells[i].Value = time.ToLongTimeString(); }
+                        { dataGridView1.Rows[row].Cells[C1.Time].Value = time.ToLongTimeString(); }
                         else
-                        { dataGridView1.Rows[row].Cells[i].Value = ""; }
+                        { dataGridView1.Rows[row].Cells[C1.Time].Value = ""; }
 
                         dataGridView1.Rows[row].Cells[C1.Time_Label].Value = time.ToLongTimeString();
 
                         //Add milliseconds granularity
                         if( time.TimeOfDay.TotalMilliseconds == 0.0 )
-                        { dataGridView1.Rows[row].Cells[C1.TimeMS].Value = time.TimeOfDay.ToString();}
-                        else {dataGridView1.Rows[row].Cells[C1.TimeMS].Value = time.TimeOfDay.ToString().Trim('0');}
+                        {
+                            dataGridView1.Rows[row].Cells[C1.TimeMS].Value = String.Format("{0:HH:mm:ss.fff}", time);
+                                                                             //time.TimeOfDay.ToString();
+                        }
+                        else 
+                        {
+                            dataGridView1.Rows[row].Cells[C1.TimeMS].Value = String.Format("{0:HH:mm:ss.fff}", time);
+                        }
 
                         //Add duration info
-                        dataGridView1.Rows[row].Cells[C1.TimeLastWrite].Value = end_file_time.TimeOfDay.ToString().TrimEnd('0');
+                        dataGridView1.Rows[row].Cells[C1.TimeLastWrite].Value = String.Format("{0:HH:mm:ss.fff}", end_file_time); 
                         dataGridView1.Rows[row].Cells[C1.TimeDuration].Value = duration;
 
 
@@ -2001,13 +2186,17 @@ namespace AudioAnnotation
                         previous_time_audio_file = dataGridView1.Rows[row].Cells[C1.TimeMS].Value.ToString();
 
                         //-------------------------------------------------------------------------
+
+ 
                     }
-                    else if (((i == C1.Time_Label) || (i == C1.TimeMS) ||
-                                 (i == C1.TimeLastWrite) || (i == C1.TimeDuration)) &&
-                               (check_time_stamp == true))
+                    else if (  ( (i == C1.Time_Label) || (i == C1.TimeMS) ||
+                                 (i == C1.TimeLastWrite) || (i == C1.TimeDuration)) )
+                               //&& (check_time_stamp == true))
                     {
                         //Do nothing, since the value was modified along with the previous field
+
                     }
+                    
                     else
                     {
                         dataGridView1.Rows[row].Cells[i].Value = ncells[i];
@@ -2017,6 +2206,8 @@ namespace AudioAnnotation
 
 
                 return needed_correction;
+                
+
             }
             catch
             {
@@ -3129,12 +3320,19 @@ namespace AudioAnnotation
 
                 if (is_busy == 1)
                 {
+                    //Handle Null Reference to this field
+                    if( dataGridView1.Rows[row].Cells[C1.category_label].Value != null)
+                    {
+                        if (dataGridView1.Rows[row].Cells[C1.category_label].Value.ToString().CompareTo(" ") != 0)
+                        { is_busy = 0; }
+                    }
 
-                    if ((dataGridView1.Rows[row].Cells[C1.category_label].Value.ToString().CompareTo(" ") != 0)
-                         ||
-                        (dataGridView1.Rows[row].Cells[C2.category_label].Value.ToString().CompareTo(" ") != 0)
-                       )
-                    { is_busy = 0; }
+                    if (dataGridView1.Rows[row].Cells[C2.category_label].Value != null)
+                    {
+                        if (dataGridView1.Rows[row].Cells[C2.category_label].Value.ToString().CompareTo(" ") != 0)
+                        { is_busy = 0; }
+                    }
+
                 }
 
                 //System.Console.WriteLine("Data Error Event");   
@@ -3924,10 +4122,14 @@ namespace AudioAnnotation
                         // only two activity categories can be loaded
                         if (i == 0)
                         {
+                            //extract the activity array
                             activityArray = CActivityList[i].ToArray();
+                            
+                            //add the blank possition
                             list_category_1.Add(" ");
 
-                            for (int j = 0; j < CActivityList[i].Count - 1; j++)
+                           
+                            for (int j = 0; j < CActivityList[i].Count; j++)
                             { list_category_1.Add(activityArray[j]._Name); }
                         }
                         else if (i == 1)
@@ -3935,7 +4137,8 @@ namespace AudioAnnotation
                             activityArray = CActivityList[i].ToArray();
                             list_category_2.Add(" ");
 
-                            for (int j = 0; j < CActivityList[i].Count - 1; j++)
+                            
+                            for (int j = 0; j < CActivityList[i].Count; j++)
                             { list_category_2.Add(activityArray[j]._Name); }
 
                         }
@@ -4384,13 +4587,16 @@ namespace AudioAnnotation
                     {
                         count = LabelsList_1.Count;
                         List_Current_XML = list_category_1;
-                        category = "Postures";
+                        //category = "Postures";
+                        category = list_category_name[0];
+
                     }
                     else
                     {
                         count = LabelsList_2.Count;
                         List_Current_XML = list_category_2;
-                        category = "Activities";
+                        //category = "Activities";
+                        category = list_category_name[1];
                     }
 
 
@@ -4409,6 +4615,7 @@ namespace AudioAnnotation
                         if (tokens[0].CompareTo("ok") == 0)
                         {
                             current_label = tokens[5];
+
                             
 
                             //filter labels comming from blank rows
