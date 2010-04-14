@@ -16,13 +16,14 @@ namespace DataMerger
         public double _ActigraphSeconds = 0;
         public double _RTISeconds = 0;
         public double _ColumbiaSeconds = 0;
+        public double _OxyconSeconds = 0;
         private string directory = "";
         private string FILENAME = "TimeOffsetCorrections.txt";
 
         public Form2(string directory)
         {
             InitializeComponent();
-            this.directory = directory;
+            this.directory = directory + "\\othersensors\\"; ;
 
            
            LoadData();
@@ -98,21 +99,80 @@ namespace DataMerger
             }
         }
 
+
+        private void textBox6_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                this._OxyconSeconds = Convert.ToDouble(this.textBox6.Text.Trim());
+                Save();
+            }
+            catch
+            {
+                this._OxyconSeconds = 0;
+            }
+        }
+
         private void LoadData()
         {
             if (File.Exists(directory + FILENAME))
             {
                 TextReader tr = new StreamReader(directory + FILENAME);
-                string line = tr.ReadLine();
-                this._ActigraphSeconds = Convert.ToDouble(line.Substring(10));
-                line = tr.ReadLine();
-                this._SensewearSeconds = Convert.ToDouble(line.Substring(10));
-                line = tr.ReadLine();
-                this._ZephyrSeconds = Convert.ToDouble(line.Substring(7));
-                line = tr.ReadLine();
-                this._ColumbiaSeconds = Convert.ToDouble(line.Substring(9));
-                line = tr.ReadLine();
-                this._RTISeconds = Convert.ToDouble(line.Substring(4));
+                string line = "";
+                try
+                {
+                    line = tr.ReadLine();
+                    this._ActigraphSeconds = Convert.ToDouble(line.Substring(10));
+                }
+                catch
+                {
+                    this._ActigraphSeconds = 0;
+                }
+                try
+                {
+                    line = tr.ReadLine();
+                    this._SensewearSeconds = Convert.ToDouble(line.Substring(10));
+                }
+                catch
+                {
+                    this._SensewearSeconds = 0;
+                }
+                try
+                {
+                    line = tr.ReadLine();
+                    this._ZephyrSeconds = Convert.ToDouble(line.Substring(7));
+                }
+                catch
+                {
+                    this._ZephyrSeconds = 0;
+                }
+                try
+                {
+                    line = tr.ReadLine();
+                    this._ColumbiaSeconds = Convert.ToDouble(line.Substring(9));
+                }
+                catch
+                {
+                    this._ColumbiaSeconds = 0;
+                }
+                try
+                {
+                    line = tr.ReadLine();
+                    this._RTISeconds = Convert.ToDouble(line.Substring(4));
+                }
+                catch
+                {
+                    this._RTISeconds = 0;
+                }
+                try
+                {
+                    line = tr.ReadLine();
+                    this._OxyconSeconds = Convert.ToDouble(line.Substring(7));
+                }
+                catch
+                {
+                    this._OxyconSeconds = 0;
+                }
                 tr.Close();
             }
             this.textBox1.Text = this._ActigraphSeconds.ToString();
@@ -120,6 +180,7 @@ namespace DataMerger
             this.textBox3.Text = this._ZephyrSeconds.ToString();
             this.textBox4.Text = this._ColumbiaSeconds.ToString();
             this.textBox5.Text = this._RTISeconds.ToString();
+            this.textBox6.Text = this._OxyconSeconds.ToString();
 
         }
         private void Save()
@@ -130,7 +191,9 @@ namespace DataMerger
             tw.WriteLine("Zephyr:" + this._ZephyrSeconds);
             tw.WriteLine("Columbia:" + this._ColumbiaSeconds);
             tw.WriteLine("RTI:" + this._RTISeconds);
+            tw.WriteLine("Oxycon:" + this._OxyconSeconds);
             tw.Close();
         }
+
     }
 }
