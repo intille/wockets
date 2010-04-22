@@ -285,7 +285,8 @@ namespace Wockets.Sensors.Accelerometers
             
         }
 
- 
+
+        byte[] ttt = new byte[2400];
         /// <summary>
         /// Saves data to a binary file
         /// </summary>
@@ -353,7 +354,7 @@ namespace Wockets.Sensors.Accelerometers
                                    DirectoryStructure.GetDate() + "." + this._ID + "." + FILE_EXT;
 
                     bw = new ByteWriter(currentDataFile, true);
-                    bw.OpenFile();
+                    bw.OpenFile(32768);
 
                     // Ensure that the first data point in the new file will start
                     // with the full, rather than differential, timecode info. 
@@ -393,6 +394,7 @@ namespace Wockets.Sensors.Accelerometers
                     #region Write Data
                     if (bw != null)
                     {
+                        
                         #region Write Timestamp
                         diffMS = (int)(aUnixTime - lastUnixTime);
                         if (isForceTimestampSave || (diffMS > 254) || (timeSaveCount == TIMESTAMP_AFTER_SAMPLES))
@@ -415,9 +417,21 @@ namespace Wockets.Sensors.Accelerometers
                         for (int j = 0; j < data.NumRawBytes; j++)
                             bw.WriteByte(data.RawBytes[j]);
                         #endregion Write Raw Data
+                        /*
 
+                        bw.WriteBytes(ttt);
+                        this._SavedPackets = 2400;
+                        tail = currentHead;
+                        if (tail ==0)
+                            data = ((AccelerationData)this._Decoder._Data[this._Decoder._Data.Length - 1]);
+                        else
+                            data = ((AccelerationData)this._Decoder._Data[tail - 1]);
+                        aUnixTime = data.UnixTimeStamp;
+                        break;      
+                         */
+                        /*
                         if ((this._Flush) && (localflushtimer > 200))
-                        {
+                        {                           
                             bw.Flush();
                             bw.CloseFile();
                             bw = new ByteWriter(currentDataFile, false);
@@ -426,6 +440,7 @@ namespace Wockets.Sensors.Accelerometers
                         }
                         else
                             localflushtimer++;
+                         */
                     }
                     #endregion Write Data
 
@@ -451,9 +466,9 @@ namespace Wockets.Sensors.Accelerometers
                 if ((bw != null) && (this._Flush))
                 {
                     bw.Flush();
-                    bw.CloseFile();
-                    bw = new ByteWriter(currentDataFile, false);
-                    bw.OpenFile(false);
+                    //bw.CloseFile();
+                    //bw = new ByteWriter(currentDataFile, false);
+                    //bw.OpenFile(false);
                 }           
             }
 #endif

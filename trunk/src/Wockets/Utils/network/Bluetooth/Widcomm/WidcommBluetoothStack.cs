@@ -4,6 +4,7 @@ using System.Text;
 using System.Collections;
 using System.Runtime.InteropServices;
 using Wockets.Utils.network.Bluetooth;
+using Microsoft.Win32;
 
 namespace Wockets.Utils.network.Bluetooth.Widcomm
 {
@@ -19,6 +20,7 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
 
         [DllImport(widcommDLL, SetLastError = false, CharSet = CharSet.Unicode)]
         internal static extern bool DeleteWidcommStack(IntPtr wdStack);
+     
 
         [DllImport(widcommDLL, SetLastError = false, CharSet = CharSet.Unicode)]
         internal static extern bool IsStackServerUp(IntPtr wdStack);
@@ -53,15 +55,24 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
         [DllImport(widcommDLL, SetLastError = false, CharSet = CharSet.Unicode)]
         internal static extern int SppRemoveConnection(IntPtr wdStack);
 
+        [DllImport(widcommDLL, SetLastError = false, CharSet = CharSet.Unicode)]
+        internal static extern int GetData(IntPtr wdStack,byte[] buffer);
+
+        [DllImport(widcommDLL, SetLastError = false, CharSet = CharSet.Unicode)]
+        internal static extern int SendData(IntPtr wdStack,byte[] buffer,int length);
+
     }
 
     public class WidcommBluetoothStack : BluetoothStack
     {
         private IntPtr wdStack= IntPtr.Zero;
         private bool m_bDisposed = false;
+        public static bool[] _PortUsed = new bool[20];
 
         public WidcommBluetoothStack()
         {
+            for (int i = 0; (i < 20); i++)
+                _PortUsed[i] = false;
         }
 
         ~WidcommBluetoothStack()
@@ -69,6 +80,13 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
             Dispose();
         }
 
+
+        public string GetCOMName()
+        {
+            string com = "";
+
+            return com;
+        }
 
         public IntPtr _Reference
         {
@@ -87,7 +105,7 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
             //create Widcomm stack object
             this.wdStack = WidcommAPI.CreateWidcommStack();
             //set the stack to auto reconnect = true
-            if ((this.wdStack != null) && (WidcommAPI.SetAutoReconnect(this.wdStack)))
+            if (this.wdStack != null)
                 return true;
             else
                 return false;

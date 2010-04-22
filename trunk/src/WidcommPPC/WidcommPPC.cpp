@@ -10,15 +10,14 @@
 
  WidcommStackPPC::WidcommStackPPC()
 {
+
 }
 
  WidcommStackPPC::~WidcommStackPPC()
 {
-    WIDCOMMSDK_ShutDown();
 }
-/*void  WidcommStackPPC::OnDataReceived (void *p_data, short len)
- {
- }*/
+
+
 void  WidcommStackPPC::OnDeviceResponded(BD_ADDR bda, DEV_CLASS devClass, BD_NAME bdName, BOOL bConnected)
 {
   //check if we already have listed this device address

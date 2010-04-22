@@ -242,7 +242,9 @@ void _send_data_bufferred(void)
 
 			for (int i=0;(i<2400);i++){
 				_transmit_packet(_encode_packet(x++,y++,z++));
-				//_delay_ms(3);
+			/*	if ((i==2400))
+					for (int j=0;(j<100);j++)
+						_delay_ms(5);*/
 				}
 			if (x>1023)
 			{
