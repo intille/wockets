@@ -45,6 +45,21 @@ namespace Wockets.Utils.network
                 }
                 return bluetoothStack;
             }
+            set
+            {
+                if (value == null)
+                {
+                    try
+                    {
+                        bluetoothStack.Dispose();
+                        bluetoothStack = null;
+                    }
+                    catch (Exception e)
+                    {
+                        bluetoothStack = null; 
+                    }
+                }
+            }
         }
     }
 }

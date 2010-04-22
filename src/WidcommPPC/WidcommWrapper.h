@@ -24,6 +24,9 @@ WMAPI int __stdcall Bond(void* wdStack,ULONGLONG p_bda,wchar_t* pin);
 WMAPI int __stdcall SppCreateConnection(void* wdStack, UINT8 scn, ULONGLONG p_bda);
 WMAPI int __stdcall SppRemoveConnection(void* wdStack);
 WMAPI short __stdcall SppComPort(void* wdStack);
+//WMAPI short __stdcall GetConnectionStatus(void* wdStack);
+
+
 
 WMAPI wchar_t* __stdcall DeviceResponded(void* wdStack, ULONGLONG* adr, ULONGLONG device_index);
 

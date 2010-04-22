@@ -65,6 +65,46 @@ namespace Wockets.Utils
         }
 
         /// <summary>
+        /// Open the file to write. Print warnings.
+        /// </summary>
+        public void OpenFile(int size)
+        {
+            OpenFile(true,size);
+        }
+
+        /// <summary>
+        /// Open the file to write. 
+        /// </summary>
+        /// <param name="isWarningOn">True if print warnings to the console.</param>
+        public void OpenFile(bool isWarningOn,int size)
+        {
+            try
+            {
+                if (isOverwrite)
+                    fileStream = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None, size);
+                else
+                {
+                    if (File.Exists(fileName))
+                    {
+                        fileStream = new FileStream(fileName, FileMode.Append);
+                        if (isWarningOn)
+                            Warning("Appending data");
+                    }
+                    else
+                        fileStream = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None, size);
+                }
+            }
+            catch (Exception e)
+            {
+                SignalError(e, "Can't write to file " + fileName);
+                return;
+            }
+
+            validFile = true;
+        }
+
+
+        /// <summary>
         /// Open the file to write. 
         /// </summary>
         /// <param name="isWarningOn">True if print warnings to the console.</param>

@@ -6,18 +6,29 @@
 
 WMAPI void* __stdcall CreateWidcommStack()
 {
+	try{
 	WidcommStackPPC* wdStack = new WidcommStackPPC;
 
 	return wdStack;
+	}catch(...){
+
+		return NULL;
+	}
 }
 
 WMAPI BOOL __stdcall DeleteWidcommStack(void* wdStack)
 {
-  WidcommStackPPC* pwdStack = (WidcommStackPPC*)wdStack;
-	delete pwdStack;
-
-  return true;
+		
+	try{
+	
+	WidcommStackPPC* pwdStack = (WidcommStackPPC*)wdStack;	
+	delete pwdStack;	  
+	return true;
+	}catch(...){
+		return false;
+	}
 }
+
 
 WMAPI BOOL __stdcall IsStackServerUp(void* wdStack)
 {
@@ -99,11 +110,16 @@ WMAPI short __stdcall SppComPort(void* wdStack)
 
 WMAPI int __stdcall SppRemoveConnection(void* wdStack)
 {
-  WidcommStackPPC* pwdStack = (WidcommStackPPC*)wdStack;
+	try{
+	WidcommStackPPC* pwdStack = (WidcommStackPPC*)wdStack;
 
-  pwdStack->RemoveConnection();
-
-  return 0;
+	if (pwdStack!=NULL)
+		return pwdStack->RemoveConnection();
+	else
+		return 10;
+	}catch(...){
+		return 10;
+	}
 }
 
 WMAPI int __stdcall Bond(void* wdStack,ULONGLONG p_bda,wchar_t* pin)
@@ -127,9 +143,14 @@ WMAPI int __stdcall Bond(void* wdStack,ULONGLONG p_bda,wchar_t* pin)
 	pp[0]='4';
 	return pwdStack->Bond(bda,pp);
 }
+
+
+
+
+
 WMAPI int __stdcall SppCreateConnection(void* wdStack, UINT8 scn, ULONGLONG p_bda)
 {
-
+try{
 	WidcommStackPPC* pwdStack = (WidcommStackPPC*)wdStack;
 
 	ULONGLONG address = (ULONGLONG)p_bda;
@@ -153,10 +174,13 @@ WMAPI int __stdcall SppCreateConnection(void* wdStack, UINT8 scn, ULONGLONG p_bd
   memcpy(m_serviceName, m_serviceNameForServerOld, BT_MAX_SERVICE_NAME_LEN + 1);
 
   CSppClient::SPP_CLIENT_RETURN_CODE port_rc;
-  port_rc = pwdStack->CreateConnection(bda, m_serviceName);
+  port_rc = pwdStack->CreateConnection(bda, m_serviceName); 
+  
 
    if (CSppClient::SUCCESS == port_rc)
    {
+	   
+	 //return pwdStack->OpenClient(0,bda);
      return 1;
    }
    else if(CSppClient::NO_BT_SERVER == port_rc)
@@ -185,6 +209,9 @@ WMAPI int __stdcall SppCreateConnection(void* wdStack, UINT8 scn, ULONGLONG p_bd
    }
 
   return 0;
+  }catch(...){
+		return 10;
+	}
 
 }
 

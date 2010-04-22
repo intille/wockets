@@ -21,7 +21,7 @@ namespace Wockets.Decoders.Accelerometers
         private const string WOCKETS_TYPE = "Wockets";
         #endregion Serialization Constants
 
-        public const int BUFFER_SIZE = 4096; 
+        public const int BUFFER_SIZE = 8192; 
         private bool headerSeen;
         private double timestamp = 0;
         private int bytesToRead = 0;
