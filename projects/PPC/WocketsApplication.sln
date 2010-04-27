@@ -14,11 +14,13 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WocketsPCInstaller", "Wocke
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kernel", "Kernel.csproj", "{0F3D4EB2-7352-4869-A7F1-E0145BF3441B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WocketsAppNS", "..\WocketsAppNS\WocketsAppNS.csproj", "{1CFF1354-F653-4E83-AC7F-1FE5D0B39D21}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WocketsAppNS", "WocketsAppNS.csproj", "{1CFF1354-F653-4E83-AC7F-1FE5D0B39D21}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WidcommPPC", "WidcommPPC.vcproj", "{251840C4-D1DC-497D-A98B-D7B8D0658404}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataCollectionApp", "DataCollectionApp.csproj", "{3A049180-1443-4610-ADB2-39E8DEB5BBDC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WocketsMonitorApp", "WocketsMonitorApp.csproj", "{04E3AD1F-0567-41C7-B6BC-EB947BC77915}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -205,6 +207,24 @@ Global
 		{3A049180-1443-4610-ADB2-39E8DEB5BBDC}.Release|Pocket PC 2003 (ARMV4).ActiveCfg = Release|Any CPU
 		{3A049180-1443-4610-ADB2-39E8DEB5BBDC}.Release|Win32.ActiveCfg = Release|Any CPU
 		{3A049180-1443-4610-ADB2-39E8DEB5BBDC}.Release|Windows Mobile 5.0 Pocket PC SDK (ARMV4I).ActiveCfg = Release|Any CPU
+		{04E3AD1F-0567-41C7-B6BC-EB947BC77915}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{04E3AD1F-0567-41C7-B6BC-EB947BC77915}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{04E3AD1F-0567-41C7-B6BC-EB947BC77915}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{04E3AD1F-0567-41C7-B6BC-EB947BC77915}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{04E3AD1F-0567-41C7-B6BC-EB947BC77915}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{04E3AD1F-0567-41C7-B6BC-EB947BC77915}.Debug|Mixed Platforms.Deploy.0 = Debug|Any CPU
+		{04E3AD1F-0567-41C7-B6BC-EB947BC77915}.Debug|Pocket PC 2003 (ARMV4).ActiveCfg = Debug|Any CPU
+		{04E3AD1F-0567-41C7-B6BC-EB947BC77915}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{04E3AD1F-0567-41C7-B6BC-EB947BC77915}.Debug|Windows Mobile 5.0 Pocket PC SDK (ARMV4I).ActiveCfg = Debug|Any CPU
+		{04E3AD1F-0567-41C7-B6BC-EB947BC77915}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{04E3AD1F-0567-41C7-B6BC-EB947BC77915}.Release|Any CPU.Build.0 = Release|Any CPU
+		{04E3AD1F-0567-41C7-B6BC-EB947BC77915}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{04E3AD1F-0567-41C7-B6BC-EB947BC77915}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{04E3AD1F-0567-41C7-B6BC-EB947BC77915}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{04E3AD1F-0567-41C7-B6BC-EB947BC77915}.Release|Mixed Platforms.Deploy.0 = Release|Any CPU
+		{04E3AD1F-0567-41C7-B6BC-EB947BC77915}.Release|Pocket PC 2003 (ARMV4).ActiveCfg = Release|Any CPU
+		{04E3AD1F-0567-41C7-B6BC-EB947BC77915}.Release|Win32.ActiveCfg = Release|Any CPU
+		{04E3AD1F-0567-41C7-B6BC-EB947BC77915}.Release|Windows Mobile 5.0 Pocket PC SDK (ARMV4I).ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

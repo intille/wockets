@@ -164,17 +164,25 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
             return bt_devices;
         }
 
-        public override void Dispose()
+        public override bool Dispose()
         {
-            if (m_bDisposed)
-                return;
+            try
+            {
+                if (m_bDisposed)
+                    return true;
 
-            if (this.wdStack != IntPtr.Zero)
-                WidcommAPI.DeleteWidcommStack(this.wdStack);
-            this.wdStack = IntPtr.Zero;
+                if (this.wdStack != IntPtr.Zero)
+                    WidcommAPI.DeleteWidcommStack(this.wdStack);
+                this.wdStack = IntPtr.Zero;
 
-            m_bDisposed = true;
-            GC.SuppressFinalize(this);
+                m_bDisposed = true;
+                GC.SuppressFinalize(this);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
 

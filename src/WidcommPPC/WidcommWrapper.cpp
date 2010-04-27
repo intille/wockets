@@ -6,6 +6,8 @@
 
 WMAPI void* __stdcall CreateWidcommStack()
 {
+		
+
 	try{
 	WidcommStackPPC* wdStack = new WidcommStackPPC;
 
@@ -20,11 +22,15 @@ WMAPI BOOL __stdcall DeleteWidcommStack(void* wdStack)
 {
 		
 	try{
-	
+		 WaitForSingleObject(   stackMutex, INFINITE );	 
 	WidcommStackPPC* pwdStack = (WidcommStackPPC*)wdStack;	
+	
 	delete pwdStack;	  
+
+	ReleaseMutex( stackMutex );
 	return true;
 	}catch(...){
+		ReleaseMutex( stackMutex );
 		return false;
 	}
 }
@@ -32,8 +38,9 @@ WMAPI BOOL __stdcall DeleteWidcommStack(void* wdStack)
 
 WMAPI BOOL __stdcall IsStackServerUp(void* wdStack)
 {
+		 WaitForSingleObject(   stackMutex, INFINITE );	
   WidcommStackPPC* pwdStack = (WidcommStackPPC*)wdStack;
-
+ReleaseMutex( stackMutex );
   //do not use this function to stay compatibel with older SDK versions !
   //return pwdStack->IsStackServerUp();
 
@@ -102,22 +109,34 @@ WMAPI BOOL __stdcall InquiryCompleteEvent(void* wdStack, int* device_index)
 }
 
 WMAPI short __stdcall SppComPort(void* wdStack)
-{
+{	try{
+			 WaitForSingleObject(   stackMutex, INFINITE );	
+			 short result=-1;
   WidcommStackPPC* pwdStack = (WidcommStackPPC*)wdStack;
-
-  return pwdStack->comPort;
+  //if (pwdStack!=NULL)
+	//  result=pwdStack->comPort;
+	ReleaseMutex( stackMutex );
+  return result;
+}catch(...){
+	ReleaseMutex( stackMutex );
+	return -1;
+}
 }
 
 WMAPI int __stdcall SppRemoveConnection(void* wdStack)
 {
 	try{
+			 WaitForSingleObject(   stackMutex, INFINITE );	
 	WidcommStackPPC* pwdStack = (WidcommStackPPC*)wdStack;
-
+	int result=pwdStack->RemoveConnection();
+	ReleaseMutex( stackMutex );
+	
 	if (pwdStack!=NULL)
-		return pwdStack->RemoveConnection();
+		return result;
 	else
 		return 10;
 	}catch(...){
+		ReleaseMutex( stackMutex );
 		return 10;
 	}
 }
@@ -150,7 +169,10 @@ WMAPI int __stdcall Bond(void* wdStack,ULONGLONG p_bda,wchar_t* pin)
 
 WMAPI int __stdcall SppCreateConnection(void* wdStack, UINT8 scn, ULONGLONG p_bda)
 {
-try{
+
+
+	try{
+				 WaitForSingleObject(   stackMutex, INFINITE );
 	WidcommStackPPC* pwdStack = (WidcommStackPPC*)wdStack;
 
 	ULONGLONG address = (ULONGLONG)p_bda;
@@ -176,6 +198,7 @@ try{
   CSppClient::SPP_CLIENT_RETURN_CODE port_rc;
   port_rc = pwdStack->CreateConnection(bda, m_serviceName); 
   
+	ReleaseMutex( stackMutex );
 
    if (CSppClient::SUCCESS == port_rc)
    {
@@ -210,6 +233,7 @@ try{
 
   return 0;
   }catch(...){
+	  	ReleaseMutex( stackMutex );
 		return 10;
 	}
 

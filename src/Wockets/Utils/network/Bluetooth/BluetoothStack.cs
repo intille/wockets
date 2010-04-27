@@ -87,6 +87,6 @@ namespace Wockets.Utils.network.Bluetooth
         /// <summary>
         /// An abstract method that disposes and releases any resources associated with the Bluetooth stack
         /// </summary>
-        public abstract void Dispose();
+        public abstract bool Dispose();
     }
 }

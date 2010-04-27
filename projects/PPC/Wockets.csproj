@@ -1,4 +1,4 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -457,9 +457,49 @@
     <Compile Include="..\..\src\Wockets\Data\Responses\CommandModeEnterResponse.cs">
       <Link>Data\Responses\CommandModeEnterResponse.cs</Link>
     </Compile>
-    <Compile Include="Data\Responses\BaudRateResponse.cs" />
-    <Compile Include="Decoders\DecoderModes.cs" />
-    <Compile Include="Sensors\SensorModes.cs" />
+    <Compile Include="..\..\src\Wockets\Data\Responses\BaudRateResponse.cs" >
+      <Link>Data\Responses\BaudRateResponse.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Decoders\DecoderModes.cs" >
+      <Link>Decoders\DecoderModes.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Sensors\SensorModes.cs" >
+      <Link>Sensors\SensorModes.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\IPC\Queues\Message.cs" >
+      <Link>Utils\IPC\Queues\Message.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\IPC\Queues\P2PMessageQueue.cs" >
+      <Link>Utils\IPC\Queues\P2PMessageQueue.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\IPC\Queues\ReadWriteResult.cs" >
+      <Link>Utils\IPC\Queues\ReadWriteResult.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\network\Bluetooth\Widcomm\CommAPI.cs" >
+      <Link>Utils\network\Bluetooth\Widcomm\CommAPI.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\network\Bluetooth\Widcomm\DCB.cs" >
+      <Link>Utils\network\Bluetooth\Widcomm\DCB.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\network\Bluetooth\Widcomm\Enumerations.cs" >
+      <Link>Utils\network\Bluetooth\Widcomm\Enumerations.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\network\Bluetooth\Widcomm\Port.cs" >
+      <Link>Utils\network\Bluetooth\Widcomm\Port.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\network\Bluetooth\Widcomm\PortCapabilities.cs" >
+      <Link>Utils\network\Bluetooth\Widcomm\PortCapabilities.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\network\Bluetooth\Widcomm\PortSettings.cs" >
+      <Link>Utils\network\Bluetooth\Widcomm\PortSettings.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\network\Bluetooth\Widcomm\SerialEventsAndArgs.cs" >
+      <Link>Utils\network\Bluetooth\Widcomm\SerialEventsAndArgs.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\network\Bluetooth\Widcomm\SerialPort.cs">
+      <Link>Utils\network\Bluetooth\Widcomm\SerialPort.cs</Link>
+      <SubType>Component</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="WocketsWeka.csproj">

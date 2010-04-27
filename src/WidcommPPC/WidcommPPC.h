@@ -14,7 +14,7 @@
 #define BLUETOOTH_MAX_NAME_SIZE 248
 
 typedef ULONGLONG BTH_ADDR;
-
+		static HANDLE  stackMutex;   
 	class WidcommStackPPC : public CBtIf, public CSppClient, public CRfCommPort
 		{
 		public:
@@ -33,6 +33,8 @@ typedef ULONGLONG BTH_ADDR;
 			int bt_counter;
 			wchar_t bt_devices[256][BLUETOOTH_MAX_NAME_SIZE];
 			UINT8 bt_addresses[256][BD_ADDR_LEN];		
+	           
+
 
 
 

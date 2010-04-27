@@ -27,11 +27,9 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
         public WidcommBluetoothStream(CircularBuffer buffer, CircularBuffer sbuffer, byte[] address, string pin)
             : base(buffer, sbuffer, address, pin)
         {
-            if (wdStack[0] != IntPtr.Zero)
-                WidcommAPI.DeleteWidcommStack(wdStack[0]);
-            Thread.Sleep(2000);
+   
            wdStack[0] = WidcommAPI.CreateWidcommStack();
-           if (wdStack[0] == null)
+           if (wdStack[0] == IntPtr.Zero)
                throw new Exception("Cannot create stack");             
         }
         public bool Open()
@@ -47,13 +45,16 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
 
                     long bt_address = long.Parse(this._HexAddress, NumberStyles.HexNumber, CultureInfo.CurrentCulture.NumberFormat);
                     //Thread.Sleep(10000);
-                    int r = WidcommAPI.SppRemoveConnection(wdStack[0]);
-                    Thread.Sleep(3000);
-                    r=WidcommAPI.SppCreateConnection(wdStack[0], (byte)1, bt_address);
+                    //int r = WidcommAPI.SppRemoveConnection(wdStack[0]);
+                    //Thread.Sleep(3000);
+                    int r=WidcommAPI.SppCreateConnection(wdStack[0], (byte)1, bt_address);
                     Thread.Sleep(3000);
                     if (r != 1)
                     {
                         WidcommAPI.SppRemoveConnection(wdStack[0]);
+                        if (wdStack[0] != IntPtr.Zero)
+                            if (WidcommAPI.DeleteWidcommStack(wdStack[0]) == false)
+                                throw new Exception("Cannot delete stack");
                         NetworkStacks._BluetoothStack = null;
 
                     }
@@ -124,6 +125,11 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
             {
                 spp[0].Close();
                 spp[0].Dispose();
+
+                WidcommAPI.SppRemoveConnection(wdStack[0]);
+                if (wdStack[0] != IntPtr.Zero)
+                    if (WidcommAPI.DeleteWidcommStack(wdStack[0]) == false)
+                        throw new Exception("Cannot delete stack");
                 NetworkStacks._BluetoothStack = null;
                 
                 CurrentWockets._LastError = Wockets.Exceptions.ErrorCodes.CONNECTION_FAILED_TO_OPEN;
@@ -193,6 +199,12 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
                         {
                             spp[0].Close();
                             spp[0].Dispose();
+
+                            WidcommAPI.SppRemoveConnection(wdStack[0]);
+                            if (wdStack[0] != IntPtr.Zero)
+                                if (WidcommAPI.DeleteWidcommStack(wdStack[0]) == false)
+                                    throw new Exception("Cannot delete stack");
+                            NetworkStacks._BluetoothStack = null;
                             //Close();
                             CurrentWockets._LastError = Wockets.Exceptions.ErrorCodes.CONNECTION_TIMEOUT;
                             //this.errorMessage = "MicrosoftBluetoothStream failed at Process(). Disconnection timeout to " + this._HexAddress;
@@ -216,6 +228,12 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
                      
                     spp[0].Close();
                     spp[0].Dispose();
+
+                    WidcommAPI.SppRemoveConnection(wdStack[0]);
+                    if (wdStack[0] != IntPtr.Zero)
+                        if (WidcommAPI.DeleteWidcommStack(wdStack[0]) == false)
+                            throw new Exception("Cannot delete stack");
+                    NetworkStacks._BluetoothStack = null;
                     this._Status = BluetoothStatus.Disconnected;
                     //Close();
                 }
