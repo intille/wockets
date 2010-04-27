@@ -648,7 +648,9 @@ namespace Wockets
                     {
                         this._Sensors[i]._ReceivedPackets = 0;
                         this._Sensors[i]._SavedPackets = 0;
-                        this._Receivers[i]._Status = Wockets.Receivers.ReceiverStatus.Disconnected;
+                        //this._Receivers[i]._Status = Wockets.Receivers.ReceiverStatus.Disconnected;
+                        this._Receivers[i].Dispose();
+
                     }
                     this.pollingEvent.WaitOne();
                 }

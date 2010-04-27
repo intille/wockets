@@ -51,7 +51,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
         public MicrosoftBluetoothStack()
         {
             this.Mode = RadioMode.PowerOff;
-            this.Mode = RadioMode.Connectable;
+            //this.Mode = RadioMode.Connectable;
         }
 
         /// <summary>
@@ -135,9 +135,17 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
         /// <summary>
         /// Shuts down the bluetooth stack
         /// </summary>
-        public override void Dispose()
+        public override bool Dispose()
         {
-            this.Mode = RadioMode.PowerOff;
+            try
+            {
+                this.Mode = RadioMode.PowerOff;
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
  
         /// <summary>

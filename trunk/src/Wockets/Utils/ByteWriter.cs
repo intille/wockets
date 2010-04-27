@@ -56,27 +56,20 @@ namespace Wockets.Utils
             fileStream.Flush();
         }
 
-        /// <summary>
-        /// Open the file to write. Print warnings.
-        /// </summary>
-        public void OpenFile()
-        {
-            OpenFile(true);
-        }
 
         /// <summary>
         /// Open the file to write. Print warnings.
         /// </summary>
         public void OpenFile(int size)
         {
-            OpenFile(true,size);
+            OpenFile(true, size);
         }
 
         /// <summary>
         /// Open the file to write. 
         /// </summary>
         /// <param name="isWarningOn">True if print warnings to the console.</param>
-        public void OpenFile(bool isWarningOn,int size)
+        public void OpenFile(bool isWarningOn, int size)
         {
             try
             {
@@ -101,6 +94,16 @@ namespace Wockets.Utils
             }
 
             validFile = true;
+        }
+
+
+
+        /// <summary>
+        /// Open the file to write. Print warnings.
+        /// </summary>
+        public void OpenFile()
+        {
+            OpenFile(true);
         }
 
 

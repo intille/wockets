@@ -153,6 +153,8 @@ namespace Wockets.Sensors.Accelerometers
         /// Specifies the current hour
         /// </summary>
         private int presentHour = -1;
+        private int presentMinute = -1;
+        private int presentSecond = -1;
 
         /// <summary>
         /// Specifies the storage path to the day
@@ -286,7 +288,6 @@ namespace Wockets.Sensors.Accelerometers
         }
 
 
-        byte[] ttt = new byte[2400];
         /// <summary>
         /// Saves data to a binary file
         /// </summary>
@@ -298,7 +299,7 @@ namespace Wockets.Sensors.Accelerometers
             {
 
                 #region Check if the data file need to be flushed
-                flushTimer++;
+                /*flushTimer++;
                 if ((flushTimer >= MAX_FLUSH_TIME) && (bw!=null))
                 {
                     bw.Flush();
@@ -306,7 +307,7 @@ namespace Wockets.Sensors.Accelerometers
                     bw = new ByteWriter(currentDataFile, false);
                     bw.OpenFile(false);
                     flushTimer = 0;
-                }
+                }*/
                 #endregion Check if the data file need to be flushed
 
                 #region Determine the head of the data buffer
@@ -337,11 +338,13 @@ namespace Wockets.Sensors.Accelerometers
                 #endregion Determine the head of the data buffer
 
                 #region Check if a new binary file need to be created
-                if (presentHour != DateTime.Now.Hour)
+                if (presentHour != DateTime.Now.Hour) //((bw==null)||(presentHour != DateTime.Now.Hour)|| (presentMinute != DateTime.Now.Minute) || (presentSecond!= DateTime.Now.Second))
                 {
                     if (bw != null)
                         bw.CloseFile();
                     presentHour = DateTime.Now.Hour;
+                    presentMinute = DateTime.Now.Minute;
+                    presentSecond = DateTime.Now.Second;
                     // Need to create a new directory and switch the file name
                     dayPath = DirectoryStructure.DayDirectoryToUse(this._RootStorageDirectory);
 
@@ -354,6 +357,7 @@ namespace Wockets.Sensors.Accelerometers
                                    DirectoryStructure.GetDate() + "." + this._ID + "." + FILE_EXT;
 
                     bw = new ByteWriter(currentDataFile, true);
+                    //bw.OpenFile();
                     bw.OpenFile(32768);
 
                     // Ensure that the first data point in the new file will start
@@ -429,18 +433,18 @@ namespace Wockets.Sensors.Accelerometers
                         aUnixTime = data.UnixTimeStamp;
                         break;      
                          */
-                        /*
-                        if ((this._Flush) && (localflushtimer > 200))
+                        
+                       /* if ((this._Flush) && (localflushtimer > 200))
                         {                           
                             bw.Flush();
-                            bw.CloseFile();
-                            bw = new ByteWriter(currentDataFile, false);
-                            bw.OpenFile(false);
+                           // bw.CloseFile();
+                            //bw = new ByteWriter(currentDataFile, false);
+                            //bw.OpenFile(false);
                             localflushtimer = 0;
                         }
                         else
-                            localflushtimer++;
-                         */
+                            localflushtimer++;*/
+                         
                     }
                     #endregion Write Data
 
@@ -467,6 +471,7 @@ namespace Wockets.Sensors.Accelerometers
                 {
                     bw.Flush();
                     //bw.CloseFile();
+                    //bw = null;
                     //bw = new ByteWriter(currentDataFile, false);
                     //bw.OpenFile(false);
                 }           

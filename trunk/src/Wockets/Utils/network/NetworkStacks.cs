@@ -37,11 +37,11 @@ namespace Wockets.Utils.network
                         bluetoothStack = new MicrosoftBluetoothStack();
                     else if (BluetoothStack._Type == BluetoothStackTypes.Widcomm)
                         bluetoothStack = new WidcommBluetoothStack();
-                    if (!bluetoothStack.Initialize())
+                    /*if (!bluetoothStack.Initialize())
                     {
                         Logger.Error("NetworkStacks: _BluetoothStack: Failed to initialize the bluetooth stack");
                         throw new Exception("Bluetooth stack failed to initialize.");                                              
-                    }
+                    }*/
                 }
                 return bluetoothStack;
             }

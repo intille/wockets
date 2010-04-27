@@ -1,8 +1,9 @@
 // WidcommPPC.cpp : Defines the initialization routines for the DLL.
 //
-
+#include <Windows.h>
 #include "stdafx.h"
 #include "WidcommPPC.h"
+
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -10,11 +11,15 @@
 
  WidcommStackPPC::WidcommStackPPC()
 {
+	 stackMutex = CreateMutex( NULL, TRUE, NULL );       /* Set */
 
 }
 
  WidcommStackPPC::~WidcommStackPPC()
 {
+		 WaitForSingleObject( stackMutex, INFINITE );
+	 ReleaseMutex( stackMutex );
+
 }
 
 
@@ -40,6 +45,7 @@ void  WidcommStackPPC::OnDeviceResponded(BD_ADDR bda, DEV_CLASS devClass, BD_NAM
 
 void  WidcommStackPPC::OnStackStatusChange(STACK_STATUS new_status)
 {
+		 WaitForSingleObject( stackMutex, INFINITE );
    switch (new_status)
     {
     case CBtIf::DEVST_DOWN:
@@ -71,6 +77,8 @@ void  WidcommStackPPC::OnStackStatusChange(STACK_STATUS new_status)
         }
         break;
     }
+
+    ReleaseMutex( stackMutex );
 }
 
 void  WidcommStackPPC::OnInquiryComplete(BOOL bSuccess, short nResponses)
@@ -81,6 +89,8 @@ void  WidcommStackPPC::OnInquiryComplete(BOOL bSuccess, short nResponses)
 
 void  WidcommStackPPC::OnClientStateChange(BD_ADDR bda, DEV_CLASS dev_class, BD_NAME name, short com_port, SPP_STATE_CODE state)
 {
+	 WaitForSingleObject( stackMutex, INFINITE );
+
   //pure virtual function has to be implemented !!!
   if (state == SPP_CONNECTED)
   {
@@ -90,4 +100,5 @@ void  WidcommStackPPC::OnClientStateChange(BD_ADDR bda, DEV_CLASS dev_class, BD_
   {
     comPort = -1;
   }
+       ReleaseMutex( stackMutex );
 }
