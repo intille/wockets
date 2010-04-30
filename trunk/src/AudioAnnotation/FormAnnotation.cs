@@ -7,8 +7,11 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
-using Wockets.Data.Annotation;
+
 using System.Reflection;
+using System.Globalization;
+
+using Wockets.Data.Annotation;
 using WMPLib;
 
 
@@ -235,6 +238,10 @@ namespace AudioAnnotation
         private BindingList<ActivityList> CActivityList = null;
 
 
+        //Time and Time Zone
+        TimeZone localZone; 
+        DaylightTime daylight; 
+
         #endregion
 
 
@@ -257,6 +264,11 @@ namespace AudioAnnotation
             button_save.Image = Resources.Im_save;
             button_generate.Image = Resources.Im_gear;
             button_exit.Image = Resources.Im_stop;
+
+
+            //Initialize Time and Time Zone
+            localZone = TimeZone.CurrentTimeZone;
+            daylight = localZone.GetDaylightChanges(DateTime.Now.Year);
 
         }
 
@@ -609,11 +621,11 @@ namespace AudioAnnotation
                    
 
                     //Load the time row in labels
-                    dgview.Rows[n].Cells[C1.Time].Value = time.ToLongTimeString();  //time.Hour + ":" + time.Minute + ":" + time.Second; //+"."+time.Millisecond;
-                    dgview.Rows[n].Cells[C1.Time_Label].Value = time.ToLongTimeString(); //time.Hour + ":" + time.Minute + ":" + time.Second; //+ "." + time.Millisecond;
-
+                    dgview.Rows[n].Cells[C1.Time].Value = time.ToLongTimeString(); 
+                    
                     //Add milliseconds granularity
                     dgview.Rows[n].Cells[C1.TimeMS].Value = String.Format("{0:HH:mm:ss.fff}", time);
+                    dgview.Rows[n].Cells[C1.Time_Label].Value = time.ToLongTimeString(); 
 
                     //Add duration info
                     dgview.Rows[n].Cells[C1.TimeLastWrite].Value = String.Format("{0:HH:mm:ss.fff}", end_file_time);
@@ -1274,10 +1286,7 @@ namespace AudioAnnotation
                     else if( path.ToUpper().Contains("WAV"))
                     {
                         secs_duration = Math.Round( ((file_length - header) / (sample_rate * (bit_rate / 8.0)))/2.0 , 3);
-                        audio_duration = secs_duration.ToString();
-                        
-
-   
+                        audio_duration = secs_duration.ToString();                  
                     }
                     else
                     {
@@ -1748,7 +1757,8 @@ namespace AudioAnnotation
         
         private int previous_row_audio_file = 0;
         private string previous_time_audio_file = "";
-        
+       
+
         private bool LoadRowsToGrid(string fname)
         {
 
@@ -1917,9 +1927,9 @@ namespace AudioAnnotation
         {
 
             int n = 0;
-            DateTime end_file_time, time;
+            DateTime end_file_time, time, time_ms, prev_time_ms;
             TimeSpan time_diff;
-            string duration;
+            string duration = "";
             double secs_duration;
 
             
@@ -1932,7 +1942,8 @@ namespace AudioAnnotation
 
             int row = dataGridView1.Rows.Add();
             int nCellsLenght = ncells.Length - 1;
-            int needed_correction = 0;
+            //int needed_correction = 0;
+            int success = 0;
 
             int i = 0;
 
@@ -2011,6 +2022,8 @@ namespace AudioAnnotation
                     {
 
                         time = DateTime.Parse("00:00:00.0");
+                        time_ms = time;
+                        prev_time_ms = time;
 
 
                         #region Compute Time
@@ -2030,27 +2043,34 @@ namespace AudioAnnotation
                             //----If there is an offset add it, to the current end time -----
                             if ((Math.Abs(AudioOffset.TotalSeconds) > 0.0) &&
                                 ((IsOffsetApplied == 0) || (IsOffsetApplied == 2)))
+                            { end_file_time = end_file_time.Add(AudioOffset);  }
+                            
+                           //----if there is not offset, check if it is daylight saving time
+                            else if (!TimeZone.IsDaylightSavingTime(end_file_time, daylight))
                             {
-                                //time = time.Add(AudioOffset);
-                                end_file_time = end_file_time.Add(AudioOffset);
+                                end_file_time = end_file_time.Add(TimeSpan.Parse("01:00:00.0"));
                             }
                             
-                         
 
+                           
 
+                            //Take the TimeMS from the "TimeLabel" field
                             if (C1.TimeMS < nCellsLenght)
-                            { time = DateTime.Parse(end_file_time.ToShortDateString() + " " + ncells[C1.TimeMS]); }
+                            {   //If the "TimeLabel" field is not empty
+                                time_ms = DateTime.Parse(end_file_time.ToShortDateString() + " " + ncells[C1.TimeMS]); 
+                            }
                             else
-                            {   if (ncells[i].Trim().CompareTo("") != 0)
-                                {  time = DateTime.Parse(end_file_time.ToShortDateString() + " " + ncells[i]);
+                            {   //If the "TimeLabel" field is empty, copy the time corresponding to the previous audio file
+                                if (ncells[C1.Time].Trim().CompareTo("") != 0) // i=7
+                                {
+                                    time_ms = DateTime.Parse(end_file_time.ToShortDateString() + " " + ncells[C1.Time]);
                                 }
                             }
-
-
                          }
-                                // if the row doesn't have an audio file, assign the time stamp 
-                                // according to the last seen audio row
-                                // Becareful, this can easily mess up things when the labels have been modified
+                        //-------------------------------------------------------------------------
+                        // if the row doesn't have an audio file, assign the time stamp 
+                        // according to the last seen audio row
+                        // Becareful, this can easily mess up things when the labels have been modified
                         else
                         {
                             if (previous_row_audio_file < files.Length - 1)
@@ -2059,41 +2079,69 @@ namespace AudioAnnotation
                             { n = previous_row_audio_file; }
 
 
-
-                             end_file_time = files[n].LastWriteTime;
+                            end_file_time = files[n].LastWriteTime;
 
 
                              //----If there is an offset add it, to the current end time -----
                              if ((Math.Abs(AudioOffset.TotalSeconds) > 0.0) &&
                                  ((IsOffsetApplied == 0) || (IsOffsetApplied == 2)))
                              {
-                                 //time = time.Add(AudioOffset);
-                                 end_file_time = end_file_time.Add(AudioOffset);
+                                end_file_time = end_file_time.Add(AudioOffset);
+                             }
+                             //----if there is not offset, check if it is daylight saving time
+                             else if (!TimeZone.IsDaylightSavingTime(end_file_time, daylight))
+                             {
+                                     end_file_time = end_file_time.Add(TimeSpan.Parse("01:00:00.0"));
                              }
                             
 
+
                             if (C1.TimeMS < nCellsLenght)
-                            { time = DateTime.Parse(end_file_time.ToShortDateString() + " " + ncells[C1.TimeMS]); }
+                            { 
+                                    //Take the time from the "TimeMS" field
+                                    time_ms = DateTime.Parse(end_file_time.ToShortDateString() + " " + ncells[C1.TimeMS]); 
+                            }
                             else
                             {
-                                if (ncells[i+1].Trim().CompareTo("") != 0)
-                                { time = DateTime.Parse(end_file_time.ToShortDateString() + " " + ncells[i + 1]); }
+                                //Take the TimeMS from the "TimeLabel" field
+                                if (ncells[C1.Time_Label].Trim().CompareTo("") != 0) //i+1 = 8
+                                { 
+                                    //If the "TimeLabel" field is not empty
+                                    time_ms = DateTime.Parse(end_file_time.ToShortDateString() + " " + ncells[C1.Time_Label]); 
+                                }
                                 else
-                                {  time = DateTime.Parse(end_file_time.ToShortDateString() + " " + previous_time_audio_file);
+                                {   //If the "TimeLabel" field is empty, copy the time corresponding to the previous audio file
+                                    time_ms = DateTime.Parse(end_file_time.ToShortDateString() + " " + previous_time_audio_file);
                                 }
                             }
-
-
                         }
+                        
+
+                        #endregion
+
 
 
 
                         //-------- Compute the creation time ---------------
+                            //time_ms = time;  //provisional while testing
+                            if (row > 0)
+                            {
+                                if (dataGridView1.Rows[row - 1].Cells[C1.TimeMS].Value != null)
+                                { prev_time_ms = DateTime.Parse(end_file_time.ToShortDateString() + " " 
+                                                 + dataGridView1.Rows[row - 1].Cells[C1.TimeMS].Value.ToString()); 
+                                }
+                            }
 
-                           //substract creation time from the end time
-                            time_diff = end_file_time.Subtract(time);
 
-
+                           // Compute the creation time
+                           // Where end_time == audio_file_time
+                            secs_duration = 0.0;
+                            duration = GetDuration(files_wav[n].FullName, files_wav[n].Length, out secs_duration);
+                            time = end_file_time.Subtract(TimeSpan.FromSeconds(secs_duration));
+                               
+                          
+                            #region commented
+                            /*
                             // if the time difference is equal zero or less than zero, less 30min
                             // greater than 30 min
                             // the time stamp needs to be corrected
@@ -2136,50 +2184,131 @@ namespace AudioAnnotation
                             }
                             else if (IsOffsetApplied == 4)
                             {
-                                // compute the creation time
+                                //Take the time of thraw audio file to compute the creation time
+                                
                                 time = end_file_time;
 
                                 secs_duration = 0.0;
                                 duration = GetDuration(files_wav[n].FullName, files_wav[n].Length, out secs_duration);
                                 time = time.Subtract(TimeSpan.FromSeconds(secs_duration));
 
-
                                 needed_correction = 4;
                             }
                             else
                             {
+                                // The end_file time and TimeTS time are correct, 
+                                // only compute the duration of the audio file 
                                 duration = time_diff.TotalSeconds.ToString();
                             }
 
 
-                       
+                       */
 
+                            #endregion
+
+                            //Check the time sequence between files: substract creation time from the end time
+                            //time_diff = end_file_time.Subtract(time);
+
+                            #region creation time check
+                        
+                           /*
+                            // Case 1: Audio creation time == Audio end time
+                            // Case 2: Creation time occurs after Audio end time
+                            // Case 3: The creation time has a duration bigger than 1 hour
+                            if (( time_diff.TotalSeconds == 0.0) ||
+                                ( time_diff.TotalSeconds  < 0.0) ||
+                                (Math.Abs(time_diff.TotalSeconds) >= 1800))
+                              {
+                                // end_time == audio_file_time
+                                // time == computed creation time
+                                // //secs_duration = 0.0;
+                                // //duration = GetDuration(files_wav[n].FullName, files_wav[n].Length, out secs_duration);
+                                // //time = end_file_time.Subtract(TimeSpan.FromSeconds(secs_duration));
+                                // time_ms = time;
+
+                                //Flag that this creation time has a problem
+                            }
+                            // when the creation time has not problems
+                            else 
+                            {
+                                //Check the time sequence between fields: substract creation time from the end time
+                                time_diff = end_file_time.Subtract(time_ms);
+
+
+                            }
+                           */
                         #endregion
 
 
-                        //------------------  Write Results To Table  -------------------------
-                       //write the creation time to the "creation time" and "label time" columns
+                            //Check the time sequence between fields: substract creation time from the end time
+                            time_diff = time_ms.Subtract(time);
+
+                            #region
+                            // Do not correct if --> time_diff == 0   ||
+                            //                   --> abs( time_diff) < Threshold||
+                            //                       Threshold = 900
+                            //                   --> time_ms > prev_time_ms: load time_ms
+
+                           // Do correct if    --> time_diff >Threshold: time_ms = time
+                           //                  --> time_ms < prev_time_ms: if ( time > prev_time_ms) time_ms = time
+                           //                                            : else time_ms = prev_time_ms
+                            //
+                            #endregion
+
+                            #region TimeMS check
+
+
+                            //if the diff from the creation time is more than 900 secs/15 min.
+                            //correct the TimeMS by replacing it with the creation time or previous TimeMS
+                            if ((Math.Abs(time_diff.TotalSeconds) >= 900))
+                            {  time_ms = time; }
+                            else if( row > 0) 
+                            {
+                                time_diff = time_ms.Subtract(prev_time_ms);
+
+                                if ( time_diff.TotalSeconds < 0.0)
+                                {
+                                    time_diff = time.Subtract(prev_time_ms);
+
+                                    if ( time_diff.TotalSeconds >= 0.0)
+                                        time_ms = time;
+                                    else
+                                        time_ms = prev_time_ms;
+                                }
+                            }
+                        
+                            #endregion
+
+
+
+                            //------------------  Write Results To Table  -------------------------
+                       //C1.Time "Audio File Creation Time Field"
                         if (is_audio_row == true)
-                        { dataGridView1.Rows[row].Cells[C1.Time].Value = time.ToLongTimeString(); }
+                        {   dataGridView1.Rows[row].Cells[C1.Time].Value = time.ToLongTimeString();
+                        
+                            dataGridView1.Rows[row].Cells[C1.TimeLastWrite].Value = String.Format("{0:HH:mm:ss.fff}", end_file_time);
+                            dataGridView1.Rows[row].Cells[C1.TimeDuration].Value = duration;
+                        }
                         else
-                        { dataGridView1.Rows[row].Cells[C1.Time].Value = ""; }
+                        { dataGridView1.Rows[row].Cells[C1.Time].Value = "";
+                        
+                          dataGridView1.Rows[row].Cells[C1.TimeLastWrite].Value = "";
+                          dataGridView1.Rows[row].Cells[C1.TimeDuration].Value = "";
+                        }
 
-                        dataGridView1.Rows[row].Cells[C1.Time_Label].Value = time.ToLongTimeString();
-
-                        //Add milliseconds granularity
-                        if( time.TimeOfDay.TotalMilliseconds == 0.0 )
+                        //C1.TimeMS "Annotation Time In Miliseconds Field"
+                        if( time_ms.TimeOfDay.TotalMilliseconds == 0.0 )
                         {
-                            dataGridView1.Rows[row].Cells[C1.TimeMS].Value = String.Format("{0:HH:mm:ss.fff}", time);
-                                                                             //time.TimeOfDay.ToString();
+                            dataGridView1.Rows[row].Cells[C1.TimeMS].Value = String.Format("{0:HH:mm:ss.fff}", time);                                                  
                         }
                         else 
                         {
-                            dataGridView1.Rows[row].Cells[C1.TimeMS].Value = String.Format("{0:HH:mm:ss.fff}", time);
+                            dataGridView1.Rows[row].Cells[C1.TimeMS].Value = String.Format("{0:HH:mm:ss.fff}", time_ms);
                         }
 
-                        //Add duration info
-                        dataGridView1.Rows[row].Cells[C1.TimeLastWrite].Value = String.Format("{0:HH:mm:ss.fff}", end_file_time); 
-                        dataGridView1.Rows[row].Cells[C1.TimeDuration].Value = duration;
+
+                        // C1.TimeLabel Reflects the TimeMS in "Annotated Time Label", in long time format
+                        dataGridView1.Rows[row].Cells[C1.Time_Label].Value = String.Format("{0:T}", time_ms);
 
 
                         //save previous audio time
@@ -2205,8 +2334,7 @@ namespace AudioAnnotation
                 }
 
 
-                return needed_correction;
-                
+                return success;
 
             }
             catch
@@ -2844,7 +2972,6 @@ namespace AudioAnnotation
         #endregion
 
 
-
         #region Search
 
         private int search_start_backwards(int row)
@@ -3276,7 +3403,6 @@ namespace AudioAnnotation
         #endregion
 
 
-
         #region User Actions
 
 
@@ -3311,6 +3437,15 @@ namespace AudioAnnotation
                     is_busy = 1;
                     ProcessCategory_StartEnd(column, row);
                     is_busy = 0;
+                }
+                else if ( ( column == ((int)C1.TimeMS)) &&
+                          (is_busy == 0))
+                {
+                    is_busy = 1;
+                    DateTime mytime = DateTime.Parse(dataGridView1.Rows[row].Cells[C1.TimeMS].Value.ToString());
+                    dataGridView1.Rows[row].Cells[C1.Time_Label].Value = String.Format("{0:T}",mytime);
+                    is_busy = 0;
+
                 }
 
 
@@ -4085,7 +4220,6 @@ namespace AudioAnnotation
 
 
         #endregion
-
 
 
         #region XML
