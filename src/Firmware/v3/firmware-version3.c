@@ -35,14 +35,14 @@ int main()
 		
 	while(1){
 	
-	/*	if (!wakeup){
+		if (!wakeup){
 			set_sleep_mode(SLEEP_MODE_PWR_SAVE);
     		sleep_enable();
     		sleep_bod_disable();
     		sei();
     		sleep_cpu();
     		sleep_disable();
-		}else*/
+		}else
 			_delay_ms(10);
 
 	}
@@ -70,7 +70,7 @@ ISR(TIMER2_OVF_vect)
 		return;		
 
 TCNT2=170;
-	/*if (!sample){
+	if (!sample){
 		if (wakeup){
 			TCNT2 = 246;
 			sample=1;
@@ -82,7 +82,7 @@ TCNT2=170;
 	}
 	
 	wakeup=0;
-	sample=0;*/
+	sample=0;
 
 	
 

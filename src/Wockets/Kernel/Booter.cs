@@ -37,6 +37,10 @@ namespace Wockets.Kernel
 
         static Booter()
         {
+
+            //Send a termination event for any running kernel to abort           
+            //Fix the registry if needed
+
             path = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase);
             registryLock = new Semaphore(1, 1, Core.REGISTRY_LOCK);
             //initialize the path as an empty string
@@ -70,17 +74,29 @@ namespace Wockets.Kernel
         }
         public static void Boot()
         {
-            lock (booterLock)
+            try
             {
-                if (!_Running)
+                lock (booterLock)
                 {
-                    Initialize();
-                    commandThread = new Thread(new ThreadStart(CommandHandler));
-                    commandThread.Start();
-                    _Running = true;
-                     commandThread.Join();                    
-                           
+                    if (!_Running)
+                    {
+                        Initialize();
+                        commandThread = new Thread(new ThreadStart(CommandHandler));
+                        commandThread.Start();
+                        _Running = true;
+                        commandThread.Join();
+
+                    }
                 }
+            }
+            catch
+            {
+                RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_WOCKETS_PATH + "\\Kernel");
+                rk.SetValue("Status", 0, RegistryValueKind.DWord);
+                rk.Close();
+                Logger.Close();
+                System.Diagnostics.Process.GetCurrentProcess().Close();
+                System.Diagnostics.Process.GetCurrentProcess().Kill();
             }
         }
 

@@ -10,7 +10,7 @@ using Wockets.Kernel;
 
 namespace WocketsApplication.Controls
 {
-    public class WocketListItem: AlphaPanel
+    public class WocketListItem: AlphaPanel, IComparable
     {
         public Label Title;
         public Label Mac;
@@ -53,7 +53,13 @@ namespace WocketsApplication.Controls
         //MMF Access
         public string _MMF = "";
         public int _MMF_SIZE = 4096;
-        
+
+
+        public int CompareTo(object wi)
+        {
+           return this._MacAddress.CompareTo(((WocketListItem)wi)._MacAddress);
+        }
+
         public WocketListItem(string name,string mac, int index)
         {
             this.Width = Screen.PrimaryScreen.WorkingArea.Width;

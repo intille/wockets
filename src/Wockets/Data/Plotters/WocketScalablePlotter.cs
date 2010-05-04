@@ -49,6 +49,8 @@ namespace Wockets.Data.Plotters
 
         public WocketsScalablePlotter(System.Windows.Forms.Panel aPanel)//, int numSensors)
         {
+
+
             this.numSensors = CurrentWockets._Controller._Sensors.Count;// numSensors;
 
             if (numSensors > 3)
@@ -57,7 +59,7 @@ namespace Wockets.Data.Plotters
                 skippedPoints = 2;
 
             this.aPanel = aPanel;
-            this.plotAreaSize = new Size(this.aPanel.Width, ((int)(0.60* this.aPanel.Height )));
+            this.plotAreaSize = new Size(this.aPanel.Width, ((int)(this.aPanel.Height)));
             graphSize = (int)Math.Floor((plotAreaSize.Height / ((double)numSensors)));
 
 
@@ -82,7 +84,7 @@ namespace Wockets.Data.Plotters
                 double range = 1024;//((Accelerometer)this.wocketsController._Sensors[i])._Max - ((Accelerometer)this.wocketsController._Sensors[i])._Min;
                 scaleFactors[i] = graphSize / range;
             }
-            
+
 #if (PocketPC)
             if (CurrentWockets._Configuration._MemoryMode == Wockets.Data.Configuration.MemoryConfiguration.SHARED)
             {
@@ -133,6 +135,7 @@ namespace Wockets.Data.Plotters
             p[2] = new Pen(System.Drawing.Color.Blue);
             requiresFullRedraw = true;
             aPanel.Invalidate();
+
         }
 
         byte[] head = new byte[4];
@@ -142,11 +145,15 @@ namespace Wockets.Data.Plotters
 
         public void Dispose()
         {
-            for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
+            if ((sdata != null) && (shead != null))
             {
-                sdata[i].Close();
-                shead[i].Close();
+                for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
+                {
 
+                    sdata[i].Close();
+                    shead[i].Close();
+
+                }
             }
 
         }
