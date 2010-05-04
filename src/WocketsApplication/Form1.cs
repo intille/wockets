@@ -21,6 +21,7 @@ using Wockets.Utils;
 using Wockets.Kernel;
 using Wockets.Data.Annotation;
 using Wockets.Data.Plotters;
+using Wockets;
 
 //using OpenNETCF.GDIPlus;
 using OpenNETCF.Windows.Forms;
@@ -188,7 +189,7 @@ namespace WocketsApplication
 
         //private bool wocketsConnected = false;
         //private DTConfiguration configuration;
-        private WocketsConfiguration configuration;
+        //private WocketsConfiguration configuration;
        
         private TextWriter trainingTW = null;
         private TextWriter structureTW = null;
@@ -197,11 +198,11 @@ namespace WocketsApplication
         private void InitializeML()
         {
 
-            File.Copy(Constants.PATH + "Master\\Configuration.xml",
-             Core._StoragePath + "\\Configuration.xml");
-            this.configuration = new WocketsConfiguration();// new DTConfiguration();
-            this.configuration.FromXML(Core._StoragePath + "\\Configuration.xml");
-            FullFeatureExtractor.Initialize(selectedWockets.Count, 90, this.configuration, this.annotatedSession.OverlappingActivityLists[0]);
+            /*File.Copy(Constants.PATH + "Master\\Configuration.xml",
+             Core._StoragePath + "\\Configuration.xml");*/
+            CurrentWockets._Configuration = new WocketsConfiguration();// new DTConfiguration();
+            CurrentWockets._Configuration.FromXML(Core._StoragePath + "\\Configuration.xml");
+            FullFeatureExtractor.Initialize(selectedWockets.Count, 90, CurrentWockets._Configuration, this.annotatedSession.OverlappingActivityLists[0]);
             if (trainingTW == null)
             {
                 arffFileName = Core._StoragePath + "\\output" + DateTime.Now.ToString().Replace('/', '_').Replace(':', '_').Replace(' ', '_') + ".arff";
@@ -304,6 +305,11 @@ namespace WocketsApplication
                 else if (response == ApplicationResponse.CONNECT_SUCCESS.ToString())
                 {
                    Core._Connected= true;
+                   CurrentWockets._Configuration = new WocketsConfiguration();//new DTConfiguration();
+                   CurrentWockets._Configuration.FromXML(Core._StoragePath + "\\Configuration.xml");
+                   CurrentWockets._Configuration._MemoryMode = MemoryConfiguration.SHARED;
+                   CurrentWockets._Controller = new WocketsController("", "", "");
+                   CurrentWockets._Controller.FromXML(Core._StoragePath + "\\SensorData.xml");
                    //plotterTimer.Enabled = true;
                    UpdatePlotter();
                    this.currentStatus = "Connected";
@@ -1058,7 +1064,7 @@ namespace WocketsApplication
                     labelCounters[currentIndex] = (int)labelCounters[currentIndex] + 1;
                     classificationCounter++;
 
-                    if (classificationCounter >= this.configuration._SmoothWindowCount)
+                    if (classificationCounter >= CurrentWockets._Configuration._SmoothWindowCount)
                     {
                       
                         int mostCount = 0;
@@ -1071,7 +1077,7 @@ namespace WocketsApplication
                             //indicate = Color.FromArgb(level, level, level);
                             //this.ActGUIlabels[j].ForeColor = indicate;
                             //this.ActGUIlabels[j].Invalidate();
-                            double intensity = (1.0-((double)labelCounters[j] /(double) this.configuration._SmoothWindowCount));
+                            double intensity = (1.0 - ((double)labelCounters[j] / (double)CurrentWockets._Configuration._SmoothWindowCount));
                             //((Label)this.classifiedLabels[activityLabels[j]]).ForeColor = Color.FromArgb((int) (250 *intensity) , (int)(237 * intensity), (int)(221 * intensity));
                             UpdateClassification(activityLabels[j], intensity);
                             if (labelCounters[j] > mostCount)
@@ -1109,12 +1115,13 @@ namespace WocketsApplication
                 
             this.annotatedSession = new Session();
             this.annotatedSession.FromXML(modelDirectory + "\\ActivityLabelsRealtime.xml");
-            this.configuration = new WocketsConfiguration();//new DTConfiguration();
-            this.configuration.FromXML(modelDirectory + "\\Configuration.xml");
-            Wockets.WocketsController wc = new Wockets.WocketsController("", "", "");
-            wc.FromXML(modelDirectory + "\\SensorData.xml");
+            CurrentWockets._Configuration = new WocketsConfiguration();//new DTConfiguration();
+            CurrentWockets._Configuration.FromXML(modelDirectory + "\\Configuration.xml");
+            CurrentWockets._Configuration._MemoryMode = MemoryConfiguration.SHARED;
+            CurrentWockets._Controller = new WocketsController("", "", "");
+            CurrentWockets._Controller.FromXML(modelDirectory + "\\SensorData.xml");
 
-            FullFeatureExtractor.Initialize(wc._Sensors.Count, 90, this.configuration, this.annotatedSession.OverlappingActivityLists[0]);
+            FullFeatureExtractor.Initialize(CurrentWockets._Controller._Sensors.Count, 90, CurrentWockets._Configuration, this.annotatedSession.OverlappingActivityLists[0]);
 
            // this.annotatedSession = new Session();
            // this.annotatedSession.FromXML(Constants.PATH + "ActivityProtocols\\" + this.aProtocols[this.selectedActivityProtocol]._FileName);
@@ -2358,7 +2365,7 @@ namespace WocketsApplication
         {
             int structureFileExamples = 0;
             string prev_activity = "";
-            windowLength = ((double)this.configuration._FeatureWindowSize * (1.0 - this.configuration._FeatureWindowOverlap))/1000.0;
+            windowLength = ((double)CurrentWockets._Configuration._FeatureWindowSize * (1.0 - CurrentWockets._Configuration._FeatureWindowOverlap)) / 1000.0;
             while (true)
             {
                 string current_activity = "unknown";

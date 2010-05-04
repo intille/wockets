@@ -87,8 +87,15 @@ void _wocket_initialize(void)
 	wocket_status=_wocket_read_status();
 
 
-	//	F_CPU/PRESCALAR
-	//_atmega_adc_turn_on();
+	unsigned short battery=_atmega_a2dConvert10bit(ADC4);
+
+	if (battery<700)
+	{
+		_greenled_turn_on();		
+		for(int i=0;(i<1000);i++)
+			_delay_ms(5);
+		_greenled_turn_off();
+	}
 }
 
 /* 
@@ -240,7 +247,7 @@ void _send_data_bufferred(void)
 			//unsigned short y=_atmega_a2dConvert10bit(ADC2);
 			//unsigned short z=_atmega_a2dConvert10bit(ADC1);
 
-			for (int i=0;(i<2400);i++){
+			for (int i=0;(i<1200);i++){
 				_transmit_packet(_encode_packet(x++,y++,z++));
 			/*	if ((i==2400))
 					for (int j=0;(j<100);j++)

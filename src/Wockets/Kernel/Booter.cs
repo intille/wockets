@@ -93,7 +93,7 @@ namespace Wockets.Kernel
             NamedEvents namedEvent = new NamedEvents();
             string applicationGuid = ((string)applicationPaths[tid]);
             string channel = applicationGuid + "-kernel";
-            WocketsController lwcontroller = null;
+            //WocketsController lwcontroller = null;
             while (true)
             {
                 //ensures prior synchronization
@@ -123,13 +123,13 @@ namespace Wockets.Kernel
                                 
                             SET_SM sniff=new SET_SM(tsniff);
                             PAUSE pause = new PAUSE();
-                            for (int i = 0; (i < lwcontroller._Receivers.Count); i++)
+                            for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
                             {
-                                ((SerialReceiver)lwcontroller._Receivers[i]).Write(pause._Bytes);
+                                ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(pause._Bytes);
                                 Thread.Sleep(500);
-                                ((SerialReceiver)lwcontroller._Receivers[i]).Write(enter._Bytes);  
-                                ((SerialReceiver)lwcontroller._Receivers[i]).Write(sniff._Bytes);
-                                ((SerialReceiver)lwcontroller._Receivers[i]).Write(reset._Bytes);
+                                ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(enter._Bytes);
+                                ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(sniff._Bytes);
+                                ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(reset._Bytes);
                             }
                         }
                     }
@@ -138,59 +138,73 @@ namespace Wockets.Kernel
                         if (!_WocketsRunning)
                         {
 
+
+                            storageDirectory = rootStorageDirectory + "Session" + DateTime.Now.Month + "-" + DateTime.Now.Day + "-" + DateTime.Now.Hour + "-" + DateTime.Now.Minute + "-" + DateTime.Now.Second;
+                            if (!Directory.Exists(storageDirectory))
+                                Directory.CreateDirectory(storageDirectory);
+                            try
+                            {
+                                File.Copy(path + "//NeededFiles//Master//Configuration.xml", storageDirectory + "\\Configuration.xml");
+                            }
+                            catch (Exception e)
+                            {
+                            }
+
+                            CurrentWockets._Configuration = new Wockets.Data.Configuration.WocketsConfiguration();
+                            CurrentWockets._Configuration.FromXML(storageDirectory + "\\Configuration.xml");
+                            CurrentWockets._Configuration._MemoryMode = Wockets.Data.Configuration.MemoryConfiguration.SHARED;
+
                             //load local wockets controller
-                            lwcontroller = new WocketsController("", "", "");
-                            lwcontroller.FromXML(path + "//NeededFiles//Master//SensorData.xml");
+                            CurrentWockets._Controller = new WocketsController("", "", "");
+                            CurrentWockets._Controller.FromXML(path + "//NeededFiles//Master//SensorData.xml");
                             int index=0;
                             for (int i = 0; (i < Booter.wcontroller._Sensors.Count); i++)
                             {
                                 if (Booter.wcontroller._Sensors[i]._Loaded)
                                 {
-                                    lwcontroller._Receivers[index]._ID = index;
-                                    ((RFCOMMReceiver)lwcontroller._Receivers[index])._Address=((RFCOMMReceiver)Booter.wcontroller._Receivers[i])._Address;
-                                    lwcontroller._Decoders[index]._ID = index;
-                                    lwcontroller._Sensors[index]._ID=index;
-                                    lwcontroller._Sensors[index]._Receiver = lwcontroller._Receivers[index];
-                                    lwcontroller._Sensors[index]._Decoder = lwcontroller._Decoders[index];
-                                    lwcontroller._Sensors[index]._Loaded = true;
+                                    CurrentWockets._Controller._Receivers[index]._ID = index;
+                                    ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[index])._Address = ((RFCOMMReceiver)Booter.wcontroller._Receivers[i])._Address;
+                                    CurrentWockets._Controller._Decoders[index]._ID = index;
+                                    CurrentWockets._Controller._Sensors[index]._ID = index;
+                                    CurrentWockets._Controller._Sensors[index]._Receiver = CurrentWockets._Controller._Receivers[index];
+                                    CurrentWockets._Controller._Sensors[index]._Decoder = CurrentWockets._Controller._Decoders[index];
+                                    CurrentWockets._Controller._Sensors[index]._Loaded = true;
                                     index++;
                                 }
                             }
-                            storageDirectory = rootStorageDirectory + "\\Session" + DateTime.Now.Month + "-" + DateTime.Now.Day + "-" + DateTime.Now.Hour + "-" + DateTime.Now.Minute + "-" + DateTime.Now.Second;
-                            lwcontroller._storageDirectory = storageDirectory;
-                            for (int i = lwcontroller._Sensors.Count-1; (i>=0); i--)
+                            CurrentWockets._Controller._storageDirectory = storageDirectory;
+                            for (int i = CurrentWockets._Controller._Sensors.Count - 1; (i >= 0); i--)
                             {
-                                if (!lwcontroller._Sensors[i]._Loaded)
+                                if (!CurrentWockets._Controller._Sensors[i]._Loaded)
                                 {
-                                    lwcontroller._Receivers.RemoveAt(i);
-                                    lwcontroller._Sensors.RemoveAt(i);
-                                    lwcontroller._Decoders.RemoveAt(i);
+                                    CurrentWockets._Controller._Receivers.RemoveAt(i);
+                                    CurrentWockets._Controller._Sensors.RemoveAt(i);
+                                    CurrentWockets._Controller._Decoders.RemoveAt(i);
                                 }
                                 else
                                 {
-                                    lwcontroller._Sensors[i]._RootStorageDirectory = storageDirectory+"\\data\\raw\\PLFormat\\";
+                                    CurrentWockets._Controller._Sensors[i]._RootStorageDirectory = storageDirectory + "\\data\\raw\\PLFormat\\";
                                 }
                             }
 
-                            lwcontroller._Receivers.SortByAddress();
-                            for (int i = 0; (i < lwcontroller._Sensors.Count); i++)                            
-                                ((Wocket)lwcontroller._Sensors[i])._Receiver = lwcontroller._Receivers[i];                            
+                            CurrentWockets._Controller._Receivers.SortByAddress();
+                            for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
+                                ((Wocket)CurrentWockets._Controller._Sensors[i])._Receiver = CurrentWockets._Controller._Receivers[i];
 
-                            if (lwcontroller._Sensors.Count > 0)
+                            if (CurrentWockets._Controller._Sensors.Count > 0)
                             {
                                 registryLock.WaitOne();
                                 rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_KERNEL_PATH,true);
                                 rk.SetValue("Storage", storageDirectory);                                                                   
                                 rk.Close();                                
                                 registryLock.Release();
-
-                                if (!Directory.Exists(storageDirectory))
-                                    Directory.CreateDirectory(storageDirectory);
+              
                                 TextWriter tw = new StreamWriter(storageDirectory + "\\SensorData.xml");
-                                tw.WriteLine(lwcontroller.ToXML());
+                                tw.WriteLine(CurrentWockets._Controller.ToXML());
                                 tw.Close();
+                           
                                _WocketsRunning = true;
-                               lwcontroller.Initialize();
+                               CurrentWockets._Controller.Initialize();
                                Send(ApplicationResponse.CONNECT_SUCCESS, applicationGuid);
                             }else
                                 Send(ApplicationResponse.CONNECT_FAILURE, applicationGuid);
@@ -203,7 +217,7 @@ namespace Wockets.Kernel
                     {
                         if (_WocketsRunning)
                         {
-                            lwcontroller.Dispose();
+                            CurrentWockets._Controller.Dispose();
                             _WocketsRunning = false;
                             Send(ApplicationResponse.DISCONNECT_SUCCESS, applicationGuid);
                         }

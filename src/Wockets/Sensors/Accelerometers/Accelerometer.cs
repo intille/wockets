@@ -454,7 +454,7 @@ namespace Wockets.Sensors.Accelerometers
                     #region Update Pointers, statistics and time stamps
                     lastUnixTime = aUnixTime;
                     this.tailUnixTimestamp = aUnixTime;    
-                    if (tail >= this._Decoder._Data.Length - 1)
+                    if (tail >= this._Decoder._BufferSize- 1)
                     {
                         tail = 0;
                         if (CurrentWockets._Configuration._MemoryMode == MemoryConfiguration.SHARED)

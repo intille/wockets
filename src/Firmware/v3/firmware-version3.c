@@ -25,6 +25,8 @@
 #include "mcu_atmega.h"
 #include "wocket.h"
 
+unsigned char wakeup=0;
+unsigned char sample=0;
 int main()
 {
 
@@ -33,13 +35,15 @@ int main()
 		
 	while(1){
 	
-		set_sleep_mode(SLEEP_MODE_PWR_SAVE);
-    	sleep_enable();
-    	sleep_bod_disable();
-    	sei();
-    	sleep_cpu();
-    	sleep_disable();
-		//_delay_ms(10);
+	/*	if (!wakeup){
+			set_sleep_mode(SLEEP_MODE_PWR_SAVE);
+    		sleep_enable();
+    		sleep_bod_disable();
+    		sei();
+    		sleep_cpu();
+    		sleep_disable();
+		}else*/
+			_delay_ms(10);
 
 	}
 
@@ -62,15 +66,33 @@ unsigned char interrupts_passed=0;
 
 ISR(TIMER2_OVF_vect)
 { 
+	if (!_bluetooth_is_connected())	
+		return;		
+
+TCNT2=170;
+	/*if (!sample){
+		if (wakeup){
+			TCNT2 = 246;
+			sample=1;
+		}else{
+			TCNT2=180;	
+			wakeup=1;			
+		}
+		return;
+	}
+	
+	wakeup=0;
+	sample=0;*/
+
+	
+
+	_receive_data();
+	_send_data();
+	
+	seconds_disconnected=0;
 
 		
-	TCNT2=170;	
-
-
-
-
-
-
+	/*TCNT2=170;	
 
 
 	if (!_bluetooth_is_connected()){
@@ -94,7 +116,9 @@ ISR(TIMER2_OVF_vect)
 		//if (seconds_passed==0){
 			_receive_data();
 		//	 _send_data();
-		_send_packet_count(2400);
+		//_send_packet_count(600);
+	
+		_send_packet_count(1200);
 		_send_data_bufferred();
 
 			seconds_passed=0;
@@ -110,7 +134,7 @@ ISR(TIMER2_OVF_vect)
 		//	_atmega_adc_turn_off();
 			seconds_disconnected=0;
 
-
+*/
 }
 
 

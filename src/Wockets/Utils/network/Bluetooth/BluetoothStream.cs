@@ -4,6 +4,7 @@ using System.Text;
 using System.Net.Sockets;
 using System.Threading;
 using System.Runtime.InteropServices;
+using Wockets.Utils.network;
 
 namespace Wockets.Utils.network.Bluetooth
 {
@@ -99,6 +100,8 @@ namespace Wockets.Utils.network.Bluetooth
         /// </summary>
         public bool _TimeoutEnabled = true;
 
+        public bool _Bursty = false;
+
 
         public double _ConnectionTime = 0;
 
@@ -142,18 +145,25 @@ namespace Wockets.Utils.network.Bluetooth
             }
              */
 #if (PocketPC)
-            if (BitConverter.IsLittleEndian)
-            {
-                //reverse address depending on the architecture
-                for (int i = 0; i < address.Length; i++)
-                    this.address[this.address.Length - 1 - i] = address[i];
-            }
-            else
-            {
 
-                for (int i = 0; i < address.Length; i++)
-                    this.address[i] = address[i];
-            }
+                if (BitConverter.IsLittleEndian)
+                {
+                    //reverse address depending on the architecture
+                    for (int i = 0; i < address.Length; i++)
+                        this.address[this.address.Length - 1 - i] = address[i]; 
+
+  
+
+                    
+       
+                }
+                else
+                {
+
+                    for (int i = 0; i < address.Length; i++)
+                        this.address[i] = address[i];  
+                }
+            
 #else
             if (BitConverter.IsLittleEndian)
             {
