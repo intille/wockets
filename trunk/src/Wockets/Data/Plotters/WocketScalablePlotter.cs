@@ -57,7 +57,7 @@ namespace Wockets.Data.Plotters
                 skippedPoints = 2;
 
             this.aPanel = aPanel;
-            this.plotAreaSize = new Size(this.aPanel.Width, ((int)(this.aPanel.Height *0.60)));
+            this.plotAreaSize = new Size(this.aPanel.Width, ((int)(0.60* this.aPanel.Height )));
             graphSize = (int)Math.Floor((plotAreaSize.Height / ((double)numSensors)));
 
 

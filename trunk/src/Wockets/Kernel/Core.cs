@@ -18,7 +18,7 @@ namespace Wockets.Kernel
         public static string COMMAND_CHANNEL = Core.REGISTRY_WOCKETS_PATH + "\\Command";
         public static string REGISTRY_KERNEL_PATH = REGISTRY_WOCKETS_PATH + "\\Kernel";
         public static string REGISTRY_LOCK = "WocketsRLock";
-        public static string KERNEL_PATH = @"\Program Files\wocketsapplication\";
+        public static string KERNEL_PATH = @"\Program Files\wockets\";
         public static string KERNEL_EXECUTABLE = "Kernel.exe";
         private static Semaphore registryLock;
         public static bool _Registered = false;

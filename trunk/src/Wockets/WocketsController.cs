@@ -669,10 +669,17 @@ namespace Wockets
                         {
                             if (_Bursty)
                             {
-                                if (sensor._ReceivedPackets< 2400)
+                                /*if (sensor._ReceivedPackets< 600)
                                     currentReceiver.Update();
                                 else
+                                    continue;*/
+
+       
+                                    //skip if got everything
+                               if (sensor._ReceivedPackets == 1200)
                                     continue;
+                               else
+                                   currentReceiver.Update();
                             }
                             else
                                 currentReceiver.Update();

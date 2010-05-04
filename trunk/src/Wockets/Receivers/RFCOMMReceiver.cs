@@ -54,6 +54,8 @@ namespace Wockets.Receivers
         public bool _Bursty = false;
         public bool _TimeoutEnabled = true;
         public double _ConnectionTime = 0;
+        public int _Reconnections = 0;
+        public int _SuccessfulConnections = 0;
      
 
         public override int CompareTo(object receiver)
@@ -95,16 +97,8 @@ namespace Wockets.Receivers
             {
                 this.address = value;
                 this.address_bytes = new byte[MAC_SIZE];
-                if (!BitConverter.IsLittleEndian)
-                {
-                    for (int i = 0; (i < MAC_SIZE); i++)
-                        this.address_bytes[i] = (byte)(System.Int32.Parse(address.Substring(i * 2, 2), System.Globalization.NumberStyles.AllowHexSpecifier) & 0xff);
-                }
-                else
-                {
-                    for (int i = 0; (i < MAC_SIZE); i++)
-                        this.address_bytes[MAC_SIZE-i-1] = (byte)(System.Int32.Parse(address.Substring(i * 2, 2), System.Globalization.NumberStyles.AllowHexSpecifier) & 0xff);
-                }
+                for (int i = 0; (i < MAC_SIZE); i++)
+                    this.address_bytes[i] = (byte)(System.Int32.Parse(address.Substring(i * 2, 2), System.Globalization.NumberStyles.AllowHexSpecifier) & 0xff);
             }
         }
         public string _PIN
@@ -205,12 +199,11 @@ namespace Wockets.Receivers
         {
             Random random = new Random();
             int backoff = random.Next(1000);
-            int reconnections = 0;
+            _Reconnections = 0;
             if (!_Bursty)
-                Thread.Sleep(10000);
+                Thread.Sleep(10000);       
+
             
-            //Thread.Sleep(19000);
-            //battery drained situation
             while ((this.bluetoothStream == null) || (this.bluetoothStream._Status != BluetoothStatus.Connected))
             {
                 Thread.Sleep(backoff);
@@ -221,15 +214,15 @@ namespace Wockets.Receivers
                 }
                 else
                 {
-                    if (reconnections == 5) //after 20 attempts
+                   /* if (_Reconnections == 5) //after 20 attempts
                         backoff = 1000 + random.Next(10000);
-                    else if (reconnections == 30)
+                    else if (_Reconnections == 30)
                         backoff = 10000 + random.Next(20000);
-                    else if (reconnections == 100)
-                        backoff = 60000 + random.Next(10000);
+                    else if (_Reconnections == 100)
+                        backoff = 60000 + random.Next(10000);   */                
                 }
 
-                reconnections++;
+                _Reconnections++;
             }
         }
 
@@ -247,9 +240,12 @@ namespace Wockets.Receivers
                 this.bluetoothStream = NetworkStacks._BluetoothStack.Connect(this._Buffer,this._SBuffer , this.address_bytes, this.pin);              
                 if (this.bluetoothStream == null)
                     return false;
-               
+
+                if (this._Bursty)
+                    this.bluetoothStream._Timeout = 2;
                 this.bluetoothStream._TimeoutEnabled = this._TimeoutEnabled;
                 this._ConnectionTime = this.bluetoothStream._ConnectionTime;
+                this._SuccessfulConnections++;
                 return true;
             }
             catch (Exception e)
@@ -286,7 +282,9 @@ namespace Wockets.Receivers
                     this.reconnectionThread.Abort(); 
                 if (this.bluetoothStream!=null)
                     this.bluetoothStream._Status = BluetoothStatus.Disconnected;
-                this._Status = ReceiverStatus.Disconnected;         
+                this._Status = ReceiverStatus.Disconnected;
+                this._Reconnections = 0;
+                this._SuccessfulConnections = 0;
                 return true;
             }
             catch (Exception)

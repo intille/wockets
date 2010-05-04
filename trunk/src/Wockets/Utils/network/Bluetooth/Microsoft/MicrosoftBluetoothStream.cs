@@ -168,8 +168,9 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                 {
                     btStream.socket = new Socket(BluetoothStream._AddressFamily, SocketType.Stream, BluetoothStream._ProtocolType);
                     btStream.socket.Blocking = true;
-                    btStream.socket.Connect(btStream._RemoteEP);
                     btStream._ConnectionTime = WocketsTimer.GetUnixTime();
+                    btStream.socket.Connect(btStream._RemoteEP);
+                    btStream._ConnectionTime = WocketsTimer.GetUnixTime() - btStream._ConnectionTime;
                     btStream.nstream = new NetworkStream(btStream.socket, true);
                 }
 
@@ -283,6 +284,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                                 this._Status = BluetoothStatus.Disconnected;
                                 return;
                             }
+
                         }
                     }
 
