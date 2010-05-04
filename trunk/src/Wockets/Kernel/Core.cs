@@ -71,6 +71,7 @@ namespace Wockets.Kernel
        }
         public static void Start()
         {
+          
             if (!_KernelStarted)
             {
                 System.Diagnostics.Process po = new System.Diagnostics.Process();
@@ -84,13 +85,45 @@ namespace Wockets.Kernel
             }
         }
 
-        public static void Terminate()
+        public static bool Terminate()
         {
-            if (_KernelGuid != null)
+
+            storagePath = "";
+            Core.Send(KernelCommand.TERMINATE, "any");
+            Thread.Sleep(2000);
+
+            //If termination failed try killing the process
+            if (_KernelStarted)
             {
-                storagePath = "";
-                Core.Send(KernelCommand.TERMINATE, _KernelGuid);
+
+                try
+                {
+                    ProcessInfo[] processes = ProcessCE.GetProcesses();
+                    if (processes != null)
+                    {
+                        for (int i = 0; (i < processes.Length); i++)
+                        {
+                            if (processes[i].FullPath.IndexOf("Kernel.exe") >= 0)
+                            {
+                                processes[i].Kill();
+                                break;
+                            }
+                        }
+
+                        // registry is corrupt fix it
+                        RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_WOCKETS_PATH + "\\Kernel");
+                        rk.SetValue("Status", 0, RegistryValueKind.DWord);
+                        rk.Close();      
+                    }
+                }
+                catch
+                {
+                    if (_KernelStarted)
+                        return false;
+                }
             }
+
+            return true;
         }
         public static void Send(KernelCommand command,string senderGuid)
         {

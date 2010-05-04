@@ -22,6 +22,7 @@ using Wockets.Kernel;
 using Wockets.Data.Annotation;
 using Wockets.Data.Plotters;
 using Wockets;
+using Microsoft.VisualBasic;
 
 //using OpenNETCF.GDIPlus;
 using OpenNETCF.Windows.Forms;
@@ -200,8 +201,8 @@ namespace WocketsApplication
 
             /*File.Copy(Constants.PATH + "Master\\Configuration.xml",
              Core._StoragePath + "\\Configuration.xml");*/
-            CurrentWockets._Configuration = new WocketsConfiguration();// new DTConfiguration();
-            CurrentWockets._Configuration.FromXML(Core._StoragePath + "\\Configuration.xml");
+            //CurrentWockets._Configuration = new WocketsConfiguration();// new DTConfiguration();
+            //CurrentWockets._Configuration.FromXML(Core._StoragePath + "\\Configuration.xml");
             FullFeatureExtractor.Initialize(selectedWockets.Count, 90, CurrentWockets._Configuration, this.annotatedSession.OverlappingActivityLists[0]);
             if (trainingTW == null)
             {
@@ -1115,9 +1116,9 @@ namespace WocketsApplication
                 
             this.annotatedSession = new Session();
             this.annotatedSession.FromXML(modelDirectory + "\\ActivityLabelsRealtime.xml");
-            CurrentWockets._Configuration = new WocketsConfiguration();//new DTConfiguration();
-            CurrentWockets._Configuration.FromXML(modelDirectory + "\\Configuration.xml");
-            CurrentWockets._Configuration._MemoryMode = MemoryConfiguration.SHARED;
+            //CurrentWockets._Configuration = new WocketsConfiguration();//new DTConfiguration();
+            //CurrentWockets._Configuration.FromXML(modelDirectory + "\\Configuration.xml");
+            //CurrentWockets._Configuration._MemoryMode = MemoryConfiguration.SHARED;
             CurrentWockets._Controller = new WocketsController("", "", "");
             CurrentWockets._Controller.FromXML(modelDirectory + "\\SensorData.xml");
 
@@ -1752,6 +1753,7 @@ namespace WocketsApplication
                 selectedWockets.Remove(wi);
                 wi.BackColor = Color.FromArgb(245, 219, 186);
             }
+            selectedWockets.Sort();
            /* else                        
             {
                 bluetoothName.Text = wi._Name;                
@@ -1928,6 +1930,17 @@ namespace WocketsApplication
 
                         if (!Core._KernelStarted)
                             Core.Start();
+                        else
+                        {
+                            if (Interaction.MsgBox("Do you want to restart it?", MsgBoxStyle.YesNo,"Kernel already running!")== MsgBoxResult.Yes)
+                            {
+                                //Make sure no kernels are running
+                                if (Core.Terminate())
+                                    Core.Start();
+                                else
+                                    MessageBox.Show("Failed to shutdown kernel");
+                            }
+                        }
 
                         Thread.Sleep(5000);
                         if (Core._KernelStarted)

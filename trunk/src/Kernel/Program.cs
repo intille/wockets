@@ -11,7 +11,9 @@ namespace Kernel
     {
         static void Main(string[] args)
         {
+
             Booter.Boot();
+
         }
     }
 }
