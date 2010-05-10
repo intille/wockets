@@ -8,7 +8,11 @@ using System.Threading;
 using System.Globalization;
 using Microsoft.Win32;
 using System.Runtime.InteropServices;
+#if (PocketPC)
 using OpenNETCF.IO.Ports;
+#else
+using System.IO.Ports;
+#endif
 namespace Wockets.Utils.network.Bluetooth.Widcomm
 {
     public class WidcommBluetoothStream : BluetoothStream
@@ -19,6 +23,7 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
         
         private static int x = 0;
         public string _COMPORT = "";
+
         private static SerialPort[] spp = new SerialPort[2]{null,null};
 
         private static IntPtr[] wdStack = new IntPtr[2]{IntPtr.Zero,IntPtr.Zero};
@@ -107,7 +112,7 @@ namespace Wockets.Utils.network.Bluetooth.Widcomm
                  
                       
               
-                        spp[0] = new OpenNETCF.IO.Ports.SerialPort(_COMPORT + ":", 38400, OpenNETCF.IO.Ports.Parity.None, 8, OpenNETCF.IO.Ports.StopBits.One);//new SerialPort(_COMPORT, 38400, Parity.None, 8, StopBits.One);                    
+                        spp[0] = new SerialPort(_COMPORT + ":", 38400,Parity.None, 8, StopBits.One);//new SerialPort(_COMPORT, 38400, Parity.None, 8, StopBits.One);                    
                         if (!spp[0].IsOpen)
                             spp[0].Open();
                         //spps.Add(this._HexAddress, spp);
