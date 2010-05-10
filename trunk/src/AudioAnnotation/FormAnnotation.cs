@@ -2049,10 +2049,10 @@ namespace AudioAnnotation
                             { end_file_time = end_file_time.Add(AudioOffset);  }
                             
                            //----if there is not offset, check if it is daylight saving time
-                            else if (!TimeZone.IsDaylightSavingTime(end_file_time, daylight))
-                            {
-                                end_file_time = end_file_time.Add(TimeSpan.Parse("01:00:00.0"));
-                            }
+                            //else if (!TimeZone.IsDaylightSavingTime(end_file_time, daylight))
+                            //{
+                            //    end_file_time = end_file_time.Add(TimeSpan.Parse("01:00:00.0"));
+                            //}
                             
 
                            
@@ -2092,10 +2092,10 @@ namespace AudioAnnotation
                                 end_file_time = end_file_time.Add(AudioOffset);
                              }
                              //----if there is not offset, check if it is daylight saving time
-                             else if (!TimeZone.IsDaylightSavingTime(end_file_time, daylight))
-                             {
-                                     end_file_time = end_file_time.Add(TimeSpan.Parse("01:00:00.0"));
-                             }
+                             //else if (!TimeZone.IsDaylightSavingTime(end_file_time, daylight))
+                             //{
+                             //        end_file_time = end_file_time.Add(TimeSpan.Parse("01:00:00.0"));
+                             //}
                             
 
 
