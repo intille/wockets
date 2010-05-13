@@ -8,6 +8,7 @@ using Wockets.Exceptions;
 using System.Net.Sockets;
 using System.Threading;
 
+
 #if (!PocketPC)
 using InTheHand.Net;
 using InTheHand.Net.Sockets;
@@ -162,7 +163,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                 // Initialize the microsoft bluetooth stream
                 MicrosoftBluetoothStream btStream = new MicrosoftBluetoothStream(buffer, sbuffer, address, pin);
                 btStream._Status = BluetoothStatus.Reconnecting;
-
+                   
                 // Critical section: Allow one connection at a time
                 lock (mylock)
                 {
