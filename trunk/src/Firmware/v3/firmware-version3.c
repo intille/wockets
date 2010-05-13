@@ -22,6 +22,7 @@
 #include <avr/sleep.h>
 #include <avr/eeprom.h> 
 #include <util/delay.h>
+#include <avr/power.h>
 #include "mcu_atmega.h"
 #include "wocket.h"
 
@@ -33,17 +34,26 @@ int main()
 
 	_wocket_initialize();
 		
+
+	power_adc_disable();
+  	power_spi_disable();
+  	power_timer0_disable();
+  	power_timer1_disable();
+  	power_twi_disable();
+
+
+
 	while(1){
-	
-		if (!wakeup){
-			set_sleep_mode(SLEEP_MODE_PWR_SAVE);
+			
+			cli();
+			set_sleep_mode(SLEEP_MODE_IDLE);
+			//set_sleep_mode(SLEEP_MODE_PWR_SAVE);
     		sleep_enable();
-    		sleep_bod_disable();
+    		sleep_bod_disable(); 	
     		sei();
     		sleep_cpu();
     		sleep_disable();
-		}else
-			_delay_ms(10);
+
 
 	}
 
@@ -65,45 +75,55 @@ unsigned char interrupts_passed=0;
 
 
 ISR(TIMER2_OVF_vect)
-{ 
-	if (!_bluetooth_is_connected())	
-		return;		
+{
 
-TCNT2=170;
-	if (!sample){
-		if (wakeup){
-			TCNT2 = 246;
-			sample=1;
-		}else{
-			TCNT2=180;	
-			wakeup=1;			
-		}
-		return;
-	}
-	
+/*
+	TCNT2=61;
+
+		if (!_bluetooth_is_connected())	
+		return;	
+
 	wakeup=0;
 	sample=0;
 
-	
 
-	_receive_data();
+	_receive_data();	
+	power_adc_enable();
+
+	_atmega_adc_turn_on();
 	_send_data();
-	
-	seconds_disconnected=0;
+	_atmega_adc_turn_off();
+	power_adc_disable();
 
-		
-	/*TCNT2=170;	
+
+	seconds_disconnected=0;
+	*/
+
+
+
+	TCNT2=61;
+	
+	power_adc_enable();
+	_atmega_adc_turn_on();
+	unsigned short x=_atmega_a2dConvert10bit(ADC3);
+	unsigned short y=_atmega_a2dConvert10bit(ADC2);
+	unsigned short z=_atmega_a2dConvert10bit(ADC1);
+	_atmega_adc_turn_off();
+	power_adc_disable();
+
+	
+
 
 
 	if (!_bluetooth_is_connected()){
 			
-		if (seconds_disconnected<2400)
+		if (seconds_disconnected<1800)
 			seconds_disconnected++;
-		else if (seconds_disconnected==2400)
+		else if (seconds_disconnected==1800)
 		{
 			_bluetooth_turn_on();
 			//_atmega_reset();
-			seconds_disconnected=2401;			
+			seconds_disconnected=1801;			
 		}
 		return;	
 
@@ -134,7 +154,6 @@ TCNT2=170;
 		//	_atmega_adc_turn_off();
 			seconds_disconnected=0;
 
-*/
 }
 
 

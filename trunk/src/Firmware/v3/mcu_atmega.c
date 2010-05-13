@@ -382,6 +382,7 @@ void _atmega_initialize(unsigned char timer_prescalar)
 	//if the wocket yellow light does not go off, the wocket has not been
 	
 	_atmega_initialize_uart0(ATMEGA_BAUD_38400, TX_RX_UART_MODE);
+
 	if ((_bluetooth_enter_command_mode()))
 	{	
 		_yellowled_turn_off();
