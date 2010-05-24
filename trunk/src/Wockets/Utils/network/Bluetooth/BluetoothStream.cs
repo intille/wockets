@@ -251,5 +251,6 @@ namespace Wockets.Utils.network.Bluetooth
         /// Must be overriden by all child classes to read/write to the Bluetooth stream
         /// </summary>
         public abstract void Process();
+
     }
 }
