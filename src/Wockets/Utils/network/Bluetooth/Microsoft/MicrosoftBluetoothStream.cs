@@ -166,7 +166,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                    
                 // Critical section: Allow one connection at a time
                 lock (mylock)
-                {
+                {                    
                     btStream.socket = new Socket(BluetoothStream._AddressFamily, SocketType.Stream, BluetoothStream._ProtocolType);
                     btStream.socket.Blocking = true;
                     btStream._ConnectionTime = WocketsTimer.GetUnixTime();
