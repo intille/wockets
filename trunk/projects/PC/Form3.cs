@@ -23,6 +23,8 @@ namespace WocketConfigurationApp
         private Bitmap backBuffer = null;
         private bool isResized = false;
 
+
+
         /// <summary>
         ///
         /// </summary>
@@ -40,7 +42,12 @@ namespace WocketConfigurationApp
             aPlotter = new WocketsScalablePlotter(this.panel1, CurrentWockets._Controller);
             isResized = true;
             this.timer1.Enabled = true;
+
+
         }
+
+
+
         private void GraphAccelerometerValues()
         {
             if ((backBuffer == null) || (isResized))
