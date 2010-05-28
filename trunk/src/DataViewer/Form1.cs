@@ -2448,8 +2448,11 @@ namespace NESPDataViewer
                      */
                     #endregion
  
+                    // commented old path for original annotations
+                    //string file_annotations = path + "\\annotation\\audioannotation\\" + "AnnotationIntervals.csv";
 
-                    string file_annotations = path + "\\annotation\\audioannotation\\" + "AnnotationIntervals.csv";
+                    //reading the corrected annotations in the merged folder
+                    string file_annotations = path + "\\merged\\" + "AnnotationIntervals.csv";
                     string path_annotations_color = path + "\\annotation\\audioannotation\\";
 
                     if (File.Exists(file_annotations))
@@ -2506,13 +2509,15 @@ namespace NESPDataViewer
             bool isMatch = false;
             string[] patternsToMatch = filePatterns.Split(',');
             int i = 0;
-            while (!isMatch && (i < patternsToMatch.Length))
-            {
-                if (Directory.GetFiles(pathSearchDirectory, patternsToMatch[i]).Length > 0) isMatch = true;
-                i++;
-            }
 
-            return isMatch;
+           
+                while (!isMatch && (i < patternsToMatch.Length))
+                {
+                    if (Directory.GetFiles(pathSearchDirectory, patternsToMatch[i]).Length > 0) isMatch = true;
+                    i++;
+                }
+
+                return isMatch;
             
         }
         
