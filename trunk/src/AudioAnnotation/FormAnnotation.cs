@@ -3063,28 +3063,48 @@ namespace AudioAnnotation
             int start_row = row;
             string search_label = " ";
 
+  
             // search backwards
             for (int i = row; i < max_rows; i++)
             {
 
-                // check row status
+                //========== check row status  ===================================
                 if (dataGridView1.Rows[i].Cells[CINDEX.Status].Value == null)
                 { dataGridView1.Rows[i].Cells[CINDEX.Status].Value = " "; }
+
+                #region commented
+                //Commented to be more robust to errors & replaced with function below
+               // else
+                // { search_label = dataGridView1.Rows[i].Cells[CINDEX.Status].Value.ToString(); }
+                #endregion
+
+
+                //========== check row start/end label  ===================================
+                if (dataGridView1.Rows[i].Cells[CINDEX.StartEnd].Value == null)
+                { dataGridView1.Rows[i].Cells[CINDEX.StartEnd].Value = " "; }
                 else
-                { search_label = dataGridView1.Rows[i].Cells[CINDEX.Status].Value.ToString(); }
+                { search_label = dataGridView1.Rows[i].Cells[CINDEX.StartEnd].Value.ToString(); }
 
 
                 if (i < (max_rows - 1))
                 {
-                    if (search_label.CompareTo(" ") == 0)
+                    #region commented
+                    /*if (search_label.CompareTo(" ") == 0)
                     {
+                        // this line was commented from before
                         //dataGridView1.Rows[i].Cells[CINDEX.Status].Value = "start_on";
                     }
-                    else if (search_label.CompareTo("start") == 0)
+                    //else if (search_label.CompareTo("start") == 0)
+                    */
+                    #endregion
+
+                    if (search_label.CompareTo("Start") == 0)
                     {
                         start_row = i;
+                        dataGridView1.Rows[i].Cells[CINDEX.Status].Value = "start"; 
                         break;
                     }
+
                 }
                 else if (start_row == row)
                 {
@@ -3109,25 +3129,46 @@ namespace AudioAnnotation
             for (int i = row; i < max_rows; i++)
             {
 
-                // check row status
+                //========================== check row status =============================
                 if (dataGridView1.Rows[i].Cells[CINDEX.Status].Value == null)
-                { dataGridView1.Rows[i].Cells[CINDEX.Status].Value = " "; }
+                {   dataGridView1.Rows[i].Cells[CINDEX.Status].Value = " "; }
+
+                #region commented
+                //Commented to make the code more robust
+                //else
+                //{ search_label = dataGridView1.Rows[i].Cells[CINDEX.Status].Value.ToString(); }
+                #endregion commented
+
+
+                //========================== check row label  =============================
+                if (dataGridView1.Rows[i].Cells[CINDEX.StartEnd].Value == null)
+                { dataGridView1.Rows[i].Cells[CINDEX.StartEnd].Value = " "; }
                 else
-                { search_label = dataGridView1.Rows[i].Cells[CINDEX.Status].Value.ToString(); }
+                { search_label = dataGridView1.Rows[i].Cells[CINDEX.StartEnd].Value.ToString(); }
 
 
 
                 if (i < (max_rows - 1))
                 {
+                    
+                    #region  commented
+                    /*
                     if (search_label.CompareTo(" ") == 0)
                     {
-                        //dataGridView1.Rows[i].Cells[CINDEX.Status].Value = "start_on";
+                       // This line was commneted from before 
+                       // //dataGridView1.Rows[i].Cells[CINDEX.Status].Value = "start_on";
                     }
                     else if (search_label.CompareTo("end") == 0)
-                    {
+                    */
+                    #endregion commneted
+
+                    if (search_label.CompareTo("End") == 0)
+                     {
                         end_row = i;
+                        dataGridView1.Rows[i].Cells[CINDEX.Status].Value = "end";
                         break;
                     }
+
                 }
                 else if (end_row == row)
                 {
@@ -3218,6 +3259,8 @@ namespace AudioAnnotation
             next_start = search_start_forward(row + 1, maxrows);  // serch for the next start label after this row
             next_end = search_end_forward(row + 1, maxrows);      // search for the next end label after this row
 
+
+           
 
             if (next_start <= next_end)
             { next = next_start; }
@@ -4424,9 +4467,13 @@ namespace AudioAnnotation
                 end_row = search_close_row_forward(start_row, nrows, start_row, true);
                 //------------------
 
+                
+               
 
                 while (end_row < nrows)
                 {
+
+
                     label_start = dataGridView1.Rows[start_row].Cells[CINDEX.category_label].Value.ToString();
                     label_end = dataGridView1.Rows[end_row].Cells[CINDEX.category_label].Value.ToString();
 
@@ -4457,6 +4504,8 @@ namespace AudioAnnotation
                             { LabelsList_2.Add(record_string); }
 
 
+
+                            #region Repaint Cells
                             //------------------------------------------------
                             // Repaint Cells
                             //Here possibly affecting the repaint of the cells
@@ -4549,7 +4598,7 @@ namespace AudioAnnotation
 
 
                             //-------------------------------------------------------
-
+                            #endregion Repaint Cells
 
 
 
@@ -5477,7 +5526,7 @@ namespace AudioAnnotation
                                argb = Color.FromArgb(255, Color.Yellow).ToArgb().ToString();
 
                            }
-                           else if (label.Contains("jumping-jacks"))
+                           else if (label.Contains("jumping-jacks") || label.Contains("running-vigorously-in-place"))
                            {
                                color = Color.Orange.Name;
                                argb = Color.FromArgb(255, Color.Orange).ToArgb().ToString();
