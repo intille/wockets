@@ -33,6 +33,8 @@ namespace DataMerger
         }
 
         private static Form2 f;
+
+
         private void button2_Click(object sender, EventArgs e)
         {
             DialogResult result = this.folderBrowserDialog1.ShowDialog();
@@ -45,11 +47,11 @@ namespace DataMerger
                 try
                 {
 
-                     
+                    #region File Status Window
 
-
-                   this.progressForm.AppendLog("Older Merged MITes CSVs .....................Deleting\r\n");
-                   string[] file = Directory.GetFileSystemEntries(this.textBox1.Text +"\\"+MERGED_SUBDIRECTORY, "*MITes*.csv");
+                    //Older Stuff
+                    this.progressForm.AppendLog("Older Merged MITes CSVs .....................Deleting\r\n");
+                    string[] file = Directory.GetFileSystemEntries(this.textBox1.Text +"\\"+MERGED_SUBDIRECTORY, "*MITes*.csv");
                     foreach (string filename in file)
                         File.Delete(filename);
 
@@ -112,6 +114,8 @@ namespace DataMerger
                     else
                         this.progressForm.AppendLog("Activity Labels File .....................Not Found\r\n");
            
+
+
                     //Sensewear
                     file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-sensewear*.csv");
                     if (file.Length == 1)
@@ -201,6 +205,9 @@ namespace DataMerger
                     {
                         this.progressForm.AppendLog("RTI Synchronization File .....................Found\r\n");
                     }
+                    
+                    
+                    
                     // check oxycon files from MITES directory
                     if (File.Exists(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY + "\\OxyconSyncronizationTime.txt"))
                     {
@@ -233,7 +240,6 @@ namespace DataMerger
 
 
                     //omron
-
                     file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-omron.csv");
                     if (file.Length == 1)
                         this.progressForm.AppendLog("Omron File .....................Found\r\n");
@@ -241,15 +247,14 @@ namespace DataMerger
                         this.progressForm.AppendLog("Omron File ..................... Not Found\r\n");
 
                     //zephyr
-
                     file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-zephyr*.csv");
                     if (file.Length == 1)
                         this.progressForm.AppendLog("Zephyr File .....................Found\r\n");
                     else if (file.Length == 0)
                         this.progressForm.AppendLog("Zephyr File ..................... Not Found\r\n");
 
-                    //Columbia
 
+                    //Columbia
                     file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-columbia*.csv");
                     if (file.Length == 1)
                         this.progressForm.AppendLog("Columbia File .....................Found\r\n");
@@ -258,7 +263,6 @@ namespace DataMerger
 
 
                     //GPS
-
                     file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-gps*.csv");
                     if (file.Length == 1)
                         this.progressForm.AppendLog("GPS File .....................Found\r\n");
@@ -267,7 +271,6 @@ namespace DataMerger
 
 
                     //RTI
-
                     file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-rti*.csv");
                     if (file.Length == 1)
                         this.progressForm.AppendLog("RTI File .....................Found\r\n");
@@ -275,8 +278,6 @@ namespace DataMerger
                         this.progressForm.AppendLog("RTI File ..................... Not Found\r\n");
 
                     //MITes
-
-            
                     //configuration files
                     if (File.Exists(this.textBox1.Text + "\\" + MITES_SUBDIRECTORY + "\\Configuration.xml"))
                         this.progressForm.AppendLog("Configuration.xml File .....................Found\r\n");
@@ -314,6 +315,10 @@ namespace DataMerger
                     }
 
 
+
+                    #endregion 
+
+
                     try
                     {
                         if (File.Exists("Configuration.xml"))
@@ -323,8 +328,11 @@ namespace DataMerger
                     {
                     }
 
+
+
                     f= new Form2(this.textBox1.Text);
                     f.Show();
+
 
                 }
                 catch (Exception ex)
@@ -343,6 +351,8 @@ namespace DataMerger
             string[] filter = new string[2];
             filter[0] = "annotation";
             filter[1] = "setup";
+
+
             try
             {
                 toCSV(this.textBox1.Text, "..\\NeededFiles\\Master\\", 3, filter);
@@ -362,8 +372,12 @@ namespace DataMerger
 
         }
 
+
+
         private Thread aConversionThread;
         private bool converted = false;
+
+
         private void button1_Click(object sender, EventArgs e)
         {
             if (converted == true)
@@ -414,6 +428,9 @@ namespace DataMerger
             if (CSVProgress == "")
                 CSVProgress = "Generating Quality Assessment Summary in HTML";
             
+
+            //===================  Load the MITES DATA ==============================
+
             //Calculate Data Gaps
             WocketsController wc = new WocketsController("", "", "");
             CurrentWockets._Controller = wc;
@@ -437,9 +454,16 @@ namespace DataMerger
                         break;
                     }
             }
-            catch
+            catch 
             {
+                //if there is not mites data, catch the error and continue
             }
+
+
+
+
+            // ============== Load annotation intervals =======================================
+
             Session session = new Session();
             session.FromXML(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\AnnotationIntervals.xml");
 
@@ -456,7 +480,15 @@ namespace DataMerger
                     k++;
 
                 }
+
             postures.Add("unknown", k);
+
+
+
+
+
+            //================= Compute Statistics based on Postures  ===========================
+
             int[] timeLostPostureSensorCounter = new int[numPostures];
             int[] wocketsSR = new int[wc._Sensors.Count];
             int[] trueWocketsSR = new int[wc._Sensors.Count];
@@ -529,102 +561,115 @@ namespace DataMerger
 
             while ((line = tr.ReadLine()) != null)
             {
+
                 string[] tokens = line.Split(',');
                 double currentTime = Convert.ToDouble(tokens[0]);
                 string posture = tokens[2];
                 string current_posture = "unknown";
-                if ((currentAnnotation<session.Annotations.Count-1)&&(session.Annotations[currentAnnotation]._EndUnix < currentTime))
-                    currentAnnotation++;
 
-                if ((currentTime >= session.Annotations[currentAnnotation]._StartUnix) &&
-                    (currentTime <= session.Annotations[currentAnnotation]._EndUnix))
+
+
+                try
                 {
-                    /* Hack until selene fixes the audio annotator */
-                    if ((session.Annotations[currentAnnotation].Activities[1]._Name == "none") || (session.Annotations[currentAnnotation].Activities[1]._Name == "") || (session.Annotations[currentAnnotation].Activities[1]._Name == "-"))
-                        session.Annotations[currentAnnotation].Activities[1]._Name = "unknown";
-                    if ((session.Annotations[currentAnnotation].Activities[0]._Name == "none") || (session.Annotations[currentAnnotation].Activities[0]._Name == "") || (session.Annotations[currentAnnotation].Activities[0]._Name == "-"))
-                        session.Annotations[currentAnnotation].Activities[0]._Name = "unknown";
 
-                    current_posture = session.Annotations[currentAnnotation].Activities[1]._Name+"_"+ session.Annotations[currentAnnotation].Activities[0]._Name;
-  
-                    if (!annotatedPostures.ContainsKey(current_posture))
-                        annotatedPostures.Add(current_posture, 1);
-                    else
+                    if ((currentAnnotation < session.Annotations.Count - 1) && (session.Annotations[currentAnnotation]._EndUnix < currentTime))
+                        currentAnnotation++;
+
+                  
+
+                    if ((currentTime >= session.Annotations[currentAnnotation]._StartUnix) &&
+                        (currentTime <= session.Annotations[currentAnnotation]._EndUnix))
                     {
-                        int annotatedSeconds = (int)annotatedPostures[current_posture] +1;
-                        annotatedPostures[current_posture]= annotatedSeconds;
-                        
-                    }
-                }
+                        /* Hack until selene fixes the audio annotator */
+                        if ((session.Annotations[currentAnnotation].Activities[1]._Name == "none") || (session.Annotations[currentAnnotation].Activities[1]._Name == "") || (session.Annotations[currentAnnotation].Activities[1]._Name == "-"))
+                            session.Annotations[currentAnnotation].Activities[1]._Name = "unknown";
+                        if ((session.Annotations[currentAnnotation].Activities[0]._Name == "none") || (session.Annotations[currentAnnotation].Activities[0]._Name == "") || (session.Annotations[currentAnnotation].Activities[0]._Name == "-"))
+                            session.Annotations[currentAnnotation].Activities[0]._Name = "unknown";
 
-                //Calculate quality metrics on data that has been annotated only
-                if ((currentTime >= startTime) && (currentTime <= endTime))
-                {
-                    //mites SR
-                    for (int i = 0; (i < mitesCount); i++)
-                    {
+                        current_posture = session.Annotations[currentAnnotation].Activities[1]._Name + "_" + session.Annotations[currentAnnotation].Activities[0]._Name;
 
-                        int sr = Convert.ToInt32(tokens[mitesStartIndex + (ACCELEROMETER_STATISTICS_LENGTH * i)]);
-                        mitesSR[i] += sr;
-                        modeMITesSR[i][sr] = modeMITesSR[i][sr] + 1;
-
-                    }
-
-
-
-
-                    int currentPostureIndex = 0;
-
-     
-                        currentPostureIndex=(int)postures[current_posture];
-                 
-                
-                    //the number of seconds in  a particular posture
-                   
-                    timeLostPostureSensorCounter[currentPostureIndex] = timeLostPostureSensorCounter[currentPostureIndex] + 1;
-                    //wockets SR
-                    for (int i = 0; (i < wc._Sensors.Count); i++)
-                    {
-                        int sr = 0;
-                        try
-                        {
-                            sr = Convert.ToInt32(tokens[wocketsStartIndex + (ACCELEROMETER_STATISTICS_LENGTH * i)]);
-                            wocketsSR[i] += sr;
-                            modeWocketsSR[i][sr] = modeWocketsSR[i][sr] + 1;
-                        }
-                        catch (Exception e)
-                        {
-                        }
-                        //add the samples collected per activity
-                   
-                        timeLostPostureSensorDistribution[i][currentPostureIndex] =   timeLostPostureSensorDistribution[i][currentPostureIndex] + sr;
-                      
-
-                        if (sr == 0)
-                        {
-                            zeroWocketsSR[i] = zeroWocketsSR[i] + 1;
-                            if (zeroWocketsSR[i] == 5)
-                            {
-                                disconnected[i] = true;
-                                numDisconnected[i] = numDisconnected[i] + 1;
-                            }
-                            disconnectionTimer[i]++;
-                        }
+                        if (!annotatedPostures.ContainsKey(current_posture))
+                            annotatedPostures.Add(current_posture, 1);
                         else
                         {
-                            if (disconnectionTimer[i] >= 5)
-                                disconnectionDistribution[i].Add(disconnectionTimer[i]);
-                            zeroWocketsSR[i] = 0;
-                            disconnected[i] = false;
-                            disconnectionTimer[i] = 0;
+                            int annotatedSeconds = (int)annotatedPostures[current_posture] + 1;
+                            annotatedPostures[current_posture] = annotatedSeconds;
+
                         }
                     }
 
-                    numSeconds++;
+                    //Calculate quality metrics on data that has been annotated only
+                    if ((currentTime >= startTime) && (currentTime <= endTime))
+                    {
+                        //mites SR
+                        for (int i = 0; (i < mitesCount); i++)
+                        {
+
+                            int sr = Convert.ToInt32(tokens[mitesStartIndex + (ACCELEROMETER_STATISTICS_LENGTH * i)]);
+                            mitesSR[i] += sr;
+                            modeMITesSR[i][sr] = modeMITesSR[i][sr] + 1;
+
+                        }
+
+
+
+
+                        int currentPostureIndex = 0;
+
+
+                        currentPostureIndex = (int)postures[current_posture];
+
+
+                        //the number of seconds in  a particular posture
+
+                        timeLostPostureSensorCounter[currentPostureIndex] = timeLostPostureSensorCounter[currentPostureIndex] + 1;
+                        //wockets SR
+                        for (int i = 0; (i < wc._Sensors.Count); i++)
+                        {
+                            int sr = 0;
+                            try
+                            {
+                                sr = Convert.ToInt32(tokens[wocketsStartIndex + (ACCELEROMETER_STATISTICS_LENGTH * i)]);
+                                wocketsSR[i] += sr;
+                                modeWocketsSR[i][sr] = modeWocketsSR[i][sr] + 1;
+                            }
+                            catch (Exception e)
+                            {
+                            }
+                            //add the samples collected per activity
+
+                            timeLostPostureSensorDistribution[i][currentPostureIndex] = timeLostPostureSensorDistribution[i][currentPostureIndex] + sr;
+
+
+                            if (sr == 0)
+                            {
+                                zeroWocketsSR[i] = zeroWocketsSR[i] + 1;
+                                if (zeroWocketsSR[i] == 5)
+                                {
+                                    disconnected[i] = true;
+                                    numDisconnected[i] = numDisconnected[i] + 1;
+                                }
+                                disconnectionTimer[i]++;
+                            }
+                            else
+                            {
+                                if (disconnectionTimer[i] >= 5)
+                                    disconnectionDistribution[i].Add(disconnectionTimer[i]);
+                                zeroWocketsSR[i] = 0;
+                                disconnected[i] = false;
+                                disconnectionTimer[i] = 0;
+                            }
+                        }
+
+                        numSeconds++;
+                    }
+                }//end of try
+                catch (Exception e)
+                {
+                    //Launch exception when there is a index mistmatch in the ActivityIntervals.xml file
                 }
 
-
-            }
+            }//end of while
 
             //calculate time lost, % data lost, burstiness
 
@@ -973,8 +1018,12 @@ namespace DataMerger
    
 
         }
-        //directories
 
+
+
+
+
+        //directories
         public static string MITES_SUBDIRECTORY = "mites";
         public static string WOCKETS_SUBDIRECTORY = "wockets";
         public static string OTHER_SUBDIRECTORY = "othersensors";
@@ -1230,7 +1279,6 @@ namespace DataMerger
             string master_csv_header = "UnixTimeStamp,TimeStamp";
 
             //files found
-
             bool sensewearFound = false;
             bool sensewearVanderbiltFound = false;
             bool zephyrFound = false;
@@ -1240,6 +1288,8 @@ namespace DataMerger
             bool gpsFound = false;
             bool rtiFound = false;
             bool rt3Found=false;
+
+
             double actigraphOffset = 0;
             double sensewearOffset = 0;
             double zephyrOffset = 0;
@@ -1247,12 +1297,24 @@ namespace DataMerger
             double rtiOffset = 0;
             double oxyconOffset = 0;
 
+            double annotationsOffset = 0;
+            double mitesOffset = 0;
+            double gpsOffset = 0;
+
+
             actigraphOffset = f._ActigraphSeconds;
             sensewearOffset = f._SensewearSeconds;
             zephyrOffset = f._ZephyrSeconds;
             columbiaOffset = f._ColumbiaSeconds;
             rtiOffset = f._RTISeconds;
             oxyconOffset = f._OxyconSeconds;
+
+            annotationsOffset = f._AnnotationsSeconds;
+            mitesOffset = f._MitesSeconds;
+            gpsOffset = f._GpsSeconds;
+
+
+
 
             WocketsConfiguration configuration = new WocketsConfiguration();
             try
@@ -1555,7 +1617,13 @@ namespace DataMerger
                             string[] dateTokens = tokens[1].Split('-');
                             string[] timeTokens = tokens[2].Split(':');
                             gpsTime = new DateTime(Convert.ToInt32(dateTokens[0]), Convert.ToInt32(dateTokens[1]), Convert.ToInt32(dateTokens[2]), Convert.ToInt32(timeTokens[0]), Convert.ToInt32(timeTokens[1]), Convert.ToInt32(timeTokens[2]));
+
+                            //add gps offset
+                            gpsTime = gpsTime.AddSeconds(gpsOffset);
+
                             gpsUnixTime = UnixTime.GetUnixTime(gpsTime);
+                            
+                            
                             string gpsKey = gpsTime.Year + "-" + gpsTime.Month + "-" + gpsTime.Day + "-" + gpsTime.Hour + "-" + gpsTime.Minute + "-" + gpsTime.Second;
                             string gpsLine = "";
 
@@ -1664,8 +1732,10 @@ namespace DataMerger
                         Match m1 = Regex.Match(tokens[0].Trim(), "([0-9]+)/([0-9]+)/([0-9]+)");
                         Match m2 = Regex.Match(tokens[1].Trim(), "([0-9]+):([0-9]+):([0-9]+)");
                         actigraphTime = new DateTime(Convert.ToInt32("20" + m1.Groups[3].Value), Convert.ToInt32(m1.Groups[1].Value), Convert.ToInt32(m1.Groups[2].Value), Convert.ToInt32(m2.Groups[1].Value), Convert.ToInt32(m2.Groups[2].Value), Convert.ToInt32(m2.Groups[3].Value));
+                        
+                        
                         //if (actigraphOffset > 0)
-                          actigraphTime = actigraphTime.AddSeconds(actigraphOffset);
+                        actigraphTime = actigraphTime.AddSeconds(actigraphOffset);
                         actigraphUnixTime = UnixTime.GetUnixTime(actigraphTime);
 
                         do
@@ -1808,6 +1878,8 @@ namespace DataMerger
             }
             #endregion Read Actigraph data
 
+
+
             #region Read Zephyr data
             file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*-zephyr*.csv");
 
@@ -1834,9 +1906,10 @@ namespace DataMerger
                             zephyrTime = new DateTime(Convert.ToInt32(dateTokens[0]), Convert.ToInt32(dateTokens[1]), Convert.ToInt32(dateTokens[2]), Convert.ToInt32(timeTokens[0]), Convert.ToInt32(timeTokens[1]), Convert.ToInt32(timeTokens[2]));
 
                            // if (zephyrOffset > 0)
-                                zephyrTime=zephyrTime.AddSeconds(zephyrOffset);
-
+                            zephyrTime=zephyrTime.AddSeconds(zephyrOffset);
                             zephyrUnixTime = UnixTime.GetUnixTime(zephyrTime);
+                            
+                            
                             string zephyrKey = zephyrTime.Year + "-" + zephyrTime.Month + "-" + zephyrTime.Day + "-" + zephyrTime.Hour + "-" + zephyrTime.Minute + "-" + zephyrTime.Second;
                             string zephyrLine = "";
                             if (zephyrStart == null)
@@ -2143,6 +2216,8 @@ namespace DataMerger
                                     oxyconTime = oxyconTime.AddSeconds(-1.0 * oxyconAdjustment);
                                     oxyconTime = oxyconTime.AddSeconds(oxyconOffset);
                                     oxyconUnixTime = UnixTime.GetUnixTime(oxyconTime);
+
+
                                     string oxyconKey = oxyconTime.Year + "-" + oxyconTime.Month + "-" + oxyconTime.Day + "-" + oxyconTime.Hour + "-" + oxyconTime.Minute + "-" + oxyconTime.Second;
                                     string oxyconLine = "";
 
@@ -2475,6 +2550,7 @@ namespace DataMerger
                             string[] timeTokens = tsTokens[1].Split('.');
                             timeTokens = timeTokens[0].Split(':');
                             sensewearTime = new DateTime(Convert.ToInt32(dateTokens[0]), Convert.ToInt32(dateTokens[1]), Convert.ToInt32(dateTokens[2]), Convert.ToInt32(timeTokens[0]), Convert.ToInt32(timeTokens[1]), Convert.ToInt32(timeTokens[2]));
+                           
                             //if (sensewearOffset > 0)
                            sensewearTime=sensewearTime.AddSeconds(sensewearOffset);
                             sensewearUnixTime = UnixTime.GetUnixTime(sensewearTime);
@@ -2657,17 +2733,114 @@ namespace DataMerger
             #endregion Setup master and other sensor files
 
             #region Load Annotation
+
             AXML.Annotation aannotation = null;
             try
             {
                 if (File.Exists(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\AnnotationIntervals.xml"))
                 {
-                    AXML.Reader reader = new AXML.Reader(masterDirectory, aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY, "AnnotationIntervals.xml");
-                    aannotation = reader.parse();
-                    aannotation.RemoveData(filter);
-                    aannotation.DataDirectory = aDataDirectory;
-                }
+                    //AXML.Reader reader = new AXML.Reader(masterDirectory, aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY, "AnnotationIntervals.xml");
+                    //aannotation = reader.parse();
+                    //aannotation.RemoveData(filter);
+                    //aannotation.DataDirectory = aDataDirectory;
 
+                    //---------------------------------------------------------------------
+                    // Read the Annotation XML file generated by the Annotation Software
+                    // Use the session.cs for cleaner implementation
+                    // If there is an offset add it 
+                    //---------------------------------------------------------------------
+                    Session xmlSession = new Session();
+                    xmlSession.FromXML(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\AnnotationIntervals.xml");
+
+                    AnnotationList ann_list = xmlSession.Annotations;
+
+
+                    //------------------------------------
+                    // Add annotations offset
+                    //------------------------------------
+                    double unix_start, unix_end;
+                    DateTime t_start, t_end;
+
+
+                    foreach (Annotation ann in ann_list)
+                    {
+
+                        //Add Offset
+                        unix_start = ann._StartUnix + (annotationsOffset * 1000);
+                        UnixTime.GetDateTime((long)unix_start, out t_start);
+                        //t_start = t_start.AddSeconds(annotationsOffset);
+
+                        unix_end = ann._EndUnix + (annotationsOffset * 1000);
+                        UnixTime.GetDateTime((long)unix_end, out t_end);
+                        //t_end = t_end.AddSeconds(annotationsOffset);
+
+                        //Start Time
+                        ann._StartDate = t_start.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ssK"); //String.Format("{0:MM-dd-yyyy}", t_start);
+                        ann._StartHour = t_start.Hour;
+                        ann._StartMinute = t_start.Minute;
+                        ann._StartSecond = t_start.Second;
+                        ann._StartMillisecond = t_start.Millisecond;
+
+                        //ts = (t_start - new DateTime(1970, 1, 1, 0, 0, 0));
+                        ann._StartUnix = unix_start; //ts.TotalSeconds;
+
+                        //Stop Time
+                        ann._EndDate = t_end.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ssK");//String.Format("{0:MM-dd-yyyy}", t_end);
+                        ann._EndHour = t_end.Hour;
+                        ann._EndMinute = t_end.Minute;
+                        ann._EndSecond = t_end.Second;
+                        ann._EndMillisecond = t_end.Millisecond;
+
+                        //ts = (t_end - new DateTime(1970, 1, 1, 0, 0, 0));
+                        ann._EndUnix = unix_end;//ts.TotalSeconds;
+
+                    }
+
+                    //------------------------------------------
+                    //Write new annotations to file
+                    //------------------------------------------
+                    TextWriter ann_intervals_xml = null;
+                    TextWriter ann_intervals_csv = null;
+
+
+                    // Annotation Intervals Files
+                    if (File.Exists(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "AnnotationIntervals.xml"))
+                    { File.Delete(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "AnnotationIntervals.xml"); }
+
+                    if (File.Exists(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "AnnotationIntervals.csv"))
+                    { File.Delete(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "AnnotationIntervals.csv"); }
+
+                    ann_intervals_xml = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "AnnotationIntervals.xml");
+                    ann_intervals_csv = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "AnnotationIntervals.csv");
+
+
+
+                    //write to files
+                    ann_intervals_xml.WriteLine(xmlSession.ToXML());
+                    ann_intervals_csv.WriteLine(xmlSession.ToCSV());
+
+                    //close files
+                    ann_intervals_xml.Flush();
+                    ann_intervals_xml.Close();
+
+                    ann_intervals_csv.Flush();
+                    ann_intervals_csv.Close();
+                }
+                    
+                    //--------------------------------------------------------------------------
+                    //Read the corrected annotation files
+                    // original code, but now the reader is pointing to the corrected xml file
+                    // it is done in this way for backwards compatibility
+                    //--------------------------------------------------------------------------
+                    if (File.Exists(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\AnnotationIntervals.xml"))
+                    {
+                        AXML.Reader reader = new AXML.Reader(masterDirectory, aDataDirectory + "\\" + MERGED_SUBDIRECTORY, "AnnotationIntervals.xml");
+                        aannotation = reader.parse();
+                        aannotation.RemoveData(filter);
+                        aannotation.DataDirectory = aDataDirectory;
+                    }
+
+                
             }
             catch (Exception e)
             {
@@ -2933,6 +3106,8 @@ namespace DataMerger
                 int[] compensatedWindows = new int[10];
                 int uncompensatedWindows = 0;
                 int correctWindows = 0;
+
+
                 for (int k = 0; (k < wcontroller._Sensors.Count); k++)
                 {
                     wocketsTR[k] = new StreamReader(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "Wocket_" + wcontroller._Sensors[k]._ID.ToString("00") + "_RawData_" + wcontroller._Sensors[k]._Location.Replace(' ', '-') + ".csv");
@@ -3359,6 +3534,8 @@ namespace DataMerger
                 }
             }
 
+
+            //sele check
             //check annotation start and end times
             if (aannotation != null)
             {
@@ -3406,20 +3583,25 @@ namespace DataMerger
             string timestamp = "";
             double currentUnixTime = 0;
 
+
+
+
+
+
             #region Initialize CSV lines
-            string master_csv_line = "";
-            string hr_csv_line = "";
-            string[] actigraph_csv_line = new string[actigraphData.Length];
-            for (int i = 0; (i < actigraphData.Length); i++)
-                actigraph_csv_line[i] = "";
-            string sensewear_csv_line = "";
-            string zephyr_csv_line = "";
-            string oxycon_csv_line = "";
-            string omron_csv_line = "";
-            string columbia_csv_line = "";
-            string gps_csv_line = "";
-            string rti_csv_line = "";
-            string rt3_csv_line = "";
+                string master_csv_line = "";
+                string hr_csv_line = "";
+                string[] actigraph_csv_line = new string[actigraphData.Length];
+                for (int i = 0; (i < actigraphData.Length); i++)
+                    actigraph_csv_line[i] = "";
+                string sensewear_csv_line = "";
+                string zephyr_csv_line = "";
+                string oxycon_csv_line = "";
+                string omron_csv_line = "";
+                string columbia_csv_line = "";
+                string gps_csv_line = "";
+                string rti_csv_line = "";
+                string rt3_csv_line = "";
             #endregion Initialize CSV lines
 
             TextReader[] wocketsTR1=null;
@@ -3505,6 +3687,10 @@ namespace DataMerger
                     #endregion Load Activity Label
 
                 }
+
+
+                double mitesTime = 0;
+
                 //if there is MITes data
                 if (aMITesDecoder != null)
                 {
@@ -3523,8 +3709,13 @@ namespace DataMerger
                             if (hr > 0)
                             {
                                 rawData[channel, 0, head[channel]] = hr;
-                                timeData[channel, head[channel]] = (long)unixtimestamp;
+
+                                //Here the offset was added
+                                
+                                mitesTime = unixtimestamp;
+                                timeData[channel, head[channel]] = (long)mitesTime;
                                 head[channel] = (head[channel] + 1) % 500;
+
                             }
                         }
                         else
@@ -3532,12 +3723,26 @@ namespace DataMerger
                             x = aMITesDecoder.GetSomeMITesData()[0].x;
                             y = aMITesDecoder.GetSomeMITesData()[0].y;
                             z = aMITesDecoder.GetSomeMITesData()[0].z;
+
+
+
+
+                            //Here add the offset
                             unixtimestamp = aMITesDecoder.GetSomeMITesData()[0].unixTimeStamp;
+                            
                             rawData[channel, 0, head[channel]] = x;
                             rawData[channel, 1, head[channel]] = y;
                             rawData[channel, 2, head[channel]] = z;
-                            timeData[channel, head[channel]] = (long)unixtimestamp;
+
+                            //DateTime d1,d2;
+                            //UnixTime.GetDateTime((long)unixtimestamp, out d1);
+                            mitesTime = unixtimestamp;
+                            //UnixTime.GetDateTime((long)mitesTime,out d2);
+
+                            timeData[channel, head[channel]] = (long)mitesTime;
                             head[channel] = (head[channel] + 1) % 500;
+
+                            
                         }
 
                     }
@@ -4271,6 +4476,7 @@ namespace DataMerger
                 #region Write master CSV line
                 masterCSV.WriteLine(master_csv_line);
                 #endregion Write master CSV line
+
 
                 //reinitialize variables
                 hrCount = 0;
