@@ -263,8 +263,8 @@ namespace Wockets.Data.Annotation
                         Match m = Regex.Match(iAttribute.Value, p);
                         this.start_hour = Convert.ToInt32(m.Groups[1].Value);
                         this.start_minute = Convert.ToInt32(m.Groups[2].Value);
+                        
                         this.start_second = Convert.ToInt32(m.Groups[3].Value);
-                        this.start_millisecond = 0;
                         if (m.Groups[5].Value.Length > 0)
                             this.start_millisecond = Convert.ToInt32(m.Groups[5].Value);                        
 
@@ -275,9 +275,11 @@ namespace Wockets.Data.Annotation
                         //parse date
                         string p = @"(\d+):(\d+):(\d+)([.](\d+))?";
                         Match m = Regex.Match(iAttribute.Value, p);
+
                         this.end_hour = Convert.ToInt32(m.Groups[1].Value);
                         this.end_minute = Convert.ToInt32(m.Groups[2].Value);
                         this.end_second = Convert.ToInt32(m.Groups[3].Value);
+                        
                         this.end_millisecond = 0;
                         if (m.Groups[5].Value.Length > 0)
                             this.end_millisecond = Convert.ToInt32(m.Groups[5].Value);
@@ -290,6 +292,8 @@ namespace Wockets.Data.Annotation
                         Match m = Regex.Match(iAttribute.Value, p);
                         if (m.Groups.Count == 7)
                         {
+                            this.start_date = m.Groups[0].Value.Substring(0, 10);
+                            
                             this.start_month = Convert.ToInt32(m.Groups[2].Value);
                             this.start_day = Convert.ToInt32(m.Groups[3].Value);
                             this.start_year = Convert.ToInt32(m.Groups[1].Value);
@@ -297,6 +301,7 @@ namespace Wockets.Data.Annotation
                             this.start_minute = Convert.ToInt32(m.Groups[5].Value);
                             this.start_second = Convert.ToInt32(m.Groups[6].Value);
                             this.start_millisecond = 0;
+                            
 
                         }
                         else
@@ -309,6 +314,9 @@ namespace Wockets.Data.Annotation
                         Match m = Regex.Match(iAttribute.Value, p);
                         if (m.Groups.Count == 7)
                         {
+                            //added
+                            this.end_date = m.Groups[0].Value.Substring(0, 10);
+
                             this.end_month = Convert.ToInt32(m.Groups[2].Value);
                             this.end_day = Convert.ToInt32(m.Groups[3].Value);
                             this.end_year = Convert.ToInt32(m.Groups[1].Value);
@@ -322,13 +330,13 @@ namespace Wockets.Data.Annotation
                             throw new Exception("Error parsing " + ENDDATE_ATTRIBUTE + ". " + iAttribute.Value);
                     }
 
-                    if ((this.start_unix<0) && (this.start_year>0) && (this.start_hour>0))
+                    if ((this.start_unix < 0) && (this.start_year > 0) && (this.start_hour > 0) && (iAttribute.Name == STARTTIME_ATTRIBUTE))
                     {
                         DateTime dt=new DateTime(this.start_year,this.start_month,this.start_day,this.start_hour,this.start_minute,this.start_second,this.start_millisecond);
                         this.start_unix = WocketsTimer.GetUnixTime(dt);
                     }
 
-                    if ((this.end_unix < 0) && (this.end_year > 0) && (this.end_hour > 0))
+                    if ((this.end_unix < 0) && (this.end_year > 0) && (this.end_hour > 0) && (iAttribute.Name == ENDTIME_ATTRIBUTE))
                     {
                         DateTime dt = new DateTime(this.end_year, this.end_month, this.end_day, this.end_hour, this.end_minute, this.end_second,this.end_millisecond);
                         this.end_unix = WocketsTimer.GetUnixTime(dt);
