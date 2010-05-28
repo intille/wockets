@@ -1817,7 +1817,7 @@ namespace Wockets.Data.Annotation
 
 
 
-            #region loop all the annotations until one of the list finishes
+            #region loop all the annotations until the shortest list finishes
 
             while ((aCounter < aData.Count && bCounter < bData.Count) &&
                     (aData.Count > 0 && bData.Count > 0))
@@ -3085,12 +3085,20 @@ namespace Wockets.Data.Annotation
 
             #region loop all the remaining annotations
 
+
             if (aCounter >= aData.Count && bCounter < bData.Count)
             {
-                
+
                 for (int b_elem = bCounter; b_elem < bData.Count; b_elem++)
                 {
-                    tempOutput.Add(bData[b_elem]);
+                    Annotation temp_rec = bData[b_elem].copy();
+                    temp_rec.Activities.Clear();
+
+                    temp_rec.Activities.Add(new Activity(unknown_label, aData[0].Activities[0]._Category));
+                    temp_rec.Activities.Add(bData[b_elem].Activities[0]);
+
+                    tempOutput.Add(temp_rec);
+
                 }
             }
             else if (aCounter < aData.Count && bCounter >= bData.Count)
@@ -3098,6 +3106,8 @@ namespace Wockets.Data.Annotation
                 for (int a_elem = aCounter; a_elem < aData.Count; a_elem++)
                 {
                     tempOutput.Add(aData[a_elem]);
+                    tempOutput[tempOutput.Count - 1].Activities.Add(new Activity(unknown_label, bData[0].Activities[0]._Category));
+
                 }
             }
 
