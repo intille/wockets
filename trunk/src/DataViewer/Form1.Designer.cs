@@ -45,6 +45,7 @@ namespace NESPDataViewer
             this.buttonZoomOut = new System.Windows.Forms.Button();
             this.buttonDisplayRaw = new System.Windows.Forms.Button();
             this.lbScrollTime = new System.Windows.Forms.Label();
+            this.button_sync = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -63,7 +64,6 @@ namespace NESPDataViewer
             this.zedGraphControl1.ScrollMinY2 = 0;
             this.zedGraphControl1.Size = new System.Drawing.Size(404, 240);
             this.zedGraphControl1.TabIndex = 0;
-
             // 
             // hScrollBar1
             // 
@@ -111,13 +111,13 @@ namespace NESPDataViewer
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.openToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(35, 20);
             this.fileToolStripMenuItem.Text = "File";
             // 
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(103, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(111, 22);
             this.openToolStripMenuItem.Text = "Open";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
@@ -153,7 +153,6 @@ namespace NESPDataViewer
             this.buttonZoomOut.Text = "Scan";
             this.buttonZoomOut.UseVisualStyleBackColor = true;
             this.buttonZoomOut.Click += new System.EventHandler(this.buttonZoomOut_Click);
-
             // 
             // buttonDisplayRaw
             // 
@@ -165,7 +164,7 @@ namespace NESPDataViewer
             this.buttonDisplayRaw.TabIndex = 10;
             this.buttonDisplayRaw.Text = "Display Raw";
             this.buttonDisplayRaw.UseVisualStyleBackColor = true;
-            this.buttonDisplayRaw.Click += new System.EventHandler(buttonDisplayRaw_Click);
+            this.buttonDisplayRaw.Click += new System.EventHandler(this.buttonDisplayRaw_Click);
             // 
             // lbScrollTime
             // 
@@ -176,11 +175,25 @@ namespace NESPDataViewer
             this.lbScrollTime.Size = new System.Drawing.Size(0, 16);
             this.lbScrollTime.TabIndex = 11;
             // 
+            // button_sync
+            // 
+            this.button_sync.Enabled = false;
+            this.button_sync.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button_sync.Location = new System.Drawing.Point(326, 455);
+            this.button_sync.Name = "button_sync";
+            this.button_sync.Size = new System.Drawing.Size(87, 25);
+            this.button_sync.TabIndex = 12;
+            this.button_sync.Text = "Sync";
+            this.button_sync.UseVisualStyleBackColor = true;
+            this.button_sync.MouseCaptureChanged += new System.EventHandler(this.button_sync_Click);
+            this.button_sync.Click += new System.EventHandler(this.button_sync_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(531, 510);
+            this.Controls.Add(this.button_sync);
             this.Controls.Add(this.lbScrollTime);
             this.Controls.Add(this.buttonZoomOut);
             this.Controls.Add(this.buttonDisplayRaw);
@@ -193,7 +206,7 @@ namespace NESPDataViewer
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
-            this.Text = "Wockets Data Viewer - Version "+CurrentWockets._Version+" "+CurrentWockets._Date ;
+            this.Text = "Wockets Data Viewer - Version 1.38 May 25th, 2010";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.Resize += new System.EventHandler(this.Form1_Resize);
             this.menuStrip1.ResumeLayout(false);
@@ -221,6 +234,7 @@ namespace NESPDataViewer
         private System.Windows.Forms.Button buttonZoomOut;
         private System.Windows.Forms.Button buttonDisplayRaw;
         private System.Windows.Forms.Label lbScrollTime;
+        private System.Windows.Forms.Button button_sync;
     }
 }
 

@@ -16,70 +16,7 @@ using MobiRnD_RDT.Logging; //Logger
 
 namespace NESPDataViewer
 {
-    public class LineSegment
-    {
-        private double x1;
-        private double x2;
-        private double y1;
-        private double y2;
-
-        public LineSegment()
-        {
-            x1 = 0;
-            x2 = 0;
-            y1 = 0;
-            y2 = 0;
-        }
-
-        public double X1
-        {
-            get
-            {
-                return this.x1;
-            }
-            set
-            {
-                this.x1 = value;
-            }
-        }
-
-        public double Y1
-        {
-            get
-            {
-                return this.y1;
-            }
-            set
-            {
-                this.y1 = value;
-            }
-        }
-
-        public double X2
-        {
-            get
-            {
-                return this.x2;
-            }
-            set
-            {
-                this.x2 = value;
-            }
-        }
-
-        public double Y2
-        {
-            get
-            {
-                return this.y2;
-            }
-            set
-            {
-                this.y2 = value;
-            }
-        }
-    }
-
+   
     public partial class Form1 : Form
     {
         #region FIELDS
@@ -105,6 +42,7 @@ namespace NESPDataViewer
         #endregion
 
         #region INITIALIZE
+        
         public Form1()
         {
             InitializeComponent();
@@ -128,6 +66,7 @@ namespace NESPDataViewer
 
             if (_pathDataset.Length > 0) OpenDataset(_pathDataset);
         }
+        
         #endregion
 
         #region LAYOUT and FORMATTING
@@ -139,23 +78,37 @@ namespace NESPDataViewer
         private void SetLayout()
         {   
             int graphwidth = ClientRectangle.Width-groupBox1.Width;
-            int graphheight = ClientRectangle.Height - 100;
+            int graphheight = ClientRectangle.Height - 110;
 
-            groupBox1.Location = new Point(graphwidth, MainMenuStrip.Bottom + 5);
-            groupBox1.Size = new Size(groupBox1.Width, graphheight);           
+
+            // Control Group dimentions
+            groupBox1.Location = new Point(graphwidth, MainMenuStrip.Bottom +5);//+5
+            groupBox1.Size = new Size(groupBox1.Width, graphheight -15); // added          
                        
+            //Graph Dimensions
             zedGraphControl1.Location = new Point(0, MainMenuStrip.Bottom);
             zedGraphControl1.Size = new Size(graphwidth,graphheight);
 
+            //Scroll Bar Dimentions
             hScrollBar1.Width = graphwidth-10;
             hScrollBar1.Location = new Point(5, zedGraphControl1.Bottom + 20);
+
+            //Date and Time Labels Locations
             lbFirstDate.Location = new Point(5, hScrollBar1.Bottom);
-            lbSecondDate.Location = new Point(hScrollBar1.Right - lbSecondDate.Width, hScrollBar1.Bottom);
+            lbSecondDate.Location = new Point(hScrollBar1.Right - lbSecondDate.Width -100, hScrollBar1.Bottom);
             lbScrollTime.Location = new Point(hScrollBar1.Left, hScrollBar1.Top - lbScrollTime.Height);
-            buttonZoomOut.Location = new Point(hScrollBar1.Right + 5, hScrollBar1.Top-5);
-            buttonDisplayRaw.Location = new Point(hScrollBar1.Right + 5, hScrollBar1.Top+20);
+            
+            //Buttons Location
+            buttonZoomOut.Location = new Point(hScrollBar1.Right + 5, hScrollBar1.Top-20); //-30
+            buttonDisplayRaw.Location = new Point(hScrollBar1.Right + 5, hScrollBar1.Top+5);//+5
+            button_sync.Location = new Point(hScrollBar1.Right +5, hScrollBar1.Top + 30);
+
+
             hScrollBar1.Visible = false;
         }
+
+
+
 
         private void SetGraphPanels()
         {
@@ -339,6 +292,8 @@ namespace NESPDataViewer
             hScrollBar1.Enabled = isEnabled;
             buttonZoomOut.Enabled = isEnabled;
             buttonDisplayRaw.Enabled = isEnabled;
+            button_sync.Enabled = isEnabled;
+
 
             zedGraphControl1.Visible = isEnabled;
         }
@@ -1584,7 +1539,7 @@ namespace NESPDataViewer
         }
         #endregion
 
-        #region LABELS
+        #region ANNOTATION LABELS
         private void CreateDiaryGraph(GraphPane gp, string filepath, string title, int y)
         {
             gp.BarSettings.Base = BarBase.Y;
@@ -2419,6 +2374,9 @@ namespace NESPDataViewer
                 string title = "Annotations";
                 GraphPane aPane = AddPane(title, "Annotations");
                 aPane.YAxis.IsVisible = true;
+
+                //Uncomment if Heart Rate Graph is deleted
+                //paneOrders.Add(title, paneOrdering);
                 
                 //Hack - Dummy curve that forces the scale of the Y-axis and alignment not to change
                PointPairList listACT = new PointPairList();
@@ -2609,29 +2567,7 @@ namespace NESPDataViewer
         }
 
 
-        Form2 rawForm = null;
-        void buttonDisplayRaw_Click(object sender, System.EventArgs e)
-        {           
-            XDate startx = (XDate)zedGraphControl1.MasterPane[0].XAxis.Scale.Min;
-            XDate endx = (XDate)zedGraphControl1.MasterPane[0].XAxis.Scale.Max;
-
-            if (((TimeSpan)(endx.DateTime.Subtract(startx.DateTime))).TotalMinutes > 20)
-            {
-                MessageBox.Show("Cannot display more than 20 minutes of raw data at a time. Please select a 20 minute segment or less then click Display Raw");
-                return;
-            }
-
-            if ((rawForm == null) || (rawForm.IsDisposed))
-                rawForm = new Form2();
-
-            rawForm.StartX = startx;
-            rawForm.EndX = endx;
-            rawForm.PathDataset = _pathDataset;
-
-            if (rawForm.Visible == false)
-                rawForm.Show();
-
-        }
+      
         #endregion
 
         #region SHOW/HIDE PANES
@@ -2774,6 +2710,132 @@ namespace NESPDataViewer
 
         #endregion
 
+        #region Buttons & ZOOM
+
+        Form2 rawForm = null;
+        void buttonDisplayRaw_Click(object sender, System.EventArgs e)
+        {
+            XDate startx = (XDate)zedGraphControl1.MasterPane[0].XAxis.Scale.Min;
+            XDate endx = (XDate)zedGraphControl1.MasterPane[0].XAxis.Scale.Max;
+
+            if (((TimeSpan)(endx.DateTime.Subtract(startx.DateTime))).TotalMinutes > 20)
+            {
+                MessageBox.Show("Cannot display more than 20 minutes of raw data at a time. Please select a 20 minute segment or less then click Display Raw");
+                return;
+            }
+
+            if ((rawForm == null) || (rawForm.IsDisposed))
+                rawForm = new Form2();
+
+            rawForm.StartX = startx;
+            rawForm.EndX = endx;
+            rawForm.PathDataset = _pathDataset;
+
+            if (rawForm.Visible == false)
+                rawForm.Show();
+
+        }
+
+
+        Form3 syncForm = null;
+        private void button_sync_Click(object sender, EventArgs e)
+        {
+            XDate startx = (XDate)zedGraphControl1.MasterPane[0].XAxis.Scale.Min;
+            XDate endx = (XDate)zedGraphControl1.MasterPane[0].XAxis.Scale.Max;
+
+            /*if (((TimeSpan)(endx.DateTime.Subtract(startx.DateTime))).TotalMinutes > 20)
+            {
+                MessageBox.Show("Cannot display more than 20 minutes of raw data at a time. Please select a 20 minute segment or less then click Display Raw");
+                return;
+            }
+             */
+
+
+            if ((syncForm == null) || (syncForm.IsDisposed))
+                syncForm = new Form3(_pathDataset);
+
+            //syncForm.StartX = startx;
+            //syncForm.EndX = endx;
+            //syncForm.PathDataset = _pathDataset;
+
+            if (syncForm.Visible == false)
+                syncForm.Show();
+
+        }
+
+
+
+        #endregion Buttons & ZOOM
+
 
     }
+
+
+
+
+    public class LineSegment
+    {
+        private double x1;
+        private double x2;
+        private double y1;
+        private double y2;
+
+        public LineSegment()
+        {
+            x1 = 0;
+            x2 = 0;
+            y1 = 0;
+            y2 = 0;
+        }
+
+        public double X1
+        {
+            get
+            {
+                return this.x1;
+            }
+            set
+            {
+                this.x1 = value;
+            }
+        }
+
+        public double Y1
+        {
+            get
+            {
+                return this.y1;
+            }
+            set
+            {
+                this.y1 = value;
+            }
+        }
+
+        public double X2
+        {
+            get
+            {
+                return this.x2;
+            }
+            set
+            {
+                this.x2 = value;
+            }
+        }
+
+        public double Y2
+        {
+            get
+            {
+                return this.y2;
+            }
+            set
+            {
+                this.y2 = value;
+            }
+        }
+    }
+
+
 }
