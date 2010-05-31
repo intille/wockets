@@ -5,21 +5,89 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-
+using Wockets;
 using System.Collections; //ArrayList
 using System.IO;
 
 using ZedGraph;
 using MobiRnD_RDT.Utilities;//FileReadWrite
 using MobiRnD_RDT.Logging; //Logger
-using Wockets;
 
 
 namespace NESPDataViewer
 {
-   
 
-    public partial class Form2 : Form
+#region Commented
+    /*
+    public class LineSegment
+    {
+        private double x1;
+        private double x2;
+        private double y1;
+        private double y2;
+
+        public LineSegment()
+        {
+            x1 = 0;
+            x2 = 0;
+            y1 = 0;
+            y2 = 0;
+        }
+
+        public double X1
+        {
+            get
+            {
+                return this.x1;
+            }
+            set
+            {
+                this.x1 = value;
+            }
+        }
+
+        public double Y1
+        {
+            get
+            {
+                return this.y1;
+            }
+            set
+            {
+                this.y1 = value;
+            }
+        }
+
+        public double X2
+        {
+            get
+            {
+                return this.x2;
+            }
+            set
+            {
+                this.x2 = value;
+            }
+        }
+
+        public double Y2
+        {
+            get
+            {
+                return this.y2;
+            }
+            set
+            {
+                this.y2 = value;
+            }
+        }
+    }
+    */
+
+#endregion commented
+
+
+    public partial class Form3 : Form
     {
         #region FIELDS
         string _pathDataset = "";
@@ -32,7 +100,7 @@ namespace NESPDataViewer
         Hashtable _htBoxes = new Hashtable();
 
         bool _isFirstTime = true; //used to determine whether graphs need to be cleared on Reset
-        bool _doesShowHover = true;
+        bool _doesShowHover = true; 
 
         int _minutesPage = 60;
 
@@ -41,24 +109,45 @@ namespace NESPDataViewer
         bool _isAdaptingPointSize = true; //as graph gets larger/smaller, changes point size to match
         bool _zoomedOut = true;
 
-        #endregion
 
-        #region INITIALIZE
         XDate startX;
         XDate endX;
 
-        public Form2()
+        float SIZE_CIRCLE = 20F;
+
+        #endregion
+
+
+
+
+        #region INITIALIZE
+        
+        public Form3()
         {
             InitializeComponent();
-
+            
         }
-        public Form2(string pathStartDS)
+
+        public Form3(string pathStartDS)
         {
-            Logger.LogDebug("Form2", "arguments " + pathStartDS);
+            Logger.LogDebug("Form3", "arguments " + pathStartDS);
             _pathDataset = pathStartDS;
             InitializeComponent();
-
+            
         }
+
+        private void Form3_Load(object sender, EventArgs e)
+        {
+            this.WindowState = FormWindowState.Maximized;
+            SetGraphPanels();
+
+            if (_isUsingLabels)
+                zedGraphControl1.PointValueEvent += new ZedGraphControl.PointValueHandler(zedGraphControl1_PointValueEvent);
+
+            if (_pathDataset.Length > 0) OpenDataset(_pathDataset);
+        }
+
+
 
         public XDate StartX
         {
@@ -86,7 +175,6 @@ namespace NESPDataViewer
         }
 
 
-
         public string PathDataset
         {
             get
@@ -100,43 +188,55 @@ namespace NESPDataViewer
         }
 
 
-        private void Form2_Load(object sender, EventArgs e)
-        {
-            this.WindowState = FormWindowState.Maximized;
-            SetGraphPanels();
-
-            if (_isUsingLabels)
-                zedGraphControl1.PointValueEvent += new ZedGraphControl.PointValueHandler(zedGraphControl1_PointValueEvent);
-
-            if (_pathDataset.Length > 0) OpenDataset(_pathDataset);
-        }
         #endregion
 
+
+
+
+
+
         #region LAYOUT and FORMATTING
-        private void Form2_Resize(object sender, EventArgs e)
+
+
+        private void Form1_Resize(object sender, EventArgs e)
         {
             SetLayout();
         }
 
+
+
         private void SetLayout()
-        {
-            int graphwidth = ClientRectangle.Width - groupBox1.Width;
+        {   
+            int graphwidth = ClientRectangle.Width-groupBox1.Width;
             int graphheight = ClientRectangle.Height - 100;
 
+            // Control Panel ( which graphs will be displayed)
             groupBox1.Location = new Point(graphwidth, MainMenuStrip.Bottom + 5);
-            groupBox1.Size = new Size(groupBox1.Width, graphheight);
-
+            groupBox1.Size = new Size(groupBox1.Width, graphheight);           
+                       
+            //Graph Dimensions
             zedGraphControl1.Location = new Point(0, MainMenuStrip.Bottom);
-            zedGraphControl1.Size = new Size(graphwidth, graphheight);
+            zedGraphControl1.Size = new Size(graphwidth,graphheight);
 
-            hScrollBar1.Width = graphwidth - 10;
+            //Scroll Bars Dimensions
+            hScrollBar1.Width = graphwidth-10;
             hScrollBar1.Location = new Point(5, zedGraphControl1.Bottom + 20);
+            hScrollBar1.Visible = false;
+            
+
+            // Date and Time Labels
             lbFirstDate.Location = new Point(5, hScrollBar1.Bottom);
             lbSecondDate.Location = new Point(hScrollBar1.Right - lbSecondDate.Width, hScrollBar1.Bottom);
             lbScrollTime.Location = new Point(hScrollBar1.Left, hScrollBar1.Top - lbScrollTime.Height);
-            buttonZoomOut.Location = new Point(hScrollBar1.Right + 5, hScrollBar1.Top);
-            hScrollBar1.Visible = false;
+            
+           
+
+            //Buttons
+            buttonZoomOut.Location = new Point(hScrollBar1.Right + 5, hScrollBar1.Top - 5);
+           
         }
+
+
 
         private void SetGraphPanels()
         {
@@ -166,10 +266,13 @@ namespace NESPDataViewer
             zedGraphControl1.IsEnableVZoom = false;
 
             zedGraphControl1.IsShowPointValues = _isUsingLabels;
-            zedGraphControl1.IsSynchronizeXAxes = true;
+            zedGraphControl1.IsSynchronizeXAxes = true;        
 
 
         }
+
+
+
         private GraphPane AddPane(string name, string ytitle)
         {
             GraphPane pane = new GraphPane();
@@ -182,13 +285,18 @@ namespace NESPDataViewer
             pane.XAxis.Type = AxisType.Date;
             pane.XAxis.Scale.MajorUnit = DateUnit.Second;
             pane.XAxis.MajorGrid.IsVisible = true;
+           
+            
             //pane.YAxis.Scale.Min = 0;
             pane.Fill.Color = Color.Empty;
             zedGraphControl1.MasterPane.Add(pane);
 
             _htBoxes.Add(name, new BoxObj());
 
+
+
             #region ADD CHECKBOX
+            
             _htPanes.Add(name, pane);
             CheckBox cBox = new CheckBox();
             cBox.Parent = groupBox1;
@@ -198,10 +306,13 @@ namespace NESPDataViewer
                 cBox.Location = new Point(5, y);
             }
             else cBox.Location = new Point(5, 15);
+            
             cBox.Text = name;
             cBox.Checked = true;
             cBox.CheckedChanged += new EventHandler(checkBox_CheckedChanged);
             _alCheckBoxes.Add(cBox);
+            
+
             #endregion
 
             //RefreshMasterPaneLayout();
@@ -209,12 +320,18 @@ namespace NESPDataViewer
             return pane;
 
         }
+
+
+
+
+
+
         private void RefreshMasterPaneLayout()
         {
             // Tell ZedGraph to auto layout all the panes
             using (Graphics g = CreateGraphics())
             {
-                zedGraphControl1.MasterPane.SetLayout(g, PaneLayout.SingleColumn);
+                zedGraphControl1.MasterPane.SetLayout(g, PaneLayout.SingleColumn);                
             }
             if (_isAdaptingPointSize) SetPointSize();
             zedGraphControl1.AxisChange();
@@ -249,14 +366,17 @@ namespace NESPDataViewer
 
         }
 
+
+
+
         private void SetPointSize()
         {
             if (zedGraphControl1.MasterPane.PaneList.Count > 0)
             {
                 double minutes = ((TimeSpan)(_lastDate - _firstDate)).TotalMinutes;
-                double ticks = (zedGraphControl1.MasterPane.PaneList[0].XAxis.Scale.Max - zedGraphControl1.MasterPane.PaneList[0].XAxis.Scale.Min) * 1000;
+                double ticks = (zedGraphControl1.MasterPane.PaneList[0].XAxis.Scale.Max - zedGraphControl1.MasterPane.PaneList[0].XAxis.Scale.Min)*1000;
                 int charts = zedGraphControl1.MasterPane.PaneList.Count;
-                //float point = (float)((10 * 7) / (ticks * charts));
+               //float point = (float)((10 * 7) / (ticks * charts));
                 float point = 1;
                 //else if (point > 10) point = 10;
                 for (int i = 0; i < _alLinesWithSymbols.Count; i++)
@@ -265,12 +385,19 @@ namespace NESPDataViewer
                 }
             }
         }
+
+
+
+
+
         private void SetTimes()
         {
             lbFirstDate.Text = _firstDate.ToString();
             lbSecondDate.Text = _lastDate.ToString();
             lbScrollTime.Text = _firstDate.ToString();
             TimeSpan ts = _lastDate - _firstDate;
+
+
 
             #region DETERMINE PAGING SIZE BASED ON TOTAL TIMESPAN OF DATA
             //if (ts.TotalHours > 1)//4 or more hours of data
@@ -282,6 +409,8 @@ namespace NESPDataViewer
             else _minutesPage = 1;
             #endregion
 
+
+
             hScrollBar1.LargeChange = 1;
             hScrollBar1.SmallChange = 1;
             hScrollBar1.Maximum = (int)Math.Floor(ts.TotalMinutes / _minutesPage);
@@ -292,6 +421,8 @@ namespace NESPDataViewer
 
             //XDate endx = new XDate(_lastDate.AddMinutes(padding));
             XDate endx = new XDate(_lastDate);
+
+
             for (int i = 0; i < zedGraphControl1.MasterPane.PaneList.Count; i++)
             {
                 zedGraphControl1.MasterPane[i].XAxis.Scale.Min = (double)startx;
@@ -302,16 +433,26 @@ namespace NESPDataViewer
             zedGraphControl1.Refresh();
         }
 
+
+
+
         private void WidenDatesIfNeeded(PointPairList pl)
         {
             if (pl.Count > 0)
                 WidenDatesIfNeeded(new XDate(pl[0].X), new XDate(pl[pl.Count - 1].X));
         }
+
+
+
         private void WidenDatesIfNeeded(XDate fDate, XDate lDate)
         {
             if (fDate.DateTime < _firstDate) _firstDate = fDate.DateTime;
             if (lDate.DateTime > _lastDate) _lastDate = lDate.DateTime;
         }
+
+
+
+
 
         private void SetEnable(bool isEnabled)
         {
@@ -319,9 +460,15 @@ namespace NESPDataViewer
             groupBox1.Enabled = isEnabled;
             hScrollBar1.Enabled = isEnabled;
             buttonZoomOut.Enabled = isEnabled;
+            
 
             zedGraphControl1.Visible = isEnabled;
         }
+
+
+
+
+
         private void Reset()
         {
             if (!_isFirstTime)
@@ -340,11 +487,21 @@ namespace NESPDataViewer
             else _isFirstTime = false;
 
         }
-        #endregion
+
+
+        #endregion  LAYOUT and FORMATTING
+
+
+
+
+
 
         #region CHART CONTENT
+
+
         #region HEART RATE
-        private void AddHeartCurve(GraphPane gp, string name, PointPairList ppl, Color lineColor, PointPairList pplInvalid)
+        /*
+        private void AddHeartCurve(GraphPane gp, string name, PointPairList ppl,Color lineColor, PointPairList pplInvalid)
         {
             LineItem pointsCurve = gp.AddCurve("Heart rate " + name, ppl, lineColor, SymbolType.Circle);
             if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
@@ -352,12 +509,12 @@ namespace NESPDataViewer
             pointsCurve.Line.IsVisible = false;
             _alLinesWithSymbols.Add(pointsCurve);
 
-            LineItem pointsCurveInvalid = gp.AddCurve("Heart rate " + name + ", Out of Range", pplInvalid, lineColor, SymbolType.XCross);
+            LineItem pointsCurveInvalid = gp.AddCurve("Heart rate " + name +", Out of Range", pplInvalid, lineColor, SymbolType.XCross);
             pointsCurveInvalid.Line.IsVisible = false;
             _alLinesWithSymbols.Add(pointsCurveInvalid);
 
         }
-
+        
         private void CreateHeartRateGraph(GraphPane gp, string[] files)
         {
             string[] coloroptions = new string[] { "red", "darkred", "tomato", "crimson" };
@@ -398,153 +555,341 @@ namespace NESPDataViewer
                     catch { }
                 }
 
-                AddHeartCurve(gp, name, listValid, Color.FromName(coloroptions[f]), listInvalid);
+                AddHeartCurve(gp, name, listValid,Color.FromName(coloroptions[f]),listInvalid);
 
                 WidenDatesIfNeeded(listValid);
             }
 
         }
+        */
+
         #endregion
 
-        #region MITES
-        private static DateTime ConvertUNIXDatTime(double timestamp)
-        {
-            // First make a System.DateTime equivalent to the UNIX Epoch.
-            DateTime dateTime = new System.DateTime(1970, 1, 1, 0, 0, 0, 0);
 
-            // Add the number of seconds in UNIX timestamp to be converted.
-            dateTime = dateTime.AddSeconds(timestamp / 1000);
-
-            return dateTime;
-
-        }
-
-
-        private void AddAccelerationCurve(string name, string title, PointPairList pplX, PointPairList pplY, PointPairList pplZ)
-        {
-            GraphPane pane = AddPane(name, "Acceleration - " + title);
-
-            LineItem pointsCurveX = pane.AddCurve("X", pplX, Color.LightBlue, SymbolType.Circle);
-            LineItem pointsCurveY = pane.AddCurve("Y", pplY, Color.Blue, SymbolType.Circle);
-            LineItem pointsCurveZ = pane.AddCurve("Z", pplZ, Color.DarkBlue, SymbolType.Circle);
-            
-            pointsCurveX.Symbol.Fill = new Fill(Color.LightBlue);
-            pointsCurveY.Symbol.Fill = new Fill(Color.Blue);
-            pointsCurveZ.Symbol.Fill = new Fill(Color.DarkBlue);
-           
-            
-            if (!_isAdaptingPointSize)
+        #region Accelerometers
+            private static DateTime ConvertUNIXDatTime(double timestamp)
             {
-                pointsCurveX.Symbol.Size = 1F;
-                pointsCurveY.Symbol.Size = 1F;
-                pointsCurveZ.Symbol.Size = 1F;
+                // First make a System.DateTime equivalent to the UNIX Epoch.
+                DateTime dateTime = new System.DateTime(1970, 1, 1, 0, 0, 0, 0);
+
+                // Add the number of seconds in UNIX timestamp to be converted.
+                dateTime = dateTime.AddSeconds(timestamp/1000);
+
+                return dateTime;
+
             }
-            _alLinesWithSymbols.Add(pointsCurveX);
-            _alLinesWithSymbols.Add(pointsCurveY);
-            _alLinesWithSymbols.Add(pointsCurveZ);
-
-            pointsCurveX.Line.IsVisible = true;
-            pointsCurveY.Line.IsVisible = true;
-            pointsCurveZ.Line.IsVisible = true;
-
-        }
 
 
-
-        private void CreateAccelerationGraph(int paneOrder, string filepath, string channel, string location, string type, string mac)
-        {
-            #region ACCELERATION X Y Z
-
-            //Extract only the selected time range
-            double startUnix = Wockets.Utils.WocketsTimer.GetDoubleTime(startX.DateTime);
-            double endUnix = Wockets.Utils.WocketsTimer.GetDoubleTime(endX.DateTime);
-
-            string[] tokens = null;
-            bool foundTime=false;
-            double currentTime = 0;
-            int start=0;
-            int end = 0;
-            TextReader tr = new StreamReader(filepath);
-            while (currentTime<=startUnix)
+            //private void AddAccelerationCurve(string name, string title, PointPairList pplX, PointPairList pplY, PointPairList pplZ, PointPairList pplActivityCount, PointPairList pplSamplingRate, PointPairList pplAUC, PointPairList pplVMag)
+        private void AddAccelerationCurve(string name, string title, PointPairList pplAUC) 
             {
-                string s = tr.ReadLine();
-                if (s == null)
-                    break;
-                currentTime = Convert.ToDouble(s.Split(',')[0]);      
-                start++;
-            }
-            end = start;
-            while (currentTime <= endUnix)
-            {
-                string s = tr.ReadLine();
-                if (s == null)
-                    break;
-                currentTime = Convert.ToDouble(s.Split(',')[0]);
-                end++;
-            }
-            tr.Close();
+                GraphPane pane = AddPane(name,"Acceleration - " + title);
 
-            string[] accel = FileReadWrite.ReadLinesFromFile(filepath);
+                #region Commented
 
-            PointPairList listX = new PointPairList();
-            PointPairList listY = new PointPairList();
-            PointPairList listZ = new PointPairList();
-
-            for (int i = start; i < end; i++)
-            {
-                try
+                /*
+                LineItem pointsCurveX = pane.AddCurve("X", pplX, Color.YellowGreen, SymbolType.Circle);
+                LineItem pointsCurveY = pane.AddCurve("Y", pplY, Color.Red, SymbolType.Circle);
+                LineItem pointsCurveZ = pane.AddCurve("Z", pplZ, Color.DarkBlue, SymbolType.Circle);
+                pointsCurveX.Symbol.Fill = new Fill(Color.YellowGreen);
+                pointsCurveY.Symbol.Fill = new Fill(Color.Red);
+                pointsCurveZ.Symbol.Fill = new Fill(Color.DarkBlue);
+               
+                
+                if (!_isAdaptingPointSize)
                 {
-                    string[] split = accel[i].Split(',');
-                    if ((split.Length > 3) && (split[1].Length > 0) && (split[2].Length > 0))
-                    {
-                        DateTime dt = new DateTime();//DateTime.Parse(split[1]);
-                        double fulltimestamp=Convert.ToDouble(split[0]);
-                        long time=(long)fulltimestamp;
-                        Wockets.Utils.WocketsTimer.GetDateTime((long)fulltimestamp, out dt);
-                        //dt.Millisecond
-
-                        //double dt = Convert.ToDouble(split[0]);
-
-                        double x = (double)new XDate(dt);
-                        double value = Convert.ToDouble(split[1]);
-                        string label = String.Format("Channel {0}, X-axis, at {1}\n{2} {3}", channel, location, dt.ToString("HH:mm:ss:fff tt"), value);
-
-                        if (_isUsingLabels) listX.Add(x, value, label);
-                        else listX.Add(x, value);
-
-                        value = Convert.ToDouble(split[2]);
-                        label = String.Format("Channel {0}, Y-axis, at {1}\n{2} {3}", channel, location, dt.ToString("HH:mm:ss:fff tt") + ":" + dt.Millisecond, value);
-                        if (_isUsingLabels) listY.Add(x, value, label);
-                        else listY.Add(x, value);
-
-                        value = Convert.ToDouble(split[3]);
-                        label = label = String.Format("Channel {0}, Z-axis, at {1}\n{2} {3}", channel, location, dt.ToString("HH:mm:ss:fff tt") + ":" + dt.Millisecond, value);
-                        if (_isUsingLabels) listZ.Add(x, value, label);
-                        else listZ.Add(x, value);
-                    }
+                    pointsCurveX.Symbol.Size = 1F;
+                    pointsCurveY.Symbol.Size = 1F;
+                    pointsCurveZ.Symbol.Size = 1F;
                 }
-                catch { }
+                _alLinesWithSymbols.Add(pointsCurveX);
+                _alLinesWithSymbols.Add(pointsCurveY);
+                _alLinesWithSymbols.Add(pointsCurveZ);
+
+                pointsCurveX.Line.IsVisible = false;
+                pointsCurveY.Line.IsVisible = false;
+                pointsCurveZ.Line.IsVisible = false;
+                */
+
+
+                
+               // LineItem pointsCurveSampling = pane.AddCurve("Sampling Rate", pplSamplingRate, Color.DarkGray, SymbolType.Circle);
+
+                /*
+                LineItem pointsCurveActivity = pane.AddCurve("Sum Absolute Derivative", pplActivityCount, Color.Violet, SymbolType.Circle);
+                pointsCurveActivity.Symbol.Size = 1F;
+                pointsCurveActivity.Symbol.Fill = new Fill(Color.Violet);
+                _alLinesWithSymbols.Add(pointsCurveActivity);
+                pointsCurveActivity.Line.IsVisible = false;
+                */
+
+                #endregion Commented
+
+
+                LineItem pointsCurveAUC = pane.AddCurve("Area Under Curve", pplAUC, Color.Green, SymbolType.Circle);
+                pointsCurveAUC.Symbol.Size = SIZE_CIRCLE;
+                pointsCurveAUC.Symbol.Fill = new Fill(Color.Green);
+                _alLinesWithSymbols.Add(pointsCurveAUC);
+                pointsCurveAUC.Line.IsVisible = false; 
+
+
+
+
+                #region Commented
+                /*
+                  LineItem pointsCurveVMAG = pane.AddCurve("Vector Magnitude", pplVMag, Color.LimeGreen, SymbolType.Circle);
+                pointsCurveVMAG.Symbol.Size = 1F;
+                 pointsCurveVMAG.Symbol.Fill = new Fill(Color.LimeGreen);
+                _alLinesWithSymbols.Add(pointsCurveVMAG);
+                 pointsCurveVMAG.Line.IsVisible = false;
+         
+                pointsCurveActivity.IsY2Axis = true;
+                */
+                #endregion Commented
+
+
             }
-            #endregion
+            
+            
+            private void CreateAccelerationGraph(int paneOrder, string filepath, string channel, string location,string type,string mac)
+            {
+                string[] accel = FileReadWrite.ReadLinesFromFile(filepath);
+              
+                #region ACCELERATION X Y Z
 
-            if (mac.Length == 0)
-                AddAccelerationCurve(type + " " + channel, location, listX, listY, listZ);
-            else
-                AddAccelerationCurve(mac, location, listX, listY, listZ);
+                
+                
+                PointPairList listX = new PointPairList();
+                PointPairList listY = new PointPairList();
+                PointPairList listZ = new PointPairList();                      
 
-            paneOrders.Add(mac, paneOrder);
-            WidenDatesIfNeeded(listX);
-        }
+                for (int i = 1; i < accel.Length; i++)
+                {
+                    try
+                    {
+                        string[] split = accel[i].Split(',');
+                        if ((split.Length > 4) && (split[1].Length > 0) && (split[2].Length > 0))
+                        {
+                            DateTime dt = DateTime.Parse(split[1]);
+
+                            double x = (double)new XDate(dt);
+                            double value = Convert.ToDouble(split[2]);
+                            string label = String.Format("Channel {0}, X-axis, at {1}\n{2} {3}", channel, location, dt.ToLongTimeString(), value);
+
+                           // if (_isUsingLabels) listX.Add(x, value, label);
+                           // else listX.Add(x, value);
+
+                           // value = Convert.ToDouble(split[3]);
+                           // label = String.Format("Channel {0}, Y-axis, at {1}\n{2} {3}", channel, location, dt.ToLongTimeString(), value);
+                          //  if (_isUsingLabels) listY.Add(x, value, label);
+                           // else listY.Add(x, value);
+
+                           // value = Convert.ToDouble(split[4]);
+                           // label = label = String.Format("Channel {0}, Z-axis, at {1}\n{2} {3}", channel, location, dt.ToLongTimeString(), value);
+                           // if (_isUsingLabels) listZ.Add(x, value, label);
+                           // else listZ.Add(x, value);
+                        }
+                    }
+                    catch { }
+                }
+                
+
+                #endregion
+
+
+                #region Commented
+
+                string[] samp = new string[0];
+                string[] matches ;
+
+                #region SAMPLE RATES Commented
+                /*
+                    
+                    matches = Directory.GetFiles(Path.GetDirectoryName(filepath), String.Format(type + "_{0}_SampleRate*", channel));
+                    
+                    if (matches.Length == 1)
+                        samp = FileReadWrite.ReadLinesFromFile(matches[0]);
+
+                    PointPairList listSampleRates = new PointPairList();
+                    for (int i = 1; i < samp.Length; i++)
+                    {
+                        try
+                        {
+                            string[] split = samp[i].Split(',');
+                            if ((split.Length > 2) && (split[1].Length > 0) && (split[2].Length > 0))
+                            {
+                                DateTime dt = DateTime.Parse(split[1]);
+                                double x = (double)new XDate(dt);
+                                double value = Convert.ToDouble(split[2]);
+                                string label = String.Format("{0} samples per second at {1}", value, dt.ToLongTimeString());
+                                if (_isUsingLabels) listSampleRates.Add(x, value, label);
+                                else listSampleRates.Add(x, value);
+                            }
+                        }
+                        catch { }
+                    }
+                 */
+                #endregion
+
+
+                #region ACTIVITY COUNTS
+                /*   
+                    string[] counts = new string[0];
+                    matches = Directory.GetFiles(Path.GetDirectoryName(filepath), String.Format(type + "_{0}_SAD*", channel));
+                    if (matches.Length == 1)
+                        counts = FileReadWrite.ReadLinesFromFile(matches[0]);
+                    PointPairList listActivityCounts = new PointPairList();
+                    for (int i = 1; i < counts.Length; i++)
+                    {
+                        try
+                        {
+                            string[] split = counts[i].Split(',');
+                            if ((split.Length > 4) && (split[1].Length > 0) && (split[2].Length > 0))
+                            {
+                                DateTime dt = DateTime.Parse(split[1]);
+                                double x = (double)new XDate(dt);
+                                double value = Convert.ToDouble(split[2]) + Convert.ToDouble(split[3]) + Convert.ToDouble(split[4]);
+                                string label = String.Format("Sum Abs. Derivatives {0} at {1}", value, dt.ToLongTimeString());
+                                if (_isUsingLabels) listActivityCounts.Add(x, value, label);
+                                else listActivityCounts.Add(x, value);
+                            }
+                        }
+                        catch { }
+                    }
+                  */ 
+                #endregion
+
+
+                #region AUC
+                
+                        string[] aucs = new string[0];
+                        matches = Directory.GetFiles(Path.GetDirectoryName(filepath), String.Format(type+"_{0}_AUC*", channel));
+                        if (matches.Length == 1)
+                            aucs = FileReadWrite.ReadLinesFromFile(matches[0]);
+                        PointPairList listAUCs = new PointPairList();
+
+                       
+
+                        for (int i = 1; i < aucs.Length; i++)
+                        {
+                            try
+                            {
+                                string[] split = aucs[i].Split(',');
+                                if ((split.Length > 4) && (split[1].Length > 0) && (split[2].Length > 0))
+                                {
+                                    DateTime dt = DateTime.Parse(split[1]);
+                                    double x = (double)new XDate(dt);
+                                    double value = (Convert.ToDouble(split[2]) + Convert.ToDouble(split[3]) + Convert.ToDouble(split[4]))/20;
+                                    string label = String.Format("Area Under Curve {0}, {1} at {2}", location, value, dt.ToLongTimeString());
+                                    
+                                    
+                                    if (_isUsingLabels) listAUCs.Add(x, value, label);
+                                    else listAUCs.Add(x, value);
+
+                                    
+                                }
+                            }
+                            catch { }
+                        }
+
+
+                        
+                 
+                #endregion
+
+                #region VMAGS
+                 /*
+                         string[] vmags = new string[0];
+                         matches = Directory.GetFiles(Path.GetDirectoryName(filepath), String.Format(type+"_{0}_VMAG*", channel));
+                        if (matches.Length == 1)
+                            vmags = FileReadWrite.ReadLinesFromFile(matches[0]);
+
+                        PointPairList listVMAGs = new PointPairList();
+                        for (int i = 1; i < vmags.Length; i++)
+                        {
+                            try
+                            {
+                                string[] split =vmags[i].Split(',');
+                                if ((split.Length > 2) && (split[1].Length > 0) && (split[2].Length > 0))
+                                {
+                                    DateTime dt = DateTime.Parse(split[1]);
+                                    double x = (double)new XDate(dt);
+                                    double value = Convert.ToDouble(split[2]);
+                                    string label = String.Format("Vector Magnitude {0}, {1} at {2}", location, value, dt.ToLongTimeString());
+                                    if (_isUsingLabels) listVMAGs.Add(x, value, label);
+                                    else listVMAGs.Add(x, value);
+                                }
+                            }
+                            catch { }
+                        }
+                  */ 
+                #endregion
+
+                #endregion Commented
+
+
+                if (mac.Length == 0)
+                {
+                    //AddAccelerationCurve(type + " " + channel, location, listX, listY, listZ, listActivityCounts, listSampleRates, listAUCs, listVMAGs);
+                    //AddAccelerationCurve(type + " " + channel, location, listX, listY, listZ);          
+                    AddAccelerationCurve(type + " " + channel, location, listAUCs);   
+                    paneOrders.Add(type + " " + channel, paneOrder);
+                }
+                else
+                {
+                    //AddAccelerationCurve(mac, location, listX, listY, listZ, listActivityCounts, listSampleRates, listAUCs, listVMAGs);
+                    //AddAccelerationCurve(mac, location, listX, listY, listZ);
+                    AddAccelerationCurve(mac, location, listAUCs); 
+
+                    #region Commented
+                    /* if (mac != "Internal")
+                    {
+                        //mac = mac.Substring(mac.Length - 2, 2);
+                        //mac = "Wocket " + mac;
+                        //string loc = wc._Sensors[Convert.ToInt32(channel)]._Location;
+                       string loc = "";
+                        switch (location)
+                        {
+                            case "Dominant-Hip":
+                                loc = "DHP";
+                                break;
+                            case "Dominant-Ankle":
+                                loc = "DAK";
+                                break;
+                            case "Dominant-Upper-Arm":
+                                loc = "DUA";
+                                break;
+                            case "Dominant-Wrist":
+                                loc = "DW";
+                                break;
+                            case "Dominant-Thigh":
+                                loc = "DT";
+                                break;
+                            default:
+                                loc = "lOC";
+                                break;
+                        }
+                        
+                        //mac = "WKT-" + loc + "-" + mac;
+                    }*/
+
+                    #endregion Commented
+
+                    paneOrders.Add(mac, paneOrder);
+                }
+
+
+                WidenDatesIfNeeded(listAUCs);
+            }
 
         #endregion
-
-
 
 
         #region Columbia Graph
         private void CreateColumbiaGraph(GraphPane gp, string filePath)
         {
             #region ACCELERATION X Y Z
+           
             string[] accel = FileReadWrite.ReadLinesFromFile(filePath);
 
             PointPairList listX = new PointPairList();
@@ -562,39 +907,42 @@ namespace NESPDataViewer
 
                         double x = (double)new XDate(dt);
                         double value = Convert.ToDouble(split[2]);
-                        string label = String.Format("X-axis,\n{0} {1}", dt.ToLongTimeString(), value);
+                        string label = String.Format("Columbia X-axis,\n{0} {1}", dt.ToLongTimeString(), value);
 
                         if (_isUsingLabels) listX.Add(x, value, label);
                         else listX.Add(x, value);
 
                         value = Convert.ToDouble(split[3]);
-                        label = String.Format("Y-axis,\n{0} {1}", dt.ToLongTimeString(), value);
+                        label = String.Format("Columbia Y-axis,\n{0} {1}", dt.ToLongTimeString(), value);
                         if (_isUsingLabels) listY.Add(x, value, label);
                         else listY.Add(x, value);
 
                         value = Convert.ToDouble(split[4]);
-                        label = label = String.Format("Z-axis,\n{0} {1}", dt.ToLongTimeString(), value);
+                        label = label = String.Format("Columbia Z-axis,\n{0} {1}", dt.ToLongTimeString(), value);
                         if (_isUsingLabels) listZ.Add(x, value, label);
                         else listZ.Add(x, value);
                     }
                 }
                 catch { }
             }
+
+
             #endregion
 
 
-
+            
             LineItem pointsCurveX = gp.AddCurve("Columbia X", listX, Color.LightBlue, SymbolType.Circle);
             LineItem pointsCurveY = gp.AddCurve("Columbia Y", listY, Color.Blue, SymbolType.Circle);
             LineItem pointsCurveZ = gp.AddCurve("Columbia Z", listZ, Color.DarkBlue, SymbolType.Circle);
+            
             pointsCurveX.Symbol.Fill = new Fill(Color.LightBlue);
             pointsCurveY.Symbol.Fill = new Fill(Color.Blue);
             pointsCurveZ.Symbol.Fill = new Fill(Color.DarkBlue);
             if (!_isAdaptingPointSize)
             {
-                pointsCurveX.Symbol.Size = 1F;
-                pointsCurveY.Symbol.Size = 1F;
-                pointsCurveZ.Symbol.Size = 1F;
+                pointsCurveX.Symbol.Size = SIZE_CIRCLE;
+                pointsCurveY.Symbol.Size = SIZE_CIRCLE;
+                pointsCurveZ.Symbol.Size = SIZE_CIRCLE;
             }
             _alLinesWithSymbols.Add(pointsCurveX);
             _alLinesWithSymbols.Add(pointsCurveY);
@@ -612,6 +960,153 @@ namespace NESPDataViewer
         #endregion Columbia Graph
 
 
+        #region RTI Graph
+        private void CreateRTIGraph(GraphPane gp, string filePath)
+        {
+            #region ACCELERATION X Y Z
+            string[] accel = FileReadWrite.ReadLinesFromFile(filePath);
+
+            //PointPairList listX = new PointPairList();
+            //PointPairList listY = new PointPairList();
+            //PointPairList listZ = new PointPairList();
+
+            //PointPairList listAUCX = new PointPairList();
+            //PointPairList listAUCY = new PointPairList();
+            //PointPairList listAUCZ = new PointPairList();
+
+            PointPairList listAUCXYZ = new PointPairList();
+
+            for (int i = 1; i < accel.Length; i++)
+            {
+                try
+                {
+                    string[] split = accel[i].Split(',');
+                    if ((split.Length > 8) && (split[1].Length > 0) && (split[2].Length > 0))
+                    {
+                        DateTime dt = DateTime.Parse(split[1]);
+
+                        
+
+                        
+                        double x = (double)new XDate(dt);
+                        double value = Convert.ToDouble(split[2]);
+                        string label = String.Format("RTI X-axis,\n{0} {1}", dt.ToLongTimeString(), value);
+                        
+                        
+                        /*
+                        if (_isUsingLabels) listX.Add(x, value * 1000.0, label);
+                        else listX.Add(x * 1000.0, value);
+
+                        value = Convert.ToDouble(split[3]);
+                        label = String.Format("RTI Y-axis,\n{0} {1}", dt.ToLongTimeString(), value);
+                        if (_isUsingLabels) listY.Add(x, value * 1000.0, label);
+                        else listY.Add(x, value * 1000.0);
+
+                        value = Convert.ToDouble(split[4]);
+                        label = String.Format("RTI Z-axis,\n{0} {1}", dt.ToLongTimeString(), value);
+                        if (_isUsingLabels) listZ.Add(x, value * 1000.0, label);
+                        else listZ.Add(x, value * 1000.0);
+                        */
+
+
+                        /*
+                        value = Convert.ToDouble(split[5]) ;
+                        label = String.Format("RTI X-AUC,\n{0} {1}", dt.ToLongTimeString(), value);
+                        if (_isUsingLabels) listAUCX.Add(x, value * 1000.0, label);
+                        else listAUCX.Add(x, value * 1000.0);
+
+                        value = Convert.ToDouble(split[6]);
+                        label = String.Format("RTI Y-AUC,\n{0} {1}", dt.ToLongTimeString(), value);
+                        if (_isUsingLabels) listAUCY.Add(x, value * 1000.0, label);
+                        else listAUCY.Add(x, value * 1000.0);
+
+                        value = Convert.ToDouble(split[7]);
+                        label = String.Format("RTI Z-AUC,\n{0} {1}", dt.ToLongTimeString(), value);
+                        if (_isUsingLabels) listAUCZ.Add(x, value * 1000.0, label);
+                        else listAUCZ.Add(x, value * 1000.0);
+                        */
+
+                        
+                        value = Convert.ToDouble(split[8]) ;
+                        label = String.Format("RTI XYZ-AUC,\n{0} {1}", dt.ToLongTimeString(), value);
+                        if (_isUsingLabels) listAUCXYZ.Add(x, value * 1000.0, label);
+                        else listAUCXYZ.Add(x, value * 1000.0);
+                         
+                    }
+                }
+                catch { }
+            }
+            #endregion
+
+
+            /*
+            LineItem pointsCurveX = gp.AddCurve("RTI X", listX, Color.YellowGreen, SymbolType.Circle);
+            LineItem pointsCurveY = gp.AddCurve("RTI Y", listY, Color.Red, SymbolType.Circle);
+            LineItem pointsCurveZ = gp.AddCurve("RTI Z", listZ, Color.DarkBlue, SymbolType.Circle);
+            */
+
+            //LineItem pointsCurveAUCX = gp.AddCurve("RTI AUC X", listAUCX, Color.Green, SymbolType.Circle);
+            //LineItem pointsCurveAUCY = gp.AddCurve("RTI AUC Y", listAUCY, Color.Turquoise, SymbolType.Circle);
+            //LineItem pointsCurveAUCZ = gp.AddCurve("RTI AUC Z", listAUCZ, Color.Violet, SymbolType.Circle); 
+            LineItem pointsCurveAUCXYZ = gp.AddCurve("RTI AUC XYZ", listAUCXYZ, Color.Red, SymbolType.Circle);
+            
+            /*
+            pointsCurveX.Symbol.Fill = new Fill(Color.YellowGreen);
+            pointsCurveY.Symbol.Fill = new Fill(Color.Red);
+            pointsCurveZ.Symbol.Fill = new Fill(Color.DarkBlue);
+            */
+
+
+            //pointsCurveAUCX.Symbol.Fill = new Fill(Color.Green);
+            //pointsCurveAUCY.Symbol.Fill = new Fill(Color.Turquoise);
+            //pointsCurveAUCZ.Symbol.Fill = new Fill(Color.Violet);
+            pointsCurveAUCXYZ.Symbol.Fill = new Fill(Color.Red);
+            
+            if (!_isAdaptingPointSize)
+            {
+                /*
+                pointsCurveX.Symbol.Size = 1F;
+                pointsCurveY.Symbol.Size = 1F;
+                pointsCurveZ.Symbol.Size = 1F;
+                */
+                //pointsCurveAUCX.Symbol.Size = 1F;
+                //pointsCurveAUCY.Symbol.Size = 1F;
+                //pointsCurveAUCZ.Symbol.Size = 1F;
+                pointsCurveAUCXYZ.Symbol.Size = SIZE_CIRCLE;
+            }
+            
+            /*
+            _alLinesWithSymbols.Add(pointsCurveX);
+            _alLinesWithSymbols.Add(pointsCurveY);
+            _alLinesWithSymbols.Add(pointsCurveZ);
+            */
+
+            //_alLinesWithSymbols.Add(pointsCurveAUCX);
+            //_alLinesWithSymbols.Add(pointsCurveAUCY);
+            //_alLinesWithSymbols.Add(pointsCurveAUCZ);
+            _alLinesWithSymbols.Add(pointsCurveAUCXYZ);
+
+            /*
+            pointsCurveX.Line.IsVisible = false;
+            pointsCurveY.Line.IsVisible = false;
+            pointsCurveZ.Line.IsVisible = false;
+            */
+
+            //pointsCurveAUCX.Line.IsVisible = false;
+            ////pointsCurveAUCY.Line.IsVisible = false;
+            //pointsCurveAUCZ.Line.IsVisible = false;
+            pointsCurveAUCXYZ.Line.IsVisible = false;
+            
+
+
+            //---//paneOrders.Add("Columbia " + channel + " " + location, paneOrder);
+            //WidenDatesIfNeeded(listX); 
+            WidenDatesIfNeeded(listAUCXYZ);
+
+        }
+
+        #endregion RTI Graph
+
 
         #region GPS Graph
         private void CreateGPSDeviceGraph(GraphPane gp, string filePath)
@@ -620,7 +1115,7 @@ namespace NESPDataViewer
 
             PointPairList listSpeed = new PointPairList();
             PointPairList listAltitude = new PointPairList();
-
+  
 
             //for each row, add values to PointPairLists
             for (int i = 0; i < values.Length; i++)
@@ -665,7 +1160,7 @@ namespace NESPDataViewer
                             }
                             else listAltitude.Add(x, y);
                         }
-                        #endregion
+                        #endregion                       
 
                         #endregion
 
@@ -676,189 +1171,214 @@ namespace NESPDataViewer
             }
 
             #region SET DISPLAY PROPERTIES FOR LINES
-            LineItem pointsCurve;
+                LineItem pointsCurve;
 
-            #region ON Y-AXIS
-            #region Speed
-            pointsCurve = gp.AddCurve("GPS Speed", listSpeed, Color.Red, SymbolType.Circle);
-            pointsCurve.Symbol.Fill = new Fill(Color.Red);
-            if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
-            pointsCurve.Line.IsVisible = false;
-            pointsCurve.Tag = "Speed";
-            _alLinesWithSymbols.Add(pointsCurve);
-            #endregion
+                #region ON Y-AXIS
+                     #region Speed
+                    pointsCurve = gp.AddCurve("GPS Speed", listSpeed, Color.Red, SymbolType.Circle);
+                    pointsCurve.Symbol.Fill = new Fill(Color.Red);
+                    if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
+                    pointsCurve.Line.IsVisible = false;
+                    pointsCurve.Tag = "Speed";
+                    _alLinesWithSymbols.Add(pointsCurve);
+                #endregion
 
-            #region Altitude
-            pointsCurve = gp.AddCurve("GPS Altitude", listAltitude, Color.GreenYellow, SymbolType.Square);
-            pointsCurve.Symbol.Fill = new Fill(Color.GreenYellow);
-            if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
-            pointsCurve.Line.IsVisible = false;
-            pointsCurve.Tag = "Altitude";
-            _alLinesWithSymbols.Add(pointsCurve);
-            #endregion
+                     #region Altitude
+                    pointsCurve = gp.AddCurve("GPS Altitude", listAltitude, Color.GreenYellow, SymbolType.Square);
+                    pointsCurve.Symbol.Fill = new Fill(Color.GreenYellow);
+                    if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
+                    pointsCurve.Line.IsVisible = false;
+                    pointsCurve.Tag = "Altitude";
+                    _alLinesWithSymbols.Add(pointsCurve);
+                #endregion
 
 
-
-            #endregion ON Y-AXIS
+                #endregion ON Y-AXIS
 
             #endregion SET DISPLAY PROPERTIES FOR LINES
+            
+            
             //if time-dates for lines include dates not previously graphed, widen range
-            WidenDatesIfNeeded(listSpeed);
+            WidenDatesIfNeeded(listSpeed); 
         }
 
         #endregion GPS Graph
 
         #region Actigraph
-        Hashtable lineSegments = new Hashtable();
-        private void CreateActigraphLineSegments(GraphPane gp)
-        {
-            foreach (DictionaryEntry entry in lineSegments)
+            Hashtable lineSegments = new Hashtable();
+
+            private void CreateActigraphLineSegments(GraphPane gp)
             {
-
-                LineSegment l = (LineSegment)entry.Value;
-                if ((l.Y1 > 0) || (l.Y2 > 0))
+                foreach (DictionaryEntry entry in lineSegments)      
                 {
-                    PointPairList listCounts = new PointPairList();
-                    listCounts.Add(l.X1, l.Y1);
-                    listCounts.Add(l.X2, l.Y2);
-
-                    LineItem pointsCurve = gp.AddCurve("", listCounts, Color.GreenYellow);
-                    pointsCurve.Symbol.IsVisible = false;
-                    pointsCurve.Symbol.Size = 1F;
-                    pointsCurve.Line.IsVisible = true;
-                }
-            }
-
-        }
-        private void CreateActigraphGraph(GraphPane gp, string filePath, int id)
-        {
-            string[] values = FileReadWrite.ReadLinesFromFile(filePath);
-            Color[] colors = new Color[9] { Color.Red, Color.YellowGreen, Color.Beige, Color.Aqua, Color.Violet, Color.Bisque, Color.Cyan, Color.DarkOrange, Color.Khaki };
-            PointPairList listCountsX = new PointPairList();
-            PointPairList listCountsY = new PointPairList();
-            PointPairList listCountsZ = new PointPairList();
-            //for each row, add values to PointPairLists
-            int numAxes = 0;
-            for (int i = 0; i < values.Length; i++)
-            {
-                try
-                {
-                    //expecting values in format: UnixTimeStamp,TimeStamp,OxyconHR,OxyconBF,OxyconVE,OxyconVO2kg,OxyconRER
-                    string[] split = values[i].Split(',');
-
-                    if (split.Length > 2) //TimeStamp + at least one data value
+                   
+                    LineSegment l = (LineSegment) entry.Value;
+                    if ((l.Y1 > 0) || (l.Y2 > 0))
                     {
-                        #region TIMESTAMP - X VALUE
-                        DateTime dt = ConvertUNIXDatTime(Convert.ToDouble(split[0]));//UnixTimeStamp, Column 1/A
-                        //DateTime dt = DateTime.Parse(split[1]);//TimeStamp, Column 2/B
-                        double x = (double)new XDate(dt);//x value is numeric representation of TimeStamp
-                        #endregion
+                        PointPairList listCounts = new PointPairList();
+                        listCounts.Add(l.X1, l.Y1);
+                        listCounts.Add(l.X2, l.Y2);
 
-                        #region DATA VALUE - Y VALUE
-                        double y = 0; string label = "";
+                        LineItem pointsCurve = gp.AddCurve("", listCounts, Color.GreenYellow);
+                        pointsCurve.Symbol.IsVisible = false;
+                        pointsCurve.Symbol.Size = SIZE_CIRCLE;
+                        pointsCurve.Line.IsVisible = true;
+                    }
+                }
+                
+            }
+            
+        
+        
+            private void CreateActigraphGraph(GraphPane gp, string filePath, int id)
+            {
+                string[] values = FileReadWrite.ReadLinesFromFile(filePath);
+                Color[] colors = new Color[9] { Color.Red, Color.YellowGreen, Color.Beige, Color.Aqua, Color.Violet,Color.Bisque,Color.Cyan,Color.DarkOrange,Color.Khaki };
+                
+                
+                PointPairList listCountsX = new PointPairList();
+                PointPairList listCountsY = new PointPairList();
+                PointPairList listCountsZ = new PointPairList();
 
-                        #region Actigraph
-                        if ((split.Length > 2) && (split[2].Length > 0))
+
+                //for each row, add values to PointPairLists
+                int numAxes = 0;
+
+                for (int i = 0; i < values.Length; i++)
+                {
+                    try
+                    {
+                        //expecting values in format: UnixTimeStamp,TimeStamp,OxyconHR,OxyconBF,OxyconVE,OxyconVO2kg,OxyconRER
+                        string[] split = values[i].Split(',');
+
+                        if (split.Length > 2) //TimeStamp + at least one data value
                         {
-                            y = Convert.ToDouble(split[2]);//Column 3/C
-                            if (_isUsingLabels)
-                            {
-                                label = String.Format("Actigraph " + (id + 1) + " AC_X\n{0} {1}", dt.ToLongTimeString(), y);
-                                listCountsX.Add(x, y, label);
-                            }
-                            else listCountsX.Add(x, y);
-                            numAxes = 1;
+                            #region TIMESTAMP - X VALUE
+                            
+                                DateTime dt = ConvertUNIXDatTime(Convert.ToDouble(split[0]));//UnixTimeStamp, Column 1/A
+                            
+                                //DateTime dt = DateTime.Parse(split[1]);//TimeStamp, Column 2/B
+                                double x = (double)new XDate(dt);//x value is numeric representation of TimeStamp
+                            
+                             #endregion
+
+
+                            #region DATA VALUE - Y VALUE
+                                double y = 0; string label = "";
+
+                                #region Actigraph
+                                if ((split.Length > 2) && (split[2].Length > 0))
+                                {
+                                    y = Convert.ToDouble(split[2]);//Column 3/C
+                                    if (_isUsingLabels)
+                                    {
+                                        label = String.Format("Actigraph "+(id+1)+" AC_X\n{0} {1}", dt.ToLongTimeString(), y);
+                                        listCountsX.Add(x, y, label);
+                                    }
+                                    else listCountsX.Add(x, y);
+                                    numAxes = 1;
+                                }
+
+                                if ((split.Length > 3) && (split[3].Length > 0))
+                                {
+                                    y = Convert.ToDouble(split[3]);//Column 3/C
+                                    if (_isUsingLabels)
+                                    {
+                                        label = String.Format("Actigraph " + (id + 1) + " AC_Y\n{0} {1}", dt.ToLongTimeString(), y);
+                                        listCountsY.Add(x, y, label);
+                                    }
+                                    else listCountsY.Add(x, y);
+                                    numAxes = 2;
+                                }
+
+                                if ((split.Length > 4) && (split[4].Length > 0))
+                                {
+                                    y = Convert.ToDouble(split[4]);//Column 3/C
+                                    if (_isUsingLabels)
+                                    {
+                                        label = String.Format("Actigraph " + (id + 1) + " AC_Z\n{0} {1}", dt.ToLongTimeString(), y);
+                                        listCountsZ.Add(x, y, label);
+                                    }
+                                    else listCountsZ.Add(x, y);
+                                    numAxes = 3;
+                                }
+
+                            #endregion
+
+                            #endregion
+
                         }
-
-                        if ((split.Length > 3) && (split[3].Length > 0))
-                        {
-                            y = Convert.ToDouble(split[3]);//Column 3/C
-                            if (_isUsingLabels)
-                            {
-                                label = String.Format("Actigraph " + (id + 1) + " AC_Y\n{0} {1}", dt.ToLongTimeString(), y);
-                                listCountsY.Add(x, y, label);
-                            }
-                            else listCountsY.Add(x, y);
-                            numAxes = 2;
-                        }
-
-                        if ((split.Length > 4) && (split[4].Length > 0))
-                        {
-                            y = Convert.ToDouble(split[4]);//Column 3/C
-                            if (_isUsingLabels)
-                            {
-                                label = String.Format("Actigraph " + (id + 1) + " AC_Z\n{0} {1}", dt.ToLongTimeString(), y);
-                                listCountsZ.Add(x, y, label);
-                            }
-                            else listCountsZ.Add(x, y);
-                            numAxes = 3;
-                        }
-
-                        #endregion
-
-                        #endregion
+                        
 
                     }
-
-
+                    catch { }
                 }
-                catch { }
+
+
+                #region SET DISPLAY PROPERTIES FOR LINES
+                    LineItem pointsCurve;
+
+                    #region ON Y-AXIS
+
+                        #region 
+                            if (numAxes >= 1)
+                            {
+                                pointsCurve = gp.AddCurve("Actigraph " + id + " X", listCountsX, colors[id % colors.Length], SymbolType.Circle);
+                                pointsCurve.Symbol.Fill = new Fill(colors[(id * 3) % colors.Length]);
+                                if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = SIZE_CIRCLE;
+                                pointsCurve.Line.IsVisible = false;
+                                pointsCurve.Tag = "AC" + (id + 1);
+                                _alLinesWithSymbols.Add(pointsCurve);
+                            }
+
+                            if (numAxes >= 2)
+                            {
+                                pointsCurve = gp.AddCurve("Actigraph " + id + " Y", listCountsY, colors[id % colors.Length], SymbolType.Circle);
+                                pointsCurve.Symbol.Fill = new Fill(colors[((id * 3) % colors.Length) + 1]);
+
+                                if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = SIZE_CIRCLE;
+                                pointsCurve.Line.IsVisible = false;
+                                pointsCurve.Tag = "AC" + (id + 1);
+                                _alLinesWithSymbols.Add(pointsCurve);
+                            }
+
+                            if (numAxes >= 3)
+                            {
+                                pointsCurve = gp.AddCurve("Actigraph " + id + " Z", listCountsZ, colors[id % colors.Length], SymbolType.Circle);
+                                pointsCurve.Symbol.Fill = new Fill(colors[((id * 3) % colors.Length) + 1]);
+
+                                if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = SIZE_CIRCLE;
+                                pointsCurve.Line.IsVisible = false;
+                                pointsCurve.Tag = "AC" + (id + 1);
+                                _alLinesWithSymbols.Add(pointsCurve);
+                            }
+
+                    
+                    #endregion
+
+                    #endregion
+
+                #endregion
+                
+               WidenDatesIfNeeded(listCountsX);    
             }
 
 
-            #region SET DISPLAY PROPERTIES FOR LINES
-            LineItem pointsCurve;
-
-            #region ON Y-AXIS
-            #region
-            if (numAxes >= 1)
-            {
-                pointsCurve = gp.AddCurve("Actigraph " + id + " X", listCountsX, colors[id % colors.Length], SymbolType.Circle);
-                pointsCurve.Symbol.Fill = new Fill(colors[(id * 3) % colors.Length]);
-                if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
-                pointsCurve.Line.IsVisible = false;
-                pointsCurve.Tag = "AC" + (id + 1);
-                _alLinesWithSymbols.Add(pointsCurve);
-            }
-
-            if (numAxes >= 2)
-            {
-                pointsCurve = gp.AddCurve("Actigraph " + id + " Y", listCountsY, colors[id % colors.Length], SymbolType.Circle);
-                pointsCurve.Symbol.Fill = new Fill(colors[((id * 3) % colors.Length) + 1]);
-
-                if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
-                pointsCurve.Line.IsVisible = false;
-                pointsCurve.Tag = "AC" + (id + 1);
-                _alLinesWithSymbols.Add(pointsCurve);
-            }
-
-            if (numAxes >= 3)
-            {
-                pointsCurve = gp.AddCurve("Actigraph " + id + " Z", listCountsZ, colors[id % colors.Length], SymbolType.Circle);
-                pointsCurve.Symbol.Fill = new Fill(colors[((id * 3) % colors.Length) + 1]);
-
-                if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
-                pointsCurve.Line.IsVisible = false;
-                pointsCurve.Tag = "AC" + (id + 1);
-                _alLinesWithSymbols.Add(pointsCurve);
-            }
-
-
-            #endregion
-            #endregion
-            #endregion
-            WidenDatesIfNeeded(listCountsX);
-        }
         #endregion Actigraph
+
+
+
+
 
         #region Zephyr
         private void CreateZephyrGraph(GraphPane gp, string filePath)
         {
             string[] values = FileReadWrite.ReadLinesFromFile(filePath);
 
-            PointPairList listHR = new PointPairList();
-            PointPairList listRR = new PointPairList();
+            //PointPairList listHR = new PointPairList();
+            //PointPairList listRR = new PointPairList();
             PointPairList listACT = new PointPairList();
+
 
             //for each row, add values to PointPairLists
             for (int i = 0; i < values.Length; i++)
@@ -870,53 +1390,64 @@ namespace NESPDataViewer
 
                     if (split.Length > 2) //TimeStamp + at least one data value
                     {
-                        #region TIMESTAMP - X VALUE
-                        DateTime dt = ConvertUNIXDatTime(Convert.ToDouble(split[0]));//UnixTimeStamp, Column 1/A
-                        //DateTime dt = DateTime.Parse(split[1]);//TimeStamp, Column 2/B
-                        double x = (double)new XDate(dt);//x value is numeric representation of TimeStamp
-                        #endregion
+                        
+
+                        #region TIMESTAMP -> X VALUE
+                            
+                             DateTime dt = ConvertUNIXDatTime(Convert.ToDouble(split[0]));//UnixTimeStamp, Column 1/A
+                            //DateTime dt = DateTime.Parse(split[1]);//TimeStamp, Column 2/B
+                            double x = (double)new XDate(dt);//x value is numeric representation of TimeStamp
+                        
+                         #endregion
+
 
                         #region DATA VALUE - Y VALUE
-                        double y = 0; string label = "";
+                            double y = 0; string label = "";
 
-                        #region ZephyrHR
-                        if ((split.Length > 2) && (split[2].Length > 0))
-                        {
-                            y = Convert.ToDouble(split[2]);//Column 3/C
-                            if (_isUsingLabels)
-                            {
-                                label = String.Format("Zephyr HR\n{0} {1}", dt.ToLongTimeString(), y);
-                                listHR.Add(x, y, label);
-                            }
-                            else listHR.Add(x, y);
-                        }
-                        #endregion
+                                #region ZephyrHR Commented
+                                /*    if ((split.Length > 2) && (split[2].Length > 0))
+                                    {
+                                        y = Convert.ToDouble(split[2]);//Column 3/C
+                                        if (_isUsingLabels)
+                                        {
+                                            label = String.Format("Zephyr HR\n{0} {1}", dt.ToLongTimeString(), y);
+                                            listHR.Add(x, y, label);
+                                        }
+                                        else listHR.Add(x, y);
+                                    }
+                                 */ 
+                                #endregion
 
-                        #region ZephyrRR
-                        if ((split.Length > 6) && (split[6].Length > 0))
-                        {
-                            y = Convert.ToDouble(split[6]);//Column 4/D
-                            if (_isUsingLabels)
-                            {
-                                label = String.Format("Zephyr RR\n{0} {1}", dt.ToLongTimeString(), y);
-                                listRR.Add(x, y, label);
-                            }
-                            else listRR.Add(x, y);
-                        }
-                        #endregion
 
-                        #region ZephyrACT
-                        if ((split.Length > 10) && (split[10].Length > 0))
-                        {
-                            y = Convert.ToDouble(split[10]);//Column 5/E
-                            if (_isUsingLabels)
-                            {
-                                label = String.Format("Zephyr ACT\n{0} {1}", dt.ToLongTimeString(), y);
-                                listACT.Add(x, y, label);
-                            }
-                            else listACT.Add(x, y);
-                        }
-                        #endregion
+
+                                #region ZephyrRR Commented
+                                  /*  if ((split.Length > 6) && (split[6].Length > 0))
+                                    {
+                                        y = Convert.ToDouble(split[6]);//Column 4/D
+                                        if (_isUsingLabels)
+                                        {
+                                            label = String.Format("Zephyr RR\n{0} {1}", dt.ToLongTimeString(), y);
+                                            listRR.Add(x, y, label);
+                                        }
+                                        else listRR.Add(x, y);
+                                    }
+                                   */ 
+                                #endregion
+
+
+
+                                #region ZephyrACT
+                                    if ((split.Length > 10) && (split[10].Length > 0))
+                                    {
+                                        y = Convert.ToDouble(split[10]);//Column 5/E
+                                        if (_isUsingLabels)
+                                        {
+                                            label = String.Format("Zephyr ACT\n{0} {1}", dt.ToLongTimeString(), y);
+                                            listACT.Add(x, y, label);
+                                        }
+                                        else listACT.Add(x, y);
+                                    }
+                                #endregion
 
                         #endregion
 
@@ -926,48 +1457,65 @@ namespace NESPDataViewer
                 catch { }
             }
 
+
+
             #region SET DISPLAY PROPERTIES FOR LINES
             LineItem pointsCurve;
 
-            #region ON Y-AXIS
-            #region HR
-            pointsCurve = gp.AddCurve("Zephyr HR", listHR, Color.Red, SymbolType.Circle);
-            pointsCurve.Symbol.Fill = new Fill(Color.Red);
-            if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
-            pointsCurve.Line.IsVisible = false;
-            pointsCurve.Tag = "HR";
-            _alLinesWithSymbols.Add(pointsCurve);
-            #endregion
+            #region ON Y-AXIS 
+               
+                #region HR Commented
+                 /* pointsCurve = gp.AddCurve("Zephyr HR", listHR, Color.Red, SymbolType.Circle);
+                    pointsCurve.Symbol.Fill = new Fill(Color.Red);
+                    if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
+                    pointsCurve.Line.IsVisible = false;
+                    pointsCurve.Tag = "HR";
+                    _alLinesWithSymbols.Add(pointsCurve);
+                  */ 
+                #endregion
 
-            #region BF
-            pointsCurve = gp.AddCurve("Zephyr RR", listRR, Color.GreenYellow, SymbolType.Square);
-            pointsCurve.Symbol.Fill = new Fill(Color.GreenYellow);
-            if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
-            pointsCurve.Line.IsVisible = false;
-            pointsCurve.Tag = "RR";
-            _alLinesWithSymbols.Add(pointsCurve);
-            #endregion
 
-            #region V02kg
-            pointsCurve = gp.AddCurve("Zephyr Activity", listACT, Color.Orchid, SymbolType.TriangleDown);
-            pointsCurve.Symbol.Fill = new Fill(Color.Orchid);
-            if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
-            pointsCurve.Line.IsVisible = false;
-            pointsCurve.Tag = "Activity";
-            pointsCurve.IsY2Axis = true;
-            _alLinesWithSymbols.Add(pointsCurve);
-            #endregion
+                #region BF Commented
+                  /*  pointsCurve = gp.AddCurve("Zephyr RR", listRR, Color.GreenYellow, SymbolType.Square);
+                    pointsCurve.Symbol.Fill = new Fill(Color.GreenYellow);
+                    if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
+                    pointsCurve.Line.IsVisible = false;
+                    pointsCurve.Tag = "RR";
+                    _alLinesWithSymbols.Add(pointsCurve);
+                   */ 
+                #endregion
+
+
+                #region Acceleration
+                    pointsCurve = gp.AddCurve("Zephyr Activity", listACT, Color.Orchid, SymbolType.TriangleDown);
+                    pointsCurve.Symbol.Fill = new Fill(Color.Orchid);
+                    if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = SIZE_CIRCLE;
+                    pointsCurve.Line.IsVisible = false;
+                    pointsCurve.Tag = "Activity";
+                    pointsCurve.IsY2Axis = true;
+                    _alLinesWithSymbols.Add(pointsCurve);
+                 
+                #endregion
+
+
+
 
             #endregion ON Y-AXIS
 
             #endregion SET DISPLAY PROPERTIES FOR LINES
+
+
             //if time-dates for lines include dates not previously graphed, widen range
-            WidenDatesIfNeeded(listHR);
+            WidenDatesIfNeeded(listACT);    
         }
         #endregion Zephyr
 
+
+
+
         #region Sensewear
-        private void CreateSensewearGraph(GraphPane gp, string filePath)
+            
+            private void CreateSensewearGraph(GraphPane gp, string filePath)
         {
             string[] values = FileReadWrite.ReadLinesFromFile(filePath);
 
@@ -1022,7 +1570,7 @@ namespace NESPDataViewer
             #region ACT
             pointsCurve = gp.AddCurve("Sensewear Activity", listACT, Color.Orchid, SymbolType.TriangleDown);
             pointsCurve.Symbol.Fill = new Fill(Color.Orchid);
-            if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
+            if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = SIZE_CIRCLE;
             pointsCurve.Line.IsVisible = false;
             pointsCurve.Tag = "Activity";
             pointsCurve.IsY2Axis = true;
@@ -1035,10 +1583,13 @@ namespace NESPDataViewer
             //if time-dates for lines include dates not previously graphed, widen range
             WidenDatesIfNeeded(listACT);
         }
+        
         #endregion Sensewear
+
+
         //ADD_GRAPH STEP 2
         #region Oxycon
-        private void CreateOxyconGraph(GraphPane gp, string filePath)
+            private void CreateOxyconGraph(GraphPane gp, string filePath)
         {
             string[] values = FileReadWrite.ReadLinesFromFile(filePath);
 
@@ -1128,7 +1679,7 @@ namespace NESPDataViewer
                         #region OxyconMET
                         if ((split.Length > 7) && (split[7].Length > 0))
                         {
-                            y = Convert.ToDouble(split[7]) * 10000.0;//Column 7/G
+                            y = Convert.ToDouble(split[7])*10000.0;//Column 7/G
                             if (_isUsingLabels)
                             {
                                 label = String.Format("Oxycon MET\n{0} {1}", dt.ToLongTimeString(), Convert.ToDouble(split[7]));
@@ -1251,10 +1802,12 @@ namespace NESPDataViewer
             #endregion
 
             //if time-dates for lines include dates not previously graphed, widen range
-            WidenDatesIfNeeded(listHR);
+            WidenDatesIfNeeded(listHR);            
 
         }
         #endregion
+
+
 
         #region GPS
         private void CreateGPSGraph(GraphPane gp, string filepath)
@@ -1304,7 +1857,7 @@ namespace NESPDataViewer
                     for (int j = 5; j < split.Length; j += 2)
                     {
                         tag += split[j] + "\n";
-                    }
+                    }                   
 
                     list.Add(x, 200, tag);
                 }
@@ -1323,22 +1876,97 @@ namespace NESPDataViewer
 
 
 
-        #region ANNOTATION LABELS
+        #region LABELS
+        
+        
+        private void CreateDiaryGraph(GraphPane gp, string filepath, string title, int y)
+        {
+            gp.BarSettings.Base = BarBase.Y;
+            gp.BarSettings.Type = BarType.Overlay;
+
+            PointPairList labelList = new PointPairList();
+
+            string[] values = FileReadWrite.ReadLinesFromFile(filepath);
+            for (int i = 0; i < values.Length; i++)
+            {
+                try
+                {
+                    string[] split = values[i].Split(',');
+                    string[] datetime = split[0].Split(' ');
+                    string[] startDate = datetime[0].Split('-');
+                    string[] startTime = datetime[1].Split('-')[0].Split(':');
+
+                    DateTime dtStart = new DateTime(Convert.ToInt32(startDate[0]), Convert.ToInt32(startDate[1]), Convert.ToInt32(startDate[2]), Convert.ToInt32(startTime[0]), Convert.ToInt32(startTime[1]), Convert.ToInt32(startTime[2]));//DateTime.Parse(split[0]);
+                    double startx = (double)new XDate(dtStart);
+                    if (split[1].Length > 0)
+                    {
+                        #region END DATE
+                        string[] enddatetime = split[1].Split(' ');
+                        string[] endDate = enddatetime[0].Split('-');
+                        string[] endTime = enddatetime[1].Split('-')[0].Split(':');
+
+                        DateTime dtEnd = new DateTime(Convert.ToInt32(endDate[0]), Convert.ToInt32(endDate[1]), Convert.ToInt32(endDate[2]), Convert.ToInt32(endTime[0]), Convert.ToInt32(endTime[1]), Convert.ToInt32(endTime[2]));//DateTime.Parse(split[0]);
+                        //DateTime dtEnd = DateTime.Parse(split[1]);
+                        double endx = (double)new XDate(dtEnd);
+                        #endregion
+
+                        #region COLOR OF BAR
+                        string color = "black";
+                        bool isSolid = false;
+                        if ((split.Length > 2) && (split[2].Length > 0))
+                        {
+                            color = split[2];
+                            isSolid = true;
+                        }
+                        #endregion
+                        
+
+                        #region LABEL AND POINT
+                        string label = "";
+                        for (int c = 3; c < split.Length; c++)
+                        {
+                            label += split[c].Replace("_", ", ").Replace("-", " ").Trim(',',' ') + "\n ";
+                        }
+                        labelList = new PointPairList();
+                        labelList.Add(endx, y, startx, String.Format("{3} {0}-{1}\n,{2}",dtStart.ToShortTimeString(),dtEnd.ToShortTimeString(),label,title));
+                        #endregion
+
+                        #region ADD BAR
+                        HiLowBarItem myBar = gp.AddHiLowBar(title, labelList, Color.FromName(color));
+                        if (isSolid) myBar.Bar.Fill.Type = FillType.Solid;
+                        else myBar.Bar.Fill.Type = FillType.None;
+                        #endregion
+                    }
+                }
+                catch { }
+            }
 
 
-       private void CreateDiaryGraph(GraphPane gp, string filepath, string dirpath_colors, 
+
+
+        }
+
+     
+
+        #region labels colors on bar
+        
+        private void CreateDiaryGraph(GraphPane gp, string filepath, string dirpath_colors, 
                                       string title, int yoffset, string type)
         {
+            gp.BarSettings.Base = BarBase.Y;
+            gp.BarSettings.ClusterScaleWidth = 200.0;
+            gp.BarSettings.Type = BarType.Overlay;
 
-           // -------------- Load Colors  ---------------------------------------
+            PointPairList labelList = new PointPairList();
+            string[] values = FileReadWrite.ReadLinesFromFile(filepath);
 
             bool is_category_1 = false;
             bool is_category_2 = false;
 
             string[] lines_read = null;
             string[] label_color = null;
-            BindingList<string[]> labels_color_list_1 = null;
-            BindingList<string[]> labels_color_list_2 = null;
+            BindingList<string[]> labels_color_list_1 = null; 
+            BindingList<string[]> labels_color_list_2 = null; 
 
 
 
@@ -1380,78 +2008,7 @@ namespace NESPDataViewer
             #endregion
 
 
-
-            //------------------- Determine start/end lines -----------------------
-
-            //Extract only the selected time range
-            double startUnix = Wockets.Utils.WocketsTimer.GetDoubleTime(startX.DateTime);
-            double endUnix = Wockets.Utils.WocketsTimer.GetDoubleTime(endX.DateTime);
-
-            string[] tokens = null;
-            bool foundTime = false;
-            double currentTime = 0;
-
-            int start = 0;
-            int end = 0;
-            string s;
-            string str_time;
-            DateTime dt_time;
-
-            TextReader tr = new StreamReader(filepath);
-
-           //Read the hearder
-            s = tr.ReadLine();
-           
-           
-            while (currentTime <= startUnix)
-            {
-                s = tr.ReadLine();
-                
-                if (s == null)
-                    break;
-                
-                str_time = s.Split(',')[0];
-                dt_time = DateTime.Parse(str_time); //str_time.Split(' ')[1]
-                currentTime = Wockets.Utils.WocketsTimer.GetDoubleTime(dt_time);
-                
-                start++;
-                 
-            }
-
-            end = start;
-            while (currentTime <= endUnix)
-            {
-                s = tr.ReadLine();
-
-                if (s == null)
-                    break;
-
-                //currentTime = Convert.ToDouble(s.Split(',')[0]);
-                str_time = s.Split(',')[0];
-                dt_time = DateTime.Parse(str_time); 
-                currentTime = Wockets.Utils.WocketsTimer.GetDoubleTime(dt_time);
-
-                end++;
-            }
-
-
-            tr.Close();
-
-
-            //---------------- Start Loading Annotations -------------------
-
-
-            gp.BarSettings.Base = BarBase.Y;
-            gp.BarSettings.ClusterScaleWidth = 200.0;
-            gp.BarSettings.Type = BarType.Overlay;
-
-            PointPairList labelList = new PointPairList();
-            string[] values = FileReadWrite.ReadLinesFromFile(filepath);
-
-           
-
-            //for (int i = 0; i < values.Length; i++)
-            for (int i = start; i < end; i++)
+            for (int i = 0; i < values.Length; i++)
             {
                 try
                 {
@@ -1568,17 +2125,16 @@ namespace NESPDataViewer
                 }
                 catch { }
             }
-        }
 
-        //-----------------------------------------------------------
+
+
+
+        }
         
+       #endregion
+
 
         #endregion
-
-
-
-
-
 
 
         #region PHOTOS and SURVEYS
@@ -1592,7 +2148,7 @@ namespace NESPDataViewer
                 {
                     string[] split = values[i].Split(',');
                     double x = (double)new XDate(DateTime.Parse(split[0]));
-                    list_Photo.Add(x, 25, split[2] + "," + Path.Combine(imagedir, split[1]));
+                    list_Photo.Add(x, 25, split[2]+","+Path.Combine(imagedir,split[1]));
                 }
                 catch { }
             }
@@ -1615,7 +2171,7 @@ namespace NESPDataViewer
                 {
                     string[] split = values[i].Split(',');
                     double x = (double)new XDate(DateTime.Parse(split[0]));
-                    list.Add(x, 20, split[1].Replace(";", "\n"));
+                    list.Add(x, 20, split[1].Replace(";","\n"));
                 }
                 catch { }
             }
@@ -1659,7 +2215,7 @@ namespace NESPDataViewer
                         string[] split = values[i].Split(',');
                         if (split.Length > 2)
                         {
-
+                            
                             int msec = Convert.ToInt32(split[0]);
                             dtLastDate = dt.AddMilliseconds(msec * 400);
                             double x = (double)new XDate(dtLastDate);
@@ -1703,7 +2259,7 @@ namespace NESPDataViewer
                                 lastDifference = difference;
                             }
 
-
+                            
                             for (int a = 0; a < alAgree_lists.Count; a++)
                             {
                                 if (a != index)
@@ -1847,7 +2403,12 @@ namespace NESPDataViewer
         #endregion
 
 
+        #endregion Chart content
 
+
+
+
+        #region Build Graphs
 
         Hashtable paneOrders;
         // Build the Chart
@@ -1855,98 +2416,109 @@ namespace NESPDataViewer
         {
             SetGraphPanels();
             string[] files;
-
+            
             paneOrders = new Hashtable();
             int paneOrdering = 1;
 
+
+
             #region DETERMINE WHICH GRAPHS TO DISPLAY BASED ON AVAILABLE FILES
-
-            #region ACCELEROMETER GRAPHS
-            /*files = Directory.GetFiles(path + "\\merged\\", "MITes*Raw*");
-            for (int i = 0; i < files.Length; i++)
-            {
-                string channel = "", location = "";
-                string[] sensorinfo = Path.GetFileNameWithoutExtension(files[i]).Split('_');
-                if (sensorinfo.Length >= 4)
-                {
-                    channel = sensorinfo[1];
-                    location = sensorinfo[3];
-                }
-                CreateAccelerationGraph(paneOrdering, files[i], channel, location, "MITes", "");
-                paneOrdering++;
-            }*/
-            #endregion
-
-
-            #region WOCKETS ACCELEROMETER GRAPHS
-            Wockets.WocketsController wc = new Wockets.WocketsController("", "", "");
-            wc.FromXML(path + "\\wockets\\SensorData.xml");
-
-
-            files = Directory.GetFiles(path + "\\merged\\", "Wocket*RawData*");
-            for (int i = 0; i < files.Length; i++)
-            {
-                string channel = "", location = "";
-                string[] sensorinfo = Path.GetFileNameWithoutExtension(files[i]).Split('_');
-                string mac = "";
-                if (sensorinfo.Length >= 3)
-                {
-                    channel = sensorinfo[1];
-                    if (wc._Receivers[Convert.ToInt32(channel)] is Wockets.Receivers.RFCOMMReceiver)
+            
+                #region ACCELEROMETER GRAPHS MITES
+                
+                    files = Directory.GetFiles(path + "\\merged\\", "MITes*Raw*");
+                    for (int i = 0; i < files.Length; i++)
                     {
-                        mac = ((Wockets.Receivers.RFCOMMReceiver)wc._Receivers[Convert.ToInt32(channel)])._Address;
-                        mac = mac.Substring(mac.Length - 2, 2);
-                       // mac = "Wocket " + mac;
-                        string loc = wc._Sensors[Convert.ToInt32(channel)]._Location;
-                        switch (loc)
+                        string channel = "", location = "";
+                        string[] sensorinfo = Path.GetFileNameWithoutExtension(files[i]).Split('_');
+                        if (sensorinfo.Length >= 4)
                         {
-                            case "Dominant Hip":
-                                loc = "DHP";
-                                break;
-                            case "Dominant Ankle":
-                                loc = "DAK";
-                                break;
-                            case "Dominant Upper Arm":
-                                loc = "DUA";
-                                break;
-                            case "Dominant Wrist":
-                                loc = "DW";
-                                break;
-                            case "Dominant Thigh":
-                                loc = "DT";
-                                break;
-                            default:
-                                loc = "lOC";
-                                break;
+                            channel = sensorinfo[1];
+                            location = sensorinfo[3];
                         }
-
-                        mac = "WKT-" + loc + "-" + mac;
+                        CreateAccelerationGraph(paneOrdering, files[i], channel, location,"MITes","");
+                        paneOrdering++;
                     }
-                    else
-                        mac = "Internal";
-                    location = sensorinfo[3];
-                }
-                CreateAccelerationGraph(paneOrdering, files[i], channel, location, "Wocket", mac);
-                paneOrdering++;
-            }
+
+
+                #endregion
+
+
+                #region ACCELEROMETER GRAPHS WOCKETS
+                    if ((Directory.Exists(path + "\\wockets\\")) && (Directory.GetFiles(path + "\\wockets\\").Length > 0))
+                    {
+                        CurrentWockets._Configuration = new Wockets.Data.Configuration.WocketsConfiguration();
+                        CurrentWockets._Configuration.FromXML(path + "\\wockets\\Configuration.xml");
+                        Wockets.WocketsController wc = new Wockets.WocketsController("", "", "");
+                        wc.FromXML(path + "\\wockets\\SensorData.xml");
+                        CurrentWockets._Controller = wc;
+                        
+                        files = Directory.GetFiles(path + "\\merged\\", "Wocket*RawMean*");
+                        for (int i = 0; i < files.Length; i++)
+                        {
+                            string channel = "", location = "";
+                            string[] sensorinfo = Path.GetFileNameWithoutExtension(files[i]).Split('_');
+                            string mac = "";
+                            if (sensorinfo.Length >= 4)
+                            {
+                                channel = sensorinfo[1];
+                                if (wc._Receivers[Convert.ToInt32(channel)] is Wockets.Receivers.RFCOMMReceiver)
+                                {
+                                    mac = ((Wockets.Receivers.RFCOMMReceiver)wc._Receivers[Convert.ToInt32(channel)])._Address;
+                                    mac = mac.Substring(mac.Length - 2, 2);
+                                    string loc = wc._Sensors[Convert.ToInt32(channel)]._Location;
+                                    switch(loc)
+                                    {
+                                        case "Dominant Hip":
+                                            loc = "DHP";
+                                            break;
+                                        case "Dominant Ankle":
+                                            loc = "DAK";
+                                            break;
+                                        case "Dominant Upper Arm":
+                                            loc = "DUA";
+                                            break;
+                                        case "Dominant Wrist":
+                                            loc = "DW";
+                                            break;
+                                        case "Dominant Thigh":
+                                            loc = "DT";
+                                            break;
+                                        default:
+                                            loc = "lOC";
+                                            break;
+                                    }
+
+                                    mac = "WKT-"+loc+"-" + mac;
+                                }
+                                else
+                                    mac = "Internal";
+                                location = sensorinfo[3];
+                            }
+                            CreateAccelerationGraph(paneOrdering, files[i], channel, location, "Wocket", mac);
+                            paneOrdering++;
+                        }
+                    }
             #endregion
 
 
             //ADD_GRAPH STEP 1
-            #region OXYCON
-            /*string oxyFile = Path.Combine(path + "\\merged\\", "Oxycon.csv");
+            #region OXYCON Commented
+            /*
+             string oxyFile = Path.Combine(path + "\\merged\\", "Oxycon.csv"); 
             if (File.Exists(oxyFile))
             {
-                string title = "Oxycon";
+                string title ="Oxycon";
                 GraphPane ePane = AddPane(title, "Oxycon");
                 CreateOxyconGraph(ePane, oxyFile);
                 paneOrders.Add(title, paneOrdering);
                 paneOrdering++;
-            }*/
+            }
+            */ 
             #endregion
 
             #region Zephyr
-            /*string zephyrFile = Path.Combine(path + "\\merged\\", "Zephyr.csv");
+            string zephyrFile = Path.Combine(path + "\\merged\\", "Zephyr.csv");
             if (File.Exists(zephyrFile))
             {
                 string title = "Zephyr";
@@ -1955,12 +2527,11 @@ namespace NESPDataViewer
                 paneOrders.Add(title, paneOrdering);
                 paneOrdering++;
             }
-             */
             #endregion Zephyr
 
             #region Columbia
-            /*string columbiaFile = Path.Combine(path + "\\merged\\", "Columbia.csv");
-
+            string columbiaFile = Path.Combine(path + "\\merged\\", "Columbia.csv");
+                  
             if (File.Exists(columbiaFile))
             {
                 string title = "Columbia";
@@ -1968,12 +2539,26 @@ namespace NESPDataViewer
                 CreateColumbiaGraph(ePane, columbiaFile);
                 paneOrders.Add(title, paneOrdering);
                 paneOrdering++;
-            }*/
+            }      
             #endregion
 
 
-            #region GPS
-           /* string gpsFile = Path.Combine(path + "\\merged\\", "GPS.csv");
+            #region RTI
+            string rtiFile = Path.Combine(path + "\\merged\\", "RTI.csv");
+
+            if (File.Exists(rtiFile))
+            {
+                string title = "RTI";
+                GraphPane ePane = AddPane(title, "RTI");
+                CreateRTIGraph(ePane, rtiFile);
+                paneOrders.Add(title, paneOrdering);
+                paneOrdering++;
+            }
+            #endregion
+
+            #region GPS Commented
+            /*
+            string gpsFile = Path.Combine(path + "\\merged\\", "GPS.csv");
 
             if (File.Exists(gpsFile))
             {
@@ -1982,12 +2567,13 @@ namespace NESPDataViewer
                 CreateGPSDeviceGraph(ePane, gpsFile);
                 paneOrders.Add(title, paneOrdering);
                 paneOrdering++;
-            }*/
+            }
+            */ 
             #endregion
 
 
             #region Actigraphs
-           /* string[] file = Directory.GetFileSystemEntries(path + "\\merged\\", "Actigraph*.csv");
+            string[] file = Directory.GetFileSystemEntries(path + "\\merged\\", "Actigraph*.csv");
 
             if (file.Length > 0)
             {
@@ -1996,19 +2582,19 @@ namespace NESPDataViewer
                 for (int i = 0; (i < file.Length); i++)
                 {
                     string actigraphFile = Path.Combine(path, "merged\\Actigraph" + (i + 1) + ".csv");
-                    if (File.Exists(actigraphFile))
-                        CreateActigraphGraph(ePane, actigraphFile, i);
+                    if (File.Exists(actigraphFile))                    
+                        CreateActigraphGraph(ePane, actigraphFile,i);
                 }
 
                 //CreateActigraphLineSegments(ePane);
                 paneOrders.Add(title, paneOrdering);
                 paneOrdering++;
-            }*/
+            }
 
             #endregion Actigraphs
 
             #region Sensewear
-         /*   string sensewearFile = Path.Combine(path + "\\merged\\", "Sensewear.csv");
+            string sensewearFile = Path.Combine(path + "\\merged\\", "Sensewear.csv");
             if (File.Exists(sensewearFile))
             {
                 string title = "Sensewear";
@@ -2016,15 +2602,18 @@ namespace NESPDataViewer
                 CreateSensewearGraph(ePane, sensewearFile);
                 paneOrders.Add(title, paneOrdering);
                 paneOrdering++;
-            }*/
+            }
             #endregion Sensewear
 
-            #region COMBINED DATATYPE GRAPH - USUALLY HAS HEART RATE + 1 or more of GPS data, Annotation labels, or Survey responses
+
             GraphPane hPane = null;
             string filepath = "";
 
+            #region COMBINED DATATYPE GRAPH - USUALLY HAS HEART RATE + 1 or more of GPS data, Annotation labels, or Survey responses
+
             #region Commented
-            /* files = Directory.GetFiles(path + "\\merged\\", "HeartRate*");
+            /*
+            files = Directory.GetFiles(path + "\\merged\\", "HeartRate*");
             if (files.Length > 0)
             {
                 string title = "Heart Rate";
@@ -2055,38 +2644,79 @@ namespace NESPDataViewer
                 _doesShowHover = false;
             }
             */
-            #endregion Commented
+            #endregion  
 
+            /*
+            if (AnyMatches(path + "\\annotation\\audioannotation\\", "annotat*"))
+            {
+                string title = paneOrdering + " Labels";
+                hPane = AddPane(title, "");
+            }
+            else if (AnyMatches(path + "\\annotation\\phoneannotation\\", "average-*"))
+            {
+                string title = paneOrdering + " Annotation";
+                hPane = AddPane(title, "");
+                hPane.YAxis.IsVisible = false;
+                _doesShowHover = false;
+            }
+            */
+
+
+            #endregion  COMBINED DATATYPE GRAPH
+
+
+            #region Annotations
 
             //if (hPane != null)
-            if (hPane == null)
+            if( hPane == null)
             {
+                // commented because the heart rate panel was eliminated
                 //paneOrdering++;
-               
                 string title = "Annotations";
                 GraphPane aPane = AddPane(title, "Annotations");
                 aPane.YAxis.IsVisible = true;
                 paneOrders.Add(title, paneOrdering);
 
                 //Hack - Dummy curve that forces the scale of the Y-axis and alignment not to change
-                PointPairList listACT = new PointPairList();
-                listACT.Add(0, 0);
-                aPane.AddCurve("annotation", listACT, Color.White, SymbolType.TriangleDown);
-                
+               PointPairList listACT = new PointPairList();
+               listACT.Add(0, 0);
+               aPane.AddCurve("annotation", listACT, Color.White, SymbolType.TriangleDown);
 
-                // add GPS
-                /*paneOrders.Add(title, paneOrdering);
-                filepath = Path.Combine(path + "\\merged\\", "GPSlog.csv");
-                if (File.Exists(filepath))
-                    CreateGPSGraph(hPane, filepath);
-                filepath = Path.Combine(path + "\\merged\\", "POIlog.csv");
-                if (File.Exists(filepath))
-                    CreatePOIGraph(hPane, filepath);
-                 */
+               #region GPS Annotation Commented
+               // add GPS
+               /*paneOrders.Add(title, paneOrdering);
+               filepath = Path.Combine(path + "\\merged\\", "GPSlog.csv");
+               if (File.Exists(filepath))
+                   CreateGPSGraph(hPane, filepath);
+               filepath = Path.Combine(path + "\\merged\\", "POIlog.csv");
+               if (File.Exists(filepath))
+                   CreatePOIGraph(hPane, filepath);
+               */
+               #endregion
 
-                //add audio annotations
+
+
+
+               //add audio annotations
                 if (Directory.Exists(path + "\\annotation\\audioannotation\\"))
                 {
+                    #region commented 
+                    /*
+                    files = Directory.GetFiles(path + "\\annotation\\audioannotation\\", "AnnotationIntervals.csv");
+                    for (int i = 0; i < files.Length; i++)
+                    {
+                        string name = Path.GetFileNameWithoutExtension(files[i]);
+                        CreateDiaryGraph(aPane, files[i], name, 10 + 20 * i);
+                    }
+                     */
+                    
+ 
+                    // commented old path for original annotations
+                    //string file_annotations = path + "\\annotation\\audioannotation\\" + "AnnotationIntervals.csv";
+
+                    #endregion
+
+
                     //reading the corrected annotations in the merged folder
                     string file_annotations = path + "\\merged\\" + "AnnotationIntervals.csv";
                     string path_annotations_color = path + "\\annotation\\audioannotation\\";
@@ -2096,10 +2726,12 @@ namespace NESPDataViewer
                         CreateDiaryGraph(aPane, file_annotations, path_annotations_color, "Time: ", 20, "activity");
                         CreateDiaryGraph(aPane, file_annotations, path_annotations_color, "Time:", 130, "posture");
                     }
+                     
 
                 }
 
                 //add phone annotations
+                #region Phone Annotations
                 if (Directory.Exists(path + "\\annotation\\phoneannotation\\"))
                 {
                     filepath = Path.Combine(path + "\\annotation\\phoneannotation\\", "photos.csv");
@@ -2115,6 +2747,8 @@ namespace NESPDataViewer
                     if (files.Length > 0)
                         CreateAgreementGraph(hPane, files);
                 }
+                #endregion
+
 
             }
             #endregion
@@ -2125,10 +2759,12 @@ namespace NESPDataViewer
 
             #endregion
 
-            hScrollBar1.Value = 0;
+            hScrollBar1.Value = 0;            
             SetTimes();
             RefreshMasterPaneLayout();
         }
+
+
 
         /// <summary>
         /// Determines whether there is at least one file matching one of the supplied filename patterns
@@ -2141,26 +2777,29 @@ namespace NESPDataViewer
             bool isMatch = false;
             string[] patternsToMatch = filePatterns.Split(',');
             int i = 0;
-            while (!isMatch && (i < patternsToMatch.Length))
-            {
-                if (Directory.GetFiles(pathSearchDirectory, patternsToMatch[i]).Length > 0) isMatch = true;
-                i++;
+
+           
+                while (!isMatch && (i < patternsToMatch.Length))
+                {
+                    if (Directory.GetFiles(pathSearchDirectory, patternsToMatch[i]).Length > 0) isMatch = true;
+                    i++;
+                }
+
+                return isMatch;
+
             }
 
-            return isMatch;
 
-        }
-        
-        #endregion
+        #endregion Build Graphs
 
 
+       #region INTERACTION
 
 
 
-        #region INTERACTION
+            #region OPEN DATASET
 
-        #region OPEN DATASET
-        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+            private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
             {
@@ -2168,6 +2807,7 @@ namespace NESPDataViewer
                 OpenDataset(_pathDataset);
             }
         }
+        
         private void OpenDataset(string path)
         {
             if (Directory.Exists(path))
@@ -2183,35 +2823,38 @@ namespace NESPDataViewer
             }
             else Logger.LogError("OpenDataset", path + " does not exist");
         }
+        
+
         #endregion
 
 
 
         #region ZOOM
+        
         private void hScrollBar1_ValueChanged(object sender, EventArgs e)
         {
             this.Cursor = Cursors.WaitCursor;
             XDate startx = new XDate(_firstDate.Year, _firstDate.Month, _firstDate.Day, _firstDate.Hour, _firstDate.Minute, _firstDate.Second);
-
+            
             XDate endx = new XDate(startx);
-            startx.AddMinutes(hScrollBar1.Value * _minutesPage);
-            endx.AddMinutes((hScrollBar1.Value + 1) * _minutesPage);
+            startx.AddMinutes(hScrollBar1.Value*_minutesPage);
+            endx.AddMinutes((hScrollBar1.Value + 1)*_minutesPage);
             for (int i = 0; i < zedGraphControl1.MasterPane.PaneList.Count; i++)
             {
                 zedGraphControl1.MasterPane[i].XAxis.Scale.Min = (double)startx;
                 zedGraphControl1.MasterPane[i].XAxis.Scale.Max = (double)endx;
             }
             int pixelunits = (int)Math.Ceiling((double)(hScrollBar1.Width - 130) / hScrollBar1.Maximum);
-            lbScrollTime.Location = new Point(hScrollBar1.Left + pixelunits * hScrollBar1.Value, lbScrollTime.Location.Y);
+            lbScrollTime.Location = new Point(hScrollBar1.Left + pixelunits* hScrollBar1.Value,lbScrollTime.Location.Y);
             lbScrollTime.Text = String.Format("{0}-{1}", startx.DateTime.ToShortTimeString(), endx.DateTime.ToShortTimeString());
 
             if (_isAdaptingPointSize) SetPointSize();
 
             zedGraphControl1.AxisChange();
             zedGraphControl1.Refresh();
-
+            
             this.Cursor = Cursors.Default;
-
+            
         }
 
         private void buttonZoomOut_Click(object sender, EventArgs e)
@@ -2244,11 +2887,12 @@ namespace NESPDataViewer
                 buttonZoomOut.Text = "Scroll Through";
             }
         }
+
         #endregion
 
 
-
         #region SHOW/HIDE PANES
+        
         private void checkBox_CheckedChanged(object sender, EventArgs e)
         {
             string item = ((CheckBox)sender).Text;
@@ -2262,7 +2906,7 @@ namespace NESPDataViewer
             {
                 if (isPane) ShowPane(item);
             }
-
+           
             RefreshMasterPaneLayout();
         }
 
@@ -2272,30 +2916,30 @@ namespace NESPDataViewer
             int index = 0;
             //determine placement of pane
             bool isFound = false;
-
-
-            int insertedPane = (int)paneOrders[pane] - 1;
+     
+            
+            int insertedPane=(int)paneOrders[pane]-1;
             for (int i = 0; i < zedGraphControl1.MasterPane.PaneList.Count; i++)
             {
                 if (!isFound)
                 {
                     string panetitle = zedGraphControl1.MasterPane.PaneList[i].Title.Text;
                     //if (panetitle.CompareTo(pane) > 0)
-                    int paneIndex = (int)paneOrders[panetitle] - 1;
+                    int paneIndex=(int)paneOrders[panetitle] -1;
                     if (paneIndex > insertedPane)
                     {
                         index = i;
                         isFound = true;
                     }
-
+                    
                 }
             }
-
+             
             if (!isFound) index = zedGraphControl1.MasterPane.PaneList.Count;
 
             if (gp != null)
                 zedGraphControl1.MasterPane.PaneList.Insert(index, gp);
-
+    
         }
 
         private void RemovePane(string pane)
@@ -2305,89 +2949,16 @@ namespace NESPDataViewer
                 zedGraphControl1.MasterPane.PaneList.Remove(gp);
 
         }
-        #endregion
-
-
-
-
-        #region HOVER Commented OLD
-        /*
-        PointPair ppHover = null;
         
-        
-        private void HighlightGraphs(double x, double z)
-        {
-            if (_doesShowHover)
-            {
-                for (int i = 0; i < zedGraphControl1.MasterPane.PaneList.Count; i++)
-                {
-                    GraphPane gp = zedGraphControl1.MasterPane.PaneList[i];
-                    if (_htBoxes.Contains(gp.Title.Text))
-                    {
-                        BoxObj boxForLabel = (BoxObj)_htBoxes[gp.Title];
-                        gp.GraphObjList.Clear();
-
-                        boxForLabel = new BoxObj(x, gp.YAxis.Scale.Max, z, gp.YAxis.Scale.Max - gp.YAxis.Scale.Min, Color.Black, Color.PapayaWhip);
-                        boxForLabel.Location.CoordinateFrame = CoordType.AxisXYScale;
-                        boxForLabel.Border.Style = System.Drawing.Drawing2D.DashStyle.DashDot;
-
-                        //// place the box behind the axis items, so the grid is drawn on top of it
-                        boxForLabel.ZOrder = ZOrder.F_BehindGrid;
-                        _htBoxes[gp.Title] = boxForLabel;
-                        gp.GraphObjList.Add(boxForLabel);
-                    }
-                }
-                zedGraphControl1.AxisChange();
-                this.Refresh();
-            }
-        }
 
 
+        #endregion       
 
-        string zedGraphControl1_PointValueEvent(ZedGraphControl sender, GraphPane pane, CurveItem curve, int iPt)
-        {
-
-            if (curve[iPt] != ppHover)
-            {
-                ppHover = curve[iPt];
-                if (pictureBox1.Visible)
-                {
-                    pictureBox1.Visible = false;
-                }
-                if (curve.Label.Text == "photos")
-                {
-                    PointF pf = pane.GeneralTransform(curve[iPt].X, curve[iPt].Y, CoordType.AxisXYScale);
-                    string[] split = curve[iPt].Tag.ToString().Split(',');
-                    pictureBox1.Image = Image.FromFile(split[1]);
-                    pictureBox1.Location = new Point(Convert.ToInt32(pf.X), Convert.ToInt32(pf.Y) - pictureBox1.Height);
-                    pictureBox1.BringToFront();
-                    pictureBox1.Visible = true;
-                    return split[0];
-                }
-                else if (curve.Label.Text.StartsWith("Anno"))
-                {
-                    HighlightGraphs(curve[iPt].Z, curve[iPt].X - curve[iPt].Z);
-                }
-
-            }
-            else if (curve.Label.Text == "photos")
-            {
-                string[] split = curve[iPt].Tag.ToString().Split(',');
-                return split[0];
-            }
-
-            if (curve[iPt].Tag != null)
-                return curve[iPt].Tag.ToString();
-            else return curve[iPt].ToString();
-        }
-
-
-        */
-        #endregion
 
 
         #region HOVER
-        
+
+
         PointPair ppHover = null;
         private void HighlightGraphs(double x, double z)
         {
@@ -2415,8 +2986,8 @@ namespace NESPDataViewer
                 this.Refresh();
             }
         }
-
-
+        
+        
         string zedGraphControl1_PointValueEvent(ZedGraphControl sender, GraphPane pane, CurveItem curve, int iPt)
         {
 
@@ -2454,7 +3025,12 @@ namespace NESPDataViewer
             else return curve[iPt].ToString();
         }
 
+
+
         #endregion
+
+        
+
 
         #endregion
 
