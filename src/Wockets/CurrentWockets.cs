@@ -22,12 +22,12 @@ namespace Wockets
         /// <summary>
         /// The version number of the wockets software
         /// </summary>
-        public static string _Version="1.38";
+        public static string _Version="1.39";
 
         /// <summary>
         /// The date the software was last modified
         /// </summary>
-        public static string _Date ="May 25th, 2010";
+        public static string _Date ="June 2nd, 2010";
 
         /// <summary>
         /// Specifies the last error code reported
