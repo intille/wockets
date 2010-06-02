@@ -1,4 +1,4 @@
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -9,6 +9,11 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Wockets</RootNamespace>
     <AssemblyName>Wockets</AssemblyName>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>2.0</OldToolsVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -370,10 +375,10 @@
     <Compile Include="..\..\src\Wockets\Sensors\SensorModes.cs">
       <Link>Sensors\SensorModes.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\CR.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Commands\CR.cs">
       <Link>Data\Commands\CR.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\GET_BR.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_BR.cs">
       <Link>Data\Commands\GET_BR.cs</Link>
     </Compile>
   </ItemGroup>

@@ -214,6 +214,7 @@ namespace Wockets.Receivers
                 }
                 else
                 {
+                    _Reconnections++;
                    /* if (_Reconnections == 5) //after 20 attempts
                         backoff = 1000 + random.Next(10000);
                     else if (_Reconnections == 30)
@@ -222,7 +223,7 @@ namespace Wockets.Receivers
                         backoff = 60000 + random.Next(10000);   */                
                 }
 
-                _Reconnections++;
+                
             }
         }
 

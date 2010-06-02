@@ -173,6 +173,10 @@ typedef struct{
 
 unsigned char num_skipped_timer_interrupts;
 unsigned char wocket_status;
+unsigned short xs[256];
+unsigned short ys[256];
+unsigned short zs[256];
+unsigned short scounter;
 
 void _wocket_initialize(void);
 void _wocket_set_master_mode(void);

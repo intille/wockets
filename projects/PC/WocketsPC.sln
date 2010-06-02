@@ -1,5 +1,5 @@
-Microsoft Visual Studio Solution File, Format Version 9.00
-# Visual Studio 2005
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataMerger", "DataMerger.csproj", "{13A2AF07-A286-468D-9F31-AD1AC957DFF5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IO", "IO.csproj", "{1D75F70F-B268-4262-817A-4A0D39E90F86}"
@@ -27,6 +27,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WocketsWeka", "WocketsWeka.csproj", "{E5BB25A9-1913-4C1A-BBCF-51F2554D0C42}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OxyconSynchronization", "OxyconSynchronization.csproj", "{E788D791-7436-4871-BA17-B286757995BE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RepCounter", "..\RepCounter\RepCounter.csproj", "{B8CAD1DD-1D0B-483C-8B56-AE297B5EAB28}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -173,6 +175,16 @@ Global
 		{E788D791-7436-4871-BA17-B286757995BE}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{E788D791-7436-4871-BA17-B286757995BE}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{E788D791-7436-4871-BA17-B286757995BE}.Release|Win32.ActiveCfg = Release|Any CPU
+		{B8CAD1DD-1D0B-483C-8B56-AE297B5EAB28}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8CAD1DD-1D0B-483C-8B56-AE297B5EAB28}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8CAD1DD-1D0B-483C-8B56-AE297B5EAB28}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{B8CAD1DD-1D0B-483C-8B56-AE297B5EAB28}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{B8CAD1DD-1D0B-483C-8B56-AE297B5EAB28}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{B8CAD1DD-1D0B-483C-8B56-AE297B5EAB28}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8CAD1DD-1D0B-483C-8B56-AE297B5EAB28}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8CAD1DD-1D0B-483C-8B56-AE297B5EAB28}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{B8CAD1DD-1D0B-483C-8B56-AE297B5EAB28}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{B8CAD1DD-1D0B-483C-8B56-AE297B5EAB28}.Release|Win32.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

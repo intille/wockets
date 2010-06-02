@@ -1,14 +1,19 @@
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.50727</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{E5BB25A9-1913-4C1A-BBCF-51F2554D0C42}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>WocketsWeka</RootNamespace>
     <AssemblyName>WocketsWeka</AssemblyName>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>2.0</OldToolsVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -582,118 +587,140 @@
     <Compile Include="..\..\src\WocketsWeka\weka\WeightedInstancesHandler.cs">
       <Link>weka\WeightedInstancesHandler.cs</Link>
     </Compile>
-    
-    
-    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\ASEvaluation.cs" >
+    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\ASEvaluation.cs">
       <Link>weka\attributeSelection\ASEvaluation.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\ASSearch.cs" >
+    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\ASSearch.cs">
       <Link>weka\attributeSelection\ASSearch.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\AttributeEvaluator.cs" >
+    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\AttributeEvaluator.cs">
       <Link>weka\attributeSelection\AttributeEvaluator.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\AttributeSelection.cs" >
+    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\AttributeSelection.cs">
       <Link>weka\attributeSelection\AttributeSelection.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\AttributeTransformer.cs" >
+    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\AttributeTransformer.cs">
       <Link>weka\attributeSelection\AttributeTransformer.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\BestFirst.cs" >
+    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\BestFirst.cs">
       <Link>weka\attributeSelection\BestFirst.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\CfsSubsetEval.cs" >
+    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\CfsSubsetEval.cs">
       <Link>weka\attributeSelection\CfsSubsetEval.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\ClassifierSubsetEval.cs" >
+    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\ClassifierSubsetEval.cs">
       <Link>weka\attributeSelection\ClassifierSubsetEval.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\ConsistencySubsetEval.cs" >
+    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\ConsistencySubsetEval.cs">
       <Link>weka\attributeSelection\ConsistencySubsetEval.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\ErrorBasedMeritEvaluator.cs" >
+    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\ErrorBasedMeritEvaluator.cs">
       <Link>weka\attributeSelection\ErrorBasedMeritEvaluator.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\ExhaustiveSearch.cs" >
+    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\ExhaustiveSearch.cs">
       <Link>weka\attributeSelection\ExhaustiveSearch.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\GainRatioAttributeEval.cs" >
+    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\GainRatioAttributeEval.cs">
       <Link>weka\attributeSelection\GainRatioAttributeEval.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\GeneticSearch.cs" >
+    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\GeneticSearch.cs">
       <Link>weka\attributeSelection\GeneticSearch.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\GreedyStepwise.cs" >
+    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\GreedyStepwise.cs">
       <Link>weka\attributeSelection\GreedyStepwise.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\HoldOutSubsetEvaluator.cs" >
+    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\HoldOutSubsetEvaluator.cs">
       <Link>weka\attributeSelection\HoldOutSubsetEvaluator.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\InfoGainAttributeEval.cs" >
+    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\InfoGainAttributeEval.cs">
       <Link>weka\attributeSelection\InfoGainAttributeEval.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\OneRAttributeEval.cs" >
+    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\OneRAttributeEval.cs">
       <Link>weka\attributeSelection\OneRAttributeEval.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\RandomSearch.cs" >
+    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\RandomSearch.cs">
       <Link>weka\attributeSelection\RandomSearch.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\RankedOutputSearch.cs" >
+    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\RankedOutputSearch.cs">
       <Link>weka\attributeSelection\RankedOutputSearch.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\Ranker.cs" >
+    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\Ranker.cs">
       <Link>weka\attributeSelection\Ranker.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\RankSearch.cs" >
+    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\RankSearch.cs">
       <Link>weka\attributeSelection\RankSearch.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\ReliefFAttributeEval.cs" >
+    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\ReliefFAttributeEval.cs">
       <Link>weka\attributeSelection\ReliefFAttributeEval.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\StartSetHandler.cs" >
+    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\StartSetHandler.cs">
       <Link>weka\attributeSelection\StartSetHandler.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\SubsetEvaluator.cs" >
+    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\SubsetEvaluator.cs">
       <Link>weka\attributeSelection\SubsetEvaluator.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\SymmetricalUncertAttributeEval.cs" >
+    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\SymmetricalUncertAttributeEval.cs">
       <Link>weka\attributeSelection\SymmetricalUncertAttributeEval.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\UnsupervisedAttributeEvaluator.cs" >
+    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\UnsupervisedAttributeEvaluator.cs">
       <Link>weka\attributeSelection\UnsupervisedAttributeEvaluator.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\UnsupervisedSubsetEvaluator.cs" >
+    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\UnsupervisedSubsetEvaluator.cs">
       <Link>weka\attributeSelection\UnsupervisedSubsetEvaluator.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\WrapperSubsetEval.cs" >
+    <Compile Include="..\..\src\WocketsWeka\weka\attributeSelection\WrapperSubsetEval.cs">
       <Link>weka\attributeSelection\WrapperSubsetEval.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\weka\core\OptionHandler.cs" >
+    <Compile Include="..\..\src\WocketsWeka\weka\core\OptionHandler.cs">
       <Link>weka\core\OptionHandler.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\weka\core\SelectedTag.cs" >
+    <Compile Include="..\..\src\WocketsWeka\weka\core\SelectedTag.cs">
       <Link>weka\core\SelectedTag.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\weka\core\Tag.cs" >
+    <Compile Include="..\..\src\WocketsWeka\weka\core\Tag.cs">
       <Link>weka\core\Tag.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\weka\filters\supervised\attribute\AttributeSelection.cs" >
+    <Compile Include="..\..\src\WocketsWeka\weka\filters\supervised\attribute\AttributeSelection.cs">
       <Link>weka\filters\supervised\attribute\AttributeSelection.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\weka\filters\supervised\attribute\ClassOrder.cs" >
+    <Compile Include="..\..\src\WocketsWeka\weka\filters\supervised\attribute\ClassOrder.cs">
       <Link>weka\filters\supervised\attribute\ClassOrder.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\weka\filters\supervised\attribute\Discretize.cs" >
+    <Compile Include="..\..\src\WocketsWeka\weka\filters\supervised\attribute\Discretize.cs">
       <Link>weka\filters\supervised\attribute\Discretize.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\weka\filters\supervised\attribute\NominalToBinary.cs" >
+    <Compile Include="..\..\src\WocketsWeka\weka\filters\supervised\attribute\NominalToBinary.cs">
       <Link>weka\filters\supervised\attribute\NominalToBinary.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\weka\filters\unsupervised\attribute\Discretize.cs" >
+    <Compile Include="..\..\src\WocketsWeka\weka\filters\unsupervised\attribute\Discretize.cs">
       <Link>weka\filters\unsupervised\attribute\Discretize.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\weka\filters\unsupervised\attribute\NumericToBinary.cs" >
+    <Compile Include="..\..\src\WocketsWeka\weka\filters\unsupervised\attribute\NumericToBinary.cs">
       <Link>weka\filters\unsupervised\attribute\NumericToBinary.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\BandPass.cs">
+      <Link>Utils\Filters\BandPass.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\Butterworth.cs">
+      <Link>Utils\Filters\Butterworth.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\Filter.cs">
+      <Link>Utils\Filters\Filter.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\Frequency.cs">
+      <Link>Utils\Filters\Frequency.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\Order.cs">
+      <Link>Utils\Filters\Order.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\SamplingRates.cs">
+      <Link>Utils\Filters\SamplingRates.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\Type.cs">
+      <Link>Utils\Filters\Type.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\ButterworthDF.cs" >
+      <Link>Utils\Filters\ButterworthDF.cs</Link>
     </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

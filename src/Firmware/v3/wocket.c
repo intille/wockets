@@ -26,6 +26,7 @@ unsigned short z=0;
 
 
 
+
 unsigned char _wocket_get_baudrate(void)
 {
 	return ((wocket_status>>BIT2_BIT3_BAUD_RATE) & 0x03);
@@ -247,8 +248,13 @@ void _send_data_bufferred(void)
 			//unsigned short y=_atmega_a2dConvert10bit(ADC2);
 			//unsigned short z=_atmega_a2dConvert10bit(ADC1);
 
-			for (int i=0;(i<1200);i++){
-				_transmit_packet(_encode_packet(x++,y++,z++));
+			unsigned mycounter=0;
+			for (int i=0;(i<2400);i++){
+				//_transmit_packet(_encode_packet(x++,y++,z++));
+				_transmit_packet(_encode_packet(xs[mycounter],ys[mycounter],zs[mycounter]));
+				mycounter++;
+				if (mycounter>255)
+					mycounter=0;
 			/*	if ((i==2400))
 					for (int j=0;(j<100);j++)
 						_delay_ms(5);*/
