@@ -30,7 +30,8 @@ unsigned char wakeup=0;
 unsigned char sample=0;
 int main()
 {
-
+	
+scounter=0;
 
 	_wocket_initialize();
 		
@@ -40,7 +41,6 @@ int main()
   	power_timer0_disable();
   	power_timer1_disable();
   	power_twi_disable();
-
 
 
 	while(1){
@@ -105,9 +105,11 @@ ISR(TIMER2_OVF_vect)
 	
 	power_adc_enable();
 	_atmega_adc_turn_on();
-	unsigned short x=_atmega_a2dConvert10bit(ADC3);
-	unsigned short y=_atmega_a2dConvert10bit(ADC2);
-	unsigned short z=_atmega_a2dConvert10bit(ADC1);
+	xs[scounter]=_atmega_a2dConvert10bit(ADC3);
+	ys[scounter]=_atmega_a2dConvert10bit(ADC2);
+	zs[scounter++]=_atmega_a2dConvert10bit(ADC1);
+	if (scounter>255)
+		scounter=0;
 	_atmega_adc_turn_off();
 	power_adc_disable();
 
@@ -138,7 +140,7 @@ ISR(TIMER2_OVF_vect)
 		//	 _send_data();
 		//_send_packet_count(600);
 	
-		_send_packet_count(1200);
+		_send_packet_count(2400);
 		_send_data_bufferred();
 
 			seconds_passed=0;

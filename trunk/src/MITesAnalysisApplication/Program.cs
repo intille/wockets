@@ -613,7 +613,7 @@ namespace MITesAnalysisApplication
 
 
 
-            FeatureExtractor.Initialize(wc, classifierConfiguration, annotatedSession.OverlappingActivityLists[0]);
+            //FullFeatureExtractor.Initialize(wc, classifierConfiguration, annotatedSession.OverlappingActivityLists[0]);
 
             TextWriter twt = new StreamWriter(storage + "\\time.csv");
             TextWriter tw = new StreamWriter(storage + "\\output.arff");

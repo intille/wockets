@@ -676,7 +676,7 @@ namespace Wockets
 
        
                                     //skip if got everything
-                               if (sensor._ReceivedPackets == 1200)
+                               if (sensor._ReceivedPackets == 2400)
                                     continue;
                                else
                                    currentReceiver.Update();

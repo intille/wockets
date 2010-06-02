@@ -59,7 +59,7 @@ namespace Wockets.Data.Plotters
                 skippedPoints = 2;
 
             this.aPanel = aPanel;
-            this.plotAreaSize = new Size(this.aPanel.Width, ((int)(this.aPanel.Height)));
+            this.plotAreaSize = new Size(this.aPanel.Width, ((int)(this.aPanel.Height *0.60)));
             graphSize = (int)Math.Floor((plotAreaSize.Height / ((double)numSensors)));
 
 
@@ -160,118 +160,128 @@ namespace Wockets.Data.Plotters
         int x = 0;
         public void Draw(Graphics g)
         {
-            int lastColumnDrawn = 0;
 
-            for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
-            {
-                int tail = this.decoderTails[i];
-                int currentHead = tail;
 
-                if (CurrentWockets._Configuration._MemoryMode == Wockets.Data.Configuration.MemoryConfiguration.NON_SHARED)
-                {
-                    currentHead = CurrentWockets._Controller._Sensors[i]._Decoder._Head;
-                }
-#if (PocketPC)
-                else if (CurrentWockets._Configuration._MemoryMode == Wockets.Data.Configuration.MemoryConfiguration.SHARED)
-                {
-                    shead[i].Read(head, 0, 4);
-                    currentHead = BitConverter.ToInt32(head, 0);
-                    shead[i].Seek(0, System.IO.SeekOrigin.Begin);
-                }
-#endif
-               
+                int lastColumnDrawn = 0;
 
-                while (tail != currentHead)
+                for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
                 {
-                    if (CurrentWockets._Configuration._MemoryMode == Wockets.Data.Configuration.MemoryConfiguration.NON_SHARED)                    
-                        data = ((AccelerationData)CurrentWockets._Controller._Sensors[i]._Decoder._Data[tail]);                    
+                    int tail = this.decoderTails[i];
+                    int currentHead = tail;
+
+                    if (CurrentWockets._Configuration._MemoryMode == Wockets.Data.Configuration.MemoryConfiguration.NON_SHARED)
+                    {
+                        currentHead = CurrentWockets._Controller._Sensors[i]._Decoder._Head;
+                    }
 #if (PocketPC)
                     else if (CurrentWockets._Configuration._MemoryMode == Wockets.Data.Configuration.MemoryConfiguration.SHARED)
                     {
-                        sdata[i].Read(timestamp, 0, sizeof(double));
-                        data.UnixTimeStamp = BitConverter.ToDouble(timestamp, 0);
-                        sdata[i].Read(acc, 0, sizeof(short));
-                        data.X = BitConverter.ToInt16(acc, 0);
-                        sdata[i].Read(acc, 0, sizeof(short));
-                        data.Y = BitConverter.ToInt16(acc, 0);
-                        sdata[i].Read(acc, 0, sizeof(short));
-                        data.Z = BitConverter.ToInt16(acc, 0);
+                        shead[i].Read(head, 0, 4);
+                        currentHead = BitConverter.ToInt32(head, 0);
+                        shead[i].Seek(0, System.IO.SeekOrigin.Begin);
                     }
-#endif         
-                    if (!((data.UnixTimeStamp > 0) && (data.UnixTimeStamp >= this.lastUnixTimestamps[i])))
-                        break;
-
-
-                    //check the data comes from the sensor i if the decoder is used with multiple sensors
-
-                    if (this.currentColumns[i] > lastColumnDrawn)
-                        lastColumnDrawn = this.currentColumns[i];
-
-                    if (this.currentColumns[i] >= this.plotAreaSize.Width - 1)
-                    {
-                        g.FillRectangle(blueBrush, 0, 0, this.plotAreaSize.Width + 10, this.plotAreaSize.Height);
-                        requiresFullRedraw = true;
-                        this.currentColumns[i] = 0;
-                    }
-
-
-                    g.DrawLine(p[0], this.currentColumns[i], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * previousVals[i][0]), this.currentColumns[i] + 1, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.X));
-                    g.DrawLine(p[1], this.currentColumns[i], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * previousVals[i][1]), this.currentColumns[i] + 1, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Y));
-                    g.DrawLine(p[2], this.currentColumns[i], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * previousVals[i][2]), this.currentColumns[i] + 1, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Z));
-
-                    if (this.currentColumns[i] > lastColumn[i])
-                        lastColumn[i] = this.currentColumns[i];
-        
-
-                    previousVals[i][0] = data.X;
-                    previousVals[i][1] = data.Y;
-                    previousVals[i][2] = data.Z;
-                    previousTimes[i] = data.UnixTimeStamp;
-
-                    this.currentColumns[i] = this.currentColumns[i] + 1;
-
-
-
-
-                    this.lastUnixTimestamps[i] = data.UnixTimeStamp;
-
-                    if (tail >= (Wockets.Decoders.Accelerometers.WocketsDecoder.BUFFER_SIZE - 1))
-                    {
-                        tail = 0;
-#if (PocketPC)
-                        if (CurrentWockets._Configuration._MemoryMode == Wockets.Data.Configuration.MemoryConfiguration.SHARED)                    
-                            this.sdata[i].Seek(0, System.IO.SeekOrigin.Begin);
 #endif
+
+
+                    while (tail != currentHead)
+                    {
+                        try{
+
+                        if (CurrentWockets._Configuration._MemoryMode == Wockets.Data.Configuration.MemoryConfiguration.NON_SHARED)
+                            data = ((AccelerationData)CurrentWockets._Controller._Sensors[i]._Decoder._Data[tail]);
+#if (PocketPC)
+                        else if (CurrentWockets._Configuration._MemoryMode == Wockets.Data.Configuration.MemoryConfiguration.SHARED)
+                        {
+                            sdata[i].Read(timestamp, 0, sizeof(double));
+                            data.UnixTimeStamp = BitConverter.ToDouble(timestamp, 0);
+                            sdata[i].Read(acc, 0, sizeof(short));
+                            data.X = BitConverter.ToInt16(acc, 0);
+                            sdata[i].Read(acc, 0, sizeof(short));
+                            data.Y = BitConverter.ToInt16(acc, 0);
+                            sdata[i].Read(acc, 0, sizeof(short));
+                            data.Z = BitConverter.ToInt16(acc, 0);
+                        }
+#endif
+                        if (!((data.UnixTimeStamp > 0) && (data.UnixTimeStamp >= this.lastUnixTimestamps[i])))
+                            break;
+
+
+                        //check the data comes from the sensor i if the decoder is used with multiple sensors
+
+                        if (this.currentColumns[i] > lastColumnDrawn)
+                            lastColumnDrawn = this.currentColumns[i];
+
+                        if (this.currentColumns[i] >= this.plotAreaSize.Width - 1)
+                        {
+                            g.FillRectangle(blueBrush, 0, 0, this.plotAreaSize.Width + 10, this.plotAreaSize.Height);
+                            requiresFullRedraw = true;
+                            this.currentColumns[i] = 0;
+                        }
+
+
+                        g.DrawLine(p[0], this.currentColumns[i], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * previousVals[i][0]), this.currentColumns[i] + 1, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.X));
+                        g.DrawLine(p[1], this.currentColumns[i], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * previousVals[i][1]), this.currentColumns[i] + 1, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Y));
+                        g.DrawLine(p[2], this.currentColumns[i], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * previousVals[i][2]), this.currentColumns[i] + 1, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Z));
+
+                        if (this.currentColumns[i] > lastColumn[i])
+                            lastColumn[i] = this.currentColumns[i];
+
+
+                        previousVals[i][0] = data.X;
+                        previousVals[i][1] = data.Y;
+                        previousVals[i][2] = data.Z;
+                        previousTimes[i] = data.UnixTimeStamp;
+
+                        this.currentColumns[i] = this.currentColumns[i] + 1;
+
+
+
+
+                        this.lastUnixTimestamps[i] = data.UnixTimeStamp;
+
+                        if (tail >= (Wockets.Decoders.Accelerometers.WocketsDecoder.BUFFER_SIZE - 1))
+                        {
+                            tail = 0;
+#if (PocketPC)
+                            if (CurrentWockets._Configuration._MemoryMode == Wockets.Data.Configuration.MemoryConfiguration.SHARED)
+                                this.sdata[i].Seek(0, System.IO.SeekOrigin.Begin);
+#endif
+                        }
+                        else
+                            tail++;
+
+
+                        }
+                        catch (Exception e)
+                        {
+                        }
                     }
-                    else
-                        tail++;
-
+                    this.decoderTails[i] = currentHead;
                 }
-                this.decoderTails[i] = currentHead;
-            }
 
 
 
 
-            if (requiresFullRedraw)
-            {
-                aPanel.Invalidate();
-                requiresFullRedraw = false;
-                this.aPanel.Width = this.aPanel.Width;
-                for (int k = 0; (k < CurrentWockets._Controller._Sensors.Count); k++)
+                if (requiresFullRedraw)
                 {
-                    this.currentColumns[k] = 0;
-                    lastColumn[k] = 0;
-                    firstColumn[k] = 999999;
-                }
+                    aPanel.Invalidate();
+                    requiresFullRedraw = false;
+                    this.aPanel.Width = this.aPanel.Width;
+                    for (int k = 0; (k < CurrentWockets._Controller._Sensors.Count); k++)
+                    {
+                        this.currentColumns[k] = 0;
+                        lastColumn[k] = 0;
+                        firstColumn[k] = 999999;
+                    }
 
-            }
-            else
-                for (int k = 0; (k < CurrentWockets._Controller._Sensors.Count); k++)
-                {
-                    aPanel.Invalidate(new System.Drawing.Rectangle(firstColumn[k], 0, lastColumn[k] - firstColumn[k], plotAreaSize.Height));
-                    firstColumn[k] = lastColumn[k];
                 }
+                else
+                    for (int k = 0; (k < CurrentWockets._Controller._Sensors.Count); k++)
+                    {
+                        aPanel.Invalidate(new System.Drawing.Rectangle(firstColumn[k], 0, lastColumn[k] - firstColumn[k], plotAreaSize.Height));
+                        firstColumn[k] = lastColumn[k];
+                    }
+
 
         }
 #else
