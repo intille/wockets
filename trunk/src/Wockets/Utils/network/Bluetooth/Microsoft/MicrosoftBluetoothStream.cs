@@ -85,11 +85,11 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
 #if (PocketPC)
                 _RemoteEP = new MicrosoftBluetoothEndPoint(this.address, BluetoothStream._SerialPort);
 #else
-                BluetoothAddress btaddress = new BluetoothAddress(address);
+                BluetoothAddress btaddress = new BluetoothAddress(this.address);
                 //Set BT Device Address
                 
                 //Set BT Device Pin
-                BluetoothSecurity.SetPin((BluetoothAddress)btaddress, "1234");
+                //BluetoothSecurity.SetPin((BluetoothAddress)btaddress, "1234");
 
                 // Create a connection channel specifying the Bluetooth-Serial end-points 
                 _RemoteEP = new BluetoothEndPoint((BluetoothAddress)btaddress, BluetoothService.SerialPort);

@@ -167,16 +167,18 @@ namespace Wockets.Utils.network.Bluetooth
 #else
             if (BitConverter.IsLittleEndian)
             {
-                for (int i = 0; i < address.Length; i++)
-                    this.address[i] = address[i];
-             
-            }
-            else
-            {
-                //reverse address depending on the architecture
+              //reverse address depending on the architecture
                 for (int i = 0; i < address.Length; i++)
                     this.address[this.address.Length - 1 - i] = address[i];
            
+               
+            }
+            else
+            {
+
+                for (int i = 0; i < address.Length; i++)
+                    this.address[i] = address[i];
+               
             }
 #endif
             this.pin = pin;

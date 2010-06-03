@@ -182,7 +182,7 @@ namespace NESPDataViewer
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form3";
-            this.Text = "Sync View";
+            this.Text = "Sync View  - Version " + CurrentWockets._Version + " " + CurrentWockets._Date;
             this.Load += new System.EventHandler(this.Form3_Load);
             this.Resize += new System.EventHandler(this.Form1_Resize);
             this.menuStrip1.ResumeLayout(false);
