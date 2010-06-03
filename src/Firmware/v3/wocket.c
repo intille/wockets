@@ -303,29 +303,30 @@ void _receive_data(void)
         	opcode=aByte&0x1f;                                              
         	switch (opcode)
 			{
-            	case (unsigned char)GET_BATTERY_LEVEL:
-                case (unsigned char)GET_PACKET_COUNT:
-                case (unsigned char)GET_SENSOR_SENSITIVITY:
-                case (unsigned char)GET_CALIBRATION_VALUES:
-                case (unsigned char)GET_SAMPLING_RATE:
-                case (unsigned char)GET_ALIVE_TIMER:
-                case (unsigned char)GET_POWER_DOWN_TIMER:
-                case (unsigned char)RESET_WOCKET:
-                case (unsigned char)GET_BAUD_RATE:
-                case (unsigned char)ALIVE:                      
+            	case (unsigned char)GET_BT:
+                case (unsigned char)GET_BP:
+                case (unsigned char)GET_PC:
+                case (unsigned char)RST_BT:
+                case (unsigned char)GET_SEN:
+                case (unsigned char)GET_CAL:
+                case (unsigned char)GET_SR:
+                case (unsigned char)GET_ALT:
+                case (unsigned char)GET_PDT:
+                case (unsigned char)RST_WKT:                      
+                case (unsigned char)ALIVE:
                 case (unsigned char)PAUSE:
-                case (unsigned char)RESUME:
+				case (unsigned char)RESUME:
+				case (unsigned char)GET_TM:
                 	command_length=1;
                     break;
-                case (unsigned char)SET_LED:
-                case (unsigned char)SET_SENSOR_SENSITIVITY:            
-                case (unsigned char)SET_SAMPLING_RATE:
-                case (unsigned char)SET_ALIVE_TIMER:
-                case (unsigned char)SET_POWER_DOWN_TIMER:
-                case (unsigned char)SET_BAUD_RATE:                                              
+                case (unsigned char)SET_SEN:
+                case (unsigned char)SET_SR:            
+                case (unsigned char)SET_ALT:
+                case (unsigned char)SET_PDT:
+                case (unsigned char)SET_TM:                
                      command_length=2;
                      break;
-                case (unsigned char)SET_CALIBRATION_VALUES:
+                case (unsigned char)SET_CAL:
                       command_length=10;                                                              
                       break;                                                          
     		}
@@ -363,7 +364,7 @@ void _receive_data(void)
 				
                             break;
                     //setup battery buffer
-                case (unsigned char) GET_BATTERY_LEVEL:             
+                case (unsigned char) GET_BT:             
                             word=_atmega_a2dConvert10bit(ADC4);
                             aBuffer[0]=m_BATTERY_LEVEL_BYTE0;
                             aBuffer[1]=m_BATTERY_LEVEL_BYTE1(word);
@@ -375,24 +376,8 @@ void _receive_data(void)
 							else
 								_greenled_turn_on();                                                                              */
                             break;
-                    case (unsigned char) SET_BAUD_RATE:
-                           /* if (_atmega_a2dConvert10bit(ADC4)<350)
-                                    break;
-                            else if (eeprom_is_ready())
-                            {
-                                    word=m_BAUD_RATE_BYTE2_TO_BR(aBuffer[1]);
-                                    eeprom_write_word((uint16_t *)BAUD_RATE_ADDRESS,word);
-                                    processed_counter=command_counter;
-                            }*/
-                            break;
-                    case (unsigned char) GET_BAUD_RATE:
-                            /*word=eeprom_read_word((uint16_t *)((uint16_t)BAUD_RATE_ADDRESS));
-                            aBuffer[0]=m_BAUD_RATE_BYTE0;
-                            aBuffer[1]=m_BAUD_RATE_BYTE1(word);                             
-                            processed_counter=command_counter;
-                            response_length=2; */
-                            break;
-                    case (unsigned char) SET_CALIBRATION_VALUES:                                                                    
+               
+                    case (unsigned char) SET_CAL:                                                                    
                             if (eeprom_is_ready())
                             {
                                     //do nothing if battery is low
@@ -433,7 +418,7 @@ void _receive_data(void)
                             }                                                                                                                       
                             //enable global interrupts
                             break;
-                    case (unsigned char) GET_CALIBRATION_VALUES:    
+                    case (unsigned char) GET_CAL:    
                                                                     
                             if (eeprom_is_ready())
                             {                                                               

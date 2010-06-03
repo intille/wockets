@@ -23,42 +23,56 @@
 
 #define PERFECT_SAMPLING_FREQUENCY 90
 
-/* Wockets Packet Format */
+
+/**  WOCKETS PDU FORMAT **/
+
+/* PDU Types */
+
+#define UNCOMPRESSED_PDU 0b00
+#define COMMAND_PDU 0b01
+#define RESPONSE_PDU 0b10
+#define COMPRESSED_PDU 0b11
+
+/* PDU Header */
+#define m_HEADER(type) (0x80|(type<<5))
+
+/* Uncompressed PDU */
+#define m_UNCOMPRESSED_PDU_BYTE1(x) (m_HEADER(UNCOMPRESSED_PDU)|(x>>8))
+#define m_UNCOMPRESSED_PDU_BYTE2(x) (0x7f & (x>>1))
+#define m_UNCOMPRESSED_PDU_BYTE3(x,y) ((0x40 & (x<<6)) | (0x3f & (y>>4)))
+#define m_UNCOMPRESSED_PDU_BYTE1(y,z) ((0x78 & (y<<3)) | (0x07 & (z>>7)))
+#define m_UNCOMPRESSED_PDU_BYTE1(z) (0x7f & z)
+
+/*
+
+#define RESPONSE_HEADER(opcode) 	(0xc0|opcode)
+
 #define HEADER_PACKET 0x80
 #define COMMAND_PREFIX 0b101
 
 /* Reserved Wockets Commands Opcodes */
 
-#define GET_BATTERY_LEVEL 			0b00000
-#define GET_PACKET_COUNT  			0b00001
-#define GET_SLEEP_MODE    			0b00010
-#define SET_SLEEP_MODE    			0b00011
-#define SET_LED           			0b00100
-#define RESET_BLUETOOTH   			0b00101
-#define GET_SENSOR_SENSITIVITY 		0b00110
-#define SET_SENSOR_SENSITIVITY		0b00111
-#define GET_CALIBRATION_VALUES		0b01000
-#define SET_CALIBRATION_VALUES		0b01001
-#define GET_TRANSMISSION_POWER		0b01010
-#define SET_TRANSMISSION_POWER		0b01011
-#define GET_SAMPLING_RATE			0b01100
-#define SET_SAMPLING_RATE			0b01101
-#define GET_DISCOVERABLE_STATUS		0b01110
-#define SET_DISCOVERABLE_STATUS		0b01111
-#define GET_TRANSMISSION_MODE		0b10000
-#define SET_TRANSMISSION_MODE		0b10001
-#define GET_ALIVE_TIMER				0b10010
-#define	SET_ALIVE_TIMER				0b10011
-#define GET_POWER_DOWN_TIMER		0b10100
-#define SET_POWER_DOWN_TIMER		0b10101
-#define RESET_WOCKET				0b10110
-#define GET_CONFIGURATION_TIMER		0b10111
-#define	SET_CONFIGURATION_TIMER		0b11000
-#define GET_BAUD_RATE				0b11001
-#define SET_BAUD_RATE				0b11010
-#define ALIVE						0b11011
-#define PAUSE						0b11100
-#define RESUME						0b11101
+#define GET_BT			0b00000
+#define GET_BP 			0b00001
+#define GET_PC 			0b00010
+#define RST_BT 			0b00011
+#define GET_SEN			0b00100
+#define SET_SEN			0b00101
+#define GET_CAL 		0b00110
+#define SET_CAL			0b00111
+#define GET_SR			0b01000
+#define SET_SR			0b01001
+#define GET_ALT			0b01010
+#define SET_ALT			0b01011
+#define GET_PDT			0b01100
+#define SET_PDT			0b01101
+#define RST_WKT			0b01110
+#define ALIVE			0b01111
+#define PAUSE			0b10000
+#define RESUME			0b10001
+#define GET_TM			0b10010
+#define	SET_TM			0b10011
+
 
 
 
@@ -80,8 +94,7 @@
 
 /* MACROS */
 
-/* Header Macros */
-#define RESPONSE_HEADER(opcode) 	(0xc0|opcode)
+
 
 /* Battery Level Macros */
 #define m_BATTERY_LEVEL_BYTE0			RESPONSE_HEADER(BATTERY_LEVEL_RESPONSE)
