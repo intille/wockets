@@ -1391,7 +1391,7 @@ namespace NESPDataViewer
             bool foundTime = false;
             double currentTime = 0;
 
-            int start = 0;
+            int start = -1;
             int end = 0;
             string s;
             string str_time;
@@ -1409,16 +1409,19 @@ namespace NESPDataViewer
                 
                 if (s == null)
                     break;
-                
-                str_time = s.Split(',')[0];
-                dt_time = DateTime.Parse(str_time); //str_time.Split(' ')[1]
-                currentTime = Wockets.Utils.WocketsTimer.GetDoubleTime(dt_time);
-                
+
+                if (s.Trim().CompareTo("") != 0)
+                {
+                    str_time = s.Split(',')[0];
+                    dt_time = DateTime.Parse(str_time); //str_time.Split(' ')[1]
+                    currentTime = Wockets.Utils.WocketsTimer.GetDoubleTime(dt_time);
+                }
+
                 start++;
                  
             }
 
-            end = start;
+            end = start +1;
             while (currentTime <= endUnix)
             {
                 s = tr.ReadLine();
@@ -1427,11 +1430,16 @@ namespace NESPDataViewer
                     break;
 
                 //currentTime = Convert.ToDouble(s.Split(',')[0]);
-                str_time = s.Split(',')[0];
-                dt_time = DateTime.Parse(str_time); 
-                currentTime = Wockets.Utils.WocketsTimer.GetDoubleTime(dt_time);
+                if (s.Trim().CompareTo("") != 0)
+                {
+                    str_time = s.Split(',')[0];
+                    dt_time = DateTime.Parse(str_time);
+                    currentTime = Wockets.Utils.WocketsTimer.GetDoubleTime(dt_time);
+                }
+                    end++;
+                
 
-                end++;
+
             }
 
 
