@@ -55,6 +55,12 @@ unsigned char _wocket_read_status(void)
 	return eeprom_read_byte((uint8_t *)((uint8_t)WOCKET_STATUS_ADDRESS));
 }
 
+
+unsigned char _wocket_read_sampling_rate(void)
+{
+	return eeprom_read_byte((uint8_t *)((uint8_t)WOCKET_SAMPLING_RATE_ADDRESS));
+}
+
 /* 
 	Function Name: _wocket_set_baudrate
 	Parameters: None
@@ -76,20 +82,15 @@ void _wocket_write_status(unsigned char status)
 */
 void _wocket_initialize(void)
 {
+	 
 	// Disable the watchdog timer. It has to be done at the beginning of the program.
 	_atmega_disable_watchdog();
 	_atmega_initialize(CPU_CLK_PRESCALAR_1024);
 	num_skipped_timer_interrupts=10;//(F_CPU/1024)/PERFECT_SAMPLING_FREQUENCY;
 
-	//read the baud rate from the eeprom
-	//unsigned short baudrate=_wocket_read_baudrate();
 	
-	//read wocket status byte
-	wocket_status=_wocket_read_status();
-
-
+	// If battery charged turn on the green led for 5 seconds then off 
 	unsigned short battery=_atmega_a2dConvert10bit(ADC4);
-
 	if (battery<700)
 	{
 		_greenled_turn_on();		
@@ -97,93 +98,61 @@ void _wocket_initialize(void)
 			_delay_ms(5);
 		_greenled_turn_off();
 	}
+
+	// read the status byte for the wockets
+	if ( (eeprom_is_ready()) && (battery>300))
+		_STATUS_BYTE=eeprom_read_byte((uint8_t *)((uint8_t)WOCKET_STATUS_ADDRESS));
+	//turn off and exit
+	else{
+	}
+	
+	if (_wocket_is_flag_set(_STATUS_INITIALIZED))
+	{
+		// read the sampling rate for the wockets
+		if ( (eeprom_is_ready()) && (battery>300))
+			_SAMPLING_RATE=eeprom_read_byte((uint8_t *)((uint8_t)WOCKET_SAMPLING_RATE_ADDRESS));
+		// Calculate the timer 
+		_TCNT2=	(255 - ((F_CPU/1024)/_SAMPLING_RATE));
+	}
+	else
+	{
+		//Setup the sampling rate to 90Hz by default
+		_SAMPLING_RATE=90;
+		_TCNT2=	170;
+		if ( (eeprom_is_ready()) && (battery>300))
+			eeprom_write_byte((uint8_t *)WOCKET_SAMPLING_RATE_ADDRESS,_SAMPLING_RATE);
+
+
+		//Update the status byte
+		_wocket_set_flag(_STATUS_INITIALIZED);		
+		if ( (eeprom_is_ready()) && (battery>300))
+			eeprom_write_byte((uint8_t *)WOCKET_STATUS_ADDRESS,_STATUS_BYTE);
+
+		//reset the wocket
+	}
+
 }
 
-/* 
-	Function Name:  _wocket_set_master_mode
-	Parameters: None
-	
-	Description: This function sets the wocket into master mode
-	
-*/
-void _wocket_set_master_mode(void)
+void _wocket_set_flag(unsigned char flag)
 {
-	// Set the status of the master mode to true
-	sbi(wocket_status, BIT0_MASTERSLAVE_STATUS);
+	sbi(_STATUS_BYTE, flag);
 }
 
 
-/* 
-	Function Name:  _wocket_set_slave_mode
-	Parameters: None
-	
-	Description: This function sets the wocket into slave mode
-	
-*/
-void _wocket_set_slave_mode(void)
+void _wocket_reset_flag(unsigned char flag)
 {
-	// Set the status of the master mode to true
-	cbi(wocket_status, BIT0_MASTERSLAVE_STATUS);
+		cbi(_STATUS_BYTE, flag);
 }
 
 
 
-/* 
-	Function Name:  _wocket_is_master
-	Parameters: None
-	
-	Description: Tests if the wocket is a master
-	
-*/
-unsigned char _wocket_is_master(void)
-{
-	// Set the status of the master mode to true
-	return ((wocket_status>>BIT0_MASTERSLAVE_STATUS) & 0x01);
+unsigned char _wocket_is_flag_set(unsigned char flag)
+{	
+	return ((_STATUS_BYTE>>flag) & 0x01);
 }
 
 
 
-/* 
-	Function Name:  _wocket_set_bursty_mode
-	Parameters: None
-	
-	Description: This function sets the wocket into bursty mode
-	
-*/
-void _wocket_set_bursty_mode(void)
-{
-	// Set the status of the master mode to true
-	sbi(wocket_status, BIT1_BURSTY_STATUS);
-}
-
-
-/* 
-	Function Name:  _wocket_set_continuous_mode
-	Parameters: None
-	
-	Description: This function sets the wocket into continuous mode
-	
-*/
-void _wocket_set_continuous_mode(void)
-{
-	// Set the status of the master mode to true
-	cbi(wocket_status, BIT1_BURSTY_STATUS);
-}
-
-
-
-/* 
-	Function Name:  _wocket_is_bursty
-	Parameters: None
-	
-	Description: Tests if the wocket is a master
-	
-*/
-unsigned char _wocket_is_bursty(void)
-{
-	// Check if the wocket is in bursty mode
-	return ((wocket_status>>BIT1_BURSTY_STATUS) & 0x01);
-}
 
 wockets_uncompressed_packet _encode_packet(unsigned short x, unsigned short y, unsigned short z)
 {
@@ -366,15 +335,11 @@ void _receive_data(void)
                     //setup battery buffer
                 case (unsigned char) GET_BT:             
                             word=_atmega_a2dConvert10bit(ADC4);
-                            aBuffer[0]=m_BATTERY_LEVEL_BYTE0;
-                            aBuffer[1]=m_BATTERY_LEVEL_BYTE1(word);
-                            aBuffer[2]=m_BATTERY_LEVEL_BYTE2(word);
+                            aBuffer[0]=m_BL_RSP_BYTE0;
+                            aBuffer[1]=m_BL_RSP_BYTE1(word);
+                            aBuffer[2]=m_BL_RSP_BYTE2(word);
                             processed_counter=command_counter;
-                            response_length=3;
-							/*if (_is_greenled_on())
-								_greenled_turn_off();
-							else
-								_greenled_turn_on();                                                                              */
+                            response_length=3;		                                                                          
                             break;
                
                     case (unsigned char) SET_CAL:                                                                    
@@ -387,28 +352,28 @@ void _receive_data(void)
                                     {       switch(address)
                                             {
                                                     case X1G_ADDRESS:
-                                                            word=m_CALIBRATION_BYTE2_TO_XN1G(aBuffer[2]) | m_CALIBRATION_BYTE3_TO_XN1G(aBuffer[3]);
+															word=m_SET_CAL_xn1g(aBuffer[2],aBuffer[3]);														                                                            
                                                             address=X1NG_ADDRESS;
                                                             break;
                                                     case X1NG_ADDRESS:
-                                                            word=m_CALIBRATION_BYTE3_TO_Y1G(aBuffer[3])|m_CALIBRATION_BYTE4_TO_Y1G(aBuffer[4])|m_CALIBRATION_BYTE5_TO_Y1G(aBuffer[5]);
+															word=m_SET_CAL_y1g(aBuffer[3],aBuffer[4],aBuffer[5]);                                                            
                                                             address=Y1G_ADDRESS;
                                                             break;
                                                     case Y1G_ADDRESS:
-                                                            word=m_CALIBRATION_BYTE5_TO_YN1G(aBuffer[5])|m_CALIBRATION_BYTE6_TO_YN1G(aBuffer[6]);//(((unsigned short)(aBuffer[5]&0x1f))<<5) | (((unsigned short)(aBuffer[6]&0x7c))>>2);
+															word= m_SET_CAL_yn1g(aBuffer[5],aBuffer[6]);                                                            
                                                             address=Y1NG_ADDRESS;
                                                             break;
                                                     case Y1NG_ADDRESS:
-                                                            word= m_CALIBRATION_BYTE6_TO_Z1G(aBuffer[6]) | m_CALIBRATION_BYTE7_TO_Z1G(aBuffer[7]) | m_CALIBRATION_BYTE8_TO_Z1G(aBuffer[8]) ;//(((unsigned short)(aBuffer[6]&0x03))<<8) | (((unsigned short)(aBuffer[7]&0x7f))<<1) | (((unsigned short)(aBuffer[8]&0x40))>>6);
+                                                            m_SET_CAL_z1g(aBuffer[6],aBuffer[7],aBuffer[8]);
                                                             address=Z1G_ADDRESS;
                                                             break;
                                                     case Z1G_ADDRESS:
-                                                            word= m_CALIBRATION_BYTE8_TO_ZN1G(aBuffer[8]) |m_CALIBRATION_BYTE9_TO_ZN1G(aBuffer[9]);
+															word=m_SET_CAL_zn1g(aBuffer[8],aBuffer[8]);                                                            
                                                             address=Z1NG_ADDRESS;
                                                             processed_counter=command_counter;
                                                             break;
                                                     default:
-                                                            word=m_CALIBRATION_BYTE1_TO_X1G(aBuffer[1])| m_CALIBRATION_BYTE2_TO_X1G(aBuffer[2]);                                                                                                                                            
+															word=m_SET_CAL_x1g(aBuffer[1],aBuffer[2]);                                                            
                                                             address=X1G_ADDRESS;
                                                             break;                                                                                                                                                                          
                                             }
@@ -419,10 +384,13 @@ void _receive_data(void)
                             //enable global interrupts
                             break;
                     case (unsigned char) GET_CAL:    
-                                                                    
+
+							/* Firmware response are written without compromising the sampling rate and
+							therefore may have some delay in processing */
+							                                                                    
                             if (eeprom_is_ready())
                             {                                                               
-                                    //do nothing if battery is low
+                                    // Don't read from the eeprom if the battery is too low
                                     if (_atmega_a2dConvert10bit(ADC4)<350)
                                             break;
                                     else                                                            
@@ -430,40 +398,40 @@ void _receive_data(void)
                                             switch(address)
                                             {
                                                     case X1G_ADDRESS:
-                                                            aBuffer[1]= m_CALIBRATION_X1G_TO_BYTE1(word);                                                                   
-                                                            aBuffer[2]= m_CALIBRATION_X1G_TO_BYTE2(word);
+                                                            aBuffer[1]= m_CAL_RSP_BYTE1_x1g(word);                                                                   
+                                                            aBuffer[2]= m_CAL_RSP_BYTE2_x1g(word);
                                                             address=X1NG_ADDRESS;
                                                             break;
                                                     case X1NG_ADDRESS:
-                                                            aBuffer[2]|= m_CALIBRATION_XN1G_TO_BYTE2(word);
-                                                            aBuffer[3] =m_CALIBRATION_XN1G_TO_BYTE3(word);
+                                                            aBuffer[2]|= m_CAL_RSP_BYTE2_xn1g(word);
+                                                            aBuffer[3] = m_CAL_RSP_BYTE3_xn1g(word);
                                                             address=Y1G_ADDRESS;
                                                             break;
                                                     case Y1G_ADDRESS:
-                                                            aBuffer[3]|= m_CALIBRATION_Y1G_TO_BYTE3(word);
-                                                            aBuffer[4] = m_CALIBRATION_Y1G_TO_BYTE4(word);
-                                                            aBuffer[5] =  m_CALIBRATION_Y1G_TO_BYTE5(word);
+                                                            aBuffer[3]|= m_CAL_RSP_BYTE3_y1g(word);
+                                                            aBuffer[4] = m_CAL_RSP_BYTE4_y1g(word);
+                                                            aBuffer[5] = m_CAL_RSP_BYTE5_y1g(word);
                                                             address=Y1NG_ADDRESS;
                                                             break;
                                                     case Y1NG_ADDRESS:
-                                                            aBuffer[5]|= m_CALIBRATION_YN1G_TO_BYTE5(word);
-                                                            aBuffer[6] = m_CALIBRATION_YN1G_TO_BYTE6(word);
+                                                            aBuffer[5]|= m_CAL_RSP_BYTE5_yn1g(word);
+                                                            aBuffer[6] = m_CAL_RSP_BYTE6_yn1g(word);
                                                             address=Z1G_ADDRESS;
                                                             break;
                                                     case Z1G_ADDRESS:
-                                                            aBuffer[6] |= m_CALIBRATION_Z1G_TO_BYTE6(word);
-                                                            aBuffer[7] = m_CALIBRATION_Z1G_TO_BYTE7(word);
-                                                            aBuffer[8] = m_CALIBRATION_Z1G_TO_BYTE8(word);
+                                                            aBuffer[6] |= m_CAL_RSP_BYTE6_z1g(word);
+                                                            aBuffer[7] =  m_CAL_RSP_BYTE7_z1g(word);
+                                                            aBuffer[8] =  m_CAL_RSP_BYTE8_z1g(word);
                                                             address=Z1NG_ADDRESS;
                                                             break;
                                                     case Z1NG_ADDRESS:
-                                                            aBuffer[8] |= m_CALIBRATION_ZN1G_TO_BYTE8(word);
-                                                            aBuffer[9] = m_CALIBRATION_ZN1G_TO_BYTE9(word);
+                                                            aBuffer[8] |= m_CAL_RSP_BYTE8_zn1g(word);
+                                                            aBuffer[9] = m_CAL_RSP_BYTE9_zn1g(word);
                                                             processed_counter=command_counter;
                                                             response_length=10;
                                                             break;
                                                     default:
-                                                            aBuffer[0]=m_CALIBRATION_BYTE0; 
+                                                            aBuffer[0]= m_CAL_RSP_BYTE0; 
                                                             address=X1G_ADDRESS;
                                                             break;                                                                                                                                                                          
                                             }
