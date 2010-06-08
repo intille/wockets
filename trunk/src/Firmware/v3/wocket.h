@@ -20,6 +20,29 @@
 #define Z1G_ADDRESS 0x08
 #define Z1NG_ADDRESS 0x0A
 #define WOCKET_STATUS_ADDRESS 0x0C
+#define WOCKET_SAMPLING_RATE_ADDRESS 0x0D
+
+/* Wockets Sensitivities */
+
+#define _1_5_G 		0b000
+#define _2_G 		0b001
+#define _4_G		0b010
+#define _6_G		0b011
+#define _8_G		0b100
+#define _INVALID_G	0b111
+
+
+/* Wockets Transmission Modes */
+
+#define _TM_Continuous	0b000
+#define _TM_Burst_30	0b001
+#define _TM_Burst_60	0b010
+#define _TM_Burst_90	0b011
+#define	_TM_Burst_120	0b100
+
+/* Wockets Status Bits */
+#define _STATUS_INITIALIZED 0
+
 
 #define PERFECT_SAMPLING_FREQUENCY 90
 
@@ -33,22 +56,32 @@
 #define RESPONSE_PDU 0b10
 #define COMPRESSED_PDU 0b11
 
-/* PDU Header */
+
+
+/* Macro for PDU Header */
 #define m_HEADER(type) (0x80|(type<<5))
 
-/* Uncompressed PDU */
+/* Macros for Uncompressed PDU */
 #define m_UNCOMPRESSED_PDU_BYTE1(x) (m_HEADER(UNCOMPRESSED_PDU)|(x>>8))
 #define m_UNCOMPRESSED_PDU_BYTE2(x) (0x7f & (x>>1))
 #define m_UNCOMPRESSED_PDU_BYTE3(x,y) ((0x40 & (x<<6)) | (0x3f & (y>>4)))
 #define m_UNCOMPRESSED_PDU_BYTE1(y,z) ((0x78 & (y<<3)) | (0x07 & (z>>7)))
 #define m_UNCOMPRESSED_PDU_BYTE1(z) (0x7f & z)
 
-/*
+/* Macros for compressed PDU */
+#define m_COMPRESSED_PDU_BYTE1(x) 	(m_HEADER(COMPRESSED_PDU)|((x>>1)&0x1f))
+#define m_COMPRESSED_PDU_BYTE2(x,y) (((x&0x01)<<6)|(y&0x3f))
+#define m_COMPRESSED_PDU_BYTE3(z) 	(0x7e & (z<<1))
+
+/* Macros for Command PDUs */
 
 #define RESPONSE_HEADER(opcode) 	(0xc0|opcode)
 
 #define HEADER_PACKET 0x80
 #define COMMAND_PREFIX 0b101
+
+
+
 
 /* Reserved Wockets Commands Opcodes */
 
@@ -73,101 +106,115 @@
 #define GET_TM			0b10010
 #define	SET_TM			0b10011
 
+/* Macros for Wockets Commands */
 
+/* SET_SEN Macros */
+#define m_SET_SEN(aByte2) 	((aByte2>>3) & 0x07)
+
+/* SET_SR Macros */
+#define m_SET_SR(aByte2) 	(aByte2 & 0x7f)
+
+/* SET_ALT Macros */
+#define m_SET_ALT(aByte2) 	(aByte2 & 0x7f)
+
+/* SET_TM Macros */
+#define m_SET_TM(aByte2) 	((aByte2>>4) & 0x07)
+
+/* SET_CAL Macros */
+#define m_SET_CAL_x1g(aByte1,aByte2)  		(	(((unsigned short)(aByte1&0x7f))<<3) | 	(((unsigned short)(aByte2&0x70))>>4)	)
+#define m_SET_CAL_xn1g(aByte2,aByte3)   	( 	(((unsigned short)(aByte2&0x0f))<<6) | 	(((unsigned short)(aByte3&0x7e))>>1)	)
+#define m_SET_CAL_y1g(aByte3,aByte4,aByte5) ( 	(((unsigned short)(aByte3&0x01))<<9) |	(((unsigned short)(aByte4&0x7f))<<2) |	(((unsigned short)(aByte5&0x60))>>5)	)
+#define m_SET_CAL_yn1g(aByte5,aByte6)  		( 	(((unsigned short)(aByte5&0x1f))<<5) | 	(((unsigned short)(aByte6&0x7c))>>2)	)
+#define m_SET_CAL_z1g(aByte6,aByte7,aByte8) ( 	(((unsigned short)(aByte6&0x03))<<8) | 	(((unsigned short)(aByte7&0x7f))<<1) | 	(((unsigned short)(aByte8&0x40))>>6)	)
+#define m_SET_CAL_zn1g(aByte8,aByte9)   	( 	(((unsigned short)(aByte8&0x3f))<<4) | 	(((unsigned short)(aByte9&0x78))>>3) 	)
 
 
 
 
 /* Reserved Wockets Response Opcodes */
 
-#define BATTERY_LEVEL_RESPONSE 		0b00000
-#define PACKET_COUNT_RESPONSE 		0b00001
-#define SLEEP_MODE_RESPONSE			0b00010
-#define SENSOR_SENSITIVITY_RESPONSE	0b00011
-#define CALIBRATION_VALUES_RESPONSE	0b00100
-#define SAMPLING_RATE_RESPONSE		0b00101
-#define POWER_DOWN_TIMER_RESPONSE	0b00111
-#define BAUD_RATE_RESPONSE			0b01000
-#define SUCCESS_RESPONSE			0b01001
+#define BL_RSP 		0b00000
+#define BP_RSP 		0b00001
+#define PC_RSP		0b00010
+#define SENS_RSP	0b00011
+#define CAL_RSP		0b00100
+#define SR_RSP		0b00101
+#define ALT_RSP		0b00110
+#define PDT_RSP		0b00111
+#define TM_RSP		0b01000
+
+/* Macros for Wockets Responses */
+
+/* BL_RSP Macros */
+#define m_BL_RSP_BYTE0			RESPONSE_HEADER(BL_RSP)
+#define m_BL_RSP_BYTE1(level)	(level>>3)
+#define m_BL_RSP_BYTE2(level)	((level & 0x07)<<4)
+
+/* BP_RSP Macros */
+#define m_BP_RSP_BYTE0			RESPONSE_HEADER(BP_RSP)
+#define m_BP_RSP_BYTE1(percent)	(percent>>3)
+
+/* PC_RSP Macros */
+#define m_PACKET_COUNT_BYTE0			RESPONSE_HEADER(PC_RSP)
+#define m_PACKET_COUNT_BYTE1(count)		(count>>25)
+#define m_PACKET_COUNT_BYTE2(count)		((count>>18) & 0x7f)
+#define m_PACKET_COUNT_BYTE3(count)		((count>>11) & 0x7f)
+#define m_PACKET_COUNT_BYTE4(count)		((count>>4) & 0x7f)
+#define m_PACKET_COUNT_BYTE5(count)		((count & 0x0f)<<3)
+
+/* SENS_RSP Macros */
+#define m_SENS_RSP_BYTE0				RESPONSE_HEADER(SENS_RSP)
+#define m_SENS_RSP_BYTE1(sensitivity)	((sensitivity & 0x07)<<4)
+
+/* CAL_RSP Macros */
+
+#define m_CAL_RSP_BYTE0					RESPONSE_HEADER(CAL_RSP)
+#define m_CAL_RSP_BYTE1_x1g(x1g)		((x1g>>3)&0x7f)
+#define m_CAL_RSP_BYTE2_x1g(x1g)		((x1g<<4)&0x70)
+#define m_CAL_RSP_BYTE2_xn1g(xn1g)		((xn1g>>6)&0x0f)
+#define m_CAL_RSP_BYTE3_xn1g(xn1g)		((xn1g<<1)&0x7e)
+#define m_CAL_RSP_BYTE3_y1g(y1g)		((y1g>>9) &0x01)
+#define m_CAL_RSP_BYTE4_y1g(y1g)		((y1g>>2) & 0x7f)
+#define m_CAL_RSP_BYTE5_y1g(y1g)		((y1g<<5) & 0x60)
+#define m_CAL_RSP_BYTE5_yn1g(yn1g)		((yn1g>>5) & 0x1f)
+#define m_CAL_RSP_BYTE6_yn1g(yn1g)		((yn1g<<2) & 0x7c)
+#define m_CAL_RSP_BYTE6_z1g(z1g)		((z1g>>8) & 0x03)
+#define m_CAL_RSP_BYTE7_z1g(z1g)		((z1g>>1) & 0x7f)
+#define m_CAL_RSP_BYTE8_z1g(z1g)		((z1g<<6) & 0x40)
+#define m_CAL_RSP_BYTE8_zn1g(zn1g)		((zn1g>>4) & 0x3f)
+#define m_CAL_RSP_BYTE9_zn1g(zn1g)		((zn1g<<3) & 0x78)
+
+/* SR_RSP Macros */
+
+#define m_SR_RSP_BYTE0			RESPONSE_HEADER(SR_RSP)
+#define m_SR_RSP_BYTE1(sr)		(sr & 0x7f)
+
+/* ALT_RSP Macros */
+
+#define m_ALT_RSP_BYTE0				RESPONSE_HEADER(ALT_RSP)
+#define m_ALT_RSP_BYTE1(timeout)	(timeout & 0x7f)
+
+/* PDT_RSP Macros */
+
+#define m_PDT_RSP_BYTE0				RESPONSE_HEADER(PDT_RSP)
+#define m_PDT_RSP_BYTE1(timeout)	(timeout & 0x7f)
+
+
+/* TM_RSP Macros */
+
+#define m_TM_RSP_BYTE0				RESPONSE_HEADER(TM_RSP)
+#define m_TM_RSP_BYTE1(mode)		((mode & 0x07)<<4)
 
 
 
-/* MACROS */
 
 
 
-/* Battery Level Macros */
-#define m_BATTERY_LEVEL_BYTE0			RESPONSE_HEADER(BATTERY_LEVEL_RESPONSE)
-#define m_BATTERY_LEVEL_BYTE1(level)		(level>>3)
-#define m_BATTERY_LEVEL_BYTE2(level)		((level & 0x07)<<4)
-
-/* Packet Count Level Macros */
-#define m_PACKET_COUNT_BYTE0			RESPONSE_HEADER(PACKET_COUNT_RESPONSE)
-#define m_PACKET_COUNT_BYTE1(count)		(count>>9)
-#define m_PACKET_COUNT_BYTE2(count)		((count>>2) & 0x7f)
-#define m_PACKET_COUNT_BYTE3(count)		((count & 0x03)<<5)
-
-
-/* Calibration Macros */
-#define m_CALIBRATION_BYTE1_TO_X1G(aByte)  (((unsigned short)(aByte&0x7f))<<3) 
-#define m_CALIBRATION_BYTE2_TO_X1G(aByte)  (((unsigned short)(aByte&0x70))>>4)
-
-
-#define m_CALIBRATION_BYTE2_TO_XN1G(aByte)  (((unsigned short)(aByte&0x0f))<<6)
-#define m_CALIBRATION_BYTE3_TO_XN1G(aByte)  (((unsigned short)(aByte&0x7e))>>1)
-
-
-
-#define m_CALIBRATION_BYTE3_TO_Y1G(aByte)  (((unsigned short)(aByte&0x01))<<9) 
-#define m_CALIBRATION_BYTE4_TO_Y1G(aByte)  (((unsigned short)(aByte&0x7f))<<2)
-#define m_CALIBRATION_BYTE5_TO_Y1G(aByte)  (((unsigned short)(aByte&0x60))>>5)
-
-
-
-#define m_CALIBRATION_BYTE5_TO_YN1G(aByte)  (((unsigned short)(aByte&0x1f))<<5)
-#define m_CALIBRATION_BYTE6_TO_YN1G(aByte)  (((unsigned short)(aByte&0x7c))>>2)
-
-
-#define m_CALIBRATION_BYTE6_TO_Z1G(aByte)  (((unsigned short)(aByte&0x03))<<8) 
-#define m_CALIBRATION_BYTE7_TO_Z1G(aByte)  (((unsigned short)(aByte&0x7f))<<1)
-#define m_CALIBRATION_BYTE8_TO_Z1G(aByte)  (((unsigned short)(aByte&0x40))>>6)
-
-
-#define m_CALIBRATION_BYTE8_TO_ZN1G(aByte)  (((unsigned short)(aByte&0x3f))<<4)
-#define m_CALIBRATION_BYTE9_TO_ZN1G(aByte)  (((unsigned short)(aByte&0x78))>>3)
-
-
-
-#define m_CALIBRATION_BYTE0				RESPONSE_HEADER(CALIBRATION_VALUES_RESPONSE)
-#define m_CALIBRATION_X1G_TO_BYTE1(x1g)	((x1g>>3)&0x7f)
-#define m_CALIBRATION_X1G_TO_BYTE2(x1g)	((x1g<<4)&0x70)
-
-
-#define m_CALIBRATION_XN1G_TO_BYTE2(xn1g)	((xn1g>>6)&0x0f)
-#define m_CALIBRATION_XN1G_TO_BYTE3(xn1g)	((xn1g<<1)&0x7e)
-
-#define m_CALIBRATION_Y1G_TO_BYTE3(y1g)	((y1g>>9) &0x01)
-#define m_CALIBRATION_Y1G_TO_BYTE4(y1g)	((y1g>>2) & 0x7f)
-#define m_CALIBRATION_Y1G_TO_BYTE5(y1g)	((y1g<<5) & 0x60)
-
-#define m_CALIBRATION_YN1G_TO_BYTE5(yn1g)	((yn1g>>5) & 0x1f)
-#define m_CALIBRATION_YN1G_TO_BYTE6(yn1g)	((yn1g<<2) & 0x7c)
-
-#define m_CALIBRATION_Z1G_TO_BYTE6(z1g)	((z1g>>8) & 0x03)
-#define m_CALIBRATION_Z1G_TO_BYTE7(z1g)	((z1g>>1) & 0x7f)
-#define m_CALIBRATION_Z1G_TO_BYTE8(z1g)	((z1g<<6) & 0x40)
-
-#define m_CALIBRATION_ZN1G_TO_BYTE8(zn1g)	((zn1g>>4) & 0x3f)
-#define m_CALIBRATION_ZN1G_TO_BYTE9(zn1g)	((zn1g<<3) & 0x78)
 
 
 #define m_SUCCESS_RESPONSE_BYTE1			RESPONSE_HEADER(SUCCESS_RESPONSE)
 
 
-/* Baud Rate Macros */
-#define m_BAUD_RATE_BYTE2_TO_BR(aByte)  (((unsigned short)(aByte&0x78))>>3) 
-#define m_BAUD_RATE_BYTE0                       RESPONSE_HEADER(BAUD_RATE_RESPONSE)
-#define m_BAUD_RATE_BYTE1(baud)         ((baud<<3)&0x78)
 
 
 
@@ -209,6 +256,12 @@ void _wocket_set_baudrate(unsigned char baudrate);
 wockets_uncompressed_packet _encode_packet(unsigned short x, unsigned short y, unsigned short z);
 void _transmit_packet(wockets_uncompressed_packet packet);
 
+unsigned char _STATUS_BYTE=0;
+unsigned char _SAMPLING_RATE=90;
+unsigned char _TCNT2=0;
+
+unsigned char BT_COUNTER=0;
+unsigned short BT[5];
 
 //unsigned int min_shutdown_timer;
 //unsigned char shutdown_timer;

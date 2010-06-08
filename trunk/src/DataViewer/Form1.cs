@@ -45,6 +45,16 @@ namespace NESPDataViewer
         
         public Form1()
         {
+            if (File.Exists("Configuration.xml"))
+            {
+                CurrentWockets._Configuration = new Wockets.Data.Configuration.WocketsConfiguration();
+                CurrentWockets._Configuration.FromXML("Configuration.xml");
+            }
+            else
+            {
+                CurrentWockets._Configuration = new Wockets.Data.Configuration.WocketsConfiguration();
+                CurrentWockets._Configuration.FromXML("..\\..\\bin\\NeededFiles\\Master\\Configuration.xml");
+            }
             InitializeComponent();
             
         }
@@ -2172,8 +2182,8 @@ namespace NESPDataViewer
             #region WOCKETS ACCELEROMETER GRAPHS
             if ((Directory.Exists(path + "\\wockets\\")) && (Directory.GetFiles(path + "\\wockets\\").Length > 0))
             {
-                CurrentWockets._Configuration = new Wockets.Data.Configuration.WocketsConfiguration();
-                CurrentWockets._Configuration.FromXML(path + "\\wockets\\Configuration.xml");
+                //CurrentWockets._Configuration = new Wockets.Data.Configuration.WocketsConfiguration();
+                // CurrentWockets._Configuration.FromXML(path + "\\wockets\\Configuration.xml");
                 Wockets.WocketsController wc = new Wockets.WocketsController("", "", "");
                 wc.FromXML(path + "\\wockets\\SensorData.xml");
                 CurrentWockets._Controller = wc;

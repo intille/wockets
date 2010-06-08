@@ -17,17 +17,17 @@ namespace Wockets
         /// <summary>
         /// A reference to the current wockets configuration that is used
         /// </summary>
-        public static WocketsConfiguration _Configuration;
+        public static WocketsConfiguration _Configuration=null;
 
         /// <summary>
         /// The version number of the wockets software
         /// </summary>
-        public static string _Version="1.39";
+        public static string _Version="1.42";
 
         /// <summary>
         /// The date the software was last modified
         /// </summary>
-        public static string _Date ="June 2nd, 2010";
+        public static string _Date ="June 8th, 2010";
 
         /// <summary>
         /// Specifies the last error code reported
