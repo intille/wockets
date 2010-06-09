@@ -25,41 +25,19 @@ unsigned short y=0;
 unsigned short z=0;
 
 
+#define _WOCKET_INITIALIZED 0x25
 
+uint8_t EEMEM _NV_INITIALIZED;
+uint8_t EEMEM _NV_STATUS_BYTE;
+uint8_t EEMEM _NV_SAMPLING_RATE;
 
-unsigned char _wocket_get_baudrate(void)
-{
-	return ((wocket_status>>BIT2_BIT3_BAUD_RATE) & 0x03);
-}
-
-void _wocket_set_baudrate(unsigned char baudrate)
-{
-	if ((baudrate!=BAUD_9600)&&(baudrate!=BAUD_19200)&&(baudrate!=BAUD_38400)&&(baudrate!=BAUD_57600))
-		return;
-
-	wocket_status=(wocket_status & 0xF3) | (baudrate<< BIT2_BIT3_BAUD_RATE);		
-	_wocket_write_status(wocket_status);
-}
-
-/* 
-	Function Name: _wocket_get_baudrate
-	Parameters: None
-	
-	Description: This function reads the baud rate from the eeprom, if not set, sets it to the default 38400
-	Currently, the wockets support 9600, 19200, 28800, 38400 and 57600
-	
-*/
-
-unsigned char _wocket_read_status(void)
-{
-	return eeprom_read_byte((uint8_t *)((uint8_t)WOCKET_STATUS_ADDRESS));
-}
-
-
-unsigned char _wocket_read_sampling_rate(void)
-{
-	return eeprom_read_byte((uint8_t *)((uint8_t)WOCKET_SAMPLING_RATE_ADDRESS));
-}
+unsigned char _INITIALIZED=0;
+unsigned char _STATUS_BYTE=0;
+unsigned char _SAMPLING_RATE=90;
+unsigned char _wTCNT2_reps=1;
+unsigned char _wTCNT2=0;
+unsigned char _wTCNT2_last=0;
+unsigned char _wTM=_TM_Continuous;
 
 /* 
 	Function Name: _wocket_set_baudrate
@@ -68,11 +46,23 @@ unsigned char _wocket_read_sampling_rate(void)
 	Description: This function sets the baud rate for the wocket to one of the following values 9600, 19200, 28800, 38400 and 57600
 	
 */
-void _wocket_write_status(unsigned char status)
-{
-		eeprom_write_byte((uint8_t *)WOCKET_STATUS_ADDRESS,status);	
-}
 
+
+void _wocket_initialize_timer2_interrupt(void)
+{
+	unsigned short ticks=(unsigned short) ((F_CPU/1024)/_SAMPLING_RATE);
+	if (ticks>256)
+	{
+		_wTCNT2=0;
+		_wTCNT2_reps=(ticks/256)+1;
+		_wTCNT2_last=255-(ticks%256);
+	}else
+	{
+		_wTCNT2=255-ticks;
+		_wTCNT2_reps=0;
+		_wTCNT2_last=255;
+	}
+}
 /* 
 	Function Name: _wocket_intialize
 	Parameters: None
@@ -82,54 +72,122 @@ void _wocket_write_status(unsigned char status)
 */
 void _wocket_initialize(void)
 {
-	 
+	
+
 	// Disable the watchdog timer. It has to be done at the beginning of the program.
 	_atmega_disable_watchdog();
 	_atmega_initialize(CPU_CLK_PRESCALAR_1024);
 	num_skipped_timer_interrupts=10;//(F_CPU/1024)/PERFECT_SAMPLING_FREQUENCY;
+;
 
 	
-	// If battery charged turn on the green led for 5 seconds then off 
+	/* Blink yellow for 5 seconds if battery not fully charged */
 	unsigned short battery=_atmega_a2dConvert10bit(ADC4);
 	if (battery<700)
 	{
-		_greenled_turn_on();		
-		for(int i=0;(i<1000);i++)
-			_delay_ms(5);
-		_greenled_turn_off();
+		for (int i=0;(i<5);i++){
+			_yellowled_turn_on();		
+			for(int i=0;(i<200);i++)
+				_delay_ms(5);
+			_yellowled_turn_off();
+		}
 	}
 
-	// read the status byte for the wockets
-	if ( (eeprom_is_ready()) && (battery>300))
-		_STATUS_BYTE=eeprom_read_byte((uint8_t *)((uint8_t)WOCKET_STATUS_ADDRESS));
-	//turn off and exit
-	else{
-	}
-	
-	if (_wocket_is_flag_set(_STATUS_INITIALIZED))
+	/* Load the status byte from the EEPROM if it fails turn on the yellow led for 5 seconds then 
+	   shutdown */
+	if (battery>100)
 	{
-		// read the sampling rate for the wockets
-		if ( (eeprom_is_ready()) && (battery>300))
-			_SAMPLING_RATE=eeprom_read_byte((uint8_t *)((uint8_t)WOCKET_SAMPLING_RATE_ADDRESS));
-		// Calculate the timer 
-		_TCNT2=	(255 - ((F_CPU/1024)/_SAMPLING_RATE));
+		_INITIALIZED=eeprom_read_byte(&_NV_INITIALIZED);		
 	}
 	else
 	{
-		//Setup the sampling rate to 90Hz by default
-		_SAMPLING_RATE=90;
-		_TCNT2=	170;
-		if ( (eeprom_is_ready()) && (battery>300))
-			eeprom_write_byte((uint8_t *)WOCKET_SAMPLING_RATE_ADDRESS,_SAMPLING_RATE);
-
-
-		//Update the status byte
-		_wocket_set_flag(_STATUS_INITIALIZED);		
-		if ( (eeprom_is_ready()) && (battery>300))
-			eeprom_write_byte((uint8_t *)WOCKET_STATUS_ADDRESS,_STATUS_BYTE);
-
-		//reset the wocket
+		_yellowled_turn_on();		
+		for(int i=0;(i<1000);i++)
+			_delay_ms(5);
+		_yellowled_turn_off();
+		_atmega_finalize();
+		return;
 	}
+	
+	/* If the wocket has been initialized */
+	if (_INITIALIZED==_WOCKET_INITIALIZED)
+	{
+		// Read the sampling rate from the EEPROM
+		if (battery>300)
+		{
+			_SAMPLING_RATE=eeprom_read_byte(&_NV_SAMPLING_RATE);
+			_STATUS_BYTE=eeprom_read_byte(&_NV_STATUS_BYTE);
+		}
+
+		// Load the transmission mode		
+		_wTM=(_STATUS_BYTE>>1)&0x07;		
+	}
+	/* If the wocket has never been initialized, write the default settings and blink green for 5 seconds */
+	else
+	{
+
+		// Set the sampling rate to 90Hz
+		_SAMPLING_RATE=90;
+		_wTM=_TM_Continuous;
+	
+		// Write the sampling rate to the EEPROM
+		if (battery>300)
+		{
+			eeprom_write_byte(&_NV_SAMPLING_RATE,_SAMPLING_RATE);
+			eeprom_write_byte(&_NV_STATUS_BYTE,0x00);
+		}
+
+		// Set the initialized flag in the status byte
+		_INITIALIZED=_WOCKET_INITIALIZED;
+
+		// Write the status byte to the EEPROM		
+		eeprom_write_byte(&_NV_INITIALIZED,_INITIALIZED);
+				
+		// Blink green for 5 seconds	
+		_greenled_turn_on();		
+		for(int i=0;(i<1000);i++)
+			_delay_ms(5);
+		_greenled_turn_off();		
+	}
+
+	/* Set the overflow interrupt timer */
+	unsigned char _MAX_SAMPLING_RATE=0;
+	switch(_wTM)
+	{
+		case _TM_Continuous:	
+			_MAX_SAMPLING_RATE=126;
+			break;			
+		case _TM_Burst_30:
+			_MAX_SAMPLING_RATE=80;		
+			break;
+		case _TM_Burst_60:
+			_MAX_SAMPLING_RATE=40;		
+			break;
+		case _TM_Burst_90:
+			_MAX_SAMPLING_RATE=30;		
+			break;
+		case _TM_Burst_120:
+			_MAX_SAMPLING_RATE=20;		
+			break;
+		default:
+			break;
+	}	
+	if (_SAMPLING_RATE>_MAX_SAMPLING_RATE)
+	{
+		_yellowled_turn_on();		
+		for(int i=0;(i<1000);i++)
+			_delay_ms(5);
+		_yellowled_turn_off();
+		_atmega_finalize();
+		return;
+	}
+
+	// Calculate the timer variables used to sample at the right frequency
+	_wocket_initialize_timer2_interrupt();
+	
+	
+     /* Enable Timer 2 */
+     _atmega_enable_timer2(CPU_CLK_PRESCALAR_1024);
 
 }
 
@@ -190,14 +248,16 @@ void _transmit_packet(wockets_uncompressed_packet packet)
 }
 
 
-void _send_packet_count(unsigned short count)
+void _send_packet_count(unsigned long count)
 {
  
     aBuffer[0]=m_PACKET_COUNT_BYTE0;
     aBuffer[1]=m_PACKET_COUNT_BYTE1(count);
     aBuffer[2]=m_PACKET_COUNT_BYTE2(count);
 	aBuffer[3]=m_PACKET_COUNT_BYTE3(count);
-	for (int i=0;(i<4);i++)                                                                                       
+	aBuffer[4]=m_PACKET_COUNT_BYTE3(count);
+	aBuffer[5]=m_PACKET_COUNT_BYTE3(count);
+	for (int i=0;(i<6);i++)                                                                                       
        	_bluetooth_transmit_uart0_byte(aBuffer[i]); 
  
 }
@@ -364,7 +424,7 @@ void _receive_data(void)
                                                             address=Y1NG_ADDRESS;
                                                             break;
                                                     case Y1NG_ADDRESS:
-                                                            m_SET_CAL_z1g(aBuffer[6],aBuffer[7],aBuffer[8]);
+                                                            word= m_SET_CAL_z1g(aBuffer[6],aBuffer[7],aBuffer[8]);
                                                             address=Z1G_ADDRESS;
                                                             break;
                                                     case Z1G_ADDRESS:

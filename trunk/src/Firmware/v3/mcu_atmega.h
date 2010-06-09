@@ -18,7 +18,7 @@
 /* Constants and preprocessor directives */
 
 // CPU Frequency 8 MHz
-#define F_CPU 7372800UL
+#define F_CPU 8000000L
 
 #define CPU_CLK_PRESCALAR_NONE 0
 #define CPU_CLK_PRESCALAR_8 1
@@ -148,6 +148,8 @@ void _atmega_initialize_uart0(unsigned int baud, unsigned char mode);
 void _atmega_initialize_uart1(unsigned int baud, unsigned char mode);
 unsigned short _atmega_a2dConvert10bit(unsigned char channel);
 void _atmega_reset(void);
+void _atmega_adc_turn_on(void);
+void _atmega_adc_turn_off(void);
 
 
 /* LED Specific Functions */

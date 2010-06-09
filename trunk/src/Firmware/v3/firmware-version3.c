@@ -21,13 +21,16 @@
 #include <avr/interrupt.h>
 #include <avr/sleep.h>
 #include <avr/eeprom.h> 
-#include <util/delay.h>
+
 #include <avr/power.h>
 #include "mcu_atmega.h"
 #include "wocket.h"
+#include <util/delay.h>
 
 unsigned char wakeup=0;
 unsigned char sample=0;
+
+
 int main()
 {
 	
@@ -73,89 +76,81 @@ unsigned int seconds_disconnected=0;
 unsigned short configurationTimer=1;
 unsigned char interrupts_passed=0;
 
-
+unsigned char interrupt_reps=0;
 
 ISR(TIMER2_OVF_vect)
 {
-
-/*
-	TCNT2=61;
-
-		if (!_bluetooth_is_connected())	
-		return;	
-
-	wakeup=0;
-	sample=0;
-
-
-	_receive_data();	
-	power_adc_enable();
-
-	_atmega_adc_turn_on();
-	_send_data();
-	_atmega_adc_turn_off();
-	power_adc_disable();
-
-
-	seconds_disconnected=0;
-	*/
-
-
-
-	TCNT2=61;
-	
-	power_adc_enable();
-	_atmega_adc_turn_on();
-	xs[scounter]=_atmega_a2dConvert10bit(ADC3);
-	ys[scounter]=_atmega_a2dConvert10bit(ADC2);
-	zs[scounter++]=_atmega_a2dConvert10bit(ADC1);
-	if (scounter>255)
-		scounter=0;
-	_atmega_adc_turn_off();
-	power_adc_disable();
-
-	
-
-
-
-	if (!_bluetooth_is_connected()){
-			
-		if (seconds_disconnected<1800)
-			seconds_disconnected++;
-		else if (seconds_disconnected==1800)
-		{
-			_bluetooth_turn_on();
-			//_atmega_reset();
-			seconds_disconnected=1801;			
-		}
-		return;	
-
+	/* Skip sampling depending on the sampling rate variables/timers */
+ 	if (interrupt_reps==0)
+	{	
+		interrupt_reps=_wTCNT2_reps;
+		TCNT2=_wTCNT2;
 	}
-		
-		//_atmega_adc_turn_on();
-		connected=1;
-		//parse and process any received bytes
+	else{ //otherwise wait
+		if (interrupt_reps==1)	
+			TCNT2=_wTCNT2_last;	
+		else		
+			TCNT2=_wTCNT2;					
+		interrupt_reps--;
+		return;
+	}
 
-		//if (seconds_passed==0){
-			_receive_data();
-		//	 _send_data();
-		//_send_packet_count(600);
+	/* Sample data and transmt it if necessary */
+	if (_wTM==_TM_Continuous)
+	{
+		if (!_bluetooth_is_connected())		
+			return;		
+		power_adc_enable();
+		_atmega_adc_turn_on();
+		_receive_data();				
+		_send_data();				
+	}
+	else if (_wTM==_TM_Burst_60)
+	{
 	
+		power_adc_enable();
+		_atmega_adc_turn_on();
+		xs[scounter]=_atmega_a2dConvert10bit(ADC3);
+		ys[scounter]=_atmega_a2dConvert10bit(ADC2);
+		zs[scounter++]=_atmega_a2dConvert10bit(ADC1);
+		if (scounter>255)
+			scounter=0;
+		_atmega_adc_turn_off();
+		power_adc_disable();
+
+		if (!_bluetooth_is_connected()){
+			
+			if (seconds_disconnected<1800)
+				seconds_disconnected++;
+			else if (seconds_disconnected==1800)
+			{
+				_bluetooth_turn_on();
+				//_atmega_reset();
+				seconds_disconnected=1801;			
+			}
+			return;	
+
+		}
+		
+		connected=1;
+		_receive_data();		
 		_send_packet_count(2400);
 		_send_data_bufferred();
 
-			seconds_passed=0;
-			while (seconds_passed<400)
-			{
-				_delay_ms(5);
-				seconds_passed++;
+		seconds_passed=0;
+		while (seconds_passed<400)
+		{
+			_delay_ms(5);
+			seconds_passed++;
 
-			}
-			
-			
-			_bluetooth_turn_off();
-		//	_atmega_adc_turn_off();
-			seconds_disconnected=0;
+		}
+						
+		_bluetooth_turn_off();		
+		seconds_disconnected=0;
+	}
+
+
+
 
 }
 

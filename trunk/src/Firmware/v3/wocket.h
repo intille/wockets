@@ -1,4 +1,5 @@
 
+
 #define MAX_COMMAND_SIZE 10
 #define MAX_COMMAND_TIMER 255
 
@@ -19,8 +20,7 @@
 #define Y1NG_ADDRESS 0x06
 #define Z1G_ADDRESS 0x08
 #define Z1NG_ADDRESS 0x0A
-#define WOCKET_STATUS_ADDRESS 0x0C
-#define WOCKET_SAMPLING_RATE_ADDRESS 0x0D
+
 
 /* Wockets Sensitivities */
 
@@ -65,8 +65,8 @@
 #define m_UNCOMPRESSED_PDU_BYTE1(x) (m_HEADER(UNCOMPRESSED_PDU)|(x>>8))
 #define m_UNCOMPRESSED_PDU_BYTE2(x) (0x7f & (x>>1))
 #define m_UNCOMPRESSED_PDU_BYTE3(x,y) ((0x40 & (x<<6)) | (0x3f & (y>>4)))
-#define m_UNCOMPRESSED_PDU_BYTE1(y,z) ((0x78 & (y<<3)) | (0x07 & (z>>7)))
-#define m_UNCOMPRESSED_PDU_BYTE1(z) (0x7f & z)
+#define m_UNCOMPRESSED_PDU_BYTE4(y,z) ((0x78 & (y<<3)) | (0x07 & (z>>7)))
+#define m_UNCOMPRESSED_PDU_BYTE5(z) (0x7f & z)
 
 /* Macros for compressed PDU */
 #define m_COMPRESSED_PDU_BYTE1(x) 	(m_HEADER(COMPRESSED_PDU)|((x>>1)&0x1f))
@@ -223,6 +223,18 @@
 #define BIT2_BIT3_BAUD_RATE 2
 
 
+
+extern uint8_t EEMEM _NV_INITIALIZED;
+extern uint8_t EEMEM _NV_STATUS_BYTE;
+extern uint8_t EEMEM _NV_SAMPLING_RATE;
+extern unsigned char _INITIALIZED;
+extern unsigned char _STATUS_BYTE;
+extern unsigned char _SAMPLING_RATE;
+extern unsigned char _wTCNT2_reps;
+extern unsigned char _wTCNT2;
+extern unsigned char _wTCNT2_last;
+extern unsigned char _wTM;
+
 typedef struct{
 	unsigned char byte1; //sync bit, 2 bits packet type, 3 bits sensitivity, 2 bits MSB X
 	unsigned char byte2;	//0 bit, 7 X
@@ -238,30 +250,36 @@ unsigned short ys[256];
 unsigned short zs[256];
 unsigned short scounter;
 
+
+
+
+
+
+
+
+
 void _wocket_initialize(void);
 void _wocket_set_master_mode(void);
 void _wocket_set_slave_mode(void);
 unsigned char _wocket_is_master(void);
 
 
-void _wocket_set_bursty_mode(void);
-void _wocket_set_continuous_mode(void);
-unsigned char _wocket_is_bursty(void);
+unsigned char _wocket_is_flag_set(unsigned char flag);
+void _wocket_reset_flag(unsigned char flag);
+void _wocket_set_flag(unsigned char flag);
 
 void _send_data(void);
 void _receive_data(void);
+void _send_packet_count(unsigned long count);
+void _send_data_bufferred(void);
 
 unsigned char _wocket_get_baudrate(void);
 void _wocket_set_baudrate(unsigned char baudrate);
 wockets_uncompressed_packet _encode_packet(unsigned short x, unsigned short y, unsigned short z);
 void _transmit_packet(wockets_uncompressed_packet packet);
 
-unsigned char _STATUS_BYTE=0;
-unsigned char _SAMPLING_RATE=90;
-unsigned char _TCNT2=0;
 
-unsigned char BT_COUNTER=0;
-unsigned short BT[5];
+
 
 //unsigned int min_shutdown_timer;
 //unsigned char shutdown_timer;
