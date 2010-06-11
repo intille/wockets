@@ -128,7 +128,8 @@
 #define m_SET_CAL_z1g(aByte6,aByte7,aByte8) ( 	(((unsigned short)(aByte6&0x03))<<8) | 	(((unsigned short)(aByte7&0x7f))<<1) | 	(((unsigned short)(aByte8&0x40))>>6)	)
 #define m_SET_CAL_zn1g(aByte8,aByte9)   	( 	(((unsigned short)(aByte8&0x3f))<<4) | 	(((unsigned short)(aByte9&0x78))>>3) 	)
 
-
+/* SET_SR Macros */
+#define m_SET_SR(aByte2) (aByte2 & 0x7f)
 
 
 /* Reserved Wockets Response Opcodes */

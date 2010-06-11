@@ -7,7 +7,7 @@ namespace WocketsApplication
 {
     public class ControlID
     {
-        public const int NUMBER_PANELS = 11;
+        public const int NUMBER_PANELS = 12;
         public const int HOME_PANEL = 0;
         public const int HOME_PANEL_BUTTON_COUNT = 7;
         public const int ABOUT_PANEL = 1;
@@ -30,10 +30,6 @@ namespace WocketsApplication
         //Home Screen                
         public const int LINE_CHART_BUTTON = 0;
         public const int ACTIVITY_BUTTON = 1;
-        public const int BATTERY_BUTTON = 10;
-
-        public const int GO_GREEN_BUTTON = 11;
-
         public const int CONNECT_BUTTON = 2;
         public const int KERNEL_BUTTON = 3;
 
@@ -94,6 +90,13 @@ namespace WocketsApplication
         public const int CLASSIFICATION_PANEL_BUTTON_COUNT = 1;
         public const int HOME_CLASSIFICATION_BUTTON = 0;
         #endregion CLASSIFICATION PANEL
+
+        #region EE PANEL
+        public const int EE_PANEL = 11;
+        public const int EE_PANEL_BUTTON_COUNT = 1;
+        public const int HOME_EE_BUTTON = 0;
+        #endregion EE PANEL
+
         //Settings Screen
        
         public const int BLUETOOTH_BUTTON = 0;
