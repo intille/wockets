@@ -43,12 +43,16 @@ namespace WocketConfigurationApp
             BluetoothRadio.PrimaryRadio.Mode = RadioMode.Connectable;
             BluetoothClient btc = new BluetoothClient();
 
-            devices = btc.DiscoverDevices(60, false, true, true);
+            devices = btc.DiscoverDevices(60, false, false, true);
             int wocketCount = 0;
             for (int i = 0; (i < devices.Length); i++)
             {
                 //if the device is a wocket
-                if (((devices[i].DeviceName.IndexOf("Wocket") >= 0) || (devices[i].DeviceName.IndexOf("WKT") >= 0) || (devices[i].DeviceName.IndexOf("FireFly") >= 0)) && (wocketCount < 100))
+                if (((devices[i].DeviceName.IndexOf("Wocket") >= 0) 
+                    || (devices[i].DeviceName.IndexOf("WKT") >= 0) 
+                    || (devices[i].DeviceName.IndexOf("FireFly") >= 0)
+                    || (devices[i].DeviceName.IndexOf("00:06:66") >= 0)) 
+                    && (wocketCount < 100))
                 {
                     string hex = "";
                     hex = devices[i].DeviceAddress.ToString();
@@ -92,9 +96,17 @@ namespace WocketConfigurationApp
                 return;
             }
 
-            Form2 f = new Form2(devices[this.listBox1.SelectedIndex]);
-            f.Show();
-            this.Visible = false;
+            for (int k = 0; (k < devices.Length); k++)
+            {
+                if (devices[k].DeviceAddress.ToString() == ((string)macaddresses[this.listBox1.SelectedIndex]))
+                {
+                    //Form2 f = new Form2(devices[k]);
+                    Form6 f = new Form6(devices[k]);
+                    f.Show();
+                    this.Visible = false;
+                    break;
+                }
+            }
 
             /*
             if (is_connected == 0)

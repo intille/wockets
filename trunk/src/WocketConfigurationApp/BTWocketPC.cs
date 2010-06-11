@@ -21,71 +21,67 @@ using Wockets.Decoders.Accelerometers;
 using Wockets.Data.Accelerometers;
 using Wockets.Utils;
 
-namespace WocketConfigurationApp
+namespace LibBtTalk_Desktop 
 {
 
-    public class BtWocketPC
-    {
+	
+	public class BtSerial
+	{
 
-
-        #region Declare Variables
-        // Bluetooth 
-        private BluetoothAddress blt_address = null;
-        private BluetoothEndPoint blt_endPoint = null;
+        
+	// Bluetooth 
+		private BluetoothAddress blt_address = null;
+		private BluetoothEndPoint blt_endPoint = null;
         private BluetoothClient bc = null;
         private BluetoothDeviceInfo[] bdi;
 
-        private string bt_type_name = "";
-        private int BT_TYPE = -1; //it determines if the firmware needs an ALIVE pckg
-        private int ALIVE_PCKG = 0;
-        private int NEW_FIRMWARE = 1;
+        private int WOCKET = 0;
+        private int SERIAL_LILYPAD = 1;
+        private int BT_TYPE = -1;
 
-        // Wocket
+        private string bt_type_name = "";
+
+    // Wocket
         private WocketsDecoder wocket_dc;
         //private AccelerationData data; 
         //private AccelerationData prevdata;
         private double lastUnixTime = 0;
-
-
-        //Buffer
+           
+     //Buffer
         private NetworkStream ns;
-
+		
         private byte[] buffer;
         CircularBuffer cbuffer;
-
+        
         private int received = 0;
-        private int MAX_BYTES;
+		private int MAX_BYTES; 
+        
 
-
-        //Update variable
-        private string _LastValue = "";
+    //Update variable
+		private string _LastValue = "";
         private string value = "";
 
-        //Thread
+    //Thread
         private object _objLock = new object();
         private Thread readingThread = null;
 
-        //Delegate
+    //Delegate
         public event OnNewReadingEventHandler OnNewReading;
         public delegate void OnNewReadingEventHandler(object sender, EventArgs e);
 
-        // Reading Flag
+     // Reading Flag
         private bool isReading = false;
         private bool address_set = false;
-
-        // status
+     
+    // status
         private string status = "";
-        //private int behavior  = 0;
+        private int behavior  = 0;
 
-
-        #endregion
-
-
-        // write alive package to wockets
+    // write alive package to wockets
         public class ALIVE
         {
             protected byte[] cmd;
-
+           
 
             public byte[] _Bytes
             {
@@ -95,104 +91,63 @@ namespace WocketConfigurationApp
                 }
             }
 
-
+            
 
             public ALIVE()
             {
                 this.cmd = new byte[] { (byte)0xbb };
-
+               
             }
         }
 
         private ALIVE Alive_CMD = new ALIVE();
         private int alive_time_offset = 20;
         private int alive = 20;
+        
+        
 
 
 
 
+//===============================================
+        // Initialize 
+		public BtSerial(string address,string type_name)
+
+		{
+                // check that it doesn't affect the other connections            
+                TurnON_BT_Radio();
+
+                Thread.Sleep(50);
+
+                bt_type_name = type_name;
+
+                if (type_name.CompareTo("wocket") == 0)
+                {
+                    BT_TYPE = WOCKET;
+                    MAX_BYTES = 4096;
+                    
+                    wocket_dc = new WocketsDecoder();
+                    Wockets.Utils.WocketsTimer.InitializeTime();
+                    cbuffer = new CircularBuffer(MAX_BYTES);
+                }
+                else if (type_name.CompareTo("lilypad") == 0)
+                {
+                    BT_TYPE = SERIAL_LILYPAD;
+                    MAX_BYTES = 4096;
+                }
+
+                //Initialize buffer
+                buffer = new byte[MAX_BYTES];
+               
+
+                address_set = SetAddress(address);
+                   
+		}
 
 
-        //===============================================
-        //Initialize 
-        public BtWocketPC(string address, string type_name)
-        {
-            // check that it doesn't affect the other connections            
-            TurnON_BT_Radio();
-            Thread.Sleep(200);
+//===============================================
+//sets the address
 
-            bt_type_name = type_name;
-
-
-            if (bt_type_name.CompareTo("alive") == 0)
-            {
-                BT_TYPE = ALIVE_PCKG;
-            }
-            else
-            {
-                BT_TYPE = NEW_FIRMWARE;
-            }
-
-            MAX_BYTES = 4096;
-
-            wocket_dc = new WocketsDecoder();
-            Wockets.Utils.WocketsTimer.InitializeTime();
-            cbuffer = new CircularBuffer(MAX_BYTES);
-
-
-
-            //Initialize buffer
-            buffer = new byte[MAX_BYTES];
-            address_set = SetAddress(address);
-
-        }
-
-
-
-        public void IntializeWocket(string address, string type_name)
-        {
-            // check that it doesn't affect the other connections            
-            TurnON_BT_Radio();
-            Thread.Sleep(200);
-
-            bt_type_name = type_name;
-
-
-            if (bt_type_name.CompareTo("alive") == 0)
-            {
-                BT_TYPE = ALIVE_PCKG;
-            }
-            else
-            {
-                BT_TYPE = NEW_FIRMWARE;
-            }
-
-            MAX_BYTES = 4096;
-
-            wocket_dc = new WocketsDecoder();
-            Wockets.Utils.WocketsTimer.InitializeTime();
-            cbuffer = new CircularBuffer(MAX_BYTES);
-
-
-
-            //Initialize buffer
-            buffer = new byte[MAX_BYTES];
-            address_set = SetAddress(address);
-
-        }
-
-
-        public BtWocketPC()
-        {
-            // check that it doesn't affect the other connections            
-            TurnON_BT_Radio();
-            Thread.Sleep(200);
-
-            bc = new BluetoothClient();
-        }
-
-
-        //sets the address
         public bool SetAddress(string address)
         {
             try
@@ -207,7 +162,7 @@ namespace WocketConfigurationApp
                 // Create a connection channel specifying the Bluetooth-Serial end-points 
                 blt_endPoint = new BluetoothEndPoint((BluetoothAddress)blt_address, BluetoothService.SerialPort);
 
-
+                
                 return true;
             }
             catch
@@ -215,6 +170,7 @@ namespace WocketConfigurationApp
                 return false;
             }
         }
+
 
         public bool SetAddress(BluetoothAddress address)
         {
@@ -229,88 +185,80 @@ namespace WocketConfigurationApp
                 // Create a connection channel specifying the Bluetooth-Serial end-points 
                 blt_endPoint = new BluetoothEndPoint((BluetoothAddress)blt_address, BluetoothService.SerialPort);
 
-
+                
                 return true;
             }
-            catch
+            catch 
             {
                 return false;
             }
         }
 
-        public BluetoothAddress GetAddress()
-        {
-            return blt_address;
-        }
 
-        //========================================================
-        // control the connection
+//========================================================
+// controls the connection
 
         // starts the connection
         // if check_radio == 1 the radio will be checked 
-        public bool Start(int check_radio, bool initialize_bt)
-        {
+		public bool Start(int check_radio)
+		{
             try
-            {
+            {   
 
                 // make sure radio is on
-                if (check_radio == 1)
+                if(check_radio == 1)
                     TurnON_BT_Radio();
 
-                if (initialize_bt)
+                // clean up bluetooth if it was open
+                if (bc != null)
                 {
-                    // clean up bluetooth if it was open
-                    if (bc != null)
-                    {
-                        bc.Close();
-                        bc.Dispose();
-                    }
-
-                    bc = new BluetoothClient();
-
-                    if (bc != null)
-                    {
-                        // check the bt end point
-                        if (blt_endPoint == null)
-                            blt_endPoint = new BluetoothEndPoint((BluetoothAddress)blt_address, BluetoothService.SerialPort);
-
-                        // check the intialization of the stream
-                        if (ns != null)
-                        {
-                            ns.Close();
-                            ns.Dispose();
-                        }
-
-
-
-                        return true;
-                    }
+                    bc.Close();
+                    bc.Dispose();
                 }
 
+                bc = new BluetoothClient();
+
+                if (bc != null)
+                {
+                    // check the bt end point
+                    if (blt_endPoint == null)
+                        blt_endPoint = new BluetoothEndPoint((BluetoothAddress)blt_address, BluetoothService.SerialPort);
+
+                    // check the intialization of the stream
+                    if (ns != null)
+                    {
+                        ns.Close();
+                        ns.Dispose();
+                    }
+
+                    
+
+                    return true;
+                   
+                }
 
                 return false;
-
             }
-            catch (Exception e)
+            catch(Exception e)
             {
                 status = e.ToString();
                 return false;
             }
 
-        }
+		}
 
 
 
         // stops the connection
-        public void Stop()
-        {
+		public void Stop()
+		{
             StopReading();
             CloseConnection();
 
             // Not turn off radio if handeling multiple connections
             //TurnOFF_BT_Radio();
-
-        }
+  
+		}
 
 
         // restart the connection
@@ -318,11 +266,11 @@ namespace WocketConfigurationApp
         {
             try
             {
-                if (Start(0, true))
+                if (Start(0))
                     return true;
                 else
                     return false;
-
+                
             }
             catch
             {
@@ -330,19 +278,16 @@ namespace WocketConfigurationApp
             }
         }
 
-
-
-
-        //=====================================================
-        // controls bt radio        
-
+//=====================================================
+// controls bt radio        
+        
         // turn off the radio
         public bool TurnOFF_BT_Radio()
         {
             try
             {
-                if (BluetoothRadio.PrimaryRadio.Mode != RadioMode.PowerOff)
-                    BluetoothRadio.PrimaryRadio.Mode = RadioMode.PowerOff;
+                if ( BluetoothRadio.PrimaryRadio.Mode != RadioMode.PowerOff )
+                BluetoothRadio.PrimaryRadio.Mode = RadioMode.PowerOff;
 
                 return true;
             }
@@ -351,7 +296,6 @@ namespace WocketConfigurationApp
                 return false;
             }
         }
-
 
         // trun on the radio
         public bool TurnON_BT_Radio()
@@ -365,7 +309,7 @@ namespace WocketConfigurationApp
                 }
                 return true;
             }
-            catch (Exception e)
+            catch(Exception e)
             {
                 status = e.ToString();
                 return false;
@@ -373,37 +317,36 @@ namespace WocketConfigurationApp
         }
 
 
-
-        //=======================================================
-        // open/close connection
+//==================================================================================
+// open/close connection
 
         // open the connection
-        public bool OpenConnection()
-        {
-            // try to connect
-            try
-            {
+		public bool OpenConnection()
+		{
+			// try to connect
+			try
+			{
                 bc.Connect(blt_endPoint);
                 return true;
-
-            }
-            catch (Exception e)
-            {
+	            
+			}
+			catch(Exception e)
+			{
                 status = e.ToString();
-                return false;
-            }
+				return false;
+			}
 
-        }
+		}
 
 
         // close the connection
-        public void CloseConnection()
-        {
-            if (bc != null)
-            {
-                bc.Close();
-                bc.Dispose();
-            }
+		public void CloseConnection()
+		{
+			if (bc != null)
+			{
+				bc.Close();
+				bc.Dispose();
+			}
 
             if (ns != null)
             {
@@ -412,47 +355,31 @@ namespace WocketConfigurationApp
             }
 
             blt_endPoint = null;
-        }
+		}
 
 
 
-        //===============================================
-        // Write/Read functionality
+//===============================================
+// Write/Read functionality
 
         // write the alive package to wocket
-        public bool WriteAlive()
+        public bool WriteAlive() 
         {
             try
             {
-
+                
                 alive = alive - 1;
                 if (alive <= 0)
                 {
                     // get stream??
-                    ns.Write(Alive_CMD._Bytes, 0, 1);
+                    ns.Write(Alive_CMD._Bytes,0,1);
                     alive = alive_time_offset;
                     return true;
                 }
 
                 return false;
             }
-            catch (Exception e)
-            {
-                status = e.ToString();
-                return false;
-            }
-
-        }
-
-
-        public bool WriteData(byte[] data)
-        {
-            try
-            {
-                ns.Write(data, 0, data.Length);
-                return false;
-            }
-            catch (Exception e)
+            catch(Exception e)
             {
                 status = e.ToString();
                 return false;
@@ -462,7 +389,7 @@ namespace WocketConfigurationApp
 
         public bool ReadData(out string out_value)
         {
-            bool is_data_available = true;
+            bool is_data_available = false;
             out_value = "---";
 
 
@@ -473,16 +400,20 @@ namespace WocketConfigurationApp
 
                 if (ns.DataAvailable)
                 {
+                    
+                   received = ns.Read(buffer, 0, MAX_BYTES);
+                   
 
-                    received = ns.Read(buffer, 0, MAX_BYTES);
-
-
-                    if (received > 0)
+                    if(received >0)
                     {
                         is_data_available = true;
-                        wockets_decoder(buffer, received, out out_value);
-                    }
 
+                        if( BT_TYPE == SERIAL_LILYPAD)
+                            serial_decoder(buffer, received, out out_value, out behavior);
+                        else if(BT_TYPE == WOCKET)
+                            wockets_decoder(buffer, received, out out_value, out behavior);
+                    }
+                    
                 }
                 else
                 {
@@ -490,18 +421,22 @@ namespace WocketConfigurationApp
                     for (int i = 0; i < 3; i++)
                     {
                         System.Threading.Thread.Sleep(500);
-
+                        
                         //this is necessary
                         ns = bc.GetStream();
 
                         if (ns.DataAvailable)
-                        {
+                        {   
                             received = ns.Read(buffer, 0, MAX_BYTES);
-
+                            
                             if (received > 0)
                             {
                                 is_data_available = true;
-                                wockets_decoder(buffer, received, out out_value);
+
+                                if (BT_TYPE == SERIAL_LILYPAD)
+                                    serial_decoder(buffer, received, out out_value, out behavior);
+                                else if (BT_TYPE == WOCKET)
+                                    wockets_decoder(buffer, received, out out_value, out behavior);
 
                                 break;
                             }
@@ -517,7 +452,7 @@ namespace WocketConfigurationApp
                 return is_data_available;
 
             }
-            catch (Exception e)
+            catch(Exception e)
             {
                 //"Problem reading the data stream"
                 status = e.ToString();
@@ -526,19 +461,16 @@ namespace WocketConfigurationApp
         }
 
 
+       
+//=================================================
+// Decoding Functions
 
-        //=================================================
-        // Decoding Functions
-
-        #region commented
-
-        /*private int NUM_BUTTONS = 3;
+        private int NUM_BUTTONS = 3;
         private int BUTTON_THRESHOLD = 1;
         private int[] button_counter = new int[3];
         private int[] button_activation = new int[3];
-        */
 
-        /*
+
         private void serial_decoder(byte[] buffer, int received_bytes,out string output, out int result_behavior)
         {
             byte val = 0;
@@ -626,23 +558,20 @@ namespace WocketConfigurationApp
 
             output = output + buf_str;
         }
-        */
-        //==================================================================
 
-        #endregion commented
+//==================================================================
+        int lastTail = 0;
+        int VMAG_THERSHOLD = 40;
 
+        double[] means = new double[3];
+        double[] Rmeans = new double[3];
+        int prev = -1;
+        double VMAG = 0.0;
 
-        private int lastTail = 0;
-        //private int VMAG_THERSHOLD = 40;
-
-        private double[] means = new double[3];
-        private double[] Rmeans = new double[3];
-
-        //private static AccelerationData data;
-
-        private void wockets_decoder(byte[] buffer, int received_bytes, out string output)
+        private void wockets_decoder(byte[] buffer, int received_bytes, out string output, out int result_behavior)
         {
-
+            
+            
             int ii;
             string status_str;
             output = "";
@@ -653,44 +582,70 @@ namespace WocketConfigurationApp
             //write the incomming bytes to the circular buffer
             for (ii = 0; ii < received_bytes; ii++)
             {
+                // this.buffer._Timestamp[this.buffer._Tail] = timestamp;
                 this.cbuffer._Bytes[mytail++] = buffer[ii];
                 mytail %= this.cbuffer._Bytes.Length;
             }
 
             //update the head and tail of buffer
+            //this.cbuffer._Head = this.cbuffer._Tail;
             this.cbuffer._Tail = mytail;
 
             int head = this.cbuffer._Head;
             int tail = this.cbuffer._Tail;
-
+           
             //decode the data for the new bytes
-            this.wocket_dc.Decode(0, this.cbuffer, head, tail);
+            this.wocket_dc.Decode(0, this.cbuffer, head ,tail);
             this.cbuffer._Head = tail;
 
             #region commented
-
-            /*
             //get the decoded data from new bytes
-            data = ((AccelerationData)this.wocket_dc._Data[tail]);
+            //data = ((AccelerationData)this.wocket_dc._Data[tail]);
+
+            //output = "X: " + data.X.ToString() + ", " +
+            //         "Y: " + data.Y.ToString() + ", " +
+            //         "Z: " + data.Z.ToString() + "\r\n";
+            #endregion 
+
+            int DecodedPackets = get_wockets_decoded_data( this.wocket_dc._Head);
 
            
-            output = "X: " + data.X.ToString() + ", " +
-                     "Y: " + data.Y.ToString() + ", " +
-                     "Z: " + data.Z.ToString();
+            /*output = received_bytes.ToString() +","+
+                      DecodedPackets.ToString()+ ","+
+                      head.ToString() +","+
+                      tail.ToString()+ "\r\n";
             */
-            #endregion commented
 
-            int DecodedPackets = get_wockets_decoded_data(this.wocket_dc._Head);
+            status_str = "X: " + ((int)Rmeans[0]).ToString() + "\r\n" +
+                        "Y: " + ((int)Rmeans[1]).ToString() + "\r\n" +
+                        "Z: " + ((int)Rmeans[2]).ToString() + "\r\n" +
+                        "VMAG: " + ((int)VMAG).ToString();
 
-            output = "x: " + ((int)Rmeans[0]).ToString() +
-                   ", y: " + ((int)Rmeans[1]).ToString() +
-                   ", z: " + ((int)Rmeans[2]).ToString();
+            if (VMAG > VMAG_THERSHOLD)
+            {
+                output = output + "active" + "\r\n";
+                result_behavior = 1;
+            }
+            else
+            {
+                output = output + "inactive" + "\r\n";
+                result_behavior = 0;
+            }
+
+            output = output + status_str;
+ 
 
         }
 
+
+        
+       
+
+        
+
         private int get_wockets_decoded_data(int currentHead)
         {
-
+            
             double tailUnixTimestamp = 0;
             double aUnixTime = 0;
             int DecodedPackets = 0;
@@ -699,12 +654,11 @@ namespace WocketConfigurationApp
             AccelerationData data = ((AccelerationData)this.wocket_dc._Data[lastTail]);
 
             //initialize statistics
-            int i = 0;
-
+            int i=0;
+            VMAG = 0.0;
             for (i = 0; i < 3; i++)
-            {
-                means[i] = 0;
-
+            {  means[i] = 0;
+            
             }
 
 
@@ -714,17 +668,44 @@ namespace WocketConfigurationApp
                 //check that data is valid
                 aUnixTime = data.UnixTimeStamp;
 
-                if (aUnixTime < lastUnixTime)
+               if (aUnixTime < lastUnixTime)
                 {
                     status = "Data overwritten without decoding";
                     //Logger.Error(s);
                     break;
                 }
 
+                #region commented
+                /*
+                //else if ((aUnixTime - lastUnixTime) > 2000)
+                //    Console.WriteLine("");
+
+                // Roughly once per second save full timestamp, no matter what
+                if (isForceTimestampSave || (timeSaveCount == TIMESTAMP_AFTER_SAMPLES))
+                {
+                    WriteTimeDiff(aUnixTime, lastUnixTime, true); // Force save
+                    timeSaveCount = 0;
+                }
+                else
+                {
+                    WriteTimeDiff(aUnixTime, lastUnixTime, false);
+                    timeSaveCount++;
+                }
+                 isForceTimestampSave = false;
+                
+
+                // Save Raw Bytes                        
+                if (bw != null)
+                    for (int j = 0; j < data.NumRawBytes; j++)
+                        bw.WriteByte(data.RawBytes[j]);
+                */
+
+                #endregion
+
 
                 lastUnixTime = aUnixTime;
                 tailUnixTimestamp = aUnixTime;
-
+                
                 //if valid, get values for buffer
                 means[0] = means[0] + data.X;
                 means[1] = means[1] + data.Y;
@@ -734,22 +715,35 @@ namespace WocketConfigurationApp
                 prevdata = data;
 
                 if (lastTail >= this.wocket_dc._Data.Length - 1)
-                    lastTail = 0;
+                    lastTail= 0;
                 else
                     lastTail++;
 
                 //get new value
                 DecodedPackets++;
                 data = ((AccelerationData)this.wocket_dc._Data[lastTail]);
+
+                if (prev > -1)
+                {
+                    VMAG= VMAG + Math.Sqrt(Math.Pow((double)(data.X - Rmeans[0]), 2.0) + 
+                                           Math.Pow((double)(data.Y - Rmeans[1]), 2.0) + 
+                                           Math.Pow((double)(data.Z - Rmeans[2]), 2.0));           
+                }
+
+
             }
 
             //compute the final mean result
             if (DecodedPackets > 1)
             {
                 for (i = 0; i < 3; i++)
-                {
-                    Rmeans[i] = means[i] / DecodedPackets;
+                { Rmeans[i] = means[i] / DecodedPackets; 
                 }
+
+                VMAG = VMAG / DecodedPackets;
+
+                if(prev == -1)
+                    prev = 0;
             }
 
 
@@ -758,7 +752,7 @@ namespace WocketConfigurationApp
 
 
 
-        //=================================================
+//=================================================
         public void StartReading()
         {
             lock (_objLock)
@@ -782,7 +776,7 @@ namespace WocketConfigurationApp
 
 
             //Start
-            Start(1, false);
+            Start(1);
 
 
             try
@@ -805,15 +799,13 @@ namespace WocketConfigurationApp
                         isconnected = ReadData(out value);
                         _LastValue = value;
 
-                        /*if (BT_TYPE == ALIVE_PCKG)
-                        {
-                            if (WriteAlive())
-                                _LastValue = "writing to wocket";
-                        }*/
+                        if (BT_TYPE == WOCKET)
+                        { if( WriteAlive())
+                            _LastValue = "writing to wocket"; 
+                        }
 
-                       // WriteData(byte[] data)
-
-
+                        
+                        //OnNewReading.Invoke(this, null);
                         if (OnNewReading != null)
                             OnNewReading(this, EventArgs.Empty);
 
@@ -841,7 +833,7 @@ namespace WocketConfigurationApp
 
                         System.Threading.Thread.Sleep(15000);
 
-                        Start(1, true);
+                        Start(1);
                         trial = 0;
 
                     }
@@ -864,30 +856,21 @@ namespace WocketConfigurationApp
 
         public void StopReading()
         {
-            try
+            lock (_objLock)
             {
-                lock (_objLock)
-                {
-                    if (readingThread == null)
-                        return;
+                if (readingThread == null)
+                    return;
 
-                    isReading = false;
-                    readingThread.Join();
-                    readingThread = null;
-                }
-
-
-            }
-            catch
-            {
-                // shows that there is an error
+                isReading = false;
+                readingThread.Join();
+                readingThread = null;
             }
         }
+	
 
 
-
-        //===================================================
-        // Retrieve BT data
+//===================================================
+// Retrieve BT data
 
         //Get the last value read
         public string LastValue
@@ -898,42 +881,34 @@ namespace WocketConfigurationApp
             }
         }
 
+        public int GetBehavior()
+        {  
+            return behavior;    
+        }
 
 
-        #region commented
-        /*
-           
-
-            public int GetBehavior()
-            {  
-                return behavior;    
-            }
-
-
-            public void SetBehavior(int value)
+        public void SetBehavior(int value)
+        {
+            lock (_objLock)
             {
-                lock (_objLock)
-                {
-                    behavior = value;
-                }
+                behavior = value;
             }
+        }
 
-            public bool IsAddressSet()
-            {
-                //lock (_objLock)
-                //{
-                
-                    return address_set;
-               // }
-                }
-        */
-
-        #endregion commented
+        public bool IsAddressSet()
+        {
+            //lock (_objLock)
+            //{
+            
+                return address_set;
+           // }
+        }
 
 
-        //===================================================
-        // Status Variables        
 
+//===================================================
+// Status Variables        
+        
         // check the status of the bt connection 
         public bool IsConnected()
         {
@@ -951,21 +926,17 @@ namespace WocketConfigurationApp
         }
 
 
+//====================================================
+// Bt search function. It is generic for all bts
 
-        //====================================================
-        // Bt search function. It is generic for all bts
 
         public bool Search()
         {
             bool isfound = false;
 
-            if (bc == null)
-            { bc = new BluetoothClient(); }
-
             // set flags about which devices we want to find
             // the discovery flags are: authenticated, remembered and unknown
             bdi = bc.DiscoverDevices(60, false, true, true);
-
 
             if (bdi.Length > 0)
             {
@@ -981,14 +952,9 @@ namespace WocketConfigurationApp
             return (bdi);
 
         }
-
-
-
-        //================================================
+ //================================================
 
 
 
     } //ends class
-
-
 }// ends namespace

@@ -25,7 +25,9 @@ namespace WocketConfigurationApp
         BluetoothDeviceInfo wocket;
         private delegate void updateTextDelegate_Wocket();
         private delegate void updateSearchDelegate_Wocket();
-        WocketsController wc;
+        WocketsController wc = null;
+
+
         public Form2(BluetoothDeviceInfo wocket)
         {
             InitializeComponent();
@@ -36,22 +38,26 @@ namespace WocketConfigurationApp
         }
 
         private void Form2_Load(object sender, EventArgs e)
-        {            
+        {
+            IniWocket();
+        }
 
+        private void IniWocket()
+        {
             WocketsConfiguration configuration = new WocketsConfiguration();
             CurrentWockets._Configuration = configuration;
-            
+
 
             wc = new WocketsController("", "", "");
-            CurrentWockets._Controller = wc;  
+            CurrentWockets._Controller = wc;
             wc._Receivers = new ReceiverList();
-            wc._Decoders = new DecoderList();           
+            wc._Decoders = new DecoderList();
             wc._Sensors = new SensorList();
             wc._Receivers.Add(new RFCOMMReceiver());
             wc._Decoders.Add(new WocketsDecoder());
             wc._Sensors.Add(new Wocket());
 
-            ((RFCOMMReceiver)wc._Receivers[0])._Address = this.wocket.DeviceAddress.ToString();      
+            ((RFCOMMReceiver)wc._Receivers[0])._Address = this.wocket.DeviceAddress.ToString();
             wc._Receivers[0]._ID = 0;
             wc._Decoders[0]._ID = 0;
             wc._Sensors[0]._Receiver = wc._Receivers[0];
@@ -61,7 +67,19 @@ namespace WocketConfigurationApp
             wc._Sensors[0]._Loaded = true;
             wc._Decoders[0].Subscribe(Wockets.Data.SensorDataType.COMMAND_MODE_ENTERED, new Response.ResponseHandler(this.CommandCallback));
             wc._Decoders[0].Subscribe(Wockets.Data.SensorDataType.BAUD_RATE, new Response.ResponseHandler(this.CommandCallback));
+         
             wc.Initialize();  
+        
+        }
+
+        private void ShutdownWocket()
+        {
+            if (wc != null)
+            {
+                wc.Dispose();
+                wc = null;
+            }
+             
         }
 
         private void label1_Click(object sender, EventArgs e)
@@ -71,7 +89,7 @@ namespace WocketConfigurationApp
 
         private void label3_Click(object sender, EventArgs e)
         {
-
+            
         }
 
         private void label6_Click(object sender, EventArgs e)
@@ -140,24 +158,29 @@ namespace WocketConfigurationApp
         }
         private void timer1_Tick(object sender, EventArgs e)
         {
-            
+
             if (CurrentWockets._Controller._Receivers[0]._Status == ReceiverStatus.Disconnected)
-                this.label27.Text = "Disconnected";
+            { this.label27.Text = "Disconnected";
+              ShutdownWocket();
+            }
             else if (CurrentWockets._Controller._Receivers[0]._Status == ReceiverStatus.Reconnecting)
                 this.label27.Text = "Reconnecting";
             else
             {
 
-                if (CurrentWockets._Controller._Sensors[0]._Mode == SensorModes.Data)                
-                    this.label27.Text = "Connected: Data Mode";                                   
-                else                
-                    this.label27.Text = "Connected: Command Mode";                                 
+                if (CurrentWockets._Controller._Sensors[0]._Mode == SensorModes.Data)
+                    this.label27.Text = "Connected: Data Mode";
+                else
+                    this.label27.Text = "Connected: Command Mode";
             }
            
         }
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
+            byte[] bb = new byte[7] { (byte)'S', (byte)'U', (byte)',', (byte)'3', (byte)'8', 13, 13 };
+            ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(bb);     
+
             if (CurrentWockets._Controller._Sensors[0]._Mode == SensorModes.Command)
             {
                 Command c = new GET_BR();
@@ -184,6 +207,11 @@ namespace WocketConfigurationApp
                 Command c = new ExitCommandMode();
                 ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(c._Bytes);
             }
+
+        }
+
+        private void comboBox5_SelectedIndexChanged(object sender, EventArgs e)
+        {
 
         }
     }

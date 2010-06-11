@@ -253,6 +253,12 @@ namespace WocketConfigurationApp
                 set_panel_cmd_entry_textbox.Visible = false;
                 info_button_sampling_rate.Enabled = true;
             }
+            else if (current_command.CompareTo("pwr_timeout") == 0)
+            {
+                set_panel_cmd_entry_textbox.Text = "";
+                set_panel_cmd_entry_textbox.Visible = false;
+                info_button_pwr_timeout.Enabled = true;
+            }
 
             current_command = "";
             
@@ -339,70 +345,92 @@ namespace WocketConfigurationApp
                     int val = 0;
 
                     //get the sampling rate
-                    if (set_panel_cmd_entry_textbox.Text.Trim().CompareTo("") == 0)
-                        val= Int32.Parse(set_panel_cmd_entry_textbox.Text);
+                    if (set_panel_cmd_entry_textbox.Text.Trim().CompareTo("") != 0)
+                        val = Int32.Parse(set_panel_cmd_entry_textbox.Text);
 
-                    
+
                     //set the sampling rate according with the transmission mode
-                        if (cur_tr_mode.CompareTo("continuous") == 0)
+                    if (cur_tr_mode.CompareTo("continuous") == 0)
+                    {
+                        if (val >= 1 && val <= 126)
                         {
-                            if (val >= 1 && val <= 126)
-                            { 
-                                //set the wockets sampling rate in countinous mode
-                                info_cmd_value_sampling_rate.Text = val.ToString() + " Hz";
-                            }
-                            else
-                               outOfrange = true;                         
+                            //set the wockets sampling rate in countinous mode
+                            info_cmd_value_sampling_rate.Text = val.ToString() + " Hz";
                         }
-                        else if (cur_tr_mode.CompareTo("30") == 0)
-                        {
-                            if (val >= 1 && val <= 80)
-                            {
-                                //set the wockets sampling rate in burst 30 secs mode
-                                info_cmd_value_sampling_rate.Text = val.ToString() + " Hz";
-                            }
-                            else
-                                outOfrange = true;     
-                        }
-                        else if (cur_tr_mode.CompareTo("60") == 0)
-                        {
-                            if (val >= 1 && val <= 40)
-                            {
-                                //set the wockets sampling rate in burst 60 secs mode
-                                info_cmd_value_sampling_rate.Text = val.ToString() + " Hz";
-                            }
-                            else
-                                outOfrange = true;
-                        }
-                        else if (cur_tr_mode.CompareTo("90") == 0)
-                        {
-                            if (val >= 1 && val <= 30)
-                            {
-                                //set the wockets sampling rate in burst 90 secs mode
-                                info_cmd_value_sampling_rate.Text = val.ToString() + " Hz";
-                            }
-                            else
-                                outOfrange = true;
-                        }
-                        else if (cur_tr_mode.CompareTo("120") == 0)
-                        {
-                            if (val >= 1 && val <= 20)
-                            {
-                                //set the wockets sampling rate in burst 90 secs mode
-                                info_cmd_value_sampling_rate.Text = val.ToString() + " Hz";
-                            }
-                            else
-                                outOfrange = true;
-                        }
-
-
-
-                        if (outOfrange == true)
-                        {
-                            set_panel_label_status.Text = set_panel_label_status.Text + "\n\r Sampling rate out of range.";
-                            info_cmd_value_sampling_rate.Text = "out of range";
-                        }
+                        else
+                            outOfrange = true;
                     }
+                    else if (cur_tr_mode.CompareTo("30") == 0)
+                    {
+                        if (val >= 1 && val <= 80)
+                        {
+                            //set the wockets sampling rate in burst 30 secs mode
+                            info_cmd_value_sampling_rate.Text = val.ToString() + " Hz";
+                        }
+                        else
+                            outOfrange = true;
+                    }
+                    else if (cur_tr_mode.CompareTo("60") == 0)
+                    {
+                        if (val >= 1 && val <= 40)
+                        {
+                            //set the wockets sampling rate in burst 60 secs mode
+                            info_cmd_value_sampling_rate.Text = val.ToString() + " Hz";
+                        }
+                        else
+                            outOfrange = true;
+                    }
+                    else if (cur_tr_mode.CompareTo("90") == 0)
+                    {
+                        if (val >= 1 && val <= 30)
+                        {
+                            //set the wockets sampling rate in burst 90 secs mode
+                            info_cmd_value_sampling_rate.Text = val.ToString() + " Hz";
+                        }
+                        else
+                            outOfrange = true;
+                    }
+                    else if (cur_tr_mode.CompareTo("120") == 0)
+                    {
+                        if (val >= 1 && val <= 20)
+                        {
+                            //set the wockets sampling rate in burst 90 secs mode
+                            info_cmd_value_sampling_rate.Text = val.ToString() + " Hz";
+                        }
+                        else
+                            outOfrange = true;
+                    }
+
+
+
+                    if (outOfrange == true)
+                    {
+                        set_panel_label_status.Text = set_panel_label_status.Text + "\n\r Sampling rate out of range.";
+                        info_cmd_value_sampling_rate.Text = "out of range";
+                    }
+                }
+                else if (current_command.CompareTo("pwr_timeout") == 0)
+                {
+                    bool outOfrange = false;
+                    int val = 0;
+
+                    //get the sampling rate
+                    if (set_panel_cmd_entry_textbox.Text.Trim().CompareTo("") != 0)
+                        val = Int32.Parse(set_panel_cmd_entry_textbox.Text);
+
+
+                    //set the power down timeout  according the permitted range in minutes
+                    if (val >= 1 && val <= 127)
+                    {
+                        //set the wockets sampling rate in countinous mode
+                        info_cmd_value_pwr_timeout.Text = val.ToString() + " Hz";
+                    }
+                    else
+                    {
+                        set_panel_label_status.Text = "The time you entered is out of range. /n/r The power down timeout range is between 1 min and 127 minutes.";
+                        info_cmd_value_pwr_timeout.Text = "out of range";
+                    }
+                }
                     
 
                 set_panel_button_set.Enabled = true;
@@ -628,6 +656,17 @@ namespace WocketConfigurationApp
 
         private void info_button_pwr_timeout_Click(object sender, EventArgs e)
         {
+            current_command = "pwr_timeout";
+
+            //prepare the set panel
+            set_panel_title.Text = info_cmd_label_pwr_timeout.Text;
+            set_panel_cmd_label.Text = info_cmd_label_pwr_timeout.Text;
+            set_panel_cmd_entry_textbox.Text = "";
+
+            set_panel_cmd_entry_combo.Visible = false;
+            set_panel_cmd_entry_textbox.Visible = true;
+            panel_set_container.Visible = true;
+            info_button_pwr_timeout.Visible= false;
 
         }
 
