@@ -1,8 +1,8 @@
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{E5BB25A9-1913-4C1A-BBCF-51F2554D0C42}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -14,6 +14,21 @@
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
     <OldToolsVersion>2.0</OldToolsVersion>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -698,30 +713,26 @@
     <Compile Include="..\..\src\WocketsWeka\weka\filters\unsupervised\attribute\NumericToBinary.cs">
       <Link>weka\filters\unsupervised\attribute\NumericToBinary.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\BandPass.cs">
-      <Link>Utils\Filters\BandPass.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\Butterworth.cs">
-      <Link>Utils\Filters\Butterworth.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\Filter.cs">
-      <Link>Utils\Filters\Filter.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\Frequency.cs">
-      <Link>Utils\Filters\Frequency.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\Order.cs">
-      <Link>Utils\Filters\Order.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\SamplingRates.cs">
-      <Link>Utils\Filters\SamplingRates.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\Type.cs">
-      <Link>Utils\Filters\Type.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\ButterworthDF.cs" >
-      <Link>Utils\Filters\ButterworthDF.cs</Link>
-    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Utils\Filters\" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 2.0 %28x86%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
