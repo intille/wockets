@@ -1149,8 +1149,8 @@ namespace WocketsApplication
                                 mostActivity = activityLabels[j];
                                 mostCount = labelCounters[j];
                             }
-                            if ((mostActivity.Length>0) && (mostCount>=2))
-                                UpdateClassification(mostActivity, intensity);                      
+                            //if ((mostActivity.Length>0) && (mostCount>=2))
+                            UpdateClassification(mostActivity, intensity);                      
                             labelCounters[j] = 0;
                         }
 
@@ -1264,14 +1264,14 @@ namespace WocketsApplication
                 yLocation += 70;
             }
             this.activityStatus = ActivityStatus.Measuring;
-            /*this.panels[ControlID.CLASSIFICATION_PANEL].Visible = true;
+            this.panels[ControlID.CLASSIFICATION_PANEL].Visible = true;
             this.panels[currentPanel].Visible = false;
-            this.currentPanel = ControlID.CLASSIFICATION_PANEL;*/
-
+            this.currentPanel = ControlID.CLASSIFICATION_PANEL;
+            /*
             this.panels[ControlID.EE_PANEL].Visible = true;
             this.panels[currentPanel].Visible = false;
             this.currentPanel = ControlID.EE_PANEL;
-
+            */
             classificationCounter = 0;
             classificationThread = new Thread(new ThreadStart(ClassificationThread));
             classificationThread.Start();

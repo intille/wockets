@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.50727</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{16986364-6B54-443E-B1F3-A6F17F0523B2}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -381,6 +381,7 @@
     <Compile Include="..\..\src\Wockets\Data\Commands\GET_BR.cs">
       <Link>Data\Commands\GET_BR.cs</Link>
     </Compile>
+    <Compile Include="Data\Commands\SET_SR.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="WocketsWeka.csproj">
