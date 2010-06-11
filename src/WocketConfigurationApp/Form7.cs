@@ -616,6 +616,8 @@ namespace WocketConfigurationApp
             if (cur_tr_mode.CompareTo("continous") == 0)
             {
                 set_panel_label_status.Text = "The Wockets is set to continous mode. \n\r This mode supports sampling rates between 1Hz and 126Hz. \n\r Enter the sampling rate in the command textbox.";
+                SET_SR set_sr_cmd = new SET_SR(90);
+                ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(set_sr_cmd._Bytes);
             }
             else if (cur_tr_mode.CompareTo("30") == 0)
             {

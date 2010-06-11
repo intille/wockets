@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{E5BB25A9-1913-4C1A-BBCF-51F2554D0C42}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -713,9 +713,14 @@
     <Compile Include="..\..\src\WocketsWeka\weka\filters\unsupervised\attribute\NumericToBinary.cs">
       <Link>weka\filters\unsupervised\attribute\NumericToBinary.cs</Link>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Utils\Filters\" />
+    <Compile Include="Utils\Filters\BandPass.cs" />
+    <Compile Include="Utils\Filters\ButterWorth.cs" />
+    <Compile Include="Utils\Filters\ButterworthDF.cs" />
+    <Compile Include="Utils\Filters\Filter.cs" />
+    <Compile Include="Utils\Filters\Frequency.cs" />
+    <Compile Include="Utils\Filters\Order.cs" />
+    <Compile Include="Utils\Filters\SamplingRates.cs" />
+    <Compile Include="Utils\Filters\Type.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">

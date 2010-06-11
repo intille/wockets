@@ -1,4 +1,4 @@
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -708,6 +708,14 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Charts\Charts.csproj">
+      <Project>{FFF66BE1-146A-4BFE-AA4B-11154AB4F11F}</Project>
+      <Name>Charts</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OpenNETCF.GDIPlus\OpenNETCF.GDIPlus.csproj">
+      <Project>{A3D094BB-6494-4385-A968-CD37F027C05D}</Project>
+      <Name>OpenNETCF.GDIPlus</Name>
+    </ProjectReference>
     <ProjectReference Include="Wockets.csproj">
       <Project>{5D98635F-251B-464F-9132-AF594E8D482B}</Project>
       <Name>Wockets</Name>
@@ -718,42 +726,42 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\src\WocketsApplication\Resources\DottedBlack.png" >
+    <None Include="..\..\src\WocketsApplication\Resources\DottedBlack.png">
       <Link>Resources\DottedBlack.png</Link>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\src\WocketsApplication\Resources\CoolBlue.jpg" >
+    <None Include="..\..\src\WocketsApplication\Resources\CoolBlue.jpg">
       <Link>Resources\CoolBlue.jpg</Link>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\src\WocketsApplication\Resources\CosmosRed.jpg" >
+    <None Include="..\..\src\WocketsApplication\Resources\CosmosRed.jpg">
       <Link>Resources\CosmosRed.jpg</Link>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\src\WocketsApplication\Resources\DottedBlack-640.png" >
+    <None Include="..\..\src\WocketsApplication\Resources\DottedBlack-640.png">
       <Link>Resources\DottedBlack-640.png</Link>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\src\WocketsApplication\Resources\DottedBlack-800-480.png" >
+    <None Include="..\..\src\WocketsApplication\Resources\DottedBlack-800-480.png">
       <Link>Resources\DottedBlack-800-480.png</Link>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\src\WocketsApplication\Resources\GraphiteBlue.jpg" >
+    <None Include="..\..\src\WocketsApplication\Resources\GraphiteBlue.jpg">
       <Link>Resources\GraphiteBlue.jpg</Link>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\src\WocketsApplication\Resources\Leather.jpg" >
+    <None Include="..\..\src\WocketsApplication\Resources\Leather.jpg">
       <Link>Resources\Leather.jpg</Link>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\src\WocketsApplication\Resources\NaturalBlack.jpg" >
+    <None Include="..\..\src\WocketsApplication\Resources\NaturalBlack.jpg">
       <Link>Resources\NaturalBlack.jpg</Link>
     </None>
   </ItemGroup>
