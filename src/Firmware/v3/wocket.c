@@ -400,8 +400,12 @@ void _receive_data(void)
                             aBuffer[2]=m_BL_RSP_BYTE2(word);
                             processed_counter=command_counter;
                             response_length=3;		                                                                          
-                            break;
-               
+                            break;				
+                   case (unsigned char) SET_SR:  
+				   		_SAMPLING_RATE=m_SET_SR(aBuffer[1]);
+						_wocket_initialize_timer2_interrupt();
+						processed_counter=command_counter;
+						break;
                     case (unsigned char) SET_CAL:                                                                    
                             if (eeprom_is_ready())
                             {

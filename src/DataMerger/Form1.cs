@@ -3063,8 +3063,8 @@ namespace DataMerger
                             long currentTS=(long)(data.UnixTimeStamp/1000.0);
                             if ((currentTS - prevWocketTS) < 1)
                                 wocketSR++;                            
-                            if ((currentTS - prevWocketTS)==1)
-                                totalseconds++;
+                            if ((prevWocketTS>0) & (currentTS - prevWocketTS)>=1)
+                                totalseconds += (int)(currentTS - prevWocketTS);
                             prevWocketTS = currentTS;
                         }
                         wocketsSR[i] = (int) Math.Round((double)wocketSR/(double)totalseconds);

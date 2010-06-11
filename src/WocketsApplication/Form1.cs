@@ -24,7 +24,8 @@ using Wockets.Data.Plotters;
 using Wockets;
 using Microsoft.VisualBasic;
 
-//using OpenNETCF.GDIPlus;
+using OpenNETCF.GDIPlus;
+using Charts.twodimensional;
 using OpenNETCF.Windows.Forms;
 
 using WocketsWeka;
@@ -471,20 +472,20 @@ namespace WocketsApplication
                 
                 this.panels[panelID]._ButtonText[buttonID].Text = unpressedText;
                 this.panels[panelID]._ButtonText[buttonID].ForeColor = Color.FromArgb(205, 183, 158);
-                this.panels[panelID]._ButtonText[buttonID].Allign = StringAlignment.Center;
+                this.panels[panelID]._ButtonText[buttonID].Allign = System.Drawing.StringAlignment.Center;
                 this.panels[panelID]._ButtonText[buttonID].Visible = true;
                 if (size == 128)
                 {
-                    this.panels[panelID]._ButtonText[buttonID].Font = new Font(FontFamily.GenericSerif, 9.0f, FontStyle.Regular);
+                    this.panels[panelID]._ButtonText[buttonID].Font = new Font(FontFamily.GenericSerif, 9.0f, System.Drawing.FontStyle.Regular);
                     this.panels[panelID]._ButtonText[buttonID].Size = new Size(128, 40);
-                    this.panels[panelID]._ButtonText[buttonID].Allign = StringAlignment.Center;
+                    this.panels[panelID]._ButtonText[buttonID].Allign = System.Drawing.StringAlignment.Center;
                     this.panels[panelID]._ButtonText[buttonID].Location = new Point(x, y + size + 2);
                 }
                 else if (size == 200)
                 {
-                    this.panels[panelID]._ButtonText[buttonID].Font = new Font(FontFamily.GenericSerif, 14.0f, FontStyle.Regular);
+                    this.panels[panelID]._ButtonText[buttonID].Font = new Font(FontFamily.GenericSerif, 14.0f, System.Drawing.FontStyle.Regular);
                     this.panels[panelID]._ButtonText[buttonID].Size = new Size(500, 100);
-                    this.panels[panelID]._ButtonText[buttonID].Allign = StringAlignment.Center;
+                    this.panels[panelID]._ButtonText[buttonID].Allign = System.Drawing.StringAlignment.Center;
                     this.panels[panelID]._ButtonText[buttonID].Location = new Point((Screen.PrimaryScreen.WorkingArea.Width-500)/2, y + size + 2);
                 }
             }
@@ -545,6 +546,13 @@ namespace WocketsApplication
         private AlphaLabel bestGuessLabel;
         private Button doneClassifying;
 
+        #region EE Panel
+        private Chart pieChart;
+        private IntPtr token;
+        private GdiplusStartupInput input = new GdiplusStartupInput();
+        private GdiplusStartupOutput output;
+        private Button doneEE;
+        #endregion EE Panel
 
         [DllImport("coredll.dll")]
         static extern int ShowWindow(IntPtr hWnd, int nCmdShow);
@@ -577,6 +585,7 @@ namespace WocketsApplication
             this.numberButtons[ControlID.ACTIVITY_PANEL] = ControlID.ACTIVITY_PANEL_BUTTON_COUNT;
             this.numberButtons[ControlID.MODELS_PANEL] = ControlID.MODELS_PANEL_BUTTON_COUNT;
             this.numberButtons[ControlID.CLASSIFICATION_PANEL] = ControlID.CLASSIFICATION_PANEL_BUTTON_COUNT;
+            this.numberButtons[ControlID.EE_PANEL] = ControlID.EE_PANEL_BUTTON_COUNT;
             for (int i = 0; (i < ControlID.NUMBER_PANELS); i++)
            {
 
@@ -614,6 +623,10 @@ namespace WocketsApplication
             this.panels[ControlID.ANNOTATION_BUTTON_PANEL]._ClearCanvas = true;
             this.panels[ControlID.CLASSIFICATION_PANEL].BackColor = Color.FromArgb(250, 237, 221);
             this.panels[ControlID.CLASSIFICATION_PANEL]._ClearCanvas = true;
+            this.panels[ControlID.EE_PANEL].BackColor = Color.FromArgb(250, 237, 221);
+            this.panels[ControlID.EE_PANEL]._ClearCanvas = true;
+
+
 
 
             #region Activity Panel
@@ -662,7 +675,7 @@ namespace WocketsApplication
             saveFeatures.Text = "Learn and Annotate";
             saveFeatures.BackColor = Color.FromArgb(250, 237, 221); 
             saveFeatures.ForeColor = Color.Black;
-            saveFeatures.Font = new Font(FontFamily.GenericSerif, 14.0f, FontStyle.Bold);
+            saveFeatures.Font = new Font(FontFamily.GenericSerif, 14.0f, System.Drawing.FontStyle.Bold);
             saveFeatures.Visible = true;
             saveFeatures.Location = new Point(10, annotationProtocolsList.Location.Y + annotationProtocolsList.Height + 10);
             saveFeatures.CheckState = CheckState.Checked;
@@ -673,7 +686,7 @@ namespace WocketsApplication
             annotationLabel.Size = new Size(Screen.PrimaryScreen.WorkingArea.Width, 50);
             annotationLabel.Text = "Choose a protocol";
             annotationLabel.BackColor = Color.FromArgb(250, 237, 221);
-            annotationLabel.Font = new Font(FontFamily.GenericSerif, 14.0f, FontStyle.Bold);
+            annotationLabel.Font = new Font(FontFamily.GenericSerif, 14.0f, System.Drawing.FontStyle.Bold);
             annotationLabel.Visible = true;
             annotationLabel.Location = new Point((int)(Screen.PrimaryScreen.WorkingArea.Width * 0.05), 10);
             this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL].Controls.Add(annotationLabel);
@@ -684,7 +697,7 @@ namespace WocketsApplication
             startAnnnotationButton.Text = "Begin Annotation";
             startAnnnotationButton.BackColor = Color.LightGray;
             startAnnnotationButton.ForeColor = Color.Black;
-            startAnnnotationButton.Font = new Font(FontFamily.GenericSerif, 14.0f, FontStyle.Bold);
+            startAnnnotationButton.Font = new Font(FontFamily.GenericSerif, 14.0f, System.Drawing.FontStyle.Bold);
             startAnnnotationButton.Enabled = false;
             startAnnnotationButton.Visible = true;
             startAnnnotationButton.Click += new EventHandler(startAnnnotationButton_Click);
@@ -724,7 +737,7 @@ namespace WocketsApplication
             modelLabel.Size = new Size(Screen.PrimaryScreen.WorkingArea.Width, 50);
             modelLabel.Text = "Select a learning profile";
             modelLabel.BackColor = Color.FromArgb(250, 237, 221);
-            modelLabel.Font = new Font(FontFamily.GenericSerif, 14.0f, FontStyle.Bold);
+            modelLabel.Font = new Font(FontFamily.GenericSerif, 14.0f, System.Drawing.FontStyle.Bold);
             modelLabel.Visible = true;
             modelLabel.Location = new Point((int)(Screen.PrimaryScreen.WorkingArea.Width * 0.05), 10);
             this.panels[ControlID.MODELS_PANEL].Controls.Add(modelLabel);
@@ -735,7 +748,7 @@ namespace WocketsApplication
             startMeasuringButton.Text = "Begin Measuring";
             startMeasuringButton.BackColor = Color.LightGray;
             startMeasuringButton.ForeColor = Color.Black;
-            startMeasuringButton.Font = new Font(FontFamily.GenericSerif, 14.0f, FontStyle.Bold);
+            startMeasuringButton.Font = new Font(FontFamily.GenericSerif, 14.0f, System.Drawing.FontStyle.Bold);
             startMeasuringButton.Enabled = false;
             startMeasuringButton.Visible = true;
             startMeasuringButton.Click += new EventHandler(startMeasuringButton_Click);
@@ -751,7 +764,7 @@ namespace WocketsApplication
             this.chooseActivityLabel.Size = new Size(500, 40);
             this.chooseActivityLabel.Text = "Choose your activity";
             this.chooseActivityLabel.ForeColor = Color.Black;
-            this.chooseActivityLabel.Font = new Font(FontFamily.GenericSerif, 10.0f, FontStyle.Bold);
+            this.chooseActivityLabel.Font = new Font(FontFamily.GenericSerif, 10.0f, System.Drawing.FontStyle.Bold);
             this.chooseActivityLabel.Visible = true;
             this.chooseActivityLabel.Location = new Point(1, 1);
             this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Controls.Add(this.chooseActivityLabel);
@@ -760,7 +773,7 @@ namespace WocketsApplication
             this.examplesLabel.Size = new Size(100, 30);
             this.examplesLabel.Text = "00:00";
             this.examplesLabel.ForeColor = Color.Black;
-            this.examplesLabel.Font = new Font(FontFamily.GenericSerif, 10.0f, FontStyle.Bold);
+            this.examplesLabel.Font = new Font(FontFamily.GenericSerif, 10.0f, System.Drawing.FontStyle.Bold);
             this.examplesLabel.Visible = true;
             this.examplesLabel.Location = new Point(130, this.Height - 100);
             this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Controls.Add(this.examplesLabel);
@@ -768,8 +781,8 @@ namespace WocketsApplication
             doneAnnotation = new Button();
             MakeButtonMultiline(doneAnnotation);
             doneAnnotation.Size = new Size(200, 80);
-            doneAnnotation.Text = "Stop\nLearning";           
-            doneAnnotation.Font = new Font(FontFamily.GenericSerif, 10.0f, FontStyle.Bold);
+            doneAnnotation.Text = "Stop\nLearning";
+            doneAnnotation.Font = new Font(FontFamily.GenericSerif, 10.0f, System.Drawing.FontStyle.Bold);
             doneAnnotation.Enabled = true;
             doneAnnotation.Visible = true;
             doneAnnotation.Click += new EventHandler(doneAnnotation_Click);
@@ -789,14 +802,14 @@ namespace WocketsApplication
             this.bestGuessLabel.Size = new Size(500, 40);
             this.bestGuessLabel.Text = "Our Best Guess";
             this.bestGuessLabel.ForeColor = Color.Black;
-            this.bestGuessLabel.Font = new Font(FontFamily.GenericSerif, 10.0f, FontStyle.Bold);
+            this.bestGuessLabel.Font = new Font(FontFamily.GenericSerif, 10.0f, System.Drawing.FontStyle.Bold);
             this.bestGuessLabel.Visible = true;
             this.bestGuessLabel.Location = new Point(1, 1);
             this.panels[ControlID.CLASSIFICATION_PANEL].Controls.Add(this.bestGuessLabel);
             doneClassifying = new Button();
             doneClassifying.Size = new Size(300, 80);
             doneClassifying.Text = "Stop Measuring";
-            doneClassifying.Font = new Font(FontFamily.GenericSerif, 12.0f, FontStyle.Bold);
+            doneClassifying.Font = new Font(FontFamily.GenericSerif, 12.0f, System.Drawing.FontStyle.Bold);
             doneClassifying.Enabled = true;
             doneClassifying.Visible = true;
             doneClassifying.Click += new EventHandler(doneClassifying_Click);
@@ -805,6 +818,42 @@ namespace WocketsApplication
             AddButton(ControlID.CLASSIFICATION_PANEL, ControlID.HOME_CLASSIFICATION_BUTTON, "Buttons\\HomePressed-128.png", "Buttons\\HomeUnpressed-128.png", 0, this.Height - 130, 128, null, ButtonType.Fixed);            
             #endregion Classification Panel
 
+
+
+            #region EE Panel
+ 
+
+            GpStatusPlus stat = NativeMethods.GdiplusStartup(out token, input, out output);
+            pieChart = new Charts.twodimensional.PieChart();
+            pieChart.Location = new Point(0, 0);
+            pieChart.Size = new Size(200, 200);
+            pieChart.IsStretch = true;
+            pieChart.SetCalories(10, 5);
+            pieChart.SetActivity("Jumping Jacks");
+            Hashtable activities = new Hashtable();
+            activities.Add("Biceps Curls", 10);
+            activities.Add("Jumping Jacks", 10);
+            activities.Add("Walking", 40);
+            activities.Add("Jogging", 20);
+            activities.Add("Standing/Sitting", 10);
+            activities.Add("Empty", 10);
+
+            pieChart.Data = activities;
+            pieChart.Invalidate();
+
+            this.panels[ControlID.EE_PANEL].Controls.Add(pieChart);
+
+            doneEE = new Button();
+            doneEE.Size = new Size(300, 80);
+            doneEE.Text = "Done";
+            doneEE.Font = new Font(FontFamily.GenericSerif, 12.0f, System.Drawing.FontStyle.Bold);
+            doneEE.Enabled = true;
+            doneEE.Visible = true;
+            doneEE.Click += new EventHandler(doneEE_Click);
+            doneEE.Location = new Point(150, this.Height - 100);
+            this.panels[ControlID.EE_PANEL].Controls.Add(doneEE);
+            AddButton(ControlID.EE_PANEL, ControlID.HOME_EE_BUTTON, "Buttons\\HomePressed-128.png", "Buttons\\HomeUnpressed-128.png", 0, this.Height - 130, 128, null, ButtonType.Fixed);
+            #endregion EE Panel
 
             //Main Page
             //Home Screen Bottom  Buttons
@@ -841,7 +890,7 @@ namespace WocketsApplication
             statusLabel.Size = new Size(300, 35);
             statusLabel.Text = "Kernel Stopped";
             statusLabel.ForeColor = Color.FromArgb(250, 237, 221);
-            statusLabel.Font = new Font(FontFamily.GenericSerif, 8.0f, FontStyle.Bold);
+            statusLabel.Font = new Font(FontFamily.GenericSerif, 8.0f, System.Drawing.FontStyle.Bold);
             statusLabel.Visible = true;
             statusLabel.Location = new Point(1, 1);
             this.panels[ControlID.HOME_PANEL].Controls.Add(statusLabel);
@@ -985,6 +1034,17 @@ namespace WocketsApplication
 
         }
 
+        void doneEE_Click(object sender, EventArgs e)
+        {
+            if (MessageBox.Show("Are you done measuring?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
+            {
+                this.activityStatus = ActivityStatus.None;
+                this.panels[ControlID.HOME_PANEL].Visible = true;
+                this.panels[ControlID.EE_PANEL].Visible = false;
+                this.currentPanel = ControlID.HOME_PANEL;
+            }
+        }
+
         void doneClassifying_Click(object sender, EventArgs e)
         {
             if (MessageBox.Show("Are you done measuring?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
@@ -1034,6 +1094,9 @@ namespace WocketsApplication
                     ((Label)this.classifiedLabels[activity]).ForeColor = Color.FromArgb((int)(250 * color), (int)(237 * color), (int)(221 * color));
                     ((Label)this.classifiedLabels[activity]).Invalidate();
                     this.panels[ControlID.CLASSIFICATION_PANEL].Refresh();
+                    pieChart.SetActivity(activity);
+                    pieChart.Invalidate();
+                    this.panels[ControlID.EE_PANEL].Invalidate();
                 }
             }
 
@@ -1080,12 +1143,14 @@ namespace WocketsApplication
                             //this.ActGUIlabels[j].Invalidate();
                             double intensity = (1.0 - ((double)labelCounters[j] / (double)CurrentWockets._Configuration._SmoothWindowCount));
                             //((Label)this.classifiedLabels[activityLabels[j]]).ForeColor = Color.FromArgb((int) (250 *intensity) , (int)(237 * intensity), (int)(221 * intensity));
-                            UpdateClassification(activityLabels[j], intensity);
+                            //UpdateClassification(activityLabels[j], intensity);
                             if (labelCounters[j] > mostCount)
                             {
                                 mostActivity = activityLabels[j];
                                 mostCount = labelCounters[j];
                             }
+                            if ((mostActivity.Length>0) && (mostCount>=2))
+                                UpdateClassification(mostActivity, intensity);                      
                             labelCounters[j] = 0;
                         }
 
@@ -1190,7 +1255,7 @@ namespace WocketsApplication
                 label.Text = activity;
                 label.BackColor = Color.FromArgb(250, 237, 221);
                 label.ForeColor = Color.FromArgb(250, 237, 221);
-                label.Font = new Font(FontFamily.GenericSerif, 16.0f, FontStyle.Bold);
+                label.Font = new Font(FontFamily.GenericSerif, 16.0f, System.Drawing.FontStyle.Bold);
                 label.Visible = true;
                 label.Location = new Point(10,yLocation );
 
@@ -1199,9 +1264,14 @@ namespace WocketsApplication
                 yLocation += 70;
             }
             this.activityStatus = ActivityStatus.Measuring;
-            this.panels[ControlID.CLASSIFICATION_PANEL].Visible = true;
+            /*this.panels[ControlID.CLASSIFICATION_PANEL].Visible = true;
             this.panels[currentPanel].Visible = false;
-            this.currentPanel = ControlID.CLASSIFICATION_PANEL;
+            this.currentPanel = ControlID.CLASSIFICATION_PANEL;*/
+
+            this.panels[ControlID.EE_PANEL].Visible = true;
+            this.panels[currentPanel].Visible = false;
+            this.currentPanel = ControlID.EE_PANEL;
+
             classificationCounter = 0;
             classificationThread = new Thread(new ThreadStart(ClassificationThread));
             classificationThread.Start();
@@ -1520,7 +1590,7 @@ namespace WocketsApplication
                         activityList[j].Width = act_button_width;
                         activityList[j].Height = act_button_height;
                         activityList[j].Location = new System.Drawing.Point(act_button_x, act_button_y+40);
-                        activityList[j].Font = new System.Drawing.Font("Microsoft Sans Serif", fontSize, FontStyle.Regular | FontStyle.Bold);
+                        activityList[j].Font = new System.Drawing.Font("Microsoft Sans Serif", fontSize, System.Drawing.FontStyle.Regular | System.Drawing.FontStyle.Bold);
                         ((Panel)this.panels[ControlID.ANNOTATION_BUTTON_PANEL]).Controls.Add(activityList[j]);
                         buttonsOnRow += 1;
 
@@ -1861,6 +1931,17 @@ namespace WocketsApplication
                 }
             }
             #endregion Classification Panel
+            #region EE Panel
+            else if (currentPanel == ControlID.EE_PANEL)
+            {
+                if (name == ControlID.HOME_EE_BUTTON)
+                {
+                    this.panels[ControlID.HOME_PANEL].Visible = true;
+                    this.panels[ControlID.EE_PANEL].Visible = false;
+                    this.currentPanel = ControlID.HOME_PANEL;
+                }
+            }
+            #endregion EE Panel
             else if (currentPanel == ControlID.WOCKETS_PANEL)
             {
                 if (name == ControlID.WOCKETS_BACK_BUTTON)
@@ -2025,11 +2106,7 @@ namespace WocketsApplication
                     }
 
                 }
-                else if (name == ControlID.BATTERY_BUTTON)
-                {
-                    if (Core._Connected)
-                        Core.SetSniff(Core._KernelGuid, SleepModes.NoSleep);
-                }
+  
                 else if (name == ControlID.ACTIVITY_BUTTON)
                 {
                     if (this.activityStatus == ActivityStatus.Annotating)
@@ -2043,12 +2120,19 @@ namespace WocketsApplication
                     }
                     else if (this.activityStatus == ActivityStatus.Measuring)
                     {
-                        this.panels[currentPanel].Visible = false;
+                       /* this.panels[currentPanel].Visible = false;
                         this.panels[ControlID.CLASSIFICATION_PANEL].Location = new Point(0, 0);
                         this.panels[ControlID.CLASSIFICATION_PANEL].BringToFront();
                         this.panels[ControlID.CLASSIFICATION_PANEL].Visible = true;
                         this.panels[ControlID.CLASSIFICATION_PANEL].Dock = DockStyle.None;
-                        this.currentPanel = ControlID.CLASSIFICATION_PANEL;
+                        this.currentPanel = ControlID.CLASSIFICATION_PANEL;*/
+
+                        this.panels[currentPanel].Visible = false;
+                        this.panels[ControlID.EE_PANEL].Location = new Point(0, 0);
+                        this.panels[ControlID.EE_PANEL].BringToFront();
+                        this.panels[ControlID.EE_PANEL].Visible = true;
+                        this.panels[ControlID.EE_PANEL].Dock = DockStyle.None;
+                        this.currentPanel = ControlID.EE_PANEL;
                     }
                     else
                     {
@@ -2059,12 +2143,6 @@ namespace WocketsApplication
                         this.panels[ControlID.ACTIVITY_PANEL].Dock = DockStyle.None;
                         this.currentPanel = ControlID.ACTIVITY_PANEL;
                     }
-                }
-                else if (name == ControlID.GO_GREEN_BUTTON)
-                {
-                   /* if (Core._Connected)
-                        Core.SetSniff(Core._KernelGuid, SleepModes.Sleep1Second);
-                    */
                 }
                 else if (name == ControlID.RESET_BUTTON)
                 {
