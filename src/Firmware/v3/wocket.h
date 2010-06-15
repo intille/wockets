@@ -228,6 +228,7 @@
 extern uint8_t EEMEM _NV_INITIALIZED;
 extern uint8_t EEMEM _NV_STATUS_BYTE;
 extern uint8_t EEMEM _NV_SAMPLING_RATE;
+extern uint8_t EEMEM _NV_DEBUG;
 extern unsigned char _INITIALIZED;
 extern unsigned char _STATUS_BYTE;
 extern unsigned char _SAMPLING_RATE;

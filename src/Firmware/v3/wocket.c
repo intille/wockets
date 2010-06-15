@@ -30,6 +30,7 @@ unsigned short z=0;
 uint8_t EEMEM _NV_INITIALIZED;
 uint8_t EEMEM _NV_STATUS_BYTE;
 uint8_t EEMEM _NV_SAMPLING_RATE;
+uint8_t EEMEM _NV_DEBUG;
 
 unsigned char _INITIALIZED=0;
 unsigned char _STATUS_BYTE=0;
@@ -78,18 +79,19 @@ void _wocket_initialize(void)
 	_atmega_disable_watchdog();
 	_atmega_initialize(CPU_CLK_PRESCALAR_1024);
 	num_skipped_timer_interrupts=10;//(F_CPU/1024)/PERFECT_SAMPLING_FREQUENCY;
-;
 
-	
+
 	/* Blink yellow for 5 seconds if battery not fully charged */
-	unsigned short battery=_atmega_a2dConvert10bit(ADC4);
+	unsigned short battery=_atmega_a2dConvert10bit(IN_VSENSE_BAT);
 	if (battery<700)
 	{
-		for (int i=0;(i<5);i++){
+		for (int i=0;(i<3);i++){
 			_yellowled_turn_on();		
-			for(int i=0;(i<200);i++)
+			for(int j=0;(j<200);j++)
 				_delay_ms(5);
 			_yellowled_turn_off();
+			for(int j=0;(j<200);j++)
+				_delay_ms(5);
 		}
 	}
 
@@ -109,6 +111,9 @@ void _wocket_initialize(void)
 		return;
 	}
 	
+
+
+	//eeprom_write_byte(&_NV_DEBUG,_INITIALIZED);	
 	/* If the wocket has been initialized */
 	if (_INITIALIZED==_WOCKET_INITIALIZED)
 	{
@@ -120,7 +125,12 @@ void _wocket_initialize(void)
 		}
 
 		// Load the transmission mode		
-		_wTM=(_STATUS_BYTE>>1)&0x07;		
+		_wTM=(_STATUS_BYTE>>1)&0x07;
+		
+		_yellowled_turn_on();		
+		for(int i=0;(i<200);i++)
+			_delay_ms(5);
+		_yellowled_turn_off();		
 	}
 	/* If the wocket has never been initialized, write the default settings and blink green for 5 seconds */
 	else
@@ -144,10 +154,14 @@ void _wocket_initialize(void)
 		eeprom_write_byte(&_NV_INITIALIZED,_INITIALIZED);
 				
 		// Blink green for 5 seconds	
-		_greenled_turn_on();		
-		for(int i=0;(i<1000);i++)
-			_delay_ms(5);
-		_greenled_turn_off();		
+		for (int i=0;(i<3);i++){
+			_greenled_turn_on();		
+			for(int j=0;(j<200);j++)
+				_delay_ms(5);
+			_greenled_turn_off();
+			for(int j=0;(j<200);j++)
+				_delay_ms(5);
+		}		
 	}
 
 	/* Set the overflow interrupt timer */
@@ -188,6 +202,7 @@ void _wocket_initialize(void)
 	
      /* Enable Timer 2 */
      _atmega_enable_timer2(CPU_CLK_PRESCALAR_1024);
+	 
 
 }
 
@@ -312,10 +327,18 @@ void _send_data(void)
 		   _bluetooth_reset();
            	alive_timer=0;                                  
         }
+#ifdef _VERSION==3
+		unsigned short x=_atmega_a2dConvert10bit(ADC2);
+		unsigned short y=_atmega_a2dConvert10bit(ADC1);
+		unsigned short z=_atmega_a2dConvert10bit(ADC0);
+		_transmit_packet(_encode_packet(x,y,z));	
+#else
 		unsigned short x=_atmega_a2dConvert10bit(ADC3);
 		unsigned short y=_atmega_a2dConvert10bit(ADC2);
 		unsigned short z=_atmega_a2dConvert10bit(ADC1);
-		_transmit_packet(_encode_packet(x,y,z));				
+		_transmit_packet(_encode_packet(x,y,z));	
+#endif
+			
 	}
 }
 void _receive_data(void)
@@ -393,8 +416,13 @@ void _receive_data(void)
 				
                             break;
                     //setup battery buffer
-                case (unsigned char) GET_BT:             
+                case (unsigned char) GET_BT:           
+#ifdef _VERSION==3
+                            word=_atmega_a2dConvert10bit(ADC7);
+#else
                             word=_atmega_a2dConvert10bit(ADC4);
+#endif				  
+
                             aBuffer[0]=m_BL_RSP_BYTE0;
                             aBuffer[1]=m_BL_RSP_BYTE1(word);
                             aBuffer[2]=m_BL_RSP_BYTE2(word);

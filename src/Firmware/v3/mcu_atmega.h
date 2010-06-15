@@ -18,6 +18,7 @@
 /* Constants and preprocessor directives */
 
 // CPU Frequency 8 MHz
+#define _VERSION 3
 #define F_CPU 8000000L
 
 #define CPU_CLK_PRESCALAR_NONE 0
@@ -78,53 +79,108 @@
 #define TX_RX_UART_MODE 2
 
 
+
+#ifdef _VERSION == 3
 // Port Definitions
 // Port A
-#define IN_VSENSE_COMP_PA0 0
-#define IN_ACCEL_Z_FILT_PA1 1
-#define IN_ACCEL_Y_FILT_PA2 2
-#define IN_ACCEL_X_FILT_PA3 3
-#define IN_VSENSE_BAT_PA4 4
-#define IN_USER_N_PA5 5
-#define FLOAT_PA6 6
-#define FLOAT_PA7 7
+#define IN_ACCEL_Z_FILT 0
+#define IN_ACCEL_Y_FILT 1
+#define IN_ACCEL_X_FILT 2
+#define IN_DOCK_N 3
+#define IN_BT_CONNECT 4
+#define IN_USER_N 5
+#define IN_BT_DISC 6
+#define IN_VSENSE_BAT 7
 
 // Port B
-#define OUT_ACCEL_SEL1_PB0 0
-#define OUT_ACCEL_SEL2_PB1 1
-#define IN_VSENSE_COMP_PB2 2
-#define OUT_ACCEL_SLEEP_N_PB3 3
-#define OUT_BT_SW_N_PB4 4
-#define IN_CPU_PROG_MOSI_PB5 5
-#define OUT_CPU_PROG_MISO_PB6 6
-#define IN_CPU_PROG_SCLK_PB7 7
+#define OUT_ACCEL_SEL1 0
+#define PB1 1
+#define PB2 2
+#define OUT_ACCEL_SLEEP_N 3
+#define OUT_BT_SW_N 4
+#define IN_CPU_PROG_MOSI 5
+#define OUT_CPU_PROG_MISO 6
+#define IN_CPU_PROG_SCLK 7
+
 
 // Port C
-#define FLOAT_PC0 0
-#define OUT_LED_GN_PC1 1
-#define OUT_LED_YE_PC2 2
-#define FLOAT_PC3 3
-#define FLOAT_PC4 4
-#define FLOAT_PC5 5
-#define FLOAT_PC6 6
-#define FLOAT_PC7 7
+#define PC0 0
+#define PC1 1
+#define PC2 2
+#define OUT_LED_YE 3
+#define PC4 4
+#define PC5 5
+#define PC6 6
+#define PC7 7
+
 
 // Port D
-#define IN_BT_RXD_PD0 0
-#define OUT_BT_TXD_PD1 1
-#define OUT_BT_RESET_N_PD2 2
-#define IN_VIB_SW_N_PD3 3
-#define IN_BT_CONNECT_PD4 4
-#define IN_BT_DISC_PD5 5
-#define FLOAT_PD6 6
-#define FLOAT_PD7 7
+#define IN_BT_RXD 0
+#define OUT_BT_TXD 1
+#define OUT_BT_RESET_N 2
+#define OUT_LED_GN 3
+#define PD4 4
+#define PD5 5
+#define PD6 6
+#define PD7 7
 
+#else
+// Port Definitions
+// Port A
+#define IN_VSENSE_COMP 0
+#define IN_ACCEL_Z_FILT 1
+#define IN_ACCEL_Y_FILT 2
+#define IN_ACCEL_X_FILT 3
+#define IN_VSENSE_BAT 4
+#define IN_USER_N 5
+#define PA6 6
+#define PA7 7
+
+// Port B
+#define OUT_ACCEL_SEL1 0
+#define OUT_ACCEL_SEL2 1
+#define IN_VSENSE_COMP 2
+#define OUT_ACCEL_SLEEP_N 3
+#define OUT_BT_SW_N 4
+#define IN_CPU_PROG_MOSI 5
+#define OUT_CPU_PROG_MISO 6
+#define IN_CPU_PROG_SCLK 7
+
+
+// Port C
+#define PC0 0
+#define OUT_LED_GN 1
+#define OUT_LED_YE 2
+#define PC3 3
+#define PC4 4
+#define PC5 5
+#define PC6 6
+#define PC7 7
+
+
+// Port D
+#define IN_BT_RXD 0
+#define OUT_BT_TXD 1
+#define OUT_BT_RESET_N 2
+#define IN_VIB_SW_N 3
+#define IN_BT_CONNECT 4
+#define IN_BT_DISC 5
+#define PD6 6
+#define PD7 7
+
+#endif
 
 /*  Accelerometer Constants */
+
+#ifdef _VERSION ==3
+#define _4G 0
+#define _12G 1
+#else
 #define _1_5G 0
 #define _2G 1
 #define _4G 2
 #define _6G 3
+#endif
 
 
 /* Wocket Status Bits Constants */
