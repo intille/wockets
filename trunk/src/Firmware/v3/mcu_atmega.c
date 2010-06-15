@@ -317,9 +317,6 @@ void _atmega_initialize(unsigned char timer_prescalar)
 
 	atmega_status=0x00;
 
-	//Turn on yellow LED while initializing		
-	_yellowled_turn_on();
-		
 
 	//Disable watchdog timer
 	//_atmega_disable_watchdog();
@@ -327,49 +324,90 @@ void _atmega_initialize(unsigned char timer_prescalar)
 	// Disable JTAG interface
 	_atmega_disable_JTAG();
 
-	
+
+#ifdef _VERSION==3
 	// By default initialize all ports as input to minimize power consumption
-	// Setup Port A pins as input to minimize power consumption	
-	cbi(DDRA,IN_VSENSE_COMP_PA0);
-	cbi(DDRA,IN_ACCEL_Z_FILT_PA1);
-	cbi(DDRA,IN_ACCEL_Y_FILT_PA2);
-	cbi(DDRA,IN_ACCEL_X_FILT_PA3);
-	cbi(DDRA,IN_VSENSE_BAT_PA4);
-	cbi(DDRA,IN_USER_N_PA5);
-	cbi(DDRA,FLOAT_PA6);
-	cbi(DDRA,FLOAT_PA7);
+	// Setup Port A pins as input to minimize power consumption		
+	cbi(DDRA,IN_ACCEL_Z_FILT);
+	cbi(DDRA,IN_ACCEL_Y_FILT);
+	cbi(DDRA,IN_ACCEL_X_FILT);
+	cbi(DDRA,IN_DOCK_N);
+	cbi(DDRA,IN_USER_N);
+	cbi(DDRA,IN_BT_DISC);
+	cbi(DDRA,IN_VSENSE_BAT);
 
 	// Setup Port B pins as input to minimize power consumption
-	cbi(DDRB,OUT_ACCEL_SEL1_PB0);	
-	cbi(DDRB,OUT_ACCEL_SEL2_PB1);
-	cbi(DDRB,IN_VSENSE_COMP_PB2);
-	cbi(PORTB,IN_VSENSE_COMP_PB2);
-	cbi(DDRB,OUT_ACCEL_SLEEP_N_PB3);
-	cbi(DDRB,OUT_BT_SW_N_PB4);	
-	cbi(DDRB,IN_CPU_PROG_MOSI_PB5);
-	cbi(DDRB,OUT_CPU_PROG_MISO_PB6);	
-	cbi(DDRB,IN_CPU_PROG_SCLK_PB7);	
+	cbi(DDRB,OUT_ACCEL_SEL1);	
+	cbi(DDRB,PB1);
+	cbi(PORTB,PB2);
+	cbi(DDRB,OUT_ACCEL_SLEEP_N);
+	cbi(DDRB,OUT_BT_SW_N);	
+	cbi(DDRB,IN_CPU_PROG_MOSI);
+	cbi(DDRB,OUT_CPU_PROG_MISO);	
+	cbi(DDRB,IN_CPU_PROG_SCLK);	
 	
 	// Setup Port C pins as input to minimize power consumption
-	cbi(DDRC,FLOAT_PC0);	
-	cbi(DDRC,OUT_LED_GN_PC1);	
-	//cbi(DDRC,OUT_LED_YE_PC2);	
-	cbi(DDRC,FLOAT_PC3);	
-	cbi(DDRC,FLOAT_PC4);	
-	cbi(DDRC,FLOAT_PC5);	
-	cbi(DDRC,FLOAT_PC6);	
-	cbi(DDRC,FLOAT_PC7);	
+	cbi(DDRC,PC0);	
+	cbi(DDRC,PC1);	
+	cbi(DDRC,PC2);	
+	cbi(DDRC,OUT_LED_YE);	
+	cbi(DDRC,PC4);	
+	cbi(DDRC,PC5);	
+	cbi(DDRC,PC6);	
+	cbi(DDRC,PC7);	
 
 	// Setup Port D pins as input to minimize power consumption
-	cbi(DDRD,IN_BT_RXD_PD0);	
-	cbi(DDRD,OUT_BT_TXD_PD1);	
-	cbi(DDRD,OUT_BT_RESET_N_PD2);	
-	cbi(DDRD,IN_VIB_SW_N_PD3);	
-	cbi(DDRD,IN_BT_CONNECT_PD4);	
-	cbi(DDRD,IN_BT_DISC_PD5);	
-	cbi(DDRD,FLOAT_PD6);
-	cbi(DDRD,FLOAT_PD7);	
+	cbi(DDRD,IN_BT_RXD);	
+	cbi(DDRD,OUT_BT_TXD);	
+	cbi(DDRD,OUT_BT_RESET_N);	
+	cbi(DDRD,OUT_LED_GN);	
+	cbi(DDRD,PD4);	
+	cbi(DDRD,PD5);	
+	cbi(DDRD,PD6);
+	cbi(DDRD,PD7);	
+#else	
+	// By default initialize all ports as input to minimize power consumption
+	// Setup Port A pins as input to minimize power consumption	
+	cbi(DDRA,IN_VSENSE_COMP);
+	cbi(DDRA,IN_ACCEL_Z_FILT);
+	cbi(DDRA,IN_ACCEL_Y_FILT);
+	cbi(DDRA,IN_ACCEL_X_FILT);
+	cbi(DDRA,IN_VSENSE_BAT);
+	cbi(DDRA,IN_USER_N);
+	cbi(DDRA,PA6);
+	cbi(DDRA,PA7);
 
+	// Setup Port B pins as input to minimize power consumption
+	cbi(DDRB,OUT_ACCEL_SEL1);	
+	cbi(DDRB,OUT_ACCEL_SEL2);
+	cbi(DDRB,IN_VSENSE_COMP);
+	cbi(PORTB,IN_VSENSE_COMP);
+	cbi(DDRB,OUT_ACCEL_SLEEP_N);
+	cbi(DDRB,OUT_BT_SW_N);	
+	cbi(DDRB,IN_CPU_PROG_MOSI);
+	cbi(DDRB,OUT_CPU_PROG_MISO);	
+	cbi(DDRB,IN_CPU_PROG_SCLK);	
+	
+	// Setup Port C pins as input to minimize power consumption
+	cbi(DDRC,PC0);	
+	cbi(DDRC,OUT_LED_GN);	
+	cbi(DDRC,OUT_LED_YE);	
+	cbi(DDRC,PC3);	
+	cbi(DDRC,PC4);	
+	cbi(DDRC,PC5);	
+	cbi(DDRC,PC6);	
+	cbi(DDRC,PC7);	
+
+	// Setup Port D pins as input to minimize power consumption
+	cbi(DDRD,IN_BT_RXD);	
+	cbi(DDRD,OUT_BT_TXD);	
+	cbi(DDRD,OUT_BT_RESET_N);	
+	cbi(DDRD,IN_VIB_SW_N);	
+	cbi(DDRD,IN_BT_CONNECT);	
+	cbi(DDRD,IN_BT_DISC);	
+	cbi(DDRD,PD6);
+	cbi(DDRD,PD7);	
+#endif
 	/* Set peripherials to the lowest power states */
 	_bluetooth_turn_on();
 	_accelerometer_turn_on();
@@ -380,7 +418,7 @@ void _atmega_initialize(unsigned char timer_prescalar)
 
 	//First check if the radio is set at the correct baud rate
 	//if the wocket yellow light does not go off, the wocket has not been
-	
+	/*	
 	_atmega_initialize_uart0(ATMEGA_BAUD_38400, TX_RX_UART_MODE);
 
 	if ((_bluetooth_enter_command_mode()))
@@ -392,8 +430,7 @@ void _atmega_initialize(unsigned char timer_prescalar)
 
 		// To run at 115K, we need to set the OSCCAL as follows, the value was
 		// determined experimentally by trying different values
-
-		for (int j=0x50;(j<0xfe);j++)
+	for (int j=0x50;(j<0xfe);j++)
 		{
 			OSCCAL=j;
 
@@ -416,6 +453,7 @@ void _atmega_initialize(unsigned char timer_prescalar)
 	}
 	
 	_yellowled_turn_off();
+	*/
 	_atmega_initialize_uart0(ATMEGA_BAUD_38400, TX_RX_UART_MODE);
 
 	/* Set ADC for conversion */    
@@ -753,15 +791,15 @@ unsigned char _bluetooth_get_baud_rate()
 void _bluetooth_turn_on(void)
 {
 	// Set the direction of TX pin as output
-	sbi(DDRD,OUT_BT_TXD_PD1);
+	sbi(DDRD,OUT_BT_TXD);
 
 	// Set the direction of the RESET pin as output and high
-	sbi(DDRD,OUT_BT_RESET_N_PD2);	
-	sbi(PORTD,OUT_BT_RESET_N_PD2);  
+	sbi(DDRD,OUT_BT_RESET_N);	
+	sbi(PORTD,OUT_BT_RESET_N);  
 
 	// Set the direction of the switch pin as output and low
-	sbi(DDRB,OUT_BT_SW_N_PB4);
-	cbi(PORTB,OUT_BT_SW_N_PB4);
+	sbi(DDRB,OUT_BT_SW_N);
+	cbi(PORTB,OUT_BT_SW_N);
 
 	// Set the status of the bluetooth to true
 	sbi(atmega_status, BIT0_BLUETOOTH_STATUS);
@@ -777,9 +815,9 @@ void _bluetooth_turn_on(void)
 void _bluetooth_turn_off(void)
 {
 	// Set the direction of TX, RESET and switch pins as input
-	cbi(DDRD,OUT_BT_TXD_PD1);
-	cbi(DDRD,OUT_BT_RESET_N_PD2);
-	cbi(DDRB,OUT_BT_SW_N_PB4);		 
+	cbi(DDRD,OUT_BT_TXD);
+	cbi(DDRD,OUT_BT_RESET_N);
+	cbi(DDRB,OUT_BT_SW_N);		 
 
 	// Set the status of bluetooth to false
 	cbi(atmega_status, BIT0_BLUETOOTH_STATUS);
@@ -803,15 +841,22 @@ unsigned char _is_bluetooth_on(void)
 
 unsigned char _bluetooth_is_connected(void){
 
-        return (0x01 & (PIND>>IN_BT_CONNECT_PD4));
-
-
+#ifdef _VERSION==3
+        return (0x01 & (PINA>>IN_BT_CONNECT));
+#else
+        return (0x01 & (PIND>>IN_BT_CONNECT));
+#endif
 }
 
 
 unsigned char _bluetooth_is_discoverable(void){
 
-        return (0x01 & (PIND>>IN_BT_DISC_PD5));
+#ifdef _VERSION==3
+        return (0x01 & (PINA>>IN_BT_DISC));
+
+#else
+         return (0x01 & (PIND>>IN_BT_DISC));
+#endif
 }
 
 
@@ -844,25 +889,34 @@ void _bluetooth_transmit_uart0_byte( unsigned char data )
 /* Accelerometer Functions */
 
 unsigned char _accelerometer_set_sensitivity(unsigned char level){
-  	
+
+#ifdef _VERSION==3
+	if (level==_4G){
+		cbi(PORTB,OUT_ACCEL_SEL1);
+		return _4G;
+	}else if (level==_12G){
+		sbi(PORTB,OUT_ACCEL_SEL1);		
+		return _12G;
+	}
+#else  	
 	if (level==_1_5G){
-		cbi(PORTB,OUT_ACCEL_SEL1_PB0);
-		cbi(PORTB,OUT_ACCEL_SEL2_PB1);
+		cbi(PORTB,OUT_ACCEL_SEL1);
+		cbi(PORTB,OUT_ACCEL_SEL2);
 		return _1_5G;
 	}else if (level==_2G){
-		sbi(PORTB,OUT_ACCEL_SEL1_PB0);
-		cbi(PORTB,OUT_ACCEL_SEL2_PB1);
+		sbi(PORTB,OUT_ACCEL_SEL1);
+		cbi(PORTB,OUT_ACCEL_SEL2);
 		return _2G;
 	}else if (level==_4G){
-		sbi(PORTB,OUT_ACCEL_SEL1_PB0);
-		cbi(PORTB,OUT_ACCEL_SEL2_PB1);
+		sbi(PORTB,OUT_ACCEL_SEL1);
+		cbi(PORTB,OUT_ACCEL_SEL2);
 		return _4G;
 	}else if (level==_6G){
-		sbi(PORTB,OUT_ACCEL_SEL1_PB0);
-		sbi(PORTB,OUT_ACCEL_SEL2_PB1);
+		sbi(PORTB,OUT_ACCEL_SEL1);
+		sbi(PORTB,OUT_ACCEL_SEL2);
 		return _6G;
 	}
-
+#endif
 	return 0;
 }
 
@@ -876,11 +930,17 @@ unsigned char _accelerometer_set_sensitivity(unsigned char level){
 */
 void _accelerometer_turn_on(void)
 {
-	sbi(DDRB,OUT_ACCEL_SEL1_PB0);	
-	sbi(DDRB,OUT_ACCEL_SEL2_PB1);
-	sbi(DDRB,OUT_ACCEL_SLEEP_N_PB3);
-	sbi(PORTB,OUT_ACCEL_SLEEP_N_PB3);	 
-	 			
+
+#ifdef _VERSION 3
+	sbi(DDRB,OUT_ACCEL_SEL1);	
+	sbi(DDRB,OUT_ACCEL_SLEEP_N);
+	sbi(PORTB,OUT_ACCEL_SLEEP_N);	 
+#else
+	sbi(DDRB,OUT_ACCEL_SEL1);	
+	sbi(DDRB,OUT_ACCEL_SEL2);
+	sbi(DDRB,OUT_ACCEL_SLEEP_N);
+	sbi(PORTB,OUT_ACCEL_SLEEP_N);
+#endif	 			
 	// Set the status of the accelerometer to true
 	sbi(atmega_status, BIT1_ACCELEROMETER_STATUS);
 }
@@ -894,11 +954,19 @@ void _accelerometer_turn_on(void)
 */
 void _accelerometer_turn_off(void)
 {
+#ifdef _VERSION==3
+	 _accelerometer_set_sensitivity(_4G);
+	 cbi(DDRB,OUT_ACCEL_SEL1);		 
+	 sbi(DDRB,OUT_ACCEL_SLEEP_N); //sleep pin in output mode
+	 cbi(PORTB,OUT_ACCEL_SLEEP_N); //clear the pin
+#else 
 	 _accelerometer_set_sensitivity(_1_5G);
-	 cbi(DDRB,OUT_ACCEL_SEL1_PB0);	
-	 cbi(DDRB,OUT_ACCEL_SEL2_PB1);
-	 sbi(DDRB,OUT_ACCEL_SLEEP_N_PB3); //sleep pin in output mode
-	 cbi(PORTB,OUT_ACCEL_SLEEP_N_PB3); //clear the pin	 
+	 cbi(DDRB,OUT_ACCEL_SEL1);	
+	 cbi(DDRB,OUT_ACCEL_SEL2);
+	 sbi(DDRB,OUT_ACCEL_SLEEP_N); //sleep pin in output mode
+	 cbi(PORTB,OUT_ACCEL_SLEEP_N); //clear the pin
+#endif
+	 
 	 
 	 // Set the status of the accelerometer to false
 	 cbi(atmega_status, BIT1_ACCELEROMETER_STATUS);
@@ -929,8 +997,13 @@ unsigned char _is_accelerometer_on(void)
 
 void _greenled_turn_on(void)
 {
-	sbi(DDRC,OUT_LED_GN_PC1);
-	sbi(PORTC,OUT_LED_GN_PC1);
+#ifdef _VERSION==3
+	sbi(DDRD,OUT_LED_GN);
+	sbi(PORTD,OUT_LED_GN);
+#else
+	sbi(DDRC,OUT_LED_GN);
+	sbi(PORTC,OUT_LED_GN);
+#endif
 	
 	// Set the status of the green led to true
 	sbi(atmega_status, BIT2_GREENLED_STATUS); 
@@ -947,9 +1020,16 @@ void _greenled_turn_on(void)
 
 void _greenled_turn_off(void)
 {
-	sbi(DDRC,OUT_LED_GN_PC1);
-	cbi(PORTC,OUT_LED_GN_PC1);
-	cbi(DDRC,OUT_LED_GN_PC1);
+
+#ifdef _VERSION==3
+	sbi(DDRD,OUT_LED_GN);
+	cbi(PORTD,OUT_LED_GN);
+	cbi(DDRD,OUT_LED_GN);
+#else
+	sbi(DDRC,OUT_LED_GN);
+	cbi(PORTC,OUT_LED_GN);
+	cbi(DDRC,OUT_LED_GN);
+#endif
 	
 	// Set the status of the green led to false
 	cbi(atmega_status, BIT2_GREENLED_STATUS);
@@ -978,8 +1058,8 @@ unsigned char _is_greenled_on(void)
 */
 void _yellowled_turn_on(void)
 {
-	sbi(DDRC,OUT_LED_YE_PC2);
-	sbi(PORTC,OUT_LED_YE_PC2);
+	sbi(DDRC,OUT_LED_YE);
+	sbi(PORTC,OUT_LED_YE);
 
 	// Set the status of the yellow led to true
 	sbi(atmega_status, BIT3_YELLOWLED_STATUS);
@@ -995,9 +1075,9 @@ void _yellowled_turn_on(void)
 void _yellowled_turn_off(void)
 {
 
-	sbi(DDRC,OUT_LED_YE_PC2);
-	cbi(PORTC,OUT_LED_YE_PC2);
-	cbi(DDRC,OUT_LED_YE_PC2);	
+	sbi(DDRC,OUT_LED_YE);
+	cbi(PORTC,OUT_LED_YE);
+	cbi(DDRC,OUT_LED_YE);	
 	
 	// Set the status of the yellow led to false
 	cbi(atmega_status, BIT3_YELLOWLED_STATUS);

@@ -33,8 +33,11 @@ unsigned char sample=0;
 
 int main()
 {
-	
+				
 scounter=0;
+
+
+	// Blink green for 5 seconds	
 
 	_wocket_initialize();
 		
@@ -110,9 +113,9 @@ ISR(TIMER2_OVF_vect)
 	
 		power_adc_enable();
 		_atmega_adc_turn_on();
-		xs[scounter]=_atmega_a2dConvert10bit(ADC3);
-		ys[scounter]=_atmega_a2dConvert10bit(ADC2);
-		zs[scounter++]=_atmega_a2dConvert10bit(ADC1);
+		xs[scounter]=_atmega_a2dConvert10bit(IN_ACCEL_X_FILT);
+		ys[scounter]=_atmega_a2dConvert10bit(IN_ACCEL_Y_FILT);
+		zs[scounter++]=_atmega_a2dConvert10bit(IN_ACCEL_Z_FILT);
 		if (scounter>255)
 			scounter=0;
 		_atmega_adc_turn_off();
