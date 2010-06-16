@@ -219,9 +219,6 @@
     <Compile Include="..\..\src\Wockets\Data\Commands\Command.cs">
       <Link>Data\Commands\ReceiverCommand.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\WocketCommand.cs">
-      <Link>Data\Commands\RFCOMMCommand.cs</Link>
-    </Compile>
     <Compile Include="..\..\src\Wockets\Utils\Logger.cs">
       <Link>Utils\logger.cs</Link>
     </Compile>
@@ -239,9 +236,6 @@
     </Compile>
     <Compile Include="..\..\src\Wockets\Utils\FileWriter.cs">
       <Link>Utils\FileWriter.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Responses\BatteryResponse.cs">
-      <Link>Data\Responses\BatteryResponse.cs</Link>
     </Compile>
     <Compile Include="..\..\src\Wockets\Utils\IPC\Barrier.cs">
       <Link>Utils\Barrier.cs</Link>
@@ -282,9 +276,6 @@
     <Compile Include="..\..\src\Wockets\Utils\network\NetworkStacks.cs">
       <Link>Utils\network\NetworkStacks.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Decoders\Response.cs">
-      <Link>Decoders\Response.cs</Link>
-    </Compile>
     <Compile Include="..\..\src\Wockets\Data\Responses\Response.cs">
       <Link>Data\Responses\Response.cs</Link>
     </Compile>
@@ -293,15 +284,6 @@
     </Compile>
     <Compile Include="..\..\src\Wockets\Data\Commands\ALIVE.cs">
       <Link>Data\Commands\ALIVE.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\BT_RST.cs">
-      <Link>Data\Commands\BT_RST.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\EnterCommandMode.cs">
-      <Link>Data\Commands\EnterCommandMode.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\ExitCommandMode.cs">
-      <Link>Data\Commands\ExitCommandMode.cs</Link>
     </Compile>
     <Compile Include="..\..\src\Wockets\Data\Commands\GET_BT.cs">
       <Link>Data\Commands\GET_BT.cs</Link>
@@ -312,20 +294,11 @@
     <Compile Include="..\..\src\Wockets\Data\Commands\GET_SEN.cs">
       <Link>Data\Commands\GET_SEN.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\GET_SM.cs">
-      <Link>Data\Commands\GET_SM.cs</Link>
-    </Compile>
     <Compile Include="..\..\src\Wockets\Data\Commands\LEDTypes.cs">
       <Link>Data\Commands\LEDTypes.cs"</Link>
     </Compile>
     <Compile Include="..\..\src\Wockets\Data\Commands\RST_WK.cs">
       <Link>Data\Commands\RST_WK.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\SET_LED.cs">
-      <Link>Data\Commands\SET_LED.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\SET_SM.cs">
-      <Link>Data\Commands\SET_SM.cs</Link>
     </Compile>
     <Compile Include="..\..\src\Wockets\Exceptions\BurstyException.cs">
       <Link>Exceptions\BurstyException.cs</Link>
@@ -360,12 +333,6 @@
     <Compile Include="..\..\src\Wockets\Data\Features\FullFeatureExtractor.cs">
       <Link>Data\Features\FullFeatureExtractor.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Responses\BaudRateResponse.cs">
-      <Link>Data\Responses\BaudRateResponse.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Responses\CommandModeEnterResponse.cs">
-      <Link>Data\Responses\CommandModeEnterResponse.cs</Link>
-    </Compile>
     <Compile Include="..\..\src\Wockets\Decoders\DecoderModes.cs">
       <Link>Decoders\DecoderModes.cs</Link>
     </Compile>
@@ -375,14 +342,47 @@
     <Compile Include="..\..\src\Wockets\Sensors\SensorModes.cs">
       <Link>Sensors\SensorModes.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\CR.cs">
-      <Link>Data\Commands\CR.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\GET_BR.cs">
-      <Link>Data\Commands\GET_BR.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\SET_SR.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Commands\SET_SR.cs">
       <Link>Data\Commands\SET_SR.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_SR.cs" >
+      <Link>Data\Commands\SET_SR.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_TM.cs" >
+      <Link>Data\Commands\GET_TM.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\ALT_RSP.cs" >
+      <Link>Data\Responses\ALT_RSP.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\BL_RSP.cs" >
+      <Link>Data\Responses\BL_RSP.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\BP_RSP.cs" >
+      <Link>Data\Responses\BP_RSP.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\CAL_RSP.cs" >
+      <Link>Data\Responses\CAL_RSP.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\PC_RSP.cs" >
+      <Link>Data\Responses\PC_RSP.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\PDT_RSP.cs" >
+      <Link>Data\Responses\PDT_RSP.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\ResponseTypes.cs" >
+      <Link>Data\Responses\ResponseTypes.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\SENS_RSP.cs" >
+      <Link>Data\Responses\SENS_RSP.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\SR_RSP.cs" >
+      <Link>Data\Responses\SR_RSP.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\TM_RSP.cs" >
+      <Link>Data\Responses\TM_RSP.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\TransmissionModes.cs" >
+      <Link>Data\Responses\TransmissionModes.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
