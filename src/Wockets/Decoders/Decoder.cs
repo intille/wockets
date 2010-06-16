@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Wockets.Data;
+using Wockets.Data.Responses;
 using Wockets.Utils;
 #if (PocketPC)
 using Wockets.Utils.IPC.MMF;
@@ -34,7 +35,7 @@ namespace Wockets.Decoders
         protected DecoderTypes type;
         protected int head = 0;
         protected int delIndex = 0;
-        protected Response.ResponseHandler[] delegates= new Response.ResponseHandler[20];
+        protected ResponseHandler[] delegates= new ResponseHandler[20];
         protected bool[] subscribed = new bool[] { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false };
         protected bool cmd = false;
 
@@ -135,19 +136,19 @@ namespace Wockets.Decoders
         }
         #endregion Access Properties
 
-        protected void FireEvent(Response.ResponseArgs e)
+        protected void FireEvent(Response e)
         {
-            if (this.subscribed[(int)e._Response.Type])
-                this.delegates[(int)e._Response.Type](this, e);
+            if (this.subscribed[(int)e._Type])
+                this.delegates[(int)e._Type](e);
         }
 
-        public void Subscribe(SensorDataType type, Response.ResponseHandler handler)
+        public void Subscribe(ResponseTypes type, ResponseHandler handler)
         {
             this.subscribed[(int)type] = true;
             this.delegates[(int)type] = handler;
         }
 
-        public void Unsubscribe(SensorDataType type, Response.ResponseHandler handler)
+        public void Unsubscribe(ResponseTypes type, ResponseHandler handler)
         {
             this.subscribed[(int)type] = false;
         }
@@ -198,6 +199,7 @@ namespace Wockets.Decoders
             return true;
         }
 
+        public delegate void ResponseHandler(object e);
         //Serialization
         public abstract string ToXML();
         public abstract void FromXML(string xml);

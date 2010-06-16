@@ -24,7 +24,7 @@ namespace Wockets.Data.Accelerometers
 
 
         public AccelerationData(byte numRawBytes,byte sensorID)
-            : base(numRawBytes, SensorDataType.ACCEL, sensorID)
+            : base(numRawBytes, SensorDataType.UNCOMPRESSED_DATA_PDU, sensorID)
         {
   
         }

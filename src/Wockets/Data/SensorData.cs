@@ -42,12 +42,12 @@ namespace Wockets.Data
         /// <summary>
         /// The channel number from which the data came from
         /// </summary>
-        private byte sensorID;
+        public byte _SensorID;
 
         /// <summary>
         /// The type of sensor based on the Types list
         /// </summary>
-        private SensorDataType type;
+        public SensorDataType _Type;
 
         /// <summary>
         /// Set to true if this MITes data is an "alive" ping from a sensor, otherwise false.
@@ -64,8 +64,8 @@ namespace Wockets.Data
         {
             this.numRawBytes = numRawBytes;
             this.rawBytes = new byte[numRawBytes];
-            this.type = type;
-            this.sensorID = sensorID;
+            this._Type = type;
+            this._SensorID = sensorID;
         }
 
         public bool IsAlive
@@ -92,31 +92,9 @@ namespace Wockets.Data
                 this.isBatteryLow = value;
             }
         }
-        public byte SensorID
-        {
-            get
-            {
-                return this.sensorID;
-            }
 
-            set
-            {
-                this.sensorID = value;
-            }
-        }
 
-        public SensorDataType Type
-        {
-            get
-            {
-                return this.type;
-            }
 
-            set
-            {
-                this.type = value;
-            }
-        }
         public double UnixTimeStamp
         {
             get
@@ -154,8 +132,8 @@ namespace Wockets.Data
 
         protected void Reset()
         {
-            this.sensorID = 0;
-            this.type = 0;
+            this._SensorID = 0;
+            this._Type = 0;
             this.isAlive = true;
             this.isBatteryLow = false;
             for (int i = 0; i < this.numRawBytes; i++)

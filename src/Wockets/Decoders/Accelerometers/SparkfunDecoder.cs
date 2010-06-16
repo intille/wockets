@@ -68,8 +68,8 @@ namespace Wockets.Decoders.Accelerometers
                             datum.RawBytes[i] = this.packet[i];
 
                         //decode sparkfun packet
-                        datum.Type = SensorDataType.ACCEL;
-                        datum.SensorID = (byte) sourceSensor;
+                        datum._Type = SensorDataType.UNCOMPRESSED_DATA_PDU;
+                        datum._SensorID = (byte) sourceSensor;
                         datum.X = (short)((((short)this.packet[4]) << 8) | ((short)this.packet[5]));
                         datum.Y = (short)((((short)this.packet[6]) << 8) | ((short)this.packet[7]));
                         datum.Z = (short)((((short)this.packet[8]) << 8) | ((short)this.packet[9]));                        

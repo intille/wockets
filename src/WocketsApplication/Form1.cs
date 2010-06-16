@@ -1040,7 +1040,8 @@ namespace WocketsApplication
             {
                 this.activityStatus = ActivityStatus.None;
                 this.panels[ControlID.HOME_PANEL].Visible = true;
-                this.panels[ControlID.EE_PANEL].Visible = false;
+                //this.panels[ControlID.EE_PANEL].Visible = false;
+                this.panels[ControlID.CLASSIFICATION_PANEL].Visible = false;
                 this.currentPanel = ControlID.HOME_PANEL;
             }
         }
@@ -1143,14 +1144,14 @@ namespace WocketsApplication
                             //this.ActGUIlabels[j].Invalidate();
                             double intensity = (1.0 - ((double)labelCounters[j] / (double)CurrentWockets._Configuration._SmoothWindowCount));
                             //((Label)this.classifiedLabels[activityLabels[j]]).ForeColor = Color.FromArgb((int) (250 *intensity) , (int)(237 * intensity), (int)(221 * intensity));
-                            //UpdateClassification(activityLabels[j], intensity);
+                            UpdateClassification(activityLabels[j], intensity);
                             if (labelCounters[j] > mostCount)
                             {
                                 mostActivity = activityLabels[j];
                                 mostCount = labelCounters[j];
                             }
-                            //if ((mostActivity.Length>0) && (mostCount>=2))
-                            UpdateClassification(mostActivity, intensity);                      
+                            
+                            //    UpdateClassification(mostActivity, intensity);                      
                             labelCounters[j] = 0;
                         }
 
@@ -1160,6 +1161,92 @@ namespace WocketsApplication
                     
                 }
                 Thread.Sleep(100);
+            }
+        }
+
+        private void ClassificationThread3()
+        {
+            int window_size=512;//Get from FullFeature
+            long[] last_extracted = new long[CurrentWockets._Controller._Decoders.Count];
+            int[] no_fv_iterations = new int[CurrentWockets._Controller._Decoders.Count];
+
+            for (int i = 0; (i < CurrentWockets._Controller._Decoders.Count); i++)
+            {
+                last_extracted[i] = CurrentWockets._Controller._Decoders[i].TotalSamples;
+                no_fv_iterations[i] = 0;
+            }
+
+            while (true)
+            {
+                //Check if each decoder decoded the desired number of samples
+                bool readyFV = true;
+                for (int i = 0; (i<CurrentWockets._Controller._Decoders.Count); i++)
+                {
+                    long numNewSamples = CurrentWockets._Controller._Decoders[i].TotalSamples - last_extracted[i];
+                    if ((numNewSamples>0) && (numNewSamples < window_size))
+                    {
+                        if (no_fv_iterations[i]>7) // a disconnection occurred, so reset the window you are looking at
+                            last_extracted[i] = CurrentWockets._Controller._Decoders[i].TotalSamples;
+                        readyFV = false;
+                        no_fv_iterations[i] = no_fv_iterations[i] + 1;
+                        break;
+                    }                                                            
+                }
+
+                // Here we are ready to do the feature extraction because we have collected
+                // sufficient data from all sensors
+                if (readyFV)
+                {
+                    //Copy the last 512 elements along with the new data
+                    FullFeatureExtractor.StoreWocketsWindow3();
+
+                    //Generate the feature vector without any checks on quality, because we are
+                    //doing it on recently collected data
+                    FullFeatureExtractor.GenerateFeatureVector3();
+
+                    Instance newinstance = new Instance(instances.numAttributes());
+                    newinstance.Dataset = instances;
+                    for (int i = 0; (i < FullFeatureExtractor.Features.Length); i++)
+                        newinstance.setValue(instances.attribute(i), FullFeatureExtractor.Features[i]);
+                    double predicted = classifier.classifyInstance(newinstance);
+                    string predicted_activity = newinstance.dataset().classAttribute().value_Renamed((int)predicted);
+
+                    int currentIndex = (int)labelIndex[predicted_activity];
+                    labelCounters[currentIndex] = (int)labelCounters[currentIndex] + 1;
+                    classificationCounter++;
+
+                    if (classificationCounter >= CurrentWockets._Configuration._SmoothWindowCount)
+                    {
+                        int mostCount = 0;
+                        string mostActivity = "";
+                        //Color indicate;
+                        //int level;
+                        for (int j = 0; (j < labelCounters.Length); j++)
+                        {
+                            // level = 240 - 240 * labelCounters[j] / configuration._SmoothWindows;
+                            //indicate = Color.FromArgb(level, level, level);
+                            //this.ActGUIlabels[j].ForeColor = indicate;
+                            //this.ActGUIlabels[j].Invalidate();
+                            double intensity = (1.0 - ((double)labelCounters[j] / (double)CurrentWockets._Configuration._SmoothWindowCount));
+                            //((Label)this.classifiedLabels[activityLabels[j]]).ForeColor = Color.FromArgb((int) (250 *intensity) , (int)(237 * intensity), (int)(221 * intensity));
+                            UpdateClassification(activityLabels[j], intensity);
+                            if (labelCounters[j] > mostCount)
+                            {
+                                mostActivity = activityLabels[j];
+                                mostCount = labelCounters[j];
+                            }
+
+                            //    UpdateClassification(mostActivity, intensity);                      
+                            labelCounters[j] = 0;
+                        }
+
+                        classificationCounter = 0;
+
+
+                    }
+
+                    Thread.Sleep(1000);
+                }
             }
         }
 
@@ -1187,7 +1274,38 @@ namespace WocketsApplication
             CurrentWockets._Controller = new WocketsController("", "", "");
             CurrentWockets._Controller.FromXML(modelDirectory + "\\SensorData.xml");
 
+
+            // 1- Make the classifier dependent on the samples rather than the actual sampling rate
+            // 2- No need to spread the signal, assume equally spaced
+            // 3- interpolate the signal to compute the FFT
+            // 4- Do experiments on ideal window size
+            // 5- Low Pass the data + Band Pass the data..
+            // 6- Ensure that the decision tree is reloaded in the right order
+            // 7- Add commonsense knowledge for the specific activities we are looking at
+            // 8- Upload to the server the classification when there is a change
+            // Bench Presses, JJs, Walking 2 intensities, No Activity, Curls
+            // Common sense JJs ---> 2 sensors have to show motion
+            // Curls -> 1 and only 1 sensor has to show motion            
+            // No Activity -> No sensor should show signficant motion: very low movement on sensors
+            // threshold based on activity count...
+            
+            
+            // Restrictions: No Activity, other - No sensors should show signficant motion
+            // - JJs : both Wrist and Ankle sensors have to show signficant motion
+            // - Curls, Bench Press : Wrist has to show motion
+            // - Walking: ankle has to show motion (2 intensities)
+
+            //if no signficant motion -> No Activity   (could be resting between curls or presses)
+            // else if signficant motion and consistent from the ankle then              
+                //JJs or walking (Decision Tree)
+            // else 
+                // Curls or Presses (Decision Tree)
+           
+            //Smmo
+
+            
             FullFeatureExtractor.Initialize(CurrentWockets._Controller._Sensors.Count, 90, CurrentWockets._Configuration, this.annotatedSession.OverlappingActivityLists[0]);
+//            FullFeatureExtractor.Initialize3(CurrentWockets._Controller._Sensors.Count, 90, CurrentWockets._Configuration, this.annotatedSession.OverlappingActivityLists[0]);
 
            // this.annotatedSession = new Session();
            // this.annotatedSession.FromXML(Constants.PATH + "ActivityProtocols\\" + this.aProtocols[this.selectedActivityProtocol]._FileName);
@@ -1225,16 +1343,7 @@ namespace WocketsApplication
             labelIndex = new Hashtable();
             for (int i = 0; (i < instances.classAttribute().numValues()); i++)
             {
-                /*labelCounters[i] = 0;
-                string label = "";
-                int j = 0;
-                for (j = 0; (j < this.annotatedSession.OverlappingActivityLists.Count - 1); j++)
-                    label += this.annotatedSession.OverlappingActivityLists[j][i]._Name.Replace(' ', '_') + "_";
-                label += this.annotatedSession.OverlappingActivityLists[j][i]._Name.Replace(' ', '_');
 
-                activityLabels[i] = label;
-                labelIndex.Add(label, i);
-                fvClassVal.addElement(label);*/
                 labelCounters[i] = 0;
                 string activity = instances.classAttribute().value_Renamed(i);
                 activityLabels[i] = activity;
@@ -2120,19 +2229,19 @@ namespace WocketsApplication
                     }
                     else if (this.activityStatus == ActivityStatus.Measuring)
                     {
-                       /* this.panels[currentPanel].Visible = false;
+                        this.panels[currentPanel].Visible = false;
                         this.panels[ControlID.CLASSIFICATION_PANEL].Location = new Point(0, 0);
                         this.panels[ControlID.CLASSIFICATION_PANEL].BringToFront();
                         this.panels[ControlID.CLASSIFICATION_PANEL].Visible = true;
                         this.panels[ControlID.CLASSIFICATION_PANEL].Dock = DockStyle.None;
-                        this.currentPanel = ControlID.CLASSIFICATION_PANEL;*/
+                        this.currentPanel = ControlID.CLASSIFICATION_PANEL;
 
-                        this.panels[currentPanel].Visible = false;
+                        /*this.panels[currentPanel].Visible = false;
                         this.panels[ControlID.EE_PANEL].Location = new Point(0, 0);
                         this.panels[ControlID.EE_PANEL].BringToFront();
                         this.panels[ControlID.EE_PANEL].Visible = true;
                         this.panels[ControlID.EE_PANEL].Dock = DockStyle.None;
-                        this.currentPanel = ControlID.EE_PANEL;
+                        this.currentPanel = ControlID.EE_PANEL;*/
                     }
                     else
                     {

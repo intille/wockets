@@ -398,7 +398,7 @@ namespace Wockets.Data.Plotters
                         }
 
                         //check the data comes from the sensor i if the decoder is used with multiple sensors
-                        if (data.SensorID == this.wocketsController._Sensors[i]._ID)
+                        if (data._SensorID == this.wocketsController._Sensors[i]._ID)
                         {
                             if (this.currentColumns[i] > lastColumnDrawn)
                                 lastColumnDrawn = this.currentColumns[i];
@@ -410,7 +410,7 @@ namespace Wockets.Data.Plotters
                                 this.currentColumns[i] = 0;
                             }
 
-                            if ((this.wocketsController._Sensors[data.SensorID])._Class == Wockets.Sensors.SensorClasses.HTCDiamondTouch)
+                            if ((this.wocketsController._Sensors[data._SensorID])._Class == Wockets.Sensors.SensorClasses.HTCDiamondTouch)
                             {
                                 if (this.wocketsController._Sensors.Count != 1)
                                 {
@@ -425,8 +425,8 @@ namespace Wockets.Data.Plotters
                                     g.DrawLine(p[1], this.currentColumns[i], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * previousVals[i][1]), this.currentColumns[i] + 1, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Y));
                                     g.DrawLine(p[2], this.currentColumns[i], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * previousVals[i][2]), this.currentColumns[i] + 1, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Z));
                                 }
-                                if (this.currentColumns[i] > lastColumn[data.SensorID])
-                                    lastColumn[data.SensorID] = this.currentColumns[i];
+                                if (this.currentColumns[i] > lastColumn[data._SensorID])
+                                    lastColumn[data._SensorID] = this.currentColumns[i];
                             }
 
                             else
@@ -435,8 +435,8 @@ namespace Wockets.Data.Plotters
                                 g.DrawLine(p[1], this.currentColumns[i], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * previousVals[i][1]), this.currentColumns[i] + 1, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Y));
                                 g.DrawLine(p[2], this.currentColumns[i], axisOffset[i] - (int)Math.Floor(scaleFactors[i] * previousVals[i][2]), this.currentColumns[i] + 1, axisOffset[i] - (int)Math.Floor(scaleFactors[i] * data.Z));
 
-                                if (this.currentColumns[i] > lastColumn[data.SensorID])
-                                    lastColumn[data.SensorID] = this.currentColumns[i];
+                                if (this.currentColumns[i] > lastColumn[data._SensorID])
+                                    lastColumn[data._SensorID] = this.currentColumns[i];
 
                             }
 

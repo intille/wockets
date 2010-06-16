@@ -114,6 +114,9 @@
 /* SET_SR Macros */
 #define m_SET_SR(aByte2) 	(aByte2 & 0x7f)
 
+/* SET_TM Macros */
+#define m_SET_TM(aByte2) 	((aByte2>>4) & 0x07)
+
 /* SET_ALT Macros */
 #define m_SET_ALT(aByte2) 	(aByte2 & 0x7f)
 
@@ -150,6 +153,16 @@
 #define m_BL_RSP_BYTE0			RESPONSE_HEADER(BL_RSP)
 #define m_BL_RSP_BYTE1(level)	(level>>3)
 #define m_BL_RSP_BYTE2(level)	((level & 0x07)<<4)
+
+/* SR_RSP Macros */
+
+#define m_SR_RSP_BYTE0			RESPONSE_HEADER(SR_RSP)
+#define m_SR_RSP_BYTE1(sr)	(sr&0x7f)
+
+/* TM_RSP Macros */
+
+#define m_TM_RSP_BYTE0			RESPONSE_HEADER(TM_RSP)
+#define m_TM_RSP_BYTE1(tm)	((tm&0x07)<<4)
 
 /* BP_RSP Macros */
 #define m_BP_RSP_BYTE0			RESPONSE_HEADER(BP_RSP)

@@ -6,15 +6,9 @@ namespace Wockets.Data
 {
     public enum SensorDataType : byte
     {
-        BATTERYLEVEL,
-        /// <summary>
-        /// Mobile Sensor accelerometer data. 
-        /// </summary>
-        COMMAND_MODE_ENTERED,
-        ACCEL,
-        CALIBRATION_VALUES,
-        BAUD_RATE,
-        PACKET_COUNT
-
+        UNCOMPRESSED_DATA_PDU=0,
+        COMMAND_PDU=1,
+        RESPONSE_PDU=2, 
+        COMPRESSED_DATA_PDU=3           
     }
 }

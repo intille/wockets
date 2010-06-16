@@ -30,7 +30,7 @@ unsigned short z=0;
 uint8_t EEMEM _NV_INITIALIZED;
 uint8_t EEMEM _NV_STATUS_BYTE;
 uint8_t EEMEM _NV_SAMPLING_RATE;
-uint8_t EEMEM _NV_DEBUG;
+uint8_t EEMEM _NV_TM;
 
 unsigned char _INITIALIZED=0;
 unsigned char _STATUS_BYTE=0;
@@ -127,10 +127,10 @@ void _wocket_initialize(void)
 		// Load the transmission mode		
 		_wTM=(_STATUS_BYTE>>1)&0x07;
 		
-		_yellowled_turn_on();		
+		_greenled_turn_on();		
 		for(int i=0;(i<200);i++)
 			_delay_ms(5);
-		_yellowled_turn_off();		
+		_greenled_turn_off();		
 	}
 	/* If the wocket has never been initialized, write the default settings and blink green for 5 seconds */
 	else
@@ -144,6 +144,7 @@ void _wocket_initialize(void)
 		if (battery>300)
 		{
 			eeprom_write_byte(&_NV_SAMPLING_RATE,_SAMPLING_RATE);
+			eeprom_write_byte(&_NV_TM,_wTM);
 			eeprom_write_byte(&_NV_STATUS_BYTE,0x00);
 		}
 
@@ -429,9 +430,28 @@ void _receive_data(void)
                             processed_counter=command_counter;
                             response_length=3;		                                                                          
                             break;				
+                   case (unsigned char) GET_SR:  
+				   		aBuffer[0]=m_SR_RSP_BYTE0;
+                        aBuffer[1]=m_SR_RSP_BYTE1(_SAMPLING_RATE);
+						processed_counter=command_counter;
+						response_length=2;
+						break;
                    case (unsigned char) SET_SR:  
 				   		_SAMPLING_RATE=m_SET_SR(aBuffer[1]);
 						_wocket_initialize_timer2_interrupt();
+						eeprom_write_byte(&_NV_SAMPLING_RATE,_SAMPLING_RATE);
+						processed_counter=command_counter;
+						break;
+
+     			 case (unsigned char) GET_TM:  
+				   		aBuffer[0]=m_TM_RSP_BYTE0;
+                        aBuffer[1]=m_TM_RSP_BYTE1(_wTM);
+						processed_counter=command_counter;
+						response_length=2;
+						break;
+                   case (unsigned char) SET_TM:  
+				   		_wTM=m_SET_TM(aBuffer[1]);
+						eeprom_write_byte(&_NV_TM,_wTM);
 						processed_counter=command_counter;
 						break;
                     case (unsigned char) SET_CAL:                                                                    

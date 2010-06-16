@@ -77,8 +77,8 @@ namespace WocketConfigurationApp
             ((Accelerometer)wc._Sensors[0])._Max = 1024;
             ((Accelerometer)wc._Sensors[0])._Min = 0;
             wc._Sensors[0]._Loaded = true;
-            wc._Decoders[0].Subscribe(Wockets.Data.SensorDataType.COMMAND_MODE_ENTERED, new Response.ResponseHandler(this.CommandCallback));
-            wc._Decoders[0].Subscribe(Wockets.Data.SensorDataType.BAUD_RATE, new Response.ResponseHandler(this.CommandCallback));
+            //wc._Decoders[0].Subscribe(Wockets.Data.SensorDataType.COMMAND_MODE_ENTERED, new Response.ResponseHandler(this.CommandCallback));
+            //wc._Decoders[0].Subscribe(Wockets.Data.SensorDataType.BAUD_RATE, new Response.ResponseHandler(this.CommandCallback));
             wc.Initialize();
 
         }
@@ -91,7 +91,7 @@ namespace WocketConfigurationApp
 
 
         #region Delegates Callback
-
+        /*
         delegate void UpdateCommandCallback(object sender, Wockets.Decoders.Response.ResponseArgs e);
 
         private void CommandCallback(object sender, Wockets.Decoders.Response.ResponseArgs e)
@@ -103,23 +103,12 @@ namespace WocketConfigurationApp
             }
             else
             {
-                if (e._Response.Type == Wockets.Data.SensorDataType.COMMAND_MODE_ENTERED)
-                {
-                    CurrentWockets._Controller._Sensors[0]._Mode = SensorModes.Command;
-                    ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(new byte[3] { 13, 13, 13 });
-                    this.label27.Text = "Connected: Command Mode";
-
-                }
-                else if (e._Response.Type == Wockets.Data.SensorDataType.BAUD_RATE)
-                {
-                    if (((Wockets.Data.Responses.BaudRateResponse)e._Response)._BaudRate == "38.4")
-                        this.comboBox1.SelectedIndex = 5;
-                }
+   
                 this.Refresh();
             }
         }
 
-
+        */
         #endregion
 
 
@@ -152,8 +141,8 @@ namespace WocketConfigurationApp
         {
             if (CurrentWockets._Controller._Sensors[0]._Mode == SensorModes.Command)
             {
-                Command c = new GET_BR();
-                ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(c._Bytes);
+                /*Command c = new GET_BR();
+                ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(c._Bytes);*/
             }
         }
 
@@ -161,10 +150,10 @@ namespace WocketConfigurationApp
         {
             if (CurrentWockets._Controller._Sensors[0]._Mode == SensorModes.Data)
             {
-                ((RFCOMMReceiver)wc._Receivers[0])._TimeoutEnabled = false;
+                /*((RFCOMMReceiver)wc._Receivers[0])._TimeoutEnabled = false;
                 CurrentWockets._Controller._Decoders[0]._Mode = DecoderModes.Command;
                 Command c = new EnterCommandMode();
-                ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(c._Bytes);
+                ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(c._Bytes);*/
             }
         }
 
@@ -172,9 +161,9 @@ namespace WocketConfigurationApp
         {
             if (CurrentWockets._Controller._Sensors[0]._Mode == SensorModes.Command)
             {
-                CurrentWockets._Controller._Decoders[0]._Mode = DecoderModes.Data;
+                /*CurrentWockets._Controller._Decoders[0]._Mode = DecoderModes.Data;
                 Command c = new ExitCommandMode();
-                ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(c._Bytes);
+                ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(c._Bytes);*/
             }
 
         }

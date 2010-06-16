@@ -16,6 +16,7 @@ using Wockets.Receivers;
 using Wockets.Sensors;
 using Wockets.Sensors.Accelerometers;
 using Wockets.Data.Commands;
+using Wockets.Data.Responses;
 
 
 namespace WocketConfigurationApp
@@ -86,8 +87,10 @@ namespace WocketConfigurationApp
             ((Accelerometer)wc._Sensors[0])._Max = 1024;
             ((Accelerometer)wc._Sensors[0])._Min = 0;
             wc._Sensors[0]._Loaded = true;
-            wc._Decoders[0].Subscribe(Wockets.Data.SensorDataType.COMMAND_MODE_ENTERED, new Response.ResponseHandler(this.CommandCallback));
-            wc._Decoders[0].Subscribe(Wockets.Data.SensorDataType.BAUD_RATE, new Response.ResponseHandler(this.CommandCallback));
+            wc._Decoders[0].Subscribe(ResponseTypes.BL_RSP, new Wockets.Decoders.Decoder.ResponseHandler(this.ResponseCallback));
+            wc._Decoders[0].Subscribe(ResponseTypes.SR_RSP, new Wockets.Decoders.Decoder.ResponseHandler(this.ResponseCallback));
+            wc._Decoders[0].Subscribe(ResponseTypes.TM_RSP, new Wockets.Decoders.Decoder.ResponseHandler(this.ResponseCallback));
+           // wc._Decoders[0].Subscribe(Wockets.Data.SensorDataType.BAUD_RATE, new Response.ResponseHandler(this.CommandCallback));
             wc.Initialize();
 
         }
@@ -101,29 +104,33 @@ namespace WocketConfigurationApp
 
         #region Delegates Callback
 
-        delegate void UpdateCommandCallback(object sender, Wockets.Decoders.Response.ResponseArgs e);
+        delegate void UpdateResponseCallback(object e);
 
-        private void CommandCallback(object sender, Wockets.Decoders.Response.ResponseArgs e)
+        private void ResponseCallback(object e)
         {
             if (this.InvokeRequired)
             {
-                UpdateCommandCallback d = new UpdateCommandCallback(CommandCallback);
-                this.Invoke(d, new object[] { sender, e });
+                UpdateResponseCallback d = new UpdateResponseCallback(ResponseCallback);
+                this.Invoke(d, new object[] {e});
             }
-            else
+            else 
             {
-                if (e._Response.Type == Wockets.Data.SensorDataType.COMMAND_MODE_ENTERED)
-                {
-                    CurrentWockets._Controller._Sensors[0]._Mode = SensorModes.Command;
-                    ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(new byte[3] { 13, 13, 13 });
-                    this.label27.Text = "Connected: Command Mode";
+               Response response = (Wockets.Data.Responses.Response) e;
+               switch (response._Type)
+               {
+                   case ResponseTypes.BL_RSP:
+                       info_cmd_value_battery_level.Text = ((BL_RSP)response)._BatteryLevel.ToString();
+                       break;
+                   case ResponseTypes.SR_RSP:
+                       info_cmd_value_sampling_rate.Text = ((SR_RSP)response)._SamplingRate.ToString();
+                       break;
+                   case ResponseTypes.TM_RSP:
+                       info_cmd_value_tr_rate.Text = ((TM_RSP)response)._TransmissionMode.ToString();
+                       break;
+                   default:
+                       break;
+               }
 
-                }
-                else if (e._Response.Type == Wockets.Data.SensorDataType.BAUD_RATE)
-                {
-                    if (((Wockets.Data.Responses.BaudRateResponse)e._Response)._BaudRate == "38.4")
-                        this.set_panel_cmd_entry_combo.SelectedIndex = 5;
-                }
                 this.Refresh();
             }
         }
@@ -161,8 +168,8 @@ namespace WocketConfigurationApp
         {
             if (CurrentWockets._Controller._Sensors[0]._Mode == SensorModes.Command)
             {
-                Command c = new GET_BR();
-                ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(c._Bytes);
+                /*Command c = new GET_BR();
+                ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(c._Bytes);*/
             }
         }
 
@@ -170,10 +177,10 @@ namespace WocketConfigurationApp
         {
             if (CurrentWockets._Controller._Sensors[0]._Mode == SensorModes.Data)
             {
-                ((RFCOMMReceiver)wc._Receivers[0])._TimeoutEnabled = false;
+                /*((RFCOMMReceiver)wc._Receivers[0])._TimeoutEnabled = false;
                 CurrentWockets._Controller._Decoders[0]._Mode = DecoderModes.Command;
                 Command c = new EnterCommandMode();
-                ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(c._Bytes);
+                ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(c._Bytes);*/
             }
         }
 
@@ -181,9 +188,9 @@ namespace WocketConfigurationApp
         {
             if (CurrentWockets._Controller._Sensors[0]._Mode == SensorModes.Command)
             {
-                CurrentWockets._Controller._Decoders[0]._Mode = DecoderModes.Data;
+                /*CurrentWockets._Controller._Decoders[0]._Mode = DecoderModes.Data;
                 Command c = new ExitCommandMode();
-                ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(c._Bytes);
+                ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(c._Bytes);*/
             }
 
         }
@@ -529,10 +536,11 @@ namespace WocketConfigurationApp
                 info_button_battery_level.Enabled= false;
                 Application.DoEvents();
 
+                GET_BT bt = new GET_BT();
+                ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(bt._Bytes);
                 //querry the battery level 
                 //set the battery level
-                info_cmd_value_battery_level.Text = "100%";
-
+                info_cmd_value_battery_level.Text = "?";
                 info_button_battery_level.Enabled = true;
 
             }
@@ -610,12 +618,15 @@ namespace WocketConfigurationApp
 
         private void info_button_sampling_rate_Click(object sender, EventArgs e)
         {
-            current_command = "sampling_rate";
+            GET_SR cmd = new GET_SR();
+            ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
+
 
             //select the allowed sampling rate
             if (cur_tr_mode.CompareTo("continous") == 0)
             {
                 set_panel_label_status.Text = "The Wockets is set to continous mode. \n\r This mode supports sampling rates between 1Hz and 126Hz. \n\r Enter the sampling rate in the command textbox.";
+                
                 SET_SR set_sr_cmd = new SET_SR(90);
                 ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(set_sr_cmd._Bytes);
             }

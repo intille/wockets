@@ -9,7 +9,7 @@ namespace Wockets.Data.Commands
         public RST_WK()
         {
             this.cmd = new byte[] { (byte)0xb6 };
-            this.type = CommandTypes.RST_WK;
+            this.type = CommandTypes.RST_WKT;
         }
     }
 }
