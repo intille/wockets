@@ -78,8 +78,8 @@ namespace Wockets.Decoders.Accelerometers
                             datum.RawBytes[i] = data._Bytes[rawDataIndex];
                             rawDataIndex = (rawDataIndex + 1) % data._Bytes.Length;
                         }
-                        datum.Type = SensorDataType.ACCEL;
-                        datum.SensorID = (byte)sourceSensor;
+                        datum._Type = SensorDataType.UNCOMPRESSED_DATA_PDU;
+                        datum._SensorID = (byte)sourceSensor;
                         datum.X = (short)(BitConverter.ToInt16(datum.RawBytes, 1) + 1024);
                         datum.Y = (short)(BitConverter.ToInt16(datum.RawBytes, 3) + 1024);
                         datum.Z = (short)(BitConverter.ToInt16(datum.RawBytes, 5) + 1024);
@@ -121,8 +121,8 @@ namespace Wockets.Decoders.Accelerometers
                 //copy raw bytes
                 for (int i = 0; (i < HTCDiamondTouchAccelerationData.NUM_RAW_BYTES); i++)
                     datum.RawBytes[i] = data[i];
-                datum.Type = SensorDataType.ACCEL;
-                datum.SensorID = (byte)sensorID;
+                datum._Type = SensorDataType.UNCOMPRESSED_DATA_PDU;
+                datum._SensorID = (byte)sensorID;
                 datum.X = (short)(BitConverter.ToInt16(data, 1) + 1024);
                 datum.Y = (short)(BitConverter.ToInt16(data, 3) + 1024);
                 datum.Z = (short)(BitConverter.ToInt16(data, 5) + 1024);

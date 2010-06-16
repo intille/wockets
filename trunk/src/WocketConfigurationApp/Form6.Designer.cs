@@ -570,10 +570,10 @@ namespace WocketConfigurationApp
             // 
             // commandToolStripMenuItem
             // 
-            this.commandToolStripMenuItem.Name = "commandToolStripMenuItem";
+           /* this.commandToolStripMenuItem.Name = "commandToolStripMenuItem";
             this.commandToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
             this.commandToolStripMenuItem.Text = "Command";
-            this.commandToolStripMenuItem.Click += new System.EventHandler(this.commandToolStripMenuItem_Click);
+            this.commandToolStripMenuItem.Click += new System.EventHandler(this.commandToolStripMenuItem_Click);*/
             // 
             // pToolStripMenuItem
             // 

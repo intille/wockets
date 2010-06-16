@@ -27,7 +27,7 @@ namespace Wockets.Decoders
 
         }
 
-        public delegate void ResponseHandler(object sender, ResponseArgs e);
+        public delegate void ResponseHandler(object e);
 
     }
 

@@ -10,7 +10,7 @@ namespace Wockets.Data.Commands
         {
             this.cmd = new byte[] { (byte)0xa9, (byte)0 };
             cmd[1] = (byte) (((byte)sr) & ((byte)0x7f));
-            this.type = CommandTypes.SET_SAMPLING_RATE;
+            this.type = CommandTypes.SET_SR;
         }
     }
 }

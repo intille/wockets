@@ -18,6 +18,7 @@ namespace WocketConfigurationApp
 
 
         ArrayList macaddresses = new ArrayList();
+        ArrayList bluetoothlist = new ArrayList();
         BluetoothDeviceInfo[] devices = null;
         
        
@@ -84,6 +85,7 @@ namespace WocketConfigurationApp
                         this.dataGridView1.Rows[row].Cells[3].Value = "Not tested";
                             
                         macaddresses.Add(hex);
+                        bluetoothlist.Add(devices[i]);
 
                     }
                     
@@ -138,7 +140,7 @@ namespace WocketConfigurationApp
 
             //Form2 f = new Form2(devices[this.WocketsList_Box.SelectedIndex]);
 
-           Form5 f = new Form5(devices[selected_device_index]);
+           Form5 f = new Form5((BluetoothDeviceInfo)bluetoothlist[selected_device_index]);
            f.Show();
            //this.Visible = false;
 
