@@ -258,6 +258,13 @@ namespace Wockets.Decoders.Accelerometers
                                     sr._SamplingRate= (this.packet[1]&0x7f);
                                     FireEvent(sr);
                                     break;
+                                case ResponseTypes.BP_RSP:
+                                    BP_RSP bp = new BP_RSP(this._ID);
+                                    for (int i = 0; (i < bytesToRead); i++)
+                                        bp.RawBytes[i] = this.packet[i];
+                                    bp._Percent= (this.packet[1] & 0x7f);
+                                    FireEvent(bp);
+                                    break;
                                 case ResponseTypes.TM_RSP:
                                     TM_RSP tm = new TM_RSP(this._ID);
                                     for (int i = 0; (i < bytesToRead); i++)
