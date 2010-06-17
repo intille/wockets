@@ -114,6 +114,9 @@
 /* SET_SR Macros */
 #define m_SET_SR(aByte2) 	(aByte2 & 0x7f)
 
+/* SET_PDT Macros */
+#define m_SET_PDT(aByte2) 	(aByte2 & 0x7f)
+
 /* SET_TM Macros */
 #define m_SET_TM(aByte2) 	((aByte2>>4) & 0x07)
 
@@ -154,19 +157,13 @@
 #define m_BL_RSP_BYTE1(level)	(level>>3)
 #define m_BL_RSP_BYTE2(level)	((level & 0x07)<<4)
 
-/* SR_RSP Macros */
-
-#define m_SR_RSP_BYTE0			RESPONSE_HEADER(SR_RSP)
-#define m_SR_RSP_BYTE1(sr)	(sr&0x7f)
-
-/* TM_RSP Macros */
-
-#define m_TM_RSP_BYTE0			RESPONSE_HEADER(TM_RSP)
-#define m_TM_RSP_BYTE1(tm)	((tm&0x07)<<4)
-
 /* BP_RSP Macros */
+
 #define m_BP_RSP_BYTE0			RESPONSE_HEADER(BP_RSP)
-#define m_BP_RSP_BYTE1(percent)	(percent>>3)
+#define m_BP_RSP_BYTE1(percent)	(percent&0x7f)
+
+
+
 
 /* PC_RSP Macros */
 #define m_PACKET_COUNT_BYTE0			RESPONSE_HEADER(PC_RSP)
@@ -225,7 +222,6 @@
 
 
 
-
 #define m_SUCCESS_RESPONSE_BYTE1			RESPONSE_HEADER(SUCCESS_RESPONSE)
 
 
@@ -249,6 +245,10 @@ extern unsigned char _wTCNT2_reps;
 extern unsigned char _wTCNT2;
 extern unsigned char _wTCNT2_last;
 extern unsigned char _wTM;
+extern unsigned long _wPC;
+extern unsigned long _wShutdownTimer;
+extern unsigned long _DEFAULT_SHUTDOWN;
+extern unsigned char _wPDT;
 
 typedef struct{
 	unsigned char byte1; //sync bit, 2 bits packet type, 3 bits sensitivity, 2 bits MSB X
