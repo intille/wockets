@@ -8,7 +8,7 @@ namespace Wockets.Data.Commands
     {
         public GET_SEN()
         {
-            this.cmd = new byte[] { (byte)0xa6 };
+            this.cmd = new byte[] { (byte)0xa4 };
             this.type = CommandTypes.GET_SEN;
         }
     }

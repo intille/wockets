@@ -226,7 +226,6 @@ namespace Wockets.Decoders.Accelerometers
 
                             switch (responseType)
                             {
-
                                 case ResponseTypes.BL_RSP:
                                     BL_RSP br = new BL_RSP(this._ID);
                                     for (int i = 0; (i < bytesToRead); i++)
@@ -234,11 +233,11 @@ namespace Wockets.Decoders.Accelerometers
                                     br._BatteryLevel = (((int)this.packet[1]) << 3) | ((this.packet[2] >> 4) & 0x07);                                    
                                     FireEvent(br);
                                     break;
-                                case ResponseTypes.PC_RSP:
+                                /*case ResponseTypes.PC_RSP:
                                     this._ExpectedPacketCount = 0;
                                     this._ExpectedPacketCount = ((this.packet[1] & 0x7f) << 9) | ((this.packet[2] & 0x7f) << 2) |
                                         ((this.packet[3] & 0x60) >> 5);
-                                    break;
+                                    break;*/
                                 case ResponseTypes.CAL_RSP:
                                     CAL_RSP cal = new CAL_RSP(this._ID);
                                     for (int i = 0; (i < bytesToRead); i++)
@@ -271,6 +270,28 @@ namespace Wockets.Decoders.Accelerometers
                                         tm.RawBytes[i] = this.packet[i];
                                     tm._TransmissionMode = (TransmissionModes)((this.packet[1]>>4) & 0x07);
                                     FireEvent(tm);
+                                    break;
+
+                                case ResponseTypes.SENS_RSP:
+                                    SENS_RSP sen = new SENS_RSP(this._ID);
+                                    for (int i = 0; (i < bytesToRead); i++)
+                                        sen.RawBytes[i] = this.packet[i];
+                                    sen._Sensitivity = (Sensitivity)((this.packet[1] >> 4) & 0x07);
+                                    FireEvent(sen);
+                                    break;
+                                case ResponseTypes.PC_RSP:
+                                    PC_RSP pc = new PC_RSP(this._ID);
+                                    for (int i = 0; (i < bytesToRead); i++)
+                                        pc.RawBytes[i] = this.packet[i];
+                                    pc._Count = ((this.packet[1] & 0x7f) << 25) | ((this.packet[2] & 0x7f) << 18) | ((this.packet[3] & 0x7f) << 11) | ((this.packet[4] & 0x7f) << 4) | ((this.packet[5] & 0x7f) >> 3);
+                                    FireEvent(pc);
+                                    break;
+                                case ResponseTypes.PDT_RSP:
+                                    PDT_RSP pdt = new PDT_RSP(this._ID);
+                                    for (int i = 0; (i < bytesToRead); i++)
+                                        pdt.RawBytes[i] = this.packet[i];
+                                    pdt._Timeout = (this.packet[1] & 0x7f); 
+                                    FireEvent(pdt);
                                     break;
                                 default:
                                     break;
