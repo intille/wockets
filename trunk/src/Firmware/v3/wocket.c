@@ -31,6 +31,50 @@ uint8_t EEMEM _NV_INITIALIZED;
 uint8_t EEMEM _NV_STATUS_BYTE;
 uint8_t EEMEM _NV_SAMPLING_RATE;
 uint8_t EEMEM _NV_TM;
+uint8_t EEMEM _NV_SENS;
+
+#define _DEFAULTBTCAL100 725
+#define _DEFAULTBTCAL80 680
+#define _DEFAULTBTCAL60 640
+#define _DEFAULTBTCAL40 600
+#define _DEFAULTBTCAL20 560
+#define _DEFAULTBTCAL10 540
+
+uint16_t EEMEM _NV_BTCAL100;
+uint16_t EEMEM _NV_BTCAL80;
+uint16_t EEMEM _NV_BTCAL60;
+uint16_t EEMEM _NV_BTCAL40;
+uint16_t EEMEM _NV_BTCAL20;
+uint16_t EEMEM _NV_BTCAL10;
+
+unsigned int _wBTCAL100;
+unsigned int _wBTCAL80;
+unsigned int _wBTCAL60;
+unsigned int _wBTCAL40;
+unsigned int _wBTCAL20;
+unsigned int _wBTCAL10;
+
+#define _DEFAULT_X1G_CAL 500
+#define _DEFAULT_XN1G_CAL 501
+#define _DEFAULT_Y1G_CAL 502
+#define _DEFAULT_YN1G_CAL 503
+#define _DEFAULT_Z1G_CAL 504
+#define _DEFAULT_ZN1G_CAL 505
+
+uint16_t EEMEM _NV_X1G_CAL;
+uint16_t EEMEM _NV_XN1G_CAL;
+uint16_t EEMEM _NV_Y1G_CAL;
+uint16_t EEMEM _NV_YN1G_CAL;
+uint16_t EEMEM _NV_Z1G_CAL;
+uint16_t EEMEM _NV_ZN1G_CAL;
+
+unsigned int _wX1G_CAL;
+unsigned int _wXN1G_CAL;
+unsigned int _wY1G_CAL;
+unsigned int _wYN1G_CAL;
+unsigned int _wZ1G_CAL;
+unsigned int _wZN1G_CAL;
+
 
 unsigned char _INITIALIZED=0;
 unsigned char _STATUS_BYTE=0;
@@ -39,6 +83,16 @@ unsigned char _wTCNT2_reps=1;
 unsigned char _wTCNT2=0;
 unsigned char _wTCNT2_last=0;
 unsigned char _wTM=_TM_Continuous;
+unsigned char _wSENS=_4_G;
+
+unsigned long _wPC=0;
+
+uint8_t EEMEM _NV_PDT;
+#define _DEFAULT_PDT 127
+unsigned char _wPDT;
+uint32_t _wShutdownTimer=0;
+uint32_t _DEFAULT_SHUTDOWN=0;
+
 
 /* 
 	Function Name: _wocket_set_baudrate
@@ -122,11 +176,29 @@ void _wocket_initialize(void)
 		{
 			_SAMPLING_RATE=eeprom_read_byte(&_NV_SAMPLING_RATE);
 			_STATUS_BYTE=eeprom_read_byte(&_NV_STATUS_BYTE);
+			_wTM=eeprom_read_byte(&_NV_TM);
+			_wSENS=eeprom_read_byte(&_NV_SENS);
+
+			_wBTCAL100=eeprom_read_word(&_NV_BTCAL100);
+			_wBTCAL80=eeprom_read_word(&_NV_BTCAL80);
+			_wBTCAL60=eeprom_read_word(&_NV_BTCAL60);
+			_wBTCAL40=eeprom_read_word(&_NV_BTCAL40);
+			_wBTCAL20=eeprom_read_word(&_NV_BTCAL20);
+			_wBTCAL10=eeprom_read_word(&_NV_BTCAL10);
+
+
+			_wX1G_CAL=eeprom_read_word(&_NV_X1G_CAL);
+			_wXN1G_CAL=eeprom_read_word(&_NV_XN1G_CAL);
+			_wY1G_CAL=eeprom_read_word(&_NV_Y1G_CAL);
+			_wYN1G_CAL=eeprom_read_word(&_NV_YN1G_CAL);
+			_wZ1G_CAL=eeprom_read_word(&_NV_Z1G_CAL);
+			_wZN1G_CAL=eeprom_read_word(&_NV_ZN1G_CAL);
+
+			_wPDT=eeprom_read_byte(&_NV_PDT);
+
 		}
 
-		// Load the transmission mode		
-		_wTM=(_STATUS_BYTE>>1)&0x07;
-		
+		// Load the transmission mode						
 		_greenled_turn_on();		
 		for(int i=0;(i<200);i++)
 			_delay_ms(5);
@@ -146,6 +218,42 @@ void _wocket_initialize(void)
 			eeprom_write_byte(&_NV_SAMPLING_RATE,_SAMPLING_RATE);
 			eeprom_write_byte(&_NV_TM,_wTM);
 			eeprom_write_byte(&_NV_STATUS_BYTE,0x00);
+			eeprom_write_byte(&_NV_SENS,_wSENS);
+
+			//Set default battery calibration values
+			eeprom_write_word(&_NV_BTCAL100,_DEFAULTBTCAL100);
+			eeprom_write_word(&_NV_BTCAL80,_DEFAULTBTCAL80);
+			eeprom_write_word(&_NV_BTCAL60,_DEFAULTBTCAL60);
+			eeprom_write_word(&_NV_BTCAL40,_DEFAULTBTCAL40);
+			eeprom_write_word(&_NV_BTCAL20,_DEFAULTBTCAL20);
+			eeprom_write_word(&_NV_BTCAL10,_DEFAULTBTCAL10);
+
+			_wBTCAL100=_DEFAULTBTCAL100;
+			_wBTCAL80=_DEFAULTBTCAL80;
+			_wBTCAL60=_DEFAULTBTCAL60;
+			_wBTCAL40=_DEFAULTBTCAL40;
+			_wBTCAL20=_DEFAULTBTCAL20;
+			_wBTCAL10=_DEFAULTBTCAL10;
+
+			//Set default acc calibration values
+			eeprom_write_word(&_NV_X1G_CAL,_DEFAULT_X1G_CAL);
+			eeprom_write_word(&_NV_XN1G_CAL,_DEFAULT_XN1G_CAL);
+			eeprom_write_word(&_NV_Y1G_CAL,_DEFAULT_Y1G_CAL);
+			eeprom_write_word(&_NV_YN1G_CAL,_DEFAULT_YN1G_CAL);
+			eeprom_write_word(&_NV_Z1G_CAL,_DEFAULT_Z1G_CAL);
+			eeprom_write_word(&_NV_ZN1G_CAL,_DEFAULT_ZN1G_CAL);
+
+			_wX1G_CAL=_DEFAULT_X1G_CAL;
+			_wXN1G_CAL=_DEFAULT_XN1G_CAL;
+			_wY1G_CAL=_DEFAULT_Y1G_CAL;
+			_wYN1G_CAL=_DEFAULT_YN1G_CAL;
+			_wZ1G_CAL=_DEFAULT_Z1G_CAL;
+			_wZN1G_CAL=_DEFAULT_ZN1G_CAL;
+
+			//SET the PDT
+			_wPDT=_DEFAULT_PDT;
+			eeprom_write_byte(&_NV_PDT,_wPDT);
+
 		}
 
 		// Set the initialized flag in the status byte
@@ -196,6 +304,9 @@ void _wocket_initialize(void)
 		_atmega_finalize();
 		return;
 	}
+
+	_DEFAULT_SHUTDOWN= (unsigned long)_wPDT*(unsigned long)_SAMPLING_RATE* (unsigned long)60;
+	_wShutdownTimer=_DEFAULT_SHUTDOWN;
 
 	// Calculate the timer variables used to sample at the right frequency
 	_wocket_initialize_timer2_interrupt();
@@ -320,7 +431,7 @@ void _send_data_bufferred(void)
 void _send_data(void)
 {	
 	if (paused==0)
-	{
+	{		
  		alive_timer++;                                  
         if (alive_timer>=2730) //if no acks for approx 30 seconds, reset radio
         {
@@ -429,12 +540,66 @@ void _receive_data(void)
                             aBuffer[2]=m_BL_RSP_BYTE2(word);
                             processed_counter=command_counter;
                             response_length=3;		                                                                          
-                            break;				
+                            break;		
+                case (unsigned char) GET_SEN:           			  
+                            aBuffer[0]=m_SENS_RSP_BYTE0;
+                            aBuffer[1]=m_SENS_RSP_BYTE1(_wSENS);                       
+                            processed_counter=command_counter;
+                            response_length=2;		                                                                          
+                            break;	
+                case (unsigned char) GET_BP:           
+#ifdef _VERSION==3
+                            word=_atmega_a2dConvert10bit(ADC7);
+#else
+                            word=_atmega_a2dConvert10bit(ADC4);
+						
+#endif				  
+							if (word>_wBTCAL100)
+								word=100;
+							else if (word>_wBTCAL80)
+								word=80 + ((word- _wBTCAL80)*20) / (_wBTCAL100-_wBTCAL80);
+							else if (word>_wBTCAL60)
+								word=60 + ((word- _wBTCAL60)*20) / (_wBTCAL80-_wBTCAL60);
+							else if (word>_wBTCAL40)
+								word=40 + ((word- _wBTCAL40)*20) / (_wBTCAL60-_wBTCAL40);
+							else if (word>_wBTCAL20)
+								word=20 + ((word- _wBTCAL20)*20) / (_wBTCAL40-_wBTCAL20);
+							else if (word>_wBTCAL10)
+								word=10 + ((word- _wBTCAL10)*10) / (_wBTCAL20-_wBTCAL10);
+							else
+								word=0;
+
+                            aBuffer[0]=m_BP_RSP_BYTE0;
+                            aBuffer[1]=m_BP_RSP_BYTE1(word);      ;
+                            processed_counter=command_counter;
+                            response_length=2;		                                                                          
+                            break;
+ 				   case (unsigned char) GET_PDT:  
+				   		aBuffer[0]=m_PDT_RSP_BYTE0;
+                        aBuffer[1]=m_PDT_RSP_BYTE1(_wPDT);
+						processed_counter=command_counter;
+						response_length=2;
+						break;			
+                   case (unsigned char) SET_PDT:  
+				   		_wPDT=m_SET_PDT(aBuffer[1]);
+						eeprom_write_byte(&_NV_PDT,_wPDT);
+						processed_counter=command_counter;
+						break;																				
                    case (unsigned char) GET_SR:  
 				   		aBuffer[0]=m_SR_RSP_BYTE0;
                         aBuffer[1]=m_SR_RSP_BYTE1(_SAMPLING_RATE);
 						processed_counter=command_counter;
 						response_length=2;
+						break;
+                case (unsigned char) GET_PC:  
+				   		aBuffer[0]=m_PACKET_COUNT_BYTE0;
+                        aBuffer[1]=m_PACKET_COUNT_BYTE1(_wPC);
+						aBuffer[2]=m_PACKET_COUNT_BYTE2(_wPC);
+                        aBuffer[3]=m_PACKET_COUNT_BYTE3(_wPC);
+						aBuffer[4]=m_PACKET_COUNT_BYTE4(_wPC);
+                        aBuffer[5]=m_PACKET_COUNT_BYTE5(_wPC);
+						processed_counter=command_counter;
+						response_length=6;
 						break;
                    case (unsigned char) SET_SR:  
 				   		_SAMPLING_RATE=m_SET_SR(aBuffer[1]);
@@ -458,38 +623,28 @@ void _receive_data(void)
                             if (eeprom_is_ready())
                             {
                                     //do nothing if battery is low
-                                    if (_atmega_a2dConvert10bit(ADC4)<350)
+#ifdef _VERSION==3
+                                    if (_atmega_a2dConvert10bit(ADC7)<600)
+#else
+                                    if (_atmega_a2dConvert10bit(ADC4)<600)
+#endif
                                             break;
                                     else
-                                    {       switch(address)
-                                            {
-                                                    case X1G_ADDRESS:
-															word=m_SET_CAL_xn1g(aBuffer[2],aBuffer[3]);														                                                            
-                                                            address=X1NG_ADDRESS;
-                                                            break;
-                                                    case X1NG_ADDRESS:
-															word=m_SET_CAL_y1g(aBuffer[3],aBuffer[4],aBuffer[5]);                                                            
-                                                            address=Y1G_ADDRESS;
-                                                            break;
-                                                    case Y1G_ADDRESS:
-															word= m_SET_CAL_yn1g(aBuffer[5],aBuffer[6]);                                                            
-                                                            address=Y1NG_ADDRESS;
-                                                            break;
-                                                    case Y1NG_ADDRESS:
-                                                            word= m_SET_CAL_z1g(aBuffer[6],aBuffer[7],aBuffer[8]);
-                                                            address=Z1G_ADDRESS;
-                                                            break;
-                                                    case Z1G_ADDRESS:
-															word=m_SET_CAL_zn1g(aBuffer[8],aBuffer[8]);                                                            
-                                                            address=Z1NG_ADDRESS;
-                                                            processed_counter=command_counter;
-                                                            break;
-                                                    default:
-															word=m_SET_CAL_x1g(aBuffer[1],aBuffer[2]);                                                            
-                                                            address=X1G_ADDRESS;
-                                                            break;                                                                                                                                                                          
-                                            }
-                                            eeprom_write_word((uint16_t *)address,word);
+                                    {   
+										word=m_SET_CAL_x1g(aBuffer[1],aBuffer[2]);
+										eeprom_write_word(&_NV_X1G_CAL,_wX1G_CAL);
+										word=m_SET_CAL_xn1g(aBuffer[2],aBuffer[3]);
+										eeprom_write_word(&_NV_XN1G_CAL,_wXN1G_CAL);
+										word=m_SET_CAL_y1g(aBuffer[3],aBuffer[4],aBuffer[5]);
+										eeprom_write_word(&_NV_Y1G_CAL,_wY1G_CAL);
+										word= m_SET_CAL_yn1g(aBuffer[5],aBuffer[6]);
+										eeprom_write_word(&_NV_YN1G_CAL,_wYN1G_CAL);
+										word= m_SET_CAL_z1g(aBuffer[6],aBuffer[7],aBuffer[8]);
+										eeprom_write_word(&_NV_Z1G_CAL,_wZ1G_CAL);
+										word=m_SET_CAL_zn1g(aBuffer[8],aBuffer[8]);
+										eeprom_write_word(&_NV_ZN1G_CAL,_wZN1G_CAL);
+										processed_counter=command_counter;
+
                                     }                                                                                                                                                                                                                                                       
                                                                                                                                     
                             }                                                                                                                       
@@ -503,51 +658,32 @@ void _receive_data(void)
                             if (eeprom_is_ready())
                             {                                                               
                                     // Don't read from the eeprom if the battery is too low
-                                    if (_atmega_a2dConvert10bit(ADC4)<350)
+#ifdef _VERSION==3
+                                    if (_atmega_a2dConvert10bit(ADC7)<600)
+#else
+                                    if (_atmega_a2dConvert10bit(ADC4)<600)
+#endif
                                             break;
                                     else                                                            
                                     {
-                                            switch(address)
-                                            {
-                                                    case X1G_ADDRESS:
-                                                            aBuffer[1]= m_CAL_RSP_BYTE1_x1g(word);                                                                   
-                                                            aBuffer[2]= m_CAL_RSP_BYTE2_x1g(word);
-                                                            address=X1NG_ADDRESS;
-                                                            break;
-                                                    case X1NG_ADDRESS:
-                                                            aBuffer[2]|= m_CAL_RSP_BYTE2_xn1g(word);
-                                                            aBuffer[3] = m_CAL_RSP_BYTE3_xn1g(word);
-                                                            address=Y1G_ADDRESS;
-                                                            break;
-                                                    case Y1G_ADDRESS:
-                                                            aBuffer[3]|= m_CAL_RSP_BYTE3_y1g(word);
-                                                            aBuffer[4] = m_CAL_RSP_BYTE4_y1g(word);
-                                                            aBuffer[5] = m_CAL_RSP_BYTE5_y1g(word);
-                                                            address=Y1NG_ADDRESS;
-                                                            break;
-                                                    case Y1NG_ADDRESS:
-                                                            aBuffer[5]|= m_CAL_RSP_BYTE5_yn1g(word);
-                                                            aBuffer[6] = m_CAL_RSP_BYTE6_yn1g(word);
-                                                            address=Z1G_ADDRESS;
-                                                            break;
-                                                    case Z1G_ADDRESS:
-                                                            aBuffer[6] |= m_CAL_RSP_BYTE6_z1g(word);
-                                                            aBuffer[7] =  m_CAL_RSP_BYTE7_z1g(word);
-                                                            aBuffer[8] =  m_CAL_RSP_BYTE8_z1g(word);
-                                                            address=Z1NG_ADDRESS;
-                                                            break;
-                                                    case Z1NG_ADDRESS:
-                                                            aBuffer[8] |= m_CAL_RSP_BYTE8_zn1g(word);
-                                                            aBuffer[9] = m_CAL_RSP_BYTE9_zn1g(word);
-                                                            processed_counter=command_counter;
-                                                            response_length=10;
-                                                            break;
-                                                    default:
-                                                            aBuffer[0]= m_CAL_RSP_BYTE0; 
-                                                            address=X1G_ADDRESS;
-                                                            break;                                                                                                                                                                          
-                                            }
-                                            word=eeprom_read_word((uint16_t *)((uint16_t)address));
+											aBuffer[0]= m_CAL_RSP_BYTE0;
+                                            aBuffer[1]= m_CAL_RSP_BYTE1_x1g(_wX1G_CAL);                                                                   
+                                            aBuffer[2]= m_CAL_RSP_BYTE2_x1g(_wX1G_CAL);
+											aBuffer[2]|= m_CAL_RSP_BYTE2_xn1g(_wXN1G_CAL);
+                                            aBuffer[3] = m_CAL_RSP_BYTE3_xn1g(_wXN1G_CAL);
+											aBuffer[3]|= m_CAL_RSP_BYTE3_y1g(_wY1G_CAL);
+                                            aBuffer[4] = m_CAL_RSP_BYTE4_y1g(_wY1G_CAL);
+                                            aBuffer[5] = m_CAL_RSP_BYTE5_y1g(_wY1G_CAL);
+                                            aBuffer[5]|= m_CAL_RSP_BYTE5_yn1g(_wYN1G_CAL);
+                                            aBuffer[6] = m_CAL_RSP_BYTE6_yn1g(_wYN1G_CAL);
+											aBuffer[6] |= m_CAL_RSP_BYTE6_z1g(_wZ1G_CAL);
+                                            aBuffer[7] =  m_CAL_RSP_BYTE7_z1g(_wZ1G_CAL);
+                                            aBuffer[8] =  m_CAL_RSP_BYTE8_z1g(_wZ1G_CAL);
+											aBuffer[8] |= m_CAL_RSP_BYTE8_zn1g(_wZN1G_CAL);
+                                            aBuffer[9] =  m_CAL_RSP_BYTE9_zn1g(_wZN1G_CAL);
+											processed_counter=command_counter;
+                                            response_length=10;
+
                                     }                                                                                                                                                                               
                             
                             }                                                       

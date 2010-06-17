@@ -98,11 +98,26 @@ ISR(TIMER2_OVF_vect)
 		return;
 	}
 
+
+	
 	/* Sample data and transmt it if necessary */
 	if (_wTM==_TM_Continuous)
 	{
-		if (!_bluetooth_is_connected())		
+		if (!_bluetooth_is_connected())
+		{
+			if (_wPDT!=0){
+				_wShutdownTimer--;
+				if (_wShutdownTimer==0)
+					_atmega_finalize();
+			}
 			return;		
+		}
+
+		if (_wShutdownTimer!=_DEFAULT_SHUTDOWN)
+			_wShutdownTimer=_DEFAULT_SHUTDOWN;
+
+		 _wPC++;
+
 		power_adc_enable();
 		_atmega_adc_turn_on();
 		_receive_data();				
@@ -110,7 +125,10 @@ ISR(TIMER2_OVF_vect)
 	}
 	else if (_wTM==_TM_Burst_60)
 	{
-	
+		if (_wPDT!=0)
+			_wShutdownTimer--;
+
+		 _wPC++;
 		power_adc_enable();
 		_atmega_adc_turn_on();
 		xs[scounter]=_atmega_a2dConvert10bit(IN_ACCEL_X_FILT);
@@ -134,7 +152,10 @@ ISR(TIMER2_OVF_vect)
 			return;	
 
 		}
-		
+		//reset shutdown timer if connected
+		if ((_wPDT!=0) && (_wShutdownTimer!=_DEFAULT_SHUTDOWN))
+			_wShutdownTimer=_DEFAULT_SHUTDOWN;
+
 		connected=1;
 		_receive_data();		
 		_send_packet_count(2400);
