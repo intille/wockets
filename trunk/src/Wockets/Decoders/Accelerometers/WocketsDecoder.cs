@@ -121,6 +121,7 @@ namespace Wockets.Decoders.Accelerometers
                                         bytesToRead = 6;
                                         break;
                                     case ResponseTypes.CAL_RSP:
+                                    case ResponseTypes.BTCAL_RSP:
                                         bytesToRead = 10;                 
                                         break;                  
                                     default:
@@ -249,6 +250,18 @@ namespace Wockets.Decoders.Accelerometers
                                     cal._Z1G = ((this.packet[6] & 0x03) << 8) | ((this.packet[7] & 0x7f) << 1) | ((this.packet[8] & 0x40) >> 6);
                                     cal._ZN1G = ((this.packet[8] & 0x3f) << 4) | ((this.packet[9] & 0x78) >> 3);                                                                        
                                     FireEvent(cal);
+                                    break;
+                                case ResponseTypes.BTCAL_RSP:
+                                    BTCAL_RSP btcal = new BTCAL_RSP(this._ID);
+                                    for (int i = 0; (i < bytesToRead); i++)
+                                        btcal.RawBytes[i] = this.packet[i];
+                                    btcal._CAL100 = ((this.packet[1] & 0x7f) << 3) | ((this.packet[2] & 0x70) >> 4);
+                                    btcal._CAL80 = ((this.packet[2] & 0x0f) << 6) | ((this.packet[3] & 0x7e) >> 1);
+                                    btcal._CAL60 = ((this.packet[3] & 0x01) << 9) | ((this.packet[4] & 0x7f) << 2) | ((this.packet[5] & 0x60) >> 5);
+                                    btcal._CAL40 = ((this.packet[5] & 0x1f) << 5) | ((this.packet[6] & 0x7c) >> 2);
+                                    btcal._CAL20 = ((this.packet[6] & 0x03) << 8) | ((this.packet[7] & 0x7f) << 1) | ((this.packet[8] & 0x40) >> 6);
+                                    btcal._CAL10 = ((this.packet[8] & 0x3f) << 4) | ((this.packet[9] & 0x78) >> 3);
+                                    FireEvent(btcal);
                                     break;
                                 case ResponseTypes.SR_RSP:
                                     SR_RSP sr = new SR_RSP(this._ID);
