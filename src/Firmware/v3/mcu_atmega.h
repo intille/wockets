@@ -18,7 +18,8 @@
 /* Constants and preprocessor directives */
 
 // CPU Frequency 8 MHz
-#define _VERSION 3
+#define _VERSION 3  //Hardware version
+#define _FVERSION 3	//Firmware version
 #define F_CPU 8000000L
 
 #define CPU_CLK_PRESCALAR_NONE 0

@@ -105,6 +105,10 @@
 #define RESUME			0b10001
 #define GET_TM			0b10010
 #define	SET_TM			0b10011
+#define GET_BTCAL		0b10100
+#define SET_BTCAL		0b10101
+#define GET_HV			0b10110
+#define GET_FV			0b10111
 
 /* Macros for Wockets Commands */
 
@@ -134,6 +138,16 @@
 #define m_SET_CAL_z1g(aByte6,aByte7,aByte8) ( 	(((unsigned short)(aByte6&0x03))<<8) | 	(((unsigned short)(aByte7&0x7f))<<1) | 	(((unsigned short)(aByte8&0x40))>>6)	)
 #define m_SET_CAL_zn1g(aByte8,aByte9)   	( 	(((unsigned short)(aByte8&0x3f))<<4) | 	(((unsigned short)(aByte9&0x78))>>3) 	)
 
+
+/* SET_BTCAL Macros */
+#define m_SET_BTCAL_100(aByte1,aByte2)  		(	(((unsigned short)(aByte1&0x7f))<<3) | 	(((unsigned short)(aByte2&0x70))>>4)	)
+#define m_SET_BTCAL_80(aByte2,aByte3)   	( 	(((unsigned short)(aByte2&0x0f))<<6) | 	(((unsigned short)(aByte3&0x7e))>>1)	)
+#define m_SET_BTCAL_60(aByte3,aByte4,aByte5) ( 	(((unsigned short)(aByte3&0x01))<<9) |	(((unsigned short)(aByte4&0x7f))<<2) |	(((unsigned short)(aByte5&0x60))>>5)	)
+#define m_SET_BTCAL_40(aByte5,aByte6)  		( 	(((unsigned short)(aByte5&0x1f))<<5) | 	(((unsigned short)(aByte6&0x7c))>>2)	)
+#define m_SET_BTCAL_20(aByte6,aByte7,aByte8) ( 	(((unsigned short)(aByte6&0x03))<<8) | 	(((unsigned short)(aByte7&0x7f))<<1) | 	(((unsigned short)(aByte8&0x40))>>6)	)
+#define m_SET_BTCAL_10(aByte8,aByte9)   	( 	(((unsigned short)(aByte8&0x3f))<<4) | 	(((unsigned short)(aByte9&0x78))>>3) 	)
+
+
 /* SET_SR Macros */
 #define m_SET_SR(aByte2) (aByte2 & 0x7f)
 
@@ -149,6 +163,9 @@
 #define ALT_RSP		0b00110
 #define PDT_RSP		0b00111
 #define TM_RSP		0b01000
+#define BTCAL_RSP 	0b01001
+#define HV_RSP	 	0b01010
+#define FV_RSP	 	0b01011
 
 /* Macros for Wockets Responses */
 
@@ -195,6 +212,24 @@
 #define m_CAL_RSP_BYTE8_zn1g(zn1g)		((zn1g>>4) & 0x3f)
 #define m_CAL_RSP_BYTE9_zn1g(zn1g)		((zn1g<<3) & 0x78)
 
+/* BTCAL_RSP Macros */
+
+#define m_BTCAL_RSP_BYTE0					RESPONSE_HEADER(BTCAL_RSP)
+#define m_BTCAL_RSP_BYTE1_100(percentile100)		((percentile100>>3)&0x7f)
+#define m_BTCAL_RSP_BYTE2_100(percentile100)		((percentile100<<4)&0x70)
+#define m_BTCAL_RSP_BYTE2_80(percentile80)		((percentile80>>6)&0x0f)
+#define m_BTCAL_RSP_BYTE3_80(percentile80)		((percentile80<<1)&0x7e)
+#define m_BTCAL_RSP_BYTE3_60(percentile60)		((percentile60>>9) &0x01)
+#define m_BTCAL_RSP_BYTE4_60(percentile60)		((percentile60>>2) & 0x7f)
+#define m_BTCAL_RSP_BYTE5_60(percentile60)		((percentile60<<5) & 0x60)
+#define m_BTCAL_RSP_BYTE5_40(percentile40)		((percentile40>>5) & 0x1f)
+#define m_BTCAL_RSP_BYTE6_40(percentile40)		((percentile40<<2) & 0x7c)
+#define m_BTCAL_RSP_BYTE6_20(percentile20)		((percentile20>>8) & 0x03)
+#define m_BTCAL_RSP_BYTE7_20(percentile20)		((percentile20>>1) & 0x7f)
+#define m_BTCAL_RSP_BYTE8_20(percentile20)		((percentile20<<6) & 0x40)
+#define m_BTCAL_RSP_BYTE8_10(percentile10)		((percentile10>>4) & 0x3f)
+#define m_BTCAL_RSP_BYTE9_10(percentile10)		((percentile10<<3) & 0x78)
+
 /* SR_RSP Macros */
 
 #define m_SR_RSP_BYTE0			RESPONSE_HEADER(SR_RSP)
@@ -217,8 +252,16 @@
 #define m_TM_RSP_BYTE1(mode)		((mode & 0x07)<<4)
 
 
+/* HV_RSP Macros */
+
+#define m_HV_RSP_BYTE0				RESPONSE_HEADER(HV_RSP)
+#define m_HV_RSP_BYTE1(version)	(version & 0x7f)
 
 
+/* FV_RSP Macros */
+
+#define m_FV_RSP_BYTE0				RESPONSE_HEADER(FV_RSP)
+#define m_FV_RSP_BYTE1(version)	(version & 0x7f)
 
 
 
