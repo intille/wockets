@@ -125,7 +125,7 @@ namespace Wockets.Kernel
                 //same time from multiple applications
                 lock (kernelLock)
                 {
-                    if (msg == KernelCommand.SET_SNIFF.ToString())
+                    /*if (msg == KernelCommand.SET_SNIFF.ToString())
                     {
                         if (_WocketsRunning)
                         {                           
@@ -149,7 +149,7 @@ namespace Wockets.Kernel
                             }
                         }
                     }
-                    else if (msg == KernelCommand.CONNECT.ToString())
+                    else*/ if (msg == KernelCommand.CONNECT.ToString())
                     {
                         if (!_WocketsRunning)
                         {

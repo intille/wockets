@@ -382,7 +382,7 @@ namespace WocketConfigurationApp
             this.dataToolStripMenuItem,
             this.commandToolStripMenuItem});
             this.modeToolStripMenuItem.Name = "modeToolStripMenuItem";
-            this.modeToolStripMenuItem.Size = new System.Drawing.Size(45, 20);
+            this.modeToolStripMenuItem.Size = new System.Drawing.Size(50, 20);
             this.modeToolStripMenuItem.Text = "Mode";
             // 
             // dataToolStripMenuItem
@@ -390,14 +390,14 @@ namespace WocketConfigurationApp
             this.dataToolStripMenuItem.Checked = true;
             this.dataToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.dataToolStripMenuItem.Name = "dataToolStripMenuItem";
-            this.dataToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
+            this.dataToolStripMenuItem.Size = new System.Drawing.Size(131, 22);
             this.dataToolStripMenuItem.Text = "Data";
             this.dataToolStripMenuItem.Click += new System.EventHandler(this.dataToolStripMenuItem_Click);
             // 
             // commandToolStripMenuItem
             // 
             this.commandToolStripMenuItem.Name = "commandToolStripMenuItem";
-            this.commandToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
+            this.commandToolStripMenuItem.Size = new System.Drawing.Size(131, 22);
             this.commandToolStripMenuItem.Text = "Command";
             this.commandToolStripMenuItem.Click += new System.EventHandler(this.commandToolStripMenuItem_Click);
             // 
@@ -407,20 +407,20 @@ namespace WocketConfigurationApp
             this.plotToolStripMenuItem,
             this.saveToolStripMenuItem});
             this.pToolStripMenuItem.Name = "pToolStripMenuItem";
-            this.pToolStripMenuItem.Size = new System.Drawing.Size(42, 20);
+            this.pToolStripMenuItem.Size = new System.Drawing.Size(43, 20);
             this.pToolStripMenuItem.Text = "Data";
             // 
             // plotToolStripMenuItem
             // 
             this.plotToolStripMenuItem.Name = "plotToolStripMenuItem";
-            this.plotToolStripMenuItem.Size = new System.Drawing.Size(109, 22);
+            this.plotToolStripMenuItem.Size = new System.Drawing.Size(98, 22);
             this.plotToolStripMenuItem.Text = "Plot";
             this.plotToolStripMenuItem.Click += new System.EventHandler(this.plotToolStripMenuItem_Click);
             // 
             // saveToolStripMenuItem
             // 
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(109, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(98, 22);
             this.saveToolStripMenuItem.Text = "Save";
             // 
             // label27
@@ -515,7 +515,6 @@ namespace WocketConfigurationApp
             this.info_cmd_value_pkt_count.Name = "info_cmd_value_pkt_count";
             this.info_cmd_value_pkt_count.Size = new System.Drawing.Size(152, 22);
             this.info_cmd_value_pkt_count.TabIndex = 77;
-            this.info_cmd_value_pkt_count.Text = "Not Loaded";
             // 
             // info_cmd_value_alive
             // 
@@ -526,7 +525,6 @@ namespace WocketConfigurationApp
             this.info_cmd_value_alive.Name = "info_cmd_value_alive";
             this.info_cmd_value_alive.Size = new System.Drawing.Size(152, 22);
             this.info_cmd_value_alive.TabIndex = 61;
-            this.info_cmd_value_alive.Text = "Not Loaded";
             // 
             // info_button_pkt_count
             // 
@@ -559,7 +557,6 @@ namespace WocketConfigurationApp
             this.info_cmd_value_btcalibration.Name = "info_cmd_value_btcalibration";
             this.info_cmd_value_btcalibration.Size = new System.Drawing.Size(152, 22);
             this.info_cmd_value_btcalibration.TabIndex = 74;
-            this.info_cmd_value_btcalibration.Text = "Not Loaded";
             // 
             // info_button_btcalibration
             // 
@@ -591,7 +588,6 @@ namespace WocketConfigurationApp
             this.info_cmd_value_btpercent.Name = "info_cmd_value_btpercent";
             this.info_cmd_value_btpercent.Size = new System.Drawing.Size(152, 22);
             this.info_cmd_value_btpercent.TabIndex = 71;
-            this.info_cmd_value_btpercent.Text = "Not Loaded";
             // 
             // info_button_btpercent
             // 
@@ -623,7 +619,6 @@ namespace WocketConfigurationApp
             this.info_cmd_value_pwr_timeout.Name = "info_cmd_value_pwr_timeout";
             this.info_cmd_value_pwr_timeout.Size = new System.Drawing.Size(152, 22);
             this.info_cmd_value_pwr_timeout.TabIndex = 68;
-            this.info_cmd_value_pwr_timeout.Text = "Not Loaded";
             // 
             // info_cmd_value_tr_rate
             // 
@@ -634,7 +629,6 @@ namespace WocketConfigurationApp
             this.info_cmd_value_tr_rate.Name = "info_cmd_value_tr_rate";
             this.info_cmd_value_tr_rate.Size = new System.Drawing.Size(152, 22);
             this.info_cmd_value_tr_rate.TabIndex = 67;
-            this.info_cmd_value_tr_rate.Text = "Not Loaded";
             // 
             // info_cmd_value_sampling_rate
             // 
@@ -645,7 +639,6 @@ namespace WocketConfigurationApp
             this.info_cmd_value_sampling_rate.Name = "info_cmd_value_sampling_rate";
             this.info_cmd_value_sampling_rate.Size = new System.Drawing.Size(152, 22);
             this.info_cmd_value_sampling_rate.TabIndex = 66;
-            this.info_cmd_value_sampling_rate.Text = "Not Loaded";
             // 
             // info_cmd_value_sensitivity
             // 
@@ -656,7 +649,6 @@ namespace WocketConfigurationApp
             this.info_cmd_value_sensitivity.Name = "info_cmd_value_sensitivity";
             this.info_cmd_value_sensitivity.Size = new System.Drawing.Size(152, 22);
             this.info_cmd_value_sensitivity.TabIndex = 65;
-            this.info_cmd_value_sensitivity.Text = "Not Loaded";
             // 
             // info_button_pwr_timeout
             // 
@@ -678,7 +670,6 @@ namespace WocketConfigurationApp
             this.info_cmd_value_calibration.Name = "info_cmd_value_calibration";
             this.info_cmd_value_calibration.Size = new System.Drawing.Size(152, 22);
             this.info_cmd_value_calibration.TabIndex = 60;
-            this.info_cmd_value_calibration.Text = "Not Loaded";
             // 
             // info_cmd_value_battery_level
             // 
@@ -689,7 +680,6 @@ namespace WocketConfigurationApp
             this.info_cmd_value_battery_level.Name = "info_cmd_value_battery_level";
             this.info_cmd_value_battery_level.Size = new System.Drawing.Size(152, 22);
             this.info_cmd_value_battery_level.TabIndex = 59;
-            this.info_cmd_value_battery_level.Text = "Not Loaded";
             // 
             // info_button_sampling_rate
             // 
@@ -733,7 +723,6 @@ namespace WocketConfigurationApp
             this.info_cmd_value_swversion.Name = "info_cmd_value_swversion";
             this.info_cmd_value_swversion.Size = new System.Drawing.Size(152, 22);
             this.info_cmd_value_swversion.TabIndex = 56;
-            this.info_cmd_value_swversion.Text = "Not Loaded";
             // 
             // info_cmd_value_hwversion
             // 
@@ -744,7 +733,6 @@ namespace WocketConfigurationApp
             this.info_cmd_value_hwversion.Name = "info_cmd_value_hwversion";
             this.info_cmd_value_hwversion.Size = new System.Drawing.Size(152, 22);
             this.info_cmd_value_hwversion.TabIndex = 55;
-            this.info_cmd_value_hwversion.Text = "Not Loaded";
             // 
             // info_button_hwversion
             // 

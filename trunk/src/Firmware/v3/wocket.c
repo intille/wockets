@@ -209,8 +209,8 @@ void _wocket_initialize(void)
 	{
 
 		// Set the sampling rate to 90Hz
-		_SAMPLING_RATE=90;
-		_wTM=_TM_Continuous;
+		_SAMPLING_RATE=40;//90;
+		_wTM=_TM_Burst_60;//_TM_Continuous;
 	
 		// Write the sampling rate to the EEPROM
 		if (battery>300)
@@ -728,7 +728,7 @@ void _receive_data(void)
 	   				case (unsigned char) GET_HV:  
 				   		aBuffer[0]=m_HV_RSP_BYTE0;
                         aBuffer[1]=m_HV_RSP_BYTE1(_VERSION);
-						processed_counter=command_counter;
+						processed_counter=command_counter;		
 						response_length=2;
 						break;				
 					case (unsigned char) GET_FV:  

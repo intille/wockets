@@ -112,6 +112,8 @@ namespace Wockets.Decoders.Accelerometers
                                     case ResponseTypes.ALT_RSP:
                                     case ResponseTypes.PDT_RSP:
                                     case ResponseTypes.TM_RSP:
+                                    case ResponseTypes.HV_RSP:
+                                    case ResponseTypes.FV_RSP:
                                         bytesToRead = 2;
                                         break;
                                     case ResponseTypes.BL_RSP:
@@ -305,6 +307,21 @@ namespace Wockets.Decoders.Accelerometers
                                         pdt.RawBytes[i] = this.packet[i];
                                     pdt._Timeout = (this.packet[1] & 0x7f); 
                                     FireEvent(pdt);
+                                    break;
+
+                                case ResponseTypes.HV_RSP:
+                                    HV_RSP hv = new HV_RSP(this._ID);
+                                    for (int i = 0; (i < bytesToRead); i++)
+                                        hv.RawBytes[i] = this.packet[i];
+                                    hv._Version = (this.packet[1] & 0x7f);
+                                    FireEvent(hv);
+                                    break;
+                                case ResponseTypes.FV_RSP:
+                                    FV_RSP fv = new FV_RSP(this._ID);
+                                    for (int i = 0; (i < bytesToRead); i++)
+                                        fv.RawBytes[i] = this.packet[i];
+                                    fv._Version = (this.packet[1] & 0x7f);
+                                    FireEvent(fv);
                                     break;
                                 default:
                                     break;
