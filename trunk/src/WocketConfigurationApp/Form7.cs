@@ -5,9 +5,14 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+using System.IO;
+
 using InTheHand.Net;
 using InTheHand.Net.Sockets;
 using InTheHand.Net.Bluetooth;
+
+
+
 using Wockets;
 using Wockets.Data.Configuration;
 using Wockets.Decoders;
@@ -29,9 +34,11 @@ namespace WocketConfigurationApp
         WocketsController wc;
 
         private string latestReading;
-
         private string current_command = "";
         private string cur_tr_mode = "";
+
+        private int[] xyzP = new int[3] {512,512,512};
+        private int[] xyzN = new int[3] { -512, -512, -512 };
 
 
         #region Initialize
@@ -39,12 +46,27 @@ namespace WocketConfigurationApp
         public Form7(BluetoothDeviceInfo wocket)
         {
             InitializeComponent();
-            
+
             //Copy parameters to loacal variables
             this.wocket = wocket;
+            this.Text = "Wocket (" + wocket.DeviceAddress.ToString() + ")";
+
+            //Load the parameters saved on the bluetoothinfo device
             this.info_cmd_value_name.Text = wocket.DeviceName;
             this.info_cmd_value_mac.Text = wocket.DeviceAddress.ToString();
-            this.Text = "Wocket (" + wocket.DeviceAddress.ToString() + ")";
+            
+            //hw & sw versions 
+            //(needs to be updated when they are implemented in the firmware)
+            this.info_cmd_value_hwversion.Text = "Version SD-3";
+            this.info_cmd_value_swversion.Text = "Rev. 3";
+
+            //battery level
+            //calibration
+            //sensor sensitivity
+            //transmission mode/sampling rate
+            //power down timeout / alive timeout
+            //packet count/ rssi
+
 
         }
 
@@ -53,11 +75,12 @@ namespace WocketConfigurationApp
         {
             InitializeWocketParameters();
 
+
+            //Hide the setting panels
             panel_calibration.Visible = false;
             panel_set_container.Visible = false;
             set_panel_cmd_entry_combo.Visible = false;
             set_panel_cmd_entry_textbox.Visible = false;
-            
 
         }
 
@@ -87,10 +110,44 @@ namespace WocketConfigurationApp
             ((Accelerometer)wc._Sensors[0])._Max = 1024;
             ((Accelerometer)wc._Sensors[0])._Min = 0;
             wc._Sensors[0]._Loaded = true;
+
+
+            //=== Suscriptions ===
+
+            //packet count
+            wc._Decoders[0].Subscribe(ResponseTypes.PC_RSP, new Wockets.Decoders.Decoder.ResponseHandler(this.ResponseCallback));
+            
+            //battery level
             wc._Decoders[0].Subscribe(ResponseTypes.BL_RSP, new Wockets.Decoders.Decoder.ResponseHandler(this.ResponseCallback));
+            
+            //battery percent
+            wc._Decoders[0].Subscribe(ResponseTypes.BP_RSP, new Wockets.Decoders.Decoder.ResponseHandler(this.ResponseCallback));
+            
+            //battery calibration?
+
+            //calibration
+            wc._Decoders[0].Subscribe(ResponseTypes.CAL_RSP, new Wockets.Decoders.Decoder.ResponseHandler(this.ResponseCallback));
+           
+            //sensor sensitivity
+            wc._Decoders[0].Subscribe(ResponseTypes.SENS_RSP, new Wockets.Decoders.Decoder.ResponseHandler(this.ResponseCallback));
+            
+            //sampling rate
             wc._Decoders[0].Subscribe(ResponseTypes.SR_RSP, new Wockets.Decoders.Decoder.ResponseHandler(this.ResponseCallback));
+            
+            //transmission mode
             wc._Decoders[0].Subscribe(ResponseTypes.TM_RSP, new Wockets.Decoders.Decoder.ResponseHandler(this.ResponseCallback));
-           // wc._Decoders[0].Subscribe(Wockets.Data.SensorDataType.BAUD_RATE, new Response.ResponseHandler(this.CommandCallback));
+            
+
+            //power down timeout 
+            wc._Decoders[0].Subscribe(ResponseTypes.PDT_RSP, new Wockets.Decoders.Decoder.ResponseHandler(this.ResponseCallback));
+            
+            // alive timeout
+            wc._Decoders[0].Subscribe(ResponseTypes.ALT_RSP, new Wockets.Decoders.Decoder.ResponseHandler(this.ResponseCallback));
+
+
+           
+
+            //=== Initialize === 
             wc.Initialize();
 
         }
@@ -118,15 +175,59 @@ namespace WocketConfigurationApp
                Response response = (Wockets.Data.Responses.Response) e;
                switch (response._Type)
                {
+                   //packet count
+                   case ResponseTypes.PC_RSP:
+                       //info_cmd_value_pkt_count.Text = ((PC_RSP)response);
+                       break;
+
+                   //battery level
                    case ResponseTypes.BL_RSP:
                        info_cmd_value_battery_level.Text = ((BL_RSP)response)._BatteryLevel.ToString();
                        break;
-                   case ResponseTypes.SR_RSP:
-                       info_cmd_value_sampling_rate.Text = ((SR_RSP)response)._SamplingRate.ToString();
+                   //battery percent
+                   case ResponseTypes.BP_RSP:
+                       info_cmd_value_btpercent.Text = ((BP_RSP)response)._Percent.ToString();
                        break;
+
+                   //battery calibration?
+
+                   //calibration
+                   case ResponseTypes.CAL_RSP:
+                       info_cmd_value_calibration.Text = "X:" + ((CAL_RSP)response)._X1G + "-" + ((CAL_RSP)response)._XN1G +
+                                                       ", Y:" + ((CAL_RSP)response)._Y1G + "-" + ((CAL_RSP)response)._YN1G +
+                                                       ", Z:" + ((CAL_RSP)response)._Z1G + "-" + ((CAL_RSP)response)._ZN1G;
+                       
+                       xyzP[0] = ((CAL_RSP)response)._X1G;
+                       xyzP[1] = ((CAL_RSP)response)._Y1G;
+                       xyzP[2] = ((CAL_RSP)response)._Z1G;
+
+                       xyzN[0] = ((CAL_RSP)response)._XN1G;
+                       xyzN[1] = ((CAL_RSP)response)._YN1G;
+                       xyzN[2] = ((CAL_RSP)response)._ZN1G;
+                                
+                       break;
+
+                   //sensor sensitivity
+                   case ResponseTypes.SENS_RSP:
+                       //info_cmd_value_sensitivity.Text = ((SENS_RSP)response);
+                       break;
+                   //transmission mode
                    case ResponseTypes.TM_RSP:
                        info_cmd_value_tr_rate.Text = ((TM_RSP)response)._TransmissionMode.ToString();
                        break;
+                   //sampling rate
+                   case ResponseTypes.SR_RSP:
+                       info_cmd_value_sampling_rate.Text = ((SR_RSP)response)._SamplingRate.ToString();
+                       break;
+                   //power down timeout
+                   case ResponseTypes.PDT_RSP:
+                       //info_cmd_value_pwr_timeout.Text = ((PDT_RSP)response);
+                       break;
+                   //alive timeout
+                   case ResponseTypes.ALT_RSP:
+                       //info_cmd_value_alive.Text = ((ALT_RSP)response);
+                       break;
+                 
                    default:
                        break;
                }
@@ -164,6 +265,7 @@ namespace WocketConfigurationApp
 
 
         #region old code
+        
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (CurrentWockets._Controller._Sensors[0]._Mode == SensorModes.Command)
@@ -199,6 +301,7 @@ namespace WocketConfigurationApp
 
 
         #region Plot Signal
+        
         Form3 plotterForm = null;
             private void plotToolStripMenuItem_Click(object sender, EventArgs e)
             {
@@ -231,12 +334,20 @@ namespace WocketConfigurationApp
 
         private void button_finish_Click(object sender, EventArgs e)
         {
+            close_form();
             this.Close();
-
         }
 
 
+        //------  Close & CleanUp panel   --------
+        #region Close & Clean up panels
+        
         private void set_panel_button_close_Click(object sender, EventArgs e)
+        {
+            set_panel_cleanup();
+        }
+
+        private void set_panel_cleanup()
         {
             if (current_command.CompareTo("name") == 0)
             {
@@ -252,7 +363,7 @@ namespace WocketConfigurationApp
             else if (current_command.CompareTo("tr_mode") == 0)
             {
                 set_panel_cmd_entry_combo.Visible = false;
-                info_button_tr_rate.Enabled= true;
+                info_button_tr_rate.Enabled = true;
             }
             else if (current_command.CompareTo("sampling_rate") == 0)
             {
@@ -266,16 +377,69 @@ namespace WocketConfigurationApp
                 set_panel_cmd_entry_textbox.Visible = false;
                 info_button_pwr_timeout.Enabled = true;
             }
+            else if (current_command.CompareTo("calibration") == 0)
+            {
+                cal_panel_entry_path.Text = "";
+                cal_panel_entry_path.Visible= false;
+                info_button_calibration.Enabled = true;
+
+                panel_calibration.Visible = false;
+                cal_panel_label_status.Text = "";
+                cal_panel_cmd_label.Text = "";
+                cal_panel_title.Text = "";
+
+            }
+            else if (current_command.CompareTo("alive") == 0)
+            {
+                set_panel_cmd_entry_textbox.Text = "";
+                set_panel_cmd_entry_textbox.Visible = false;
+                info_button_alive.Enabled = true;
+            }
+
 
             current_command = "";
-            
+
             panel_set_container.Visible = false;
             set_panel_label_status.Text = "";
             set_panel_cmd_label.Text = "";
-            set_panel_title.Text= "";
+            set_panel_title.Text = "";
 
         }
 
+        private void set_panel_setup(string title, string label, string value, bool text_on) 
+        {
+
+            set_panel_title.Text = title;
+            set_panel_cmd_label.Text = label;
+           
+
+
+            if (text_on)
+            {
+                set_panel_cmd_entry_textbox.Text = value;
+
+                set_panel_cmd_entry_textbox.Visible = true;
+                set_panel_cmd_entry_textbox.Enabled = true;
+
+                set_panel_cmd_entry_combo.Visible = false;
+                set_panel_cmd_entry_combo.Enabled = false;
+            }
+            else
+            {
+
+                set_panel_cmd_entry_textbox.Visible = false;
+                set_panel_cmd_entry_textbox.Enabled = false;
+
+                set_panel_cmd_entry_combo.Visible = true;
+                set_panel_cmd_entry_combo.Enabled = true;
+            }
+
+            set_panel_button_set.Enabled = true;
+            set_panel_button_close.Enabled = true;
+
+            panel_set_container.Visible = true;
+        
+        }
 
 
         //Click the "set" button in the configuration panel
@@ -438,6 +602,28 @@ namespace WocketConfigurationApp
                         info_cmd_value_pwr_timeout.Text = "out of range";
                     }
                 }
+                else if (current_command.CompareTo("alive") == 0)
+                {
+                    bool outOfrange = false;
+                    int val = 0;
+
+                    //get the alive timeout
+                    if (set_panel_cmd_entry_textbox.Text.Trim().CompareTo("") != 0)
+                        val = Int32.Parse(set_panel_cmd_entry_textbox.Text);
+
+
+                    //set the alive timeout  according the permitted range in seconds
+                    if (val >= 10)
+                    {
+                        //set the alive timeout in seconds
+                        info_cmd_value_alive.Text = val.ToString() + " Secs";
+                    }
+                    else
+                    {
+                        set_panel_label_status.Text = "The time you entered is too short. /n/r The alive timeout minimum value is 10 seconds.";
+                        info_cmd_value_alive.Text = "?";
+                    }
+                }
                     
 
                 set_panel_button_set.Enabled = true;
@@ -455,27 +641,32 @@ namespace WocketConfigurationApp
 
             }
         }
+        
 
 
+        #endregion 
+
+
+        //-------  Commands -----------------------
+        #region commands
+
+        //name
         private void button_set_name_Click(object sender, EventArgs e)
         {
-            
+            set_panel_cleanup();
             current_command = "name";
 
-            set_panel_title.Text = info_cmd_label_name.Text;
-            set_panel_cmd_label.Text = info_cmd_label_name.Text;
-            set_panel_cmd_entry_textbox.Text = info_cmd_value_name.Text;
+            set_panel_setup(info_cmd_label_name.Text, info_cmd_label_name.Text, info_cmd_value_name.Text, true);
 
-            set_panel_cmd_entry_textbox.Visible = true;
-            set_panel_cmd_entry_combo.Visible = false;
-
-            panel_set_container.Visible = true;
             info_button_name.Enabled = false;
 
         }
 
+        //hardware version
         private void button_load_hw_version_Click(object sender, EventArgs e)
         {
+            set_panel_cleanup();
+
             current_command = "hw_version";
 
             try
@@ -486,7 +677,6 @@ namespace WocketConfigurationApp
                 //querry the hw version 
                 //set the hw version
                 info_cmd_value_hwversion.Text = "Rev. 3";
-
                 info_button_hwversion.Enabled = true;
 
             }
@@ -500,8 +690,11 @@ namespace WocketConfigurationApp
             current_command = "";
         }
 
+        //software version
         private void info_button_swversion_Click(object sender, EventArgs e)
         {
+            set_panel_cleanup();
+
             current_command = "sw_version";
 
             try
@@ -527,8 +720,59 @@ namespace WocketConfigurationApp
         }
 
 
+        //packet count
+        private void info_button_pkt_count_Click(object sender, EventArgs e)
+        {
+            set_panel_cleanup();
+
+            current_command = "packet_count";
+
+            try
+            {
+                info_button_pkt_count.Enabled = false;
+                Application.DoEvents();
+
+                //get the packets count
+                info_cmd_value_pkt_count.Text = get_packet_count();
+
+                info_button_pkt_count.Enabled = true;
+
+            }
+            catch
+            {
+                // error
+                info_cmd_value_pkt_count.Text = "Error.Packet count not loaded.";
+                info_button_pkt_count.Enabled = true;
+            }
+
+            current_command = "";
+        }
+
+        private string get_packet_count()
+        {
+            string val = "?";
+
+            try
+            {
+                //GET_PC pc = new GET_PC();
+                //((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(pc._Bytes);
+                //val = pc._Bytes[0].ToString();
+            }
+            catch
+            {
+                val = "?";
+            }
+
+            return val;
+        }
+
+
+        //battery level
         private void button_load_battery_level_Click(object sender, EventArgs e)
         {
+
+            set_panel_cleanup();
+
             current_command = "battery";
 
             try
@@ -536,11 +780,10 @@ namespace WocketConfigurationApp
                 info_button_battery_level.Enabled= false;
                 Application.DoEvents();
 
-                GET_BT bt = new GET_BT();
-                ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(bt._Bytes);
                 //querry the battery level 
                 //set the battery level
-                info_cmd_value_battery_level.Text = "?";
+                info_cmd_value_battery_level.Text = get_battery_level();
+
                 info_button_battery_level.Enabled = true;
 
             }
@@ -554,15 +797,152 @@ namespace WocketConfigurationApp
             current_command = "";
         }
 
-        private void button_load_calibration_Click(object sender, EventArgs e)
+        private string get_battery_level()
         {
+            string val = "?";
 
+            try
+            {
+                //GET_BT bt_level = new GET_BT();
+                //((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(bt_level._Bytes);
+                //val = bt_level._Bytes.ToString();
+            }
+            catch 
+            {
+                val = "?";
+            }
+
+            return val;
         }
 
 
+        //calibration
+        private void button_load_calibration_Click(object sender, EventArgs e)
+        {
+            set_panel_cleanup();
+
+            current_command = "calibration";
+            info_cmd_value_calibration.Text = get_sensor_calibration();
+
+            //prepare the calibration panel
+            cal_panel_title.Text = info_cmd_label_calibration.Text;
+            cal_panel_cmd_label.Text = info_cmd_label_calibration.Text;
+            cal_panel_entry_path.Text = "";
+            cal_panel_label_status.Text = "";
+
+            cal_panel_entry_path.Visible = true;
+            panel_calibration.Visible = true;
+            
+            info_button_calibration.Enabled = false;
+
+        }
+
+        private string get_sensor_calibration()
+        {
+            string val = "?";
+
+            try
+            {
+                //GET_CAL cal = new GET_CAL();
+                //((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cal._Bytes);
+               // val = cal._Bytes.ToString();
+            }
+            catch
+            {
+                val = "?";
+            }
+
+            return val;
+        }
+        
+        //calibration  panel buttons
+        private void cal_panel_button_browse_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                //check the path selected in the textbox
+                this.folderBrowserDialog1.ShowNewFolderButton = false;
+
+                if (cal_panel_entry_path.Text.Trim().CompareTo("") != 0)
+                {
+                    if (Directory.Exists(cal_panel_entry_path.Text))
+                    { this.folderBrowserDialog1.SelectedPath = cal_panel_entry_path.Text.ToString(); }
+                    else
+                    { this.folderBrowserDialog1.RootFolder = System.Environment.SpecialFolder.Desktop; }
+                }
+                else
+                {
+                    this.folderBrowserDialog1.RootFolder = System.Environment.SpecialFolder.Desktop;
+                }
+
+
+                //check the path selected in the dialog
+                DialogResult result = this.folderBrowserDialog1.ShowDialog();
+
+
+                if (result == DialogResult.OK)
+                {
+                    string fullPath = this.folderBrowserDialog1.SelectedPath;
+                    cal_panel_entry_path.Text = fullPath;
+
+                    if (cal_panel_entry_path.Text.Trim().CompareTo("") == 0)
+                    {
+                        cal_panel_label_status.Text = "Please provide a valid path";
+                    }
+                    else
+                    {
+                        // it is a valid file
+                        //open the sensordata file and get the calibration values   
+                        cal_panel_label_status.Text = "The sensordata file is valid. You can set the CAL values.";
+                    }
+                }
+
+
+            } // end try
+
+            catch (Exception err)
+            {
+                Console.WriteLine(err.Message);
+            }
+        }
+
+        private void cal_panel_button_set_Click(object sender, EventArgs e)
+        {
+
+            cal_panel_button_set.Enabled = false;
+
+            if (cal_panel_entry_path.Text.Trim().CompareTo("") == 0)
+            {
+                cal_panel_label_status.Text = "Please provide a valid path";
+            }
+            else
+            {
+                // if is a valid path
+                // check if it is a valid file
+                // open the file and get the calibration values
+
+                //set status
+                cal_panel_label_status.Text = "The CAL values were set.";
+            }
+
+            cal_panel_button_set.Enabled = true;
+
+        }
+
+        private void cal_panel_button_close_Click(object sender, EventArgs e)
+        {
+            set_panel_cleanup();
+        }
+
+        
+        //sensitivity
         private void button_set_sensitivity_Click(object sender, EventArgs e)
         {
+            set_panel_cleanup();
+
             current_command = "sensitivity";
+
+            info_cmd_value_sensitivity.Text = get_sensor_sensitivity();
 
             //add sensitivity options to combo box
             set_panel_cmd_entry_combo.Items.Clear();
@@ -571,25 +951,40 @@ namespace WocketConfigurationApp
             set_panel_cmd_entry_combo.Items.Add("2.0 g");
             set_panel_cmd_entry_combo.Items.Add("4.0 g");
             set_panel_cmd_entry_combo.Items.Add("6.0 g");
-
+            set_panel_cmd_entry_combo.SelectedIndex = 0;
 
             //prepare the set panel
-            set_panel_title.Text = info_cmd_label_sensitivity.Text;
-            set_panel_cmd_label.Text = info_cmd_label_sensitivity.Text;
-            set_panel_cmd_entry_combo.SelectedIndex = 0;
-            set_panel_label_status.Text = "";
+            set_panel_setup(info_cmd_label_sensitivity.Text, info_cmd_label_sensitivity.Text, "", false);
 
-            set_panel_cmd_entry_combo.Visible = true;
-            set_panel_cmd_entry_textbox.Visible = false;
-
-            panel_set_container.Visible = true;
+           
             info_button_sensitivity.Enabled = false;
 
         }
 
+        private string get_sensor_sensitivity()
+        {
+            string val = "?";
 
+            try
+            {
+                GET_SEN sen = new GET_SEN();
+                ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(sen._Bytes);
+                val = sen._Bytes[0].ToString();
+            }
+            catch
+            {
+                val = "?";
+            }
+
+            return val;
+        }
+
+
+        //transmission mode
         private void info_button_tr_rate_Click(object sender, EventArgs e)
         {
+            set_panel_cleanup();
+
             current_command = "tr_mode";
 
             //add sensitivity options to combo box
@@ -600,26 +995,37 @@ namespace WocketConfigurationApp
             set_panel_cmd_entry_combo.Items.Add("Burst Mode 60 secs");
             set_panel_cmd_entry_combo.Items.Add("Burst Mode 90 secs");
             set_panel_cmd_entry_combo.Items.Add("Burst Mode 120 secs");
+            set_panel_cmd_entry_combo.SelectedIndex = 0;
 
             //prepare the set panel
-            set_panel_title.Text = info_cmd_label_tr_rate.Text;
-            set_panel_cmd_label.Text = info_cmd_label_tr_rate.Text;
-            set_panel_cmd_entry_combo.SelectedIndex = 0;
-            set_panel_label_status.Text = "";
+            set_panel_setup(info_cmd_label_tr_rate.Text, info_cmd_label_tr_rate.Text, "", false);
 
-            set_panel_cmd_entry_combo.Visible = true;
-            set_panel_cmd_entry_textbox.Visible = false;
+            //read the current saved value
 
-            panel_set_container.Visible = true;
+            //disable button
             info_button_tr_rate.Enabled = false;
 
         }
 
 
+        //sampling rate
         private void info_button_sampling_rate_Click(object sender, EventArgs e)
         {
-            GET_SR cmd = new GET_SR();
-            ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
+            set_panel_cleanup();
+
+            current_command = "sampling_rate";
+
+            //prepare the set panel
+            set_panel_setup(info_cmd_label_sampling_rate.Text, info_cmd_label_sampling_rate.Text, "", true);
+
+            //disable the sampling rate button
+            info_button_sampling_rate.Enabled = false;
+
+
+
+            //send cmd
+            //GET_SR cmd = new GET_SR();
+            //((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
 
 
             //select the allowed sampling rate
@@ -627,8 +1033,8 @@ namespace WocketConfigurationApp
             {
                 set_panel_label_status.Text = "The Wockets is set to continous mode. \n\r This mode supports sampling rates between 1Hz and 126Hz. \n\r Enter the sampling rate in the command textbox.";
                 
-                SET_SR set_sr_cmd = new SET_SR(90);
-                ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(set_sr_cmd._Bytes);
+                //SET_SR set_sr_cmd = new SET_SR(90);
+                //((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(set_sr_cmd._Bytes);
             }
             else if (cur_tr_mode.CompareTo("30") == 0)
             {
@@ -649,81 +1055,66 @@ namespace WocketConfigurationApp
             else if (cur_tr_mode.CompareTo("") == 0)
             {
                 set_panel_label_status.Text = "Before setting up the sampling rate, it is necessary specify the transmission mode.";
-
-                set_panel_button_set.Enabled = false;
-                set_panel_cmd_entry_textbox.Enabled = false;
-            }
-
-
-            //prepare the set panel
-            set_panel_title.Text = info_cmd_label_sampling_rate.Text;
-            set_panel_cmd_label.Text = info_cmd_label_sampling_rate.Text;
-            set_panel_cmd_entry_textbox.Text = "";
-
-            set_panel_cmd_entry_combo.Visible = false;
-            set_panel_cmd_entry_textbox.Visible = true;
-            panel_set_container.Visible = true;
-            info_button_sampling_rate.Enabled= false;
+            }       
 
         }
 
+        //power timeout
         private void info_button_pwr_timeout_Click(object sender, EventArgs e)
         {
+            set_panel_cleanup();
+
             current_command = "pwr_timeout";
 
             //prepare the set panel
-            set_panel_title.Text = info_cmd_label_pwr_timeout.Text;
-            set_panel_cmd_label.Text = info_cmd_label_pwr_timeout.Text;
-            set_panel_cmd_entry_textbox.Text = "";
+            set_panel_setup(info_cmd_label_pwr_timeout.Text, info_cmd_label_pwr_timeout.Text, "", true);
 
-            set_panel_cmd_entry_combo.Visible = false;
-            set_panel_cmd_entry_textbox.Visible = true;
-            panel_set_container.Visible = true;
-            info_button_pwr_timeout.Visible= false;
+            //read the current saved value
+
+            //disable button
+            info_button_pwr_timeout.Enabled= false;
 
         }
 
-        private void button_load_baudrate_Click(object sender, EventArgs e)
+
+        #endregion 
+
+        //------ Close Form ----------
+        #region Close Forms
+        
+        private void Form7_FormClosing(object sender, FormClosingEventArgs e)
+        {  close_form();
+        }
+
+        private void close_form()
         {
-            current_command = "baudrate";
-
-
-            try
-            {
-                info_button_baudrate.Enabled= false;
-                Application.DoEvents();
-
-                //querry the hw version 
-                //set the hw version
-                info_cmd_value_baudrate.Text = "38.4";
-
-                info_button_baudrate.Enabled = true;
-
+            if ( plotterForm != null )
+            {   plotterForm.Close();
+                plotterForm = null;
             }
-            catch
-            {
-                // error
-                info_cmd_value_baudrate.Text = "Error. Baudrate not loaded.";
-                info_button_baudrate.Enabled = true;
-            }
-
-            current_command = "";
-
         }
 
+        #endregion
+
+
+
+        private void info_button_alive_Click(object sender, EventArgs e)
+        {
+            set_panel_cleanup();
+
+            current_command = "alive";
+
+            //prepare the set panel
+            set_panel_setup(info_cmd_label_alive.Text, info_cmd_label_alive.Text, "", true);
+
+            //disable the sampling rate button
+            info_button_alive.Enabled = false;
+
+            
+        }
         
-
-        
-
-
-        
-
-
 
        
-
-
-
 
     }//end form
 }//end namespace
