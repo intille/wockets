@@ -39,6 +39,7 @@ namespace WocketConfigurationApp
             this.Wockets_Column_Status = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Wockets_Column_Test = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.button_quit = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
             this.button_settings = new System.Windows.Forms.Button();
             this.panel2 = new System.Windows.Forms.Panel();
@@ -130,7 +131,6 @@ namespace WocketConfigurationApp
             this.dataGridView1.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dataGridView1.Size = new System.Drawing.Size(593, 373);
             this.dataGridView1.TabIndex = 9;
-            this.dataGridView1.DoubleClick += new System.EventHandler(this.dataGridView1_DoubleClick);
             // 
             // Wockets_Column_Name
             // 
@@ -160,6 +160,7 @@ namespace WocketConfigurationApp
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.button_quit);
             this.panel1.Controls.Add(this.label3);
             this.panel1.Controls.Add(this.button_settings);
             this.panel1.Controls.Add(this.button_configure);
@@ -169,6 +170,17 @@ namespace WocketConfigurationApp
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(889, 519);
             this.panel1.TabIndex = 10;
+            // 
+            // button_quit
+            // 
+            this.button_quit.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button_quit.Location = new System.Drawing.Point(698, 445);
+            this.button_quit.Name = "button_quit";
+            this.button_quit.Size = new System.Drawing.Size(168, 52);
+            this.button_quit.TabIndex = 13;
+            this.button_quit.Text = "Quit";
+            this.button_quit.UseVisualStyleBackColor = true;
+            this.button_quit.Click += new System.EventHandler(this.button_quit_Click);
             // 
             // label3
             // 
@@ -236,7 +248,7 @@ namespace WocketConfigurationApp
             this.Controls.Add(this.panel1);
             this.Name = "Form4";
             this.Text = "Wocket Configuration App";
-            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form4_FormClosed);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form4_FormClosing);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
@@ -265,6 +277,7 @@ namespace WocketConfigurationApp
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button button_settings;
         private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Button button_quit;
     }
 }
 

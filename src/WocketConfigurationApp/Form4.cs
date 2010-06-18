@@ -65,6 +65,7 @@ namespace WocketConfigurationApp
                 {
                     string hex = "";
                     hex = devices[i].DeviceAddress.ToString();
+                   
 
                     #region Commented
                     // if (this.WocketsList_Box.Items.IndexOf(hex) < 0)
@@ -138,12 +139,9 @@ namespace WocketConfigurationApp
            DataGridViewRow selected_row =  this.dataGridView1.SelectedRows[0];
            int selected_device_index = selected_row.Index;
 
-            //Form2 f = new Form2(devices[this.WocketsList_Box.SelectedIndex]);
-
            Form5 f = new Form5((BluetoothDeviceInfo)bluetoothlist[selected_device_index]);
            f.Show();
            //this.Visible = false;
-
 
 
         #region commented
@@ -354,6 +352,7 @@ namespace WocketConfigurationApp
                         this.dataGridView1.Rows[row].Cells[3].Value = "Not tested";
 
                         macaddresses.Add(macaddress);
+                        bluetoothlist.Add(devices[device_index]);
 
                         label_status.Text = "Waiting for wocket...";
                         Application.DoEvents();
@@ -406,6 +405,7 @@ namespace WocketConfigurationApp
 
         }
 
+
         private void button_remove_wocket_Click(object sender, EventArgs e)
         {
 
@@ -435,6 +435,7 @@ namespace WocketConfigurationApp
             {    
                  this.dataGridView1.Rows.RemoveAt(selected_device_index);
                  macaddresses.RemoveAt(selected_device_index);
+                 bluetoothlist.RemoveAt(selected_device_index);
 
 
                  //update buttons
@@ -497,11 +498,12 @@ namespace WocketConfigurationApp
         #endregion Commented
 
 
-       
 
-   
+
+        // Testing if this will go out
+        #region commented
         //Select a wocket by double clicking the raw
-        private void dataGridView1_DoubleClick(object sender, EventArgs e)
+        /*private void dataGridView1_DoubleClick(object sender, EventArgs e)
         {
             if (this.dataGridView1.Focused)
             {
@@ -514,8 +516,11 @@ namespace WocketConfigurationApp
                     button_settings.Enabled = true;
                 }
             }
-        }
+        }*/
+        #endregion
 
+
+        Form7 WocketForm;
         private void button_settings_Click(object sender, EventArgs e)
         {
             
@@ -535,8 +540,8 @@ namespace WocketConfigurationApp
             DataGridViewRow selected_row = this.dataGridView1.SelectedRows[0];
             int selected_device_index = selected_row.Index;
            
-            Form7 f = new Form7(devices[selected_device_index]);
-            f.Show();
+            WocketForm = new Form7((BluetoothDeviceInfo) bluetoothlist[selected_device_index]);
+            WocketForm.Show();
 
             //this.Enabled = false;
 
@@ -545,9 +550,31 @@ namespace WocketConfigurationApp
 
         }
 
-        private void Form4_FormClosed(object sender, FormClosedEventArgs e)
+        
+
+        //--------------- Close Form -------------------------
+
+        private void close_form()
         {
+            if (WocketForm != null)
+            {
+                WocketForm.Close();
+                WocketForm = null;
+            }
+
             Application.Exit();
+        }
+
+
+
+        private void button_quit_Click(object sender, EventArgs e)
+        {
+            close_form();
+        }
+
+        private void Form4_FormClosing(object sender, FormClosingEventArgs e)
+        {
+             close_form();
         }
 
 
