@@ -60,14 +60,6 @@ namespace WocketConfigurationApp
             this.info_cmd_value_hwversion.Text = "Version SD-3";
             this.info_cmd_value_swversion.Text = "Rev. 3";
 
-            //battery level
-            //calibration
-            //sensor sensitivity
-            //transmission mode/sampling rate
-            //power down timeout / alive timeout
-            //packet count/ rssi
-
-
         }
 
 
@@ -76,11 +68,46 @@ namespace WocketConfigurationApp
             InitializeWocketParameters();
 
 
+            Command cmd = new GET_SR();
+            ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
+
+            cmd = new GET_TM();
+            ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
+
+            cmd = new GET_BT();
+            ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
+
+            cmd = new GET_BP();
+            ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
+
+            cmd = new GET_SEN();
+            ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
+
+            cmd = new GET_CAL();
+            ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
+
+            cmd = new GET_PC();
+            ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
+
+            cmd = new GET_PDT();
+            ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
+
+            cmd = new GET_BTCAL();
+            ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
+
+            cmd = new GET_FV();
+            ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
+
+            cmd = new GET_HV();
+            ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
+
             //Hide the setting panels
             panel_calibration.Visible = false;
             panel_set_container.Visible = false;
             set_panel_cmd_entry_combo.Visible = false;
             set_panel_cmd_entry_textbox.Visible = false;
+
+
 
         }
 
@@ -111,45 +138,19 @@ namespace WocketConfigurationApp
             ((Accelerometer)wc._Sensors[0])._Min = 0;
             wc._Sensors[0]._Loaded = true;
 
-
-            //=== Suscriptions ===
-
-            //packet count
-            wc._Decoders[0].Subscribe(ResponseTypes.PC_RSP, new Wockets.Decoders.Decoder.ResponseHandler(this.ResponseCallback));
-            
-            //battery level
             wc._Decoders[0].Subscribe(ResponseTypes.BL_RSP, new Wockets.Decoders.Decoder.ResponseHandler(this.ResponseCallback));
-            
-            //battery percent
-            wc._Decoders[0].Subscribe(ResponseTypes.BP_RSP, new Wockets.Decoders.Decoder.ResponseHandler(this.ResponseCallback));
-            
-            //battery calibration?
-
-            //calibration
-            wc._Decoders[0].Subscribe(ResponseTypes.CAL_RSP, new Wockets.Decoders.Decoder.ResponseHandler(this.ResponseCallback));
-           
-            //sensor sensitivity
-            wc._Decoders[0].Subscribe(ResponseTypes.SENS_RSP, new Wockets.Decoders.Decoder.ResponseHandler(this.ResponseCallback));
-            
-            //sampling rate
             wc._Decoders[0].Subscribe(ResponseTypes.SR_RSP, new Wockets.Decoders.Decoder.ResponseHandler(this.ResponseCallback));
-            
-            //transmission mode
             wc._Decoders[0].Subscribe(ResponseTypes.TM_RSP, new Wockets.Decoders.Decoder.ResponseHandler(this.ResponseCallback));
-            
-
-            //power down timeout 
+            wc._Decoders[0].Subscribe(ResponseTypes.BP_RSP, new Wockets.Decoders.Decoder.ResponseHandler(this.ResponseCallback));
+            wc._Decoders[0].Subscribe(ResponseTypes.SENS_RSP, new Wockets.Decoders.Decoder.ResponseHandler(this.ResponseCallback));
+            wc._Decoders[0].Subscribe(ResponseTypes.CAL_RSP, new Wockets.Decoders.Decoder.ResponseHandler(this.ResponseCallback));
+            wc._Decoders[0].Subscribe(ResponseTypes.PC_RSP, new Wockets.Decoders.Decoder.ResponseHandler(this.ResponseCallback));
             wc._Decoders[0].Subscribe(ResponseTypes.PDT_RSP, new Wockets.Decoders.Decoder.ResponseHandler(this.ResponseCallback));
-            
-            // alive timeout
-            wc._Decoders[0].Subscribe(ResponseTypes.ALT_RSP, new Wockets.Decoders.Decoder.ResponseHandler(this.ResponseCallback));
-
-
-           
-
-            //=== Initialize === 
+            wc._Decoders[0].Subscribe(ResponseTypes.BTCAL_RSP, new Wockets.Decoders.Decoder.ResponseHandler(this.ResponseCallback));
+            wc._Decoders[0].Subscribe(ResponseTypes.HV_RSP, new Wockets.Decoders.Decoder.ResponseHandler(this.ResponseCallback));
+            wc._Decoders[0].Subscribe(ResponseTypes.FV_RSP, new Wockets.Decoders.Decoder.ResponseHandler(this.ResponseCallback));
             wc.Initialize();
-
+         
         }
 
 
@@ -168,69 +169,49 @@ namespace WocketConfigurationApp
             if (this.InvokeRequired)
             {
                 UpdateResponseCallback d = new UpdateResponseCallback(ResponseCallback);
-                this.Invoke(d, new object[] {e});
+                this.Invoke(d, new object[] { e });
             }
-            else 
+            else
             {
-               Response response = (Wockets.Data.Responses.Response) e;
-               switch (response._Type)
-               {
-                   //packet count
-                   case ResponseTypes.PC_RSP:
-                       //info_cmd_value_pkt_count.Text = ((PC_RSP)response);
-                       break;
-
-                   //battery level
-                   case ResponseTypes.BL_RSP:
-                       info_cmd_value_battery_level.Text = ((BL_RSP)response)._BatteryLevel.ToString();
-                       break;
-                   //battery percent
-                   case ResponseTypes.BP_RSP:
-                       info_cmd_value_btpercent.Text = ((BP_RSP)response)._Percent.ToString();
-                       break;
-
-                   //battery calibration?
-
-                   //calibration
-                   case ResponseTypes.CAL_RSP:
-                       info_cmd_value_calibration.Text = "X:" + ((CAL_RSP)response)._X1G + "-" + ((CAL_RSP)response)._XN1G +
-                                                       ", Y:" + ((CAL_RSP)response)._Y1G + "-" + ((CAL_RSP)response)._YN1G +
-                                                       ", Z:" + ((CAL_RSP)response)._Z1G + "-" + ((CAL_RSP)response)._ZN1G;
-                       
-                       xyzP[0] = ((CAL_RSP)response)._X1G;
-                       xyzP[1] = ((CAL_RSP)response)._Y1G;
-                       xyzP[2] = ((CAL_RSP)response)._Z1G;
-
-                       xyzN[0] = ((CAL_RSP)response)._XN1G;
-                       xyzN[1] = ((CAL_RSP)response)._YN1G;
-                       xyzN[2] = ((CAL_RSP)response)._ZN1G;
-                                
-                       break;
-
-                   //sensor sensitivity
-                   case ResponseTypes.SENS_RSP:
-                       //info_cmd_value_sensitivity.Text = ((SENS_RSP)response);
-                       break;
-                   //transmission mode
-                   case ResponseTypes.TM_RSP:
-                       info_cmd_value_tr_rate.Text = ((TM_RSP)response)._TransmissionMode.ToString();
-                       break;
-                   //sampling rate
-                   case ResponseTypes.SR_RSP:
-                       info_cmd_value_sampling_rate.Text = ((SR_RSP)response)._SamplingRate.ToString();
-                       break;
-                   //power down timeout
-                   case ResponseTypes.PDT_RSP:
-                       //info_cmd_value_pwr_timeout.Text = ((PDT_RSP)response);
-                       break;
-                   //alive timeout
-                   case ResponseTypes.ALT_RSP:
-                       //info_cmd_value_alive.Text = ((ALT_RSP)response);
-                       break;
-                 
-                   default:
-                       break;
-               }
+                Response response = (Wockets.Data.Responses.Response)e;
+                switch (response._Type)
+                {
+                    case ResponseTypes.BL_RSP:
+                        info_cmd_value_battery_level.Text = ((BL_RSP)response)._BatteryLevel.ToString();
+                        break;
+                    case ResponseTypes.SR_RSP:
+                        info_cmd_value_sampling_rate.Text = ((SR_RSP)response)._SamplingRate.ToString();
+                        break;
+                    case ResponseTypes.TM_RSP:
+                        info_cmd_value_tr_rate.Text = ((TM_RSP)response)._TransmissionMode.ToString();
+                        break;
+                    case ResponseTypes.BP_RSP:
+                        info_cmd_value_btpercent.Text = ((BP_RSP)response)._Percent.ToString() + "%";
+                        break;
+                    case ResponseTypes.SENS_RSP:
+                        info_cmd_value_sensitivity.Text = ((SENS_RSP)response)._Sensitivity.ToString() + " G";
+                        break;
+                    case ResponseTypes.CAL_RSP:
+                        info_cmd_value_calibration.Text = ((CAL_RSP)response)._X1G.ToString() + " " + ((CAL_RSP)response)._XN1G.ToString() + " " + ((CAL_RSP)response)._Y1G.ToString() + " " + ((CAL_RSP)response)._YN1G.ToString() + " " + ((CAL_RSP)response)._Z1G.ToString() + " " + ((CAL_RSP)response)._ZN1G.ToString();
+                        break;
+                    case ResponseTypes.PC_RSP:
+                        info_cmd_value_pkt_count.Text = ((PC_RSP)response)._Count.ToString();
+                        break;
+                    case ResponseTypes.PDT_RSP:
+                        info_cmd_value_pwr_timeout.Text = ((PDT_RSP)response)._Timeout.ToString();
+                        break;
+                    case ResponseTypes.BTCAL_RSP:
+                       info_cmd_value_btcalibration.Text = ((BTCAL_RSP)response)._CAL100.ToString() + " " + ((BTCAL_RSP)response)._CAL80.ToString() + " " + ((BTCAL_RSP)response)._CAL60.ToString() + " " + ((BTCAL_RSP)response)._CAL40.ToString() + " " + ((BTCAL_RSP)response)._CAL20.ToString() + " " + ((BTCAL_RSP)response)._CAL10.ToString();
+                        break;
+                    case ResponseTypes.HV_RSP:
+                        info_cmd_value_hwversion.Text = ((HV_RSP)response)._Version.ToString();
+                        break;
+                    case ResponseTypes.FV_RSP:
+                       info_cmd_value_swversion.Text = ((FV_RSP)response)._Version.ToString();
+                        break;
+                    default:
+                        break;
+                }
 
                 this.Refresh();
             }
