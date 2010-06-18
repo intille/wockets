@@ -294,9 +294,6 @@
     <Compile Include="..\..\src\Wockets\Data\Commands\GET_SEN.cs">
       <Link>Data\Commands\GET_SEN.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\LEDTypes.cs">
-      <Link>Data\Commands\LEDTypes.cs"</Link>
-    </Compile>
     <Compile Include="..\..\src\Wockets\Data\Commands\RST_WK.cs">
       <Link>Data\Commands\RST_WK.cs</Link>
     </Compile>
@@ -345,44 +342,80 @@
     <Compile Include="..\..\src\Wockets\Data\Commands\SET_SR.cs">
       <Link>Data\Commands\SET_SR.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\GET_SR.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_SR.cs">
       <Link>Data\Commands\SET_SR.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\GET_TM.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_TM.cs">
       <Link>Data\Commands\GET_TM.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Responses\ALT_RSP.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Responses\ALT_RSP.cs">
       <Link>Data\Responses\ALT_RSP.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Responses\BL_RSP.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Responses\BL_RSP.cs">
       <Link>Data\Responses\BL_RSP.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Responses\BP_RSP.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Responses\BP_RSP.cs">
       <Link>Data\Responses\BP_RSP.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Responses\CAL_RSP.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Responses\CAL_RSP.cs">
       <Link>Data\Responses\CAL_RSP.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Responses\PC_RSP.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Responses\PC_RSP.cs">
       <Link>Data\Responses\PC_RSP.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Responses\PDT_RSP.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Responses\PDT_RSP.cs">
       <Link>Data\Responses\PDT_RSP.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Responses\ResponseTypes.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Responses\ResponseTypes.cs">
       <Link>Data\Responses\ResponseTypes.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Responses\SENS_RSP.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Responses\SENS_RSP.cs">
       <Link>Data\Responses\SENS_RSP.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Responses\SR_RSP.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Responses\SR_RSP.cs">
       <Link>Data\Responses\SR_RSP.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Responses\TM_RSP.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Responses\TM_RSP.cs">
       <Link>Data\Responses\TM_RSP.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Responses\TransmissionModes.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Responses\TransmissionModes.cs">
       <Link>Data\Responses\TransmissionModes.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_BP.cs">
+      <Link>Data\Commands\GET_BP.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_CAL.cs">
+      <Link>Data\Commands\GET_CAL.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_PDT.cs">
+      <Link>Data\Commands\GET_PDT.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\SET_PDT.cs">
+      <Link>Data\Commands\SET_PDT.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\Sensitivity.cs">
+      <Link>Data\Responses\Sensitivity.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_BTCAL.cs">
+      <Link>Data\Commands\GET_BTCAL.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\SET_BTCAL.cs">
+      <Link>Data\Commands\GET_BTCAL.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\BTCAL_RSP.cs">
+      <Link>Data\Responses\BTCAL_RSP.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_FV.cs" >
+      <Link>Data\Commands\GET_FV.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_HV.cs" >
+      <Link>Data\Commands\GET_HV.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\FV_RSP.cs" >
+      <Link>Data\Responses\FV_RSP.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\HV_RSP.cs" >
+      <Link>Data\Responses\HV_RSP.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>

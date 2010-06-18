@@ -1,4 +1,4 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -233,15 +233,6 @@
     <Compile Include="..\..\src\Wockets\WocketsControllerList.cs">
       <Link>WocketsControllerList.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\CommandTypes.cs">
-      <Link>Data\Commands\CommandTypes.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\Command.cs">
-      <Link>Data\Commands\ReceiverCommand.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\WocketCommand.cs">
-      <Link>Data\Commands\RFCOMMCommand.cs</Link>
-    </Compile>
     <Compile Include="..\..\src\Wockets\Utils\Logger.cs">
       <Link>Utils\logger.cs</Link>
     </Compile>
@@ -253,9 +244,6 @@
     </Compile>
     <Compile Include="..\..\src\Wockets\Utils\ByteWriter.cs">
       <Link>Utils\ByteWriter.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Responses\BatteryResponse.cs">
-      <Link>Data\Responses\BatteryResponse.cs</Link>
     </Compile>
     <Compile Include="..\..\src\Wockets\Utils\IPC\Barrier.cs">
       <Link>Utils\IPC\Barrier.cs</Link>
@@ -296,50 +284,8 @@
     <Compile Include="..\..\src\Wockets\Utils\network\NetworkStacks.cs">
       <Link>Utils\network\NetworkStacks.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Decoders\Response.cs">
-      <Link>Decoders\Response.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Responses\Response.cs">
-      <Link>Data\Responses\Response.cs</Link>
-    </Compile>
     <Compile Include="..\..\src\Wockets\Receivers\GenericReceiver.cs">
       <Link>Receivers\GenericReceiver.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\ALIVE.cs">
-      <Link>Data\Commands\ALIVE.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\BT_RST.cs">
-      <Link>Data\Commands\BT_RST.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\EnterCommandMode.cs">
-      <Link>Data\Commands\EnterCommandMode.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\ExitCommandMode.cs">
-      <Link>Data\Commands\ExitCommandMode.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\GET_BT.cs">
-      <Link>Data\Commands\GET_BT.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\GET_PC.cs">
-      <Link>Data\Commands\GET_PC.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\GET_SEN.cs">
-      <Link>Data\Commands\GET_SEN.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\GET_SM.cs">
-      <Link>Data\Commands\GET_SM.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\LEDTypes.cs">
-      <Link>Data\Commands\LEDTypes.cs"</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\RST_WK.cs">
-      <Link>Data\Commands\RST_WK.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\SET_LED.cs">
-      <Link>Data\Commands\SET_LED.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\SET_SM.cs">
-      <Link>Data\Commands\SET_SM.cs</Link>
     </Compile>
     <Compile Include="..\..\src\Wockets\Exceptions\BurstyException.cs">
       <Link>Exceptions\BurstyException.cs</Link>
@@ -413,15 +359,6 @@
     <Compile Include="..\..\src\Wockets\Utils\Battery.cs">
       <Link>Utils\Battery.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\PAUSE.cs">
-      <Link>Data\Commands\PAUSE.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\RESUME.cs">
-      <Link>Data\Commands\RESUME.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Utils\network\Bluetooth\TSniff.cs">
-      <Link>Data\Commands\Utils\network\Bluetooth\TSniff.cs</Link>
-    </Compile>
     <Compile Include="..\..\src\Wockets\Utils\ProcessCE.cs">
       <Link>Utils\ProcessCE.cs</Link>
     </Compile>
@@ -454,12 +391,6 @@
     </Compile>
     <Compile Include="..\..\src\Wockets\Exceptions\ErrorCodes.cs">
       <Link>Exceptions\ErrorCodes.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Responses\CommandModeEnterResponse.cs">
-      <Link>Data\Responses\CommandModeEnterResponse.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Responses\BaudRateResponse.cs">
-      <Link>Data\Responses\BaudRateResponse.cs</Link>
     </Compile>
     <Compile Include="..\..\src\Wockets\Decoders\DecoderModes.cs">
       <Link>Decoders\DecoderModes.cs</Link>
@@ -501,9 +432,123 @@
       <Link>Utils\network\Bluetooth\Widcomm\SerialPort.cs</Link>
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Utils\sms\SentMessage.cs" />
-    <Compile Include="Utils\sms\SMSManager.cs" />
-    <Compile Include="Utils\sms\Util.cs" />
+    <Compile Include="..\..\src\Wockets\Utils\sms\SentMessage.cs">
+      <Link>Utils\sms\SentMessage.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\sms\SMSManager.cs">
+      <Link>Utils\sms\SMSManager.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\sms\Util.cs">
+      <Link>Utils\sms\Util.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\ALIVE.cs">
+      <Link>Data\Commands\ALIVE.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\Command.cs">
+      <Link>Data\Commands\Command.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\CommandTypes.cs">
+      <Link>Data\Commands\CommandTypes.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_BP.cs">
+      <Link>Data\Commands\GET_BP.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_BT.cs">
+         <Link>Data\Commands\GET_BT.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_BTCAL.cs">
+      <Link>Data\Commands\GET_BTCAL.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_CAL.cs">
+      <Link>Data\Commands\GET_CAL.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_FV.cs">
+      <Link>Data\Commands\GET_FV.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_HV.cs">
+      <Link>Data\Commands\GET_HV.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_PC.cs">
+      <Link>Data\Commands\GET_PC.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_PDT.cs">
+      <Link>Data\Commands\GET_PDT.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_SEN.cs">
+      <Link>Data\Commands\GET_SEN.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_SR.cs">
+      <Link>Data\Commands\GET_SR.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_TM.cs">
+      <Link>Data\Commands\GET_TM.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\PAUSE.cs">
+      <Link>Data\Commands\PAUSE.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\RESUME.cs">
+      <Link>Data\Commands\RESUME.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\RST_WK.cs">
+      <Link>Data\Commands\RST_WK.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\SET_BTCAL.cs">
+      <Link>Data\Commands\SET_BTCAL.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\SET_PDT.cs">
+      <Link>Data\Commands\SET_PDT.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\SET_SR.cs">
+      <Link>Data\Commands\SET_SR.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\ALT_RSP.cs">
+      <Link>Data\Responses\ALT_RSP.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\BL_RSP.cs">
+      <Link>Data\Responses\BL_RSP.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\BP_RSP.cs">
+      <Link>Data\Responses\BP_RSP.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\BTCAL_RSP.cs">
+      <Link>Data\Responses\BTCAL_RSP.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\CAL_RSP.cs">
+      <Link>Data\Responses\CAL_RSP.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\FV_RSP.cs">
+      <Link>Data\Responses\FV_RSP.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\HV_RSP.cs">
+      <Link>Data\Responses\HV_RSP.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\PC_RSP.cs">
+      <Link>Data\Responses\PC_RSP.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\PDT_RSP.cs">
+      <Link>Data\Responses\PDT_RSP.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\Response.cs">
+      <Link>Data\Responses\Response.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\ResponseTypes.cs">
+      <Link>Data\Responses\ResponseTypes.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\Sensitivity.cs">
+      <Link>Data\Responses\Sensitivity.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\SENS_RSP.cs">
+      <Link>Data\Responses\SENS_RSP.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\SR_RSP.cs">
+      <Link>Data\Responses\SR_RSP.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\TM_RSP.cs">
+      <Link>Data\Responses\TM_RSP.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\TransmissionModes.cs">
+      <Link>Data\Responses\TransmissionModes.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="WocketsWeka.csproj">
