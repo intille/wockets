@@ -1,4 +1,4 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -713,16 +713,30 @@
     <Compile Include="..\..\src\WocketsWeka\weka\filters\unsupervised\attribute\NumericToBinary.cs">
       <Link>weka\filters\unsupervised\attribute\NumericToBinary.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\ButterWorth.cs">
+    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\BandPass.cs" >
+      <Link>Utils\Filters\BandPass.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\ButterWorth.cs" >
       <Link>Utils\Filters\ButterWorth.cs</Link>
     </Compile>
-    <Compile Include="Utils\Filters\BandPass.cs" />
-    <Compile Include="Utils\Filters\ButterworthDF.cs" />
-    <Compile Include="Utils\Filters\Filter.cs" />
-    <Compile Include="Utils\Filters\Frequency.cs" />
-    <Compile Include="Utils\Filters\Order.cs" />
-    <Compile Include="Utils\Filters\SamplingRates.cs" />
-    <Compile Include="Utils\Filters\Type.cs" />
+    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\ButterworthDF.cs" >
+      <Link>Utils\Filters\ButterworthDF.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\Filter.cs" >
+      <Link>Utils\Filters\Filter.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\Frequency.cs" >
+      <Link>Utils\Filters\Frequency.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\Order.cs" >
+      <Link>Utils\Filters\Order.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\SamplingRates.cs" >
+      <Link>Utils\Filters\SamplingRates.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\Type.cs" >
+      <Link>Utils\Filters\Type.cs</Link>
+    </Compile>
   </ItemGroup>
   <Import Condition="'$(TargetFrameworkVersion)' == 'v1.0'" Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.v1.targets" />
   <Import Condition="'$(TargetFrameworkVersion)' == 'v2.0'" Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />
