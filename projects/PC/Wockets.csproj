@@ -417,6 +417,9 @@
     <Compile Include="..\..\src\Wockets\Data\Responses\HV_RSP.cs" >
       <Link>Data\Responses\HV_RSP.cs</Link>
     </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\BC_RSP.cs" >
+      <Link>Data\Responses\BC_RSP.cs</Link>
+    </Compile>    
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="WocketsWeka.csproj">
