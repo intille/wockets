@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace Wockets.Data.Responses
-{
+{ 
     public class BC_RSP : Response
     {
 
