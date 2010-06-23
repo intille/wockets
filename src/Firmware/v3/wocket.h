@@ -1,3 +1,24 @@
+typedef struct{
+	unsigned char byte1;
+	unsigned char byte2;
+	unsigned char byte3;
+	unsigned char byte4;
+	unsigned char byte5;
+	unsigned char byte6;
+	unsigned char byte7;
+	unsigned char byte8;
+	unsigned char byte9;
+	unsigned char byte10;
+	unsigned char byte11;
+	unsigned char byte12;
+	unsigned char byte13;
+	unsigned char byte14;
+	unsigned char byte15;
+
+} data_unit;
+
+
+
 
 
 #define MAX_COMMAND_SIZE 10
@@ -166,6 +187,7 @@
 #define BTCAL_RSP 	0b01001
 #define HV_RSP	 	0b01010
 #define FV_RSP	 	0b01011
+#define BC_RSP		0b01100
 
 /* Macros for Wockets Responses */
 
@@ -183,12 +205,12 @@
 
 
 /* PC_RSP Macros */
-#define m_PACKET_COUNT_BYTE0			RESPONSE_HEADER(PC_RSP)
-#define m_PACKET_COUNT_BYTE1(count)		(count>>25)
-#define m_PACKET_COUNT_BYTE2(count)		((count>>18) & 0x7f)
-#define m_PACKET_COUNT_BYTE3(count)		((count>>11) & 0x7f)
-#define m_PACKET_COUNT_BYTE4(count)		((count>>4) & 0x7f)
-#define m_PACKET_COUNT_BYTE5(count)		((count & 0x0f)<<3)
+#define m_PC_RSP_BYTE0			RESPONSE_HEADER(PC_RSP)
+#define m_PC_RSP_BYTE1(count)		(count>>25)
+#define m_PC_RSP_BYTE2(count)		((count>>18) & 0x7f)
+#define m_PC_RSP_BYTE3(count)		((count>>11) & 0x7f)
+#define m_PC_RSP_BYTE4(count)		((count>>4) & 0x7f)
+#define m_PC_RSP_BYTE5(count)		((count & 0x0f)<<3)
 
 /* SENS_RSP Macros */
 #define m_SENS_RSP_BYTE0				RESPONSE_HEADER(SENS_RSP)
@@ -265,6 +287,12 @@
 
 
 
+/* BC_RSP Macros */
+#define m_BC_RSP_BYTE0			RESPONSE_HEADER(BC_RSP)
+#define m_BC_RSP_BYTE1(count)	((count>>7) &0x7f)
+#define m_BC_RSP_BYTE2(count)	(count & 0x7f)
+
+
 #define m_SUCCESS_RESPONSE_BYTE1			RESPONSE_HEADER(SUCCESS_RESPONSE)
 
 
@@ -303,18 +331,67 @@ typedef struct{
 
 unsigned char num_skipped_timer_interrupts;
 unsigned char wocket_status;
-unsigned short xs[256];
-unsigned short ys[256];
-unsigned short zs[256];
+//unsigned short xs[256];
+//unsigned short ys[256];
+//unsigned short zs[256];
 unsigned short scounter;
 
 
+/*
+extern data_unit data1[100];
+extern data_unit data2[100];
+extern data_unit data3[100];
+extern data_unit data4[100];
+extern data_unit data5[100];
+extern data_unit data6[100];
+extern data_unit data7[50];*/
+
+//extern unsigned short xs[3000];
+//extern unsigned short ys[3000];
+//extern unsigned short zs[3000];
+extern data_unit data[750];
+extern unsigned short dataIndex;
+extern unsigned char dataSubindex;
+
+extern unsigned short *xsp;
+extern unsigned short *ysp;
+extern unsigned short *zsp;
+
+#define m_SET_X(pdata,x,index) switch(index){\
+									case 0: pdata.byte1=(x>>2);pdata.byte2=((x<<6)&0xc0);break;\
+									case 1: pdata.byte4|=(x>>8);pdata.byte5=(x&0xff);break;\
+									case 2: pdata.byte8|=(x>>6);pdata.byte9=((x<<2)&0xfc);break;\
+									case 3: pdata.byte12|=(x>>4);pdata.byte13=((x<<4)&0xf0);break;}
+#define m_SET_Y(pdata,y,index) switch(index){\
+									case 0: pdata.byte2|=(y>>4);pdata.byte3=((y<<4)&0xf0);break;\
+									case 1: pdata.byte6=(y>>2);pdata.byte7=((y<<6)&0xc0);break;\
+									case 2: pdata.byte9|=(y>>8);pdata.byte10=(y&0xff);break;\
+									case 3: pdata.byte13|=(y>>6);pdata.byte14=((y<<2)&0xfc);break;}
+#define m_SET_Z(pdata,z,index) switch(index){\
+									case 0: pdata.byte3|=(z>>6);pdata.byte4=((z<<2)&0xfc);break;\
+									case 1: pdata.byte7|=(z>>4);pdata.byte8=((z<<4)&0xf0);break;\
+									case 2: pdata.byte11=(z>>2);pdata.byte12=((z<<6)&0xc0);break;\
+									case 3: pdata.byte14|=(z>>8);pdata.byte15=(z&0xff);break;}
 
 
+#define m_GET_X(x,byte1,byte2,index) switch(index){\
+									case 0: x=((byte1&0xff)<<2)|((byte2&0xc0)>>6); break;\
+									case 1: x=((byte1&0x03)<<8)|(byte2&0xff);break;\
+									case 2: x=((byte1&0x0f)<<6)|((byte2 &0xfc)>>2);break;\
+									case 3: x=((byte1&0x3f)<<4)|((byte2&0xf0)>>4);break;}
+
+#define m_GET_Y(y,byte1,byte2,index) switch(index){\
+									case 0: y=((byte1&0x3f)<<4)|(byte2>>4); break;\
+									case 1: y=(byte1<<2)|(byte2>>6);break;\
+									case 2: y=((byte1&0x03)<<8)|byte2;break;\
+									case 3: y=((byte1&0x0f)<<6)|(byte2>>2);break;} 
 
 
-
-
+#define m_GET_Z(z,byte1,byte2,index) switch(index){\
+									case 0: z=((byte1&0x0f)<<6)|(byte2>>2); break;\
+									case 1: z=((byte1&0x3f)<<4)|(byte2>>4);break;\
+									case 2: z=(byte1<<2)|(byte2>>6);break;\
+									case 3: z=((byte1&0x03)<<8)|byte2;break;}
 
 void _wocket_initialize(void);
 void _wocket_set_master_mode(void);
@@ -328,7 +405,7 @@ void _wocket_set_flag(unsigned char flag);
 
 void _send_data(void);
 void _receive_data(void);
-void _send_packet_count(unsigned long count);
+void _send_batch_count(unsigned short count);
 void _send_data_bufferred(void);
 
 unsigned char _wocket_get_baudrate(void);

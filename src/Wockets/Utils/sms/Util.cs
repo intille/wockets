@@ -5,8 +5,7 @@ using System.Threading;
 using System.IO;
 using Microsoft.WindowsMobile.PocketOutlook;
 
-
-namespace Wockets.Data.sms
+namespace Wockets.Utils.sms
 {
     internal class Util
     {
@@ -21,7 +20,10 @@ namespace Wockets.Data.sms
             if (!bSuccess)
             {
 
-             
+                // the following lines are specific for City Project. 
+
+                // make a log of message not send here.
+                //Logger.LogError("Error sending text message :" + m_sSMSContent, false);
 
                 //SMSManager.requireResendMsgList.Add(new MessageToResend(m_sRecipientPhone, m_sSMSContent));
 

@@ -31,12 +31,50 @@ unsigned char wakeup=0;
 unsigned char sample=0;
 
 
+/*data_unit data1[100];
+data_unit data2[100];
+data_unit data3[100];
+data_unit data4[100];
+data_unit data5[100];
+data_unit data6[100];
+data_unit data7[50];*/
+
+//unsigned short xs[3000];
+//unsigned short ys[3000];
+//unsigned short zs[3000];
+
+data_unit data[750];
+unsigned short x;
+unsigned short y;
+unsigned short z;
+
+unsigned short dataIndex;
+unsigned char dataSubindex;
+unsigned char sampleFlag=0;
+unsigned short batch_counter=0;
+
+/* Interrupt Service Routines */
+unsigned int seconds_passed=0;
+unsigned int counter=0;
+
+unsigned char skip_interrupt_counter=0;
+unsigned char connected=0;
+unsigned int seconds_disconnected=0;
+
+unsigned short configurationTimer=1;
+unsigned char interrupts_passed=0;
+
+unsigned char interrupt_reps=0;
+
 int main()
 {
 				
 scounter=0;
 
 
+	//Initialized data buffer
+	dataIndex=0;
+	dataSubindex=0;
 	// Blink green for 5 seconds	
 
 	_wocket_initialize();
@@ -51,6 +89,182 @@ scounter=0;
 
 	while(1){
 			
+
+			
+
+		//Sample only in the main loop because of p
+		if(sampleFlag){
+			power_adc_enable();
+			_atmega_adc_turn_on();
+#ifdef _VERSION ==3
+			x=_atmega_a2dConvert10bit(ADC2);
+			y=_atmega_a2dConvert10bit(ADC1);
+			z=_atmega_a2dConvert10bit(ADC0);
+#else
+			x=_atmega_a2dConvert10bit(ADC3);
+			y=_atmega_a2dConvert10bit(ADC2);
+			z=_atmega_a2dConvert10bit(ADC1);		
+#endif
+		
+
+			 m_SET_X(data[dataIndex],x,dataSubindex);
+			 m_SET_Y(data[dataIndex],y,dataSubindex);
+			 m_SET_Z(data[dataIndex],z,dataSubindex);
+
+			 dataSubindex++;
+			 if (dataSubindex>=4)
+			 	dataSubindex=0;
+			 
+			 //Most of the time the data buffer with 750 will not overflow
+			 //and will be enough to transmit the data, data will go from 0 up to a specific
+			 //value
+
+			if (_wTM==_TM_Continuous)
+			{
+
+				
+				switch(dataSubindex){
+				case 1:
+						m_GET_X(x,data[dataIndex].byte1,data[dataIndex].byte2,0);
+						m_GET_Y(y,data[dataIndex].byte2,data[dataIndex].byte3,0);
+						m_GET_Z(z,data[dataIndex].byte3,data[dataIndex].byte4,0);
+						break;
+				case 2:
+						m_GET_X(x,data[dataIndex].byte4,data[dataIndex].byte5,1);
+						m_GET_Y(y,data[dataIndex].byte6,data[dataIndex].byte7,1);
+						m_GET_Z(z,data[dataIndex].byte7,data[dataIndex].byte8,1);
+						break;
+				case 3:
+						m_GET_X(x,data[dataIndex].byte8,data[dataIndex].byte9,2);
+						m_GET_Y(y,data[dataIndex].byte9,data[dataIndex].byte10,2);
+						m_GET_Z(z,data[dataIndex].byte11,data[dataIndex].byte12,2);
+						break;
+				case 0:
+						m_GET_X(x,data[dataIndex].byte12,data[dataIndex].byte13,3);
+						m_GET_Y(y,data[dataIndex].byte13,data[dataIndex].byte14,3);
+						m_GET_Z(z,data[dataIndex].byte14,data[dataIndex].byte15,3);
+						break;
+				}
+											
+				_transmit_packet(_encode_packet( x, y, z));	
+
+			}
+			else 
+			{
+				if ((dataSubindex==0) && (batch_counter<750))
+					batch_counter++;
+				if (connected){
+					_greenled_turn_on();
+					
+					_send_batch_count(batch_counter*4);
+
+
+					if (batch_counter<750) // Go from 0 up to batch_counter
+					{						
+						for (int i=0;(i<batch_counter);i++)
+						{
+							m_GET_X(x,data[i].byte1,data[i].byte2,0);
+							m_GET_Y(y,data[i].byte2,data[i].byte3,0);
+							m_GET_Z(z,data[i].byte3,data[i].byte4,0);
+							_transmit_packet(_encode_packet(x,y,z));
+
+							m_GET_X(x,data[i].byte4,data[i].byte5,1);
+							m_GET_Y(y,data[i].byte6,data[i].byte7,1);
+							m_GET_Z(z,data[i].byte7,data[i].byte8,1);
+							_transmit_packet(_encode_packet(x,y,z));
+
+							m_GET_X(x,data[i].byte8,data[i].byte9,2);
+							m_GET_Y(y,data[i].byte9,data[i].byte10,2);
+							m_GET_Z(z,data[i].byte11,data[i].byte12,2);
+							_transmit_packet(_encode_packet(x,y,z));
+
+							m_GET_X(x,data[i].byte12,data[i].byte13,3);
+						m_GET_Y(y,data[i].byte13,data[i].byte14,3);
+							m_GET_Z(z,data[i].byte14,data[i].byte15,3);
+							_transmit_packet(_encode_packet(x,y,z));
+						}
+					}else{
+
+						int current=dataIndex+1;
+						int end =dataIndex;
+						if (current>=750)
+							current=0;
+						while(current!=end)
+						{
+							m_GET_X(x,data[current].byte1,data[current].byte2,0);
+							m_GET_Y(y,data[current].byte2,data[current].byte3,0);
+							m_GET_Z(z,data[current].byte3,data[current].byte4,0);
+							_transmit_packet(_encode_packet(x,y,z));
+
+							m_GET_X(x,data[current].byte4,data[current].byte5,1);
+							m_GET_Y(y,data[current].byte6,data[current].byte7,1);
+							m_GET_Z(z,data[current].byte7,data[current].byte8,1);
+							_transmit_packet(_encode_packet(x,y,z));
+
+							m_GET_X(x,data[current].byte8,data[current].byte9,2);
+							m_GET_Y(y,data[current].byte9,data[current].byte10,2);
+							m_GET_Z(z,data[current].byte11,data[current].byte12,2);
+							_transmit_packet(_encode_packet(x,y,z));
+
+							m_GET_X(x,data[current].byte12,data[current].byte13,3);
+							m_GET_Y(y,data[current].byte13,data[current].byte14,3);
+							m_GET_Z(z,data[current].byte14,data[current].byte15,3);
+							_transmit_packet(_encode_packet(x,y,z));
+
+							current++;
+							if (current==750)
+								current=0;
+						}
+
+						//copy end item into start
+						data[0].byte1=data[end].byte1;
+						data[0].byte2=data[end].byte2;
+						data[0].byte3=data[end].byte3;
+						data[0].byte4=data[end].byte4;
+						data[0].byte5=data[end].byte5;
+						data[0].byte6=data[end].byte6;
+						data[0].byte7=data[end].byte7;
+						data[0].byte8=data[end].byte8;
+						data[0].byte9=data[end].byte9;
+						data[0].byte10=data[end].byte10;
+						data[0].byte11=data[end].byte11;
+						data[0].byte12=data[end].byte12;
+						data[0].byte13=data[end].byte13;
+						data[0].byte14=data[end].byte14;
+						data[0].byte15=data[end].byte15;
+					}
+
+					batch_counter=0;
+					dataIndex=0;
+					seconds_passed=0;
+					while (seconds_passed<400)
+					{
+						_delay_ms(5);
+						seconds_passed++;
+
+					}						
+					connected=0;
+					_bluetooth_turn_off();		
+					seconds_disconnected=0;
+					_greenled_turn_off();
+				
+				}
+			}
+			_atmega_adc_turn_off();
+			power_adc_disable();
+
+			if (dataSubindex==0)
+			{
+				dataIndex++;
+
+
+			}
+
+			if (dataIndex==750)
+				dataIndex=0;
+			sampleFlag=0;
+		}	
+		
 			cli();
 			set_sleep_mode(SLEEP_MODE_IDLE);
 			//set_sleep_mode(SLEEP_MODE_PWR_SAVE);
@@ -68,18 +282,7 @@ scounter=0;
 
 
 
-/* Interrupt Service Routines */
-unsigned int seconds_passed=0;
-unsigned int counter=0;
 
-unsigned char skip_interrupt_counter=0;
-unsigned char connected=0;
-unsigned int seconds_disconnected=0;
-
-unsigned short configurationTimer=1;
-unsigned char interrupts_passed=0;
-
-unsigned char interrupt_reps=0;
 
 ISR(TIMER2_OVF_vect)
 {
@@ -101,6 +304,7 @@ ISR(TIMER2_OVF_vect)
 
 	
 	/* Sample data and transmt it if necessary */
+	sampleFlag=1;
 	if (_wTM==_TM_Continuous)
 	{
 		if (!_bluetooth_is_connected())
@@ -118,10 +322,8 @@ ISR(TIMER2_OVF_vect)
 
 		 _wPC++;
 
-		power_adc_enable();
-		_atmega_adc_turn_on();
-		_receive_data();				
-		_send_data();				
+
+		_receive_data();
 	}
 	else if (_wTM==_TM_Burst_60)
 	{
@@ -129,15 +331,6 @@ ISR(TIMER2_OVF_vect)
 			_wShutdownTimer--;
 
 		 _wPC++;
-		power_adc_enable();
-		_atmega_adc_turn_on();
-		xs[scounter]=_atmega_a2dConvert10bit(IN_ACCEL_X_FILT);
-		ys[scounter]=_atmega_a2dConvert10bit(IN_ACCEL_Y_FILT);
-		zs[scounter++]=_atmega_a2dConvert10bit(IN_ACCEL_Z_FILT);
-		if (scounter>255)
-			scounter=0;
-		_atmega_adc_turn_off();
-		power_adc_disable();
 
 		if (!_bluetooth_is_connected()){
 			
@@ -158,7 +351,7 @@ ISR(TIMER2_OVF_vect)
 
 		connected=1;
 		_receive_data();		
-		_send_packet_count(2400);
+		/*_send_batch_count(2400);
 		_send_data_bufferred();
 
 		seconds_passed=0;
@@ -170,7 +363,7 @@ ISR(TIMER2_OVF_vect)
 		}
 						
 		_bluetooth_turn_off();		
-		seconds_disconnected=0;
+		seconds_disconnected=0;*/
 	}
 
 

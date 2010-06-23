@@ -674,9 +674,9 @@ namespace Wockets
                                 else
                                     continue;*/
 
-       
+                                int expectedPackets=((Wockets.Decoders.Accelerometers.WocketsDecoder)sensor._Decoder)._ExpectedBatchCount;
                                     //skip if got everything
-                               if (sensor._ReceivedPackets == 2400)
+                               if ((expectedPackets>0) && (sensor._ReceivedPackets == expectedPackets))
                                     continue;
                                else
                                    currentReceiver.Update();

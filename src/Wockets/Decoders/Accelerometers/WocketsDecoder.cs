@@ -28,7 +28,7 @@ namespace Wockets.Decoders.Accelerometers
         private SensorDataType packetType;
         private ResponseTypes responseType;
         private double lastTimestamp;
-        public int _ExpectedPacketCount = 0;
+        public int _ExpectedBatchCount = 0;
         public double _ReferenceTime = 0;
 
         public WocketsDecoder()
@@ -117,6 +117,7 @@ namespace Wockets.Decoders.Accelerometers
                                         bytesToRead = 2;
                                         break;
                                     case ResponseTypes.BL_RSP:
+                                    case ResponseTypes.BC_RSP:
                                         bytesToRead = 3;                 
                                         break;
                                     case ResponseTypes.PC_RSP:
@@ -322,6 +323,14 @@ namespace Wockets.Decoders.Accelerometers
                                         fv.RawBytes[i] = this.packet[i];
                                     fv._Version = (this.packet[1] & 0x7f);
                                     FireEvent(fv);
+                                    break;
+                                case ResponseTypes.BC_RSP:
+                                    BC_RSP bc = new BC_RSP(this._ID);
+                                    for (int i = 0; (i < bytesToRead); i++)
+                                        bc.RawBytes[i] = this.packet[i];
+                                    bc._Count = ((this.packet[1] & 0x7f) << 7) | (this.packet[2] & 0x7f);
+                                    this._ExpectedBatchCount = bc._Count;
+                                    FireEvent(bc);
                                     break;
                                 default:
                                     break;
