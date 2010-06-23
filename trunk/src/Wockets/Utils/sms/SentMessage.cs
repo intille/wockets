@@ -1,8 +1,9 @@
 ﻿using System;
+//using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Wockets.Data.sms
+namespace Wockets.Utils.sms
 {
     class SentMessage
     {

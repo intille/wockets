@@ -1,12 +1,15 @@
 ﻿using System;
+//using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
 using System.Threading;
 using Microsoft.WindowsMobile.PocketOutlook;
 using Microsoft.WindowsMobile.PocketOutlook.MessageInterception;
+//using System.IO.Compression;
+using Microsoft.Win32;
 
-namespace Wockets.Data.sms
+namespace Wockets.Utils.sms
 {
     /// <summary>
     /// SMSLib is a library for sending messages and files over the SMS network.
@@ -18,8 +21,8 @@ namespace Wockets.Data.sms
         /// </summary>
         internal Char receivingProjectCode, receivingProgramCode;
 
-        public enum SMSErrorMessage {None, RecipientNumberFormatIncorrect, MessageTypeNotEqualTo3, InvalidProjectCode, InvalidProgramCode, MessageTooBig, InvalidCharInMessage};
-        
+        public enum SMSErrorMessage { None, RecipientNumberFormatIncorrect, MessageTypeNotEqualTo3, InvalidProjectCode, InvalidProgramCode, MessageTooBig, InvalidCharInMessage };
+
         // total of 84 usable chars (Deducted single/double quotes)
         public Char[] usableCharset = { '@', '$','\n', '_', ' ', '!', '"','#', '%', '&', '\'' ,'(',')','*', '+', ',', '-', '.', '/', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', ';', '<', 
         '=', '>', '?', 'A', 'B', 'C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'};
@@ -64,10 +67,10 @@ namespace Wockets.Data.sms
         public SMSManager(Char receivingProjectCode, Char receivingProgramCode)
         {
             // check project code and program code availability.
-            if (!(usableCharset.ToString().IndexOf(receivingProjectCode)>=0))
+            if (!arrayContains(usableCharset, receivingProjectCode))
                 throw new ArgumentException("Project Code needs to be within accepted Charset");
 
-            if (!(usableCharset.ToString().IndexOf(receivingProgramCode)>=0))
+            if (!arrayContains(usableCharset, receivingProgramCode))
                 throw new ArgumentException("Program Code needs to be within accepted Charset");
 
             this.receivingProjectCode = receivingProjectCode;
@@ -100,21 +103,22 @@ namespace Wockets.Data.sms
 
             if (MessageInterceptor.IsApplicationLauncherEnabled(appId))
             {
-                smsInterceptor = new MessageInterceptor(appId, false);
-            }
-            else
-            {
-                // We want to intercept messages that begin with "CKF:" within the
-                // message body and delete these messages before they reach the
-                // SMS inbox.
-                smsInterceptor = new MessageInterceptor(InterceptionAction.NotifyAndDelete, false);
-                smsInterceptor.MessageCondition = new MessageCondition(MessageProperty.Body,
-                    MessagePropertyComparisonType.StartsWith, receiveControlPrefix);
-                
-                // Enable the message interceptor, launch application when a certain condition met.
-                smsInterceptor.EnableApplicationLauncher(appId);
+                // clean up the key
+                RegistryKey rk = Registry.LocalMachine.OpenSubKey("Software\\Microsoft\\Inbox\\Rules", true);
+                rk.DeleteSubKeyTree(appId);
+                rk.Close();
             }
 
+
+            // We want to intercept messages that begin with "CKF:" within the
+            // message body and delete these messages before they reach the
+            // SMS inbox.
+            smsInterceptor = new MessageInterceptor(InterceptionAction.NotifyAndDelete, false);
+            smsInterceptor.MessageCondition = new MessageCondition(MessageProperty.Body,
+                MessagePropertyComparisonType.StartsWith, receiveControlPrefix);
+
+            // Enable the message interceptor, launch application when a certain condition met.
+            smsInterceptor.EnableApplicationLauncher(appId);
             smsInterceptor.MessageReceived += SmsInterceptor_MessageReceived;
         }
 
@@ -136,14 +140,14 @@ namespace Wockets.Data.sms
         private void ResendFailedToSentMsgs(Object myObject, EventArgs myEventArgs)
         {
             int initialCount = unfinishedSentMsgList.Count;
-           
+
             foreach (KeyValuePair<String, SentMessage> entry in unfinishedSentMsgList)
             {
                 // do something with entry.Value or entry.Key
                 DateTime messageSentTime = entry.Value.getSentTime();
                 DateTime currentTime = DateTime.Now;
                 TimeSpan ts = currentTime.Subtract(messageSentTime);
-                
+
                 // resend message if it's been over an hour since its last been sent. 
                 if (ts.Hours >= 1)
                 {
@@ -152,7 +156,7 @@ namespace Wockets.Data.sms
                     for (int i = 0; i < msgContentArray.Length; i++)
                     {
                         String smsToSend = receiveControlPrefix + entry.Value.getSendDataType() + entry.Value.getMsgID()
-                                        + entry.Value.getNumOfMessages() + convertPartNumberToChar(i+1) + "0"
+                                        + entry.Value.getNumOfMessages() + convertPartNumberToChar(i + 1) + "0"
                                         + msgContentArray[i];
 
                         char crcChar = getCRC86(smsToSend);
@@ -173,7 +177,7 @@ namespace Wockets.Data.sms
                         sendDataThread.Start();
                     }
                 }
-            
+
             }
         }
 
@@ -184,7 +188,7 @@ namespace Wockets.Data.sms
             if (request != null)
             {
                 // Look at the body of the SMS message to determine
-                String incomeData = request.Body.Substring(receiveControlPrefix.Length).Trim();
+                String incomeData = request.Body.Substring(receiveControlPrefix.Length);
                 String msgType = incomeData.Substring(0, 3);
                 String msgID = incomeData.Substring(3, 2);
 
@@ -192,6 +196,7 @@ namespace Wockets.Data.sms
                 {
                     case "srv": // all parts received.
                         unfinishedSentMsgList.Remove(msgID);
+                        Console.WriteLine("message received: " + msgID);
                         break;
                     case "rty": // something to resend
                         if (unfinishedSentMsgList.ContainsKey(msgID))
@@ -205,8 +210,8 @@ namespace Wockets.Data.sms
                             {
                                 char resendPartChar = msgsToResendPart[i];
 
-                                String smsToSend = receiveControlPrefix + unfinishedSentMsgList[msgID].getSendDataType() + unfinishedSentMsgList[msgID].getMsgID() 
-                                    + unfinishedSentMsgList[msgID].getNumOfMessages() + resendPartChar + "0" 
+                                String smsToSend = receiveControlPrefix + unfinishedSentMsgList[msgID].getSendDataType() + unfinishedSentMsgList[msgID].getMsgID()
+                                    + unfinishedSentMsgList[msgID].getNumOfMessages() + resendPartChar + "0"
                                     + unfinishedMsg[convertPartNumberCharToInt(resendPartChar) - 1];
 
                                 char crcChar = getCRC86(smsToSend);
@@ -289,12 +294,12 @@ namespace Wockets.Data.sms
 
             // destination information
             // check project code and program code availability.
-            if (!(usableCharset.ToString().IndexOf(receivingProjectCode)>=0))
+            if (!arrayContains(usableCharset, receivingProjectCode))
                 return SMSErrorMessage.InvalidProjectCode;
             else
                 destinationInfo += receivingProjectCode;
 
-            if (!(usableCharset.ToString().IndexOf(receivingProgramCode)>=0))
+            if (!arrayContains(usableCharset, receivingProgramCode))
                 return SMSErrorMessage.InvalidProgramCode;
             else
                 destinationInfo += receivingProgramCode;
@@ -325,7 +330,7 @@ namespace Wockets.Data.sms
             // for the time being, as compression is not used, I am currently letting the system ALWAYS send 
             // uncompressed text.
             //if (compressedStrBase64.Length > msg.Length)
-            if(true)
+            if (true)
             {
                 msgID = getMsgID(false);
                 messagesToSend = splitMessage(msg);
@@ -351,17 +356,18 @@ namespace Wockets.Data.sms
             for (int i = 0; i < messagesToSend.Length; i++)
             {
                 String smsToSend = smsHeaderBeforeCRCPartNum;
-                smsToSend += (i + 1); //let message number start with 1
+                smsToSend += convertPartNumberToChar(i + 1) + ""; //let message number start with 1
                 smsToSend += '0'; //initialize CRC char to 0 for CRC checksum
                 smsToSend += messagesToSend[i];
 
                 Char crcChar = getCRC86(smsToSend);
-                
+
                 //insert CRC char
                 smsToSend = smsToSend.Remove(13, 1);
                 String msgContent = smsToSend.Insert(13, crcChar.ToString());
 
-                while(!messageSendingFlag){
+                while (!messageSendingFlag)
+                {
                     Thread.Sleep(1000);
                 }
 
@@ -371,9 +377,9 @@ namespace Wockets.Data.sms
             }
 
             // record messages sent
-            if(mustGoThrough)
+            if (mustGoThrough)
                 unfinishedSentMsgList.Add(msgID, new SentMessage(msgRecipient, msgID, numberOfParts, msgType, false, messagesToSend, DateTime.Now));
-            
+
             return SMSErrorMessage.None;
         }
 
@@ -405,7 +411,7 @@ namespace Wockets.Data.sms
         {
             for (int i = 0; i < msg.Length; i++)
             {
-                if (!(usableCharset.ToString().IndexOf(Convert.ToChar(msg[i]))>=0))
+                if (!arrayContains(usableCharset, Convert.ToChar(msg[i])))
                 {
                     return false;
                 }
@@ -436,17 +442,18 @@ namespace Wockets.Data.sms
 
         private Char convertPartNumberToChar(int number)
         {
-            if (number > numberCharset.Length)
+            if ((number > numberCharset.Length) || (number == 0))
             {
                 return '!';
             }
 
-            return numberCharset[number-1];
+            return numberCharset[number - 1];
         }
 
-        private int convertPartNumberCharToInt(char partNumber){
+        private int convertPartNumberCharToInt(char partNumber)
+        {
             return Array.IndexOf(numberCharset, partNumber) + 1;
-	    }
+        }
 
         private String getMsgID(bool compression)
         {
@@ -471,7 +478,7 @@ namespace Wockets.Data.sms
                     randomNumber = random.Next(0, usableCharset.Length - 1);
                     Char randChar = usableCharset[randomNumber];
                     secondChar = (Char)(randChar & 255);
-                    if (usableCharset.ToString().IndexOf(secondChar)>=0)
+                    if (arrayContains(usableCharset, secondChar))
                     {
                         msgID += secondChar;
                         break;
@@ -485,7 +492,7 @@ namespace Wockets.Data.sms
                     randomNumber = random.Next(0, usableCharset.Length - 1);
                     Char randChar = usableCharset[randomNumber];
                     secondChar = (Char)(randChar & 254);
-                    if (usableCharset.ToString().IndexOf(secondChar)>=0)
+                    if (arrayContains(usableCharset, secondChar))
                     {
                         msgID += secondChar;
                         break;
@@ -497,10 +504,22 @@ namespace Wockets.Data.sms
 
         }
 
+        private bool arrayContains(char[] charArray, char itemToCheck)
+        {
+            for (int i = 0; i < charArray.Length; i++)
+            {
+                if (charArray[i] == itemToCheck)
+                    return true;
+            }
+
+            return false;
+        }
+
         private String[] splitMessage(String msgToSplit)
         {
             List<String> tmpString = new List<String>();
-            while(msgToSplit.Length > 0){
+            while (msgToSplit.Length > 0)
+            {
                 if (msgToSplit.Length > maxSMSLength - headerOverhead)
                 {
                     tmpString.Add(msgToSplit.Substring(0, maxSMSLength - headerOverhead));
@@ -516,7 +535,23 @@ namespace Wockets.Data.sms
             return tmpString.ToArray();
         }
 
+        /*
+        private byte[] CompressString(string str)
+        {
+            // open memory stream
+            MemoryStream ms = new MemoryStream();
+            DeflateStream sw = new DeflateStream(ms, CompressionMode.Compress, true);
 
+            // write data into compressor stream
+            StreamWriter writer = new StreamWriter(sw, Encoding.Default, 16384);
+            writer.Write(str);
+
+            writer.Flush();
+            sw.Close();
+
+            return ms.ToArray();
+        }
+        */
     }
 
     // class for sending text through SMS
