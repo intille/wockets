@@ -34,17 +34,14 @@ namespace WocketConfigurationApp
             this.info_cmd_label_mac = new System.Windows.Forms.Label();
             this.info_cmd_value_mac = new System.Windows.Forms.TextBox();
             this.info_cmd_label_swversion = new System.Windows.Forms.Label();
-            this.set_panel_cmd_entry_combo = new System.Windows.Forms.ComboBox();
             this.info_cmd_label_battery = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.cal_panel_x1g = new System.Windows.Forms.Label();
             this.cal_panel_xn1g = new System.Windows.Forms.Label();
-            this.label8 = new System.Windows.Forms.Label();
             this.cal_panel_yn1g = new System.Windows.Forms.Label();
             this.cal_panel_y1g = new System.Windows.Forms.Label();
             this.cal_panel_zn1g = new System.Windows.Forms.Label();
             this.cal_panel_z1g = new System.Windows.Forms.Label();
-            this.label13 = new System.Windows.Forms.Label();
             this.cal_panel_xstd = new System.Windows.Forms.Label();
             this.cal_panel_ystd = new System.Windows.Forms.Label();
             this.cal_panel_zstd = new System.Windows.Forms.Label();
@@ -79,20 +76,32 @@ namespace WocketConfigurationApp
             this.info_cmd_value_hwversion = new System.Windows.Forms.TextBox();
             this.info_cmd_label_tr_rate = new System.Windows.Forms.Label();
             this.info_cmd_label_sensitivity = new System.Windows.Forms.Label();
-            this.panel_set_container = new System.Windows.Forms.Panel();
-            this.set_panel_label_status = new System.Windows.Forms.TextBox();
+            this.panel_status = new System.Windows.Forms.Panel();
+            this.panel_status_texbox = new System.Windows.Forms.TextBox();
             this.set_panel_title = new System.Windows.Forms.TextBox();
-            this.set_panel_button_close = new System.Windows.Forms.Button();
-            this.set_panel_button_set = new System.Windows.Forms.Button();
-            this.set_panel_cmd_label = new System.Windows.Forms.Label();
-            this.set_panel_cmd_entry_textbox = new System.Windows.Forms.TextBox();
             this.panel_calibration = new System.Windows.Forms.Panel();
+            this.cal_panel_button_cancel = new System.Windows.Forms.Button();
+            this.cal_panel_button_ok = new System.Windows.Forms.Button();
             this.cal_panel_label_status = new System.Windows.Forms.TextBox();
             this.cal_panel_button_browse = new System.Windows.Forms.Button();
             this.cal_panel_entry_path = new System.Windows.Forms.TextBox();
-            this.cal_panel_values = new System.Windows.Forms.Panel();
+            this.cal_panel_cal_values = new System.Windows.Forms.Panel();
+            this.label3 = new System.Windows.Forms.Label();
             this.cal_panel_cmd_label = new System.Windows.Forms.Label();
             this.cal_panel_title = new System.Windows.Forms.TextBox();
+            this.cal_panel_bat_values = new System.Windows.Forms.Panel();
+            this.label1 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.cal_panel_bat_20 = new System.Windows.Forms.Label();
+            this.cal_panel_bat_40 = new System.Windows.Forms.Label();
+            this.cal_panel_bat_10 = new System.Windows.Forms.Label();
+            this.label9 = new System.Windows.Forms.Label();
+            this.label17 = new System.Windows.Forms.Label();
+            this.label16 = new System.Windows.Forms.Label();
+            this.cal_panel_bat_80 = new System.Windows.Forms.Label();
+            this.cal_panel_bat_100 = new System.Windows.Forms.Label();
+            this.cal_panel_bat_60 = new System.Windows.Forms.Label();
+            this.label15 = new System.Windows.Forms.Label();
             this.button_set = new System.Windows.Forms.Button();
             this.label18 = new System.Windows.Forms.Label();
             this.panel3 = new System.Windows.Forms.Panel();
@@ -100,13 +109,20 @@ namespace WocketConfigurationApp
             this.button_finish = new System.Windows.Forms.Button();
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
             this.button_load = new System.Windows.Forms.Button();
-            this.cal_panel_button_ok = new System.Windows.Forms.Button();
-            this.cal_panel_button_cancel = new System.Windows.Forms.Button();
+            this.label7 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
+            this.label10 = new System.Windows.Forms.Label();
+            this.label11 = new System.Windows.Forms.Label();
+            this.label12 = new System.Windows.Forms.Label();
+            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.menuStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
-            this.panel_set_container.SuspendLayout();
+            this.panel_status.SuspendLayout();
             this.panel_calibration.SuspendLayout();
-            this.cal_panel_values.SuspendLayout();
+            this.cal_panel_cal_values.SuspendLayout();
+            this.cal_panel_bat_values.SuspendLayout();
             this.panel3.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -164,20 +180,6 @@ namespace WocketConfigurationApp
             this.info_cmd_label_swversion.TabIndex = 4;
             this.info_cmd_label_swversion.Text = "Software Version";
             // 
-            // set_panel_cmd_entry_combo
-            // 
-            this.set_panel_cmd_entry_combo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.set_panel_cmd_entry_combo.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.set_panel_cmd_entry_combo.FormattingEnabled = true;
-            this.set_panel_cmd_entry_combo.Items.AddRange(new object[] {
-            "1",
-            "2"});
-            this.set_panel_cmd_entry_combo.Location = new System.Drawing.Point(205, 72);
-            this.set_panel_cmd_entry_combo.Name = "set_panel_cmd_entry_combo";
-            this.set_panel_cmd_entry_combo.Size = new System.Drawing.Size(166, 24);
-            this.set_panel_cmd_entry_combo.TabIndex = 5;
-            this.set_panel_cmd_entry_combo.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
-            // 
             // info_cmd_label_battery
             // 
             this.info_cmd_label_battery.AutoSize = true;
@@ -192,132 +194,110 @@ namespace WocketConfigurationApp
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label5.ForeColor = System.Drawing.Color.WhiteSmoke;
+            this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label5.ForeColor = System.Drawing.Color.Orange;
             this.label5.Location = new System.Drawing.Point(5, 28);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(31, 20);
+            this.label5.Size = new System.Drawing.Size(44, 16);
             this.label5.TabIndex = 8;
-            this.label5.Text = "X :";
+            this.label5.Text = "X1G :";
             // 
             // cal_panel_x1g
             // 
             this.cal_panel_x1g.AutoSize = true;
-            this.cal_panel_x1g.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cal_panel_x1g.ForeColor = System.Drawing.Color.Orange;
-            this.cal_panel_x1g.Location = new System.Drawing.Point(38, 28);
+            this.cal_panel_x1g.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cal_panel_x1g.ForeColor = System.Drawing.Color.WhiteSmoke;
+            this.cal_panel_x1g.Location = new System.Drawing.Point(73, 28);
             this.cal_panel_x1g.Name = "cal_panel_x1g";
-            this.cal_panel_x1g.Size = new System.Drawing.Size(49, 20);
+            this.cal_panel_x1g.Size = new System.Drawing.Size(41, 16);
             this.cal_panel_x1g.TabIndex = 9;
             this.cal_panel_x1g.Text = "1g  =";
             // 
             // cal_panel_xn1g
             // 
             this.cal_panel_xn1g.AutoSize = true;
-            this.cal_panel_xn1g.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cal_panel_xn1g.ForeColor = System.Drawing.Color.Orange;
-            this.cal_panel_xn1g.Location = new System.Drawing.Point(38, 65);
+            this.cal_panel_xn1g.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cal_panel_xn1g.ForeColor = System.Drawing.Color.WhiteSmoke;
+            this.cal_panel_xn1g.Location = new System.Drawing.Point(73, 65);
             this.cal_panel_xn1g.Name = "cal_panel_xn1g";
-            this.cal_panel_xn1g.Size = new System.Drawing.Size(50, 20);
+            this.cal_panel_xn1g.Size = new System.Drawing.Size(42, 16);
             this.cal_panel_xn1g.TabIndex = 10;
             this.cal_panel_xn1g.Text = "-1g =";
-            // 
-            // label8
-            // 
-            this.label8.AutoSize = true;
-            this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label8.ForeColor = System.Drawing.Color.WhiteSmoke;
-            this.label8.Location = new System.Drawing.Point(132, 28);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(31, 20);
-            this.label8.TabIndex = 11;
-            this.label8.Text = "Y :";
             // 
             // cal_panel_yn1g
             // 
             this.cal_panel_yn1g.AutoSize = true;
-            this.cal_panel_yn1g.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cal_panel_yn1g.ForeColor = System.Drawing.Color.Orange;
-            this.cal_panel_yn1g.Location = new System.Drawing.Point(162, 65);
+            this.cal_panel_yn1g.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cal_panel_yn1g.ForeColor = System.Drawing.Color.WhiteSmoke;
+            this.cal_panel_yn1g.Location = new System.Drawing.Point(209, 65);
             this.cal_panel_yn1g.Name = "cal_panel_yn1g";
-            this.cal_panel_yn1g.Size = new System.Drawing.Size(50, 20);
+            this.cal_panel_yn1g.Size = new System.Drawing.Size(42, 16);
             this.cal_panel_yn1g.TabIndex = 13;
             this.cal_panel_yn1g.Text = "-1g =";
             // 
             // cal_panel_y1g
             // 
             this.cal_panel_y1g.AutoSize = true;
-            this.cal_panel_y1g.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cal_panel_y1g.ForeColor = System.Drawing.Color.Orange;
-            this.cal_panel_y1g.Location = new System.Drawing.Point(162, 28);
+            this.cal_panel_y1g.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cal_panel_y1g.ForeColor = System.Drawing.Color.WhiteSmoke;
+            this.cal_panel_y1g.Location = new System.Drawing.Point(209, 28);
             this.cal_panel_y1g.Name = "cal_panel_y1g";
-            this.cal_panel_y1g.Size = new System.Drawing.Size(49, 20);
+            this.cal_panel_y1g.Size = new System.Drawing.Size(41, 16);
             this.cal_panel_y1g.TabIndex = 12;
             this.cal_panel_y1g.Text = "1g  =";
             // 
             // cal_panel_zn1g
             // 
             this.cal_panel_zn1g.AutoSize = true;
-            this.cal_panel_zn1g.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cal_panel_zn1g.ForeColor = System.Drawing.Color.Orange;
-            this.cal_panel_zn1g.Location = new System.Drawing.Point(290, 65);
+            this.cal_panel_zn1g.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cal_panel_zn1g.ForeColor = System.Drawing.Color.WhiteSmoke;
+            this.cal_panel_zn1g.Location = new System.Drawing.Point(329, 65);
             this.cal_panel_zn1g.Name = "cal_panel_zn1g";
-            this.cal_panel_zn1g.Size = new System.Drawing.Size(50, 20);
+            this.cal_panel_zn1g.Size = new System.Drawing.Size(42, 16);
             this.cal_panel_zn1g.TabIndex = 15;
             this.cal_panel_zn1g.Text = "-1g =";
             // 
             // cal_panel_z1g
             // 
             this.cal_panel_z1g.AutoSize = true;
-            this.cal_panel_z1g.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cal_panel_z1g.ForeColor = System.Drawing.Color.Orange;
-            this.cal_panel_z1g.Location = new System.Drawing.Point(291, 28);
+            this.cal_panel_z1g.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cal_panel_z1g.ForeColor = System.Drawing.Color.WhiteSmoke;
+            this.cal_panel_z1g.Location = new System.Drawing.Point(329, 28);
             this.cal_panel_z1g.Name = "cal_panel_z1g";
-            this.cal_panel_z1g.Size = new System.Drawing.Size(49, 20);
+            this.cal_panel_z1g.Size = new System.Drawing.Size(41, 16);
             this.cal_panel_z1g.TabIndex = 14;
             this.cal_panel_z1g.Text = "1g  =";
-            // 
-            // label13
-            // 
-            this.label13.AutoSize = true;
-            this.label13.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label13.ForeColor = System.Drawing.Color.WhiteSmoke;
-            this.label13.Location = new System.Drawing.Point(257, 28);
-            this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(30, 20);
-            this.label13.TabIndex = 16;
-            this.label13.Text = "Z :";
             // 
             // cal_panel_xstd
             // 
             this.cal_panel_xstd.AutoSize = true;
-            this.cal_panel_xstd.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cal_panel_xstd.ForeColor = System.Drawing.Color.Orange;
-            this.cal_panel_xstd.Location = new System.Drawing.Point(42, 101);
+            this.cal_panel_xstd.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cal_panel_xstd.ForeColor = System.Drawing.Color.WhiteSmoke;
+            this.cal_panel_xstd.Location = new System.Drawing.Point(73, 101);
             this.cal_panel_xstd.Name = "cal_panel_xstd";
-            this.cal_panel_xstd.Size = new System.Drawing.Size(49, 20);
+            this.cal_panel_xstd.Size = new System.Drawing.Size(41, 16);
             this.cal_panel_xstd.TabIndex = 17;
             this.cal_panel_xstd.Text = "std =";
             // 
             // cal_panel_ystd
             // 
             this.cal_panel_ystd.AutoSize = true;
-            this.cal_panel_ystd.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cal_panel_ystd.ForeColor = System.Drawing.Color.Orange;
-            this.cal_panel_ystd.Location = new System.Drawing.Point(164, 101);
+            this.cal_panel_ystd.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cal_panel_ystd.ForeColor = System.Drawing.Color.WhiteSmoke;
+            this.cal_panel_ystd.Location = new System.Drawing.Point(209, 101);
             this.cal_panel_ystd.Name = "cal_panel_ystd";
-            this.cal_panel_ystd.Size = new System.Drawing.Size(49, 20);
+            this.cal_panel_ystd.Size = new System.Drawing.Size(41, 16);
             this.cal_panel_ystd.TabIndex = 18;
             this.cal_panel_ystd.Text = "std =";
             // 
             // cal_panel_zstd
             // 
             this.cal_panel_zstd.AutoSize = true;
-            this.cal_panel_zstd.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cal_panel_zstd.ForeColor = System.Drawing.Color.Orange;
-            this.cal_panel_zstd.Location = new System.Drawing.Point(297, 101);
+            this.cal_panel_zstd.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cal_panel_zstd.ForeColor = System.Drawing.Color.WhiteSmoke;
+            this.cal_panel_zstd.Location = new System.Drawing.Point(329, 101);
             this.cal_panel_zstd.Name = "cal_panel_zstd";
-            this.cal_panel_zstd.Size = new System.Drawing.Size(49, 20);
+            this.cal_panel_zstd.Size = new System.Drawing.Size(41, 16);
             this.cal_panel_zstd.TabIndex = 19;
             this.cal_panel_zstd.Text = "std =";
             // 
@@ -661,81 +641,38 @@ namespace WocketConfigurationApp
             this.info_cmd_label_sensitivity.TabIndex = 45;
             this.info_cmd_label_sensitivity.Text = "Sensor Sensitivity";
             // 
-            // panel_set_container
+            // panel_status
             // 
-            this.panel_set_container.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.panel_set_container.Controls.Add(this.set_panel_label_status);
-            this.panel_set_container.Controls.Add(this.set_panel_title);
-            this.panel_set_container.Controls.Add(this.set_panel_button_close);
-            this.panel_set_container.Controls.Add(this.set_panel_button_set);
-            this.panel_set_container.Controls.Add(this.set_panel_cmd_label);
-            this.panel_set_container.Controls.Add(this.set_panel_cmd_entry_combo);
-            this.panel_set_container.Controls.Add(this.set_panel_cmd_entry_textbox);
-            this.panel_set_container.Location = new System.Drawing.Point(526, 33);
-            this.panel_set_container.Name = "panel_set_container";
-            this.panel_set_container.Size = new System.Drawing.Size(395, 573);
-            this.panel_set_container.TabIndex = 43;
+            this.panel_status.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.panel_status.Controls.Add(this.panel_status_texbox);
+            this.panel_status.Controls.Add(this.set_panel_title);
+            this.panel_status.Location = new System.Drawing.Point(526, 33);
+            this.panel_status.Name = "panel_status";
+            this.panel_status.Size = new System.Drawing.Size(395, 573);
+            this.panel_status.TabIndex = 43;
             // 
-            // set_panel_label_status
+            // panel_status_texbox
             // 
-            this.set_panel_label_status.BackColor = System.Drawing.Color.DimGray;
-            this.set_panel_label_status.ForeColor = System.Drawing.Color.White;
-            this.set_panel_label_status.Location = new System.Drawing.Point(22, 317);
-            this.set_panel_label_status.Multiline = true;
-            this.set_panel_label_status.Name = "set_panel_label_status";
-            this.set_panel_label_status.Size = new System.Drawing.Size(349, 57);
-            this.set_panel_label_status.TabIndex = 44;
+            this.panel_status_texbox.BackColor = System.Drawing.Color.DimGray;
+            this.panel_status_texbox.ForeColor = System.Drawing.Color.White;
+            this.panel_status_texbox.Location = new System.Drawing.Point(22, 64);
+            this.panel_status_texbox.Multiline = true;
+            this.panel_status_texbox.Name = "panel_status_texbox";
+            this.panel_status_texbox.Size = new System.Drawing.Size(349, 492);
+            this.panel_status_texbox.TabIndex = 44;
             // 
             // set_panel_title
             // 
             this.set_panel_title.BackColor = System.Drawing.Color.DimGray;
-            this.set_panel_title.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.set_panel_title.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.set_panel_title.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.set_panel_title.ForeColor = System.Drawing.Color.Orange;
             this.set_panel_title.Location = new System.Drawing.Point(16, 22);
             this.set_panel_title.Name = "set_panel_title";
             this.set_panel_title.Size = new System.Drawing.Size(355, 22);
             this.set_panel_title.TabIndex = 43;
-            this.set_panel_title.Text = "Wocket Name";
+            this.set_panel_title.Text = "WOCKET STATUS";
             this.set_panel_title.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // set_panel_button_close
-            // 
-            this.set_panel_button_close.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.set_panel_button_close.Location = new System.Drawing.Point(263, 199);
-            this.set_panel_button_close.Name = "set_panel_button_close";
-            this.set_panel_button_close.Size = new System.Drawing.Size(102, 38);
-            this.set_panel_button_close.TabIndex = 41;
-            this.set_panel_button_close.Text = "Close";
-            this.set_panel_button_close.UseVisualStyleBackColor = true;
-            this.set_panel_button_close.Click += new System.EventHandler(this.set_panel_button_close_Click);
-            // 
-            // set_panel_button_set
-            // 
-            this.set_panel_button_set.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.set_panel_button_set.Location = new System.Drawing.Point(22, 199);
-            this.set_panel_button_set.Name = "set_panel_button_set";
-            this.set_panel_button_set.Size = new System.Drawing.Size(102, 38);
-            this.set_panel_button_set.TabIndex = 37;
-            this.set_panel_button_set.Text = "Set";
-            this.set_panel_button_set.UseVisualStyleBackColor = true;
-            // 
-            // set_panel_cmd_label
-            // 
-            this.set_panel_cmd_label.AutoSize = true;
-            this.set_panel_cmd_label.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.set_panel_cmd_label.ForeColor = System.Drawing.Color.Orange;
-            this.set_panel_cmd_label.Location = new System.Drawing.Point(19, 75);
-            this.set_panel_cmd_label.Name = "set_panel_cmd_label";
-            this.set_panel_cmd_label.Size = new System.Drawing.Size(105, 16);
-            this.set_panel_cmd_label.TabIndex = 38;
-            this.set_panel_cmd_label.Text = "Wocket Name";
-            // 
-            // set_panel_cmd_entry_textbox
-            // 
-            this.set_panel_cmd_entry_textbox.Location = new System.Drawing.Point(205, 72);
-            this.set_panel_cmd_entry_textbox.Name = "set_panel_cmd_entry_textbox";
-            this.set_panel_cmd_entry_textbox.Size = new System.Drawing.Size(166, 20);
-            this.set_panel_cmd_entry_textbox.TabIndex = 42;
             // 
             // panel_calibration
             // 
@@ -745,14 +682,37 @@ namespace WocketConfigurationApp
             this.panel_calibration.Controls.Add(this.cal_panel_label_status);
             this.panel_calibration.Controls.Add(this.cal_panel_button_browse);
             this.panel_calibration.Controls.Add(this.cal_panel_entry_path);
-            this.panel_calibration.Controls.Add(this.cal_panel_values);
+            this.panel_calibration.Controls.Add(this.cal_panel_cal_values);
             this.panel_calibration.Controls.Add(this.cal_panel_cmd_label);
             this.panel_calibration.Controls.Add(this.cal_panel_title);
+            this.panel_calibration.Controls.Add(this.cal_panel_bat_values);
             this.panel_calibration.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.panel_calibration.Location = new System.Drawing.Point(526, 33);
             this.panel_calibration.Name = "panel_calibration";
             this.panel_calibration.Size = new System.Drawing.Size(395, 573);
             this.panel_calibration.TabIndex = 20;
+            // 
+            // cal_panel_button_cancel
+            // 
+            this.cal_panel_button_cancel.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cal_panel_button_cancel.Location = new System.Drawing.Point(269, 486);
+            this.cal_panel_button_cancel.Name = "cal_panel_button_cancel";
+            this.cal_panel_button_cancel.Size = new System.Drawing.Size(102, 60);
+            this.cal_panel_button_cancel.TabIndex = 49;
+            this.cal_panel_button_cancel.Text = "CANCEL";
+            this.cal_panel_button_cancel.UseVisualStyleBackColor = true;
+            this.cal_panel_button_cancel.Click += new System.EventHandler(this.cal_panel_button_cancel_Click);
+            // 
+            // cal_panel_button_ok
+            // 
+            this.cal_panel_button_ok.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cal_panel_button_ok.Location = new System.Drawing.Point(22, 486);
+            this.cal_panel_button_ok.Name = "cal_panel_button_ok";
+            this.cal_panel_button_ok.Size = new System.Drawing.Size(102, 60);
+            this.cal_panel_button_ok.TabIndex = 48;
+            this.cal_panel_button_ok.Text = "OK";
+            this.cal_panel_button_ok.UseVisualStyleBackColor = true;
+            this.cal_panel_button_ok.Click += new System.EventHandler(this.cal_panel_button_ok_Click);
             // 
             // cal_panel_label_status
             // 
@@ -781,24 +741,41 @@ namespace WocketConfigurationApp
             this.cal_panel_entry_path.Size = new System.Drawing.Size(234, 22);
             this.cal_panel_entry_path.TabIndex = 43;
             // 
-            // cal_panel_values
+            // cal_panel_cal_values
             // 
-            this.cal_panel_values.Controls.Add(this.cal_panel_zstd);
-            this.cal_panel_values.Controls.Add(this.cal_panel_yn1g);
-            this.cal_panel_values.Controls.Add(this.label8);
-            this.cal_panel_values.Controls.Add(this.cal_panel_y1g);
-            this.cal_panel_values.Controls.Add(this.cal_panel_xn1g);
-            this.cal_panel_values.Controls.Add(this.cal_panel_ystd);
-            this.cal_panel_values.Controls.Add(this.label13);
-            this.cal_panel_values.Controls.Add(this.cal_panel_z1g);
-            this.cal_panel_values.Controls.Add(this.cal_panel_x1g);
-            this.cal_panel_values.Controls.Add(this.cal_panel_zn1g);
-            this.cal_panel_values.Controls.Add(this.cal_panel_xstd);
-            this.cal_panel_values.Controls.Add(this.label5);
-            this.cal_panel_values.Location = new System.Drawing.Point(3, 146);
-            this.cal_panel_values.Name = "cal_panel_values";
-            this.cal_panel_values.Size = new System.Drawing.Size(385, 137);
-            this.cal_panel_values.TabIndex = 42;
+            this.cal_panel_cal_values.Controls.Add(this.label10);
+            this.cal_panel_cal_values.Controls.Add(this.label11);
+            this.cal_panel_cal_values.Controls.Add(this.label12);
+            this.cal_panel_cal_values.Controls.Add(this.label4);
+            this.cal_panel_cal_values.Controls.Add(this.label6);
+            this.cal_panel_cal_values.Controls.Add(this.label7);
+            this.cal_panel_cal_values.Controls.Add(this.label8);
+            this.cal_panel_cal_values.Controls.Add(this.label3);
+            this.cal_panel_cal_values.Controls.Add(this.cal_panel_zstd);
+            this.cal_panel_cal_values.Controls.Add(this.cal_panel_yn1g);
+            this.cal_panel_cal_values.Controls.Add(this.cal_panel_y1g);
+            this.cal_panel_cal_values.Controls.Add(this.cal_panel_xn1g);
+            this.cal_panel_cal_values.Controls.Add(this.cal_panel_ystd);
+            this.cal_panel_cal_values.Controls.Add(this.cal_panel_z1g);
+            this.cal_panel_cal_values.Controls.Add(this.cal_panel_x1g);
+            this.cal_panel_cal_values.Controls.Add(this.cal_panel_zn1g);
+            this.cal_panel_cal_values.Controls.Add(this.cal_panel_xstd);
+            this.cal_panel_cal_values.Controls.Add(this.label5);
+            this.cal_panel_cal_values.Location = new System.Drawing.Point(3, 146);
+            this.cal_panel_cal_values.Name = "cal_panel_cal_values";
+            this.cal_panel_cal_values.Size = new System.Drawing.Size(385, 137);
+            this.cal_panel_cal_values.TabIndex = 42;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label3.ForeColor = System.Drawing.Color.Orange;
+            this.label3.Location = new System.Drawing.Point(5, 101);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(43, 16);
+            this.label3.TabIndex = 20;
+            this.label3.Text = "STD:";
             // 
             // cal_panel_cmd_label
             // 
@@ -821,6 +798,157 @@ namespace WocketConfigurationApp
             this.cal_panel_title.Size = new System.Drawing.Size(360, 22);
             this.cal_panel_title.TabIndex = 40;
             this.cal_panel_title.Text = "Calibration";
+            // 
+            // cal_panel_bat_values
+            // 
+            this.cal_panel_bat_values.Controls.Add(this.label1);
+            this.cal_panel_bat_values.Controls.Add(this.label2);
+            this.cal_panel_bat_values.Controls.Add(this.cal_panel_bat_20);
+            this.cal_panel_bat_values.Controls.Add(this.cal_panel_bat_40);
+            this.cal_panel_bat_values.Controls.Add(this.cal_panel_bat_10);
+            this.cal_panel_bat_values.Controls.Add(this.label9);
+            this.cal_panel_bat_values.Controls.Add(this.label17);
+            this.cal_panel_bat_values.Controls.Add(this.label16);
+            this.cal_panel_bat_values.Controls.Add(this.cal_panel_bat_80);
+            this.cal_panel_bat_values.Controls.Add(this.cal_panel_bat_100);
+            this.cal_panel_bat_values.Controls.Add(this.cal_panel_bat_60);
+            this.cal_panel_bat_values.Controls.Add(this.label15);
+            this.cal_panel_bat_values.Location = new System.Drawing.Point(3, 146);
+            this.cal_panel_bat_values.Name = "cal_panel_bat_values";
+            this.cal_panel_bat_values.Size = new System.Drawing.Size(385, 137);
+            this.cal_panel_bat_values.TabIndex = 50;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.ForeColor = System.Drawing.Color.Orange;
+            this.label1.Location = new System.Drawing.Point(230, 101);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(54, 20);
+            this.label1.TabIndex = 27;
+            this.label1.Text = "10% :";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label2.ForeColor = System.Drawing.Color.Orange;
+            this.label2.Location = new System.Drawing.Point(230, 65);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(54, 20);
+            this.label2.TabIndex = 26;
+            this.label2.Text = "20% :";
+            // 
+            // cal_panel_bat_20
+            // 
+            this.cal_panel_bat_20.AutoSize = true;
+            this.cal_panel_bat_20.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cal_panel_bat_20.ForeColor = System.Drawing.Color.WhiteSmoke;
+            this.cal_panel_bat_20.Location = new System.Drawing.Point(305, 64);
+            this.cal_panel_bat_20.Name = "cal_panel_bat_20";
+            this.cal_panel_bat_20.Size = new System.Drawing.Size(19, 20);
+            this.cal_panel_bat_20.TabIndex = 24;
+            this.cal_panel_bat_20.Text = "0";
+            // 
+            // cal_panel_bat_40
+            // 
+            this.cal_panel_bat_40.AutoSize = true;
+            this.cal_panel_bat_40.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cal_panel_bat_40.ForeColor = System.Drawing.Color.WhiteSmoke;
+            this.cal_panel_bat_40.Location = new System.Drawing.Point(305, 28);
+            this.cal_panel_bat_40.Name = "cal_panel_bat_40";
+            this.cal_panel_bat_40.Size = new System.Drawing.Size(19, 20);
+            this.cal_panel_bat_40.TabIndex = 23;
+            this.cal_panel_bat_40.Text = "0";
+            // 
+            // cal_panel_bat_10
+            // 
+            this.cal_panel_bat_10.AutoSize = true;
+            this.cal_panel_bat_10.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cal_panel_bat_10.ForeColor = System.Drawing.Color.WhiteSmoke;
+            this.cal_panel_bat_10.Location = new System.Drawing.Point(305, 100);
+            this.cal_panel_bat_10.Name = "cal_panel_bat_10";
+            this.cal_panel_bat_10.Size = new System.Drawing.Size(19, 20);
+            this.cal_panel_bat_10.TabIndex = 25;
+            this.cal_panel_bat_10.Text = "0";
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label9.ForeColor = System.Drawing.Color.Orange;
+            this.label9.Location = new System.Drawing.Point(230, 28);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(54, 20);
+            this.label9.TabIndex = 22;
+            this.label9.Text = "40% :";
+            // 
+            // label17
+            // 
+            this.label17.AutoSize = true;
+            this.label17.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label17.ForeColor = System.Drawing.Color.Orange;
+            this.label17.Location = new System.Drawing.Point(56, 101);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(54, 20);
+            this.label17.TabIndex = 21;
+            this.label17.Text = "60% :";
+            // 
+            // label16
+            // 
+            this.label16.AutoSize = true;
+            this.label16.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label16.ForeColor = System.Drawing.Color.Orange;
+            this.label16.Location = new System.Drawing.Point(56, 65);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(54, 20);
+            this.label16.TabIndex = 20;
+            this.label16.Text = "80% :";
+            // 
+            // cal_panel_bat_80
+            // 
+            this.cal_panel_bat_80.AutoSize = true;
+            this.cal_panel_bat_80.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cal_panel_bat_80.ForeColor = System.Drawing.Color.WhiteSmoke;
+            this.cal_panel_bat_80.Location = new System.Drawing.Point(131, 64);
+            this.cal_panel_bat_80.Name = "cal_panel_bat_80";
+            this.cal_panel_bat_80.Size = new System.Drawing.Size(19, 20);
+            this.cal_panel_bat_80.TabIndex = 10;
+            this.cal_panel_bat_80.Text = "0";
+            // 
+            // cal_panel_bat_100
+            // 
+            this.cal_panel_bat_100.AutoSize = true;
+            this.cal_panel_bat_100.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cal_panel_bat_100.ForeColor = System.Drawing.Color.WhiteSmoke;
+            this.cal_panel_bat_100.Location = new System.Drawing.Point(131, 28);
+            this.cal_panel_bat_100.Name = "cal_panel_bat_100";
+            this.cal_panel_bat_100.Size = new System.Drawing.Size(19, 20);
+            this.cal_panel_bat_100.TabIndex = 9;
+            this.cal_panel_bat_100.Text = "0";
+            // 
+            // cal_panel_bat_60
+            // 
+            this.cal_panel_bat_60.AutoSize = true;
+            this.cal_panel_bat_60.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cal_panel_bat_60.ForeColor = System.Drawing.Color.WhiteSmoke;
+            this.cal_panel_bat_60.Location = new System.Drawing.Point(131, 100);
+            this.cal_panel_bat_60.Name = "cal_panel_bat_60";
+            this.cal_panel_bat_60.Size = new System.Drawing.Size(19, 20);
+            this.cal_panel_bat_60.TabIndex = 17;
+            this.cal_panel_bat_60.Text = "0";
+            // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label15.ForeColor = System.Drawing.Color.Orange;
+            this.label15.Location = new System.Drawing.Point(56, 28);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(64, 20);
+            this.label15.TabIndex = 8;
+            this.label15.Text = "100% :";
             // 
             // button_set
             // 
@@ -894,27 +1022,86 @@ namespace WocketConfigurationApp
             this.button_load.UseVisualStyleBackColor = true;
             this.button_load.Click += new System.EventHandler(this.Load_button_Click);
             // 
-            // cal_panel_button_ok
+            // label7
             // 
-            this.cal_panel_button_ok.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cal_panel_button_ok.Location = new System.Drawing.Point(22, 486);
-            this.cal_panel_button_ok.Name = "cal_panel_button_ok";
-            this.cal_panel_button_ok.Size = new System.Drawing.Size(102, 60);
-            this.cal_panel_button_ok.TabIndex = 48;
-            this.cal_panel_button_ok.Text = "OK";
-            this.cal_panel_button_ok.UseVisualStyleBackColor = true;
-            this.cal_panel_button_ok.Click += new System.EventHandler(this.cal_panel_button_ok_Click);
+            this.label7.AutoSize = true;
+            this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label7.ForeColor = System.Drawing.Color.Orange;
+            this.label7.Location = new System.Drawing.Point(5, 65);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(55, 16);
+            this.label7.TabIndex = 23;
+            this.label7.Text = "XN1G :";
             // 
-            // cal_panel_button_cancel
+            // label4
             // 
-            this.cal_panel_button_cancel.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cal_panel_button_cancel.Location = new System.Drawing.Point(269, 486);
-            this.cal_panel_button_cancel.Name = "cal_panel_button_cancel";
-            this.cal_panel_button_cancel.Size = new System.Drawing.Size(102, 60);
-            this.cal_panel_button_cancel.TabIndex = 49;
-            this.cal_panel_button_cancel.Text = "CANCEL";
-            this.cal_panel_button_cancel.UseVisualStyleBackColor = true;
-            this.cal_panel_button_cancel.Click += new System.EventHandler(this.cal_panel_button_cancel_Click);
+            this.label4.AutoSize = true;
+            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label4.ForeColor = System.Drawing.Color.Orange;
+            this.label4.Location = new System.Drawing.Point(140, 65);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(56, 16);
+            this.label4.TabIndex = 53;
+            this.label4.Text = "YN1G :";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label6.ForeColor = System.Drawing.Color.Orange;
+            this.label6.Location = new System.Drawing.Point(140, 101);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(43, 16);
+            this.label6.TabIndex = 52;
+            this.label6.Text = "STD:";
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label8.ForeColor = System.Drawing.Color.Orange;
+            this.label8.Location = new System.Drawing.Point(140, 28);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(45, 16);
+            this.label8.TabIndex = 51;
+            this.label8.Text = "Y1G :";
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label10.ForeColor = System.Drawing.Color.Orange;
+            this.label10.Location = new System.Drawing.Point(272, 64);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(55, 16);
+            this.label10.TabIndex = 56;
+            this.label10.Text = "ZN1G :";
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label11.ForeColor = System.Drawing.Color.Orange;
+            this.label11.Location = new System.Drawing.Point(272, 100);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(43, 16);
+            this.label11.TabIndex = 55;
+            this.label11.Text = "STD:";
+            // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label12.ForeColor = System.Drawing.Color.Orange;
+            this.label12.Location = new System.Drawing.Point(272, 27);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(44, 16);
+            this.label12.TabIndex = 54;
+            this.label12.Text = "Z1G :";
+            // 
+            // openFileDialog1
+            // 
+            this.openFileDialog1.FileName = "openFileDialog1";
             // 
             // Form7
             // 
@@ -929,8 +1116,8 @@ namespace WocketConfigurationApp
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.label_status);
             this.Controls.Add(this.menuStrip1);
+            this.Controls.Add(this.panel_status);
             this.Controls.Add(this.panel_calibration);
-            this.Controls.Add(this.panel_set_container);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form7";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
@@ -941,12 +1128,14 @@ namespace WocketConfigurationApp
             this.menuStrip1.PerformLayout();
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
-            this.panel_set_container.ResumeLayout(false);
-            this.panel_set_container.PerformLayout();
+            this.panel_status.ResumeLayout(false);
+            this.panel_status.PerformLayout();
             this.panel_calibration.ResumeLayout(false);
             this.panel_calibration.PerformLayout();
-            this.cal_panel_values.ResumeLayout(false);
-            this.cal_panel_values.PerformLayout();
+            this.cal_panel_cal_values.ResumeLayout(false);
+            this.cal_panel_cal_values.PerformLayout();
+            this.cal_panel_bat_values.ResumeLayout(false);
+            this.cal_panel_bat_values.PerformLayout();
             this.panel3.ResumeLayout(false);
             this.panel3.PerformLayout();
             this.ResumeLayout(false);
@@ -961,17 +1150,14 @@ namespace WocketConfigurationApp
         private System.Windows.Forms.Label info_cmd_label_mac;
         private System.Windows.Forms.TextBox info_cmd_value_mac;
         private System.Windows.Forms.Label info_cmd_label_swversion;
-        private System.Windows.Forms.ComboBox set_panel_cmd_entry_combo;
         private System.Windows.Forms.Label info_cmd_label_battery;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label cal_panel_x1g;
         private System.Windows.Forms.Label cal_panel_xn1g;
-        private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Label cal_panel_yn1g;
         private System.Windows.Forms.Label cal_panel_y1g;
         private System.Windows.Forms.Label cal_panel_zn1g;
         private System.Windows.Forms.Label cal_panel_z1g;
-        private System.Windows.Forms.Label label13;
         private System.Windows.Forms.Label cal_panel_xstd;
         private System.Windows.Forms.Label cal_panel_ystd;
         private System.Windows.Forms.Label cal_panel_zstd;
@@ -988,36 +1174,31 @@ namespace WocketConfigurationApp
         private System.Windows.Forms.ToolStripMenuItem dataToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem commandToolStripMenuItem;
         private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.Panel panel_set_container;
+        private System.Windows.Forms.Panel panel_status;
         private System.Windows.Forms.Label label18;
         private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.Label info_cmd_label_tr_rate;
         private System.Windows.Forms.Label info_cmd_label_sampling_rate;
         private System.Windows.Forms.Label info_cmd_label_sensitivity;
         private System.Windows.Forms.Button button_finish;
-        private System.Windows.Forms.Button set_panel_button_set;
         private System.Windows.Forms.Panel panel_calibration;
-        private System.Windows.Forms.Label set_panel_cmd_label;
         private System.Windows.Forms.TextBox info_cmd_value_hwversion;
         private System.Windows.Forms.TextBox info_cmd_value_swversion;
         private System.Windows.Forms.TextBox info_cmd_value_battery_level;
         private System.Windows.Forms.Label info_cmd_label_hwversion;
         private System.Windows.Forms.TextBox info_cmd_value_calibration;
-        private System.Windows.Forms.Button set_panel_button_close;
         private System.Windows.Forms.Label cal_panel_cmd_label;
         private System.Windows.Forms.TextBox cal_panel_title;
         private System.Windows.Forms.TextBox info_cmd_value_sampling_rate;
         private System.Windows.Forms.TextBox info_cmd_value_pwr_timeout;
-        private System.Windows.Forms.TextBox set_panel_cmd_entry_textbox;
-        private System.Windows.Forms.TextBox set_panel_title;
-        private System.Windows.Forms.TextBox set_panel_label_status;
+        private System.Windows.Forms.TextBox panel_status_texbox;
         private System.Windows.Forms.TextBox info_cmd_value_btpercent;
         private System.Windows.Forms.Label info_cmd_label_btpercent;
         private System.Windows.Forms.TextBox info_cmd_value_btcalibration;
         private System.Windows.Forms.Label info_cmd_label_btcalibration;
         private System.Windows.Forms.TextBox info_cmd_value_pkt_count;
         private System.Windows.Forms.Label info_cmd_label_pkt_count;
-        private System.Windows.Forms.Panel cal_panel_values;
+        private System.Windows.Forms.Panel cal_panel_cal_values;
         private System.Windows.Forms.Button button_set;
         private System.Windows.Forms.Button cal_panel_button_browse;
         private System.Windows.Forms.TextBox cal_panel_entry_path;
@@ -1029,5 +1210,28 @@ namespace WocketConfigurationApp
         private System.Windows.Forms.ComboBox info_cmd_value_tr_rate;
         private System.Windows.Forms.Button cal_panel_button_cancel;
         private System.Windows.Forms.Button cal_panel_button_ok;
+        private System.Windows.Forms.TextBox set_panel_title;
+        private System.Windows.Forms.Panel cal_panel_bat_values;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label cal_panel_bat_20;
+        private System.Windows.Forms.Label cal_panel_bat_40;
+        private System.Windows.Forms.Label cal_panel_bat_10;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.Label label17;
+        private System.Windows.Forms.Label label16;
+        private System.Windows.Forms.Label cal_panel_bat_80;
+        private System.Windows.Forms.Label cal_panel_bat_100;
+        private System.Windows.Forms.Label cal_panel_bat_60;
+        private System.Windows.Forms.Label label15;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.OpenFileDialog openFileDialog1;
     }
 }
