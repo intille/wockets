@@ -6,9 +6,11 @@ using Wockets;
 using Wockets.Data.Configuration;
 using Wockets.Data.Annotation;
 using Wockets.Data.Accelerometers;
+using WocketsWeka.Utils.Filters;
 #if (PocketPC)
 using Wockets.Utils.IPC.MMF;
 #endif
+using System.IO;
 
 namespace Wockets.Data.Features
 {
@@ -66,6 +68,14 @@ namespace Wockets.Data.Features
         private static int discardedLossRateWindows = 0;
         private static int discardedConsecutiveLossWindows = 0;
         private static bool _Initialized = false;
+
+        private static double[] bpb = new double[5] { 0.0745, 0.0, -0.1490, 0.0, 0.0745 };
+        private static double[] bpa = new double[5] { 1.0000, -3.0584, 3.5224, -1.8552, 0.3915 };
+
+        private static double[] lpb = new double[3] { 0.0002973, 0.0005945, 0.0002973 };
+        private static double[] lpa = new double[3] { 1.0000, -1.9506, 0.9518 };
+        private static BPButterworth[] bpFilters;
+        private static LPButterworth[] lpFilters;
 
         public static string[] ArffAttributeLabels
         {
@@ -242,6 +252,7 @@ namespace Wockets.Data.Features
 
 
 
+     
 
         public static void Initialize3(int sensorCount, int samplingRate, WocketsConfiguration configuration, ActivityList activities)
         {
@@ -283,7 +294,7 @@ namespace Wockets.Data.Features
                 unacceptable_window_count = 0;
                 unacceptable_consecutive_window_loss_count = 0;
 
-
+                
                 //Upgrade to handle HR
                 extractorSensorCount = sensorCount;
                 inputRowSize = sensorCount * 3;
@@ -291,9 +302,8 @@ namespace Wockets.Data.Features
                 fftMaximumFrequencies = configuration._FFTMaximumFrequencies;
 
                 //Depending on the window size and sr select the higher power of 2
-                int numSamples=(int)Math.Ceiling(((configuration._FeatureWindowSize/1000.0)*samplingRate));
-                int power2=10; //replace with NextPower2
-                configuration._FFTInterpolationPower=power2;                
+                int numSamples=(int)Math.Ceiling(((configuration._FeatureWindowSize/1000.0)*samplingRate));      
+                configuration._FFTInterpolationPower = Wockets.Utils.Math.NextPower2(numSamples);               
                 inputColumnSize = (int)Math.Pow(2, configuration._FFTInterpolationPower);
 
 
@@ -312,15 +322,24 @@ namespace Wockets.Data.Features
                 arffAttriburesLabels = new string[num_features];
                 standardized = new double[sensorCount * 3][];
 
-                for (int i = 0; (i < inputRowSize); i++)
-                {
-                    standardized[i] = new double[inputColumnSize];
-                }
+                for (int i = 0; (i < inputRowSize); i++)                
+                    standardized[i] = new double[inputColumnSize];                
                 
                 means = new double[inputRowSize];
+                meansbp = new double[inputRowSize];
+                meanslp = new double[inputRowSize];
                 inputFFT = new int[inputColumnSize];
                 FFT.Initialize(configuration._FFTInterpolationPower, configuration._FFTMaximumFrequencies);
                 //FullFeatureExtractor.wocketsController = wocketsController;
+
+                bpFilters = new BPButterworth[inputRowSize];
+                lpFilters = new LPButterworth[inputRowSize];
+                for (int i = 0; (i < bpFilters.Length); i++)
+                {
+                    bpFilters[i] = new BPButterworth(Frequency._1_0Hz, Frequency._20_0Hz, Order.Second, SamplingRates._90Hz, bpa, bpb);
+                    lpFilters[i] = new LPButterworth(Frequency._1_0Hz, Order.Second, SamplingRates._90Hz, lpa, lpb);
+                }
+  
 
                 //Create the ARFF File header
                 string arffHeader = "@RELATION wockets\n\n" + GetArffHeader();//sannotation.Sensors.Count * 3, configuration.FFTMaximumFrequencies);
@@ -345,7 +364,7 @@ namespace Wockets.Data.Features
 
                 for (int i = 0; (i < sensorCount); i++)
                 {
-                    EXPECTED_WINDOW_SIZES[i] = (int)(samplingRate * (configuration._FeatureWindowSize / 1000.0));
+                    EXPECTED_WINDOW_SIZES[i] = (int)(inputColumnSize * (configuration._FeatureWindowSize / 1000.0));
                     EXPECTED_GOOD_SAMPLING_RATES[i] = EXPECTED_WINDOW_SIZES[i] - (int)(configuration._MaximumNonconsecutivePacketLoss * EXPECTED_WINDOW_SIZES[i]);
                     EXPECTED_SAMPLES_SPACING[i] = (double)configuration._FeatureWindowSize / EXPECTED_WINDOW_SIZES[i];
                 }
@@ -371,10 +390,10 @@ namespace Wockets.Data.Features
                     for (int j = 0; (j < 3); j++)
                     {
                         int index=(i * 3) +j;
-                        data[index] = new double[EXPECTED_WINDOW_SIZES[i]+512];                        
+                        data[index] = new double[EXPECTED_WINDOW_SIZES[i]];                        
                         //Start using data from 513
-                        lpData[index] = new double[EXPECTED_WINDOW_SIZES[i] + 512];
-                        bpData[index] = new double[EXPECTED_WINDOW_SIZES[i] + 512];                      
+                        lpData[index] = new double[EXPECTED_WINDOW_SIZES[i]];
+                        bpData[index] = new double[EXPECTED_WINDOW_SIZES[i]];                      
 
                         for (int k = 0; (k < data[index].Length); k++)
                         {
@@ -386,14 +405,7 @@ namespace Wockets.Data.Features
                 }
 
 
-                //Here it is equal across all sensors, so we do not need to consider
-                //the sampling rate of each sensor separately
-                //for (int i = 0; (i < (extractorSensorCount * 3)); i++)
-                //{
-                  //  interpolated_data[i] = new double[INTERPOLATED_SAMPLING_RATE_PER_WINDOW];
-                    //for (int j = 0; (j < INTERPOLATED_SAMPLING_RATE_PER_WINDOW); j++)
-                      //  interpolated_data[i][j] = 0;
-                //}
+      
 
                 tail = new int[extractorSensorCount];
                 tailUnixtimestamp = new double[extractorSensorCount];
@@ -405,6 +417,8 @@ namespace Wockets.Data.Features
                     tailUnixtimestamp[i] = 0.0;
                 }
 
+
+                
 
                 _Initialized = true;
             }
@@ -590,65 +604,29 @@ namespace Wockets.Data.Features
 
         }
 
-
         //Call this window when there is a new full window ready for analysis
         //the window should belong to consecutive data
         //Ensure you are copying the sliding window
         public static void StoreWocketsWindow3()
-       {            
-            int window_size=128;
-
-           //Start copying the most recent window from all sensors
-           for (int i = 0; (i < sdata.Length); i++)
-           {
-               shead[i].Read(head, 0, 4);
-               int currentHead = BitConverter.ToInt32(head, 0);
-               int startCopy = 0;
-               shead[i].Seek(0, System.IO.SeekOrigin.Begin);
-               
-               if (currentHead >= window_size)
-                   startCopy = currentHead - window_size;
-               else
-                   startCopy = window_size - currentHead;
-               sdata[i].Seek(startCopy* (sizeof(double)+3*sizeof(short)), System.IO.SeekOrigin.Begin);
-           }
-                        
-            for (int i = 0; (i < sdata.Length); i++)
+       {
+           int decoderIndex = 0;
+            for (int i = 0; (i <CurrentWockets._Controller._Decoders.Count); i++)
             {
-                //Skip to the start copy location
-
-
                 int sensorIndex = i * 3;
-
-                //Prior to copying the most recent data copy the 512 samples at the end of the 
-                //previous data
-                //vector to the front of this vector
-                int startcopy=data[sensorIndex].Length-512;
-                for (int j=0;(j<512);j++)
+                int start = CurrentWockets._Controller._Decoders[i]._Head-1-EXPECTED_WINDOW_SIZES[i];
+                if (start < 0)
+                    start = CurrentWockets._Controller._Decoders[i]._BufferSize + start;
+                decoderIndex = start;
+                for (int j =0; (j < EXPECTED_WINDOW_SIZES[i]);j++)
                 {
-                    FullFeatureExtractor.data[sensorIndex][j] = FullFeatureExtractor.data[sensorIndex][startcopy+j];
-                    FullFeatureExtractor.data[sensorIndex + 1][j] = FullFeatureExtractor.data[sensorIndex+1][startcopy+j];
-                    FullFeatureExtractor.data[sensorIndex + 2][j] = FullFeatureExtractor.data[sensorIndex+2][startcopy+j];;                                        
-                }
-            
-                for (int j=0;(j<FullFeatureExtractor.EXPECTED_WINDOW_SIZES[i]);j++)
-                {
-                    int x = 0, y = 0, z = 0;
-                    //discard timestamp
-                    sdata[i].Read(timestamp, 0, sizeof(double));                    
-                    sdata[i].Read(acc, 0, sizeof(short));
-                    x = BitConverter.ToInt16(acc, 0);
-                    sdata[i].Read(acc, 0, sizeof(short));
-                    y = BitConverter.ToInt16(acc, 0);
-                    sdata[i].Read(acc, 0, sizeof(short));
-                    z = BitConverter.ToInt16(acc, 0);
 
-                    
-                    // store the values in the current frame in the correct column based of the EXPECTED_WINDOW data array
-                    // on the y_index for the sensor
-                    FullFeatureExtractor.data[sensorIndex][512+j] = x;
-                    FullFeatureExtractor.data[sensorIndex + 1][512+j] = y;
-                    FullFeatureExtractor.data[sensorIndex + 2][512+j] = z;              
+
+                    FullFeatureExtractor.data[sensorIndex][j] = ((AccelerationData)CurrentWockets._Controller._Decoders[i]._Data[decoderIndex]).X;
+                    FullFeatureExtractor.data[sensorIndex + 1][j] = ((AccelerationData)CurrentWockets._Controller._Decoders[i]._Data[decoderIndex]).Y;
+                    FullFeatureExtractor.data[sensorIndex + 2][j] = ((AccelerationData)CurrentWockets._Controller._Decoders[i]._Data[decoderIndex]).Z;
+                    decoderIndex++;
+                    if (decoderIndex >= CurrentWockets._Controller._Decoders[i]._BufferSize)
+                        decoderIndex = 0;
                 }                
             }            
 
@@ -704,24 +682,38 @@ namespace Wockets.Data.Features
         }
 #endif
 
+        static TextWriter tw=null;
         //Call this only when enough samples are recorded
         public static void GenerateFeatureVector3()
         {
 
+            
             // Go through each sensor and extract the collected data within 
             // the current time window
-            for (int i = 0; (i < extractorSensorCount); i++)
+            for (int i = 0; (i < FullFeatureExtractor.data.Length); i++)
             {
-                //Apply a low pass and a band pass filter to all axes
-                for (int j = 0; (j < 3); j++)
+
+                //bpData[i] = bpFilters[i].Filter(FullFeatureExtractor.data[i]);
+                //lpData[i] = lpFilters[i].Filter(FullFeatureExtractor.data[i]);                       
+            }
+
+            //At this point data, bpdata and lpdata have the unfiltered and filtered window
+            //Extract3(lpData, bpData);
+            
+            /*tw = new StreamWriter("FilteredDataBP.csv",true);
+            for (int j = 0; (j < EXPECTED_WINDOW_SIZES[0]); j++)
+            {
+                string line = "";
+                for (int i = 0; (i < FullFeatureExtractor.data.Length); i++)
                 {
+                    line += FullFeatureExtractor.data[i][j] + "," + bpData[i][j] + "," + lpData[i][j];
+                    if (i < FullFeatureExtractor.data.Length - 1)
+                        line += ",";
 
                 }
-
-                //Extract the features using only the window from 513 and up
-
-
+                tw.WriteLine(line);
             }
+            tw.Close();*/
         }
 
         public static bool GenerateFeatureVector(double lastTimeStamp)
@@ -947,7 +939,7 @@ namespace Wockets.Data.Features
                 min = 999999999.0;
                 max = -999999999.0;
 
-                for (j = 513; (j < inputColumnSize); j++)
+                for (j = 0; (j < inputColumnSize); j++)
                 {
                     if (bp[i][j] < min)
                         min = bp[i][j];
@@ -973,7 +965,7 @@ namespace Wockets.Data.Features
 
                 //fill variance
                 variance = 0;
-                for (j = 513; (j < inputColumnSize); j++)
+                for (j = 0; (j < inputColumnSize); j++)
                 {
                     variance += Math.Pow(bp[i][j] - meansbp[i], 2);
                     //***mean subtracted

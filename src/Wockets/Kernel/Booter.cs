@@ -65,6 +65,8 @@ namespace Wockets.Kernel
             
             wcontroller = new WocketsController("", "", "");           
             wcontroller.FromXML(path+"//NeededFiles//Master//SensorData.xml");
+            wcontroller._Mode = MemoryMode.BluetoothToShared;
+
             Logger.InitLogger(rootStorageDirectory + "kernellog\\");
             Logger.Debug2("Time,Time,PowerPercent,Voltage,Current,Temperature\n");
 
@@ -173,6 +175,7 @@ namespace Wockets.Kernel
                             //load local wockets controller
                             CurrentWockets._Controller = new WocketsController("", "", "");
                             CurrentWockets._Controller.FromXML(path + "//NeededFiles//Master//SensorData.xml");
+                            CurrentWockets._Controller._Mode = MemoryMode.BluetoothToShared;
                             int index=0;
                             for (int i = 0; (i < Booter.wcontroller._Sensors.Count); i++)
                             {

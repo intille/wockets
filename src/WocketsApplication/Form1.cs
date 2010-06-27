@@ -70,10 +70,7 @@ namespace WocketsApplication
         private Rectangle clientArea;
         public bool pushed = false;
         private AlphaContainer _alphaManager;
-        private Thread slidingThread;
-       // private ClickableAlphaPanel[] buttonPanels = new ClickableAlphaPanel[9];
-        //private Bitmap[] _buttonBackBuffers = new Bitmap[9];
-
+  
          private Sound disconnectedAlert =null;
          private Sound connectedAlert = null;
 
@@ -189,10 +186,8 @@ namespace WocketsApplication
             }
         }
 
-        //private bool wocketsConnected = false;
-        //private DTConfiguration configuration;
-        //private WocketsConfiguration configuration;
-       
+
+        private SimpleFeatureVector fv;
         private TextWriter trainingTW = null;
         private TextWriter structureTW = null;
         private Thread mlThread = null;
@@ -200,17 +195,15 @@ namespace WocketsApplication
         private void InitializeML()
         {
 
-            /*File.Copy(Constants.PATH + "Master\\Configuration.xml",
-             Core._StoragePath + "\\Configuration.xml");*/
-            //CurrentWockets._Configuration = new WocketsConfiguration();// new DTConfiguration();
-            //CurrentWockets._Configuration.FromXML(Core._StoragePath + "\\Configuration.xml");
-            FullFeatureExtractor.Initialize(selectedWockets.Count, 90, CurrentWockets._Configuration, this.annotatedSession.OverlappingActivityLists[0]);
+            //FullFeatureExtractor.Initialize(selectedWockets.Count, 90, CurrentWockets._Configuration, this.annotatedSession.OverlappingActivityLists[0]);
+            //FullFeatureExtractor.Initialize3(selectedWockets.Count, 90, CurrentWockets._Configuration, this.annotatedSession.OverlappingActivityLists[0]);
+            fv = new SimpleFeatureVector(selectedWockets.Count, 256, 90);
             if (trainingTW == null)
             {
                 arffFileName = Core._StoragePath + "\\output" + DateTime.Now.ToString().Replace('/', '_').Replace(':', '_').Replace(' ', '_') + ".arff";
                 trainingTW = new StreamWriter(arffFileName);
                 trainingTW.WriteLine("@RELATION wockets");
-                string arffHeader = FullFeatureExtractor.GetArffHeader();
+                string arffHeader = fv.GetHeader(); 
                 arffHeader += "\n@ATTRIBUTE activity {";
                 int i = 0;
                 for (i = 0; (i < ((this.annotatedSession.OverlappingActivityLists[0]).Count - 1)); i++)
@@ -256,7 +249,8 @@ namespace WocketsApplication
                 structureTW.Close();
                 structureTW = null;
             }
-            FullFeatureExtractor.Cleanup();
+            fv.Cleanup();
+            //FullFeatureExtractor.Cleanup();
 
             //Save any existing arff files
             if ((this._SaveFeatures) && (arffFileName != ""))
@@ -311,7 +305,9 @@ namespace WocketsApplication
                    CurrentWockets._Configuration.FromXML(Core._StoragePath + "\\Configuration.xml");
                    CurrentWockets._Configuration._MemoryMode = MemoryConfiguration.SHARED;
                    CurrentWockets._Controller = new WocketsController("", "", "");
+                   CurrentWockets._Controller._Mode = MemoryMode.SharedToLocal;
                    CurrentWockets._Controller.FromXML(Core._StoragePath + "\\SensorData.xml");
+                   CurrentWockets._Controller.Initialize();
                    //plotterTimer.Enabled = true;
                    UpdatePlotter();
                    this.currentStatus = "Connected";
@@ -407,7 +403,8 @@ namespace WocketsApplication
                         plotterTimer.Enabled = false;
                         plotter.Dispose();
                     }
-                    plotter = new WocketsScalablePlotter(plotterPanel);//, selectedWockets.Count);
+                    plotterPanel.Size = new Size(Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height);
+                    plotter = new WocketsScalablePlotter(plotterPanel);
                     plotterPanel.Visible = true;
                     plotterTimer.Enabled = true;
                     
@@ -557,6 +554,8 @@ namespace WocketsApplication
         [DllImport("coredll.dll")]
         static extern int ShowWindow(IntPtr hWnd, int nCmdShow);
         const int SW_MINIMIZED = 6;
+        private const int ACTIVITY_TIMER = 1;
+        private ATimer activityTimer;
 
         public void InitializeInterface()
         {
@@ -799,10 +798,10 @@ namespace WocketsApplication
 
             #region Classification Panel
             this.bestGuessLabel = new AlphaLabel();
-            this.bestGuessLabel.Size = new Size(500, 40);
-            this.bestGuessLabel.Text = "Our Best Guess";
+            this.bestGuessLabel.Size = new Size(500, 60);
+            this.bestGuessLabel.Text = "EveryFit Tracker";
             this.bestGuessLabel.ForeColor = Color.Black;
-            this.bestGuessLabel.Font = new Font(FontFamily.GenericSerif, 10.0f, System.Drawing.FontStyle.Bold);
+            this.bestGuessLabel.Font = new Font(FontFamily.GenericSerif, 14.0f, System.Drawing.FontStyle.Bold);
             this.bestGuessLabel.Visible = true;
             this.bestGuessLabel.Location = new Point(1, 1);
             this.panels[ControlID.CLASSIFICATION_PANEL].Controls.Add(this.bestGuessLabel);
@@ -823,26 +822,27 @@ namespace WocketsApplication
             #region EE Panel
  
 
-            GpStatusPlus stat = NativeMethods.GdiplusStartup(out token, input, out output);
+          /*  GpStatusPlus stat = NativeMethods.GdiplusStartup(out token, input, out output);
             pieChart = new Charts.twodimensional.PieChart();
             pieChart.Location = new Point(0, 0);
             pieChart.Size = new Size(200, 200);
             pieChart.IsStretch = true;
-            pieChart.SetCalories(10, 5);
-            pieChart.SetActivity("Jumping Jacks");
+            //pieChart.SetCalories(10, 5);
+            pieChart.SetActivity("No Activity");
             Hashtable activities = new Hashtable();
             activities.Add("Biceps Curls", 10);
             activities.Add("Jumping Jacks", 10);
-            activities.Add("Walking", 40);
-            activities.Add("Jogging", 20);
-            activities.Add("Standing/Sitting", 10);
-            activities.Add("Empty", 10);
+            activities.Add("Walking", 10);
+            activities.Add("Running", 10);
+            activities.Add("Empty", 60 );
 
             pieChart.Data = activities;
             pieChart.Invalidate();
+            
 
             this.panels[ControlID.EE_PANEL].Controls.Add(pieChart);
-
+            */
+            this.activityTimer = new ATimer();           
             doneEE = new Button();
             doneEE.Size = new Size(300, 80);
             doneEE.Text = "Done";
@@ -1074,9 +1074,44 @@ namespace WocketsApplication
         }
 
 
+        double totalCalories = 0.0;
+        double prevHrs;
+        int reps = 0;
+        delegate void UpdateTimerCallback();
+        public void UpdateTimer()
+        {
+            if (!disposed)
+            {
+                // InvokeRequired required compares the thread ID of the
+                // calling thread to the thread ID of the creating thread.
+                // If these threads are different, it returns true.
+                if (this.panels[ControlID.CLASSIFICATION_PANEL].InvokeRequired)
+                {
+                    UpdateTimerCallback d = new UpdateTimerCallback(UpdateTimer);
+                    this.Invoke(d, new object[] {  });
+                }
+                else
+                {
 
+                    this.panels[ControlID.CLASSIFICATION_PANEL].Refresh();
+                    TimeSpan ts = TimeSpan.FromSeconds(activityTimer.Ticks);
+                    ((Label)this.classifiedLabels["timer"]).Text = "Time Elapsed: "+ ts.Hours.ToString("00") + ":" + ts.Minutes.ToString("00") + ":" + ts.Seconds.ToString("00");
+                    double hrs = (ts.Hours + ts.Minutes / 60.0 + ts.Seconds / 3600.0);
+                    double difference=(hrs - prevHrs);
+                    if (difference>0)
+                        totalCalories += (kcal_kg_hr * kgs * difference);
+                    prevHrs = hrs;
+                    ((Label)this.classifiedLabels["kcals"]).Text = "Calories Burnt: " + totalCalories.ToString("0.0");
+                    ((Label)this.classifiedLabels["reps"]).Text = "Reps: " +reps;
+                    //pieChart.SetTime(ts.Hours,ts.Minutes,ts.Seconds);
+                    //pieChart.Invalidate();
+                    this.panels[ControlID.CLASSIFICATION_PANEL].Invalidate();
+                }
+            }
 
+        }
 
+        string prevActivity="no-activity";
         delegate void UpdateClassificationCallback(string activity,double intensity);
         public void UpdateClassification(string activity,double color)
         {
@@ -1085,19 +1120,40 @@ namespace WocketsApplication
                 // InvokeRequired required compares the thread ID of the
                 // calling thread to the thread ID of the creating thread.
                 // If these threads are different, it returns true.
-                if (((Label)this.classifiedLabels[activity]).InvokeRequired)
+                if (this.panels[ControlID.CLASSIFICATION_PANEL].InvokeRequired)
                 {
                     UpdateClassificationCallback d = new UpdateClassificationCallback(UpdateClassification);
                     this.Invoke(d, new object[] {activity,color });
                 }
                 else
                 {
-                    ((Label)this.classifiedLabels[activity]).ForeColor = Color.FromArgb((int)(250 * color), (int)(237 * color), (int)(221 * color));
-                    ((Label)this.classifiedLabels[activity]).Invalidate();
-                    this.panels[ControlID.CLASSIFICATION_PANEL].Refresh();
-                    pieChart.SetActivity(activity);
-                    pieChart.Invalidate();
-                    this.panels[ControlID.EE_PANEL].Invalidate();
+                    
+                    //((Label)this.classifiedLabels[activity]).ForeColor = Color.FromArgb((int)(250 * color), (int)(237 * color), (int)(221 * color));
+                    //((Label)this.classifiedLabels[activity]).Invalidate();
+                    if (prevActivity != activity)
+                    {
+                        ((AlphaPictureBox)this.activityPictures[activity]).Visible = true;
+                        ((AlphaPictureBox)this.activityPictures[prevActivity]).Visible = false;
+                        prevActivity = activity;
+                        if (color == 1)
+                        {
+                            ((Label)this.classifiedLabels["classification"]).Text = "Reconnecting...";
+                            ((Label)this.classifiedLabels["classification"]).ForeColor = Color.Red;
+                        }
+                        else
+                        {
+                            if (activity=="no-activity")
+                                ((Label)this.classifiedLabels["classification"]).ForeColor = Color.Black;
+                            else
+                                ((Label)this.classifiedLabels["classification"]).ForeColor = Color.Green;
+                            ((Label)this.classifiedLabels["classification"]).Text = "Now: " + activity;
+                        }
+                        ((Label)this.classifiedLabels["classification"]).Invalidate();
+                        this.panels[ControlID.CLASSIFICATION_PANEL].Refresh();
+                    }
+                    //pieChart.SetActivity(activity);                    
+                    //pieChart.Invalidate();
+                    //this.panels[ControlID.EE_PANEL].Invalidate();
                 }
             }
 
@@ -1111,17 +1167,26 @@ namespace WocketsApplication
         Hashtable labelIndex ;
         private Thread classificationThread = null;
         int classificationCounter = 0;
+        int kgs = 80;
+        double kcal_kg_hr = 0;
+        string mets = "?";
+    
+
         private void ClassificationThread()
         {
+            string previousActivity = "";
+            int missedExtractions = 0;
             while (true)
             {
-                double lastTimeStamp = FullFeatureExtractor.StoreWocketsWindow();
-                if (FullFeatureExtractor.GenerateFeatureVector(lastTimeStamp))
+                //double lastTimeStamp = FullFeatureExtractor.StoreWocketsWindow();
+                //if (FullFeatureExtractor.GenerateFeatureVector(lastTimeStamp))
+                if (fv.Extract())
                 {
+                    missedExtractions = 0;
                     Instance newinstance = new Instance(instances.numAttributes());
                     newinstance.Dataset = instances;
-                    for (int i = 0; (i < FullFeatureExtractor.Features.Length); i++)
-                        newinstance.setValue(instances.attribute(i), FullFeatureExtractor.Features[i]);
+                    for (int i = 0; (i < fv._Values.Length); i++)
+                        newinstance.setValue(instances.attribute(i), fv._Values[i]);
                     double predicted = classifier.classifyInstance(newinstance);
                     string predicted_activity = newinstance.dataset().classAttribute().value_Renamed((int)predicted);
 
@@ -1129,10 +1194,10 @@ namespace WocketsApplication
                     labelCounters[currentIndex] = (int)labelCounters[currentIndex] + 1;
                     classificationCounter++;
 
-                    if (classificationCounter >= CurrentWockets._Configuration._SmoothWindowCount)
+                    if (classificationCounter >= 5) //CurrentWockets._Configuration._SmoothWindowCount)
                     {
-                      
-                        int mostCount = 0;
+
+                        int mostCount = -1;
                         string mostActivity = "";
                         //Color indicate;
                         //int level;
@@ -1142,25 +1207,74 @@ namespace WocketsApplication
                             //indicate = Color.FromArgb(level, level, level);
                             //this.ActGUIlabels[j].ForeColor = indicate;
                             //this.ActGUIlabels[j].Invalidate();
-                            double intensity = (1.0 - ((double)labelCounters[j] / (double)CurrentWockets._Configuration._SmoothWindowCount));
+                            double intensity = (1.0 - ((double)labelCounters[j] / (double)5));
                             //((Label)this.classifiedLabels[activityLabels[j]]).ForeColor = Color.FromArgb((int) (250 *intensity) , (int)(237 * intensity), (int)(221 * intensity));
-                            UpdateClassification(activityLabels[j], intensity);
+                            //UpdateClassification(activityLabels[j], intensity);
                             if (labelCounters[j] > mostCount)
                             {
                                 mostActivity = activityLabels[j];
                                 mostCount = labelCounters[j];
                             }
-                            
-                            //    UpdateClassification(mostActivity, intensity);                      
+
+
                             labelCounters[j] = 0;
                         }
 
+                        if (previousActivity != mostActivity)
+                        {
+                            this.activityTimer.stop();
+                            this.activityTimer.reset();
+                            this.activityTimer.start();
+                        }
+
+                        UpdateClassification(mostActivity, 0);
+
+                        if (mostActivity == "walking")
+                        {
+                            mets = "3.1 KCals/min";
+                            kcal_kg_hr = 2; //3 METs
+                        }
+                        else if (mostActivity == "running")
+                        {
+                            mets = "3.8 KCals/min";
+                            kcal_kg_hr = 4; // 6 METs
+                        }
+                        else if (mostActivity == "jumping-jacks")
+                        {
+                            mets = "8 KCals/min";
+                            kcal_kg_hr = 6; // 8 METs
+                        }
+                        else if (mostActivity == "bicycling")
+                        {
+                            mets = "1 KCals/min";
+                            kcal_kg_hr = 5; // 8 METs
+                        }
+                        else if (mostActivity == "no-activity")
+                        {
+                            mets = "1.8 KCals/min";
+                            kcal_kg_hr = 1.0; // 
+                        }
+                        else if (mostActivity == "biceps-curls")
+                        {
+                            mets = "1.4 KCals/min";
+                            kcal_kg_hr = 1.4; // 1 METs
+                        }
+                        else
+                        {
+                            mets = "1.0 KCals/min";
+                            kcal_kg_hr = 1.0; // 1 METs
+                        }
                         classificationCounter = 0;
-                                               
+                        previousActivity = mostActivity;
                     }
-                    
+                    UpdateTimer();
                 }
-                Thread.Sleep(100);
+                else if (missedExtractions > 5)                
+                    UpdateClassification("no-activity", 1);                  
+                else
+                    missedExtractions++;
+                
+                Thread.Sleep(500);
             }
         }
 
@@ -1252,6 +1366,8 @@ namespace WocketsApplication
 
         private string modelDirectory = "";
         private Hashtable classifiedLabels;
+        private Hashtable activityPictures;
+        
         void startMeasuringButton_Click(object sender, EventArgs e)
         {
             //Copy the annotation file to the storage directory
@@ -1272,7 +1388,9 @@ namespace WocketsApplication
             //CurrentWockets._Configuration.FromXML(modelDirectory + "\\Configuration.xml");
             //CurrentWockets._Configuration._MemoryMode = MemoryConfiguration.SHARED;
             CurrentWockets._Controller = new WocketsController("", "", "");
+            CurrentWockets._Controller._Mode = MemoryMode.SharedToLocal;
             CurrentWockets._Controller.FromXML(modelDirectory + "\\SensorData.xml");
+            CurrentWockets._Controller.Initialize();
 
 
             // 1- Make the classifier dependent on the samples rather than the actual sampling rate
@@ -1304,8 +1422,9 @@ namespace WocketsApplication
             //Smmo
 
             
-            FullFeatureExtractor.Initialize(CurrentWockets._Controller._Sensors.Count, 90, CurrentWockets._Configuration, this.annotatedSession.OverlappingActivityLists[0]);
-//            FullFeatureExtractor.Initialize3(CurrentWockets._Controller._Sensors.Count, 90, CurrentWockets._Configuration, this.annotatedSession.OverlappingActivityLists[0]);
+            //FullFeatureExtractor.Initialize(CurrentWockets._Controller._Sensors.Count, 90, CurrentWockets._Configuration, this.annotatedSession.OverlappingActivityLists[0]);
+            //FullFeatureExtractor.Initialize3(CurrentWockets._Controller._Sensors.Count, 90, CurrentWockets._Configuration, this.annotatedSession.OverlappingActivityLists[0]);
+            fv = new SimpleFeatureVector(selectedWockets.Count, 256, 90);
 
            // this.annotatedSession = new Session();
            // this.annotatedSession.FromXML(Constants.PATH + "ActivityProtocols\\" + this.aProtocols[this.selectedActivityProtocol]._FileName);
@@ -1315,7 +1434,7 @@ namespace WocketsApplication
             if (!File.Exists(modelDirectory + "\\model.xml"))
             {
                 instances = new Instances(new StreamReader(this.aModels[this.selectedModel]._FileName));
-                instances.Class = instances.attribute(FullFeatureExtractor.ArffAttributeLabels.Length);
+                instances.Class = instances.attribute(fv._Names.Length);
                 classifier.buildClassifier(instances);
                 TextWriter tc = new StreamWriter(modelDirectory + "\\model.xml");
                 classifier.toXML(tc);
@@ -1325,14 +1444,14 @@ namespace WocketsApplication
             else
             {
                 instances = new Instances(new StreamReader(modelDirectory + "\\structure.arff"));
-                instances.Class = instances.attribute(FullFeatureExtractor.ArffAttributeLabels.Length);
+                instances.Class = instances.attribute(fv._Names.Length);
                 classifier.buildClassifier(modelDirectory + "\\model.xml", instances);
             }
 
 
-            fvWekaAttributes = new FastVector(FullFeatureExtractor.ArffAttributeLabels.Length + 1);
-            for (int i = 0; (i < FullFeatureExtractor.ArffAttributeLabels.Length); i++)
-                fvWekaAttributes.addElement(new weka.core.Attribute(FullFeatureExtractor.ArffAttributeLabels[i]));
+            fvWekaAttributes = new FastVector(fv._Names.Length + 1);
+            for (int i = 0; (i < fv._Names.Length); i++)
+                fvWekaAttributes.addElement(new weka.core.Attribute(fv._Names[i]));
 
             FastVector fvClassVal = new FastVector();
             labelCounters = new int[this.annotatedSession.OverlappingActivityLists[0].Count];
@@ -1351,11 +1470,114 @@ namespace WocketsApplication
                 fvClassVal.addElement(activity);
             }
 
+            classifiedLabels = new Hashtable();
+            activityPictures = new Hashtable();
+
+            AlphaPictureBox picture = new AlphaPictureBox();            
+            picture.Name = "running";
+            picture.Size = new Size(240, 240);
+            picture.Image = AlphaImage.CreateFromFile(Constants.PATH +"images\\" + picture.Name+".gif");
+            picture.Visible = false;
+            picture.Location = new Point(40, 90);
+            activityPictures.Add(picture.Name, picture);
+            this.panels[ControlID.CLASSIFICATION_PANEL].Controls.Add(picture);
+
+            picture = new AlphaPictureBox();
+            picture.Name = "bicycling";
+            picture.Size = new Size(240, 240);
+            picture.Image = AlphaImage.CreateFromFile(Constants.PATH + "images\\" + picture.Name + ".gif");
+            picture.Visible = false;
+            picture.Location = new Point(40, 90);
+            activityPictures.Add(picture.Name, picture);
+            this.panels[ControlID.CLASSIFICATION_PANEL].Controls.Add(picture);
+
+            picture = new AlphaPictureBox();
+            picture.Name = "walking";
+            picture.Size = new Size(240, 240);
+            picture.Image = AlphaImage.CreateFromFile(Constants.PATH + "images\\" + picture.Name + ".gif");
+            picture.Visible = false;
+            picture.Location = new Point(40, 90);
+            activityPictures.Add(picture.Name, picture);
+            this.panels[ControlID.CLASSIFICATION_PANEL].Controls.Add(picture);
+
+            picture = new AlphaPictureBox();
+            picture.Name = "biceps-curls";
+            picture.Size = new Size(240, 240);
+            picture.Image = AlphaImage.CreateFromFile(Constants.PATH + "images\\" + picture.Name + ".gif");
+            picture.Visible = false;
+            picture.Location = new Point(40, 90);
+            activityPictures.Add(picture.Name, picture);
+            this.panels[ControlID.CLASSIFICATION_PANEL].Controls.Add(picture);
+
+            picture = new AlphaPictureBox();
+            picture.Name = "jumping-jacks";
+            picture.Size = new Size(240, 240);
+            picture.Image = AlphaImage.CreateFromFile(Constants.PATH + "images\\" + picture.Name + ".gif");
+            picture.Visible = false;
+            picture.Location = new Point(40, 90);
+            activityPictures.Add(picture.Name, picture);
+            this.panels[ControlID.CLASSIFICATION_PANEL].Controls.Add(picture);
+
+            picture = new AlphaPictureBox();
+            picture.Name = "no-activity";
+            picture.Size = new Size(240, 240);
+            picture.Image = AlphaImage.CreateFromFile(Constants.PATH + "images\\" + picture.Name + ".gif");
+            picture.Visible = false;
+            picture.Location = new Point(40, 90);
+            activityPictures.Add(picture.Name, picture);
+            this.panels[ControlID.CLASSIFICATION_PANEL].Controls.Add(picture);
+            
+            Label label = new Label();
+            label.Size = new Size(500, 100);
+            label.Text = "";
+            label.BackColor = Color.FromArgb(250, 237, 221);
+            label.ForeColor = Color.Black;
+            label.Font = new Font(FontFamily.GenericSerif, 16.0f, System.Drawing.FontStyle.Bold);
+            label.Visible = true;
+            label.Location = new Point(30, this.Height-450);
+            classifiedLabels.Add("classification", label);
+            this.panels[ControlID.CLASSIFICATION_PANEL].Controls.Add(label);
+
+
+            label = new Label();
+            label.Size = new Size(500, 70);
+            label.Text = "";
+            label.BackColor = Color.FromArgb(250, 237, 221);
+            label.ForeColor = Color.Black;
+            label.Font = new Font(FontFamily.GenericSerif, 14.0f, System.Drawing.FontStyle.Bold);
+            label.Visible = true;
+            label.Location = new Point(30, this.Height - 320);
+            classifiedLabels.Add("kcals", label);
+            this.panels[ControlID.CLASSIFICATION_PANEL].Controls.Add(label);
+
+            label = new Label();
+            label.Size = new Size(500, 70);
+            label.Text = "";
+            label.BackColor = Color.FromArgb(250, 237, 221);
+            label.ForeColor = Color.Black;
+            label.Font = new Font(FontFamily.GenericSerif, 14.0f, System.Drawing.FontStyle.Bold);
+            label.Visible = true;
+            label.Location = new Point(30, this.Height - 250);
+            classifiedLabels.Add("timer", label);
+            this.panels[ControlID.CLASSIFICATION_PANEL].Controls.Add(label);
+
+
+            label = new Label();
+            label.Size = new Size(500, 70);
+            label.Text = "";
+            label.BackColor = Color.FromArgb(250, 237, 221);
+            label.ForeColor = Color.Black;
+            label.Font = new Font(FontFamily.GenericSerif, 14.0f, System.Drawing.FontStyle.Bold);
+            label.Visible = true;
+            label.Location = new Point(30, this.Height - 180);
+            classifiedLabels.Add("reps", label);
+            this.panels[ControlID.CLASSIFICATION_PANEL].Controls.Add(label);
+            
 
             //add the labels to the interface
-            int yLocation=40;
+            //int yLocation=40;
           
-            classifiedLabels = new Hashtable();
+            /*
             for (int i = 0; (i < instances.classAttribute().numValues()); i++)
             {
                 string activity= instances.classAttribute().value_Renamed(i);
@@ -1371,16 +1593,18 @@ namespace WocketsApplication
                 classifiedLabels.Add(activity, label);
                 this.panels[ControlID.CLASSIFICATION_PANEL].Controls.Add(label);
                 yLocation += 70;
-            }
+            }*/
             this.activityStatus = ActivityStatus.Measuring;
+           
             this.panels[ControlID.CLASSIFICATION_PANEL].Visible = true;
             this.panels[currentPanel].Visible = false;
             this.currentPanel = ControlID.CLASSIFICATION_PANEL;
-            /*
-            this.panels[ControlID.EE_PANEL].Visible = true;
+            
+            /*this.panels[ControlID.EE_PANEL].Visible = true;
             this.panels[currentPanel].Visible = false;
             this.currentPanel = ControlID.EE_PANEL;
             */
+
             classificationCounter = 0;
             classificationThread = new Thread(new ThreadStart(ClassificationThread));
             classificationThread.Start();
@@ -1660,21 +1884,22 @@ namespace WocketsApplication
 
             if (numberOfButtons > 12)
             {
+                max_buttons_per_row = 5;
                 screenWidth -= scrollbarWidth;
                 act_button_width = act_button_height = screenWidth / max_buttons_per_row;
             }
             else if ((numberOfButtons <= 12) && (numberOfButtons > 8))
             {
+                max_buttons_per_row = 3;
                 act_button_width = screenWidth / max_buttons_per_row;
                 act_button_height = act_button_width + (act_button_width / 3);
             }
             else if ((numberOfButtons <= 8) && (numberOfButtons > 3))
             {
-                int dBlockSize = (screenWidth - 2) / max_buttons_per_row;
-                max_buttons_per_row = 2;
-                act_button_width = dBlockSize * 2;
-                int s = (int)Math.Ceiling(numberOfButtons / 2.0);
-                act_button_height = ((dBlockSize * 4) + 22) / s;
+                max_buttons_per_row = 2; 
+                act_button_width = (screenWidth - 10) / max_buttons_per_row;
+                int numRows = (int)System.Math.Ceiling(numberOfButtons / 2.0);
+                act_button_height = (screenHeight - 120) / numRows;
                 fontSize = 12F;
             }
             else
@@ -2235,7 +2460,7 @@ namespace WocketsApplication
                         this.panels[ControlID.CLASSIFICATION_PANEL].Visible = true;
                         this.panels[ControlID.CLASSIFICATION_PANEL].Dock = DockStyle.None;
                         this.currentPanel = ControlID.CLASSIFICATION_PANEL;
-
+                        
                         /*this.panels[currentPanel].Visible = false;
                         this.panels[ControlID.EE_PANEL].Location = new Point(0, 0);
                         this.panels[ControlID.EE_PANEL].BringToFront();
@@ -2550,10 +2775,8 @@ namespace WocketsApplication
                 }
                 else
                 {
-                    int sec = (int) (this.trainingExamples * this.windowLength);
-                    int min = sec / 60;
-                    sec = sec % 60;
-                    this.examplesLabel.Text = min.ToString("00")+":"+sec.ToString("00");
+
+                    this.examplesLabel.Text = this.trainingExamples.ToString();
                 }
             }
 
@@ -2561,11 +2784,17 @@ namespace WocketsApplication
 
         int trainingExamples = 0;
         double windowLength = 0;
+        long[] lastTotalSamples;
+        int[] last_extracted;
+        int[] no_fv_iterations;
         private void MLThread()
         {
+
             int structureFileExamples = 0;
-            string prev_activity = "";
-            windowLength = ((double)CurrentWockets._Configuration._FeatureWindowSize * (1.0 - CurrentWockets._Configuration._FeatureWindowOverlap)) / 1000.0;
+            string prev_activity = "";          
+            lastTotalSamples = new long[CurrentWockets._Controller._Decoders.Count];
+            last_extracted = new int[CurrentWockets._Controller._Decoders.Count];
+            no_fv_iterations = new int[CurrentWockets._Controller._Decoders.Count];
             while (true)
             {
                 string current_activity = "unknown";
@@ -2576,26 +2805,56 @@ namespace WocketsApplication
                 }
                 if (current_activity != "unknown")
                 {
-                    
-                    double lastTimeStamp = FullFeatureExtractor.StoreWocketsWindow();
-                    if (FullFeatureExtractor.GenerateFeatureVector(lastTimeStamp))
-                    {           
-                        string arffSample = FullFeatureExtractor.toString() + "," + current_activity;
-                        trainingTW.WriteLine(arffSample);                  
+
+                    //Check if each decoder decoded the desired number of samples
+                    bool readyFV = true;
+                    for (int i = 0; (i < CurrentWockets._Controller._Decoders.Count); i++)
+                    {
+                        long numNewSamples = CurrentWockets._Controller._Decoders[i].TotalSamples-lastTotalSamples[i];                   
+                        if (numNewSamples == 0)
+                            readyFV = false;
+                        else if (numNewSamples < fv._Length)
+                        {
+                            if (no_fv_iterations[i] > 7) // a disconnection occurred, so reset the window you are looking at
+                            {
+                                //reinitialize all
+                                for (int j = 0; (j < CurrentWockets._Controller._Decoders.Count); j++)              
+                                    no_fv_iterations[j] = 0;                                
+                            }
+                            readyFV = false;
+                            no_fv_iterations[i] = no_fv_iterations[i] + 1;
+                            break;
+                        }
+                    }
+
+                    if (!readyFV)
+                    {
+                        Thread.Sleep(1000);
+                        continue;
+                    }
+                                     
+                    for (int i = 0; (i < CurrentWockets._Controller._Decoders.Count); i++)
+                        lastTotalSamples[i]=CurrentWockets._Controller._Decoders[i].TotalSamples;
+
+                    //skip boundary don't use it
+                    if ((prev_activity==current_activity) && (fv.Extract()))
+                    {
+                        string arffSample = fv.toString() + "," + current_activity;
+                        trainingTW.WriteLine(arffSample);
                         if (structureFileExamples < 10)
                         {
                             structureTW.WriteLine(arffSample);
                             structureFileExamples++;
                         }
                         trainingExamples++;
-                        UpdateExamples();                     
+                        UpdateExamples();        
                     }
-
                     if (prev_activity != current_activity)
                         trainingExamples = 0;
                     prev_activity = current_activity;
+           
                 }
-                Thread.Sleep(100);
+                Thread.Sleep(1000);
             }
         }
         public override void Refresh()

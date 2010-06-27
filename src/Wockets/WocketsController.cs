@@ -23,6 +23,9 @@ using weka;
 using weka.core;
 using weka.classifiers.trees;
 
+#if (PocketPC)
+using Wockets.Utils.IPC.MMF;
+#endif
 
 namespace Wockets
 {
@@ -52,12 +55,13 @@ namespace Wockets
         #region Threads instantiated by the controller
         
         /// <summary>
-        /// Handle to the data polling thread
+        /// Polls the data from BT serial to a local buffer, a shared memory buffer or polls data
+        /// from a shared memory buffer to a local buffer.
         /// </summary>
         private Thread aPollingThread;
 
         /// <summary>
-        /// Handle to the data saving thread
+        /// Saves data
         /// </summary>
         private Thread aSavingThread;
 
@@ -65,6 +69,8 @@ namespace Wockets
         /// Handle to the classification thread
         /// </summary>
         private Thread aClassifyingThread;
+
+
         #endregion Threads instantiated by the controller
 
 
@@ -102,8 +108,8 @@ namespace Wockets
 
            
         public bool _Bursty = false;
-        private ManualResetEvent paused;
-        public bool _Paused = false;
+
+        public MemoryMode _Mode = MemoryMode.BluetoothToLocal;
 
         /// <summary>
         /// A property that controls the data saving thread. When set to true the saving thread is signaled to run.
@@ -183,7 +189,7 @@ namespace Wockets
             this._Description = description;
 
 
-            this.paused = new ManualResetEvent(false);
+
             
             this.savingEvent = new AutoResetEvent(false);
             this.waitToSaveEvent = new AutoResetEvent(false);
@@ -201,69 +207,64 @@ namespace Wockets
   
         public void Initialize()
         {
-            //NetworkStacks._BluetoothStack.Initialize();
-            for (int i = 0; (i < this._Receivers.Count); i++)
+
+
+            if (this._Mode == MemoryMode.SharedToLocal)
             {
-                try
+                for (int i = 0; (i < this._Decoders.Count); i++)
                 {
-                    if (this._Sensors[i]._Loaded)
+                    try
                     {
-                        this._Receivers[i].Initialize();
                         this._Decoders[i].Initialize();
                     }
-
-                    if (this._Receivers[i]._Type == ReceiverTypes.RFCOMM)
-                        ((RFCOMMReceiver)this._Receivers[i])._Bursty = this._Bursty;
-                    //this._Receivers[i].
-                    //Thread.Sleep(2000);
-
+                    catch (Exception e)
+                    {
+                    }
                 }
-                catch (Exception e)
+            }
+            else if (this._Mode != MemoryMode.SharedToLocal)
+            {
+
+                for (int i = 0; (i < this._Receivers.Count); i++)
                 {
-                }
+                    try
+                    {
+                        if (this._Sensors[i]._Loaded)
+                        {
+                            this._Receivers[i].Initialize();
+                            this._Decoders[i].Initialize();
+                        }
 
+                        if (this._Receivers[i]._Type == ReceiverTypes.RFCOMM)
+                            ((RFCOMMReceiver)this._Receivers[i])._Bursty = this._Bursty;                  
+                    }
+                    catch (Exception e)
+                    {
+                    }
+
+                }
             }
 
             polling = true;
             classifying = true;
             
-            //Priorities are very critical to avoid buffer overflow
-           
-            
- 
+            //Priorities are very critical to avoid buffer overflow                      
             aPollingThread = new Thread(new ThreadStart(Poll));
-            aPollingThread.Priority = ThreadPriority.Highest;
-            //aClassifyingThread = new Thread(new ThreadStart(Classify));
-            // aClassifyingThread.Start();
-
+            aPollingThread.Priority = ThreadPriority.Highest;            
             aPollingThread.Start();
-           
 
-            //selene commented it out for power test
-
-            if (!_Bursty)
+            if (((this._Mode== MemoryMode.BluetoothToShared) ||(this._Mode== MemoryMode.SharedToLocal)) && (!_Bursty))
             {
                 _Saving = true;
                 aSavingThread = new Thread(new ThreadStart(Save));
                 aSavingThread.Priority = ThreadPriority.Highest;
                 aSavingThread.Start();
             }
-            
-
+                        
         }
 
 
-        public void Unpause()
-        {
-            _Paused = false;
-            this.paused.Set();
-        }
-
-        public void Pause()
-        {
-            this.paused.Reset();
-            _Paused = true;
-        }
+   
         
  
         
@@ -338,7 +339,6 @@ namespace Wockets
                 {
                     try
                     {
-
                         this._Sensors[i].Save();
                         Thread.Sleep(1000);
                     }
@@ -426,7 +426,6 @@ namespace Wockets
                 if (!this.training)
                     this.trainingEvent.WaitOne();
 
-
                 #region Training
                 //create arff file
                 if (trainingTW == null)
@@ -482,10 +481,6 @@ namespace Wockets
                     }
                 }
                 #endregion Training
-
-
-
-
 
                 Thread.Sleep(50);
             }
@@ -601,200 +596,282 @@ namespace Wockets
         }
 
 
+
+
         public static object MyLock = new object();
 
         private void Poll()
         {
             #region Poll All Wockets and MITes and Decode Data
-            //CeSetThreadQuantum(new IntPtr(aPollingThread.ManagedThreadId),200);
-            //int quantum= CeGetThreadQuantum(new IntPtr(aPollingThread.ManagedThreadId));
 
-            bool allWocketsDisconnected = true;
-            bool bluetoothIsReset = false;
-            Receiver currentReceiver = null;
-            Sensor sensor = null;
-
-            int[] batteryPoll = new int[this._Sensors.Count];
-            int[] alive = new int[this._Sensors.Count];
-
-            GET_BT GET_BT_CMD = new GET_BT();
-            ALIVE ALIVE_CMD = new ALIVE();
-            int pollCounter = 0;
-            Logger.Warn("Version "+CurrentWockets._Version+" "+CurrentWockets._Date);
-            this.StartTime = WocketsTimer.GetUnixTime();
-
-            while (true)
+            if ((this._Mode == MemoryMode.BluetoothToLocal) || (this._Mode == MemoryMode.BluetoothToShared))
             {
+                bool allWocketsDisconnected = true;
+                bool bluetoothIsReset = false;
+                Receiver currentReceiver = null;
+                Sensor sensor = null;
 
-              /* if ((_Bursty) && (_Paused))
+                int[] batteryPoll = new int[this._Sensors.Count];
+                int[] alive = new int[this._Sensors.Count];
+
+                GET_BT GET_BT_CMD = new GET_BT();
+                ALIVE ALIVE_CMD = new ALIVE();
+                int pollCounter = 0;
+                Logger.Warn("Version " + CurrentWockets._Version + " " + CurrentWockets._Date);
+                this.StartTime = WocketsTimer.GetUnixTime();
+
+                while (true)
                 {
+
+                    if (!polling)
+                    {
+                        this.waitToPollEvent.Set();
+                        for (int i = 0; (i < this._Sensors.Count); i++)
+                        {
+                            this._Sensors[i]._ReceivedPackets = 0;
+                            this._Sensors[i]._SavedPackets = 0;                            
+                            this._Receivers[i].Dispose();
+                        }
+                        this.pollingEvent.WaitOne();
+                    }
+
+                    allWocketsDisconnected = true;
+                    pollCounter++;
+
                     for (int i = 0; (i < this._Sensors.Count); i++)
                     {
-                        //this._Sensors[i].Save();
-                        this._Sensors[i]._ReceivedPackets = 0;
-                        this._Sensors[i]._SavedPackets = 0;
-                        this._Receivers[i]._Status = Wockets.Receivers.ReceiverStatus.Disconnected;
+
+                        sensor = this._Sensors[i];
+                        if (sensor._Loaded)
+                        {
+                            currentReceiver = sensor._Receiver;
+                            try
+                            {
+                                if (_Bursty)
+                                {
+
+                                    int expectedPackets = ((Wockets.Decoders.Accelerometers.WocketsDecoder)sensor._Decoder)._ExpectedBatchCount;
+                                    //skip if got everything
+                                    if ((expectedPackets > 0) && (sensor._ReceivedPackets == expectedPackets))
+                                        continue;
+                                    else
+                                        currentReceiver.Update();
+                                }
+                                else
+                                    currentReceiver.Update();
+
+
+
+                                if (currentReceiver._Status == ReceiverStatus.Connected)
+                                {
+                                    Decoder decoder = sensor._Decoder;
+                                    int numDecodedPackets = 0;
+                                    int tail = currentReceiver._Buffer._Tail;
+                                    int head = currentReceiver._Buffer._Head;
+
+                                    int dataLength = tail - head; //((RFCOMMReceiver)currentReceiver).bluetoothStream._Tail - currentReceiver._Head;
+                                    if (dataLength < 0)
+                                        dataLength = currentReceiver._Buffer._Bytes.Length - head + tail;//((RFCOMMReceiver)currentReceiver).bluetoothStream._Buffer.Length - currentReceiver._Head + ((RFCOMMReceiver)currentReceiver).bluetoothStream._Tail;
+
+                                    //test if all wockets are disconnected
+                                    if (sensor._Class == SensorClasses.Wockets)
+                                    {
+                                        if (bluetoothIsReset)
+                                            bluetoothIsReset = false;
+
+                                        if (allWocketsDisconnected)
+                                            allWocketsDisconnected = false;
+                                    }
+
+                                    if (dataLength > 0)
+                                    {
+                                        if (currentReceiver._Type == ReceiverTypes.HTCDiamond)
+                                        {
+                                            numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer, head, tail);
+                                            sensor._ReceivedPackets += numDecodedPackets;
+                                        }
+                                        else if (sensor._Class == SensorClasses.Wockets)
+                                        {
+
+                                            #region Write Data
+                                            #region Battery Query
+                                            batteryPoll[i] -= 1;
+                                            if (batteryPoll[i] <= 0)
+                                            {
+                                                ((SerialReceiver)currentReceiver).Write(GET_BT_CMD._Bytes);
+                                                batteryPoll[i] = 6000 + i * 200;
+                                            }
+                                            #endregion Battery Query
+
+                                            #region Alive
+                                            alive[i] -= 1;
+                                            if (alive[i] <= 0)
+                                            {
+                                                ((SerialReceiver)currentReceiver).Write(ALIVE_CMD._Bytes);                                                
+                                                alive[i] = 200;
+                                            }
+                                            #endregion Alive
+
+                                            #endregion Write Data
+
+                                            #region Read Data
+
+                                            numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer, head, tail); //((RFCOMMReceiver)currentReceiver).bluetoothStream._Buffer, head, tail);
+                                            currentReceiver._Buffer._Head = tail;
+                                            sensor._ReceivedPackets += numDecodedPackets;
+                                            #endregion Read Data
+                                        }
+
+                                    }
+
+                                    if (pollCounter > 2000)
+                                    {
+                                        Logger.Warn("Receiver " + sensor._Receiver._ID + " decoded:" + sensor._ReceivedPackets + ",saved:" + sensor._SavedPackets + ", tail=" + tail + ",head=" + head);
+                                        pollCounter = 0;
+                                    }
+
+                                }
+
+                            }
+
+                            catch (Exception ex)
+                            {
+                                alive[i] = 200;//10 in sniff//200 in continuous worked well
+                                Logger.Error(ex.Message + " \nTrace:" + ex.StackTrace);
+                                currentReceiver.Dispose();
+                            }
+                        }
                     }
-                    this.paused.WaitOne();
-                }*/
-               
 
-                if (!polling)
-                {
+                    //reset bluetooth stack once if all wockets are disconnected
 
-
-                    this.waitToPollEvent.Set();
-                    for (int i = 0; (i < this._Sensors.Count); i++)
+                    if ((!_Bursty) && (!bluetoothIsReset) && (allWocketsDisconnected))
                     {
-                        this._Sensors[i]._ReceivedPackets = 0;
-                        this._Sensors[i]._SavedPackets = 0;
-                        //this._Receivers[i]._Status = Wockets.Receivers.ReceiverStatus.Disconnected;
-                        this._Receivers[i].Dispose();
-
-                    }
-                    this.pollingEvent.WaitOne();
-                }
-
-                allWocketsDisconnected = true;
-                pollCounter++;
-
-                for (int i = 0; (i < this._Sensors.Count); i++)
-                {
-
-                    sensor = this._Sensors[i];
-                    if (sensor._Loaded)
-                    {
-                        currentReceiver = sensor._Receiver;
                         try
                         {
-                            if (_Bursty)
-                            {
-                                /*if (sensor._ReceivedPackets< 600)
-                                    currentReceiver.Update();
-                                else
-                                    continue;*/
-
-                                int expectedPackets=((Wockets.Decoders.Accelerometers.WocketsDecoder)sensor._Decoder)._ExpectedBatchCount;
-                                    //skip if got everything
-                               if ((expectedPackets>0) && (sensor._ReceivedPackets == expectedPackets))
-                                    continue;
-                               else
-                                   currentReceiver.Update();
-                            }
-                            else
-                                currentReceiver.Update();
-
-
-
-                            if (currentReceiver._Status == ReceiverStatus.Connected)
-                            {
-                                Decoder decoder = sensor._Decoder;
-                                int numDecodedPackets = 0;
-                                int tail = currentReceiver._Buffer._Tail;
-                                int head = currentReceiver._Buffer._Head;
-
-                                int dataLength = tail - head; //((RFCOMMReceiver)currentReceiver).bluetoothStream._Tail - currentReceiver._Head;
-                                if (dataLength < 0)
-                                    dataLength = currentReceiver._Buffer._Bytes.Length - head + tail;//((RFCOMMReceiver)currentReceiver).bluetoothStream._Buffer.Length - currentReceiver._Head + ((RFCOMMReceiver)currentReceiver).bluetoothStream._Tail;
-
-                                //test if all wockets are disconnected
-                                if (sensor._Class == SensorClasses.Wockets)
-                                {
-                                    if (bluetoothIsReset)
-                                        bluetoothIsReset = false;
-
-                                    if (allWocketsDisconnected)
-                                        allWocketsDisconnected = false;
-                                }
-
-                                if (dataLength > 0)
-                                {
-                                    if (currentReceiver._Type == ReceiverTypes.HTCDiamond)
-                                    {
-                                        numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer, head, tail);
-                                        sensor._ReceivedPackets += numDecodedPackets;
-                                    }
-                                    else if (sensor._Class == SensorClasses.Wockets)
-                                    {
-
-                                        #region Write Data
-                                        #region Battery Query
-                                        batteryPoll[i] -= 1;
-                                        if (batteryPoll[i] <= 0)
-                                        {
-                                            ((SerialReceiver)currentReceiver).Write(GET_BT_CMD._Bytes);
-                                            batteryPoll[i] = 6000 + i * 200;
-                                        }
-                                        #endregion Battery Query
-
-                                        #region Alive
-                                        alive[i] -= 1;
-                                        if (alive[i] <= 0)
-                                        {
-                                            ((SerialReceiver)currentReceiver).Write(ALIVE_CMD._Bytes);
-                                            //if (((RFCOMMReceiver)currentReceiver)._Tsniff == Wockets.Utils.network.Bluetooth.TSniff.Continuous)
-                                                alive[i] = 200;//10 for sniff, 200 in continuous worked well
-                                            //else
-                                             //   alive[i] = 10;
-                                            //if (((RFCOMMReceiver)currentReceiver)._Tsniff== Wockets.Utils.network.Bluetooth.TSniff.Sniff2Seconds)
-                                        }
-                                        #endregion Alive
-
-                                        #endregion Write Data
-
-                                        #region Read Data
-
-                                        numDecodedPackets = decoder.Decode(sensor._ID, currentReceiver._Buffer, head, tail); //((RFCOMMReceiver)currentReceiver).bluetoothStream._Buffer, head, tail);
-                                        currentReceiver._Buffer._Head = tail;//((RFCOMMReceiver)currentReceiver)._Head = tail;
-                                        sensor._ReceivedPackets += numDecodedPackets;
-                                        #endregion Read Data
-                                    }
-
-                                    //     if (numDecodedPackets>0)
-                                    //        sensor.Save();
-
-                                }
-
-                                if (pollCounter > 2000)
-                                {
-                                    Logger.Warn("Receiver " + sensor._Receiver._ID + " decoded:" + sensor._ReceivedPackets + ",saved:" + sensor._SavedPackets + ", tail=" + tail + ",head=" + head);
-                                    pollCounter = 0;
-                                }
-
-                            }
-
+                            if (CurrentWockets._Configuration._SoftwareMode == Wockets.Data.Configuration.SoftwareConfiguration.DEBUG)
+                                Logger.Debug("All Wockets Disconnected. BT Reset.");
+                            NetworkStacks._BluetoothStack.Dispose();
+                            NetworkStacks._BluetoothStack.Initialize();
+                            bluetoothIsReset = true;
                         }
-
-                        catch (Exception ex)
+                        catch
                         {
-                            alive[i] = 200;//10 in sniff//200 in continuous worked well
-                            Logger.Error(ex.Message + " \nTrace:" + ex.StackTrace);
-                            currentReceiver.Dispose();
                         }
                     }
+
+                    Thread.Sleep(10);
                 }
 
-                //reset bluetooth stack once if all wockets are disconnected
 
-                if ((!_Bursty) && (!bluetoothIsReset) && (allWocketsDisconnected))
+
+
+            }
+#if (PocketPC)
+            //Read data from shared memory and populate the decoder
+            else if (this._Mode == MemoryMode.SharedToLocal)
+            {
+                MemoryMappedFileStream[] sdata = null;
+                MemoryMappedFileStream[] shead = null;
+                byte[] head = new byte[4];
+                int sdataSize = 0;
+                int numSensors = CurrentWockets._Controller._Sensors.Count;
+                int[] decoderTails;
+
+                byte[] timestamp = new byte[sizeof(double)];
+                byte[] acc = new byte[sizeof(short)];
+
+                sdata = new MemoryMappedFileStream[numSensors];
+                shead = new MemoryMappedFileStream[numSensors];
+                sdataSize = (int)Decoder._DUSize * Wockets.Decoders.Accelerometers.WocketsDecoder.BUFFER_SIZE;
+                decoderTails = new int[numSensors];
+                for (int i = 0; (i < numSensors); i++)
+                {
+                    sdata[i] = new MemoryMappedFileStream("\\Temp\\wocket" + i + ".dat", "wocket" + i, (uint)sdataSize, MemoryProtection.PageReadWrite);
+                    shead[i] = new MemoryMappedFileStream("\\Temp\\whead" + i + ".dat", "whead" + i, sizeof(int), MemoryProtection.PageReadWrite);
+
+                    sdata[i].MapViewToProcessMemory(0, sdataSize);
+                    shead[i].MapViewToProcessMemory(0, sizeof(int));
+
+                    shead[i].Read(head, 0, 4);
+                    int currentHead = BitConverter.ToInt32(head, 0);
+                    decoderTails[i] = currentHead;
+                    shead[i].Seek(0, System.IO.SeekOrigin.Begin);
+                    sdata[i].Seek((currentHead * (sizeof(double) + 3 * sizeof(short))), System.IO.SeekOrigin.Begin);
+
+                }
+
+
+                while (true)
                 {
                     try
                     {
-                        if (CurrentWockets._Configuration._SoftwareMode == Wockets.Data.Configuration.SoftwareConfiguration.DEBUG)
-                            Logger.Debug("All Wockets Disconnected. BT Reset.");
-                        NetworkStacks._BluetoothStack.Dispose();
-                        NetworkStacks._BluetoothStack.Initialize();
-                        bluetoothIsReset = true;
+                        for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
+                        {
+                            int tail = decoderTails[i];
+                            int currentHead = tail;
+                            shead[i].Read(head, 0, 4);
+                            currentHead = BitConverter.ToInt32(head, 0);
+                            shead[i].Seek(0, System.IO.SeekOrigin.Begin);
+
+                            while (tail != currentHead)
+                            {
+
+#if (PocketPC)
+                                int bufferHead = CurrentWockets._Controller._Decoders[i]._Head;
+                                WocketsAccelerationData datum = ((WocketsAccelerationData)CurrentWockets._Controller._Decoders[i]._Data[bufferHead]);
+                                datum.Reset();
+                                datum._SensorID = (byte)i;
+                                sdata[i].Read(timestamp, 0, sizeof(double));
+                                datum.UnixTimeStamp = BitConverter.ToDouble(timestamp, 0);
+                                sdata[i].Read(acc, 0, sizeof(short));
+                                datum.X = BitConverter.ToInt16(acc, 0);
+                                sdata[i].Read(acc, 0, sizeof(short));
+                                datum.Y = BitConverter.ToInt16(acc, 0);
+                                sdata[i].Read(acc, 0, sizeof(short));
+                                datum.Z = BitConverter.ToInt16(acc, 0);
+                                datum._Type = Data.SensorDataType.UNCOMPRESSED_DATA_PDU;
+                                CurrentWockets._Controller._Decoders[i].TotalSamples++;
+
+                                //copy raw bytes
+                                //for (int i = 0; (i < bytesToRead); i++)
+                                //  datum.RawBytes[i] = this.packet[i];
+
+                                //datum.RawBytes[0] = (byte)(((datum.RawBytes[0])&0xc7)|(sourceSensor<<3));
+
+
+                                if (bufferHead >= (CurrentWockets._Controller._Decoders[i]._BufferSize - 1))
+                                    bufferHead = 0;
+                                else
+                                    bufferHead++;
+                                CurrentWockets._Controller._Decoders[i]._Head = bufferHead;
+
+#endif
+
+
+                                if (tail >= (Wockets.Decoders.Accelerometers.WocketsDecoder.BUFFER_SIZE - 1))
+                                {
+                                    tail = 0;
+#if (PocketPC)
+                                    sdata[i].Seek(0, System.IO.SeekOrigin.Begin);
+#endif
+                                }
+                                else
+                                    tail++;
+                            }
+
+                            decoderTails[i] = currentHead;
+                        }
                     }
                     catch
                     {
                     }
+                    Thread.Sleep(100);
                 }
 
-                Thread.Sleep(10);
+
             }
-
-
+#endif
 
             #endregion Poll All Wockets and MITes and Decode Data
         }
