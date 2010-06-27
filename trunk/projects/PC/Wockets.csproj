@@ -420,6 +420,18 @@
     <Compile Include="..\..\src\Wockets\Data\Responses\BC_RSP.cs" >
       <Link>Data\Responses\BC_RSP.cs</Link>
     </Compile>    
+    <Compile Include="..\..\src\Wockets\Data\Features\FeatureVector.cs" >
+      <Link>Data\Features\FeatureVector.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Features\SimpleFeatureVector.cs" >
+      <Link>Data\Features\SimpleFeatureVector.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\MemoryMode.cs" >
+      <Link>MemoryMode.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\Math.cs" >
+      <Link>Utils\Math.cs</Link>
+    </Compile>    
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="WocketsWeka.csproj">

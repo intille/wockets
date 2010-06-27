@@ -713,29 +713,35 @@
     <Compile Include="..\..\src\WocketsWeka\weka\filters\unsupervised\attribute\NumericToBinary.cs">
       <Link>weka\filters\unsupervised\attribute\NumericToBinary.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\BandPass.cs" >
+    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\BandPass.cs">
       <Link>Utils\Filters\BandPass.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\ButterWorth.cs" >
+    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\ButterWorth.cs">
       <Link>Utils\Filters\ButterWorth.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\ButterworthDF.cs" >
+    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\ButterworthDF.cs">
       <Link>Utils\Filters\ButterworthDF.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\Filter.cs" >
+    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\Filter.cs">
       <Link>Utils\Filters\Filter.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\Frequency.cs" >
+    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\Frequency.cs">
       <Link>Utils\Filters\Frequency.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\Order.cs" >
+    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\Order.cs">
       <Link>Utils\Filters\Order.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\SamplingRates.cs" >
+    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\SamplingRates.cs">
       <Link>Utils\Filters\SamplingRates.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\Type.cs" >
+    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\Type.cs">
       <Link>Utils\Filters\Type.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\LowPass.cs" >
+      <Link>Utils\Filters\LowPass.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\LPButterWorth.cs" >
+      <Link>Utils\Filters\LPButterWorth.cs</Link>
     </Compile>
   </ItemGroup>
   <Import Condition="'$(TargetFrameworkVersion)' == 'v1.0'" Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.v1.targets" />
