@@ -41,17 +41,13 @@ namespace Wockets.Data.Plotters
         private PlottingMode mode;
 
 #if(PocketPC)
-        private MemoryMappedFileStream[] sdata = null;
-        private MemoryMappedFileStream[] shead = null;
-        private int sdataSize = 0;
+
         private int numSensors = 0;
 
 
-        public WocketsScalablePlotter(System.Windows.Forms.Panel aPanel)//, int numSensors)
+        public WocketsScalablePlotter(System.Windows.Forms.Panel aPanel)
         {
-
-
-            this.numSensors = CurrentWockets._Controller._Sensors.Count;// numSensors;
+            this.numSensors = CurrentWockets._Controller._Sensors.Count;
 
             if (numSensors > 3)
                 skippedPoints = 3;
@@ -59,7 +55,7 @@ namespace Wockets.Data.Plotters
                 skippedPoints = 2;
 
             this.aPanel = aPanel;
-            this.plotAreaSize = new Size(this.aPanel.Width, ((int)(this.aPanel.Height *0.60)));
+            this.plotAreaSize = new Size(this.aPanel.Width, ((int)(this.aPanel.Height)));
             graphSize = (int)Math.Floor((plotAreaSize.Height / ((double)numSensors)));
 
 
@@ -78,36 +74,14 @@ namespace Wockets.Data.Plotters
                 this.currentColumns[i] = this.plotAreaSize.Width - 1;
                 this.firstColumn[i] = 999999;
                 this.lastColumn[i] = this.plotAreaSize.Width - 1;
-                this.decoderTails[i] = 0;
+                this.decoderTails[i] = CurrentWockets._Controller._Sensors[i]._Decoder._Head;
                 this.lastUnixTimestamps[i] = 0;
                 this.pointsToPlot[i] = 0;
                 double range = 1024;//((Accelerometer)this.wocketsController._Sensors[i])._Max - ((Accelerometer)this.wocketsController._Sensors[i])._Min;
                 scaleFactors[i] = graphSize / range;
             }
 
-#if (PocketPC)
-            if (CurrentWockets._Configuration._MemoryMode == Wockets.Data.Configuration.MemoryConfiguration.SHARED)
-            {
-                sdata = new MemoryMappedFileStream[numSensors];
-                shead = new MemoryMappedFileStream[numSensors];
-                this.sdataSize = (int)Decoder._DUSize * Wockets.Decoders.Accelerometers.WocketsDecoder.BUFFER_SIZE;
-                for (int i = 0; (i < numSensors); i++)
-                {
-                    sdata[i] = new MemoryMappedFileStream("\\Temp\\wocket" + i + ".dat", "wocket" + i, (uint)this.sdataSize, MemoryProtection.PageReadWrite);
-                    shead[i] = new MemoryMappedFileStream("\\Temp\\whead" + i + ".dat", "whead" + i, sizeof(int), MemoryProtection.PageReadWrite);
 
-                    sdata[i].MapViewToProcessMemory(0, this.sdataSize);
-                    shead[i].MapViewToProcessMemory(0, sizeof(int));
-
-                    shead[i].Read(head, 0, 4);
-                    int currentHead = BitConverter.ToInt32(head, 0);
-                    this.decoderTails[i] = currentHead;
-                    shead[i].Seek(0, System.IO.SeekOrigin.Begin);
-                    sdata[i].Seek((currentHead * (sizeof(double) + 3 * sizeof(short))), System.IO.SeekOrigin.Begin);
-
-                }
-            }
-#endif
             int dy = (int)Math.Floor(plotAreaSize.Height / ((double)numSensors));
             int offset = dy;
             axisOffset = new int[numSensors];
@@ -145,16 +119,6 @@ namespace Wockets.Data.Plotters
 
         public void Dispose()
         {
-            if ((sdata != null) && (shead != null))
-            {
-                for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
-                {
-
-                    sdata[i].Close();
-                    shead[i].Close();
-
-                }
-            }
 
         }
         int x = 0;
@@ -169,39 +133,18 @@ namespace Wockets.Data.Plotters
                     int tail = this.decoderTails[i];
                     int currentHead = tail;
 
-                    if (CurrentWockets._Configuration._MemoryMode == Wockets.Data.Configuration.MemoryConfiguration.NON_SHARED)
-                    {
-                        currentHead = CurrentWockets._Controller._Sensors[i]._Decoder._Head;
-                    }
-#if (PocketPC)
-                    else if (CurrentWockets._Configuration._MemoryMode == Wockets.Data.Configuration.MemoryConfiguration.SHARED)
-                    {
-                        shead[i].Read(head, 0, 4);
-                        currentHead = BitConverter.ToInt32(head, 0);
-                        shead[i].Seek(0, System.IO.SeekOrigin.Begin);
-                    }
-#endif
+
+                    currentHead = CurrentWockets._Controller._Sensors[i]._Decoder._Head;
+
 
 
                     while (tail != currentHead)
                     {
                         try{
 
-                        if (CurrentWockets._Configuration._MemoryMode == Wockets.Data.Configuration.MemoryConfiguration.NON_SHARED)
-                            data = ((AccelerationData)CurrentWockets._Controller._Sensors[i]._Decoder._Data[tail]);
-#if (PocketPC)
-                        else if (CurrentWockets._Configuration._MemoryMode == Wockets.Data.Configuration.MemoryConfiguration.SHARED)
-                        {
-                            sdata[i].Read(timestamp, 0, sizeof(double));
-                            data.UnixTimeStamp = BitConverter.ToDouble(timestamp, 0);
-                            sdata[i].Read(acc, 0, sizeof(short));
-                            data.X = BitConverter.ToInt16(acc, 0);
-                            sdata[i].Read(acc, 0, sizeof(short));
-                            data.Y = BitConverter.ToInt16(acc, 0);
-                            sdata[i].Read(acc, 0, sizeof(short));
-                            data.Z = BitConverter.ToInt16(acc, 0);
-                        }
-#endif
+                        
+                        data = ((AccelerationData)CurrentWockets._Controller._Sensors[i]._Decoder._Data[tail]);
+
                         if (!((data.UnixTimeStamp > 0) && (data.UnixTimeStamp >= this.lastUnixTimestamps[i])))
                             break;
 
@@ -242,10 +185,7 @@ namespace Wockets.Data.Plotters
                         if (tail >= (Wockets.Decoders.Accelerometers.WocketsDecoder.BUFFER_SIZE - 1))
                         {
                             tail = 0;
-#if (PocketPC)
-                            if (CurrentWockets._Configuration._MemoryMode == Wockets.Data.Configuration.MemoryConfiguration.SHARED)
-                                this.sdata[i].Seek(0, System.IO.SeekOrigin.Begin);
-#endif
+
                         }
                         else
                             tail++;

@@ -293,26 +293,15 @@ namespace Wockets.Sensors.Accelerometers
         /// </summary>
         public override void Save()
         {
-            int localflushtimer = 0;
 #if (PocketPC)           
             if (_Saving)
             {
-
-                #region Check if the data file need to be flushed
-                /*flushTimer++;
-                if ((flushTimer >= MAX_FLUSH_TIME) && (bw!=null))
-                {
-                    bw.Flush();
-                    bw.CloseFile();
-                    bw = new ByteWriter(currentDataFile, false);
-                    bw.OpenFile(false);
-                    flushTimer = 0;
-                }*/
-                #endregion Check if the data file need to be flushed
+         
 
                 #region Determine the head of the data buffer
                 int currentHead = -1;
-                if (CurrentWockets._Configuration._MemoryMode == MemoryConfiguration.SHARED)
+                //if (CurrentWockets._Configuration._MemoryMode == MemoryConfiguration.SHARED)
+                if (CurrentWockets._Controller._Mode== MemoryMode.BluetoothToShared)
                 {
                     if (sdata == null)
                     {
@@ -371,7 +360,8 @@ namespace Wockets.Sensors.Accelerometers
                 while (tail != currentHead)
                 {
                     #region Populate the acceleration data that need to be written
-                    if (CurrentWockets._Configuration._MemoryMode == MemoryConfiguration.SHARED)
+                    //if (CurrentWockets._Configuration._MemoryMode == MemoryConfiguration.SHARED)
+                    if (CurrentWockets._Controller._Mode== MemoryMode.BluetoothToShared)
                     {
                         sdata.Read(timestamp, 0, sizeof(double));
                         data.UnixTimeStamp = BitConverter.ToDouble(timestamp, 0);
@@ -381,6 +371,12 @@ namespace Wockets.Sensors.Accelerometers
                         data.Y = BitConverter.ToInt16(acc, 0);
                         sdata.Read(acc, 0, sizeof(short));
                         data.Z = BitConverter.ToInt16(acc, 0);
+
+                        data.RawBytes[0] = (byte)(0x80 | ((data.X & 0x300) >> 8));
+                        data.RawBytes[1] = (byte) ((data.X & 0xff)>>1);
+                        data.RawBytes[2] = (byte)(((data.X & 0x01) <<6) | ((data.Y &0x3f0)>>4));
+                        data.RawBytes[3] = (byte)(((data.Y & 0x0f) << 3) | ((data.Z & 0x380) >> 7));
+                        data.RawBytes[4] = (byte)(data.Z & 0x7f);
                     }
                     else
                         data = ((AccelerationData)this._Decoder._Data[tail]);
@@ -421,29 +417,7 @@ namespace Wockets.Sensors.Accelerometers
                         for (int j = 0; j < data.NumRawBytes; j++)
                             bw.WriteByte(data.RawBytes[j]);
                         #endregion Write Raw Data
-                        /*
-
-                        bw.WriteBytes(ttt);
-                        this._SavedPackets = 2400;
-                        tail = currentHead;
-                        if (tail ==0)
-                            data = ((AccelerationData)this._Decoder._Data[this._Decoder._Data.Length - 1]);
-                        else
-                            data = ((AccelerationData)this._Decoder._Data[tail - 1]);
-                        aUnixTime = data.UnixTimeStamp;
-                        break;      
-                         */
-                        
-                       /* if ((this._Flush) && (localflushtimer > 200))
-                        {                           
-                            bw.Flush();
-                           // bw.CloseFile();
-                            //bw = new ByteWriter(currentDataFile, false);
-                            //bw.OpenFile(false);
-                            localflushtimer = 0;
-                        }
-                        else
-                            localflushtimer++;*/
+                 
                          
                     }
                     #endregion Write Data
@@ -457,7 +431,8 @@ namespace Wockets.Sensors.Accelerometers
                     if (tail >= this._Decoder._BufferSize- 1)
                     {
                         tail = 0;
-                        if (CurrentWockets._Configuration._MemoryMode == MemoryConfiguration.SHARED)
+                        //if (CurrentWockets._Configuration._MemoryMode == MemoryConfiguration.SHARED)
+                        if (CurrentWockets._Controller._Mode== MemoryMode.BluetoothToShared)
                             sdata.Seek(0, System.IO.SeekOrigin.Begin);
                     }
                     else

@@ -250,7 +250,7 @@ namespace Wockets.Utils
         {
             try
             {
-                return Convert.ToInt32(Math.Floor(unixTime / 1000));
+                return Convert.ToInt32(System.Math.Floor(unixTime / 1000));
             }
             catch (Exception e)
             {
@@ -270,7 +270,7 @@ namespace Wockets.Utils
         {
             try
             {
-                return Convert.ToInt16(Math.Round(unixTime % 1000));
+                return Convert.ToInt16(System.Math.Round(unixTime % 1000));
             }
             catch (Exception e)
             {

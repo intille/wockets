@@ -44,7 +44,7 @@ namespace Wockets.Decoders.Accelerometers
         public override bool Initialize()
         {
             base.Initialize();
-            if (CurrentWockets._Configuration._MemoryMode == Wockets.Data.Configuration.MemoryConfiguration.NON_SHARED)
+            if ((CurrentWockets._Controller._Mode == MemoryMode.BluetoothToLocal) || (CurrentWockets._Controller._Mode == MemoryMode.SharedToLocal))
             {
                 for (int i = 0; (i < this._Data.Length); i++)
                     this._Data[i] = new WocketsAccelerationData();
@@ -151,18 +151,13 @@ namespace Wockets.Decoders.Accelerometers
                             short x = (short)((((short)(this.packet[0] & 0x03)) << 8) | (((short)(this.packet[1] & 0x7f)) << 1) | (((short)(this.packet[2] & 0x40)) >> 6));
                             short y = (short)((((short)(this.packet[2] & 0x3f)) << 4) | (((short)(this.packet[3] & 0x78)) >> 3));
                             short z = (short)((((short)(this.packet[3] & 0x07)) << 7) | ((short)(this.packet[4] & 0x7f)));
-                            double ts = 0;
-                            ///if (this._ExpectedPacketCount == 0)
-                                ts = WocketsTimer.GetUnixTime();
-                            /*else
-                            {
-                                if (this._ReferenceTime<1)                                
-                                    this._ReferenceTime=((Receivers.RFCOMMReceiver)CurrentWockets._Controller._Receivers[this._ID])._ConnectionTime-(25.0*2401.0);
-                                ts = this._ReferenceTime + 25.0;
-                            }*/
-                            
+                            double ts = 0;          
+                             ts = WocketsTimer.GetUnixTime();
+                             this.TotalSamples++;
+                    
 
-                            if (CurrentWockets._Configuration._MemoryMode == Wockets.Data.Configuration.MemoryConfiguration.NON_SHARED)
+                            //if (CurrentWockets._Configuration._MemoryMode == Wockets.Data.Configuration.MemoryConfiguration.NON_SHARED)
+                            if (CurrentWockets._Controller._Mode== MemoryMode.BluetoothToLocal)
                             {
                                 int bufferHead = this.head;
                                 WocketsAccelerationData datum = ((WocketsAccelerationData)this._Data[bufferHead]);
@@ -187,7 +182,7 @@ namespace Wockets.Decoders.Accelerometers
                                 this.head = bufferHead;
                             }
 #if (PocketPC)
-                        else if (CurrentWockets._Configuration._MemoryMode == Wockets.Data.Configuration.MemoryConfiguration.SHARED)
+                            else if (CurrentWockets._Controller._Mode == MemoryMode.BluetoothToShared)//if (CurrentWockets._Configuration._MemoryMode == Wockets.Data.Configuration.MemoryConfiguration.SHARED)
                         {
                             this.sdata.Write(BitConverter.GetBytes(ts), 0, sizeof(double));
                             //this.head+=sizeof(double);

@@ -72,13 +72,13 @@ namespace Wockets.Receivers
         {
             get
             {
-                return Math.Sqrt(myX * myX + myY * myY + myZ * myZ);
+                return System.Math.Sqrt(myX * myX + myY * myY + myZ * myZ);
             }
         }
 
         public override string ToString()
         {
-            return string.Format("X={0} Y={1} Z={2}", Math.Round(myX, 4), Math.Round(myY, 4), Math.Round(myZ, 4));
+            return string.Format("X={0} Y={1} Z={2}", System.Math.Round(myX, 4), System.Math.Round(myY, 4), System.Math.Round(myZ, 4));
         }
     }
 
