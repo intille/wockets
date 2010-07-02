@@ -197,7 +197,7 @@ namespace WocketsApplication
 
             //FullFeatureExtractor.Initialize(selectedWockets.Count, 90, CurrentWockets._Configuration, this.annotatedSession.OverlappingActivityLists[0]);
             //FullFeatureExtractor.Initialize3(selectedWockets.Count, 90, CurrentWockets._Configuration, this.annotatedSession.OverlappingActivityLists[0]);
-            fv = new SimpleFeatureVector(selectedWockets.Count, 256, 90);
+            fv = new SimpleFeatureVector(selectedWockets.Count, 128, 90);
             if (trainingTW == null)
             {
                 arffFileName = Core._StoragePath + "\\output" + DateTime.Now.ToString().Replace('/', '_').Replace(':', '_').Replace(' ', '_') + ".arff";
@@ -1102,7 +1102,7 @@ namespace WocketsApplication
                         totalCalories += (kcal_kg_hr * kgs * difference);
                     prevHrs = hrs;
                     ((Label)this.classifiedLabels["kcals"]).Text = "Calories Burnt: " + totalCalories.ToString("0.0");
-                    ((Label)this.classifiedLabels["reps"]).Text = "Reps: " +reps;
+                    //((Label)this.classifiedLabels["reps"]).Text = "Reps: " +reps;
                     //pieChart.SetTime(ts.Hours,ts.Minutes,ts.Seconds);
                     //pieChart.Invalidate();
                     this.panels[ControlID.CLASSIFICATION_PANEL].Invalidate();
@@ -1133,12 +1133,16 @@ namespace WocketsApplication
                     if (prevActivity != activity)
                     {
                         ((AlphaPictureBox)this.activityPictures[activity]).Visible = true;
-                        ((AlphaPictureBox)this.activityPictures[prevActivity]).Visible = false;
+                        if (prevActivity == "Reconnecting")
+                            ((AlphaPictureBox)this.activityPictures["no-activity"]).Visible = false;
+                        else
+                            ((AlphaPictureBox)this.activityPictures[prevActivity]).Visible = false;
                         prevActivity = activity;
                         if (color == 1)
                         {
                             ((Label)this.classifiedLabels["classification"]).Text = "Reconnecting...";
                             ((Label)this.classifiedLabels["classification"]).ForeColor = Color.Red;
+                            prevActivity = "Reconnecting";
                         }
                         else
                         {
@@ -1176,11 +1180,50 @@ namespace WocketsApplication
         {
             string previousActivity = "";
             int missedExtractions = 0;
+            bool extracted = false;
+            lastTotalSamples = new long[CurrentWockets._Controller._Decoders.Count];
+            last_extracted = new int[CurrentWockets._Controller._Decoders.Count];
+            no_fv_iterations = new int[CurrentWockets._Controller._Decoders.Count];
             while (true)
             {
-                //double lastTimeStamp = FullFeatureExtractor.StoreWocketsWindow();
-                //if (FullFeatureExtractor.GenerateFeatureVector(lastTimeStamp))
-                if (fv.Extract())
+
+                //Check if each decoder decoded the desired number of samples
+                bool readyFV = true;
+                for (int i = 0; (i < CurrentWockets._Controller._Decoders.Count); i++)
+                {
+                    long numNewSamples = CurrentWockets._Controller._Decoders[i].TotalSamples - lastTotalSamples[i];
+                    if (numNewSamples == 0)
+                        readyFV = false;
+                    else if (numNewSamples < fv._Length)
+                    {
+                        if (no_fv_iterations[i] > 7) // a disconnection occurred, so reset the window you are looking at
+                        {
+                            //reinitialize all
+                            for (int j = 0; (j < CurrentWockets._Controller._Decoders.Count); j++)
+                                no_fv_iterations[j] = 0;
+                        }
+                        readyFV = false;
+                        no_fv_iterations[i] = no_fv_iterations[i] + 1;
+                        break;
+                    }
+                }
+
+                if (!readyFV)
+                {
+                    Thread.Sleep(1000);
+                    missedExtractions++;
+                    if (missedExtractions>6)
+                        UpdateClassification("no-activity", 1); 
+                    continue;
+                }
+
+                extracted = fv.Extract();
+
+                for (int i = 0; (i < CurrentWockets._Controller._Decoders.Count); i++)
+                    lastTotalSamples[i] = CurrentWockets._Controller._Decoders[i].TotalSamples;
+
+
+                if (extracted)
                 {
                     missedExtractions = 0;
                     Instance newinstance = new Instance(instances.numAttributes());
@@ -1256,8 +1299,13 @@ namespace WocketsApplication
                         }
                         else if (mostActivity == "biceps-curls")
                         {
-                            mets = "1.4 KCals/min";
-                            kcal_kg_hr = 1.4; // 1 METs
+                            mets = "1.8 KCals/min";
+                            kcal_kg_hr = 1.8; // 1 METs
+                        }
+                        else if (mostActivity == "pushups")
+                        {
+                            mets = "3.2 KCals/min";
+                            kcal_kg_hr = 3.2; // 1 METs
                         }
                         else
                         {
@@ -1269,10 +1317,10 @@ namespace WocketsApplication
                     }
                     UpdateTimer();
                 }
-                else if (missedExtractions > 5)                
-                    UpdateClassification("no-activity", 1);                  
-                else
-                    missedExtractions++;
+                //else if (missedExtractions > 5)                
+                    
+                //else
+                  //  missedExtractions++;
                 
                 Thread.Sleep(500);
             }
@@ -1424,12 +1472,12 @@ namespace WocketsApplication
             
             //FullFeatureExtractor.Initialize(CurrentWockets._Controller._Sensors.Count, 90, CurrentWockets._Configuration, this.annotatedSession.OverlappingActivityLists[0]);
             //FullFeatureExtractor.Initialize3(CurrentWockets._Controller._Sensors.Count, 90, CurrentWockets._Configuration, this.annotatedSession.OverlappingActivityLists[0]);
-            fv = new SimpleFeatureVector(selectedWockets.Count, 256, 90);
+            fv = new SimpleFeatureVector(selectedWockets.Count, 128, 90);
 
            // this.annotatedSession = new Session();
            // this.annotatedSession.FromXML(Constants.PATH + "ActivityProtocols\\" + this.aProtocols[this.selectedActivityProtocol]._FileName);
             classifier = new J48();
-            classifier.set_MinNumObj(10);
+            classifier.set_MinNumObj(5);
             classifier.set_ConfidenceFactor((float)0.25);
             if (!File.Exists(modelDirectory + "\\model.xml"))
             {
@@ -1526,6 +1574,17 @@ namespace WocketsApplication
             picture.Location = new Point(40, 90);
             activityPictures.Add(picture.Name, picture);
             this.panels[ControlID.CLASSIFICATION_PANEL].Controls.Add(picture);
+
+
+            picture = new AlphaPictureBox();
+            picture.Name = "pushups";
+            picture.Size = new Size(240, 240);
+            picture.Image = AlphaImage.CreateFromFile(Constants.PATH + "images\\" + picture.Name + ".gif");
+            picture.Visible = false;
+            picture.Location = new Point(40, 90);
+            activityPictures.Add(picture.Name, picture);
+            this.panels[ControlID.CLASSIFICATION_PANEL].Controls.Add(picture);
+
             
             Label label = new Label();
             label.Size = new Size(500, 100);
@@ -2795,6 +2854,7 @@ namespace WocketsApplication
             lastTotalSamples = new long[CurrentWockets._Controller._Decoders.Count];
             last_extracted = new int[CurrentWockets._Controller._Decoders.Count];
             no_fv_iterations = new int[CurrentWockets._Controller._Decoders.Count];
+            bool extracted = false;
             while (true)
             {
                 string current_activity = "unknown";
@@ -2803,41 +2863,43 @@ namespace WocketsApplication
                     if (this.currentRecord != null)
                         current_activity = this.currentRecord.Activities._CurrentActivity;
                 }
-                if (current_activity != "unknown")
+
+                //Check if each decoder decoded the desired number of samples
+                bool readyFV = true;
+                for (int i = 0; (i < CurrentWockets._Controller._Decoders.Count); i++)
                 {
-
-                    //Check if each decoder decoded the desired number of samples
-                    bool readyFV = true;
-                    for (int i = 0; (i < CurrentWockets._Controller._Decoders.Count); i++)
+                    long numNewSamples = CurrentWockets._Controller._Decoders[i].TotalSamples - lastTotalSamples[i];
+                    if (numNewSamples == 0)
+                        readyFV = false;
+                    else if (numNewSamples < fv._Length)
                     {
-                        long numNewSamples = CurrentWockets._Controller._Decoders[i].TotalSamples-lastTotalSamples[i];                   
-                        if (numNewSamples == 0)
-                            readyFV = false;
-                        else if (numNewSamples < fv._Length)
+                        if (no_fv_iterations[i] > 7) // a disconnection occurred, so reset the window you are looking at
                         {
-                            if (no_fv_iterations[i] > 7) // a disconnection occurred, so reset the window you are looking at
-                            {
-                                //reinitialize all
-                                for (int j = 0; (j < CurrentWockets._Controller._Decoders.Count); j++)              
-                                    no_fv_iterations[j] = 0;                                
-                            }
-                            readyFV = false;
-                            no_fv_iterations[i] = no_fv_iterations[i] + 1;
-                            break;
+                            //reinitialize all
+                            for (int j = 0; (j < CurrentWockets._Controller._Decoders.Count); j++)
+                                no_fv_iterations[j] = 0;
                         }
+                        readyFV = false;
+                        no_fv_iterations[i] = no_fv_iterations[i] + 1;
+                        break;
                     }
+                }
 
-                    if (!readyFV)
-                    {
-                        Thread.Sleep(1000);
-                        continue;
-                    }
-                                     
-                    for (int i = 0; (i < CurrentWockets._Controller._Decoders.Count); i++)
-                        lastTotalSamples[i]=CurrentWockets._Controller._Decoders[i].TotalSamples;
+                if (!readyFV)
+                {
+                    Thread.Sleep(1000);
+                    continue;
+                }
 
+                extracted = fv.Extract();
+
+                for (int i = 0; (i < CurrentWockets._Controller._Decoders.Count); i++)
+                    lastTotalSamples[i] = CurrentWockets._Controller._Decoders[i].TotalSamples;
+
+                if (current_activity != "unknown")
+                {                    
                     //skip boundary don't use it
-                    if ((prev_activity==current_activity) && (fv.Extract()))
+                    if ((prev_activity==current_activity) && (extracted))
                     {
                         string arffSample = fv.toString() + "," + current_activity;
                         trainingTW.WriteLine(arffSample);

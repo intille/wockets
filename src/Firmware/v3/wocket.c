@@ -210,11 +210,11 @@ void _wocket_initialize(void)
 	{
 
 		// Set the sampling rate to 90Hz
-		_SAMPLING_RATE=40;
-		_wTM=_TM_Burst_60;
+		//_SAMPLING_RATE=40;
+		//_wTM=_TM_Burst_60;
 
-		//_SAMPLING_RATE=90;
-		//_wTM=_TM_Continuous;
+		_SAMPLING_RATE=90;
+		_wTM=_TM_Continuous;
 	
 		// Write the sampling rate to the EEPROM
 		if (battery>300)
@@ -344,7 +344,7 @@ unsigned char _wocket_is_flag_set(unsigned char flag)
 
 
 
-
+/*
 wockets_uncompressed_packet _encode_packet(unsigned short x, unsigned short y, unsigned short z)
 {
 	wockets_uncompressed_packet packet;
@@ -379,7 +379,31 @@ void _transmit_packet(wockets_uncompressed_packet packet)
 	_bluetooth_transmit_uart0_byte(packet.byte5);
 	
 }
+*/
+void _send_uncompressed_pdu(unsigned short x, unsigned short y, unsigned short z)
+{
+	aBuffer[0] =0x80| ((x>>8)& 0x03);
+	_bluetooth_transmit_uart0_byte(aBuffer[0]);
+	aBuffer[1] = ((unsigned char) ((x>>1)&0x7f));
+	_bluetooth_transmit_uart0_byte(aBuffer[1]);
+	aBuffer[2] = ((unsigned char) ((x<<6) &0x40)) | ((unsigned char) ((y>>4)&0x3f));
+	_bluetooth_transmit_uart0_byte(aBuffer[2]);
+	aBuffer[3] = ((unsigned char) ((y<<3) &0x78)) | ((unsigned char) ((z>>7)&0x07));
+	_bluetooth_transmit_uart0_byte(aBuffer[3]);
+	aBuffer[4] = ((unsigned char) (z&0x7f));
+	_bluetooth_transmit_uart0_byte(aBuffer[4]);
+}
 
+
+void _send_compressed_pdu(unsigned char x, unsigned char y, unsigned char z)
+{
+	aBuffer[0] =0xe0| ((x>>1)& 0x1f);
+	_bluetooth_transmit_uart0_byte(aBuffer[0]);
+	aBuffer[1] = ((x & 0x01)<<6) | (y & 0x3f);
+	_bluetooth_transmit_uart0_byte(aBuffer[1]);
+	aBuffer[2] =  (z<<1);
+	_bluetooth_transmit_uart0_byte(aBuffer[2]);	
+}
 
 void _send_batch_count(unsigned short count)
 {
@@ -388,6 +412,16 @@ void _send_batch_count(unsigned short count)
     aBuffer[1]=m_BC_RSP_BYTE1(count);
     aBuffer[2]=m_BC_RSP_BYTE2(count);
 	for (int i=0;(i<3);i++)                                                                                       
+       	_bluetooth_transmit_uart0_byte(aBuffer[i]); 
+ 
+}
+
+void _send_sr()
+{
+ 
+	aBuffer[0]=m_SR_RSP_BYTE0;
+    aBuffer[1]=m_SR_RSP_BYTE1(_SAMPLING_RATE);
+	for (int i=0;(i<2);i++)                                                                                       
        	_bluetooth_transmit_uart0_byte(aBuffer[i]); 
  
 }

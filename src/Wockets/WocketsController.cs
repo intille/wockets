@@ -110,6 +110,7 @@ namespace Wockets
         public bool _Bursty = false;
 
         public MemoryMode _Mode = MemoryMode.BluetoothToLocal;
+        public TransmissionMode _TMode = TransmissionMode.Continuous;
 
         /// <summary>
         /// A property that controls the data saving thread. When set to true the saving thread is signaled to run.

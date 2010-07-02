@@ -6,7 +6,8 @@ namespace Wockets.Decoders
 {
     public enum DecoderModes
     {
-        Data,
+        DataBatch,
+        DataContinuous,
         Command
     }
 }

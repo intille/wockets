@@ -268,7 +268,7 @@ namespace WocketConfigurationApp
                         info_cmd_value_calibration.Text = ((CAL_RSP)response)._X1G.ToString() + " " + ((CAL_RSP)response)._XN1G.ToString() + " " + ((CAL_RSP)response)._Y1G.ToString() + " " + ((CAL_RSP)response)._YN1G.ToString() + " " + ((CAL_RSP)response)._Z1G.ToString() + " " + ((CAL_RSP)response)._ZN1G.ToString();
                         break;
                     case ResponseTypes.PC_RSP:
-                        info_cmd_value_pkt_count.Text = ((PC_RSP)response)._Count.ToString();
+                        info_cmd_value_pkt_count.Text = ((PC_RSP)response)._Count.ToString() + " - " + ((WocketsDecoder)wc._Decoders[0])._UncompressedPDUCount + " - " + ((WocketsDecoder)wc._Decoders[0])._CompressedPDUCount;
                         break;
                     case ResponseTypes.PDT_RSP:
                         //info_cmd_value_pwr_timeout.Text = ((PDT_RSP)response)._Timeout.ToString();
