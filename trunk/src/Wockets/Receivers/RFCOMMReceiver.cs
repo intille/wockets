@@ -54,6 +54,7 @@ namespace Wockets.Receivers
         public bool _Bursty = false;
         public bool _TimeoutEnabled = true;
         public double _ConnectionTime = 0;
+        public double _CurrentConnectionUnixTime = 0;
         public int _Reconnections = 0;
         public int _SuccessfulConnections = 0;
      
@@ -246,6 +247,7 @@ namespace Wockets.Receivers
                     this.bluetoothStream._Timeout = 2;
                 this.bluetoothStream._TimeoutEnabled = this._TimeoutEnabled;
                 this._ConnectionTime = this.bluetoothStream._ConnectionTime;
+                this._CurrentConnectionUnixTime = this.bluetoothStream._CurrentConnectionUnixTime;
                 this._SuccessfulConnections++;
                 return true;
             }

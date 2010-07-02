@@ -408,7 +408,7 @@ namespace Wockets.Sensors.Accelerometers
                         }
                         else
                         {
-                            bw.WriteByte((byte)diffMSByte);
+                            bw.WriteByte((byte)diffMS);
                             timeSaveCount++;
                         }
                         #endregion Write Timestamp

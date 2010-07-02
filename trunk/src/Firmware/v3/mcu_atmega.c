@@ -513,7 +513,7 @@ void _atmega_finalize(void)
   	ACSR &= ~(1<<ACIE);   // Disable analog comparator interrupt
   	ACSR |= (1<<ACD);     // Disable analog comparitor 
 	// Power Reduction Register, everything off;
-  	PRR |= (uint8_t)((1<<PRADC)|(1<<PRSPI)|(1<<PRTIM0)|(1<<PRTIM1)|(1<<PRTWI)); 
+  	//PRR |= (uint8_t)((1<<PRADC)|(1<<PRSPI)|(1<<PRTIM0)|(1<<PRTIM1)|(1<<PRTWI)); 
 
 	//Power down the MCU
 

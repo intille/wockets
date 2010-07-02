@@ -47,6 +47,11 @@ data_unit data[750];
 unsigned short x;
 unsigned short y;
 unsigned short z;
+unsigned short prevx;
+unsigned short prevy;
+unsigned short prevz;
+unsigned char deltasign;
+unsigned char compress=0;
 
 unsigned short dataIndex;
 unsigned char dataSubindex;
@@ -65,6 +70,49 @@ unsigned short configurationTimer=1;
 unsigned char interrupts_passed=0;
 
 unsigned char interrupt_reps=0;
+
+static __inline__ void _send_pdu(unsigned short x, unsigned short y, unsigned short z){	
+	if(compress)
+					{
+						deltasign=0;
+						if (x>prevx)
+						{
+							deltasign |=0x01;
+							prevx=x-prevx;
+						}
+						else
+							prevx=prevx-x;
+						if (y>prevy)
+						{
+							deltasign |=0x02;
+							prevy=y-prevy;
+						}
+						else
+							prevy=prevy-y;
+						if (z>prevz)
+						{
+							deltasign |=0x04;
+							prevz=z-prevz;
+						}
+						else
+							prevz=prevz-z;
+						if ((prevx<32) && (prevy<32) && (prevz<32))
+							//_send_uncompressed_pdu(x,y,z);
+							//_send_compressed_pdu(30,20,15);
+							_send_compressed_pdu((prevx | ((deltasign &0x01)<<5)),(prevy | ((deltasign &0x02)<<4)),(prevz | ((deltasign &0x04)<<3)));
+						else
+							_send_uncompressed_pdu(x,y,z);
+					}
+					else
+					{
+					 	_send_uncompressed_pdu(x,y,z);
+						compress=1;
+					}
+					prevx=x;
+					prevy=y;
+					prevz=z;
+
+}
 
 int main()
 {
@@ -146,7 +194,9 @@ scounter=0;
 						break;
 				}
 											
-				_transmit_packet(_encode_packet( x, y, z));	
+				//_transmit_packet(_encode_packet( x, y, z));	
+				//_send_uncompressed_pdu(x, y, z);
+				_send_pdu(x,y,z);
 
 			}
 			else 
@@ -166,22 +216,30 @@ scounter=0;
 							m_GET_X(x,data[i].byte1,data[i].byte2,0);
 							m_GET_Y(y,data[i].byte2,data[i].byte3,0);
 							m_GET_Z(z,data[i].byte3,data[i].byte4,0);
-							_transmit_packet(_encode_packet(x,y,z));
+							//_transmit_packet(_encode_packet(x,y,z));
+							//_send_uncompressed_pdu(x, y, z);
+							_send_pdu(x,y,z);
 
 							m_GET_X(x,data[i].byte4,data[i].byte5,1);
 							m_GET_Y(y,data[i].byte6,data[i].byte7,1);
 							m_GET_Z(z,data[i].byte7,data[i].byte8,1);
-							_transmit_packet(_encode_packet(x,y,z));
+							//_transmit_packet(_encode_packet(x,y,z));
+							//_send_uncompressed_pdu(x, y, z);
+							_send_pdu(x,y,z);
 
 							m_GET_X(x,data[i].byte8,data[i].byte9,2);
 							m_GET_Y(y,data[i].byte9,data[i].byte10,2);
 							m_GET_Z(z,data[i].byte11,data[i].byte12,2);
-							_transmit_packet(_encode_packet(x,y,z));
+							//_transmit_packet(_encode_packet(x,y,z));
+							//_send_uncompressed_pdu(x, y, z);
+							_send_pdu(x,y,z);
 
 							m_GET_X(x,data[i].byte12,data[i].byte13,3);
-						m_GET_Y(y,data[i].byte13,data[i].byte14,3);
+							m_GET_Y(y,data[i].byte13,data[i].byte14,3);
 							m_GET_Z(z,data[i].byte14,data[i].byte15,3);
-							_transmit_packet(_encode_packet(x,y,z));
+							//_transmit_packet(_encode_packet(x,y,z));
+							//_send_uncompressed_pdu(x, y, z);
+							_send_pdu(x,y,z);
 						}
 					}else{
 
@@ -194,22 +252,30 @@ scounter=0;
 							m_GET_X(x,data[current].byte1,data[current].byte2,0);
 							m_GET_Y(y,data[current].byte2,data[current].byte3,0);
 							m_GET_Z(z,data[current].byte3,data[current].byte4,0);
-							_transmit_packet(_encode_packet(x,y,z));
+							//_transmit_packet(_encode_packet(x,y,z));
+							//_send_uncompressed_pdu(x, y, z);
+							_send_pdu(x,y,z);
 
 							m_GET_X(x,data[current].byte4,data[current].byte5,1);
 							m_GET_Y(y,data[current].byte6,data[current].byte7,1);
 							m_GET_Z(z,data[current].byte7,data[current].byte8,1);
-							_transmit_packet(_encode_packet(x,y,z));
+							//_transmit_packet(_encode_packet(x,y,z));
+							//_send_uncompressed_pdu(x, y, z);
+							_send_pdu(x,y,z);
 
 							m_GET_X(x,data[current].byte8,data[current].byte9,2);
 							m_GET_Y(y,data[current].byte9,data[current].byte10,2);
 							m_GET_Z(z,data[current].byte11,data[current].byte12,2);
-							_transmit_packet(_encode_packet(x,y,z));
+							//_transmit_packet(_encode_packet(x,y,z));
+							//_send_uncompressed_pdu(x, y, z);
+							_send_pdu(x,y,z);
 
 							m_GET_X(x,data[current].byte12,data[current].byte13,3);
 							m_GET_Y(y,data[current].byte13,data[current].byte14,3);
 							m_GET_Z(z,data[current].byte14,data[current].byte15,3);
-							_transmit_packet(_encode_packet(x,y,z));
+							//_transmit_packet(_encode_packet(x,y,z));
+							//_send_uncompressed_pdu(x, y, z);
+							_send_pdu(x,y,z);
 
 							current++;
 							if (current==750)
@@ -284,6 +350,7 @@ scounter=0;
 
 
 
+
 ISR(TIMER2_OVF_vect)
 {
 	/* Skip sampling depending on the sampling rate variables/timers */
@@ -309,6 +376,7 @@ ISR(TIMER2_OVF_vect)
 	{
 		if (!_bluetooth_is_connected())
 		{
+			compress=0; //false
 			if (_wPDT!=0){
 				_wShutdownTimer--;
 				if (_wShutdownTimer==0)
@@ -334,6 +402,8 @@ ISR(TIMER2_OVF_vect)
 
 		if (!_bluetooth_is_connected()){
 			
+			compress=0; 
+
 			if (seconds_disconnected<1800)
 				seconds_disconnected++;
 			else if (seconds_disconnected==1800)

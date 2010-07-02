@@ -329,6 +329,7 @@ typedef struct{
 	unsigned char byte5; // 0 bit, 7 LSB z
 } wockets_uncompressed_packet;
 
+
 unsigned char num_skipped_timer_interrupts;
 unsigned char wocket_status;
 //unsigned short xs[256];
@@ -413,7 +414,8 @@ void _wocket_set_baudrate(unsigned char baudrate);
 wockets_uncompressed_packet _encode_packet(unsigned short x, unsigned short y, unsigned short z);
 void _transmit_packet(wockets_uncompressed_packet packet);
 
-
+//void _send_uncompressed_pdu(unsigned short x, unsigned short y, unsigned short z);
+//void _send_compressed_pdu(unsigned char x, unsigned char y, unsigned char z);
 
 
 //unsigned int min_shutdown_timer;

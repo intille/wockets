@@ -169,9 +169,10 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                 {                    
                     btStream.socket = new Socket(BluetoothStream._AddressFamily, SocketType.Stream, BluetoothStream._ProtocolType);
                     btStream.socket.Blocking = true;
-                    btStream._ConnectionTime = WocketsTimer.GetUnixTime();
-                    btStream.socket.Connect(btStream._RemoteEP);
-                    btStream._ConnectionTime = WocketsTimer.GetUnixTime() - btStream._ConnectionTime;
+                    btStream._ConnectionTime = WocketsTimer.GetUnixTime(DateTime.Now);
+                    btStream.socket.Connect(btStream._RemoteEP);       
+                    btStream._CurrentConnectionUnixTime = WocketsTimer.GetUnixTime(DateTime.Now);
+                    btStream._ConnectionTime = btStream._CurrentConnectionUnixTime - btStream._ConnectionTime;
                     btStream.nstream = new NetworkStream(btStream.socket, true);
                 }
 

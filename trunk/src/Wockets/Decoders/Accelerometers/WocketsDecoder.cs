@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Xml;
+using Wockets.Receivers;
 using Wockets.Data;
 using Wockets.Data.Accelerometers;
 using Wockets.Data.Commands;
@@ -29,7 +30,20 @@ namespace Wockets.Decoders.Accelerometers
         private ResponseTypes responseType;
         private double lastTimestamp;
         public int _ExpectedBatchCount = 0;
+        public int _ExpectedSamplingRate = 0;
         public double _ReferenceTime = 0;
+
+        private double batchCurrentTime = 0;
+        private double batchDeltaTime = 0;
+        private double lastDecodedSampleTime = 0;
+
+        private int prevx = 0;
+        private int prevy = 0;
+        private int prevz = 0;
+
+        public int _UncompressedPDUCount = 0;
+        public int _CompressedPDUCount = 0;
+        
 
         public WocketsDecoder()
             : base(BUFFER_SIZE, (WocketsAccelerationData.NUM_RAW_BYTES > Wockets.Data.Responses.Response.MAX_RAW_BYTES) ? WocketsAccelerationData.NUM_RAW_BYTES : Wockets.Data.Responses.Response.MAX_RAW_BYTES)
@@ -88,8 +102,8 @@ namespace Wockets.Decoders.Accelerometers
                         }
 
                 }
-                else */if (this._Mode == DecoderModes.Data)
-                {
+                else *///if ((this._Mode == DecoderModes.DataContinuous)||(this._Mode == DecoderModes.DataBatch))
+                //{
                            //If a PDU first byte
                     if ((data._Bytes[rawDataIndex] & 0x80) != 0) 
                     {
@@ -101,6 +115,9 @@ namespace Wockets.Decoders.Accelerometers
                         {
                             case SensorDataType.UNCOMPRESSED_DATA_PDU:
                                 bytesToRead = 5;
+                                break;
+                            case SensorDataType.COMPRESSED_DATA_PDU:
+                                bytesToRead = 3;
                                 break;
                             case SensorDataType.RESPONSE_PDU:
                                 responseType = (ResponseTypes)((int)(((byte)data._Bytes[rawDataIndex]) & 0x1f));
@@ -145,23 +162,52 @@ namespace Wockets.Decoders.Accelerometers
 
                     if ((this.packetPosition == bytesToRead)) //a full packet was received
                     {
-                        if (packetType == SensorDataType.UNCOMPRESSED_DATA_PDU)
+                        if ( (packetType == SensorDataType.UNCOMPRESSED_DATA_PDU)||(packetType == SensorDataType.COMPRESSED_DATA_PDU))
                         {
 
-                            short x = (short)((((short)(this.packet[0] & 0x03)) << 8) | (((short)(this.packet[1] & 0x7f)) << 1) | (((short)(this.packet[2] & 0x40)) >> 6));
-                            short y = (short)((((short)(this.packet[2] & 0x3f)) << 4) | (((short)(this.packet[3] & 0x78)) >> 3));
-                            short z = (short)((((short)(this.packet[3] & 0x07)) << 7) | ((short)(this.packet[4] & 0x7f)));
-                            double ts = 0;          
-                             ts = WocketsTimer.GetUnixTime();
-                             this.TotalSamples++;
-                    
+                            short x = 0;
+                            short y = 0;
+                            short z = 0;
+
+                            if (packetType == SensorDataType.UNCOMPRESSED_DATA_PDU)
+                            {
+                                x = (short)((((short)(this.packet[0] & 0x03)) << 8) | (((short)(this.packet[1] & 0x7f)) << 1) | (((short)(this.packet[2] & 0x40)) >> 6));
+                                y = (short)((((short)(this.packet[2] & 0x3f)) << 4) | (((short)(this.packet[3] & 0x78)) >> 3));
+                                z = (short)((((short)(this.packet[3] & 0x07)) << 7) | ((short)(this.packet[4] & 0x7f)));
+                                _UncompressedPDUCount++;
+                            }
+                            else
+                            {
+                                x = (short)(((this.packet[0] & 0x0f) << 1) | ((this.packet[1] & 0x40) >> 6));
+                                x = ((((short)((this.packet[0] >> 4) & 0x01)) == 1) ? ((short)(prevx + x)) : ((short)(prevx - x)));
+                                y = (short)(this.packet[1] & 0x1f);
+                                y = ((((short)((this.packet[1] >> 5) & 0x01)) == 1) ? ((short)(prevy + y)) : ((short)(prevy - y)));
+                                z = (short)((this.packet[2] >> 1) & 0x1f);
+                                z = ((((short)((this.packet[2] >> 6) & 0x01)) == 1) ? ((short)(prevz + z)) : ((short)(prevz - z)));
+                                _CompressedPDUCount++;
+                            }
+
+                            prevx = x;
+                            prevy = y;
+                            prevz = z;
+                            double ts = 0;
+
+                            //Use the high precision timer
+                            if (CurrentWockets._Controller._TMode == TransmissionMode.Continuous)
+                                ts = WocketsTimer.GetUnixTime();
+                            else // use date time now assuming suspension is possible
+                            {
+                                ts = batchCurrentTime;
+                                batchCurrentTime += batchDeltaTime;
+                            }
+                            this.TotalSamples++;                    
 
                             //if (CurrentWockets._Configuration._MemoryMode == Wockets.Data.Configuration.MemoryConfiguration.NON_SHARED)
                             if (CurrentWockets._Controller._Mode== MemoryMode.BluetoothToLocal)
                             {
                                 int bufferHead = this.head;
                                 WocketsAccelerationData datum = ((WocketsAccelerationData)this._Data[bufferHead]);
-                                datum.Reset();
+                                datum.Reset();                                
                                 datum.UnixTimeStamp = ts;
 
                                 //copy raw bytes
@@ -266,6 +312,7 @@ namespace Wockets.Decoders.Accelerometers
                                     for (int i = 0; (i < bytesToRead); i++)
                                         sr.RawBytes[i] = this.packet[i];
                                     sr._SamplingRate= (this.packet[1]&0x7f);
+                                    this._ExpectedSamplingRate = sr._SamplingRate;
                                     FireEvent(sr);
                                     break;
                                 case ResponseTypes.BP_RSP:
@@ -325,6 +372,27 @@ namespace Wockets.Decoders.Accelerometers
                                         bc.RawBytes[i] = this.packet[i];
                                     bc._Count = ((this.packet[1] & 0x7f) << 7) | (this.packet[2] & 0x7f);
                                     this._ExpectedBatchCount = bc._Count;
+                                    //Compute the start time and delta for timestamping the data
+                                    double startTime=((RFCOMMReceiver)CurrentWockets._Controller._Receivers[this._ID])._CurrentConnectionUnixTime;
+                                    //attempt correcting using the sampling rate, check if the
+                                    // first sample has a timestamp greater than the last timestamped
+                                    // sample... if that is the case continue
+                                    // if it is not the case then temporarily alter the delta value
+                                    // to fit within the start time and end time for the samples
+                                    // this is necessary to avoid overspreading the samples when disconnections
+                                    // occur
+                                    startTime -= ((1000.0 / this._ExpectedSamplingRate) * bc._Count);
+
+                                    if (startTime > lastDecodedSampleTime)
+                                    {
+                                        batchCurrentTime = startTime;
+                                        batchDeltaTime = 1000.0 / this._ExpectedSamplingRate;
+                                    }
+                                    else
+                                    {
+                                        batchDeltaTime = (startTime - lastDecodedSampleTime) / bc._Count;
+                                        batchCurrentTime = lastDecodedSampleTime+batchDeltaTime;
+                                    }
                                     FireEvent(bc);
                                     break;
                                 default:
@@ -337,7 +405,7 @@ namespace Wockets.Decoders.Accelerometers
                                    
                     }
 
-                }
+                //}
             }
             return numDecodedPackets;
         }

@@ -24,6 +24,7 @@ namespace Wockets.Data.Features
 
         //Vectors to store intermidate values
         private double[][] standardized;
+        private double[][] standardizedn;
         private double[][] lpData;
         private double[][] bpData;
         private double[] means;
@@ -69,6 +70,8 @@ namespace Wockets.Data.Features
             num_features += 2 * FFT_MAX_FREQUENCIES * this.raw_rows_size; // number of fft magnitudes and frequencies
             num_features += this.raw_rows_size; // number of energies
             num_features += ((this.raw_rows_size * this.raw_rows_size) - this.raw_rows_size) / 2; //correlation coefficients off-di
+            num_features += this.raw_rows_size; //RM
+            num_features += this.raw_rows_size; //SN
 
             //Allocate the feature vector and labels vector
             this._Values = new double[num_features];
@@ -110,16 +113,16 @@ namespace Wockets.Data.Features
             for (int i = 0; (i < this.raw_rows_size); i++)
                 standardized[i] = new double[this.raw_columns_size];
 
+            standardizedn = new double[this.raw_rows_size][];
+            for (int i = 0; (i < this.raw_rows_size); i++)
+                standardizedn[i] = new double[this.raw_columns_size];
+
             if (_Filtered)
             {
                 meansbp = new double[this.raw_rows_size];
                 meanslp = new double[this.raw_rows_size];
-            }
-            else
-            {
-                means = new double[this.raw_rows_size];
-            }
-            
+            }                            
+            means = new double[this.raw_rows_size];                        
             inputFFT = new int[this.raw_columns_size];
             FFT.Initialize(input_power, FFT_MAX_FREQUENCIES);
             
@@ -143,7 +146,7 @@ namespace Wockets.Data.Features
         public override bool Extract()
         {
             int j = 0, i = 0;
-            double sumlp = 0, sumbp = 0,sum=0, min = 0, max = 0, total = 0, variance = 0;
+            double sumlp = 0, sumbp = 0,sum=0, min = 0, max = 0, total = 0, variance = 0,variancen=0;
 
             #region Copy data from wockets decoder
             int decoderIndex = 0;
@@ -205,7 +208,8 @@ namespace Wockets.Data.Features
             int fftIndex = rangeIndex + this.raw_rows_size;
             int energyIndex = fftIndex + (2 * FFT_MAX_FREQUENCIES * this.raw_rows_size);
             int correlationIndex = energyIndex + this.raw_rows_size; //add number of variances         
-
+            int rmIndex = correlationIndex + this.raw_rows_size;
+            int snIndex = rmIndex + this.raw_rows_size;
 
             for (i = 0; (i < this._Values.Length); i++)
                 this._Values[i] = 0;
@@ -227,6 +231,7 @@ namespace Wockets.Data.Features
                         inputFFT[j] = (int)(bpData[i][j]);
                         sumbp += bpData[i][j];
                         sumlp += lpData[i][j];
+                        sum += raw[i][j];
                     }
                     else
                     {
@@ -242,11 +247,14 @@ namespace Wockets.Data.Features
                 {
                     meansbp[i] = sumbp / this.raw_columns_size;   //mean
                     meanslp[i] = sumlp / this.raw_columns_size;   //mean
+                    means[i] = sum / this.raw_columns_size;
+                    this._Values[rmIndex++] = meanslp[i];                  
                     total += meansbp[i];  //total mean
                 }
                 else
                 {
                     means[i] = sum / this.raw_columns_size;
+                    this._Values[rmIndex++] = means[i];
                     total += means[i];  //total mean
                 }
 
@@ -277,8 +285,10 @@ namespace Wockets.Data.Features
                     if (_Filtered)
                     {
                         variance += Math.Pow(bpData[i][j] - meansbp[i], 2);
+                        variancen += Math.Pow(raw[i][j] - means[i], 2);
                         //***mean subtracted
                         standardized[i][j] = bpData[i][j] - meansbp[i]; //mean subtracted
+                        standardizedn[i][j] = raw[i][j] - means[i]; //mean subtracted
                     }
                     else
                     {
@@ -288,7 +298,7 @@ namespace Wockets.Data.Features
                     }
 
                 }
-
+                this._Values[snIndex++] = variance/variancen;
                 this._Values[varianceIndex++] = variance / (this.raw_columns_size - 1);
 
                 //calculate the range
@@ -347,6 +357,8 @@ namespace Wockets.Data.Features
             string FFT_ATTRIBUTES = "";
             string ENERGY_ATTRIBUTES = "";
             string CORRELATION_ATTRIBUTES = "";
+            string RM_ATTRIBUTES = "";
+            string SN_ATTRIBUTES = "";
 
             int distanceIndex = 0;//number of means on every row + 1 for total mean, 0 based index
             int varianceIndex = distanceIndex + this.raw_rows_size + 1; // add number of distances
@@ -354,6 +366,8 @@ namespace Wockets.Data.Features
             int fftIndex = rangeIndex + this.raw_rows_size;
             int energyIndex = fftIndex + (2 * FFT_MAX_FREQUENCIES * this.raw_rows_size);
             int correlationIndex = energyIndex + this.raw_rows_size; //add number of variances   
+            int rmIndex = correlationIndex + this.raw_rows_size;
+            int snIndex = rmIndex + this.raw_rows_size;
 
             for (int i = 0; (i < this.raw_rows_size); i++)
             {
@@ -374,6 +388,12 @@ namespace Wockets.Data.Features
 
                 RANGE_ATTRIBUTES += "@ATTRIBUTE RANGE_" + i + " NUMERIC\n";
                 this._Names[rangeIndex++] = "RANGE_" + i;
+
+                RM_ATTRIBUTES += "@ATTRIBUTE RM_" + i + " NUMERIC\n";
+                this._Names[rmIndex++] = "RM_" + i;
+
+                SN_ATTRIBUTES += "@ATTRIBUTE SN_" + i + " NUMERIC\n";
+                this._Names[snIndex++] = "SN_" + i;
 
                 for (int k = 0; (k < (FFT_MAX_FREQUENCIES * 2)); k++)
                 {
@@ -402,7 +422,7 @@ namespace Wockets.Data.Features
             this._Names[distanceIndex] = "TotalMean";
 
             return DISTANCE_ATTRIBUTES + TOTAL_ATTRIBUTE + VARIANCE_ATTRIBUTES + RANGE_ATTRIBUTES +
-               FFT_ATTRIBUTES + ENERGY_ATTRIBUTES + CORRELATION_ATTRIBUTES;
+               FFT_ATTRIBUTES + ENERGY_ATTRIBUTES + CORRELATION_ATTRIBUTES + RM_ATTRIBUTES +SN_ATTRIBUTES;
         }
 
         public string toString()

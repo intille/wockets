@@ -104,6 +104,8 @@ namespace Wockets.Utils.network.Bluetooth
 
 
         public double _ConnectionTime = 0;
+        //public double _LastConnectionUnixTime = 0;
+        public double _CurrentConnectionUnixTime = 0;
 
 
         /// <summary>
