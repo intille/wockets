@@ -431,6 +431,9 @@
     </Compile>
     <Compile Include="..\..\src\Wockets\Utils\Math.cs" >
       <Link>Utils\Math.cs</Link>
+    </Compile>  
+  <Compile Include="..\..\src\Wockets\TransmissionMode.cs" >
+      <Link>TransmissionMode.cs</Link>
     </Compile>    
   </ItemGroup>
   <ItemGroup>
