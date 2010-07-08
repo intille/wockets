@@ -159,6 +159,18 @@ namespace Wockets.Utils
             return true;
         }
 
+        public bool ReadBytes(byte[] someBytes, int start, int len)
+        {
+            for (int i = 0; i < (len-start); i++)
+            {
+                if (ReadByte(tb))
+                    someBytes[i+start] = tb[0];
+                else
+                    return false;
+            }
+            return true;
+        }
+
         /// <summary>
         /// Read a single int value from a byte file.
         /// </summary>

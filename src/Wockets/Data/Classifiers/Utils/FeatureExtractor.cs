@@ -434,9 +434,9 @@ namespace Wockets.Data.Classifiers.Utils
                
                 {
                     int  x = 0, y = 0, z = 0;                    
-                    x = (int)((AccelerationData)FeatureExtractor.wocketsController._Decoders[i]._Data[tail[i]]).X;
-                    y = (int)((AccelerationData)FeatureExtractor.wocketsController._Decoders[i]._Data[tail[i]]).Y;
-                    z = (int)((AccelerationData)FeatureExtractor.wocketsController._Decoders[i]._Data[tail[i]]).Z;
+                    x = (int)((AccelerationData)FeatureExtractor.wocketsController._Decoders[i]._Data[tail[i]])._X;
+                    y = (int)((AccelerationData)FeatureExtractor.wocketsController._Decoders[i]._Data[tail[i]])._Y;
+                    z = (int)((AccelerationData)FeatureExtractor.wocketsController._Decoders[i]._Data[tail[i]])._Z;
                     unixtimestamp = ((AccelerationData)FeatureExtractor.wocketsController._Decoders[i]._Data[tail[i]]).UnixTimeStamp;
                     tailUnixtimestamp[i] = unixtimestamp;
                     if (tail[i] >= (FeatureExtractor.wocketsController._Decoders[i]._Data.Length - 1))

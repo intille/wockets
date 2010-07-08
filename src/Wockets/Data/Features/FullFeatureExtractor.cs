@@ -621,9 +621,9 @@ namespace Wockets.Data.Features
                 {
 
 
-                    FullFeatureExtractor.data[sensorIndex][j] = ((AccelerationData)CurrentWockets._Controller._Decoders[i]._Data[decoderIndex]).X;
-                    FullFeatureExtractor.data[sensorIndex + 1][j] = ((AccelerationData)CurrentWockets._Controller._Decoders[i]._Data[decoderIndex]).Y;
-                    FullFeatureExtractor.data[sensorIndex + 2][j] = ((AccelerationData)CurrentWockets._Controller._Decoders[i]._Data[decoderIndex]).Z;
+                    FullFeatureExtractor.data[sensorIndex][j] = ((AccelerationData)CurrentWockets._Controller._Decoders[i]._Data[decoderIndex])._X;
+                    FullFeatureExtractor.data[sensorIndex + 1][j] = ((AccelerationData)CurrentWockets._Controller._Decoders[i]._Data[decoderIndex])._Y;
+                    FullFeatureExtractor.data[sensorIndex + 2][j] = ((AccelerationData)CurrentWockets._Controller._Decoders[i]._Data[decoderIndex])._Z;
                     decoderIndex++;
                     if (decoderIndex >= CurrentWockets._Controller._Decoders[i]._BufferSize)
                         decoderIndex = 0;
@@ -650,9 +650,9 @@ namespace Wockets.Data.Features
                
                 {
                     int  x = 0, y = 0, z = 0;                    
-                    x = (int)((AccelerationData)FullFeatureExtractor.wocketsController._Decoders[i]._Data[tail[i]]).X;
-                    y = (int)((AccelerationData)FullFeatureExtractor.wocketsController._Decoders[i]._Data[tail[i]]).Y;
-                    z = (int)((AccelerationData)FullFeatureExtractor.wocketsController._Decoders[i]._Data[tail[i]]).Z;
+                    x = (int)((AccelerationData)FullFeatureExtractor.wocketsController._Decoders[i]._Data[tail[i]])._X;
+                    y = (int)((AccelerationData)FullFeatureExtractor.wocketsController._Decoders[i]._Data[tail[i]])._Y;
+                    z = (int)((AccelerationData)FullFeatureExtractor.wocketsController._Decoders[i]._Data[tail[i]])._Z;
                     unixtimestamp = ((AccelerationData)FullFeatureExtractor.wocketsController._Decoders[i]._Data[tail[i]]).UnixTimeStamp;
                     tailUnixtimestamp[i] = unixtimestamp;
                     if (tail[i] >= (FullFeatureExtractor.wocketsController._Decoders[i]._Data.Length - 1))

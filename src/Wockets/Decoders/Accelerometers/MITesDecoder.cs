@@ -86,9 +86,9 @@ namespace Wockets.Decoders.Accelerometers
                             //Decode the MITes axes data
                             datum._Type = SensorDataType.UNCOMPRESSED_DATA_PDU;
                             datum._SensorID = (byte) sensorID;
-                            datum.X = (short)(this.packet[1] | ((this.packet[4] & 0xC0) << 2));
-                            datum.Y = (short)(this.packet[2] | ((this.packet[4] & 0x30) << 4));
-                            datum.Z = (short)(this.packet[3] | ((this.packet[4] & 0x0C) << 6));
+                            datum._X = (short)(this.packet[1] | ((this.packet[4] & 0xC0) << 2));
+                            datum._Y = (short)(this.packet[2] | ((this.packet[4] & 0x30) << 4));
+                            datum._Z = (short)(this.packet[3] | ((this.packet[4] & 0x0C) << 6));
 
                             //Set time stamps
                             datum.UnixTimeStamp = WocketsTimer.GetUnixTime();
@@ -117,7 +117,8 @@ namespace Wockets.Decoders.Accelerometers
             this._Size = decodedDataIndex;
             return decodedDataIndex;
         }
-
+        public override void Load(ByteReader br)
+        { }
         #region Serialization Methods
         public override string ToXML()
         {

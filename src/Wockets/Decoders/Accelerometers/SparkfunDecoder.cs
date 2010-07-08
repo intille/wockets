@@ -70,9 +70,9 @@ namespace Wockets.Decoders.Accelerometers
                         //decode sparkfun packet
                         datum._Type = SensorDataType.UNCOMPRESSED_DATA_PDU;
                         datum._SensorID = (byte) sourceSensor;
-                        datum.X = (short)((((short)this.packet[4]) << 8) | ((short)this.packet[5]));
-                        datum.Y = (short)((((short)this.packet[6]) << 8) | ((short)this.packet[7]));
-                        datum.Z = (short)((((short)this.packet[8]) << 8) | ((short)this.packet[9]));                        
+                        datum._X = (short)((((short)this.packet[4]) << 8) | ((short)this.packet[5]));
+                        datum._Y = (short)((((short)this.packet[6]) << 8) | ((short)this.packet[7]));
+                        datum._Z = (short)((((short)this.packet[8]) << 8) | ((short)this.packet[9]));                        
 
                         //Set time stamps
                         datum.UnixTimeStamp = WocketsTimer.GetUnixTime();
@@ -87,6 +87,8 @@ namespace Wockets.Decoders.Accelerometers
             this._Size = decodedDataIndex;
             return decodedDataIndex;
         }
+        public override void Load(ByteReader br)
+        { }
 
        /* public override bool IsValid(SensorData data)
         {

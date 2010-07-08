@@ -800,7 +800,7 @@ namespace DataMerger
                         else
                             lastDecodedIndex = wc._Sensors[i]._Decoder._Head - 1;                      
                         Wockets.Data.Accelerometers.AccelerationData data = (Wockets.Data.Accelerometers.AccelerationData)wc._Sensors[i]._Decoder._Data[lastDecodedIndex];
-                        if ((data.X >= 1023) || (data.Y >= 1023) || (data.Z >= 1023))
+                        if ((data._X >= 1023) || (data._Y >= 1023) || (data._Z >= 1023))
                             maxedOut[i] = maxedOut[i] + 1;
                     }
                 }
@@ -3058,7 +3058,7 @@ namespace DataMerger
                                 lastDecodedPacket = wc._Sensors[i]._Decoder._Head - 1;
 
                             Wockets.Data.Accelerometers.AccelerationData data = (Wockets.Data.Accelerometers.AccelerationData)wc._Sensors[i]._Decoder._Data[lastDecodedPacket];
-                            tw.WriteLine(data.UnixTimeStamp + "," + data.X + "," + data.Y + "," + data.Z);
+                            tw.WriteLine(data.UnixTimeStamp + "," + data._X + "," + data._Y + "," + data._Z);
 
                             long currentTS=(long)(data.UnixTimeStamp/1000.0);
                             if ((currentTS - prevWocketTS) < 1)

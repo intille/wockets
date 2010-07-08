@@ -72,6 +72,7 @@ namespace Wockets.Data.Features
             num_features += ((this.raw_rows_size * this.raw_rows_size) - this.raw_rows_size) / 2; //correlation coefficients off-di
             num_features += this.raw_rows_size; //RM
             num_features += this.raw_rows_size; //SN
+            num_features += this.num_wockets;
 
             //Allocate the feature vector and labels vector
             this._Values = new double[num_features];
@@ -165,9 +166,9 @@ namespace Wockets.Data.Features
                 {
 
 
-                    raw[sensorIndex][j] = ((AccelerationData)CurrentWockets._Controller._Decoders[i]._Data[decoderIndex]).X;
-                    raw[sensorIndex + 1][j] = ((AccelerationData)CurrentWockets._Controller._Decoders[i]._Data[decoderIndex]).Y;
-                    raw[sensorIndex + 2][j] = ((AccelerationData)CurrentWockets._Controller._Decoders[i]._Data[decoderIndex]).Z;
+                    raw[sensorIndex][j] = ((AccelerationData)CurrentWockets._Controller._Decoders[i]._Data[decoderIndex])._X;
+                    raw[sensorIndex + 1][j] = ((AccelerationData)CurrentWockets._Controller._Decoders[i]._Data[decoderIndex])._Y;
+                    raw[sensorIndex + 2][j] = ((AccelerationData)CurrentWockets._Controller._Decoders[i]._Data[decoderIndex])._Z;
                     decoderIndex++;
                     if (decoderIndex >= CurrentWockets._Controller._Decoders[i]._BufferSize)
                         decoderIndex = 0;
@@ -208,8 +209,10 @@ namespace Wockets.Data.Features
             int fftIndex = rangeIndex + this.raw_rows_size;
             int energyIndex = fftIndex + (2 * FFT_MAX_FREQUENCIES * this.raw_rows_size);
             int correlationIndex = energyIndex + this.raw_rows_size; //add number of variances         
-            int rmIndex = correlationIndex + this.raw_rows_size;
+            int rmIndex = correlationIndex + ((this.raw_rows_size * this.raw_rows_size) - this.raw_rows_size) / 2;
             int snIndex = rmIndex + this.raw_rows_size;
+            int svIndex = snIndex + this.raw_rows_size;
+           
 
             for (i = 0; (i < this._Values.Length); i++)
                 this._Values[i] = 0;
@@ -332,6 +335,18 @@ namespace Wockets.Data.Features
             }
 
             this._Values[this.raw_rows_size] = total;
+
+            varianceIndex = this.raw_rows_size + 1; // add number of distances
+            double sv=0;
+            for (i = 0; (i < this.raw_rows_size); i++)
+            {
+                sv+=this._Values[varianceIndex++];
+                if ((i + 1) % 3 == 0)
+                {
+                    this._Values[svIndex++]=sv;
+                    sv=0;
+                }
+            }
             #endregion Calculate feature vector
 
             return true;
@@ -359,6 +374,7 @@ namespace Wockets.Data.Features
             string CORRELATION_ATTRIBUTES = "";
             string RM_ATTRIBUTES = "";
             string SN_ATTRIBUTES = "";
+            string SV_ATTRIBUTES = "";
 
             int distanceIndex = 0;//number of means on every row + 1 for total mean, 0 based index
             int varianceIndex = distanceIndex + this.raw_rows_size + 1; // add number of distances
@@ -366,8 +382,10 @@ namespace Wockets.Data.Features
             int fftIndex = rangeIndex + this.raw_rows_size;
             int energyIndex = fftIndex + (2 * FFT_MAX_FREQUENCIES * this.raw_rows_size);
             int correlationIndex = energyIndex + this.raw_rows_size; //add number of variances   
-            int rmIndex = correlationIndex + this.raw_rows_size;
+            int rmIndex = correlationIndex + ((this.raw_rows_size * this.raw_rows_size) - this.raw_rows_size) / 2;
             int snIndex = rmIndex + this.raw_rows_size;
+            int svIndex = snIndex + this.raw_rows_size;
+            
 
             for (int i = 0; (i < this.raw_rows_size); i++)
             {
@@ -421,8 +439,15 @@ namespace Wockets.Data.Features
             TOTAL_ATTRIBUTE += "@ATTRIBUTE TotalMean NUMERIC\n";
             this._Names[distanceIndex] = "TotalMean";
 
+            for (int i = 0; (i < this.num_wockets); i++)
+            {
+                SV_ATTRIBUTES += "@ATTRIBUTE SV_" +  i + " NUMERIC\n";
+                this._Names[svIndex++] =  "SV_" +  i;
+
+            }
+
             return DISTANCE_ATTRIBUTES + TOTAL_ATTRIBUTE + VARIANCE_ATTRIBUTES + RANGE_ATTRIBUTES +
-               FFT_ATTRIBUTES + ENERGY_ATTRIBUTES + CORRELATION_ATTRIBUTES + RM_ATTRIBUTES +SN_ATTRIBUTES;
+               FFT_ATTRIBUTES + ENERGY_ATTRIBUTES + CORRELATION_ATTRIBUTES + RM_ATTRIBUTES +SN_ATTRIBUTES + SV_ATTRIBUTES;
         }
 
         public string toString()

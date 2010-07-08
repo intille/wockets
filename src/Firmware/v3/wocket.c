@@ -210,11 +210,11 @@ void _wocket_initialize(void)
 	{
 
 		// Set the sampling rate to 90Hz
-		//_SAMPLING_RATE=40;
-		//_wTM=_TM_Burst_60;
+		_SAMPLING_RATE=40;
+		_wTM=_TM_Burst_60;
 
-		_SAMPLING_RATE=90;
-		_wTM=_TM_Continuous;
+		//_SAMPLING_RATE=90;
+		//_wTM=_TM_Continuous;
 	
 		// Write the sampling rate to the EEPROM
 		if (battery>300)
@@ -481,87 +481,6 @@ void _send_data(void)
 		y=_atmega_a2dConvert10bit(ADC1);
 		z=_atmega_a2dConvert10bit(ADC0);
 
-
-
-		/*if (dataIndex<100){
-		data1[dataIndex].byte1=10;
-		data1[dataIndex].byte2=20;
-		data1[dataIndex].byte3=20;
-		data1[dataIndex].byte4=20;
-		data1[dataIndex].byte5=20;
-		data1[dataIndex].byte6=20;
-		data1[dataIndex].byte7=20;
-		data1[dataIndex].byte8=20;
-		//data1[dataIndex].byte9=20;
-		//data1[dataIndex].byte10=20;
-		//data1[dataIndex].byte11=20;
-		//data1[dataIndex].byte12=20;
-		//data1[dataIndex].byte13=20;
-		//data1[dataIndex].byte14=20;
-		//data1[dataIndex].byte15=20;
-		}
-		else if (dataIndex<200){
-		data2[dataIndex-100].byte1=10;
-		data2[dataIndex-100].byte2=20;
-		data2[dataIndex-100].byte3=20;
-		data2[dataIndex-100].byte4=20;
-		data2[dataIndex-100].byte5=20;
-		data2[dataIndex-100].byte6=20;
-		data2[dataIndex-100].byte7=20;
-		data2[dataIndex-100].byte8=20;
-		//data2[dataIndex-100].byte9=20;
-		//data2[dataIndex-100].byte10=20;
-		//data2[dataIndex-100].byte11=20;
-		//data2[dataIndex-100].byte12=20;
-		//data2[dataIndex-100].byte13=20;
-		//data2[dataIndex-100].byte14=20;
-		//data2[dataIndex-100].byte15=20;
-		}
-		else if (dataIndex<300){
-		data3[dataIndex-200].byte1=10;
-		data3[dataIndex-200].byte2=20;
-		data3[dataIndex-200].byte3=20;
-		data3[dataIndex-200].byte4=20;
-		data3[dataIndex-200].byte5=20;
-		data3[dataIndex-200].byte6=20;
-		data3[dataIndex-200].byte7=20;
-		data3[dataIndex-200].byte8=20;
-		//data3[dataIndex-200].byte9=20;
-		//data3[dataIndex-200].byte10=20;
-		//data3[dataIndex-200].byte11=20;
-		//data3[dataIndex-200].byte12=20;
-		//data3[dataIndex-200].byte13=20;
-		//data3[dataIndex-200].byte14=20;
-		//data3[dataIndex-200].byte15=20;
-		}
-*/
-
-		/**(xsp+dataIndex)=x;
-		*(ysp+dataIndex)=y;
-		*(zsp+dataIndex)=z;
-		dataIndex++;
-		dataIndex=dataIndex%2399;	
-		_transmit_packet(_encode_packet(dataIndex,y,z));	*/
-
-		/*for (int i=0;(i<4);i++)
-		{
-			data[dataIndex]=10;
-			dataIndex++;
-			if (dataIndex==11250)
-				dataIndex=0;		
-		}*/
-		//Store data in the local memory buffer
-		/*m_SET_X(data[dataIndex],x,dataSubindex);
-		dataSubindex=((++dataSubindex==4)?0:dataSubindex);
-		dataIndex=((dataSubindex==0)? ((dataIndex==19)?0:(dataIndex+1)):dataIndex);
-
-		m_SET_Y(data[dataIndex],y,dataSubindex);
-		dataSubindex=((++dataSubindex==4)?0:dataSubindex);
-		dataIndex=((dataSubindex==0)? ((dataIndex==19)?0:(dataIndex+1)):dataIndex);
-
-		m_SET_Z(data[dataIndex],z,dataSubindex);
-		dataSubindex=((++dataSubindex==4)?0:dataSubindex);
-		dataIndex=((dataSubindex==0)? ((dataIndex==19)?0:(dataIndex+1)):dataIndex);*/
 #else
 		x=_atmega_a2dConvert10bit(ADC3);
 		y=_atmega_a2dConvert10bit(ADC2);

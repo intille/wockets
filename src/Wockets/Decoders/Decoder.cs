@@ -208,6 +208,8 @@ namespace Wockets.Decoders
         //Serialization
         public abstract string ToXML();
         public abstract void FromXML(string xml);
+
+        public abstract void Load(ByteReader br);
     }
 }
 

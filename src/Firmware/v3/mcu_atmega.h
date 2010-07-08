@@ -239,6 +239,7 @@ unsigned char _accelerometer_set_sensitivity(unsigned char sensitivity);
 void _accelerometer_turn_on(void);
 void _accelerometer_turn_off(void);
 unsigned char _is_accelerometer_on(void);
+unsigned char _is_docked(void);
 
 
 /* Variables */
