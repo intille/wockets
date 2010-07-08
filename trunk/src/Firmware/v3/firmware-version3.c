@@ -196,6 +196,7 @@ scounter=0;
 											
 				//_transmit_packet(_encode_packet( x, y, z));	
 				//_send_uncompressed_pdu(x, y, z);
+				//_send_pdu(x,y,z);
 				_send_pdu(x,y,z);
 
 			}
@@ -206,6 +207,7 @@ scounter=0;
 				if (connected){
 					_greenled_turn_on();
 					
+					_send_sr();
 					_send_batch_count(batch_counter*4);
 
 
@@ -353,6 +355,12 @@ scounter=0;
 
 ISR(TIMER2_OVF_vect)
 {
+
+	/* If the wocket is docked in shut it down */
+
+	if (_is_docked())
+		_atmega_finalize();
+		
 	/* Skip sampling depending on the sampling rate variables/timers */
  	if (interrupt_reps==0)
 	{	

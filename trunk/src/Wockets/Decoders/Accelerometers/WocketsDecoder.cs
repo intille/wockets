@@ -65,6 +65,65 @@ namespace Wockets.Decoders.Accelerometers
             }
             return true;
         }
+
+        private byte[] b6 = new byte[6];
+        private byte[] b = new byte[1];
+        private double lastUnixTime = 0;
+        byte[] header = new byte[1];        
+        byte[] pdu = new byte[5];
+
+        public override void Load(ByteReader br)
+        {
+            if (this._Head == 200)
+                pdu = pdu;
+            #region Read Timestamp
+            if (!(br.ReadByte(b)))
+                throw new Exception("Error: reading first byte in PLFormat file");
+
+            //read a complete timestamp
+            if (b[0] == ((int)255))
+            {
+                if (!(br.ReadBytes(b6)))
+                    throw new Exception("Error: reading full timestamp in PLFormat file");
+
+                lastUnixTime = WocketsTimer.DecodeUnixTimeCodeBytesFixed(b6);
+            }
+            else //read a differential timestamp          
+                lastUnixTime += (int)b[0];
+
+            #endregion Read Timestamp
+
+            DateTime dt = new DateTime();
+            WocketsTimer.GetDateTime((long)lastUnixTime, out dt);
+
+            if (!br.ReadByte(header))
+                throw new Exception("Error: reading data in PLFormat file");
+            pdu[0] = header[0];
+
+            
+            int len = 0;
+            if ((header[0] & 0x60) > 0)
+                len = 3;
+            else
+                len = 5;
+            if (!(br.ReadBytes(pdu, 1, len)))
+                throw new Exception("Error: reading data in PLFormat file");
+
+
+            int lastDecodedIndex = 0;
+            //Successfully decoded a packet
+            if (this.Decode(this._ID, pdu, len) == 1)
+            {
+                if (this._Head == 0)
+                    lastDecodedIndex = this._Data.Length - 1;
+                else
+                    lastDecodedIndex = this._Head - 1;
+                this._Data[lastDecodedIndex].UnixTimeStamp = lastUnixTime;
+                return;
+            }
+            else
+                throw new Exception("Failed to decode data");
+        }
         public override int Decode(int sourceSensor, CircularBuffer data,int start,int end)
         {
 
@@ -76,34 +135,7 @@ namespace Wockets.Decoders.Accelerometers
 
             while (rawDataIndex != end)
             {
-               /* if (this._Mode == DecoderModes.Command)
-                {
-                    int plen=this.packet.Length;
-                    this.packetPosition = (this.packetPosition+1)%plen;
-                    this.packet[this.packetPosition] = data._Bytes[rawDataIndex];                        
-                    rawDataIndex = (rawDataIndex + 1) % data._Bytes.Length;
-
-                    if ((this.packet[this.packetPosition] == 'D') &&
-                         (this.packet[((this.packetPosition-1+plen) % plen)] == 'M') &&
-                         (this.packet[((this.packetPosition-2+plen) % plen)] == 'C'))
-                    {
-                        CommandModeEnterResponse response = new CommandModeEnterResponse(this._ID);
-                        Response.ResponseArgs e = new Response.ResponseArgs();
-                        e._Response = response;
-                        FireEvent(e);                         
-                    }else if ((this.packet[this.packetPosition] == '8') &&
-                      (this.packet[((this.packetPosition - 1 + plen) % plen)] == '3') )
-                        {
-                            BaudRateResponse response = new BaudRateResponse(this._ID);
-                            response._BaudRate = "38.4";
-                            Response.ResponseArgs e = new Response.ResponseArgs();
-                            e._Response = response;
-                            FireEvent(e);
-                        }
-
-                }
-                else *///if ((this._Mode == DecoderModes.DataContinuous)||(this._Mode == DecoderModes.DataBatch))
-                //{
+              
                            //If a PDU first byte
                     if ((data._Bytes[rawDataIndex] & 0x80) != 0) 
                     {
@@ -213,12 +245,16 @@ namespace Wockets.Decoders.Accelerometers
                                 //copy raw bytes
                                 for (int i = 0; (i < bytesToRead); i++)
                                     datum.RawBytes[i] = this.packet[i];
-                                datum._Type = SensorDataType.UNCOMPRESSED_DATA_PDU;
+                                if (bytesToRead == 3)
+                                    datum._Type = SensorDataType.COMPRESSED_DATA_PDU;
+                                else
+                                    datum._Type = SensorDataType.UNCOMPRESSED_DATA_PDU;
+                                datum._Length = bytesToRead;
                                 //datum.RawBytes[0] = (byte)(((datum.RawBytes[0])&0xc7)|(sourceSensor<<3));
                                 datum._SensorID = (byte)sourceSensor;
-                                datum.X = x;
-                                datum.Y = y;
-                                datum.Z = z;
+                                datum._X = x;
+                                datum._Y = y;
+                                datum._Z = z;
 
 
                                 if (bufferHead >= (BUFFER_SIZE - 1))
@@ -311,7 +347,8 @@ namespace Wockets.Decoders.Accelerometers
                                     SR_RSP sr = new SR_RSP(this._ID);
                                     for (int i = 0; (i < bytesToRead); i++)
                                         sr.RawBytes[i] = this.packet[i];
-                                    sr._SamplingRate= (this.packet[1]&0x7f);
+                                    //sr._SamplingRate= (this.packet[1]&0x7f);
+                                    sr._SamplingRate = 42;
                                     this._ExpectedSamplingRate = sr._SamplingRate;
                                     FireEvent(sr);
                                     break;
@@ -373,7 +410,7 @@ namespace Wockets.Decoders.Accelerometers
                                     bc._Count = ((this.packet[1] & 0x7f) << 7) | (this.packet[2] & 0x7f);
                                     this._ExpectedBatchCount = bc._Count;
                                     //Compute the start time and delta for timestamping the data
-                                    double startTime=((RFCOMMReceiver)CurrentWockets._Controller._Receivers[this._ID])._CurrentConnectionUnixTime;
+                                    double calculated_startTime=((RFCOMMReceiver)CurrentWockets._Controller._Receivers[this._ID])._CurrentConnectionUnixTime;
                                     //attempt correcting using the sampling rate, check if the
                                     // first sample has a timestamp greater than the last timestamped
                                     // sample... if that is the case continue
@@ -381,18 +418,21 @@ namespace Wockets.Decoders.Accelerometers
                                     // to fit within the start time and end time for the samples
                                     // this is necessary to avoid overspreading the samples when disconnections
                                     // occur
-                                    startTime -= ((1000.0 / this._ExpectedSamplingRate) * bc._Count);
+                                    calculated_startTime -= ((1000.0 / this._ExpectedSamplingRate) * bc._Count);
 
-                                    if (startTime > lastDecodedSampleTime)
+                                    // Only use the ideal sampling rate to spread out the signal if
+                                    // there is a huge gap with the previous transmission
+                                    if ((calculated_startTime > lastDecodedSampleTime) && ((calculated_startTime - lastDecodedSampleTime) >60000))
                                     {
-                                        batchCurrentTime = startTime;
+                                        batchCurrentTime = calculated_startTime;
                                         batchDeltaTime = 1000.0 / this._ExpectedSamplingRate;
                                     }
                                     else
                                     {
-                                        batchDeltaTime = (startTime - lastDecodedSampleTime) / bc._Count;
+                                        batchDeltaTime = (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[this._ID])._CurrentConnectionUnixTime - lastDecodedSampleTime) / bc._Count;
                                         batchCurrentTime = lastDecodedSampleTime+batchDeltaTime;
                                     }
+                                    lastDecodedSampleTime = ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[this._ID])._CurrentConnectionUnixTime;
                                     FireEvent(bc);
                                     break;
                                 default:
@@ -420,23 +460,58 @@ namespace Wockets.Decoders.Accelerometers
             {
                 while (rawDataIndex < length)
                 {
-                    if ((data[rawDataIndex] & 0x80) != 0) //grab the next 6 bytes
+
+
+                    if ((data[rawDataIndex] & 0x80) != 0)
                     {
                         this.packetPosition = 0;
                         this.headerSeen = true;
-                        int headerByte=((byte)(((byte)data[rawDataIndex])<<1))>>6;
-                        if (headerByte==0){
-                            bytesToRead=WocketsAccelerationData.NUM_RAW_BYTES;
-                            packetType=SensorDataType.UNCOMPRESSED_DATA_PDU;
-                        }
-                        else if (headerByte==2){                         
-                            bytesToRead=3;  
-                            packetType=SensorDataType.COMMAND_PDU;
+                        packetType = (SensorDataType)((int)((byte)(((byte)data[rawDataIndex]) << 1) >> 6));                        
+                        switch (packetType)
+                        {
+                            case SensorDataType.UNCOMPRESSED_DATA_PDU:
+                                bytesToRead = 5;
+                                break;
+                            case SensorDataType.COMPRESSED_DATA_PDU:
+                                bytesToRead = 3;
+                                break;
+                            case SensorDataType.RESPONSE_PDU:
+                                responseType = (ResponseTypes)((int)(((byte)data[rawDataIndex]) & 0x1f));
+                                switch (responseType)
+                                {
+                                    case ResponseTypes.BP_RSP:
+                                    case ResponseTypes.SENS_RSP:
+                                    case ResponseTypes.SR_RSP:
+                                    case ResponseTypes.ALT_RSP:
+                                    case ResponseTypes.PDT_RSP:
+                                    case ResponseTypes.TM_RSP:
+                                    case ResponseTypes.HV_RSP:
+                                    case ResponseTypes.FV_RSP:
+                                        bytesToRead = 2;
+                                        break;
+                                    case ResponseTypes.BL_RSP:
+                                    case ResponseTypes.BC_RSP:
+                                        bytesToRead = 3;
+                                        break;
+                                    case ResponseTypes.PC_RSP:
+                                        bytesToRead = 6;
+                                        break;
+                                    case ResponseTypes.CAL_RSP:
+                                    case ResponseTypes.BTCAL_RSP:
+                                        bytesToRead = 10;
+                                        break;
+                                    default:
+                                        break;
+                                }
+                                break;
+                            default:
+                                break;
                         }
                     }
-                    
-                     if ((this.headerSeen == true) && (this.packetPosition < bytesToRead))
-                         this.packet[this.packetPosition] = data[rawDataIndex];
+
+                    if ((this.headerSeen == true) && (this.packetPosition < bytesToRead))
+                        this.packet[this.packetPosition] = data[rawDataIndex];
+
 
                     this.packetPosition++;
                     rawDataIndex++;
@@ -444,25 +519,51 @@ namespace Wockets.Decoders.Accelerometers
 
                     if ((this.packetPosition == bytesToRead)) //a full packet was received
                     {
-                        if (packetType == SensorDataType.UNCOMPRESSED_DATA_PDU)
+                        WocketsAccelerationData datum = ((WocketsAccelerationData)this._Data[this.head]);
+                        datum.Reset();
+                        //copy raw bytes
+                        for (int i = 0; (i < bytesToRead); i++)
+                            datum.RawBytes[i] = this.packet[i];
+
+                        datum.UnixTimeStamp = lastUnixTime;
+                        if ( (packetType == SensorDataType.UNCOMPRESSED_DATA_PDU)||(packetType == SensorDataType.COMPRESSED_DATA_PDU))
                         {
 
-                            WocketsAccelerationData datum = ((WocketsAccelerationData)this._Data[this.head]);
-                            datum.Reset();
-                            //copy raw bytes
-                            for (int i = 0; (i < bytesToRead); i++)
-                                datum.RawBytes[i] = this.packet[i];
-                            datum._Type = SensorDataType.UNCOMPRESSED_DATA_PDU;
-                            //datum.RawBytes[0] = (byte)(((datum.RawBytes[0])&0xc7)|(sourceSensor<<3));
-                            datum._SensorID = (byte)sourceSensor;
-                            datum.X = (short)((((short)(this.packet[0] & 0x03)) << 8) | (((short)(this.packet[1] & 0x7f)) << 1) | (((short)(this.packet[2] & 0x40)) >> 6));
-                            datum.Y = (short)((((short)(this.packet[2] & 0x3f)) << 4) | (((short)(this.packet[3] & 0x78)) >> 3));
-                            datum.Z = (short)((((short)(this.packet[3] & 0x07)) << 7) | ((short)(this.packet[4] & 0x7f)));
-                            //Set time stamps
-                            datum.UnixTimeStamp = WocketsTimer.GetUnixTime();
+                            short x = 0;
+                            short y = 0;
+                            short z = 0;
 
-                            //if (IsValid(datum))
-                            if (this.head >= (BUFFER_SIZE - 1))
+                            if (packetType == SensorDataType.UNCOMPRESSED_DATA_PDU)
+                            {
+                                              
+                                datum._Type = SensorDataType.UNCOMPRESSED_DATA_PDU;
+                                x = (short)((((short)(this.packet[0] & 0x03)) << 8) | (((short)(this.packet[1] & 0x7f)) << 1) | (((short)(this.packet[2] & 0x40)) >> 6));
+                                y = (short)((((short)(this.packet[2] & 0x3f)) << 4) | (((short)(this.packet[3] & 0x78)) >> 3));
+                                z = (short)((((short)(this.packet[3] & 0x07)) << 7) | ((short)(this.packet[4] & 0x7f)));
+                                _UncompressedPDUCount++;
+                            }
+                            else
+                            {
+                                                            
+                                datum._Type = SensorDataType.COMPRESSED_DATA_PDU;
+                                x = (short)(((this.packet[0] & 0x0f) << 1) | ((this.packet[1] & 0x40) >> 6));
+                                x = ((((short)((this.packet[0] >> 4) & 0x01)) == 1) ? ((short)(prevx + x)) : ((short)(prevx - x)));
+                                y = (short)(this.packet[1] & 0x1f);
+                                y = ((((short)((this.packet[1] >> 5) & 0x01)) == 1) ? ((short)(prevy + y)) : ((short)(prevy - y)));
+                                z = (short)((this.packet[2] >> 1) & 0x1f);
+                                z = ((((short)((this.packet[2] >> 6) & 0x01)) == 1) ? ((short)(prevz + z)) : ((short)(prevz - z)));
+                                _CompressedPDUCount++;
+                            }
+
+                            prevx = x;
+                            prevy = y;
+                            prevz = z;
+                            datum._X = (short)x;
+                            datum._Y = (short)y;
+                            datum._Z = (short)z;
+
+
+                             if (this.head >= (BUFFER_SIZE - 1))
                                 this.head = 0;
                             else
                                 this.head++;
@@ -471,7 +572,6 @@ namespace Wockets.Decoders.Accelerometers
                             this.packetPosition = 0;
                             this.headerSeen = false;
                         }
-                  
                     }
  
                 }

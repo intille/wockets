@@ -184,7 +184,7 @@ namespace Wockets.Data.Logger
 
                         // Save Raw Bytes                        
                         if (bwPLFormat != null)
-                            for (int k = 0; k < this.wocketsController._Decoders[i]._Data[j].NumRawBytes; k++)
+                            for (int k = 0; k < this.wocketsController._Decoders[i]._Data[j]._Length; k++)
                                 bwPLFormat.WriteByte(this.wocketsController._Decoders[i]._Data[j].RawBytes[k]);
 
                         lastUnixTime = aUnixTime;

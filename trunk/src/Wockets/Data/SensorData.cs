@@ -59,10 +59,11 @@ namespace Wockets.Data
         /// </summary>
         private bool isBatteryLow;
 
+        public int _Length;
 
         public SensorData(byte numRawBytes,SensorDataType type, byte sensorID)
         {
-            this.numRawBytes = numRawBytes;
+            this._Length = numRawBytes;
             this.rawBytes = new byte[numRawBytes];
             this._Type = type;
             this._SensorID = sensorID;
@@ -106,17 +107,7 @@ namespace Wockets.Data
                 this.unixTimeStamp = value;
             }
         }
-        public byte NumRawBytes
-        {
-            get
-            {
-                return this.numRawBytes;
-            }
-            set
-            {
-                this.numRawBytes = value;
-            }
-        }
+
 
         public byte[] RawBytes
         {

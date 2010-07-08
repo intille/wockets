@@ -35,7 +35,8 @@ namespace WocketsMonitorApp
         double loss1 = 0;
         double loss2 = 0;
         P2PMessageQueue mQue = null;
-        int ExpectedPackets = 2400;
+        int ExpectedPackets1 = 0;
+        int ExpectedPackets2 = 0;
         bool playAlert = false;
         public Form1()
         {
@@ -101,10 +102,17 @@ namespace WocketsMonitorApp
                 payload = System.Text.Encoding.ASCII.GetString(bytes, 0, bytes.GetLength(0));
 
                 string[] tokens = payload.Split(new char[1] { ',' });
-                int myraw1 = Convert.ToInt32(tokens[6]);
-                int myraw2 = Convert.ToInt32(tokens[11]);
+                int myraw1 = 0;
+                int myraw2 = 0;
+                myraw1 = Convert.ToInt32(tokens[6]);
+                ExpectedPackets1 = Convert.ToInt32(tokens[7]);
+                if (tokens.Length > 11)
+                {
+                    myraw2 = Convert.ToInt32(tokens[11]);
+                    ExpectedPackets2 = Convert.ToInt32(tokens[12]);
+                }
 
-                if (myraw1 == ExpectedPackets)
+                if (myraw1 == ExpectedPackets1)
                     raw1++;
                 else if (myraw1 > 0)
                     partial1++;
@@ -112,20 +120,22 @@ namespace WocketsMonitorApp
                     sum1++;
 
                 receivedPackets1 += myraw1;
-                expectedPackets1 += ExpectedPackets;
+                expectedPackets1 += ExpectedPackets1;
                 loss1=(1.0-((double)receivedPackets1/expectedPackets1))*100.0;
 
-                if (myraw2 == ExpectedPackets)
-                    raw2++;
-                else if (myraw2 > 0)
-                    partial2++;
-                else
-                    sum2++;
+                if (tokens.Length > 11)
+                {
+                    if (myraw2 == ExpectedPackets2)
+                        raw2++;
+                    else if (myraw2 > 0)
+                        partial2++;
+                    else
+                        sum2++;
 
-                receivedPackets2 += myraw2;
-                expectedPackets2 += ExpectedPackets;
-                loss2 = (1.0-((double)receivedPackets2 / expectedPackets2)) * 100.0;
-
+                    receivedPackets2 += myraw2;
+                    expectedPackets2 += ExpectedPackets2;
+                    loss2 = (1.0 - ((double)receivedPackets2 / expectedPackets2)) * 100.0;
+                }
                 UpdateForm();
             }
         }

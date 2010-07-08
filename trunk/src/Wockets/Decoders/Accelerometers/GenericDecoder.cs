@@ -21,7 +21,8 @@ namespace Wockets.Decoders.Accelerometers
         {
             return 0;
         }
-
+        public override void Load(ByteReader br)
+        { }
         #region Serialization Methods
         public override string ToXML()
         {

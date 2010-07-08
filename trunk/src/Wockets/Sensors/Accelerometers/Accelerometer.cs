@@ -366,17 +366,17 @@ namespace Wockets.Sensors.Accelerometers
                         sdata.Read(timestamp, 0, sizeof(double));
                         data.UnixTimeStamp = BitConverter.ToDouble(timestamp, 0);
                         sdata.Read(acc, 0, sizeof(short));
-                        data.X = BitConverter.ToInt16(acc, 0);
+                        data._X = BitConverter.ToInt16(acc, 0);
                         sdata.Read(acc, 0, sizeof(short));
-                        data.Y = BitConverter.ToInt16(acc, 0);
+                        data._Y = BitConverter.ToInt16(acc, 0);
                         sdata.Read(acc, 0, sizeof(short));
-                        data.Z = BitConverter.ToInt16(acc, 0);
+                        data._Z = BitConverter.ToInt16(acc, 0);
 
-                        data.RawBytes[0] = (byte)(0x80 | ((data.X & 0x300) >> 8));
-                        data.RawBytes[1] = (byte) ((data.X & 0xff)>>1);
-                        data.RawBytes[2] = (byte)(((data.X & 0x01) <<6) | ((data.Y &0x3f0)>>4));
-                        data.RawBytes[3] = (byte)(((data.Y & 0x0f) << 3) | ((data.Z & 0x380) >> 7));
-                        data.RawBytes[4] = (byte)(data.Z & 0x7f);
+                        data.RawBytes[0] = (byte)(0x80 | ((data._X & 0x300) >> 8));
+                        data.RawBytes[1] = (byte) ((data._X & 0xff)>>1);
+                        data.RawBytes[2] = (byte)(((data._X & 0x01) <<6) | ((data._Y &0x3f0)>>4));
+                        data.RawBytes[3] = (byte)(((data._Y & 0x0f) << 3) | ((data._Z & 0x380) >> 7));
+                        data.RawBytes[4] = (byte)(data._Z & 0x7f);
                     }
                     else
                         data = ((AccelerationData)this._Decoder._Data[tail]);
@@ -414,7 +414,7 @@ namespace Wockets.Sensors.Accelerometers
                         #endregion Write Timestamp
 
                         #region Write Raw Data
-                        for (int j = 0; j < data.NumRawBytes; j++)
+                        for (int j = 0; j < data._Length; j++)
                             bw.WriteByte(data.RawBytes[j]);
                         #endregion Write Raw Data
                  
@@ -536,53 +536,10 @@ namespace Wockets.Sensors.Accelerometers
             {
                 try
                 {
-                    #region Read Timestamp
-                    if (!(br.ReadByte(b)))
-                        throw new Exception("Error: reading first byte in PLFormat file");
-
-                    //read a complete timestamp
-                    if (b[0] == ((int)255))
-                    {
-                        if (!(br.ReadBytes(b6)))
-                            throw new Exception("Error: reading full timestamp in PLFormat file");
-
-                        lastUnixTime = WocketsTimer.DecodeUnixTimeCodeBytesFixed(b6);
-                    }
-                    else //read a differential timestamp          
-                        lastUnixTime += (int)b[0];
-
-                    #endregion Read Timestamp
-
-                    DateTime dt = new DateTime();
-                    WocketsTimer.GetDateTime((long)lastUnixTime, out dt);
-
-                    int numRawBytes = 0;
-                    if (this._Decoder._Type == DecoderTypes.Wockets)
-                        numRawBytes = Data.Accelerometers.WocketsAccelerationData.NUM_RAW_BYTES;
-                    else if (this._Decoder._Type == DecoderTypes.HTCDiamondTouch)
-                        numRawBytes = Data.Accelerometers.HTCDiamondTouchAccelerationData.NUM_RAW_BYTES;
-
-                    byte[] tempByte = new byte[numRawBytes];
-                    if (!(br.ReadBytes(tempByte)))
-                        throw new Exception("Error: reading data in PLFormat file");
-
-       
-                    int lastDecodedIndex = 0;
-                    //Successfully decoded a packet
-                    if (this._Decoder.Decode(this._ID, tempByte, tempByte.Length) == 1)
-                    {
-
-                        if (this._Decoder._Head == 0)
-                            lastDecodedIndex = this._Decoder._Data.Length - 1;
-                        else
-                            lastDecodedIndex = this._Decoder._Head - 1;                        
-                        this._Decoder._Data[lastDecodedIndex].UnixTimeStamp = lastUnixTime;                       
-                        break;
-                    }
-                    else //failed to decode a packet... check if this ever happens
-                        return false;
+                    this._Decoder.Load(br);
+                    return true;
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
                     //if the data ended return false
                     if (!((++fileIndex < someBinaryFiles.Count) && SetupNextFiles(fileIndex)))

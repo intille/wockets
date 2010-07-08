@@ -10,17 +10,19 @@ namespace Wockets.Data.Accelerometers
         /// <summary>
         /// The x value of an accelerometer
         /// </summary>
-        private short x;
+        public short _X;
 
         /// <summary>
         /// The y value of an accelerometer
         /// </summary>
-        private short y;
+        public short _Y;
 
         /// <summary>
         /// The z value of an accelerometer
         /// </summary>
-        private short z;
+        public short _Z;
+
+
 
 
         public AccelerationData(byte numRawBytes,byte sensorID)
@@ -33,46 +35,12 @@ namespace Wockets.Data.Accelerometers
         public void Reset()
         {
             base.Reset();
-            this.x = 0;
-            this.y = 0;
-            this.z = 0;
+            this._X = 0;
+            this._Y = 0;
+            this._Z = 0;
         }
 
-        public short X
-        {
-            get
-            {
-                return this.x;
-            }
-            set
-            {
-                this.x = value;
-            }
-        }
 
-        public short Y
-        {
-            get
-            {
-                return this.y;
-            }
-            set
-            {
-                this.y = value;
-            }
-        }
-
-        public short Z
-        {
-            get
-            {
-                return this.z;
-            }
-            set
-            {
-                this.z = value;
-            }
-        }
 
     }
 }

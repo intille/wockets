@@ -1094,3 +1094,18 @@ unsigned char _is_yellowled_on(void)
 {
 	return ((atmega_status>>BIT3_YELLOWLED_STATUS) & 0x01);
 }
+
+
+
+/* 
+	Function Name: _is_docked
+	Parameters: None
+	
+	Description: Tests if the wocket is docked
+	
+*/
+unsigned char _is_docked(void)
+{
+	return ((PORTA>>IN_DOCK_N) & 0x01);
+}
+

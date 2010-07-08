@@ -80,9 +80,9 @@ namespace Wockets.Decoders.Accelerometers
                         }
                         datum._Type = SensorDataType.UNCOMPRESSED_DATA_PDU;
                         datum._SensorID = (byte)sourceSensor;
-                        datum.X = (short)(BitConverter.ToInt16(datum.RawBytes, 1) + 1024);
-                        datum.Y = (short)(BitConverter.ToInt16(datum.RawBytes, 3) + 1024);
-                        datum.Z = (short)(BitConverter.ToInt16(datum.RawBytes, 5) + 1024);
+                        datum._X = (short)(BitConverter.ToInt16(datum.RawBytes, 1) + 1024);
+                        datum._Y = (short)(BitConverter.ToInt16(datum.RawBytes, 3) + 1024);
+                        datum._Z = (short)(BitConverter.ToInt16(datum.RawBytes, 5) + 1024);
                         datum.UnixTimeStamp = WocketsTimer.GetUnixTime();
 
                         if (this.head >= (BUFFER_SIZE - 1))
@@ -123,9 +123,9 @@ namespace Wockets.Decoders.Accelerometers
                     datum.RawBytes[i] = data[i];
                 datum._Type = SensorDataType.UNCOMPRESSED_DATA_PDU;
                 datum._SensorID = (byte)sensorID;
-                datum.X = (short)(BitConverter.ToInt16(data, 1) + 1024);
-                datum.Y = (short)(BitConverter.ToInt16(data, 3) + 1024);
-                datum.Z = (short)(BitConverter.ToInt16(data, 5) + 1024);
+                datum._X = (short)(BitConverter.ToInt16(data, 1) + 1024);
+                datum._Y = (short)(BitConverter.ToInt16(data, 3) + 1024);
+                datum._Z = (short)(BitConverter.ToInt16(data, 5) + 1024);
                 //Set time stamps
                 datum.UnixTimeStamp = WocketsTimer.GetUnixTime();
 
@@ -143,7 +143,8 @@ namespace Wockets.Decoders.Accelerometers
             return numDecodedPackets;
         }
 
-
+        public override void Load(ByteReader br)
+        { }
         #region Serialization Methods
         public override string ToXML()
         {

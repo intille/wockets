@@ -826,11 +826,11 @@ namespace Wockets
                                 sdata[i].Read(timestamp, 0, sizeof(double));
                                 datum.UnixTimeStamp = BitConverter.ToDouble(timestamp, 0);
                                 sdata[i].Read(acc, 0, sizeof(short));
-                                datum.X = BitConverter.ToInt16(acc, 0);
+                                datum._X = BitConverter.ToInt16(acc, 0);
                                 sdata[i].Read(acc, 0, sizeof(short));
-                                datum.Y = BitConverter.ToInt16(acc, 0);
+                                datum._Y = BitConverter.ToInt16(acc, 0);
                                 sdata[i].Read(acc, 0, sizeof(short));
-                                datum.Z = BitConverter.ToInt16(acc, 0);
+                                datum._Z = BitConverter.ToInt16(acc, 0);
                                 datum._Type = Data.SensorDataType.UNCOMPRESSED_DATA_PDU;
                                 CurrentWockets._Controller._Decoders[i].TotalSamples++;
 
