@@ -60,8 +60,9 @@ namespace WocketConfigurationApp
                 //if the device is a wocket
                 if (((devices[i].DeviceName.IndexOf("Wocket") >= 0) 
                     || (devices[i].DeviceName.IndexOf("WKT") >= 0) 
-                    || (devices[i].DeviceName.IndexOf("FireFly") >= 0)) 
-                    && (wocketCount < 100))
+                    || (devices[i].DeviceName.IndexOf("FireFly") >= 0)
+                    || (devices[i].DeviceName.IndexOf("0006660") >= 0) 
+                    && (wocketCount < 100)))
                 {
                     string hex = "";
                     hex = devices[i].DeviceAddress.ToString();
@@ -107,7 +108,7 @@ namespace WocketConfigurationApp
 
             if (this.dataGridView1.Rows.Count > 0)
             {
-                this.button_configure.Enabled = true;
+                this.button_test.Enabled = true;
                 this.button_settings.Enabled = true;
             }
 
@@ -117,60 +118,34 @@ namespace WocketConfigurationApp
         }
 
 
-        //Configure Button
-        private void button2_Click(object sender, EventArgs e)
+        FormTestWocket WktTestForm;
+        //Button Start Test
+        private void button_test_Click(object sender, EventArgs e)
         {
 
-            #region Commented
-            //if (this.WocketsList_Box.SelectedIndex < 0)
-           // {
-           //     MessageBox.Show("Please select a wocket");
-           //     return;
-            // }
-            #endregion commented
-
-
             if (this.dataGridView1.SelectedRows.Count <= 0)
-             {
-                 MessageBox.Show("Please select a wocket");
-                 return;
-             }
-
-           DataGridViewRow selected_row =  this.dataGridView1.SelectedRows[0];
-           int selected_device_index = selected_row.Index;
-
-           Form5 f = new Form5((BluetoothDeviceInfo)bluetoothlist[selected_device_index]);
-           f.Show();
-           //this.Visible = false;
-
-
-        #region commented
-           
-            /*
-            if (is_connected == 0)
             {
-                bt_wocket.StartReading();
-                is_connected = 1;
-                label_status.Text = "Connected to " + mac_address.Substring(7) + " ...";
-
-                button_configure.Enabled = true;
-                button_unselect_wocket.Enabled = false;
-
-
-
+                MessageBox.Show("Please select a wocket");
+                return;
             }
-            else if (is_connected == 1)
-            {
-                bt_wocket.Stop();
-                is_connected = 0;
-                label_status.Text = "Disconnected from " + mac_address.Substring(7) + " ...";
 
-                button_configure.Enabled = false;
-                button_unselect_wocket.Enabled = true;
-            }
-            */
 
-        #endregion commented
+            this.label_status.Text = "Loading Wocket...";
+            this.button_test.Enabled = false;
+            Application.DoEvents();
+
+
+            DataGridViewRow selected_row = this.dataGridView1.SelectedRows[0];
+            int selected_device_index = selected_row.Index;
+
+            WktTestForm = new FormTestWocket((BluetoothDeviceInfo)bluetoothlist[selected_device_index]);
+            WktTestForm.Show();
+
+            //this.Enabled = false;
+
+            this.label_status.Text = "Wocket Loaded...";
+            this.button_test.Enabled = true;
+
 
         }
 
@@ -364,12 +339,12 @@ namespace WocketConfigurationApp
                     if (this.dataGridView1.Rows.Count > 0)
                     {
                         button_settings.Enabled = true;
-                        button_configure.Enabled = true;
+                        button_test.Enabled = true;
                     }
                     else
                     {
                         button_settings.Enabled = false;
-                        button_configure.Enabled = false;
+                        button_test.Enabled = false;
                     }
 
 
@@ -442,12 +417,12 @@ namespace WocketConfigurationApp
                  if (this.dataGridView1.Rows.Count > 0)
                  {
                      button_settings.Enabled = true;
-                     button_configure.Enabled = true;
+                     button_test.Enabled = true;
                  }
                  else
                  {
                      button_settings.Enabled = false;
-                     button_configure.Enabled = false;
+                     button_test.Enabled = false;
                  }
 
 
