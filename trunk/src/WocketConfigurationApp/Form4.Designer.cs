@@ -29,7 +29,7 @@ namespace WocketConfigurationApp
         private void InitializeComponent()
         {
             this.button_search = new System.Windows.Forms.Button();
-            this.button_configure = new System.Windows.Forms.Button();
+            this.button_test = new System.Windows.Forms.Button();
             this.button_select_wocket = new System.Windows.Forms.Button();
             this.button_unselect_wocket = new System.Windows.Forms.Button();
             this.label_status = new System.Windows.Forms.Label();
@@ -63,17 +63,17 @@ namespace WocketConfigurationApp
             this.button_search.UseVisualStyleBackColor = false;
             this.button_search.Click += new System.EventHandler(this.button_search_Click);
             // 
-            // button_configure
+            // button_test
             // 
-            this.button_configure.Enabled = false;
-            this.button_configure.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button_configure.Location = new System.Drawing.Point(504, 445);
-            this.button_configure.Name = "button_configure";
-            this.button_configure.Size = new System.Drawing.Size(168, 52);
-            this.button_configure.TabIndex = 3;
-            this.button_configure.Text = "Start Test";
-            this.button_configure.UseVisualStyleBackColor = true;
-            this.button_configure.Click += new System.EventHandler(this.button2_Click);
+            this.button_test.Enabled = false;
+            this.button_test.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button_test.Location = new System.Drawing.Point(504, 445);
+            this.button_test.Name = "button_test";
+            this.button_test.Size = new System.Drawing.Size(168, 52);
+            this.button_test.TabIndex = 3;
+            this.button_test.Text = "Test";
+            this.button_test.UseVisualStyleBackColor = true;
+            this.button_test.Click += new System.EventHandler(this.button_test_Click);
             // 
             // button_select_wocket
             // 
@@ -163,7 +163,7 @@ namespace WocketConfigurationApp
             this.panel1.Controls.Add(this.button_quit);
             this.panel1.Controls.Add(this.label3);
             this.panel1.Controls.Add(this.button_settings);
-            this.panel1.Controls.Add(this.button_configure);
+            this.panel1.Controls.Add(this.button_test);
             this.panel1.Controls.Add(this.dataGridView1);
             this.panel1.Controls.Add(this.panel2);
             this.panel1.Location = new System.Drawing.Point(12, 5);
@@ -261,7 +261,7 @@ namespace WocketConfigurationApp
         #endregion
 
         private System.Windows.Forms.Button button_search;
-        private System.Windows.Forms.Button button_configure;
+        private System.Windows.Forms.Button button_test;
         private System.Windows.Forms.Button button_select_wocket;
         private System.Windows.Forms.Button button_unselect_wocket;
 
