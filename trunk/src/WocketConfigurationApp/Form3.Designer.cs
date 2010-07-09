@@ -43,17 +43,19 @@ namespace WocketConfigurationApp
             // 
             // timer1
             // 
-            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             this.timer1.Enabled = true;
             this.timer1.Interval = 50;
+            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // Form3
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(346, 393);
+            this.ClientSize = new System.Drawing.Size(321, 369);
             this.Controls.Add(this.panel1);
+            this.Location = new System.Drawing.Point(50, 50);
             this.Name = "Form3";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "Wockets Plotter";
             this.Resize += new System.EventHandler(this.Form3_Resize);
             this.ResumeLayout(false);
