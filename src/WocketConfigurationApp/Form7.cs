@@ -52,7 +52,6 @@ namespace WocketConfigurationApp
         #endregion
 
 
-
         #region Initialize
 
         public Form7(BluetoothDeviceInfo wocket)
@@ -226,8 +225,6 @@ namespace WocketConfigurationApp
         #endregion Initialize
 
 
-
-
         #region Delegates Callback
 
         delegate void UpdateResponseCallback(object e);
@@ -304,16 +301,16 @@ namespace WocketConfigurationApp
         {
 
             if (CurrentWockets._Controller._Receivers[0]._Status == ReceiverStatus.Disconnected)
-                this.label27.Text = "Disconnected";
+                this.label_connection_status.Text = "Disconnected";
             else if (CurrentWockets._Controller._Receivers[0]._Status == ReceiverStatus.Reconnecting)
-                this.label27.Text = "Reconnecting";
+                this.label_connection_status.Text = "Reconnecting";
             else
             {
 
                 if (CurrentWockets._Controller._Sensors[0]._Mode == SensorModes.Data)
-                    this.label27.Text = "Connected: Data Mode";
+                    this.label_connection_status.Text = "Connected: Data Mode";
                 else
-                    this.label27.Text = "Connected: Command Mode";
+                    this.label_connection_status.Text = "Connected: Command Mode";
             }
 
         }
@@ -383,13 +380,6 @@ namespace WocketConfigurationApp
 
         #endregion
 
-
-       
-        
-
-        
-
-        
 
         //------  Close & CleanUp panel   --------
         #region Close & Clean up panels
@@ -700,9 +690,7 @@ namespace WocketConfigurationApp
 
 
         //-------  Commands -----------------------
-       
-
-        // load sensitivity to field
+       // load sensitivity to field
         // 0="", 1= 1.5, 2=2.0, 3=4.0, 4=6.0, 5=8.0
         private void load_sensitivity_field(string val)
         { 
@@ -1274,10 +1262,13 @@ namespace WocketConfigurationApp
             {
                 if (current_command.Trim().CompareTo("") != 0)
                 {
-                    cleanup_fields(current_command);
-                    Application.DoEvents();
-
+                    if (current_command.CompareTo(cur_cmd) != 0)
+                    {
+                        cleanup_fields(current_command);
+                        Application.DoEvents();
+                    }
                 }
+
 
                 if (value == Keys.Enter)
                 {
@@ -1583,7 +1574,7 @@ namespace WocketConfigurationApp
         #endregion
 
 
-       #region Buttons
+        #region Buttons
 
        private void Load_button_Click(object sender, EventArgs e)
        {
@@ -1680,306 +1671,317 @@ namespace WocketConfigurationApp
        private void button_set_Click(object sender, EventArgs e)
        {
 
-           button_set.Enabled = false;
-
-
-           if (current_command.CompareTo("sensor_sensitivity") == 0)
+           if (!checkBox_LoadAll.Checked)
            {
-               #region Sensitivity
 
-               string val = info_cmd_value_sensitivity.Text;
+               button_set.Enabled = false;
 
-               if (cur_sensitivity.CompareTo(val) != 0)
+               if (current_command.CompareTo("sensor_sensitivity") == 0)
                {
-                   //sets sensitivity to the selected value
-                   // SET_SEN sen = new SET_SEN(val);
-                   //((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(sen._Bytes);
+                   #region Sensitivity
 
-                   //System.Threading.Thread.Sleep(200);
+                   string val = info_cmd_value_sensitivity.Text;
+
+                   if (cur_sensitivity.CompareTo(val) != 0)
+                   {
+                       //sets sensitivity to the selected value
+                       // SET_SEN sen = new SET_SEN(val);
+                       //((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(sen._Bytes);
+
+                       //System.Threading.Thread.Sleep(200);
+                   }
+
+
+                   info_cmd_value_sensitivity.Text = "";
+                   Application.DoEvents();
+                   System.Threading.Thread.Sleep(200);
+
+                   //reads the sensor sensitivity
+                   Command cmd = new GET_SEN();
+                   ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
+
+                   #endregion Sensitivity
+
+                   button_set.Enabled = true;
+               }
+               else if (current_command.CompareTo("transmission_mode") == 0)
+               {
+                   #region Transmission Mode
+
+                   string trm_val = info_cmd_value_tr_rate.Text;
+                   
+
+                   //check if the value changed 
+                   if (cur_tr_mode.CompareTo(trm_val) != 0)
+                   {
+                       //sets the appropriate sampling rate for the new transmission mode
+                       int sr_value = cur_sampling_rate;
+                       bool is_valid = true;
+
+                       if (trm_val.CompareTo("continuous") == 0)
+                       {
+                           if (cur_sampling_rate < 1 || cur_sampling_rate > 126)
+                           {  //set cur_sampling_rate to 90Hz
+                               sr_value = 90;
+                               is_valid = false;
+                           }
+                       }
+                       else if (trm_val.Contains("30"))
+                       {
+                           if (cur_sampling_rate < 1 || cur_sampling_rate > 80)
+                           {  //set cur_sampling_rate to 80Hz
+                               sr_value = 80;
+                               is_valid = false;
+                           }
+                       }
+                       else if (trm_val.Contains("60"))
+                       {
+                           if (cur_sampling_rate < 1 || cur_sampling_rate > 40)
+                           {  //set cur_sampling_rate to 40Hz
+                               sr_value = 40;
+                               is_valid = false;
+                           }
+                       }
+                       else if (trm_val.Contains("90"))
+                       {
+                           if (cur_sampling_rate < 1 || cur_sampling_rate > 30)
+                           {  //set cur_sampling_rate to 30Hz
+                               sr_value = 30;
+                               is_valid = false;
+                           }
+                       }
+                       else if (trm_val.Contains("120"))
+                       {
+                           if (cur_sampling_rate < 1 || cur_sampling_rate > 20)
+                           {  //set cur_sampling_rate to 20Hz
+                               sr_value = 20;
+                               is_valid = false;
+                           }
+                       }
+
+
+                       //if sampling rate is not valid, change to the right value
+                       if (!is_valid)
+                       {
+                           //clean field
+                           info_cmd_value_sampling_rate.Text = "";
+                           Application.DoEvents();
+                           System.Threading.Thread.Sleep(200);
+
+                           //set sampling rate
+                           //SET_SR sr = new SET_SR(sr_value);
+                           //((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(sr._Bytes);
+
+                           //wait for response
+                           System.Threading.Thread.Sleep(200);
+
+                           //reads the sampling rate
+                           Command sr_cmd = new GET_SR();
+                           ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(sr_cmd._Bytes);
+
+                       }
+
+
+                       //sets transmission mode to the selected value
+                       //SET_TM tr = new SET_TM(val);
+                       //((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(tr._Bytes);
+
+                       //System.Threading.Thread.Sleep(200);
+                   }
+
+
+                   //clean field
+                   info_cmd_value_tr_rate.Text = "";
+                   Application.DoEvents();
+
+                   //reads the sensor sensitivity
+                   Command cmd = new GET_TM();
+                   ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
+
+                   #endregion Transmission Mode
+
+                   button_set.Enabled = true;
+               }
+               else if (current_command.CompareTo("sampling_rate") == 0)
+               {
+
+                   #region Sampling Rate
+
+                   string sr_val = info_cmd_value_sampling_rate.Text;
+                   int value = Int32.Parse(sr_val);
+
+
+                   if (cur_sampling_rate != value)
+                   {
+                       string tm_val = info_cmd_label_tr_rate.Text;
+                       bool is_valid = false;
+
+                       //verify validity
+                       if (tm_val.CompareTo("Continous") == 0)
+                       {
+                           //set_panel_label_status.Text = "The Wockets is set to continous mode. This mode supports sampling rates between 1Hz and 126Hz. Enter the sampling rate in the command textbox.";
+                           if (value > 1 && value <= 126)
+                               is_valid = true;
+                       }
+                       else if (tm_val.Contains("30"))
+                       {
+                           //set_panel_label_status.Text = "The Wockets is set to burst 30 secs mode. This mode supports sampling rates between 1Hz and 80Hz. Enter the sampling rate in the command textbox.";
+                           value = Int32.Parse(sr_val);
+                           if (value > 1 && value <= 80)
+                               is_valid = true;
+                       }
+                       else if (tm_val.Contains("60"))
+                       {
+                           //set_panel_label_status.Text = "The Wockets is set to burst 60 secs mode. This mode supports sampling rates between 1Hz and 40Hz. Enter the sampling rate in the command textbox.";
+                           value = Int32.Parse(sr_val);
+                           if (value > 1 && value <= 40)
+                               is_valid = true;
+                       }
+                       else if (cur_tr_mode.Contains("90"))
+                       {
+                           //set_panel_label_status.Text = "The Wockets is set to burst 90 secs mode. This mode supports sampling rates between 1Hz and 30Hz. Enter the sampling rate in the command textbox.";
+                           value = Int32.Parse(sr_val);
+                           if (value > 1 && value <= 30)
+                               is_valid = true;
+                       }
+                       else if (cur_tr_mode.Contains("120"))
+                       {
+                           //set_panel_label_status.Text = "The Wockets is set to burst 120 secs mode. This mode supports sampling rates between 1Hz and 20Hz. Enter the sampling rate in the command textbox.";
+                           value = Int32.Parse(sr_val);
+                           if (value > 1 && value <= 20)
+                               is_valid = true;
+                       }
+                       else if (cur_tr_mode.CompareTo("") == 0)
+                       {
+                           //set_panel_label_status.Text = "Before setting up the sampling rate, it is necessary specify the transmission mode.";
+                       }
+
+
+                       //sets the sampling rate to the selected value
+                       if (is_valid)
+                       {
+                           SET_SR sr = new SET_SR(value);
+                           ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(sr._Bytes);
+                       }
+                   }
+
+
+                   //clean field
+                   info_cmd_value_sampling_rate.Text = "";
+                   Application.DoEvents();
+                   System.Threading.Thread.Sleep(200);
+
+                   //reads the sampling rate
+                   Command cmd = new GET_SR();
+                   ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
+
+
+                   #endregion Sampling Rate
+
+                   button_set.Enabled = true;
+               }
+               else if (current_command.CompareTo("power_down") == 0)
+               {
+
+                   #region PowerDown Timeout
+
+                   string pdt_val = info_cmd_value_pwr_timeout.Text;
+
+
+                   if (pdt_val.Trim().CompareTo("") != 0)
+                   {
+                       try
+                       {
+                           int value = Int32.Parse(pdt_val);
+
+                           if (cur_power_down != value)
+                           {
+                               //verify validity
+                               if (value >= 1 && value <= 127)
+                               {   //set the power down timeout  according the permitted range in minutes
+                                   SET_PDT pdt = new SET_PDT(value);
+                                   ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(pdt._Bytes);
+                               }
+                               else
+                               {
+                                   //set_panel_label_status.Text = "The time you entered is out of range. The power down timeout range is between 1 min and 127 minutes.";       
+                               }
+                           }
+                       }
+                       catch
+                       {
+                           //TODO
+                           //set_panel_label_status.Text = "The time you entered is out of range. The power down timeout range is between 1 min and 127 minutes.";       
+                       }
+                   }
+
+
+                   //clean field
+                   info_cmd_value_pwr_timeout.Text = "";
+                   Application.DoEvents();
+                   System.Threading.Thread.Sleep(200);
+
+                   //reads the power down timeout
+                   Command cmd = new GET_PDT();
+                   ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
+
+
+                   #endregion PowerDown Timeout
+
+                   button_set.Enabled = true;
+               }
+               else if (current_command.CompareTo("calibration") == 0)
+               {
+                   #region Calibration
+
+                   //setup the calibration panel parameters
+                   cal_panel_title.Text = info_cmd_label_calibration.Text;
+                   cal_panel_cmd_label.Text = "File";
+                   cal_panel_entry_path.Text = "";
+                   cal_panel_label_status.Text = "";
+
+                   panel_status_texbox.Text = "";
+                   panel_status.Visible = false;
+
+                   cal_panel_bat_values.Visible = false;
+                   cal_panel_cal_values.Visible = true;
+
+                   panel_calibration.Visible = true;
+                   is_sensordata_valid = false;
+
+                   #endregion Calibration
+
+               }
+               else if (current_command.CompareTo("battery_calibration") == 0)
+               {
+                   #region BAT Calibration
+                   //setup the calibration panel parameters
+                   cal_panel_title.Text = info_cmd_label_btcalibration.Text;
+                   cal_panel_cmd_label.Text = "File";
+                   cal_panel_entry_path.Text = "";
+                   cal_panel_label_status.Text = "";
+
+                   panel_status_texbox.Text = "";
+                   panel_status.Visible = false;
+
+                   cal_panel_bat_values.Visible = true;
+                   cal_panel_cal_values.Visible = false;
+
+                   panel_calibration.Visible = true;
+                   is_sensordata_valid = false;
+
+                   #endregion BAT Calibration
+
+               }
+               else
+               {
+                   button_set.Enabled = true;
                }
 
-
-               info_cmd_value_sensitivity.Text = "";
-               Application.DoEvents();
-               System.Threading.Thread.Sleep(200);
-
-               //reads the sensor sensitivity
-               Command cmd = new GET_SEN();
-               ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
-
-               #endregion Sensitivity
-
-               button_set.Enabled = true;
            }
-           else if (current_command.CompareTo("transmission_mode") == 0)
-           {
-               #region Transmission Mode
-
-               string trm_val = info_cmd_value_tr_rate.Text;
-               bool is_changed = false;
-
-               //check if the value changed 
-               if (cur_tr_mode.CompareTo(trm_val) != 0)
-               {
-
-                   //sets the appropriate sampling rate for the new transmission mode
-                   int sr_value = cur_sampling_rate;
-                   bool is_valid = true;
-
-                   if (trm_val.CompareTo("continuous") == 0)
-                   {
-                       if (cur_sampling_rate < 1 || cur_sampling_rate > 126)
-                       {  //set cur_sampling_rate to 90Hz
-                           sr_value = 90;
-                           is_valid = false;
-                       }
-                   }
-                   else if (trm_val.Contains("30"))
-                   {
-                       if (cur_sampling_rate < 1 || cur_sampling_rate > 80)
-                       {  //set cur_sampling_rate to 80Hz
-                           sr_value = 80;
-                           is_valid = false;
-                       }
-                   }
-                   else if (trm_val.Contains("60"))
-                   {
-                       if (cur_sampling_rate < 1 || cur_sampling_rate > 40)
-                       {  //set cur_sampling_rate to 40Hz
-                           sr_value = 40;
-                           is_valid = false;
-                       }
-                   }
-                   else if (trm_val.Contains("90"))
-                   {
-                       if (cur_sampling_rate < 1 || cur_sampling_rate > 30)
-                       {  //set cur_sampling_rate to 30Hz
-                           sr_value = 30;
-                           is_valid = false;
-                       }
-                   }
-                   else if (trm_val.Contains("120"))
-                   {
-                       if (cur_sampling_rate < 1 || cur_sampling_rate > 20)
-                       {  //set cur_sampling_rate to 20Hz
-                           sr_value = 20;
-                           is_valid = false;
-                       }
-                   }
-
-
-                   //if sampling rate is not valid, change to the right value
-                   if (!is_valid)
-                   {
-                       //clean field
-                       info_cmd_value_sampling_rate.Text = "";
-                       Application.DoEvents();
-                       System.Threading.Thread.Sleep(200);
-
-                       //set sampling rate
-                       //SET_SR sr = new SET_SR(sr_value);
-                       //((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(sr._Bytes);
-
-                       //wait for response
-                       System.Threading.Thread.Sleep(200);
-
-                       //reads the sampling rate
-                       Command sr_cmd = new GET_SR();
-                       ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(sr_cmd._Bytes);
-
-
-                   }
-
-
-
-                   //sets transmission mode to the selected value
-                   //SET_TM tr = new SET_TM(val);
-                   //((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(tr._Bytes);
-
-                   //System.Threading.Thread.Sleep(200);
-
-
-               }
-
-
-               //clean field
-               info_cmd_value_tr_rate.Text = "";
-               Application.DoEvents();
-
-               //reads the sensor sensitivity
-               Command cmd = new GET_TM();
-               ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
-
-               #endregion Transmission Mode
-
-               button_set.Enabled = true;
-           }
-           else if (current_command.CompareTo("sampling_rate") == 0)
-           {
-
-               #region Sampling Rate
-
-               string sr_val = info_cmd_value_sampling_rate.Text;
-               int value = Int32.Parse(sr_val);
-
-
-               if (cur_sampling_rate != value)
-               {
-                   string tm_val = info_cmd_label_tr_rate.Text;
-                   bool is_valid = false;
-
-                   //verify validity
-                   if (tm_val.CompareTo("Continous") == 0)
-                   {
-                       //set_panel_label_status.Text = "The Wockets is set to continous mode. This mode supports sampling rates between 1Hz and 126Hz. Enter the sampling rate in the command textbox.";
-                       if (value > 1 && value <= 126)
-                           is_valid = true;
-                   }
-                   else if (tm_val.Contains("30"))
-                   {
-                       //set_panel_label_status.Text = "The Wockets is set to burst 30 secs mode. This mode supports sampling rates between 1Hz and 80Hz. Enter the sampling rate in the command textbox.";
-                       value = Int32.Parse(sr_val);
-                       if (value > 1 && value <= 80)
-                           is_valid = true;
-                   }
-                   else if (tm_val.Contains("60"))
-                   {
-                       //set_panel_label_status.Text = "The Wockets is set to burst 60 secs mode. This mode supports sampling rates between 1Hz and 40Hz. Enter the sampling rate in the command textbox.";
-                       value = Int32.Parse(sr_val);
-                       if (value > 1 && value <= 40)
-                           is_valid = true;
-                   }
-                   else if (cur_tr_mode.Contains("90"))
-                   {
-                       //set_panel_label_status.Text = "The Wockets is set to burst 90 secs mode. This mode supports sampling rates between 1Hz and 30Hz. Enter the sampling rate in the command textbox.";
-                       value = Int32.Parse(sr_val);
-                       if (value > 1 && value <= 30)
-                           is_valid = true;
-                   }
-                   else if (cur_tr_mode.Contains("120"))
-                   {
-                       //set_panel_label_status.Text = "The Wockets is set to burst 120 secs mode. This mode supports sampling rates between 1Hz and 20Hz. Enter the sampling rate in the command textbox.";
-                       value = Int32.Parse(sr_val);
-                       if (value > 1 && value <= 20)
-                           is_valid = true;
-                   }
-                   else if (cur_tr_mode.CompareTo("") == 0)
-                   {
-                       //set_panel_label_status.Text = "Before setting up the sampling rate, it is necessary specify the transmission mode.";
-                   }
-
-
-                   //sets the sampling rate to the selected value
-                   if (is_valid)
-                   {
-                       SET_SR sr = new SET_SR(value);
-                       ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(sr._Bytes);
-                   }
-               }
-
-
-               //clean field
-               info_cmd_value_sampling_rate.Text = "";
-               Application.DoEvents();
-               System.Threading.Thread.Sleep(200);
-
-               //reads the sampling rate
-               Command cmd = new GET_SR();
-               ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
-
-
-               #endregion Sampling Rate
-
-               button_set.Enabled = true;
-           }
-           else if (current_command.CompareTo("power_down") == 0)
-           {
-
-               #region PowerDown Timeout
-
-               string pdt_val = info_cmd_value_pwr_timeout.Text;
-               int value = Int32.Parse(pdt_val);
-
-
-               if (cur_power_down != value)
-               {
-                   //verify validity
-                   if (value >= 1 && value <= 127)
-                   {   //set the power down timeout  according the permitted range in minutes
-                       SET_PDT pdt = new SET_PDT(value);
-                       ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(pdt._Bytes);
-                   }
-                   else
-                   {
-                       //set_panel_label_status.Text = "The time you entered is out of range. The power down timeout range is between 1 min and 127 minutes.";       
-                   }
-
-               }
-
-
-               //clean field
-               info_cmd_value_pwr_timeout.Text = "";
-               Application.DoEvents();
-               System.Threading.Thread.Sleep(200);
-
-               //reads the power down timeout
-               Command cmd = new GET_PDT();
-               ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
-
-
-               #endregion PowerDown Timeout
-
-               button_set.Enabled = true;
-           }
-           else if (current_command.CompareTo("calibration") == 0)
-           {
-               #region Calibration
-
-               //setup the calibration panel parameters
-               cal_panel_title.Text = info_cmd_label_calibration.Text;
-               cal_panel_cmd_label.Text = "File";
-               cal_panel_entry_path.Text = "";
-               cal_panel_label_status.Text = "";
-
-               panel_status_texbox.Text = "";
-               panel_status.Visible = false;
-
-               cal_panel_bat_values.Visible = false;
-               cal_panel_cal_values.Visible = true;
-
-               panel_calibration.Visible = true;
-               is_sensordata_valid = false;
-
-               #endregion Calibration
-
-           }
-           else if (current_command.CompareTo("battery_calibration") == 0)
-           {
-               #region BAT Calibration
-               //setup the calibration panel parameters
-               cal_panel_title.Text = info_cmd_label_btcalibration.Text;
-               cal_panel_cmd_label.Text = "File";
-               cal_panel_entry_path.Text = "";
-               cal_panel_label_status.Text = "";
-
-               panel_status_texbox.Text = "";
-               panel_status.Visible = false;
-
-               cal_panel_bat_values.Visible = true;
-               cal_panel_cal_values.Visible = false;
-
-               panel_calibration.Visible = true;
-               is_sensordata_valid = false;
-
-               #endregion BAT Calibration
-
-           }
-
-
-
-
        }
 
+        
         private void checkBox_LoadAll_CheckedChanged(object sender, EventArgs e)
         {
             if (checkBox_LoadAll.Checked)
@@ -2237,7 +2239,7 @@ namespace WocketConfigurationApp
        #endregion Buttons
 
 
-        //------ Close Form ----------
+        //Close Forms 
         #region Close Forms
 
         private void Form7_FormClosing(object sender, FormClosingEventArgs e)
@@ -2263,8 +2265,5 @@ namespace WocketConfigurationApp
         #endregion
 
 
-
-     
-  
     }//end form
 }//end namespace
