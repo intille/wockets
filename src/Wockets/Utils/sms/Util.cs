@@ -9,36 +9,17 @@ namespace Wockets.Utils.sms
 {
     internal class Util
     {
-        private static Thread m_SendSMSThread;
-        private static string m_sRecipientPhone;
-        private static string m_sSMSContent;
 
-        private static void SendSMS()
+        public static bool SendSMS(String m_sRecipientPhone, String m_sSMSContent)
         {
             bool bSuccess = SendSMSMessage(m_sRecipientPhone, m_sSMSContent, false) == 0;
 
             if (!bSuccess)
             {
-
-                // the following lines are specific for City Project. 
-
-                // make a log of message not send here.
-                //Logger.LogError("Error sending text message :" + m_sSMSContent, false);
-
-                //SMSManager.requireResendMsgList.Add(new MessageToResend(m_sRecipientPhone, m_sSMSContent));
-
+                return false;
             }
 
-            // Next.
-            SMSManager.messageSendingFlag = true;
-        }
-
-        internal static void SendSMS(string recipient, string sContent)
-        {
-            m_sRecipientPhone = recipient;
-            m_sSMSContent = sContent;
-            m_SendSMSThread = new Thread(SendSMS);
-            m_SendSMSThread.Start();
+            return true;
         }
 
         [DllImport("cemapi.dll", EntryPoint = "#48", SetLastError = true)]

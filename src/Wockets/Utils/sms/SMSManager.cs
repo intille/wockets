@@ -53,9 +53,6 @@ namespace Wockets.Utils.sms
 
         private int headerOverhead = 13;
 
-        // send ONE message at a time globally
-        public static bool messageSendingFlag = true;
-
         // keeping track of sentMessages
         private Dictionary<String, SentMessage> unfinishedSentMsgList;
 
@@ -63,6 +60,16 @@ namespace Wockets.Utils.sms
 
         // resend if no response was heard over an hour
         private const int resendCheckInterval = 600000; // 10 minutes
+
+        // for flow control
+        private const int sendSMSPollingFreq = 15; // seconds
+        private const int smsResendRetryTimes = 5;
+        private Thread smsSendingMonitorThread;
+        private List<MessageToSend> smsSendingQueue = new List<MessageToSend>();
+
+        // for logging
+        private StreamWriter logWriter;
+        private bool enableLogging = false;
 
         public SMSManager(Char receivingProjectCode, Char receivingProgramCode)
         {
@@ -87,7 +94,64 @@ namespace Wockets.Utils.sms
             resendTimer.Enabled = true;
 
             unfinishedSentMsgList = new Dictionary<String, SentMessage>();
+
+            // create monitoring thread
+            smsSendingMonitorThread = new Thread(new ThreadStart(smsSendingMonitor));
+            smsSendingMonitorThread.Start();
         }
+
+        private void smsSendingMonitor()
+        {
+            while (true)
+            {
+                while (smsSendingQueue.Count > 0)
+                {
+                    MessageToSend messageToSend = smsSendingQueue[0];
+                    if (messageToSend == null)
+                    {
+                        logWriter.WriteLine(DateTime.Now + ", Null message?");
+                        logWriter.Flush();
+
+                        smsSendingQueue.RemoveAt(0);
+                    }
+
+                    if (Util.SendSMS(messageToSend.getClientNum(), messageToSend.getMsgContent()))
+                    {
+                        if (enableLogging)
+                        {
+                            logWriter.WriteLine(DateTime.Now + "," + messageToSend.getClientNum() + "," + messageToSend.getMsgContent() + ", successfully sent.");
+                            logWriter.Flush();
+                        }
+
+                        smsSendingQueue.RemoveAt(0);
+                    }
+                    else
+                    {
+
+                        if (messageToSend.failedCount >= smsResendRetryTimes)
+                        {
+                            if (enableLogging)
+                            {
+                                logWriter.WriteLine(DateTime.Now + "," + messageToSend.getClientNum() + "," + messageToSend.getMsgContent() + ", failed to send too many times. Giving up retrying.");
+                                logWriter.Flush();
+                            }
+                            smsSendingQueue.RemoveAt(0);
+                        }
+                        else
+                        {
+                            logWriter.WriteLine(DateTime.Now + "," + messageToSend.getClientNum() + "," + messageToSend.getMsgContent() + ", message failed to send, retrying in " + sendSMSPollingFreq * (messageToSend.failedCount + 1) + " seconds.");
+                            logWriter.Flush();
+
+                            messageToSend.failedCount++;
+                            Thread.Sleep(sendSMSPollingFreq * messageToSend.failedCount * 1000);
+                        }
+                    }
+                }
+
+                Thread.Sleep(sendSMSPollingFreq * 1000);
+            }
+        }
+
 
         /// <summary>
         /// Call this method to initialize message interceptor.
@@ -136,6 +200,13 @@ namespace Wockets.Utils.sms
             }
         }
 
+        public void enableLogger(StreamWriter logWriter)
+        {
+            this.logWriter = logWriter;
+
+            if (logWriter != null)
+                enableLogging = true;
+        }
 
         private void ResendFailedToSentMsgs(Object myObject, EventArgs myEventArgs)
         {
@@ -166,15 +237,9 @@ namespace Wockets.Utils.sms
                         String msgContent = smsToSend.Insert(13, crcChar.ToString());
 
 
-                        while (!messageSendingFlag)
-                        {
-                            Thread.Sleep(1000);
-                        }
-
                         // resend message back to the server
                         MessageToSend messageToSend = new MessageToSend(entry.Value.getMsgRecipient(), msgContent);
-                        Thread sendDataThread = new Thread(new ThreadStart(messageToSend.startConnection));
-                        sendDataThread.Start();
+                        smsSendingQueue.Add(messageToSend);
                     }
                 }
 
@@ -220,15 +285,9 @@ namespace Wockets.Utils.sms
                                 smsToSend = smsToSend.Remove(13, 1);
                                 String msgContent = smsToSend.Insert(13, crcChar.ToString());
 
-                                while (!messageSendingFlag)
-                                {
-                                    Thread.Sleep(1000);
-                                }
-
                                 // resend message back to the server
                                 MessageToSend messageToSend = new MessageToSend(request.From.Address, msgContent);
-                                Thread sendDataThread = new Thread(new ThreadStart(messageToSend.startConnection));
-                                sendDataThread.Start();
+                                smsSendingQueue.Add(messageToSend);
                             }
 
                         }
@@ -236,16 +295,9 @@ namespace Wockets.Utils.sms
                         {
                             String msgContent = "SMS-" + receivingProjectCode + receivingProgramCode + "ukn" + msgID;
 
-
-                            while (!messageSendingFlag)
-                            {
-                                Thread.Sleep(1000);
-                            }
-
                             // send a message-unknown 'ukn' back to the server
                             MessageToSend messageToSend = new MessageToSend(request.From.Address, msgContent);
-                            Thread sendDataThread = new Thread(new ThreadStart(messageToSend.startConnection));
-                            sendDataThread.Start();
+                            smsSendingQueue.Add(messageToSend);
                         }
                         break;
                 }
@@ -366,14 +418,8 @@ namespace Wockets.Utils.sms
                 smsToSend = smsToSend.Remove(13, 1);
                 String msgContent = smsToSend.Insert(13, crcChar.ToString());
 
-                while (!messageSendingFlag)
-                {
-                    Thread.Sleep(1000);
-                }
-
                 MessageToSend messageToSend = new MessageToSend(msgRecipient, msgContent);
-                Thread sendDataThread = new Thread(new ThreadStart(messageToSend.startConnection));
-                sendDataThread.Start();
+                smsSendingQueue.Add(messageToSend);
             }
 
             // record messages sent
@@ -395,14 +441,8 @@ namespace Wockets.Utils.sms
             if (msgRecipient.Length != 10)
                 return SMSErrorMessage.RecipientNumberFormatIncorrect;
 
-            while (!messageSendingFlag)
-            {
-                Thread.Sleep(1000);
-            }
-
             MessageToSend messageToSend = new MessageToSend(msgRecipient, msgContent);
-            Thread sendDataThread = new Thread(new ThreadStart(messageToSend.startConnection));
-            sendDataThread.Start();
+            smsSendingQueue.Add(messageToSend);
 
             return SMSErrorMessage.None;
         }
@@ -558,19 +598,22 @@ namespace Wockets.Utils.sms
     internal class MessageToSend
     {
         private String clientNum, msgContent;
+        public int failedCount = 0;
 
         public MessageToSend(String clientNum, String msgContent)
         {
             this.clientNum = clientNum;
             this.msgContent = msgContent;
-
-            // block for this message
-            SMSManager.messageSendingFlag = false;
         }
 
-        internal void startConnection()
+        public String getClientNum()
         {
-            Util.SendSMS(clientNum, msgContent);
+            return clientNum;
+        }
+
+        public String getMsgContent()
+        {
+            return msgContent;
         }
     }
 }
