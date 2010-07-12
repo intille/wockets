@@ -16,142 +16,26 @@ namespace WocketConfigurationApp
     public partial class Form4: Form
     {
 
-
+        #region Declared Variables
+        
         ArrayList macaddresses = new ArrayList();
         ArrayList bluetoothlist = new ArrayList();
         BluetoothDeviceInfo[] devices = null;
         
-       
+        int is_connected = 0;
+        FormTestWocket WktTestForm;
+        Form7 WocketForm;
+
+        #endregion
+
+
+        //Initialize
         public Form4()
         {
             InitializeComponent();
         }
 
-
-        //Search Button
-        private void button_search_Click(object sender, EventArgs e)
-        {
-
-            this.label_status.Text = "Please wait... searching for wockets";
-            this.Refresh();
-            this.button_search.Enabled = false;
-
-            //this.WocketsList_Box.Items.Clear();
-            
-            this.dataGridView1.Rows.Clear();
-            this.macaddresses.Clear();
-            int wocketCount = 0;
-            
-            BluetoothRadio.PrimaryRadio.Mode = RadioMode.Connectable;
-            BluetoothClient btc = new BluetoothClient();
-
-            label_status.Text = "Searching for wockets...";
-            Application.DoEvents();
-
-            devices = btc.DiscoverDevices(60, false, true, true);
-
-            label_status.Text = "Waiting for wocket...";
-            Application.DoEvents();
-
-
-
-            for (int i = 0; (i < devices.Length); i++)
-            {
-                //if the device is a wocket
-                if (((devices[i].DeviceName.IndexOf("Wocket") >= 0) 
-                    || (devices[i].DeviceName.IndexOf("WKT") >= 0) 
-                    || (devices[i].DeviceName.IndexOf("FireFly") >= 0)
-                    || (devices[i].DeviceName.IndexOf("0006660") >= 0) 
-                    && (wocketCount < 100)))
-                {
-                    string hex = "";
-                    hex = devices[i].DeviceAddress.ToString();
-                   
-
-                    #region Commented
-                    // if (this.WocketsList_Box.Items.IndexOf(hex) < 0)
-                    //{
-                    //    this.WocketsList_Box.Items.Add(devices[i].DeviceName + " (" + hex + ")");
-                        //macaddresses.Add(hex);
-                    //}
-                    #endregion Commented
-
-
-                    if (this.macaddresses.IndexOf(hex) < 0)
-                    {
-                        int row = this.dataGridView1.Rows.Add();
-                        
-                        this.dataGridView1.Rows[row].Cells[0].Value = devices[i].DeviceName;
-                        this.dataGridView1.Rows[row].Cells[1].Value = hex;
-                        this.dataGridView1.Rows[row].Cells[2].Value = "Not tested";
-                        this.dataGridView1.Rows[row].Cells[3].Value = "Not tested";
-                            
-                        macaddresses.Add(hex);
-                        bluetoothlist.Add(devices[i]);
-
-                    }
-                    
-
-
-                    wocketCount++;
-                }
-            }
-
-
-            btc.Dispose();
-            btc.Close();
-
-            #region Commented
-            // if (this.WocketsList_Box.Items.Count > 0)
-            //     this.button_configure.Enabled = true;
-            #endregion Commented
-
-            if (this.dataGridView1.Rows.Count > 0)
-            {
-                this.button_test.Enabled = true;
-                this.button_settings.Enabled = true;
-            }
-
-            this.button_search.Enabled = true;
-
-
-        }
-
-
-        FormTestWocket WktTestForm;
-        //Button Start Test
-        private void button_test_Click(object sender, EventArgs e)
-        {
-
-            if (this.dataGridView1.SelectedRows.Count <= 0)
-            {
-                MessageBox.Show("Please select a wocket");
-                return;
-            }
-
-
-            this.label_status.Text = "Loading Wocket...";
-            this.button_test.Enabled = false;
-            Application.DoEvents();
-
-
-            DataGridViewRow selected_row = this.dataGridView1.SelectedRows[0];
-            int selected_device_index = selected_row.Index;
-
-            WktTestForm = new FormTestWocket((BluetoothDeviceInfo)bluetoothlist[selected_device_index]);
-            WktTestForm.Show();
-
-            //this.Enabled = false;
-
-            this.label_status.Text = "Wocket Loaded...";
-            this.button_test.Enabled = true;
-
-
-        }
-
-
-
-        int is_connected = 0;
+        //Validate Mac Address
         public static string IsValidMAC(string macAddress)
         {
             string result = null;
@@ -178,10 +62,86 @@ namespace WocketConfigurationApp
         }
 
 
+        #region Discovery Buttons
 
-        //-----------------------------EVENTS -----------------------------------------
-        #region Events
+        //Search
+        private void button_search_Click(object sender, EventArgs e)
+        {
 
+            this.label_status.Text = "Please wait... searching for wockets";
+            this.Refresh();
+            this.button_search.Enabled = false;
+
+            //this.WocketsList_Box.Items.Clear();
+            
+            this.dataGridView1.Rows.Clear();
+            this.macaddresses.Clear();
+            int wocketCount = 0;
+            
+            BluetoothRadio.PrimaryRadio.Mode = RadioMode.Connectable;
+            BluetoothClient btc = new BluetoothClient();
+
+            label_status.Text = "Searching for wockets...";
+            Application.DoEvents();
+
+            devices = btc.DiscoverDevices(60, true, true, true);
+
+            label_status.Text = "Waiting for wocket...";
+            Application.DoEvents();
+
+
+
+            for (int i = 0; (i < devices.Length); i++)
+            {
+                //if the device is a wocket
+                if (((devices[i].DeviceName.IndexOf("Wocket") >= 0) 
+                    || (devices[i].DeviceName.IndexOf("WKT") >= 0) 
+                    || (devices[i].DeviceName.IndexOf("FireFly") >= 0)
+                    || (devices[i].DeviceName.IndexOf("0006660") >= 0) 
+                    && (wocketCount < 100)))
+                {
+                    string hex = "";
+                    hex = devices[i].DeviceAddress.ToString();
+                   
+
+                  
+                    if (this.macaddresses.IndexOf(hex) < 0)
+                    {
+                        int row = this.dataGridView1.Rows.Add();
+                        
+                        this.dataGridView1.Rows[row].Cells[0].Value = devices[i].DeviceName;
+                        this.dataGridView1.Rows[row].Cells[1].Value = hex;
+                        this.dataGridView1.Rows[row].Cells[2].Value = "Not tested";
+                        this.dataGridView1.Rows[row].Cells[3].Value = "Not tested";
+                            
+                        macaddresses.Add(hex);
+                        bluetoothlist.Add(devices[i]);
+
+                    }
+                    
+
+
+                    wocketCount++;
+                }
+            }
+
+
+            btc.Dispose();
+            btc.Close();
+
+           
+            if (this.dataGridView1.Rows.Count > 0)
+            {
+                this.button_test.Enabled = true;
+                this.button_settings.Enabled = true;
+            }
+
+            this.button_search.Enabled = true;
+
+
+        }
+
+        //Add Wocket Manually
         private void button_add_wocket_Click(object sender, EventArgs e)
         {
 
@@ -224,6 +184,7 @@ namespace WocketConfigurationApp
                                     if (((devices[i].DeviceName.IndexOf("Wocket") >= 0)
                                         || (devices[i].DeviceName.IndexOf("WKT") >= 0)
                                         || (devices[i].DeviceName.IndexOf("FireFly") >= 0))
+                                        || (devices[i].DeviceName.IndexOf("0006660") >= 0) 
                                         && (wocketCount < 100))
                                     {
                                         string hex = "";
@@ -294,6 +255,7 @@ namespace WocketConfigurationApp
                             if (((devices[i].DeviceName.IndexOf("Wocket") >= 0)
                                 || (devices[i].DeviceName.IndexOf("WKT") >= 0)
                                 || (devices[i].DeviceName.IndexOf("FireFly") >= 0))
+                                || (devices[i].DeviceName.IndexOf("0006660") >= 0) 
                                 && (wocketCount < 100))
                             {
                                 string hex = "";
@@ -379,8 +341,8 @@ namespace WocketConfigurationApp
             #endregion commented
 
         }
-
-
+        
+        //Remove Wocket Manually
         private void button_remove_wocket_Click(object sender, EventArgs e)
         {
 
@@ -463,49 +425,21 @@ namespace WocketConfigurationApp
 
         }
 
-        #region Commented
-        /*
-        private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            button_configure.Enabled = true;
-        }
-         */
-        #endregion Commented
+        #endregion 
 
 
 
-
-        // Testing if this will go out
-        #region commented
-        //Select a wocket by double clicking the raw
-        /*private void dataGridView1_DoubleClick(object sender, EventArgs e)
-        {
-            if (this.dataGridView1.Focused)
-            {
-                DataGridViewRow selected_row = this.dataGridView1.SelectedRows[0];
-                int selected_device_index = selected_row.Index;
-
-                if(selected_device_index >= 0 )
-                {
-                    button_configure.Enabled = true;
-                    button_settings.Enabled = true;
-                }
-            }
-        }*/
-        #endregion
-
-
-        Form7 WocketForm;
+        #region Settings/Test Buttons
+       
+        //Get Settings
         private void button_settings_Click(object sender, EventArgs e)
         {
             
-
             if (this.dataGridView1.SelectedRows.Count <= 0)
             {
                 MessageBox.Show("Please select a wocket");
                 return;
             }
-
 
             label_status.Text = "Loading Wocket...";
             button_settings.Enabled = false;
@@ -518,16 +452,43 @@ namespace WocketConfigurationApp
             WocketForm = new Form7((BluetoothDeviceInfo) bluetoothlist[selected_device_index]);
             WocketForm.Show();
 
-            //this.Enabled = false;
-
             label_status.Text = "Wocket Loaded...";
             button_settings.Enabled = true;
+        }
+
+        //Start Test
+        private void button_test_Click(object sender, EventArgs e)
+        {
+
+            if (this.dataGridView1.SelectedRows.Count <= 0)
+            {
+                MessageBox.Show("Please select a wocket");
+                return;
+            }
+
+
+            this.label_status.Text = "Loading Wocket...";
+            this.button_test.Enabled = false;
+            Application.DoEvents();
+
+
+            DataGridViewRow selected_row = this.dataGridView1.SelectedRows[0];
+            int selected_device_index = selected_row.Index;
+
+            WktTestForm = new FormTestWocket((BluetoothDeviceInfo)bluetoothlist[selected_device_index]);
+            WktTestForm.Show();
+
+
+            this.label_status.Text = "Wocket Loaded...";
+            this.button_test.Enabled = true;
+
 
         }
 
-        
+        #endregion 
+       
 
-        //--------------- Close Form -------------------------
+        #region Close Functions
 
         private void close_form()
         {
@@ -540,8 +501,6 @@ namespace WocketConfigurationApp
             Application.Exit();
         }
 
-
-
         private void button_quit_Click(object sender, EventArgs e)
         {
             close_form();
@@ -553,76 +512,8 @@ namespace WocketConfigurationApp
         }
 
 
+        #endregion
 
-        //----------------------------------------------------------------------
-        #endregion Events
-
-
-
-        #region Commented
-        /*
-        public static string IsValidMAC(string macAddress)
-        {
-            string result =null;
-            Regex rx = new Regex("^([0-9a-fA-F][0-9a-fA-F]-){5}([0-9a-fA-F][0-9a-fA-F])$", RegexOptions.IgnoreCase);
-            Match m = rx.Match(macAddress);
-            result = m.Groups[0].Value;
-            if (result.Length == 17)
-            {
-                return result;
-            }
-            else
-            {
-                rx = new Regex("^([0-9a-fA-F][0-9a-fA-F]){5}([0-9a-fA-F][0-9a-fA-F])$", RegexOptions.IgnoreCase);
-                Match m2 = rx.Match(macAddress);
-                result = m2.Groups[0].Value;
-                if (result.Length == 12)
-                {
-                    return result;
-                }
-                return null;
-            }
-        }
-
-        private void button3_Click(object sender, EventArgs e)
-        {
-           string macaddress=Microsoft.VisualBasic.Interaction.InputBox("Please type in the MAC address for the wocket:", "Add a New Wocket", "e.g. 00066602FEA3", 0, 0);
-           if (IsValidMAC(macaddress)!=null)
-               if (this.listBox1.Items.IndexOf(macaddress)<0)                
-                   this.listBox1.Items.Add(macaddress);
-               else
-                   MessageBox.Show("Mac address already exists in the list.");
-           else
-               MessageBox.Show("You entered an invalid mac address.");
-        }
-
-        private void button4_Click(object sender, EventArgs e)
-        {
-            if (this.listBox1.SelectedIndex >= 0)
-                this.listBox1.Items.RemoveAt(this.listBox1.SelectedIndex);
-            else
-            {
-                MessageBox.Show("Please select a wocket");
-                return;
-            }
-        }
-
-        private void button2_Click(object sender, EventArgs e)
-        {
-            if (this.listBox1.SelectedIndex < 0)
-            {
-                MessageBox.Show("Please select a wocket");
-                return;
-            }
-
-            Form2 f = new Form2(devices[this.listBox1.SelectedIndex].DeviceAddress);
-            f.Show();
-            this.Visible = false;
-        }
-          
-         */
-
-        #endregion Commented
 
     }
 }
