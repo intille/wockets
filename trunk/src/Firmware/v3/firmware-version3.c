@@ -358,8 +358,8 @@ ISR(TIMER2_OVF_vect)
 
 	/* If the wocket is docked in shut it down */
 
-	if (_is_docked())
-		_atmega_finalize();
+//	if (_is_docked())
+//		_atmega_finalize();
 		
 	/* Skip sampling depending on the sampling rate variables/timers */
  	if (interrupt_reps==0)

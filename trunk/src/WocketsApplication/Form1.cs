@@ -1101,7 +1101,7 @@ namespace WocketsApplication
                     if (difference>0)
                         totalCalories += (kcal_kg_hr * kgs * difference);
                     prevHrs = hrs;
-                    ((Label)this.classifiedLabels["kcals"]).Text = "Calories Burnt: " + totalCalories.ToString("0.0");
+                    ((Label)this.classifiedLabels["kcals"]).Text = "Calories Burned: " + totalCalories.ToString("0.0");
                     //((Label)this.classifiedLabels["reps"]).Text = "Reps: " +reps;
                     //pieChart.SetTime(ts.Hours,ts.Minutes,ts.Seconds);
                     //pieChart.Invalidate();
@@ -1585,6 +1585,34 @@ namespace WocketsApplication
             activityPictures.Add(picture.Name, picture);
             this.panels[ControlID.CLASSIFICATION_PANEL].Controls.Add(picture);
 
+
+            picture = new AlphaPictureBox();
+            picture.Name = "exercise-1";
+            picture.Size = new Size(240, 240);
+            picture.Image = AlphaImage.CreateFromFile(Constants.PATH + "images\\" + picture.Name + ".gif");
+            picture.Visible = false;
+            picture.Location = new Point(40, 90);
+            activityPictures.Add(picture.Name, picture);
+            this.panels[ControlID.CLASSIFICATION_PANEL].Controls.Add(picture);
+
+            picture = new AlphaPictureBox();
+            picture.Name = "exercise-2";
+            picture.Size = new Size(240, 240);
+            picture.Image = AlphaImage.CreateFromFile(Constants.PATH + "images\\" + picture.Name + ".gif");
+            picture.Visible = false;
+            picture.Location = new Point(40, 90);
+            activityPictures.Add(picture.Name, picture);
+            this.panels[ControlID.CLASSIFICATION_PANEL].Controls.Add(picture);
+
+
+            picture = new AlphaPictureBox();
+            picture.Name = "exercise-3";
+            picture.Size = new Size(240, 240);
+            picture.Image = AlphaImage.CreateFromFile(Constants.PATH + "images\\" + picture.Name + ".gif");
+            picture.Visible = false;
+            picture.Location = new Point(40, 90);
+            activityPictures.Add(picture.Name, picture);
+            this.panels[ControlID.CLASSIFICATION_PANEL].Controls.Add(picture);
             
             Label label = new Label();
             label.Size = new Size(500, 100);
