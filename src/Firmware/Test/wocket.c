@@ -136,146 +136,44 @@ void _wocket_initialize(void)
 	num_skipped_timer_interrupts=10;//(F_CPU/1024)/PERFECT_SAMPLING_FREQUENCY;
 
 
-	/* Blink yellow for 5 seconds if battery not fully charged */
-	unsigned short battery=_atmega_a2dConvert10bit(IN_VSENSE_BAT);
-	if (battery<700)
-	{
-		for (int i=0;(i<3);i++){
-			_yellowled_turn_on();		
-			for(int j=0;(j<200);j++)
-				_delay_ms(5);
-			_yellowled_turn_off();
-			for(int j=0;(j<200);j++)
-				_delay_ms(5);
-		}
-	}
 
-	/* Load the status byte from the EEPROM if it fails turn on the yellow led for 5 seconds then 
-	   shutdown */
-	if (battery>100)
-	{
-		_INITIALIZED=eeprom_read_byte(&_NV_INITIALIZED);		
-	}
-	else
-	{
-		_yellowled_turn_on();		
-		for(int i=0;(i<1000);i++)
-			_delay_ms(5);
-		_yellowled_turn_off();
-		_atmega_finalize();
-		return;
-	}
-	
+	_yellowled_turn_on();		
+	_greenled_turn_on();		
+	for(int i=0;(i<2000);i++)
+		_delay_ms(5);
+	_yellowled_turn_off();
+	_greenled_turn_off();
 
 
-	//eeprom_write_byte(&_NV_DEBUG,_INITIALIZED);	
-	/* If the wocket has been initialized */
-	if (_INITIALIZED==_WOCKET_INITIALIZED)
-	{
-		// Read the sampling rate from the EEPROM
-		if (battery>300)
-		{
-			_SAMPLING_RATE=eeprom_read_byte(&_NV_SAMPLING_RATE);
-			_STATUS_BYTE=eeprom_read_byte(&_NV_STATUS_BYTE);
-			_wTM=eeprom_read_byte(&_NV_TM);
-			_wSENS=eeprom_read_byte(&_NV_SENS);
+	_SAMPLING_RATE=90;
+	_wTM=_TM_Continuous;
 
-			_wBTCAL100=eeprom_read_word(&_NV_BTCAL100);
-			_wBTCAL80=eeprom_read_word(&_NV_BTCAL80);
-			_wBTCAL60=eeprom_read_word(&_NV_BTCAL60);
-			_wBTCAL40=eeprom_read_word(&_NV_BTCAL40);
-			_wBTCAL20=eeprom_read_word(&_NV_BTCAL20);
-			_wBTCAL10=eeprom_read_word(&_NV_BTCAL10);
+	_wBTCAL100=_DEFAULTBTCAL100;
+	_wBTCAL80=_DEFAULTBTCAL80;
+	_wBTCAL60=_DEFAULTBTCAL60;
+	_wBTCAL40=_DEFAULTBTCAL40;
+	_wBTCAL20=_DEFAULTBTCAL20;
+	_wBTCAL10=_DEFAULTBTCAL10;
 
 
-			_wX1G_CAL=eeprom_read_word(&_NV_X1G_CAL);
-			_wXN1G_CAL=eeprom_read_word(&_NV_XN1G_CAL);
-			_wY1G_CAL=eeprom_read_word(&_NV_Y1G_CAL);
-			_wYN1G_CAL=eeprom_read_word(&_NV_YN1G_CAL);
-			_wZ1G_CAL=eeprom_read_word(&_NV_Z1G_CAL);
-			_wZN1G_CAL=eeprom_read_word(&_NV_ZN1G_CAL);
 
-			_wPDT=eeprom_read_byte(&_NV_PDT);
+	_wX1G_CAL=_DEFAULT_X1G_CAL;
+	_wXN1G_CAL=_DEFAULT_XN1G_CAL;
+	_wY1G_CAL=_DEFAULT_Y1G_CAL;
+	_wYN1G_CAL=_DEFAULT_YN1G_CAL;
+	_wZ1G_CAL=_DEFAULT_Z1G_CAL;
+	_wZN1G_CAL=_DEFAULT_ZN1G_CAL;
 
-		}
+	//SET the PDT
+	_wPDT=_DEFAULT_PDT;
 
-		// Load the transmission mode						
-		_greenled_turn_on();		
-		for(int i=0;(i<200);i++)
-			_delay_ms(5);
-		_greenled_turn_off();		
-	}
-	/* If the wocket has never been initialized, write the default settings and blink green for 5 seconds */
-	else
-	{
 
-		// Set the sampling rate to 90Hz
-		//_SAMPLING_RATE=40;
-		//_wTM=_TM_Burst_60;
 
-		_SAMPLING_RATE=90;
-		_wTM=_TM_Continuous;
-	
-		// Write the sampling rate to the EEPROM
-		if (battery>300)
-		{
-			eeprom_write_byte(&_NV_SAMPLING_RATE,_SAMPLING_RATE);
-			eeprom_write_byte(&_NV_TM,_wTM);
-			eeprom_write_byte(&_NV_STATUS_BYTE,0x00);
-			eeprom_write_byte(&_NV_SENS,_wSENS);
 
-			//Set default battery calibration values
-			eeprom_write_word(&_NV_BTCAL100,_DEFAULTBTCAL100);
-			eeprom_write_word(&_NV_BTCAL80,_DEFAULTBTCAL80);
-			eeprom_write_word(&_NV_BTCAL60,_DEFAULTBTCAL60);
-			eeprom_write_word(&_NV_BTCAL40,_DEFAULTBTCAL40);
-			eeprom_write_word(&_NV_BTCAL20,_DEFAULTBTCAL20);
-			eeprom_write_word(&_NV_BTCAL10,_DEFAULTBTCAL10);
+	// Set the initialized flag in the status byte
+	_INITIALIZED=_WOCKET_INITIALIZED;
 
-			_wBTCAL100=_DEFAULTBTCAL100;
-			_wBTCAL80=_DEFAULTBTCAL80;
-			_wBTCAL60=_DEFAULTBTCAL60;
-			_wBTCAL40=_DEFAULTBTCAL40;
-			_wBTCAL20=_DEFAULTBTCAL20;
-			_wBTCAL10=_DEFAULTBTCAL10;
-
-			//Set default acc calibration values
-			eeprom_write_word(&_NV_X1G_CAL,_DEFAULT_X1G_CAL);
-			eeprom_write_word(&_NV_XN1G_CAL,_DEFAULT_XN1G_CAL);
-			eeprom_write_word(&_NV_Y1G_CAL,_DEFAULT_Y1G_CAL);
-			eeprom_write_word(&_NV_YN1G_CAL,_DEFAULT_YN1G_CAL);
-			eeprom_write_word(&_NV_Z1G_CAL,_DEFAULT_Z1G_CAL);
-			eeprom_write_word(&_NV_ZN1G_CAL,_DEFAULT_ZN1G_CAL);
-
-			_wX1G_CAL=_DEFAULT_X1G_CAL;
-			_wXN1G_CAL=_DEFAULT_XN1G_CAL;
-			_wY1G_CAL=_DEFAULT_Y1G_CAL;
-			_wYN1G_CAL=_DEFAULT_YN1G_CAL;
-			_wZ1G_CAL=_DEFAULT_Z1G_CAL;
-			_wZN1G_CAL=_DEFAULT_ZN1G_CAL;
-
-			//SET the PDT
-			_wPDT=_DEFAULT_PDT;
-			eeprom_write_byte(&_NV_PDT,_wPDT);
-
-		}
-
-		// Set the initialized flag in the status byte
-		_INITIALIZED=_WOCKET_INITIALIZED;
-
-		// Write the status byte to the EEPROM		
-		eeprom_write_byte(&_NV_INITIALIZED,_INITIALIZED);
-				
-		// Blink green for 5 seconds	
-		for (int i=0;(i<3);i++){
-			_greenled_turn_on();		
-			for(int j=0;(j<200);j++)
-				_delay_ms(5);
-			_greenled_turn_off();
-			for(int j=0;(j<200);j++)
-				_delay_ms(5);
-		}		
-	}
+		
 
 	/* Set the overflow interrupt timer */
 	unsigned char _MAX_SAMPLING_RATE=0;
