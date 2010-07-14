@@ -15,6 +15,18 @@
     {
         "Entry"
         {
+        "MsmKey" = "8:_032C684DB75F4D9C954CDE10795008C4"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_17B24499954841A79895C0B911C98AE4"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_1B00A3972DC1D47C8A032C7728B55B0C"
         "OwnerKey" = "8:_BCD3F189F0B02D607CE6D1F7A459F4A2"
         "MsmSig" = "8:_UNDEFINED"
@@ -45,7 +57,37 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_1B00A3972DC1D47C8A032C7728B55B0C"
+        "OwnerKey" = "8:_17B24499954841A79895C0B911C98AE4"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_1B833B939C194D5DB50B1AFBE0ABE2E6"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_2D252D063CB44F33B0BE33DE5C9E5D7E"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_318B56D69B0E4C36BB863450E6D49726"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_42A4A8AEAB0C4F83B340007C0EB03222"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_43EE62CC4BD14622B5C833A38699A130"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -57,13 +99,115 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_498E20E4ED3447079E0B7C3E27295462"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_4CFE3E6541E586D17820E9A92058C561"
+        "OwnerKey" = "8:_17B24499954841A79895C0B911C98AE4"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_4CFE3E6541E586D17820E9A92058C561"
+        "OwnerKey" = "8:_DFD0A2DD9E68420888ABCC17AB43E5EF"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_4CFE3E6541E586D17820E9A92058C561"
+        "OwnerKey" = "8:_CCCF234C77174EC49130BB4AD39C0B4F"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_4CFE3E6541E586D17820E9A92058C561"
+        "OwnerKey" = "8:_C2385F9BF98C4E8EA5BE4C99902B1882"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_4CFE3E6541E586D17820E9A92058C561"
+        "OwnerKey" = "8:_9684725F82234F07AB6709C3A60600DE"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_4CFE3E6541E586D17820E9A92058C561"
+        "OwnerKey" = "8:_BCD3F189F0B02D607CE6D1F7A459F4A2"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_50201198C78643E9A4F3AFC586D6DEE7"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_50C198E49BF9457CAFAF1C702F888022"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_53EFDAE2B0BB4899B09E31321DA2C34D"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_65799DB915044166A54248D1C1D0D06E"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_6FD54AA3D8CF41F3B06EB7D0C06EAB9F"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_74A502EC57354C528D87F3820756CE5E"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_889D330E5A3A4684AD2A94A85FCE385D"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_8E2B5689F395A72FD1FCD071854C03E4"
         "OwnerKey" = "8:_DFD0A2DD9E68420888ABCC17AB43E5EF"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
+        "MsmKey" = "8:_90CDB481DE514F37AEC5E1BE0A980413"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_9684725F82234F07AB6709C3A60600DE"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_A764C663F70E4258AA66C20027401FB5"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_AA00103621F441489F54FEABAF6E835B"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -94,7 +238,7 @@
         "Entry"
         {
         "MsmKey" = "8:_BCD3F189F0B02D607CE6D1F7A459F4A2"
-        "OwnerKey" = "8:_9684725F82234F07AB6709C3A60600DE"
+        "OwnerKey" = "8:_17B24499954841A79895C0B911C98AE4"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -113,6 +257,12 @@
         {
         "MsmKey" = "8:_BCD3F189F0B02D607CE6D1F7A459F4A2"
         "OwnerKey" = "8:_C2385F9BF98C4E8EA5BE4C99902B1882"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_BCD3F189F0B02D607CE6D1F7A459F4A2"
+        "OwnerKey" = "8:_9684725F82234F07AB6709C3A60600DE"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -129,38 +279,26 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_C5D6F75C6E4645E1A97A1633ED8DDF2A"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_C81349DD3BC19EFD5F14D340F709D553"
         "OwnerKey" = "8:_CCCF234C77174EC49130BB4AD39C0B4F"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_C9AEA5512F464AD322FDBF45198CB7A9"
-        "OwnerKey" = "8:_9684725F82234F07AB6709C3A60600DE"
+        "MsmKey" = "8:_C8B5F91466384FDB87E8DB685667DB0A"
+        "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_C9AEA5512F464AD322FDBF45198CB7A9"
-        "OwnerKey" = "8:_DFD0A2DD9E68420888ABCC17AB43E5EF"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_C9AEA5512F464AD322FDBF45198CB7A9"
-        "OwnerKey" = "8:_CCCF234C77174EC49130BB4AD39C0B4F"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_C9AEA5512F464AD322FDBF45198CB7A9"
-        "OwnerKey" = "8:_C2385F9BF98C4E8EA5BE4C99902B1882"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_C9AEA5512F464AD322FDBF45198CB7A9"
-        "OwnerKey" = "8:_BCD3F189F0B02D607CE6D1F7A459F4A2"
+        "MsmKey" = "8:_CA414F3703CC4A9D82FF2A20B9DBE38C"
+        "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -177,7 +315,25 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_D1ABEED0C5774675885C6C65E5DBCB5F"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_DA48082452A448ABBCEEB3EA132F15A9"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_DFD0A2DD9E68420888ABCC17AB43E5EF"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_E2DF11446A644ECBA29BED53B72A82FE"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -195,6 +351,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_ED6ECF54A7A547888D589AD156FC7007"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_FF8884444E7231555DE7BA0AF45D5A72"
         "OwnerKey" = "8:_DFD0A2DD9E68420888ABCC17AB43E5EF"
         "MsmSig" = "8:_UNDEFINED"
@@ -203,6 +365,12 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_C2385F9BF98C4E8EA5BE4C99902B1882"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_ED6ECF54A7A547888D589AD156FC7007"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -274,6 +442,12 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_17B24499954841A79895C0B911C98AE4"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_BCD3F189F0B02D607CE6D1F7A459F4A2"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -286,7 +460,7 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_C9AEA5512F464AD322FDBF45198CB7A9"
+        "OwnerKey" = "8:_4CFE3E6541E586D17820E9A92058C561"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -379,20 +553,40 @@
         }
         "File"
         {
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_032C684DB75F4D9C954CDE10795008C4"
+            {
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\programmer\\Stk500_connect.bmp"
+            "TargetName" = "8:Stk500_connect.bmp"
+            "Tag" = "8:"
+            "Folder" = "8:_94022B759D9C4E078518EF2BDC168239"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_1B00A3972DC1D47C8A032C7728B55B0C"
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:WocketsWeka, Version=1.0.3811.29387, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:WocketsWeka, Version=1.0.3628.23057, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
                     "_1B00A3972DC1D47C8A032C7728B55B0C"
                     {
-                    "Name" = "8:WocketsWeka.dll"
+                    "Name" = "8:WocketsWeka.DLL"
                     "Attributes" = "3:512"
                     }
                 }
-            "SourcePath" = "8:WocketsWeka.dll"
+            "SourcePath" = "8:WocketsWeka.DLL"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_45D43034C6CA4CE79DC31D031DA107F1"
@@ -410,12 +604,92 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_1B833B939C194D5DB50B1AFBE0ABE2E6"
+            {
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\programmer\\STK500.ebn"
+            "TargetName" = "8:STK500.ebn"
+            "Tag" = "8:"
+            "Folder" = "8:_94022B759D9C4E078518EF2BDC168239"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_2D252D063CB44F33B0BE33DE5C9E5D7E"
+            {
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\programmer\\gdiplus.dll"
+            "TargetName" = "8:gdiplus.dll"
+            "Tag" = "8:"
+            "Folder" = "8:_94022B759D9C4E078518EF2BDC168239"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_318B56D69B0E4C36BB863450E6D49726"
             {
             "SourcePath" = "8:..\\..\\bin\\NeededFiles\\tools\\WocketsList.bat"
             "TargetName" = "8:WocketsList.bat"
             "Tag" = "8:"
             "Folder" = "8:_45D43034C6CA4CE79DC31D031DA107F1"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_42A4A8AEAB0C4F83B340007C0EB03222"
+            {
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\programmer\\STK500.ini"
+            "TargetName" = "8:STK500.ini"
+            "Tag" = "8:"
+            "Folder" = "8:_94022B759D9C4E078518EF2BDC168239"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_43EE62CC4BD14622B5C833A38699A130"
+            {
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\programmer\\ProgramWocket.bat"
+            "TargetName" = "8:ProgramWocket.bat"
+            "Tag" = "8:"
+            "Folder" = "8:_94022B759D9C4E078518EF2BDC168239"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -461,6 +735,197 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_498E20E4ED3447079E0B7C3E27295462"
+            {
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\programmer\\Stk500Common.dll"
+            "TargetName" = "8:Stk500Common.dll"
+            "Tag" = "8:"
+            "Folder" = "8:_94022B759D9C4E078518EF2BDC168239"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_4CFE3E6541E586D17820E9A92058C561"
+            {
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:InTheHand.Net.Personal, Version=2.3.0.0, Culture=neutral, PublicKeyToken=ea38caa273134499, processorArchitecture=MSIL"
+                "ScatterAssemblies"
+                {
+                    "_4CFE3E6541E586D17820E9A92058C561"
+                    {
+                    "Name" = "8:InTheHand.Net.Personal.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:InTheHand.Net.Personal.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_45D43034C6CA4CE79DC31D031DA107F1"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_50201198C78643E9A4F3AFC586D6DEE7"
+            {
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\programmer\\Stk500_eread.bmp"
+            "TargetName" = "8:Stk500_eread.bmp"
+            "Tag" = "8:"
+            "Folder" = "8:_94022B759D9C4E078518EF2BDC168239"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_50C198E49BF9457CAFAF1C702F888022"
+            {
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\programmer\\Firmware-Version-2.hex"
+            "TargetName" = "8:Firmware-Version-2.hex"
+            "Tag" = "8:"
+            "Folder" = "8:_94022B759D9C4E078518EF2BDC168239"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_53EFDAE2B0BB4899B09E31321DA2C34D"
+            {
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\programmer\\Firmware-Version-3.hex"
+            "TargetName" = "8:Firmware-Version-3.hex"
+            "Tag" = "8:"
+            "Folder" = "8:_94022B759D9C4E078518EF2BDC168239"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_65799DB915044166A54248D1C1D0D06E"
+            {
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\programmer\\libelfdwarfparser.dll"
+            "TargetName" = "8:libelfdwarfparser.dll"
+            "Tag" = "8:"
+            "Folder" = "8:_94022B759D9C4E078518EF2BDC168239"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_6FD54AA3D8CF41F3B06EB7D0C06EAB9F"
+            {
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\programmer\\Stk500_show.bmp"
+            "TargetName" = "8:Stk500_show.bmp"
+            "Tag" = "8:"
+            "Folder" = "8:_94022B759D9C4E078518EF2BDC168239"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_74A502EC57354C528D87F3820756CE5E"
+            {
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\programmer\\Stk500_fprog.bmp"
+            "TargetName" = "8:Stk500_fprog.bmp"
+            "Tag" = "8:"
+            "Folder" = "8:_94022B759D9C4E078518EF2BDC168239"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_889D330E5A3A4684AD2A94A85FCE385D"
+            {
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\programmer\\stk500.xml"
+            "TargetName" = "8:stk500.xml"
+            "Tag" = "8:"
+            "Folder" = "8:_94022B759D9C4E078518EF2BDC168239"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_8E2B5689F395A72FD1FCD071854C03E4"
             {
             "AssemblyRegister" = "3:1"
@@ -490,6 +955,66 @@
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_90CDB481DE514F37AEC5E1BE0A980413"
+            {
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\programmer\\AVRISP-mkII.dat"
+            "TargetName" = "8:AVRISP-mkII.dat"
+            "Tag" = "8:"
+            "Folder" = "8:_94022B759D9C4E078518EF2BDC168239"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_A764C663F70E4258AA66C20027401FB5"
+            {
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\programmer\\Upgrade.exe"
+            "TargetName" = "8:Upgrade.exe"
+            "Tag" = "8:"
+            "Folder" = "8:_94022B759D9C4E078518EF2BDC168239"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_AA00103621F441489F54FEABAF6E835B"
+            {
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\programmer\\Stk500.exe"
+            "TargetName" = "8:Stk500.exe"
+            "Tag" = "8:"
+            "Folder" = "8:_94022B759D9C4E078518EF2BDC168239"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_AA961E7C12BA75DF31BE21891E5168E9"
@@ -567,7 +1092,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:Wockets, Version=1.0.3811.29388, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:Wockets, Version=1.0.3846.25180, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
                     "_BCD3F189F0B02D607CE6D1F7A459F4A2"
@@ -592,6 +1117,26 @@
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_C5D6F75C6E4645E1A97A1633ED8DDF2A"
+            {
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\programmer\\Firmware-Diagnostic-Test.hex"
+            "TargetName" = "8:Firmware-Diagnostic-Test.hex"
+            "Tag" = "8:"
+            "Folder" = "8:_94022B759D9C4E078518EF2BDC168239"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_C81349DD3BC19EFD5F14D340F709D553"
@@ -625,23 +1170,12 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_C9AEA5512F464AD322FDBF45198CB7A9"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_C8B5F91466384FDB87E8DB685667DB0A"
             {
-            "AssemblyRegister" = "3:1"
-            "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:InTheHand.Net.Personal, Version=2.3.0.0, Culture=neutral, PublicKeyToken=ea38caa273134499, processorArchitecture=MSIL"
-                "ScatterAssemblies"
-                {
-                    "_C9AEA5512F464AD322FDBF45198CB7A9"
-                    {
-                    "Name" = "8:InTheHand.Net.Personal.dll"
-                    "Attributes" = "3:512"
-                    }
-                }
-            "SourcePath" = "8:InTheHand.Net.Personal.dll"
-            "TargetName" = "8:"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\programmer\\Stk500Dll.dll"
+            "TargetName" = "8:Stk500Dll.dll"
             "Tag" = "8:"
-            "Folder" = "8:_45D43034C6CA4CE79DC31D031DA107F1"
+            "Folder" = "8:_94022B759D9C4E078518EF2BDC168239"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -653,7 +1187,27 @@
             "PackageAs" = "3:1"
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
-            "IsDependency" = "11:TRUE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_CA414F3703CC4A9D82FF2A20B9DBE38C"
+            {
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\programmer\\libdwarf.dll"
+            "TargetName" = "8:libdwarf.dll"
+            "Tag" = "8:"
+            "Folder" = "8:_94022B759D9C4E078518EF2BDC168239"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_D031DCB08C410860698E89C31DFC2A74"
@@ -685,6 +1239,66 @@
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_D1ABEED0C5774675885C6C65E5DBCB5F"
+            {
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\programmer\\Stk500_auto.bmp"
+            "TargetName" = "8:Stk500_auto.bmp"
+            "Tag" = "8:"
+            "Folder" = "8:_94022B759D9C4E078518EF2BDC168239"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_DA48082452A448ABBCEEB3EA132F15A9"
+            {
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\programmer\\libelf.dll"
+            "TargetName" = "8:libelf.dll"
+            "Tag" = "8:"
+            "Folder" = "8:_94022B759D9C4E078518EF2BDC168239"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_E2DF11446A644ECBA29BED53B72A82FE"
+            {
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\programmer\\Stk500_eprog.bmp"
+            "TargetName" = "8:Stk500_eprog.bmp"
+            "Tag" = "8:"
+            "Folder" = "8:_94022B759D9C4E078518EF2BDC168239"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_EAABE4250ED4AA1CA2C455B9BA551148"
@@ -765,6 +1379,17 @@
             "Property" = "8:TARGETDIR"
                 "Folders"
                 {
+                    "{9EF0B969-E518-4E46-987F-47570745A589}:_94022B759D9C4E078518EF2BDC168239"
+                    {
+                    "Name" = "8:programmer"
+                    "AlwaysCreate" = "11:FALSE"
+                    "Condition" = "8:"
+                    "Transitive" = "11:FALSE"
+                    "Property" = "8:_27E181566F72438ABA107B3E2FC1E05D"
+                        "Folders"
+                        {
+                        }
+                    }
                 }
             }
             "{1525181F-901A-416C-8A58-119130FE478E}:_837F8D8C1C724470BEEDBA7E09CD1FA6"
@@ -785,6 +1410,17 @@
                     "Property" = "8:_D26816403A5E418C95130B65D664B51F"
                         "Folders"
                         {
+                            "{9EF0B969-E518-4E46-987F-47570745A589}:_7790ACBD53A34E2389C044903058DFE4"
+                            {
+                            "Name" = "8:Advanced"
+                            "AlwaysCreate" = "11:FALSE"
+                            "Condition" = "8:"
+                            "Transitive" = "11:FALSE"
+                            "Property" = "8:_8298B18F1A9C4347BE1BAFADF5391E65"
+                                "Folders"
+                                {
+                                }
+                            }
                         }
                     }
                 }
@@ -816,14 +1452,14 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:WocketsInstaller"
-        "ProductCode" = "8:{B7454181-B6F3-4498-AC2E-2F280D7C41CC}"
-        "PackageCode" = "8:{54BBF241-67E1-4C2D-AA51-9EAD927D9C49}"
+        "ProductCode" = "8:{9FDE5343-98CD-410B-8665-77F11D394143}"
+        "PackageCode" = "8:{3BBF7A2D-909A-430E-9BF3-788A96086367}"
         "UpgradeCode" = "8:{C469586D-4266-4E79-8F41-3937F5A8F09F}"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:1.42.0"
+        "ProductVersion" = "8:1.44.0"
         "Manufacturer" = "8:MIT"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
@@ -950,6 +1586,20 @@
             "Icon" = "8:"
             "Feature" = "8:"
             }
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_2B6FF989E7BD44B0B26B39A596B686C3"
+            {
+            "Name" = "8:Program Wocket"
+            "Arguments" = "8:"
+            "Description" = "8:"
+            "ShowCmd" = "3:1"
+            "IconIndex" = "3:0"
+            "Transitive" = "11:FALSE"
+            "Target" = "8:_ED6ECF54A7A547888D589AD156FC7007"
+            "Folder" = "8:_7790ACBD53A34E2389C044903058DFE4"
+            "WorkingFolder" = "8:_45D43034C6CA4CE79DC31D031DA107F1"
+            "Icon" = "8:"
+            "Feature" = "8:"
+            }
             "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_4A48C5B48055468780D1C4F998EF0999"
             {
             "Name" = "8:Wockets Time Synchronizer"
@@ -959,6 +1609,20 @@
             "IconIndex" = "3:0"
             "Transitive" = "11:FALSE"
             "Target" = "8:_9684725F82234F07AB6709C3A60600DE"
+            "Folder" = "8:_8C13D4D01F3142E88FE9F91E7BFD22DB"
+            "WorkingFolder" = "8:_45D43034C6CA4CE79DC31D031DA107F1"
+            "Icon" = "8:"
+            "Feature" = "8:"
+            }
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_56A0D85A390D4281AACB073D3DDE3C9D"
+            {
+            "Name" = "8:Test Wocket"
+            "Arguments" = "8:"
+            "Description" = "8:"
+            "ShowCmd" = "3:1"
+            "IconIndex" = "3:0"
+            "Transitive" = "11:FALSE"
+            "Target" = "8:_17B24499954841A79895C0B911C98AE4"
             "Folder" = "8:_8C13D4D01F3142E88FE9F91E7BFD22DB"
             "WorkingFolder" = "8:_45D43034C6CA4CE79DC31D031DA107F1"
             "Icon" = "8:"
@@ -974,6 +1638,20 @@
             "Transitive" = "11:FALSE"
             "Target" = "8:_AD69C2055ECF4317A7128964D8373CD3"
             "Folder" = "8:_49BCD4DDE5CF4251A8EA0F420275B4EE"
+            "WorkingFolder" = "8:_45D43034C6CA4CE79DC31D031DA107F1"
+            "Icon" = "8:"
+            "Feature" = "8:"
+            }
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_59AB853CFB0F4D1DB49EEFAADF7A1BC6"
+            {
+            "Name" = "8:Program Wocket"
+            "Arguments" = "8:"
+            "Description" = "8:"
+            "ShowCmd" = "3:1"
+            "IconIndex" = "3:0"
+            "Transitive" = "11:FALSE"
+            "Target" = "8:_ED6ECF54A7A547888D589AD156FC7007"
+            "Folder" = "8:_8C13D4D01F3142E88FE9F91E7BFD22DB"
             "WorkingFolder" = "8:_45D43034C6CA4CE79DC31D031DA107F1"
             "Icon" = "8:"
             "Feature" = "8:"
@@ -1016,6 +1694,20 @@
             "Transitive" = "11:FALSE"
             "Target" = "8:_C2385F9BF98C4E8EA5BE4C99902B1882"
             "Folder" = "8:_8C13D4D01F3142E88FE9F91E7BFD22DB"
+            "WorkingFolder" = "8:_45D43034C6CA4CE79DC31D031DA107F1"
+            "Icon" = "8:"
+            "Feature" = "8:"
+            }
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_82AF69B6718449569130F71BB4579EF8"
+            {
+            "Name" = "8:Test Wocket"
+            "Arguments" = "8:"
+            "Description" = "8:"
+            "ShowCmd" = "3:1"
+            "IconIndex" = "3:0"
+            "Transitive" = "11:FALSE"
+            "Target" = "8:_17B24499954841A79895C0B911C98AE4"
+            "Folder" = "8:_7790ACBD53A34E2389C044903058DFE4"
             "WorkingFolder" = "8:_45D43034C6CA4CE79DC31D031DA107F1"
             "Icon" = "8:"
             "Feature" = "8:"
@@ -1489,6 +2181,34 @@
         }
         "ProjectOutput"
         {
+            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_17B24499954841A79895C0B911C98AE4"
+            {
+            "SourcePath" = "8:obj\\Debug\\WocketsTestApp.exe"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_45D43034C6CA4CE79DC31D031DA107F1"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            "ProjectOutputGroupRegister" = "3:1"
+            "OutputConfiguration" = "8:"
+            "OutputGroupCanonicalName" = "8:Built"
+            "OutputProjectGuid" = "8:{294383F9-A02B-4643-AC33-A9CD7FEAEDD6}"
+            "ShowKeyOutput" = "11:TRUE"
+                "ExcludeFilters"
+                {
+                }
+            }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_9684725F82234F07AB6709C3A60600DE"
             {
             "SourcePath" = "8:obj\\Debug\\TimeSync_PC.exe"
@@ -1624,6 +2344,34 @@
             "OutputConfiguration" = "8:"
             "OutputGroupCanonicalName" = "8:Built"
             "OutputProjectGuid" = "8:{13A2AF07-A286-468D-9F31-AD1AC957DFF5}"
+            "ShowKeyOutput" = "11:TRUE"
+                "ExcludeFilters"
+                {
+                }
+            }
+            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_ED6ECF54A7A547888D589AD156FC7007"
+            {
+            "SourcePath" = "8:obj\\Debug\\WocketsProgrammer.exe"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_45D43034C6CA4CE79DC31D031DA107F1"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            "ProjectOutputGroupRegister" = "3:1"
+            "OutputConfiguration" = "8:"
+            "OutputGroupCanonicalName" = "8:Built"
+            "OutputProjectGuid" = "8:{14487665-253E-4ABC-A87F-7ED2FDAD4B48}"
             "ShowKeyOutput" = "11:TRUE"
                 "ExcludeFilters"
                 {
