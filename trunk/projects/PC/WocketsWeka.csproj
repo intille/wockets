@@ -716,8 +716,8 @@
     <Compile Include="..\..\src\WocketsWeka\Utils\Filters\BandPass.cs" >
       <Link>Utils\Filters\BandPass.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\ButterWorth.cs" >
-      <Link>Utils\Filters\ButterWorth.cs</Link>
+    <Compile Include="..\..\src\WocketsWeka\Utils\Filters\BPButterWorth.cs" >
+      <Link>Utils\Filters\BPButterWorth.cs</Link>
     </Compile>
     <Compile Include="..\..\src\WocketsWeka\Utils\Filters\ButterworthDF.cs" >
       <Link>Utils\Filters\ButterworthDF.cs</Link>
@@ -743,6 +743,8 @@
     <Compile Include="..\..\src\WocketsWeka\Utils\Filters\LPButterWorth.cs" >
       <Link>Utils\Filters\LPButterWorth.cs</Link>
     </Compile>    
+    
+
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
