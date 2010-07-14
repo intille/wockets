@@ -129,8 +129,11 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
             }
 
             try
-            {
+            {               
                 IDisposable idStream = nstream;
+#if (!PocketPC)
+                nstream.Close();
+#endif
                 if (idStream != null)
                 {
                     //dispose the stream which will also close the socket

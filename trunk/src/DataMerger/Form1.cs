@@ -467,19 +467,34 @@ namespace DataMerger
             Session session = new Session();
             session.FromXML(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\AnnotationIntervals.xml");
 
-            int numPostures = session.OverlappingActivityLists[0].Count * session.OverlappingActivityLists[1].Count +1;
+            int numPostures = 0;
             Hashtable postures = new Hashtable();
             int k = 0;
-          
-            for (int i = 0; (i < session.OverlappingActivityLists[1].Count); i++)
-                for (int j = 0; (j < session.OverlappingActivityLists[0].Count); j++)
+
+            if (session.OverlappingActivityLists.Count == 2)
+            {
+                numPostures = session.OverlappingActivityLists[0].Count * session.OverlappingActivityLists[1].Count + 1;
+                for (int i = 0; (i < session.OverlappingActivityLists[1].Count); i++)
+                    for (int j = 0; (j < session.OverlappingActivityLists[0].Count); j++)
+                    {
+
+
+                        postures.Add(session.OverlappingActivityLists[1][i]._Name + "_" + session.OverlappingActivityLists[0][j]._Name, k);
+                        k++;
+
+                    }
+            }
+            else if (session.OverlappingActivityLists.Count == 1)
+            {
+                numPostures = session.OverlappingActivityLists[0].Count + 1;
+                for (int i = 0; (i < session.OverlappingActivityLists[0].Count); i++)
                 {
-
-
-                    postures.Add(session.OverlappingActivityLists[1][i]._Name + "_" + session.OverlappingActivityLists[0][j]._Name, k);
+                    postures.Add(session.OverlappingActivityLists[0][i]._Name , k);
                     k++;
 
                 }
+            }
+
 
             postures.Add("unknown", k);
 
@@ -581,12 +596,19 @@ namespace DataMerger
                         (currentTime <= session.Annotations[currentAnnotation]._EndUnix))
                     {
                         /* Hack until selene fixes the audio annotator */
-                        if ((session.Annotations[currentAnnotation].Activities[1]._Name == "none") || (session.Annotations[currentAnnotation].Activities[1]._Name == "") || (session.Annotations[currentAnnotation].Activities[1]._Name == "-"))
-                            session.Annotations[currentAnnotation].Activities[1]._Name = "unknown";
+                        if (session.Annotations[currentAnnotation].Activities.Count > 1)
+                        {
+                            if ((session.Annotations[currentAnnotation].Activities[1]._Name == "none") || (session.Annotations[currentAnnotation].Activities[1]._Name == "") || (session.Annotations[currentAnnotation].Activities[1]._Name == "-"))
+                                session.Annotations[currentAnnotation].Activities[1]._Name = "unknown";
+                        }
                         if ((session.Annotations[currentAnnotation].Activities[0]._Name == "none") || (session.Annotations[currentAnnotation].Activities[0]._Name == "") || (session.Annotations[currentAnnotation].Activities[0]._Name == "-"))
                             session.Annotations[currentAnnotation].Activities[0]._Name = "unknown";
 
-                        current_posture = session.Annotations[currentAnnotation].Activities[1]._Name + "_" + session.Annotations[currentAnnotation].Activities[0]._Name;
+                        if (session.Annotations[currentAnnotation].Activities.Count > 1)                        
+                            current_posture = session.Annotations[currentAnnotation].Activities[1]._Name + "_" + session.Annotations[currentAnnotation].Activities[0]._Name;
+                        else
+                            current_posture = session.Annotations[currentAnnotation].Activities[0]._Name;
+
 
                         if (!annotatedPostures.ContainsKey(current_posture))
                             annotatedPostures.Add(current_posture, 1);
@@ -804,7 +826,7 @@ namespace DataMerger
                             maxedOut[i] = maxedOut[i] + 1;
                     }
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
                 }
             }
@@ -856,37 +878,38 @@ namespace DataMerger
 
             summary += "<TR><TD colspan=\"8\"></TD></TR><TR>\n";
 
-            for (int i = 0; (i < wc._Sensors.Count-1); i++)
+            for (int i = 0; (i < wc._Sensors.Count); i++)
             {
 
-                                
-                string row="<TR>\n";
-                row += "<TD><div align=\"center\"><strong>Wocket " + wc._Sensors[i]._Location + "</strong></div></TD>\n";
-
-                if (wocketsPercentLost[i] >= 20)
+                if (wc._Receivers[i] is Wockets.Receivers.RFCOMMReceiver)
                 {
-                    row += "<TD bgcolor=\"#FF0000\"><div align=\"center\">" + wocketsSecondsLost[i].ToString() + "</div></TD>\n";
-                    row += "<TD bgcolor=\"#FF0000\"><div align=\"center\">" + wocketsPercentLost[i].ToString() + "%" + "</div></TD>\n";
-                }
-                else
-                {
-                    row += "<TD><div align=\"center\">" + wocketsSecondsLost[i].ToString() + "</div></TD>\n";
-                    row += "<TD><div align=\"center\">" + wocketsPercentLost[i].ToString() + "%" + "</div></TD>\n";
-                }
-                row += "<TD><div align=\"center\">" + numDisconnections[i].ToString() + "</div></TD>\n";
-                row += "<TD><div align=\"center\">" + meanDisconnection[i].ToString() + "</div></TD>\n";
-                if (sdDisconnection[i]>=0)
-                    row += "<TD><div align=\"center\">" + sdDisconnection[i].ToString() + "</div></TD>\n";
-                else
-                    row += "<TD><div align=\"center\">N/A</div></TD>\n";
-                row += "<TD><div align=\"center\">" + maxedOut[i].ToString() + "</div></TD>\n";
-                if (samplesCount[i]>0)
-                    row += "<TD><div align=\"center\">" + ((int)(((double)maxedOut[i] / (double)samplesCount[i]) * 100.0)).ToString() + "% </div></TD>\n";
-                else
-                    row += "<TD><div align=\"center\">0% </div></TD>\n";
-                row+="</TR>\n";                
-                summary+=row;
+                    string row = "<TR>\n";
+                    row += "<TD><div align=\"center\"><strong>Wocket " + wc._Sensors[i]._Location + "</strong></div></TD>\n";
 
+                    if (wocketsPercentLost[i] >= 20)
+                    {
+                        row += "<TD bgcolor=\"#FF0000\"><div align=\"center\">" + wocketsSecondsLost[i].ToString() + "</div></TD>\n";
+                        row += "<TD bgcolor=\"#FF0000\"><div align=\"center\">" + wocketsPercentLost[i].ToString() + "%" + "</div></TD>\n";
+                    }
+                    else
+                    {
+                        row += "<TD><div align=\"center\">" + wocketsSecondsLost[i].ToString() + "</div></TD>\n";
+                        row += "<TD><div align=\"center\">" + wocketsPercentLost[i].ToString() + "%" + "</div></TD>\n";
+                    }
+                    row += "<TD><div align=\"center\">" + numDisconnections[i].ToString() + "</div></TD>\n";
+                    row += "<TD><div align=\"center\">" + meanDisconnection[i].ToString() + "</div></TD>\n";
+                    if (sdDisconnection[i] >= 0)
+                        row += "<TD><div align=\"center\">" + sdDisconnection[i].ToString() + "</div></TD>\n";
+                    else
+                        row += "<TD><div align=\"center\">N/A</div></TD>\n";
+                    row += "<TD><div align=\"center\">" + maxedOut[i].ToString() + "</div></TD>\n";
+                    if (samplesCount[i] > 0)
+                        row += "<TD><div align=\"center\">" + ((int)(((double)maxedOut[i] / (double)samplesCount[i]) * 100.0)).ToString() + "% </div></TD>\n";
+                    else
+                        row += "<TD><div align=\"center\">0% </div></TD>\n";
+                    row += "</TR>\n";
+                    summary += row;
+                }
 
             }
             summary += "</TABLE>\n";
@@ -909,14 +932,38 @@ namespace DataMerger
             summary += header;
 
             int m = 0;
-            for (int i = 0; (i < session.OverlappingActivityLists[1].Count); i++)
+            if (session.OverlappingActivityLists.Count > 1)
+            {
+                for (int i = 0; (i < session.OverlappingActivityLists[1].Count); i++)
+                    for (int j = 0; (j < session.OverlappingActivityLists[0].Count); j++)
+                    {
+                        if (annotatedPostures.ContainsKey(session.OverlappingActivityLists[1][i]._Name + "_" + session.OverlappingActivityLists[0][j]._Name))
+                        {
+                            string row = "<TR>\n";
+                            row += "<TD><div align=\"center\"><strong>" + session.OverlappingActivityLists[1][i]._Name + "</strong></div></TD><TD><div align=\"center\"><strong>" + session.OverlappingActivityLists[0][j]._Name + "</strong></div></TD>\n";
+                            row += "<TD><div>" + (int)annotatedPostures[session.OverlappingActivityLists[1][i]._Name + "_" + session.OverlappingActivityLists[0][j]._Name] + "</TD>\n";
+                            for (int r = 0; (r < wc._Sensors.Count - 1); r++)
+                                if (percentLostPostureSensorDistribution[r][m] > 20)
+                                    row += "<TD bgcolor=\"#FF0000\"><div align=\"center\">" + timeLostPostureSensorDistribution[r][m].ToString() + " | " + percentLostPostureSensorDistribution[r][m].ToString() + "%" + "</div></TD>\n";
+                                else
+                                    row += "<TD ><div align=\"center\">" + timeLostPostureSensorDistribution[r][m].ToString() + " | " + percentLostPostureSensorDistribution[r][m].ToString() + "%" + "</div></TD>\n";
+
+                            row += "</TR>\n";
+                            summary += row;
+                        }
+                        m++;
+                    }
+            }
+            else
+            {
+
                 for (int j = 0; (j < session.OverlappingActivityLists[0].Count); j++)
                 {
-                    if (annotatedPostures.ContainsKey(session.OverlappingActivityLists[1][i]._Name + "_" + session.OverlappingActivityLists[0][j]._Name))
+                    if (annotatedPostures.ContainsKey(session.OverlappingActivityLists[0][j]._Name))
                     {
                         string row = "<TR>\n";
-                        row += "<TD><div align=\"center\"><strong>" + session.OverlappingActivityLists[1][i]._Name + "</strong></div></TD><TD><div align=\"center\"><strong>" + session.OverlappingActivityLists[0][j]._Name + "</strong></div></TD>\n";
-                        row += "<TD><div>" + (int)annotatedPostures[session.OverlappingActivityLists[1][i]._Name + "_" + session.OverlappingActivityLists[0][j]._Name] + "</TD>\n";
+                        row += "<TD><div align=\"center\"><strong>" + session.OverlappingActivityLists[0][j]._Name + "</strong></div></TD><TD><div align=\"center\"><strong>" + session.OverlappingActivityLists[0][j]._Name + "</strong></div></TD>\n";
+                        row += "<TD><div></TD>\n";
                         for (int r = 0; (r < wc._Sensors.Count - 1); r++)
                             if (percentLostPostureSensorDistribution[r][m] > 20)
                                 row += "<TD bgcolor=\"#FF0000\"><div align=\"center\">" + timeLostPostureSensorDistribution[r][m].ToString() + " | " + percentLostPostureSensorDistribution[r][m].ToString() + "%" + "</div></TD>\n";
@@ -928,6 +975,7 @@ namespace DataMerger
                     }
                     m++;
                 }
+            }
             tw.WriteLine(summary + "</TABLE>\n");
 
 

@@ -3355,9 +3355,9 @@ namespace WocketConfigurationApp
                 //update data & time stamps 
                 lastUnixTime = curUnixTime;
 
-                accMeans[0] = accMeans[0] + data.X;
-                accMeans[1] = accMeans[1] + data.Y;
-                accMeans[2] = accMeans[2] + data.Z;
+                accMeans[0] = accMeans[0] + data._X;
+                accMeans[1] = accMeans[1] + data._Y;
+                accMeans[2] = accMeans[2] + data._Z;
 
                 //update the tail
                 if (myTail >= wc._Decoders[0]._Data.Length - 1)

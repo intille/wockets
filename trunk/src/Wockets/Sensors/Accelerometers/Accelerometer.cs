@@ -541,6 +541,7 @@ namespace Wockets.Sensors.Accelerometers
                 }
                 catch (Exception e)
                 {
+                    br.CloseFile();
                     //if the data ended return false
                     if (!((++fileIndex < someBinaryFiles.Count) && SetupNextFiles(fileIndex)))
                         return false;
