@@ -1095,10 +1095,6 @@ namespace AudioAnnotation
 
 
 
-
-
-
-
         #region Audio Files
 
         //=======  Compute the sound length ==================
@@ -1385,8 +1381,6 @@ namespace AudioAnnotation
 
 
         #endregion
-
-
 
 
         #region Row Operations
@@ -2362,10 +2356,6 @@ namespace AudioAnnotation
         }
 
         #endregion
-
-
-
-
 
 
         #region Sessions
@@ -4276,10 +4266,15 @@ namespace AudioAnnotation
         {
             bool is_file_found = false;
 
+            string unknown_label = "unknown";
+            bool unknow_label_exist = false;
+
+
             if (XmlSession == null)
             {
                 XmlSession = new Session();
                 CActivityList = new BindingList<ActivityList>();
+
 
                 // Load the "ActivityLabelsRealtime.xml" file
                 string labels_file_name = Folder_session + "wockets\\ActivityLabelsRealtime.xml";
@@ -4299,27 +4294,63 @@ namespace AudioAnnotation
 
                         list_category_name.Add(CActivityList[i]._Name);
 
+
+
                         // only two activity categories can be loaded
                         if (i == 0)
                         {
+                            #region Load First Category 
+
                             //extract the activity array
                             activityArray = CActivityList[i].ToArray();
                             
                             //add the blank possition
                             list_category_1.Add(" ");
 
-                           
+                            //initialize unknown label flag
+                            unknow_label_exist = false;
+                            
                             for (int j = 0; j < CActivityList[i].Count; j++)
-                            { list_category_1.Add(activityArray[j]._Name); }
+                            {
+                                list_category_1.Add(activityArray[j]._Name);
+
+                                if (activityArray[j]._Name.ToLower().CompareTo(unknown_label) == 0)
+                                { unknow_label_exist = true; }
+                            }
+
+                            //If "unknown label" doesn't exist, added it
+                            if (!unknow_label_exist)
+                            { list_category_1.Add(unknown_label); }
+
+
+                            #endregion 
+
                         }
                         else if (i == 1)
                         {
+
+                            #region Load Second Category
+
                             activityArray = CActivityList[i].ToArray();
                             list_category_2.Add(" ");
 
+                            //initialize unknown label flag
+                            unknow_label_exist = false;
                             
                             for (int j = 0; j < CActivityList[i].Count; j++)
-                            { list_category_2.Add(activityArray[j]._Name); }
+                            {   
+                                list_category_2.Add(activityArray[j]._Name);
+
+                                if (activityArray[j]._Name.ToLower().CompareTo(unknown_label) == 0)
+                                { unknow_label_exist = true; }
+                            }
+
+
+                            //If "unknown label" doesn't exist, added it
+                            if (!unknow_label_exist)
+                            { list_category_2.Add(unknown_label); }
+
+                            #endregion 
 
                         }
 
@@ -5381,7 +5412,7 @@ namespace AudioAnnotation
         }
 
 
-
+        //--- This colors assigned to the annotation bar in the viewer are protocol specific  ----
         private void SaveLabelsColorsToFile()
         {
             //Category 1
@@ -5721,8 +5752,7 @@ namespace AudioAnnotation
             Application.Exit();
         }
 
-        
-        
+         
         private void button_session_part_Click(object sender, EventArgs e)
         {
             button_category_select.Enabled = false;
@@ -5750,8 +5780,6 @@ namespace AudioAnnotation
             label_category_button.Enabled = true;
 
         }
-
-
 
 
         private void LoadSessionView_1()
@@ -5818,8 +5846,6 @@ namespace AudioAnnotation
 
           
         }
-
-
 
 
         private void LoadSessionView_2()
@@ -5981,6 +6007,7 @@ namespace AudioAnnotation
                 CTime_LastWritten.Visible = false;
             }
         }
+
 
         private void paintcells_view(int irow, int view)
         {
