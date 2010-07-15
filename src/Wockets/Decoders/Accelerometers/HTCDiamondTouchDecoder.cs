@@ -143,8 +143,57 @@ namespace Wockets.Decoders.Accelerometers
             return numDecodedPackets;
         }
 
+        private byte[] b6 = new byte[6];
+        private byte[] b = new byte[1];
+        private double lastUnixTime = 0;
+        byte[] header = new byte[1];
+        byte[] pdu = new byte[16];
+
         public override void Load(ByteReader br)
-        { }
+        {
+            #region Read Timestamp
+            if (!(br.ReadByte(b)))
+                throw new Exception("Error: reading first byte in PLFormat file");
+
+            //read a complete timestamp
+            if (b[0] == ((int)255))
+            {
+                if (!(br.ReadBytes(b6)))
+                    throw new Exception("Error: reading full timestamp in PLFormat file");
+
+                lastUnixTime = WocketsTimer.DecodeUnixTimeCodeBytesFixed(b6);
+            }
+            else //read a differential timestamp          
+                lastUnixTime += (int)b[0];
+
+            #endregion Read Timestamp
+
+            DateTime dt = new DateTime();
+            WocketsTimer.GetDateTime((long)lastUnixTime, out dt);
+
+            if (!br.ReadByte(header))
+                throw new Exception("Error: reading data in PLFormat file");
+            pdu[0] = header[0];
+
+
+            if (!(br.ReadBytes(pdu, 1, 16)))
+                throw new Exception("Error: reading data in PLFormat file");
+
+
+            int lastDecodedIndex = 0;
+            //Successfully decoded a packet
+            if (this.Decode(this._ID, pdu, 16) == 1)
+            {
+                if (this._Head == 0)
+                    lastDecodedIndex = this._Data.Length - 1;
+                else
+                    lastDecodedIndex = this._Head - 1;
+                this._Data[lastDecodedIndex].UnixTimeStamp = lastUnixTime;
+                return;
+            }
+            else
+                throw new Exception("Failed to decode data");
+        }
         #region Serialization Methods
         public override string ToXML()
         {

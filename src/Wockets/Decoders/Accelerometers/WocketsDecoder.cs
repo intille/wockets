@@ -74,8 +74,6 @@ namespace Wockets.Decoders.Accelerometers
 
         public override void Load(ByteReader br)
         {
-            if (this._Head == 200)
-                pdu = pdu;
             #region Read Timestamp
             if (!(br.ReadByte(b)))
                 throw new Exception("Error: reading first byte in PLFormat file");
