@@ -1092,7 +1092,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:Wockets, Version=1.0.3846.25180, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:Wockets, Version=1.0.3848.21438, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
                     "_BCD3F189F0B02D607CE6D1F7A459F4A2"
@@ -1452,14 +1452,14 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:WocketsInstaller"
-        "ProductCode" = "8:{9FDE5343-98CD-410B-8665-77F11D394143}"
-        "PackageCode" = "8:{3BBF7A2D-909A-430E-9BF3-788A96086367}"
+        "ProductCode" = "8:{986710E1-249F-4510-A0A5-4A3783F7D667}"
+        "PackageCode" = "8:{FCEACE31-16D5-4AF4-9AC4-0504E6EAD4D3}"
         "UpgradeCode" = "8:{C469586D-4266-4E79-8F41-3937F5A8F09F}"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:1.44.0"
+        "ProductVersion" = "8:1.45.0"
         "Manufacturer" = "8:MIT"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
