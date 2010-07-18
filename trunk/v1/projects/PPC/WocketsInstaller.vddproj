@@ -14,20 +14,8 @@
     {
         "Entry"
         {
-        "MsmKey" = "8:_00B25973938740CBBAD163F6DFB0279B"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_046F998E4C84D482884D359E4F01955E"
         "OwnerKey" = "8:_731E23E476AD51CB581A218D4D100C8E"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_09AFBDD244EF4C849533092C8C101BF1"
-        "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -40,6 +28,12 @@
         {
         "MsmKey" = "8:_100959BDB2EF40A5A66DB397CAC890D4"
         "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_10CE5827769D965882A551BA2CF4DE58"
+        "OwnerKey" = "8:_56DD47A0E5804567AEF3C8D5E96B4C8D"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -80,12 +74,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_1B7C32536A9A4C76A2C9FFC14CBB4819"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_23164D2AA8964FE7A0A4212F190F0310"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -93,12 +81,6 @@
         "Entry"
         {
         "MsmKey" = "8:_237D66D7864A4E639B030E776B4A4D62"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_24B09B26FBF74B4989A2C1E3B647D824"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -159,13 +141,19 @@
         "Entry"
         {
         "MsmKey" = "8:_32CCEE091D3FAF98F1C1FC6E2E0928E9"
-        "OwnerKey" = "8:_C66DA87609EC16A5BAAF4550AEEBCEF1"
+        "OwnerKey" = "8:_56DD47A0E5804567AEF3C8D5E96B4C8D"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_32CCEE091D3FAF98F1C1FC6E2E0928E9"
         "OwnerKey" = "8:_D7B8A7440C7C4C22B85C2F227C7B39CC"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_32CCEE091D3FAF98F1C1FC6E2E0928E9"
+        "OwnerKey" = "8:_7E8F925A67D01C286C1CEC8D3CD28991"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -182,13 +170,25 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_3A05C34BE0BE40EEAF91B6519C04F9AB"
-        "OwnerKey" = "8:_UNDEFINED"
+        "MsmKey" = "8:_392BB49A12C98783F0A9D9E9C0F85D87"
+        "OwnerKey" = "8:_E49F3E8577AD97CA1AFFC84042484BBB"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_3D2FE02446714A75B7EA593434FEE5BE"
+        "MsmKey" = "8:_392BB49A12C98783F0A9D9E9C0F85D87"
+        "OwnerKey" = "8:_FD78BAFB416847179B58EC76EC2F9995"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_392BB49A12C98783F0A9D9E9C0F85D87"
+        "OwnerKey" = "8:_56DD47A0E5804567AEF3C8D5E96B4C8D"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_3A05C34BE0BE40EEAF91B6519C04F9AB"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -224,6 +224,30 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_439374CE724A52C7F55E5017D79E39BD"
+        "OwnerKey" = "8:_56DD47A0E5804567AEF3C8D5E96B4C8D"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_439374CE724A52C7F55E5017D79E39BD"
+        "OwnerKey" = "8:_D7B8A7440C7C4C22B85C2F227C7B39CC"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_439374CE724A52C7F55E5017D79E39BD"
+        "OwnerKey" = "8:_7E8F925A67D01C286C1CEC8D3CD28991"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_439374CE724A52C7F55E5017D79E39BD"
+        "OwnerKey" = "8:_32CCEE091D3FAF98F1C1FC6E2E0928E9"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_4570B85CE64A49C0BFDDD7549D138790"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -231,12 +255,6 @@
         "Entry"
         {
         "MsmKey" = "8:_4621140D2D3441929B003F08763DB398"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_47B73CCE25AB4AC89C68ABCC162F942E"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -268,6 +286,24 @@
         {
         "MsmKey" = "8:_48F8EEABCD466B373E9C92B53D7A4650"
         "OwnerKey" = "8:_A62C10A9532C443DB19316B239B52908"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_48F8EEABCD466B373E9C92B53D7A4650"
+        "OwnerKey" = "8:_9EFAB62F391BDFA06E40838CC6F74F37"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_48F8EEABCD466B373E9C92B53D7A4650"
+        "OwnerKey" = "8:_10CE5827769D965882A551BA2CF4DE58"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_48F8EEABCD466B373E9C92B53D7A4650"
+        "OwnerKey" = "8:_E49F3E8577AD97CA1AFFC84042484BBB"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -345,6 +381,24 @@
         "Entry"
         {
         "MsmKey" = "8:_491B2D2964630606B82177DABD87EA2E"
+        "OwnerKey" = "8:_10CE5827769D965882A551BA2CF4DE58"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_491B2D2964630606B82177DABD87EA2E"
+        "OwnerKey" = "8:_E49F3E8577AD97CA1AFFC84042484BBB"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_491B2D2964630606B82177DABD87EA2E"
+        "OwnerKey" = "8:_7DFDA0AB5959ACD16124F5B61B6FF71B"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_491B2D2964630606B82177DABD87EA2E"
         "OwnerKey" = "8:_915CC0A1D9877C5C4D14005BB7D35FCE"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -404,13 +458,13 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_602ACA9168924FD7B8D663D64A3757F4"
+        "MsmKey" = "8:_60C5B198C98F48A98D8E0D51C3669370"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_60C5B198C98F48A98D8E0D51C3669370"
+        "MsmKey" = "8:_64D4C2DC9F0C4741A6800FEB00A1DD4E"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -429,12 +483,6 @@
         "Entry"
         {
         "MsmKey" = "8:_69A41C5E94084E5D899E83E65653FB8D"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_6E2C71BB1E0C4F2B99CFF3E36AD69040"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -471,6 +519,18 @@
         "Entry"
         {
         "MsmKey" = "8:_6EAD692F6639D8375427F91F2C217921"
+        "OwnerKey" = "8:_9EFAB62F391BDFA06E40838CC6F74F37"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_6EAD692F6639D8375427F91F2C217921"
+        "OwnerKey" = "8:_10CE5827769D965882A551BA2CF4DE58"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_6EAD692F6639D8375427F91F2C217921"
         "OwnerKey" = "8:_56DD47A0E5804567AEF3C8D5E96B4C8D"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -484,12 +544,6 @@
         {
         "MsmKey" = "8:_6EAD692F6639D8375427F91F2C217921"
         "OwnerKey" = "8:_19F0A45799F74CE8AD0794F75D6B39A9"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_6EE8754C1ED74DAC889718E0F1FA62DB"
-        "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -542,30 +596,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_7B1E6473E81954AC9B89ADB16A747FD4"
-        "OwnerKey" = "8:_D7B8A7440C7C4C22B85C2F227C7B39CC"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_7B1E6473E81954AC9B89ADB16A747FD4"
-        "OwnerKey" = "8:_32CCEE091D3FAF98F1C1FC6E2E0928E9"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_7B1E6473E81954AC9B89ADB16A747FD4"
-        "OwnerKey" = "8:_C66DA87609EC16A5BAAF4550AEEBCEF1"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_7B4CAA571BA2476F9F3174371816CC87"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_7B6C6B5DF75B48E8A706981A87922042"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -574,6 +604,30 @@
         {
         "MsmKey" = "8:_7CB64C3670CA43BCB92558C4B2BB8AFD"
         "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_7DFDA0AB5959ACD16124F5B61B6FF71B"
+        "OwnerKey" = "8:_56DD47A0E5804567AEF3C8D5E96B4C8D"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_7E8F925A67D01C286C1CEC8D3CD28991"
+        "OwnerKey" = "8:_56DD47A0E5804567AEF3C8D5E96B4C8D"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_7E8F925A67D01C286C1CEC8D3CD28991"
+        "OwnerKey" = "8:_D7B8A7440C7C4C22B85C2F227C7B39CC"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_7E8F925A67D01C286C1CEC8D3CD28991"
+        "OwnerKey" = "8:_10CE5827769D965882A551BA2CF4DE58"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -620,12 +674,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_913A031280DC448D9EBDE35E9EE95D67"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_9147E61C9F1C4BC4BE683C04AD66D13B"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -634,12 +682,6 @@
         {
         "MsmKey" = "8:_915CC0A1D9877C5C4D14005BB7D35FCE"
         "OwnerKey" = "8:_56DD47A0E5804567AEF3C8D5E96B4C8D"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_94CD12CF3F9D408AA95A76729AC62980"
-        "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -674,8 +716,20 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_9EDBFEAE325643C29F8847FDF7CA9436"
-        "OwnerKey" = "8:_UNDEFINED"
+        "MsmKey" = "8:_9EFAB62F391BDFA06E40838CC6F74F37"
+        "OwnerKey" = "8:_10CE5827769D965882A551BA2CF4DE58"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_9EFAB62F391BDFA06E40838CC6F74F37"
+        "OwnerKey" = "8:_D7B8A7440C7C4C22B85C2F227C7B39CC"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_9EFAB62F391BDFA06E40838CC6F74F37"
+        "OwnerKey" = "8:_56DD47A0E5804567AEF3C8D5E96B4C8D"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -734,12 +788,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_B68528DCF60641AC8D9518178C5D8353"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_BAE46D366039468CA67A7EEC60BB62EF"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -760,12 +808,6 @@
         {
         "MsmKey" = "8:_C342E2AE16B34CC384EE85930D49A854"
         "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_C66DA87609EC16A5BAAF4550AEEBCEF1"
-        "OwnerKey" = "8:_D7B8A7440C7C4C22B85C2F227C7B39CC"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -802,6 +844,36 @@
         {
         "MsmKey" = "8:_CE68FEDF056D8F4E55E21B3308B23496"
         "OwnerKey" = "8:_A62C10A9532C443DB19316B239B52908"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_CE68FEDF056D8F4E55E21B3308B23496"
+        "OwnerKey" = "8:_9EFAB62F391BDFA06E40838CC6F74F37"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_CE68FEDF056D8F4E55E21B3308B23496"
+        "OwnerKey" = "8:_10CE5827769D965882A551BA2CF4DE58"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_CE68FEDF056D8F4E55E21B3308B23496"
+        "OwnerKey" = "8:_392BB49A12C98783F0A9D9E9C0F85D87"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_CE68FEDF056D8F4E55E21B3308B23496"
+        "OwnerKey" = "8:_E49F3E8577AD97CA1AFFC84042484BBB"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_CE68FEDF056D8F4E55E21B3308B23496"
+        "OwnerKey" = "8:_7DFDA0AB5959ACD16124F5B61B6FF71B"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -878,12 +950,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_DCB0835A9D8E47F8B7280F2767D83168"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_DE00B249424847DB8446F83B3E9CBF95"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -896,19 +962,13 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_E20B408BCEA141C49AD336D6393A4D10"
-        "OwnerKey" = "8:_UNDEFINED"
+        "MsmKey" = "8:_E49F3E8577AD97CA1AFFC84042484BBB"
+        "OwnerKey" = "8:_56DD47A0E5804567AEF3C8D5E96B4C8D"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_E61B4DE6E367482C93E7B2AD333AFB7B"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_F24C538D31FA4335A95ECD045F992DAC"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -952,6 +1012,30 @@
         {
         "MsmKey" = "8:_F7A1CF35CC87986505BEEE6F26B3B849"
         "OwnerKey" = "8:_A62C10A9532C443DB19316B239B52908"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_F7A1CF35CC87986505BEEE6F26B3B849"
+        "OwnerKey" = "8:_10CE5827769D965882A551BA2CF4DE58"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_F7A1CF35CC87986505BEEE6F26B3B849"
+        "OwnerKey" = "8:_392BB49A12C98783F0A9D9E9C0F85D87"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_F7A1CF35CC87986505BEEE6F26B3B849"
+        "OwnerKey" = "8:_E49F3E8577AD97CA1AFFC84042484BBB"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_F7A1CF35CC87986505BEEE6F26B3B849"
+        "OwnerKey" = "8:_7DFDA0AB5959ACD16124F5B61B6FF71B"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -1028,24 +1112,6 @@
     {
         "File"
         {
-            "{BA458234-9B71-4F46-8107-E91156377184}:_00B25973938740CBBAD163F6DFB0279B"
-            {
-            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\images\\calibrations\\calibration1.gif"
-            "TargetName" = "8:calibration1.gif"
-            "Tag" = "8:"
-            "Folder" = "8:_F3E2F8F53F804A3682F67CB1800C364F"
-            "Condition" = "8:"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "Register" = "3:0"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
             "{E4F2F62A-3940-4BF5-A031-F7FA98CAAFFA}:_046F998E4C84D482884D359E4F01955E"
             {
             "AssemblyIsInGAC" = "11:FALSE"
@@ -1072,24 +1138,6 @@
             "Register" = "3:0"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:TRUE"
-            "IsolateTo" = "8:"
-            }
-            "{BA458234-9B71-4F46-8107-E91156377184}:_09AFBDD244EF4C849533092C8C101BF1"
-            {
-            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\images\\orientations\\wrist4.jpg"
-            "TargetName" = "8:wrist4.jpg"
-            "Tag" = "8:"
-            "Folder" = "8:_E50D45BD4D344EACA450AD2E528BCA70"
-            "Condition" = "8:"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "Register" = "3:0"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_0F860E1798664D91B083ABF7D3F99EBF"
@@ -1126,6 +1174,34 @@
             "Register" = "3:0"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{E4F2F62A-3940-4BF5-A031-F7FA98CAAFFA}:_10CE5827769D965882A551BA2CF4DE58"
+            {
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:Wockets, Version=1.0.3840.18360, Culture=neutral"
+                "ScatterAssemblies"
+                {
+                    "_10CE5827769D965882A551BA2CF4DE58"
+                    {
+                    "Name" = "8:Wockets.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:Wockets.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_DCEA25421C7F402DBE33C9659A7CCD2C"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_146E45E7A3BD4E3A8800E95C82DBD98E"
@@ -1218,24 +1294,6 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{BA458234-9B71-4F46-8107-E91156377184}:_1B7C32536A9A4C76A2C9FFC14CBB4819"
-            {
-            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\images\\orientations\\thigh1.jpg"
-            "TargetName" = "8:thigh1.jpg"
-            "Tag" = "8:"
-            "Folder" = "8:_E50D45BD4D344EACA450AD2E528BCA70"
-            "Condition" = "8:"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "Register" = "3:0"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
             "{BA458234-9B71-4F46-8107-E91156377184}:_23164D2AA8964FE7A0A4212F190F0310"
             {
             "SourcePath" = "8:..\\..\\bin\\NeededFiles\\Master\\Configuration2.xml"
@@ -1260,24 +1318,6 @@
             "TargetName" = "8:xp_overlay.png"
             "Tag" = "8:"
             "Folder" = "8:_0E158D58928F4A8E965A0110F900E2FE"
-            "Condition" = "8:"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "Register" = "3:0"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{BA458234-9B71-4F46-8107-E91156377184}:_24B09B26FBF74B4989A2C1E3B647D824"
-            {
-            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\images\\orientations\\arm3.jpg"
-            "TargetName" = "8:arm3.jpg"
-            "Tag" = "8:"
-            "Folder" = "8:_E50D45BD4D344EACA450AD2E528BCA70"
             "Condition" = "8:"
             "Vital" = "11:TRUE"
             "ReadOnly" = "11:FALSE"
@@ -1400,12 +1440,22 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{BA458234-9B71-4F46-8107-E91156377184}:_3A05C34BE0BE40EEAF91B6519C04F9AB"
+            "{E4F2F62A-3940-4BF5-A031-F7FA98CAAFFA}:_392BB49A12C98783F0A9D9E9C0F85D87"
             {
-            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\images\\mites\\vertical9696.jpg"
-            "TargetName" = "8:vertical9696.jpg"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:OpenNETCF.GDIPlus, Version=1.0.3840.18347, Culture=neutral"
+                "ScatterAssemblies"
+                {
+                    "_392BB49A12C98783F0A9D9E9C0F85D87"
+                    {
+                    "Name" = "8:OpenNETCF.GDIPlus.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:OpenNETCF.GDIPlus.dll"
+            "TargetName" = "8:"
             "Tag" = "8:"
-            "Folder" = "8:_9087C766F1094ACC9C6DE0792BAA7FB3"
+            "Folder" = "8:_DCEA25421C7F402DBE33C9659A7CCD2C"
             "Condition" = "8:"
             "Vital" = "11:TRUE"
             "ReadOnly" = "11:FALSE"
@@ -1415,15 +1465,15 @@
             "SharedLegacy" = "11:FALSE"
             "Register" = "3:0"
             "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{BA458234-9B71-4F46-8107-E91156377184}:_3D2FE02446714A75B7EA593434FEE5BE"
+            "{BA458234-9B71-4F46-8107-E91156377184}:_3A05C34BE0BE40EEAF91B6519C04F9AB"
             {
-            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\images\\calibrations\\calibration7.gif"
-            "TargetName" = "8:calibration7.gif"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\images\\mites\\vertical9696.jpg"
+            "TargetName" = "8:vertical9696.jpg"
             "Tag" = "8:"
-            "Folder" = "8:_F3E2F8F53F804A3682F67CB1800C364F"
+            "Folder" = "8:_9087C766F1094ACC9C6DE0792BAA7FB3"
             "Condition" = "8:"
             "Vital" = "11:TRUE"
             "ReadOnly" = "11:FALSE"
@@ -1526,6 +1576,34 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{E4F2F62A-3940-4BF5-A031-F7FA98CAAFFA}:_439374CE724A52C7F55E5017D79E39BD"
+            {
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:Microsoft.WindowsMobile, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35"
+                "ScatterAssemblies"
+                {
+                    "_439374CE724A52C7F55E5017D79E39BD"
+                    {
+                    "Name" = "8:Microsoft.WindowsMobile.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:Microsoft.WindowsMobile.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_DCEA25421C7F402DBE33C9659A7CCD2C"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
             "{BA458234-9B71-4F46-8107-E91156377184}:_4570B85CE64A49C0BFDDD7549D138790"
             {
             "SourcePath" = "8:..\\..\\bin\\NeededFiles\\Master\\ActivityProtocols.xsd"
@@ -1550,24 +1628,6 @@
             "TargetName" = "8:vertical288288.jpg"
             "Tag" = "8:"
             "Folder" = "8:_9087C766F1094ACC9C6DE0792BAA7FB3"
-            "Condition" = "8:"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "Register" = "3:0"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{BA458234-9B71-4F46-8107-E91156377184}:_47B73CCE25AB4AC89C68ABCC162F942E"
-            {
-            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\images\\orientations\\wrist2.jpg"
-            "TargetName" = "8:wrist2.jpg"
-            "Tag" = "8:"
-            "Folder" = "8:_E50D45BD4D344EACA450AD2E528BCA70"
             "Condition" = "8:"
             "Vital" = "11:TRUE"
             "ReadOnly" = "11:FALSE"
@@ -1726,12 +1786,12 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{BA458234-9B71-4F46-8107-E91156377184}:_602ACA9168924FD7B8D663D64A3757F4"
+            "{BA458234-9B71-4F46-8107-E91156377184}:_60C5B198C98F48A98D8E0D51C3669370"
             {
-            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\images\\calibrations\\calibration6.gif"
-            "TargetName" = "8:calibration6.gif"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\Master\\MITesInstructions-05-22-08.pdf"
+            "TargetName" = "8:MITesInstructions-05-22-08.pdf"
             "Tag" = "8:"
-            "Folder" = "8:_F3E2F8F53F804A3682F67CB1800C364F"
+            "Folder" = "8:_7662690D224741608C6A119E00CB7ECB"
             "Condition" = "8:"
             "Vital" = "11:TRUE"
             "ReadOnly" = "11:FALSE"
@@ -1744,12 +1804,12 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{BA458234-9B71-4F46-8107-E91156377184}:_60C5B198C98F48A98D8E0D51C3669370"
+            "{BA458234-9B71-4F46-8107-E91156377184}:_64D4C2DC9F0C4741A6800FEB00A1DD4E"
             {
-            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\Master\\MITesInstructions-05-22-08.pdf"
-            "TargetName" = "8:MITesInstructions-05-22-08.pdf"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\ActivityProtocols\\ActivityLabelsKids.xml"
+            "TargetName" = "8:ActivityLabelsKids.xml"
             "Tag" = "8:"
-            "Folder" = "8:_7662690D224741608C6A119E00CB7ECB"
+            "Folder" = "8:_971A03D1515E4D4C85ABCF3830613080"
             "Condition" = "8:"
             "Vital" = "11:TRUE"
             "ReadOnly" = "11:FALSE"
@@ -1816,24 +1876,6 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{BA458234-9B71-4F46-8107-E91156377184}:_6E2C71BB1E0C4F2B99CFF3E36AD69040"
-            {
-            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\images\\orientations\\wrist3.jpg"
-            "TargetName" = "8:wrist3.jpg"
-            "Tag" = "8:"
-            "Folder" = "8:_E50D45BD4D344EACA450AD2E528BCA70"
-            "Condition" = "8:"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "Register" = "3:0"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
             "{E4F2F62A-3940-4BF5-A031-F7FA98CAAFFA}:_6EAD692F6639D8375427F91F2C217921"
             {
             "AssemblyIsInGAC" = "11:FALSE"
@@ -1860,24 +1902,6 @@
             "Register" = "3:0"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:TRUE"
-            "IsolateTo" = "8:"
-            }
-            "{BA458234-9B71-4F46-8107-E91156377184}:_6EE8754C1ED74DAC889718E0F1FA62DB"
-            {
-            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\images\\orientations\\wrist1.jpg"
-            "TargetName" = "8:wrist1.jpg"
-            "Tag" = "8:"
-            "Folder" = "8:_E50D45BD4D344EACA450AD2E528BCA70"
-            "Condition" = "8:"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "Register" = "3:0"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_70FD070BFA5B4AA0A6FDC03029AF6B6E"
@@ -2016,52 +2040,6 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{E4F2F62A-3940-4BF5-A031-F7FA98CAAFFA}:_7B1E6473E81954AC9B89ADB16A747FD4"
-            {
-            "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:Microsoft.WindowsMobile, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35"
-                "ScatterAssemblies"
-                {
-                    "_7B1E6473E81954AC9B89ADB16A747FD4"
-                    {
-                    "Name" = "8:Microsoft.WindowsMobile.dll"
-                    "Attributes" = "3:512"
-                    }
-                }
-            "SourcePath" = "8:Microsoft.WindowsMobile.dll"
-            "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_DCEA25421C7F402DBE33C9659A7CCD2C"
-            "Condition" = "8:"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "Register" = "3:0"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:TRUE"
-            "IsolateTo" = "8:"
-            }
-            "{BA458234-9B71-4F46-8107-E91156377184}:_7B4CAA571BA2476F9F3174371816CC87"
-            {
-            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\images\\calibrations\\calibration2.gif"
-            "TargetName" = "8:calibration2.gif"
-            "Tag" = "8:"
-            "Folder" = "8:_F3E2F8F53F804A3682F67CB1800C364F"
-            "Condition" = "8:"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "Register" = "3:0"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
             "{BA458234-9B71-4F46-8107-E91156377184}:_7B6C6B5DF75B48E8A706981A87922042"
             {
             "SourcePath" = "8:..\\..\\bin\\NeededFiles\\Resources\\text_background.png"
@@ -2096,6 +2074,62 @@
             "Register" = "3:0"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{E4F2F62A-3940-4BF5-A031-F7FA98CAAFFA}:_7DFDA0AB5959ACD16124F5B61B6FF71B"
+            {
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:BornanderUIProgressBar, Version=1.0.0.0, Culture=neutral"
+                "ScatterAssemblies"
+                {
+                    "_7DFDA0AB5959ACD16124F5B61B6FF71B"
+                    {
+                    "Name" = "8:BornanderUIProgressBar.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:BornanderUIProgressBar.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_DCEA25421C7F402DBE33C9659A7CCD2C"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{E4F2F62A-3940-4BF5-A031-F7FA98CAAFFA}:_7E8F925A67D01C286C1CEC8D3CD28991"
+            {
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:Microsoft.WindowsMobile.Status, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35"
+                "ScatterAssemblies"
+                {
+                    "_7E8F925A67D01C286C1CEC8D3CD28991"
+                    {
+                    "Name" = "8:Microsoft.WindowsMobile.Status.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:Microsoft.WindowsMobile.Status.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_DCEA25421C7F402DBE33C9659A7CCD2C"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_80F7E97889D24123AFA370926EDC192F"
@@ -2206,24 +2240,6 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{BA458234-9B71-4F46-8107-E91156377184}:_913A031280DC448D9EBDE35E9EE95D67"
-            {
-            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\images\\calibrations\\calibration4.gif"
-            "TargetName" = "8:calibration4.gif"
-            "Tag" = "8:"
-            "Folder" = "8:_F3E2F8F53F804A3682F67CB1800C364F"
-            "Condition" = "8:"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "Register" = "3:0"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
             "{BA458234-9B71-4F46-8107-E91156377184}:_9147E61C9F1C4BC4BE683C04AD66D13B"
             {
             "SourcePath" = "8:..\\..\\bin\\NeededFiles\\images\\network\\4.GIF"
@@ -2268,24 +2284,6 @@
             "Register" = "3:0"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:TRUE"
-            "IsolateTo" = "8:"
-            }
-            "{BA458234-9B71-4F46-8107-E91156377184}:_94CD12CF3F9D408AA95A76729AC62980"
-            {
-            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\images\\orientations\\thigh2.jpg"
-            "TargetName" = "8:thigh2.jpg"
-            "Tag" = "8:"
-            "Folder" = "8:_E50D45BD4D344EACA450AD2E528BCA70"
-            "Condition" = "8:"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "Register" = "3:0"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_9600F1A6609440B29962602768B94015"
@@ -2378,12 +2376,22 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{BA458234-9B71-4F46-8107-E91156377184}:_9EDBFEAE325643C29F8847FDF7CA9436"
+            "{E4F2F62A-3940-4BF5-A031-F7FA98CAAFFA}:_9EFAB62F391BDFA06E40838CC6F74F37"
             {
-            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\images\\calibrations\\calibration3.gif"
-            "TargetName" = "8:calibration3.gif"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:WocketsWeka, Version=1.0.3840.18351, Culture=neutral"
+                "ScatterAssemblies"
+                {
+                    "_9EFAB62F391BDFA06E40838CC6F74F37"
+                    {
+                    "Name" = "8:WocketsWeka.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:WocketsWeka.dll"
+            "TargetName" = "8:"
             "Tag" = "8:"
-            "Folder" = "8:_F3E2F8F53F804A3682F67CB1800C364F"
+            "Folder" = "8:_DCEA25421C7F402DBE33C9659A7CCD2C"
             "Condition" = "8:"
             "Vital" = "11:TRUE"
             "ReadOnly" = "11:FALSE"
@@ -2393,7 +2401,7 @@
             "SharedLegacy" = "11:FALSE"
             "Register" = "3:0"
             "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_A41C633FFFAE4165A75077438FB76AA5"
@@ -2540,24 +2548,6 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{BA458234-9B71-4F46-8107-E91156377184}:_B68528DCF60641AC8D9518178C5D8353"
-            {
-            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\images\\calibrations\\calibration5.gif"
-            "TargetName" = "8:calibration5.gif"
-            "Tag" = "8:"
-            "Folder" = "8:_F3E2F8F53F804A3682F67CB1800C364F"
-            "Condition" = "8:"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "Register" = "3:0"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
             "{BA458234-9B71-4F46-8107-E91156377184}:_BAE46D366039468CA67A7EEC60BB62EF"
             {
             "SourcePath" = "8:..\\..\\bin\\NeededFiles\\Resources\\PC.gif"
@@ -2610,34 +2600,6 @@
             "Register" = "3:0"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{E4F2F62A-3940-4BF5-A031-F7FA98CAAFFA}:_C66DA87609EC16A5BAAF4550AEEBCEF1"
-            {
-            "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:Microsoft.WindowsMobile.Status, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35"
-                "ScatterAssemblies"
-                {
-                    "_C66DA87609EC16A5BAAF4550AEEBCEF1"
-                    {
-                    "Name" = "8:Microsoft.WindowsMobile.Status.dll"
-                    "Attributes" = "3:512"
-                    }
-                }
-            "SourcePath" = "8:Microsoft.WindowsMobile.Status.dll"
-            "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_DCEA25421C7F402DBE33C9659A7CCD2C"
-            "Condition" = "8:"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "Register" = "3:0"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_CA0FBBC4BCEC4A978C662165996B886A"
@@ -2704,24 +2666,6 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{BA458234-9B71-4F46-8107-E91156377184}:_DCB0835A9D8E47F8B7280F2767D83168"
-            {
-            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\images\\orientations\\arm1.jpg"
-            "TargetName" = "8:arm1.jpg"
-            "Tag" = "8:"
-            "Folder" = "8:_E50D45BD4D344EACA450AD2E528BCA70"
-            "Condition" = "8:"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "Register" = "3:0"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
             "{BA458234-9B71-4F46-8107-E91156377184}:_DE00B249424847DB8446F83B3E9CBF95"
             {
             "SourcePath" = "8:..\\..\\bin\\NeededFiles\\images\\network\\disconnected.gif"
@@ -2758,12 +2702,22 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{BA458234-9B71-4F46-8107-E91156377184}:_E20B408BCEA141C49AD336D6393A4D10"
+            "{E4F2F62A-3940-4BF5-A031-F7FA98CAAFFA}:_E49F3E8577AD97CA1AFFC84042484BBB"
             {
-            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\images\\orientations\\wrist5.jpg"
-            "TargetName" = "8:wrist5.jpg"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:Charts, Version=1.0.3840.18353, Culture=neutral"
+                "ScatterAssemblies"
+                {
+                    "_E49F3E8577AD97CA1AFFC84042484BBB"
+                    {
+                    "Name" = "8:Charts.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:Charts.dll"
+            "TargetName" = "8:"
             "Tag" = "8:"
-            "Folder" = "8:_E50D45BD4D344EACA450AD2E528BCA70"
+            "Folder" = "8:_DCEA25421C7F402DBE33C9659A7CCD2C"
             "Condition" = "8:"
             "Vital" = "11:TRUE"
             "ReadOnly" = "11:FALSE"
@@ -2773,7 +2727,7 @@
             "SharedLegacy" = "11:FALSE"
             "Register" = "3:0"
             "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_E61B4DE6E367482C93E7B2AD333AFB7B"
@@ -2782,24 +2736,6 @@
             "TargetName" = "8:SensorConfigurations.xml"
             "Tag" = "8:"
             "Folder" = "8:_7662690D224741608C6A119E00CB7ECB"
-            "Condition" = "8:"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "Register" = "3:0"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{BA458234-9B71-4F46-8107-E91156377184}:_F24C538D31FA4335A95ECD045F992DAC"
-            {
-            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\images\\orientations\\arm2.jpg"
-            "TargetName" = "8:arm2.jpg"
-            "Tag" = "8:"
-            "Folder" = "8:_E50D45BD4D344EACA450AD2E528BCA70"
             "Condition" = "8:"
             "Vital" = "11:TRUE"
             "ReadOnly" = "11:FALSE"
@@ -3021,24 +2957,6 @@
                                             "Name" = "8:mites"
                                             "Condition" = "8:"
                                             "Property" = "8:_746FDB0B4BBE4CE88EE9D381108478B8"
-                                                "Folders"
-                                                {
-                                                }
-                                            }
-                                            "{5943FCFD-5B64-4EE4-96C9-4618EC95352A}:_E50D45BD4D344EACA450AD2E528BCA70"
-                                            {
-                                            "Name" = "8:orientations"
-                                            "Condition" = "8:"
-                                            "Property" = "8:_0E01887D478445DD95469427716DA446"
-                                                "Folders"
-                                                {
-                                                }
-                                            }
-                                            "{5943FCFD-5B64-4EE4-96C9-4618EC95352A}:_F3E2F8F53F804A3682F67CB1800C364F"
-                                            {
-                                            "Name" = "8:calibrations"
-                                            "Condition" = "8:"
-                                            "Property" = "8:_16744EA5F0194207A0EA16B24D6D9840"
                                                 "Folders"
                                                 {
                                                 }
