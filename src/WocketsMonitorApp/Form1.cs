@@ -112,7 +112,7 @@ namespace WocketsMonitorApp
                     ExpectedPackets2 = Convert.ToInt32(tokens[12]);
                 }
 
-                if (myraw1 == ExpectedPackets1)
+                if ((ExpectedPackets1!=0) && (myraw1 == ExpectedPackets1))
                     raw1++;
                 else if (myraw1 > 0)
                     partial1++;
@@ -125,7 +125,7 @@ namespace WocketsMonitorApp
 
                 if (tokens.Length > 11)
                 {
-                    if (myraw2 == ExpectedPackets2)
+                    if ((ExpectedPackets2!=0) && (myraw2 == ExpectedPackets2))
                         raw2++;
                     else if (myraw2 > 0)
                         partial2++;
