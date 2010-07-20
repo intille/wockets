@@ -1706,6 +1706,7 @@ namespace WocketConfigurationApp
                }
                else if (current_command.CompareTo("transmission_mode") == 0)
                {
+
                    #region Transmission Mode
 
                    string trm_val = info_cmd_value_tr_rate.Text;
@@ -1717,6 +1718,8 @@ namespace WocketConfigurationApp
                        //sets the appropriate sampling rate for the new transmission mode
                        int sr_value = cur_sampling_rate;
                        bool is_valid = true;
+
+                       #region Set The Appropriate Sampling Rate
 
                        if (trm_val.CompareTo("continuous") == 0)
                        {
@@ -1758,6 +1761,10 @@ namespace WocketConfigurationApp
                                is_valid = false;
                            }
                        }
+
+
+                       #endregion 
+
 
 
                        //if sampling rate is not valid, change to the right value

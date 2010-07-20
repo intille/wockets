@@ -98,6 +98,7 @@ namespace WocketConfigurationApp
             this.panel_status_texbox = new System.Windows.Forms.TextBox();
             this.set_panel_title = new System.Windows.Forms.TextBox();
             this.panel_calibration = new System.Windows.Forms.Panel();
+            this.panel_time_updates = new System.Windows.Forms.Panel();
             this.cal_panel_progressBar = new System.Windows.Forms.ProgressBar();
             this.pictureBox_calibration = new System.Windows.Forms.PictureBox();
             this.cal_panel_button_browse = new System.Windows.Forms.Button();
@@ -123,9 +124,8 @@ namespace WocketConfigurationApp
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
             this.button_load = new System.Windows.Forms.Button();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-            this.timer_battery = new System.Windows.Forms.Timer(this.components);
+            this.test_timer = new System.Windows.Forms.Timer(this.components);
             this.button_to_xml = new System.Windows.Forms.Button();
-            this.panel_time_updates = new System.Windows.Forms.Panel();
             this.menuStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.cal_panel_cal_values.SuspendLayout();
@@ -133,9 +133,9 @@ namespace WocketConfigurationApp
             this.cal_panel_bat_values_percent.SuspendLayout();
             this.panel_status.SuspendLayout();
             this.panel_calibration.SuspendLayout();
+            this.panel_time_updates.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_calibration)).BeginInit();
             this.panel3.SuspendLayout();
-            this.panel_time_updates.SuspendLayout();
             this.SuspendLayout();
             // 
             // info_cmd_label_name
@@ -920,6 +920,17 @@ namespace WocketConfigurationApp
             this.panel_calibration.Size = new System.Drawing.Size(407, 573);
             this.panel_calibration.TabIndex = 20;
             // 
+            // panel_time_updates
+            // 
+            this.panel_time_updates.Controls.Add(this.cal_panel_bat_label_elapTime);
+            this.panel_time_updates.Controls.Add(this.label25);
+            this.panel_time_updates.Controls.Add(this.cal_panel_bat_label_startTime);
+            this.panel_time_updates.Controls.Add(this.label26);
+            this.panel_time_updates.Location = new System.Drawing.Point(4, 518);
+            this.panel_time_updates.Name = "panel_time_updates";
+            this.panel_time_updates.Size = new System.Drawing.Size(389, 48);
+            this.panel_time_updates.TabIndex = 80;
+            // 
             // cal_panel_progressBar
             // 
             this.cal_panel_progressBar.Location = new System.Drawing.Point(5, 412);
@@ -1176,10 +1187,10 @@ namespace WocketConfigurationApp
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
             // 
-            // timer_battery
+            // test_timer
             // 
-            this.timer_battery.Interval = 1000;
-            this.timer_battery.Tick += new System.EventHandler(this.timer_battery_Tick);
+            this.test_timer.Interval = 1000;
+            this.test_timer.Tick += new System.EventHandler(this.test_timer_Tick);
             // 
             // button_to_xml
             // 
@@ -1191,17 +1202,6 @@ namespace WocketConfigurationApp
             this.button_to_xml.Text = "To Xml";
             this.button_to_xml.UseVisualStyleBackColor = true;
             this.button_to_xml.Click += new System.EventHandler(this.button_to_xml_Click);
-            // 
-            // panel_time_updates
-            // 
-            this.panel_time_updates.Controls.Add(this.cal_panel_bat_label_elapTime);
-            this.panel_time_updates.Controls.Add(this.label25);
-            this.panel_time_updates.Controls.Add(this.cal_panel_bat_label_startTime);
-            this.panel_time_updates.Controls.Add(this.label26);
-            this.panel_time_updates.Location = new System.Drawing.Point(4, 518);
-            this.panel_time_updates.Name = "panel_time_updates";
-            this.panel_time_updates.Size = new System.Drawing.Size(389, 48);
-            this.panel_time_updates.TabIndex = 80;
             // 
             // FormTestWocket
             // 
@@ -1238,11 +1238,11 @@ namespace WocketConfigurationApp
             this.panel_status.PerformLayout();
             this.panel_calibration.ResumeLayout(false);
             this.panel_calibration.PerformLayout();
+            this.panel_time_updates.ResumeLayout(false);
+            this.panel_time_updates.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_calibration)).EndInit();
             this.panel3.ResumeLayout(false);
             this.panel3.PerformLayout();
-            this.panel_time_updates.ResumeLayout(false);
-            this.panel_time_updates.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1330,7 +1330,7 @@ namespace WocketConfigurationApp
         private System.Windows.Forms.Label cal_panel_zn1g;
         private System.Windows.Forms.Label cal_panel_xstd;
         private System.Windows.Forms.Label label35;
-        private System.Windows.Forms.Timer timer_battery;
+        private System.Windows.Forms.Timer test_timer;
         private System.Windows.Forms.ProgressBar cal_panel_progressBar;
         private System.Windows.Forms.Label label26;
         private System.Windows.Forms.Label label25;
