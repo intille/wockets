@@ -27,6 +27,7 @@ namespace WocketConfigurationApp
 {
     public partial class FormTestWocket : Form
     {
+
         #region Declare Variables
 
         //---- Bluetooth & Wockets ----
@@ -37,8 +38,8 @@ namespace WocketConfigurationApp
 
         //---- Commands ---------------
         private string current_command = "";
+
        
-        
         #region commented
         //private string cur_tr_mode = "";
         //private int cur_sampling_rate = 90;
@@ -135,8 +136,8 @@ namespace WocketConfigurationApp
             this.panel_status_texbox.Text = "";
 
             //disable battery timer
-            this.timer_battery.Enabled = false;
-            this.timer_battery.Stop();
+            this.test_timer.Enabled = false;
+            this.test_timer.Stop();
 
 
             //load status panels
@@ -274,6 +275,9 @@ namespace WocketConfigurationApp
             ((Accelerometer)wc._Sensors[0])._Min = 0;
             wc._Sensors[0]._Loaded = true;
 
+            //initialize circular data buffer
+            //cbuffer = new Wockets.Data.Accelerometers.AccelerationData[MaxSamples];
+            cbuffer = new double[MaxSamples ,3];
 
 
             //------------ suscriptions --------------
@@ -325,21 +329,7 @@ namespace WocketConfigurationApp
                 { this.label_connect_status.Text = "Connected: Command Mode"; }
 
 
-                // Update the progress indicators
-                if ((current_command.Trim().CompareTo("") != 0) &&
-                     (!is_test_finished))
-                {
-                    //update battery progress bar
-                    int val = 0;
-                    Math.DivRem(cal_panel_progressBar.Value + 10, 100, out val);
-                    cal_panel_progressBar.Value = val;
-
-                    //update elapsed time field = time.now - start_time
-                    ElapsedTime = ((DateTime)DateTime.Now).Subtract(BTCAL_StartTime);
-                    ElapsedTime = ElapsedTime.Subtract(BTCAL_OffTime);
-
-                    cal_panel_bat_label_elapTime.Text = ElapsedTime.ToString().Split('.')[0];
-                }
+                //update progress bars here
 
                 #endregion 
             }
@@ -347,49 +337,79 @@ namespace WocketConfigurationApp
             {
                 #region Disconnected & Reconnecting
 
-                if (CurrentWockets._Controller._Receivers[0]._Status == ReceiverStatus.Disconnected)
-                {
-                    this.label_connect_status.Text = "Disconnected";
-                }
-                else if (CurrentWockets._Controller._Receivers[0]._Status == ReceiverStatus.Reconnecting)
-                {
-                    this.label_connect_status.Text = "Reconnecting";
-                   
-                }
+                    if (CurrentWockets._Controller._Receivers[0]._Status == ReceiverStatus.Disconnected)
+                    {
+                        this.label_connect_status.Text = "Disconnected";
+                    }
+                    else if (CurrentWockets._Controller._Receivers[0]._Status == ReceiverStatus.Reconnecting)
+                    {
+                        this.label_connect_status.Text = "Reconnecting";
+                    }
 
-                if (current_command.CompareTo("battery_calibration") == 0)
-                {   //Interrupt the test
-                    bat_calibration_step = 1;
-                }
-                if (current_command.CompareTo("sampling_rate") == 0)
-                {   //Interrupt the test
-                   sr_test_step = 1;
-                }
 
-                //process the stop step
-                process_calibration();
+                    #region Interrupt the test
+                    
+                    /*
+                    if (current_command.CompareTo("battery_calibration") == 0)
+                    {   //Interrupt the test
+                        bat_calibration_step = 1;
+                    }
+                    if (current_command.CompareTo("sampling_rate") == 0)
+                    {   //Interrupt the test
+                       sr_test_step = 1;
+                    }
+                    if (current_command.CompareTo("calibration") == 0)
+                    {   //Interrupt the test
+                        calibration_step = 1;
+                    }
 
-                
-                //bat_calibration_step = 3;
-                //process_calibration();
-                cal_panel_label_status.Text = " The wocket is Disconnected.\r\n The test has STOPPED. \r\n";
+                    //process the stop step
+                    process_calibration();
 
+                    cal_panel_label_status.Text = " The wocket is Disconnected.\r\n The test has STOPPED. \r\n";
+                    cal_panel_button_ok.Enabled = false;
+                    */
+
+                    #endregion Interrup the test
 
                 #endregion
-           
             }
+
+
+            //temporal for testing
+            #region Update the progress indicators
+            
+            if ((current_command.Trim().CompareTo("") != 0) &&
+                 (!is_test_finished))
+            {
+                //update battery progress bar
+                int val = 0;
+                Math.DivRem(cal_panel_progressBar.Value + 10, 100, out val);
+                cal_panel_progressBar.Value = val;
+
+                //update elapsed time field = time.now - start_time
+                ElapsedTime = ((DateTime)DateTime.Now).Subtract(BTCAL_StartTime);
+                ElapsedTime = ElapsedTime.Subtract(BTCAL_OffTime);
+
+                cal_panel_bat_label_elapTime.Text = ElapsedTime.ToString().Split('.')[0];
+            }
+
+            #endregion
+
         }
 
 
-        private void timer_battery_Tick(object sender, EventArgs e)
+        private void test_timer_Tick(object sender, EventArgs e)
         {
-            if (label_connect_status.Text.Contains("Connected:"))
-            {
-                if ((current_command.CompareTo("calibration") != 0) &&
+            
+            
+            //if (label_connect_status.Text.Contains("Connected:"))
+            //{
+                if ((current_command.CompareTo("batery_calibration") != 0) &&
                          (!is_test_finished))
                 {
 
-                    #region Send the battery level command
+                    #region Send battery level command
 
                     BTCAL_CurTime = DateTime.Now;
                     TimeSpan TimeDiff = BTCAL_CurTime.Subtract(BTCAL_TotalTime);
@@ -419,11 +439,12 @@ namespace WocketConfigurationApp
                 else if ((current_command.CompareTo("calibration") == 0) &&
                          (is_test_finished) && (!is_reading) )
                 {
+                    StopReading();
                     cal_panel_button_ok.Enabled = true;
                     process_calibration();
                 }
 
-            }
+            //}
         }
 
 
@@ -1012,7 +1033,7 @@ namespace WocketConfigurationApp
                    cal_panel_entry_path.Text = "";
                    cal_panel_label_status.Text = "Position the wocket as shown in the picture.\r\n" +
                                                  "Then, click START to begin the calibration.\r\n"  +
-                                                 "During the calibration process, keep the wocket in the same position.";
+                                                 "During the test, keep the wocket in the same position.";
                    
                    cal_panel_button_ok.Text = "Start";
 
@@ -1034,8 +1055,8 @@ namespace WocketConfigurationApp
 
                    //picture box
                    pictureBox_calibration.Size = new Size(358, 240);
-                   //pictureBox_calibration.Location = new Point(526, 33);
                    pictureBox_calibration.Visible = true;
+                   pictureBox_calibration.Image = calibrationImages[0];
 
                    //Hide select folder fields
                    cal_panel_entry_path.Enabled = false;
@@ -1057,7 +1078,7 @@ namespace WocketConfigurationApp
                    cal_panel_button_ok.Enabled = true;
                    info_cmd_value_WKTCalibration.Text = "Calibrating ...";
                    clean_calibration_values(true);
-                   pictureBox_calibration.Image = calibrationImages[0];
+                  
 
                    #endregion Calibration
                }
@@ -1181,9 +1202,10 @@ namespace WocketConfigurationApp
                    button_start_test.Enabled = true;
                }
 
-
            }
        }
+
+
 
        private void button_to_xml_Click(object sender, EventArgs e)
        {
@@ -1976,6 +1998,129 @@ namespace WocketConfigurationApp
         #endregion 
 
 
+
+        private void start_axis_calibration(string axis_name, bool compute_std)
+        {
+            cal_panel_button_ok.Enabled = false;
+            cal_panel_button_ok.Text = "OK";
+            cal_panel_label_status.Text = "Calibrating " + axis_name + "...\r\n" +
+                                          "Keep the wocket in the same position.";
+            
+            //values for panel
+            cal_panel_cal_values.Visible = true;
+
+            //progress bar
+            cal_panel_progressBar.Value = 0;
+            cal_panel_progressBar.Visible = true;
+
+            //pictureBox Calibration
+            pictureBox_calibration.Visible = true;
+
+
+            // start calibration & initialize time counters
+            is_test_finished = false;
+            BTCAL_OffTime = TimeSpan.Zero;
+            BTCAL_StartTime = DateTime.Now;
+            cal_panel_bat_label_startTime.Text = String.Format("{0:HH:mm:ss}", BTCAL_StartTime);
+
+
+            //Flag that determines if the axis standard deviations need to be computed
+            if (compute_std)
+                CALIBRATE_STD = true;
+              
+
+            //Enable timer
+            test_timer.Enabled = true;
+            test_timer.Start();
+
+
+            //Start the reading thread for calibration
+            StartReading();
+
+        }
+
+
+        private string stop_axis_calibration(string axis_name)
+        {
+            string calibration_result = "";
+
+            cal_panel_button_ok.Enabled = true;
+            cal_panel_button_ok.Text = "Continue";
+            cal_panel_label_status.Text = "The axis " + axis_name + " calibration has finished.\r\n";
+                                            
+
+            //pause test
+            is_test_finished = true;
+
+            //update progres bar 
+            cal_panel_progressBar.Value = 100;
+
+            //disable timer
+            test_timer.Stop();
+            test_timer.Enabled = false;
+
+            
+            //Get the computed variables
+            if (compute_calibration_stats(axis_name, out calibration_result) == 0)
+            {
+                cal_panel_label_status.Text = cal_panel_label_status.Text +
+                                              "The calibration data was collected successfully.";
+               //pass to the next step
+                calibration_step++;
+            }
+            else
+            {
+                cal_panel_label_status.Text = cal_panel_label_status.Text +
+                                              "The calibration data was NOT collected successfully.";
+                
+                //perform the calibration again
+                calibration_step --;
+            }
+
+
+            //show the std dev results
+            if (CALIBRATE_STD)
+            {
+                cal_panel_xstd.Text = String.Format("{0:0.00}", xyzSTD[0]);
+                cal_panel_ystd.Text = String.Format("{0:0.00}", xyzSTD[1]);
+                cal_panel_zstd.Text = String.Format("{0:0.00}", xyzSTD[2]);
+            }
+
+
+            //reset the compute std. dev. flag
+            CALIBRATE_STD = false;
+
+
+            return calibration_result;
+
+        }
+
+
+        private void position_axis_calibration(string axis_name, int image_number)
+        {
+            //cal_panel_button_ok.Enabled = false;
+            cal_panel_button_ok.Text = "Start";
+            cal_panel_label_status.Text = "To start calibrating the "+ axis_name + " axis,\r\n" + 
+                                          "place the wocket as shown in the picture.\r\n" +
+                                          "When ready, click START.";
+
+            //progress bar
+            cal_panel_progressBar.Value = 0;
+            cal_panel_progressBar.Visible = true;
+
+            //clean time counters labels
+            cal_panel_bat_label_elapTime.Text = "";
+            cal_panel_bat_label_startTime.Text = "";
+
+            //update the image
+            pictureBox_calibration.Image = calibrationImages[image_number];
+
+            //update calibration step
+            calibration_step++;
+
+        }
+
+
         private void process_calibration()
         {
             if (current_command.CompareTo("calibration") == 0)
@@ -1986,8 +2131,9 @@ namespace WocketConfigurationApp
                 if (calibration_step == 0)
                 {
                     #region Start Calibrate X +1G
-
-                    //cal_panel_button_ok.Enabled = false;
+                    #region commented
+                    /*
+                    cal_panel_button_ok.Enabled = false;
                     cal_panel_button_ok.Text = "OK";
                     cal_panel_label_status.Text = "Calibrating X +1G...\r\n" +
                                                   "Keep the wocket in the position shown in the picture.";
@@ -1997,18 +2143,27 @@ namespace WocketConfigurationApp
                     cal_panel_progressBar.Value = 0;
                     cal_panel_progressBar.Visible = true;
 
+                    //pictureBox Calibration
+                    pictureBox_calibration.Visible = true;
+
+
                     // start battery calibration & initialize time counters
                     is_test_finished = false;
                     BTCAL_OffTime = TimeSpan.Zero;
                     BTCAL_StartTime = DateTime.Now;
                     cal_panel_bat_label_startTime.Text = String.Format("{0:HH:mm:ss}", BTCAL_StartTime);
 
-                    //enable timer
-                    //timer_battery.Enabled = true;
-                    //timer_battery.Start();
+                    //Enable timer
+                    test_timer.Enabled = true;
+                    test_timer.Start();
+                     
+                   //Start the read ACC for calibration
+                   StartReading(); 
+                     
+                     
+                    */
 
 
-                    #region commented
                     //--- clean up the mean and std variables
 
                     //--- enable-start calibration timer
@@ -2025,21 +2180,18 @@ namespace WocketConfigurationApp
                         //    return;
                     //}
                     #endregion 
-
-
-                    //Start the read ACC for calibration
-                   // StartReading();
-
-
                     #endregion
 
-                    //temporal
-                    //calibration_step = 1;
+                    start_axis_calibration("X +G", false);
+            
                 }
                 else if(calibration_step == 1)
                 {
+                    
                     #region Stop Calibrate X +1G
 
+                    #region commented
+                    /*
                     cal_panel_button_ok.Enabled = true;
                     cal_panel_button_ok.Text = "OK";
                     cal_panel_label_status.Text = "X+1G axis has been calibrated.\r\n" + 
@@ -2055,18 +2207,31 @@ namespace WocketConfigurationApp
                     cal_panel_progressBar.Value = 100;
 
                     //disable timer
-                    timer_battery.Enabled = false;
+                    test_timer.Stop();
+                    test_timer.Enabled = false;
 
-                    #endregion 
+                    //update the calibrated variable
+                    //cal_panel_x1g.Text = xyzP[0].ToString();
 
                     //Pass to the next step
-                    calibration_step = 2;
+                    //calibration_step = 2;
+                     
+                    */
+                    #endregion
+
+                    #endregion
+
+                    cal_panel_x1g.Text = stop_axis_calibration("X +G");
+                    
+
                 }
                 else if (calibration_step == 2)
                 {
 
                    #region Position Y +1G
 
+                    #region commented
+                    /*
                     //cal_panel_button_ok.Enabled = false;
                     cal_panel_button_ok.Text = "Start";
                     cal_panel_label_status.Text = "To calibrate the Y+1G axis, position the wocket as in the picture.\r\n" +
@@ -2078,17 +2243,24 @@ namespace WocketConfigurationApp
 
                     //update the image
                     pictureBox_calibration.Image = calibrationImages[2];
+                     
+                    //Pass to the next step
+                    //calibration_step = 3;
 
+                     
+                    */
                     #endregion
+                   #endregion
 
-                    //temporal
-                    calibration_step = 3;
+                    position_axis_calibration("Y +G", 2);
+                  
                 }
                 else if (calibration_step == 3)
                 {
                     
                     #region Start Calibrate Y +1G
-
+                    #region commented
+                    /*
                     //cal_panel_button_ok.Enabled = false;
                     cal_panel_button_ok.Text = "NEXT";
                     cal_panel_label_status.Text = "Calibrating Y+1G...\r\n" +
@@ -2109,41 +2281,44 @@ namespace WocketConfigurationApp
                     //--- enable-start calibration timer
                     //--- within the timer call the calibration function
                     ////calibrate wocket
+                    */
+                    #endregion 
+                    #endregion
 
-                    #endregion                    
-                   
-                    //temporal
-                    calibration_step = 4;
+                    start_axis_calibration("Y +G",false);
+                    
                 }
                 else if (calibration_step == 4)
                 {
                     
                     #region Stop Calibrate Y+1G
-
+                    /*
                     cal_panel_button_ok.Enabled = true;
                     cal_panel_button_ok.Text = "OK";
                     cal_panel_label_status.Text = "Y+1G axis has been calibrated.\r\n" +
                                                   "Click OK to continue...";
-
-                    //update the calibrated variable
-                    cal_panel_y1g.Text = xyzP[1].ToString();
 
                     //pause test
                     is_test_finished = true;
 
                     //update progres bar 
                     cal_panel_progressBar.Value = 100;
+                     
+                    //Pass to the next step
+                    //calibration_step = 5;
 
+                    */
                     #endregion
 
-                    //Pass to the next step
-                   calibration_step = 5;
+                    //update the calibrated variable
+                    cal_panel_y1g.Text = stop_axis_calibration("Y +G");
 
+                   
                 }
                 else if (calibration_step == 5)
                 {
                     #region Position X-1G
-
+                    /*
                     //cal_panel_button_ok.Enabled = false;
                     cal_panel_button_ok.Text = "Start";
                     cal_panel_label_status.Text = "To calibrate the X -1G axis, position the wocket as in the picture.\r\n" +
@@ -2155,16 +2330,21 @@ namespace WocketConfigurationApp
 
                     //update the image
                     pictureBox_calibration.Image = calibrationImages[1];
-
+                     
+                    //temporal
+                    //calibration_step = 6;
+                     
+                    */
                     #endregion
 
-                    //temporal
-                    calibration_step = 6;
+                    position_axis_calibration("X -G", 1);
+
+                    
                 }
                 else if (calibration_step == 6)
                 {
                     #region Start Calibrate X-1G
-
+                    /*
                     //cal_panel_button_ok.Enabled = false;
                     cal_panel_button_ok.Text = "NEXT";
                     cal_panel_label_status.Text = "Calibrating X -1G...\r\n" +
@@ -2185,41 +2365,46 @@ namespace WocketConfigurationApp
                     //--- enable-start calibration timer
                     //--- within the timer call the calibration function
                     ////calibrate wocket
-
-                    #endregion 
-
+                     
                     //temporal
                     calibration_step = 7;
+                     
+                    */
+                    #endregion
 
+                    start_axis_calibration("X -G", false);
+
+              
                 }
                 else if (calibration_step == 7)
                 {
                     #region Stop Calibrate X-1G
-
+                    /*
                     cal_panel_button_ok.Enabled = true;
                     cal_panel_button_ok.Text = "OK";
                     cal_panel_label_status.Text = "X-1G axis has been calibrated.\r\n" +
                                                   "Click OK to continue...";
 
-                    //update the calibrated variable
-                    cal_panel_xn1g.Text = xyzN[0].ToString();
-
-                    //pause test
+                   //pause test
                     is_test_finished = true;
 
                     //update progres bar 
                     cal_panel_progressBar.Value = 100;
+                    
+                     //Pass to the next step
+                    //calibration_step = 8;
+                    
+                    */
+                    #endregion
 
-                    #endregion 
-
-                    //Pass to the next step
-                    calibration_step = 8;
+                    //update the calibrated variable
+                    cal_panel_xn1g.Text = stop_axis_calibration("X -G");
 
                 }
                 else if (calibration_step == 8)
                 {
                     #region Position Y -1G
-
+                    /*
                     //cal_panel_button_ok.Enabled = false;
                     cal_panel_button_ok.Text = "Start";
                     cal_panel_label_status.Text = "To calibrate the Y-1G axis, position the wocket as in the picture.\r\n" +
@@ -2231,17 +2416,19 @@ namespace WocketConfigurationApp
 
                     //update the image
                     pictureBox_calibration.Image = calibrationImages[3];
-
+                    */
                     #endregion
 
-                    //temporal
-                    calibration_step = 9;
+                    position_axis_calibration("Y -G", 3);
+
+                    //Pass to the next step
+                    //calibration_step = 9;
                 }
                 else if (calibration_step == 9)
                 {
 
                     #region Start Calibrate Y -1G
-
+                    /*
                     //cal_panel_button_ok.Enabled = false;
                     cal_panel_button_ok.Text = "NEXT";
                     cal_panel_label_status.Text = "Calibrating Y-1G...\r\n" +
@@ -2262,41 +2449,44 @@ namespace WocketConfigurationApp
                     //--- enable-start calibration timer
                     //--- within the timer call the calibration function
                     ////calibrate wocket
-
-                    #endregion
-                    
+                   
                     //temporal
                     calibration_step = 10;
+                    
+                    */
+                    #endregion
+
+                    start_axis_calibration("Y -G", false);
 
                 }
                 else if (calibration_step == 10)
                 {
                     
                     #region Stop Calibrate Y -1G
-
+                    /*
                     //cal_panel_button_ok.Enabled = true;
                     cal_panel_button_ok.Text = "OK";
                     cal_panel_label_status.Text = "Y-1G axis has been calibrated.\r\n" +
                                                   "Click OK to continue...";
 
-                    //update the calibrated variable
-                    cal_panel_yn1g.Text = xyzN[1].ToString();
-
-                    //pause test
+                   //pause test
                     is_test_finished = true;
 
                     //update progres bar 
                     cal_panel_progressBar.Value = 100;
-
+                    */
                     #endregion
-                    
+
+                   //update the calibrated variable
+                    cal_panel_yn1g.Text = stop_axis_calibration("Y -G");
+
                     //Pass to the next step
-                    calibration_step = 11;
+                    //calibration_step = 11;
                 }
                 else if (calibration_step == 11)
                 {
                     #region Position Z-1G
-
+                    /*
                     //cal_panel_button_ok.Enabled = false;
                     cal_panel_button_ok.Text = "Start";
                     cal_panel_label_status.Text = "To calibrate the Z-1G axis, position the wocket as in the picture.\r\n" +
@@ -2308,17 +2498,19 @@ namespace WocketConfigurationApp
 
                     //update the image
                     pictureBox_calibration.Image = calibrationImages[5];
-
+                    */
                     #endregion
 
-                    //temporal
-                    calibration_step = 12;
+                    position_axis_calibration("Z -G", 5);
+
+                    //Pass to the next step
+                    //calibration_step = 12;
                 }
                 else if (calibration_step == 12)
                 {
                     
                     #region Start Calibrate Z-1G
-
+                    /*
                     //cal_panel_button_ok.Enabled = false;
                     cal_panel_button_ok.Text = "NEXT";
                     cal_panel_label_status.Text = "Calibrating Z-1G...\r\n" +
@@ -2340,42 +2532,46 @@ namespace WocketConfigurationApp
                     //--- within the timer call the calibration function
                     ////calibrate wocket
 
-                    #endregion
-
                     //temporal
                     calibration_step = 13;
+                    */
+
+                    #endregion
+
+                    start_axis_calibration("Z -G", false);
 
                 }
                 else if (calibration_step == 13)
                 {
                     
                     #region Stop Calibrate Z-1G
-
+                    /*
                     cal_panel_button_ok.Enabled = true;
                     cal_panel_button_ok.Text = "OK";
                     cal_panel_label_status.Text = "Z-1G axis has been calibrated.\r\n" +
                                                   "Click OK to continue...";
-
-                    //update the calibrated variable
-                    cal_panel_zn1g.Text = xyzN[2].ToString();
 
                     //pause test
                     is_test_finished = true;
 
                     //update progres bar 
                     cal_panel_progressBar.Value = 100;
-
+                    */
                     #endregion
 
+                   
+                    //update the calibrated variable
+                    cal_panel_zn1g.Text = stop_axis_calibration("Z -G");
+
                     //Pass to the next step
-                    calibration_step = 14;
+                    //calibration_step = 14;
 
                 }
                 else if (calibration_step == 14)
                 {
                     
                     #region Position Z+1G
-
+                    /*
                     //cal_panel_button_ok.Enabled = false;
                     cal_panel_button_ok.Text = "Start";
                     cal_panel_label_status.Text = "To calibrate the Z+1G axis, position the wocket in the picture.\r\n" +
@@ -2387,17 +2583,19 @@ namespace WocketConfigurationApp
 
                     //update the image
                     pictureBox_calibration.Image = calibrationImages[4];
-
+                    */
                     #endregion
 
-                    //temporal
-                    calibration_step = 15;
+                    position_axis_calibration("Z +G", 4);
+
+                    //Pass to the next step
+                    //calibration_step = 15;
                 }
                 else if (calibration_step == 15)
                 {
 
                     #region Start Calibrate Z+1G
-
+                    /*
                     //cal_panel_button_ok.Enabled = false;
                     cal_panel_button_ok.Text = "NEXT";
                     cal_panel_label_status.Text = "Calibrating Z+1G...\r\n" +
@@ -2418,36 +2616,38 @@ namespace WocketConfigurationApp
                     //--- enable-start calibration timer
                     //--- within the timer call the calibration function
                     ////calibrate wocket
-
+                    
+                     * //temporal
+                    calibration_step = 16; 
+                    
+                    */
                     #endregion
-                   
-                    //temporal
-                    calibration_step = 16;
+
+                    start_axis_calibration("Z +G", true);
 
                 }
                 else if (calibration_step == 16)
                 {
                     
                     #region Stop Calibrate Z+1G
-
+                    /*
                     cal_panel_button_ok.Enabled = true;
                     cal_panel_button_ok.Text = "OK";
                     cal_panel_label_status.Text = "Z+1G axis has been calibrated.\r\n" +
                                                   "Click OK to continue...";
-
-                    //update the calibrated variable
-                    cal_panel_z1g.Text = xyzP[2].ToString();
-
-                    //pause test
+                     //pause test
                     is_test_finished = true;
 
                     //update progres bar 
                     cal_panel_progressBar.Value = 100;
-
+                    */
                     #endregion
 
+                    //update the calibrated variable
+                    cal_panel_z1g.Text = stop_axis_calibration("Z +G");
+
                     //Pass to the next step
-                    calibration_step = 17;
+                    //calibration_step = 17;
 
                 }
                 else if (calibration_step == 17)
@@ -2478,7 +2678,6 @@ namespace WocketConfigurationApp
 
                     #endregion 
 
-
                     calibration_step = 18;
 
                 }
@@ -2488,9 +2687,9 @@ namespace WocketConfigurationApp
                     #region SAVE values
 
                     //cal_panel_button_ok.Enabled = false;
-                    cal_panel_button_ok.Text = "SAVE";
-                    cal_panel_label_status.Text = "Saving results to file...";
-                    Application.DoEvents();
+                    //cal_panel_button_ok.Text = "SAVE";
+                    //cal_panel_label_status.Text = "Saving results to file...";
+                    //Application.DoEvents();
 
 
                     //Get the current time
@@ -2560,8 +2759,8 @@ namespace WocketConfigurationApp
                     cal_panel_bat_label_startTime.Text = String.Format("{0:HH:mm:ss}", BTCAL_StartTime);
 
                     //Enable Timer
-                    timer_battery.Enabled = true;
-                    timer_battery.Start();
+                    test_timer.Enabled = true;
+                    test_timer.Start();
 
                     //Pass to the next step
                     bat_calibration_step = 1;
@@ -2732,8 +2931,8 @@ namespace WocketConfigurationApp
                     SRCount = 0;
 
                     //Enable Timer
-                    timer_battery.Enabled = true;
-                    timer_battery.Start();
+                    test_timer.Enabled = true;
+                    test_timer.Start();
 
                     //Pass to the next step
                     sr_test_step = 1;
@@ -2873,8 +3072,8 @@ namespace WocketConfigurationApp
         {
             
             //Disable timer
-            timer_battery.Enabled = false;
-            timer_battery.Stop();
+            test_timer.Enabled = false;
+            test_timer.Stop();
                 
             StartBTLevel = 0;
             BTCAL_OffTime = TimeSpan.Zero;
@@ -2922,7 +3121,12 @@ namespace WocketConfigurationApp
             plotToolStripMenuItem.Checked = true;
             plotData();
 
-            
+            Application.DoEvents();
+
+            //Stop Reading The Thread
+            StopReading();
+
+
         }
 
         private void clean_calibration_values(bool clean_array)
@@ -3260,13 +3464,18 @@ namespace WocketConfigurationApp
 
 
 
-    #region Calibration 
+    #region Compute Calibration 
 
     private double[] RMEANS = new double[3]{0.0, 0.0, 0.0};
+    private double[] RSTD   = new double[3] { 0.0, 0.0, 0.0 };
+
     private double lastUnixTime = 0.0;
     private int MaxSamples = 1800;
     private int DecodedPackets = 0;
     private bool is_reading = false;
+    //private Wockets.Data.Accelerometers.AccelerationData[] cbuffer;
+    private double[,] cbuffer;
+    private bool CALIBRATE_STD = false;
 
 
     //Thread
@@ -3309,7 +3518,6 @@ namespace WocketConfigurationApp
 
 
 
-
     private void ReadingLoop()
     {
         
@@ -3323,33 +3531,47 @@ namespace WocketConfigurationApp
         RMEANS[1] = 0.0;
         RMEANS[2] = 0.0;
 
+        RSTD[0] = 0.0;
+        RSTD[1] = 0.0;
+        RSTD[2] = 0.0;
+
         //Initialize buffer pointers
         int myHead = wc._Decoders[0]._Head;
         int myTail = myHead;
+        
 
         //Initialize the acceleration data 
         DecodedPackets = 0;
-        Wockets.Data.Accelerometers.AccelerationData data = ((Wockets.Data.Accelerometers.AccelerationData)wc._Decoders[0]._Data[myTail]);
+        Wockets.Data.Accelerometers.AccelerationData data = ((Wockets.Data.Accelerometers.AccelerationData)wc._Decoders[0]._Data[myHead]);
+        
+        cbuffer[DecodedPackets,0] = data._X;
+        cbuffer[DecodedPackets,1] = data._Y;
+        cbuffer[DecodedPackets,2] = data._Z;
+        
         myTail++;
+        
+        
 
-        try
+       try
         {
             is_reading = true;
 
             //Get the data samples
+            #region Get Data Samples
+           
             while ( (myTail != myHead) && 
                     (data.UnixTimeStamp > 0) &&
-                    (DecodedPackets <= MaxSamples) && 
+                    (DecodedPackets < MaxSamples -1) && 
                     (is_reading))
             {
                 //check if the ACC data is valid
                 curUnixTime = data.UnixTimeStamp;
 
-                if (curUnixTime < lastUnixTime)
-                {
-                    MessageBox.Show("Data overwritten without decoding");
-                    break;
-                }
+                //if (curUnixTime < lastUnixTime)
+                //{
+                //    MessageBox.Show("Data overwritten without decoding");
+                //    break;
+                //}
 
 
                 //update data & time stamps 
@@ -3359,41 +3581,140 @@ namespace WocketConfigurationApp
                 accMeans[1] = accMeans[1] + data._Y;
                 accMeans[2] = accMeans[2] + data._Z;
 
+                //update the number of decoded packets
+                DecodedPackets++;
+
+                if (DecodedPackets == 1799)
+                { }
+
+                //get new data value
+                data = ((Wockets.Data.Accelerometers.AccelerationData)wc._Decoders[0]._Data[myTail]);
+                
+                cbuffer[DecodedPackets,0] = data._X;
+                cbuffer[DecodedPackets,1] = data._Y;
+                cbuffer[DecodedPackets,2] = data._Z;
+
+
                 //update the tail
                 if (myTail >= wc._Decoders[0]._Data.Length - 1)
                     myTail = 0;
                 else
                     myTail++;
 
-
-                DecodedPackets++;
-
-                //get new data value
-                data = ((Wockets.Data.Accelerometers.AccelerationData)wc._Decoders[0]._Data[myTail]);
-
             }
 
+            DecodedPackets++;
 
             //compute the final mean result
             if (DecodedPackets > 1)
             {
                 for (int i = 0; i < 3; i++)
                 {
+                    //compute the mean
                     RMEANS[i] = accMeans[i] / DecodedPackets;
+
+                    if (CALIBRATE_STD)
+                    {   //compute the standard deviation
+                        for (int j = 0; j < DecodedPackets; j++)
+                        {
+                            RSTD[i] = RSTD[i] + Math.Pow( cbuffer[j,i] - RMEANS[i], 2.0);
+                        }
+
+                        RSTD[i] = Math.Sqrt(RSTD[0] / DecodedPackets);
+                    }
                 }
             }
+
+            //Finish Test & Update Delegate
+            calibration_step = calibration_step + 1;
+
         }
         catch
         {
             DecodedPackets = -1;
         }
+             
 
-        //Finish Test & Update Delegate
-        calibration_step = calibration_step + 1;
+        #endregion 
+
+
+       #region commented
+        //commented ----- 
+         //temporal code
+         //System.Threading.Thread.Sleep(5000);
+         //calibration_step = calibration_step + 1;
+       // commented -----
+       #endregion
+
+       System.Threading.Thread.Sleep(1500);
+
+       //Indicate that the reading loop ended
         is_reading = false;
         is_test_finished = true;
-       
+        
+
     }//function ends
+
+
+     
+    private int compute_calibration_stats(string axis_id, out string st_result)
+    {
+        int success = -1;
+        double result = 0.0;
+
+
+        if (DecodedPackets >= MaxSamples)
+        {
+          
+            //status: The calibration data was collected successfully;
+            success = 0;
+
+            // Assign the mean value to the appropriate axis
+            switch (axis_id)
+            { 
+                case "X +G":
+                    xyzP[0] = RMEANS[0];
+                    result = xyzP[0];
+                    break;
+                case "X -G":
+                    xyzN[0] = RMEANS[0];
+                    result  = xyzN[0];
+                    break;
+                case "Y +G":
+                    xyzP[1] = RMEANS[1];
+                    result = xyzP[1];
+                    break;
+                case "Y -G":
+                    xyzN[1] = RMEANS[1];
+                    result = xyzN[1];
+                    break;
+                case "Z +G":
+                    xyzP[2] = RMEANS[2];
+                    result = xyzP[2];
+                    break;
+                case "Z -G":
+                    xyzN[2] = RMEANS[2];
+                    result = xyzN[2];
+                    break;
+                default:
+                    break;
+
+            }
+
+            // Asign the std. dev. 
+            if (CALIBRATE_STD)
+            {   
+                for (int i = 0; i < 3; i++)
+                    xyzSTD[i] = RSTD[i];
+            }
+        }
+
+
+        st_result = String.Format("{0:0.00}", result);
+
+
+        return success;
+    }
 
 
     #endregion 
