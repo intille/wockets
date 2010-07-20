@@ -1105,7 +1105,7 @@ unsigned char _is_yellowled_on(void)
 	
 */
 unsigned char _is_docked(void)
-{
-	return ((PORTA>>IN_DOCK_N) & 0x01);
+{	
+	return (!( 0x01 & (PINA>>IN_DOCK_N)));
 }
 

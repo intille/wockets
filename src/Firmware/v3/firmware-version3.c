@@ -70,6 +70,7 @@ unsigned short configurationTimer=1;
 unsigned char interrupts_passed=0;
 
 unsigned char interrupt_reps=0;
+unsigned short docking_counter=0;
 
 static __inline__ void _send_pdu(unsigned short x, unsigned short y, unsigned short z){	
 	if(compress)
@@ -358,8 +359,21 @@ ISR(TIMER2_OVF_vect)
 
 	/* If the wocket is docked in shut it down */
 
-//	if (_is_docked())
-//		_atmega_finalize();
+	if (_is_docked())
+	{
+		docking_counter++;
+
+		if (docking_counter>900)
+		{
+			_yellowled_turn_on();
+			for (int i=0;(i<1000);i++)
+				_delay_ms(5);
+			_atmega_finalize();
+		}
+	}
+	else if (docking_counter>0)
+		docking_counter=0;
+
 		
 	/* Skip sampling depending on the sampling rate variables/timers */
  	if (interrupt_reps==0)
