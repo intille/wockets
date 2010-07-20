@@ -18,13 +18,12 @@ namespace WocketConfigurationApp
 
         #region Declared Variables
         
-        ArrayList macaddresses = new ArrayList();
-        ArrayList bluetoothlist = new ArrayList();
-        BluetoothDeviceInfo[] devices = null;
-        
-        int is_connected = 0;
-        FormTestWocket WktTestForm;
-        Form7 WocketForm;
+            ArrayList macaddresses = new ArrayList();
+            ArrayList bluetoothlist = new ArrayList();
+            BluetoothDeviceInfo[] devices = null;
+            
+            FormTestWocket WktTestForm;
+            Form7 WocketForm;
 
         #endregion
 
@@ -72,8 +71,7 @@ namespace WocketConfigurationApp
             this.Refresh();
             this.button_search.Enabled = false;
 
-            //this.WocketsList_Box.Items.Clear();
-            
+           
             this.dataGridView1.Rows.Clear();
             this.macaddresses.Clear();
             int wocketCount = 0;
@@ -86,11 +84,7 @@ namespace WocketConfigurationApp
 
             devices = btc.DiscoverDevices(60, true, true, true);
 
-            label_status.Text = "Waiting for wocket...";
-            Application.DoEvents();
-
-
-
+            
             for (int i = 0; (i < devices.Length); i++)
             {
                 //if the device is a wocket
@@ -102,8 +96,8 @@ namespace WocketConfigurationApp
                 {
                     string hex = "";
                     hex = devices[i].DeviceAddress.ToString();
-                   
 
+                    System.Threading.Thread.Sleep(1000);
                   
                     if (this.macaddresses.IndexOf(hex) < 0)
                     {
@@ -117,10 +111,10 @@ namespace WocketConfigurationApp
                         macaddresses.Add(hex);
                         bluetoothlist.Add(devices[i]);
 
+                        System.Threading.Thread.Sleep(1000);
+
                     }
-                    
-
-
+                   
                     wocketCount++;
                 }
             }
@@ -136,10 +130,10 @@ namespace WocketConfigurationApp
                 this.button_settings.Enabled = true;
             }
 
+            label_status.Text = "Waiting for wocket...";
             this.button_search.Enabled = true;
-
-
         }
+
 
         //Add Wocket Manually
         private void button_add_wocket_Click(object sender, EventArgs e)
@@ -160,19 +154,20 @@ namespace WocketConfigurationApp
                 #endregion Commented
 
 
-                if (macaddresses.IndexOf(macaddress) < 0)
+                if (macaddresses.IndexOf(macaddress.ToUpper()) < 0)
                 {
 
                     //Find device index in the list of searched devices
                     int device_index = -1;
                     int wocketCount = 0;
                     //int bt_search_pass = 0;
-
+                    
                     BluetoothRadio.PrimaryRadio.Mode = RadioMode.Connectable;
-                    BluetoothClient btc = new BluetoothClient();
 
-                    System.Threading.Thread.Sleep(1500);
-
+                    #region commented
+                    //BluetoothClient btc = new BluetoothClient();
+                    //System.Threading.Thread.Sleep(1500);
+                    #endregion
 
                     if (devices != null)
                     {
@@ -198,86 +193,95 @@ namespace WocketConfigurationApp
                                         }
 
                                         wocketCount++;
+                                        
                                     }
                                 }
 
+                            #region commented
+                            ////If the mac was not found, search again for devices
+                                //if ( device_index <= 0)
+                                //{   label_status.Text = "Searching for wockets...";
+                                //    Application.DoEvents();
 
-                                //If the mac was not found, search again for devices
-                                if ( device_index <= 0)
-                                {
+                                //    devices = btc.DiscoverDevices(60, false, true, true);
 
-                                    label_status.Text = "Searching for wockets...";
-                                    Application.DoEvents();
+                                //    label_status.Text = "Waiting for wocket...";
+                                //    Application.DoEvents();
+                            //}
+                            #endregion 
 
-                                    devices = btc.DiscoverDevices(60, false, true, true);
-
-                                    label_status.Text = "Waiting for wocket...";
-                                    Application.DoEvents();
-
-                                }
                         }
-                        else
-                        {   // if search has not been performed, search for devices 
-                            label_status.Text = "Searching for wockets...";
-                            Application.DoEvents();
+                        //else
+                        //{
 
-                            devices = btc.DiscoverDevices(60, false, true, true);
+                            #region commented
+                        //    // if search has not been performed, search for devices 
+                        //    //    label_status.Text = "Searching for wockets...";
+                        //    //    Application.DoEvents();
 
-                            label_status.Text = "Waiting for wocket...";
-                            Application.DoEvents();
+                        //    //    devices = btc.DiscoverDevices(60, false, true, true);
 
-                           
-                        }
-                    }
-                    else
-                    {   // if search has not been performed, search for devices 
-                        label_status.Text = "Searching for wockets...";
-                        Application.DoEvents();
-
-                        devices = btc.DiscoverDevices(60, false, true, true);
-
-                        label_status.Text = "Waiting for wocket...";
-                        Application.DoEvents();
-
+                        //    //    //label_status.Text = "Waiting for wocket...";
+                        //    //    //Application.DoEvents();
+                            #endregion 
+                        //    //----> Connect directly to the wocket
+                            
+                        //}
                     }
 
-                    System.Threading.Thread.Sleep(1000);
-                    btc.Close();
-                    btc.Dispose();
+                    //else
+                    //{
+                        #region commented
+                    //    //// if search has not been performed, search for devices 
+                    //    //label_status.Text = "Searching for wockets...";
+                    //    //Application.DoEvents();
+
+                    //    //devices = btc.DiscoverDevices(60, false, true, true);
+
+                    //    //label_status.Text = "Waiting for wocket...";
+                    //    //Application.DoEvents();
+                        #endregion
+
+                    //    //----> Connect directly to the wocket
+                    //}
+
+                    #region commented
+                    //System.Threading.Thread.Sleep(1000);
+                    //btc.Close();
+                    //btc.Dispose();
                    
 
-                    //Search again if device was not found
-                    if( device_index <= 0 && devices != null)
-                    {
-                        for (int i = 0; (i < devices.Length); i++)
-                        {
-                            //if the device is a wocket
-                            if (((devices[i].DeviceName.IndexOf("Wocket") >= 0)
-                                || (devices[i].DeviceName.IndexOf("WKT") >= 0)
-                                || (devices[i].DeviceName.IndexOf("FireFly") >= 0))
-                                || (devices[i].DeviceName.IndexOf("0006660") >= 0) 
-                                && (wocketCount < 100))
-                            {
-                                string hex = "";
-                                hex = devices[i].DeviceAddress.ToString();
+                    //Search again if device was not found 
+                    //---> connect to wocket directly && added to the list
+                    //if( device_index <= 0 && devices != null)
+                    //{
+                    //    for (int i = 0; (i < devices.Length); i++)
+                    //    {
+                    //        //if the device is a wocket
+                    //        if (((devices[i].DeviceName.IndexOf("Wocket") >= 0)
+                    //            || (devices[i].DeviceName.IndexOf("WKT") >= 0)
+                    //            || (devices[i].DeviceName.IndexOf("FireFly") >= 0))
+                    //            || (devices[i].DeviceName.IndexOf("0006660") >= 0) 
+                    //            && (wocketCount < 100))
+                    //        {
+                    //            string hex = "";
+                    //            hex = devices[i].DeviceAddress.ToString();
 
 
-                                if (macaddress.CompareTo(hex) == 0)
-                                {
-                                    device_index = i;
-                                    break;
-                                }
+                    //            if (macaddress.CompareTo(hex) == 0)
+                    //            {
+                    //                device_index = i;
+                    //                break;
+                    //            }
 
-                                wocketCount++;
-                            }
-                        }
+                    //            wocketCount++;
+                    //        }
+                    //    }
+                    //}
+                    #endregion 
 
                     
-                    }
-
-
-
-
+                    
                     //If bluetooth device information found
                     if (device_index >= 0)
                     {
@@ -291,11 +295,24 @@ namespace WocketConfigurationApp
                         macaddresses.Add(macaddress);
                         bluetoothlist.Add(devices[device_index]);
 
-                        label_status.Text = "Waiting for wocket...";
-                        Application.DoEvents();
+                        
+                    }
+                    else
+                    {
+                        int row = this.dataGridView1.Rows.Add();
+
+                        this.dataGridView1.Rows[row].Cells[0].Value = macaddress;
+                        this.dataGridView1.Rows[row].Cells[1].Value = macaddress;
+                        this.dataGridView1.Rows[row].Cells[2].Value = "Not tested";
+                        this.dataGridView1.Rows[row].Cells[3].Value = "Not tested";
+
+                        macaddresses.Add(macaddress);
+                        bluetoothlist.Add(new BluetoothDeviceInfo(BluetoothAddress.Parse(macaddress)));
+
                     }
 
-
+                    label_status.Text = "Waiting for wocket...";
+                   
 
                     //update buttons
                     if (this.dataGridView1.Rows.Count > 0)
