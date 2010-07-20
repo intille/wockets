@@ -107,40 +107,36 @@ namespace Wockets.Utils.sms
                 while (smsSendingQueue.Count > 0)
                 {
                     MessageToSend messageToSend = smsSendingQueue[0];
-                    if (messageToSend == null)
-                    {
-                        logWriter.WriteLine(DateTime.Now + ", Null message?");
-                        logWriter.Flush();
-
-                        smsSendingQueue.RemoveAt(0);
-                    }
-
                     if (Util.SendSMS(messageToSend.getClientNum(), messageToSend.getMsgContent()))
                     {
+                        smsSendingQueue.RemoveAt(0);
+
                         if (enableLogging)
                         {
                             logWriter.WriteLine(DateTime.Now + "," + messageToSend.getClientNum() + "," + messageToSend.getMsgContent() + ", successfully sent.");
                             logWriter.Flush();
                         }
-
-                        smsSendingQueue.RemoveAt(0);
                     }
                     else
                     {
 
                         if (messageToSend.failedCount >= smsResendRetryTimes)
                         {
+                            smsSendingQueue.RemoveAt(0);
+
                             if (enableLogging)
                             {
                                 logWriter.WriteLine(DateTime.Now + "," + messageToSend.getClientNum() + "," + messageToSend.getMsgContent() + ", failed to send too many times. Giving up retrying.");
                                 logWriter.Flush();
                             }
-                            smsSendingQueue.RemoveAt(0);
                         }
                         else
                         {
-                            logWriter.WriteLine(DateTime.Now + "," + messageToSend.getClientNum() + "," + messageToSend.getMsgContent() + ", message failed to send, retrying in " + sendSMSPollingFreq * (messageToSend.failedCount + 1) + " seconds.");
-                            logWriter.Flush();
+                            if (enableLogging)
+                            {
+                                logWriter.WriteLine(DateTime.Now + "," + messageToSend.getClientNum() + "," + messageToSend.getMsgContent() + ", message failed to send, retrying in " + sendSMSPollingFreq * (messageToSend.failedCount + 1) + " seconds.");
+                                logWriter.Flush();
+                            }
 
                             messageToSend.failedCount++;
                             Thread.Sleep(sendSMSPollingFreq * messageToSend.failedCount * 1000);
@@ -151,6 +147,7 @@ namespace Wockets.Utils.sms
                 Thread.Sleep(sendSMSPollingFreq * 1000);
             }
         }
+
 
 
         /// <summary>
