@@ -91,7 +91,7 @@ namespace WocketConfigurationApp
                 if (((devices[i].DeviceName.IndexOf("Wocket") >= 0) 
                     || (devices[i].DeviceName.IndexOf("WKT") >= 0) 
                     || (devices[i].DeviceName.IndexOf("FireFly") >= 0)
-                    || (devices[i].DeviceName.IndexOf("0006660") >= 0) 
+                    || (devices[i].DeviceName.IndexOf("00:06:66") >= 0) 
                     && (wocketCount < 100)))
                 {
                     string hex = "";
