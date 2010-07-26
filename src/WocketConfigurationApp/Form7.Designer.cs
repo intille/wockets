@@ -96,7 +96,7 @@ namespace WocketConfigurationApp
             this.label3 = new System.Windows.Forms.Label();
             this.cal_panel_cmd_label = new System.Windows.Forms.Label();
             this.cal_panel_title = new System.Windows.Forms.TextBox();
-            this.cal_panel_bat_values = new System.Windows.Forms.Panel();
+            this.cal_panel_values_BTpercent = new System.Windows.Forms.Panel();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.cal_panel_bat_20 = new System.Windows.Forms.Label();
@@ -122,7 +122,7 @@ namespace WocketConfigurationApp
             this.panel_status.SuspendLayout();
             this.panel_calibration.SuspendLayout();
             this.cal_panel_cal_values.SuspendLayout();
-            this.cal_panel_bat_values.SuspendLayout();
+            this.cal_panel_values_BTpercent.SuspendLayout();
             this.panel3.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -685,7 +685,7 @@ namespace WocketConfigurationApp
             this.panel_calibration.Controls.Add(this.cal_panel_cal_values);
             this.panel_calibration.Controls.Add(this.cal_panel_cmd_label);
             this.panel_calibration.Controls.Add(this.cal_panel_title);
-            this.panel_calibration.Controls.Add(this.cal_panel_bat_values);
+            this.panel_calibration.Controls.Add(this.cal_panel_values_BTpercent);
             this.panel_calibration.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.panel_calibration.Location = new System.Drawing.Point(526, 33);
             this.panel_calibration.Name = "panel_calibration";
@@ -876,24 +876,24 @@ namespace WocketConfigurationApp
             this.cal_panel_title.TabIndex = 40;
             this.cal_panel_title.Text = "Calibration";
             // 
-            // cal_panel_bat_values
+            // cal_panel_values_BTpercent
             // 
-            this.cal_panel_bat_values.Controls.Add(this.label1);
-            this.cal_panel_bat_values.Controls.Add(this.label2);
-            this.cal_panel_bat_values.Controls.Add(this.cal_panel_bat_20);
-            this.cal_panel_bat_values.Controls.Add(this.cal_panel_bat_40);
-            this.cal_panel_bat_values.Controls.Add(this.cal_panel_bat_10);
-            this.cal_panel_bat_values.Controls.Add(this.label9);
-            this.cal_panel_bat_values.Controls.Add(this.label17);
-            this.cal_panel_bat_values.Controls.Add(this.label16);
-            this.cal_panel_bat_values.Controls.Add(this.cal_panel_bat_80);
-            this.cal_panel_bat_values.Controls.Add(this.cal_panel_bat_100);
-            this.cal_panel_bat_values.Controls.Add(this.cal_panel_bat_60);
-            this.cal_panel_bat_values.Controls.Add(this.label15);
-            this.cal_panel_bat_values.Location = new System.Drawing.Point(3, 146);
-            this.cal_panel_bat_values.Name = "cal_panel_bat_values";
-            this.cal_panel_bat_values.Size = new System.Drawing.Size(385, 137);
-            this.cal_panel_bat_values.TabIndex = 50;
+            this.cal_panel_values_BTpercent.Controls.Add(this.label1);
+            this.cal_panel_values_BTpercent.Controls.Add(this.label2);
+            this.cal_panel_values_BTpercent.Controls.Add(this.cal_panel_bat_20);
+            this.cal_panel_values_BTpercent.Controls.Add(this.cal_panel_bat_40);
+            this.cal_panel_values_BTpercent.Controls.Add(this.cal_panel_bat_10);
+            this.cal_panel_values_BTpercent.Controls.Add(this.label9);
+            this.cal_panel_values_BTpercent.Controls.Add(this.label17);
+            this.cal_panel_values_BTpercent.Controls.Add(this.label16);
+            this.cal_panel_values_BTpercent.Controls.Add(this.cal_panel_bat_80);
+            this.cal_panel_values_BTpercent.Controls.Add(this.cal_panel_bat_100);
+            this.cal_panel_values_BTpercent.Controls.Add(this.cal_panel_bat_60);
+            this.cal_panel_values_BTpercent.Controls.Add(this.label15);
+            this.cal_panel_values_BTpercent.Location = new System.Drawing.Point(3, 146);
+            this.cal_panel_values_BTpercent.Name = "cal_panel_values_BTpercent";
+            this.cal_panel_values_BTpercent.Size = new System.Drawing.Size(385, 137);
+            this.cal_panel_values_BTpercent.TabIndex = 50;
             // 
             // label1
             // 
@@ -1134,8 +1134,8 @@ namespace WocketConfigurationApp
             this.panel_calibration.PerformLayout();
             this.cal_panel_cal_values.ResumeLayout(false);
             this.cal_panel_cal_values.PerformLayout();
-            this.cal_panel_bat_values.ResumeLayout(false);
-            this.cal_panel_bat_values.PerformLayout();
+            this.cal_panel_values_BTpercent.ResumeLayout(false);
+            this.cal_panel_values_BTpercent.PerformLayout();
             this.panel3.ResumeLayout(false);
             this.panel3.PerformLayout();
             this.ResumeLayout(false);
@@ -1211,7 +1211,7 @@ namespace WocketConfigurationApp
         private System.Windows.Forms.Button cal_panel_button_cancel;
         private System.Windows.Forms.Button cal_panel_button_ok;
         private System.Windows.Forms.TextBox set_panel_title;
-        private System.Windows.Forms.Panel cal_panel_bat_values;
+        private System.Windows.Forms.Panel cal_panel_values_BTpercent;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label cal_panel_bat_20;
