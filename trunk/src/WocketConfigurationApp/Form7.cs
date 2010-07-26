@@ -1950,7 +1950,7 @@ namespace WocketConfigurationApp
                    panel_status_texbox.Text = "";
                    panel_status.Visible = false;
 
-                   cal_panel_bat_values.Visible = false;
+                   cal_panel_values_BTpercent.Visible = false;
                    cal_panel_cal_values.Visible = true;
 
                    panel_calibration.Visible = true;
@@ -1971,7 +1971,7 @@ namespace WocketConfigurationApp
                    panel_status_texbox.Text = "";
                    panel_status.Visible = false;
 
-                   cal_panel_bat_values.Visible = true;
+                   cal_panel_values_BTpercent.Visible = true;
                    cal_panel_cal_values.Visible = false;
 
                    panel_calibration.Visible = true;
@@ -2201,7 +2201,7 @@ namespace WocketConfigurationApp
 
             clean_calibration_values();
 
-            cal_panel_bat_values.Visible = false;
+            cal_panel_values_BTpercent.Visible = false;
             cal_panel_cal_values.Visible = false;
 
             panel_calibration.Visible = false;
