@@ -10,19 +10,67 @@ using System.IO;
 using FileUploadLib;
 using System.Threading;
 
+using Microsoft.WindowsCE.Forms;
+
+//using Wockets.Utils.IPC;
+
+
+
 namespace FileUploadTestApp
 {
+
+    #region Events
+    
+    public class internalMessageWindow : MessageWindow
+    {
+        private const int TERMINATE_MESSAGE = 0xA123;
+
+        Form1 referedForm;
+        
+
+        public internalMessageWindow(Form1 referedForm)
+        {
+            this.referedForm = referedForm;
+        }
+
+
+        protected override void WndProc(ref Message m)
+        {
+            //filter the Terminate Message
+            if (m.Msg == TERMINATE_MESSAGE)
+            {
+                //display that we recieved the message, of course we could do
+                //something else more important here.
+               referedForm.textBox1.Text  = "Terminate Message Received: " + TERMINATE_MESSAGE;
+               referedForm.Refresh();
+            }
+            //be sure to pass along all messages to the base also
+            base.WndProc(ref m);
+        }
+
+    }
+
+    #endregion
+
+
+
+
+
+
     public partial class Form1 : Form
     {
         private const String fileUploadSeverURL = "http://citytesting.scripts.mit.edu/upload/upload.php";
-
         private const String logFilePath = "\\Wockets\\FUlog.txt";
-      
-        
+        private internalMessageWindow messageWindow;
+       
+
 
         public Form1()
         {
             InitializeComponent();
+
+            this.messageWindow = new internalMessageWindow(this); 
+
 
             /*
             if (!File.Exists(logFilePath))
@@ -57,6 +105,7 @@ namespace FileUploadTestApp
         {
             FileStream logFile = new FileStream(logFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);        
             String buffer = "";
+           
             // create reader & open file
             TextReader tr = new StreamReader(logFile);
             
