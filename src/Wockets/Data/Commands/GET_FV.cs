@@ -8,8 +8,7 @@ namespace Wockets.Data.Commands
     {
         public GET_FV()
         {
-            this.cmd = new byte[] { (byte)0xb7 };
-            this.type = CommandTypes.GET_FV;
+            this._Bytes = new byte[] { (byte)0xa0 | (byte)CommandTypes.GET_FV };
         }
     }
 }

@@ -151,7 +151,11 @@ namespace Wockets.Kernel
                             }
                         }
                     }
-                    else*/ if (msg == KernelCommand.CONNECT.ToString())
+                    else*/
+
+
+                    #region CONNECT
+                    if (msg == KernelCommand.CONNECT.ToString())
                     {
                         if (!_WocketsRunning)
                         {
@@ -176,7 +180,7 @@ namespace Wockets.Kernel
                             CurrentWockets._Controller = new WocketsController("", "", "");
                             CurrentWockets._Controller.FromXML(path + "//NeededFiles//Master//SensorData.xml");
                             CurrentWockets._Controller._Mode = MemoryMode.BluetoothToShared;
-                            int index=0;
+                            int index = 0;
                             for (int i = 0; (i < Booter.wcontroller._Sensors.Count); i++)
                             {
                                 if (Booter.wcontroller._Sensors[i]._Loaded)
@@ -213,25 +217,29 @@ namespace Wockets.Kernel
                             if (CurrentWockets._Controller._Sensors.Count > 0)
                             {
                                 registryLock.WaitOne();
-                                rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_KERNEL_PATH,true);
-                                rk.SetValue("Storage", storageDirectory);                                                                   
-                                rk.Close();                                
+                                rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_KERNEL_PATH, true);
+                                rk.SetValue("Storage", storageDirectory);
+                                rk.Close();
                                 registryLock.Release();
-              
+
                                 TextWriter tw = new StreamWriter(storageDirectory + "\\SensorData.xml");
                                 tw.WriteLine(CurrentWockets._Controller.ToXML());
                                 tw.Close();
-                           
-                               _WocketsRunning = true;
-                               CurrentWockets._Controller.Initialize();
-                               Send(ApplicationResponse.CONNECT_SUCCESS, applicationGuid);
-                            }else
+
+                                _WocketsRunning = true;
+                                CurrentWockets._Controller.Initialize();
+                                Send(ApplicationResponse.CONNECT_SUCCESS, applicationGuid);
+                            }
+                            else
                                 Send(ApplicationResponse.CONNECT_FAILURE, applicationGuid);
-                            
+
                         }
                         else
                             Send(ApplicationResponse.CONNECT_FAILURE, applicationGuid);
                     }
+                    #endregion CONNECT
+
+                    #region DISCONNECT
                     else if (msg == KernelCommand.DISCONNECT.ToString())
                     {
                         if (_WocketsRunning)
@@ -244,7 +252,10 @@ namespace Wockets.Kernel
                             Send(ApplicationResponse.DISCONNECT_FAILURE, applicationGuid);
 
                     }
-                    else if (msg == KernelCommand.SET_SENSORS.ToString())
+                    #endregion DISCONNECT
+
+                    #region SET_WOCKETS
+                    else if (msg == KernelCommand.SET_WOCKETS.ToString())
                     {
                         if (!_WocketsRunning)
                         {
@@ -270,6 +281,109 @@ namespace Wockets.Kernel
                         else
                             Send(ApplicationResponse.SET_SENSORS_FAILURE, applicationGuid);
                     }
+                    #endregion SET_WOCKETS
+
+                    #region GET_BATTERY_LEVEL
+                    else if (msg == KernelCommand.GET_BATTERY_LEVEL.ToString())
+                    {
+                        if (_WocketsRunning)
+                        {
+                            Command command = new GET_BT();                         
+                            for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+                            {
+                                if (param=="all")
+                                    ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == param)
+                                {
+                                    ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    #endregion GET_BATTERY_LEVEL
+
+                    #region GET_BATTERY_PERCENT
+                    else if (msg == KernelCommand.GET_BATTERY_PERCENT.ToString())
+                    {
+                        if (_WocketsRunning)
+                        {
+                            Command command = new GET_BP();
+                            for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+                            {
+                                if (param == "all")
+                                    ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == param)
+                                {
+                                    ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    #endregion GET_BATTERY_PERCENT
+
+                    #region GET_PDU_COUNT
+                    else if (msg == KernelCommand.GET_PDU_COUNT.ToString())
+                    {
+                        if (_WocketsRunning)
+                        {
+                            Command command = new GET_PC();
+                            for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+                            {
+                                if (param == "all")
+                                    ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == param)
+                                {
+                                    ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    #endregion GET_PDU_COUNT
+
+                    #region GET_WOCKET_SENSITIVITY
+                    else if (msg == KernelCommand.GET_WOCKET_SENSITIVITY.ToString())
+                    {
+                        if (_WocketsRunning)
+                        {
+                            Command command = new GET_SEN();
+                            for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+                            {
+                                if (param == "all")
+                                    ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == param)
+                                {
+                                    ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    #endregion GET_WOCKET_SENSITIVITY
+
+                    #region SET_WOCKET_SENSITIVITY
+                    else if (msg == KernelCommand.GET_WOCKET_SENSITIVITY.ToString())
+                    {
+                       /* if (_WocketsRunning)
+                        {
+                            
+                            Command command = new SET_SEN();
+                            for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+                            {
+                                if (param == "all")
+                                    ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == param)
+                                {
+                                    ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                    break;
+                                }
+                            }
+                        }*/
+                    }
+                    #endregion SET_WOCKET_SENSITIVITY
                 }
 
                 namedEvent.Reset();

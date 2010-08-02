@@ -5,7 +5,7 @@ using System.Xml;
 using Wockets.Receivers;
 using Wockets.Data;
 using Wockets.Data.Accelerometers;
-using Wockets.Data.Commands;
+using Wockets.Data.Types;
 using Wockets.Data.Responses;
 using Wockets.Utils;
 using Wockets.Exceptions;
@@ -361,7 +361,7 @@ namespace Wockets.Decoders.Accelerometers
                                     TM_RSP tm = new TM_RSP(this._ID);
                                     for (int i = 0; (i < bytesToRead); i++)
                                         tm.RawBytes[i] = this.packet[i];
-                                    tm._TransmissionMode = (TransmissionModes)((this.packet[1]>>4) & 0x07);
+                                    tm._TransmissionMode = (TransmissionMode)((this.packet[1]>>4) & 0x07);
                                     FireEvent(tm);
                                     break;
 

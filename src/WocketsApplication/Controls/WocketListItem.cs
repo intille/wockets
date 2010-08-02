@@ -30,13 +30,11 @@ namespace WocketsApplication.Controls
         public string _MacAddress="";
         public string _Name = "";
         public string _PIN = "";
-        public BaudRates _BaudRate = BaudRates.BR38400;
-        public TransmissionPowers _TransmissionPower = TransmissionPowers.TP12dBm;
-        public SleepModes _SleepMode = SleepModes.NoSleep;
+
 
         //Accelerometer
-        public Sensitivities _Sensitivity = Sensitivities.Sensitivity4G;
-        public Calibration _Calibration = new Calibration();
+        //public Sensitivities _Sensitivity = Sensitivities.Sensitivity4G;
+        //public Calibration _Calibration = new Calibration();
         public SamplingRates _SR = SamplingRates.SR90Hz;
 
         //General

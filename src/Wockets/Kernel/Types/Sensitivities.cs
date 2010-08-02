@@ -9,6 +9,7 @@ namespace Wockets.Kernel.Types
         Sensitivity1_5G,
         Sensitivity2G,
         Sensitivity4G,
-        Sensitivity6G
+        Sensitivity6G,
+        Sensitivity12G
     }
 }

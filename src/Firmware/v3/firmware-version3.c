@@ -44,6 +44,9 @@ data_unit data7[50];*/
 //unsigned short zs[3000];
 
 data_unit data[750];
+//unsigned short acount[1440];
+//data_unit pose[360];
+
 unsigned short x;
 unsigned short y;
 unsigned short z;
@@ -359,7 +362,7 @@ ISR(TIMER2_OVF_vect)
 
 	/* If the wocket is docked in shut it down */
 
-	if (_is_docked())
+/*	if (_is_docked())
 	{
 		docking_counter++;
 
@@ -373,7 +376,7 @@ ISR(TIMER2_OVF_vect)
 	}
 	else if (docking_counter>0)
 		docking_counter=0;
-
+*/
 		
 	/* Skip sampling depending on the sampling rate variables/timers */
  	if (interrupt_reps==0)
