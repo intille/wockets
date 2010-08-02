@@ -3,6 +3,8 @@ using System.Collections;
 using System.Threading;
 using System.Diagnostics;
 using Wockets.Utils.IPC;
+using Wockets.Data.Types;
+using Wockets.Data.Commands;
 using Wockets.Kernel.Types;
 using Wockets.Utils;
 using Microsoft.Win32;
@@ -137,27 +139,7 @@ namespace Wockets.Kernel
             registryLock.Release();
             namedEvent.Send(Channels.COMMAND.ToString());
         }
-        public static bool SetSniff(string channel, SleepModes mode)
-        {
-            bool success = false;
-            if (_Registered)
-            {
-                string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + channel + "}";
-                NamedEvents namedEvent = new NamedEvents();
 
-                registryLock.WaitOne();
-                RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
-                rk.SetValue("Message", KernelCommand.SET_SNIFF.ToString(), RegistryValueKind.String);     
-                rk.SetValue("Param", mode.ToString(), RegistryValueKind.String);
-
-
-                rk.Flush();
-                rk.Close();
-                registryLock.Release();
-                namedEvent.Send(channel + "-kernel");
-            }
-            return success;
-        }
         public static void SetSensors(string channel, ArrayList s)
         {
             if ((_Registered) && (!_Connected))
@@ -166,7 +148,7 @@ namespace Wockets.Kernel
                 NamedEvents namedEvent = new NamedEvents();
                 registryLock.WaitOne();
                 RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
-                rk.SetValue("Message", KernelCommand.SET_SENSORS.ToString(), RegistryValueKind.String);
+                rk.SetValue("Message", KernelCommand.SET_WOCKETS.ToString(), RegistryValueKind.String);
                 rk.Flush();
                 rk.Close();
                 for (int i = 0; (i < 5); i++)
@@ -285,6 +267,317 @@ namespace Wockets.Kernel
                 registryLock.Release();
                 namedEvent.Send(Channels.COMMAND.ToString());
                 _Registered = false;
+            }
+            return success;
+        }
+
+        public static bool GET_BATTERY_LEVEL(string channel,string mac)
+        {
+            bool success = false;
+            if ((_Registered) && (_Connected))
+            {
+                string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + channel + "}";
+                NamedEvents namedEvent = new NamedEvents();
+                registryLock.WaitOne();
+                RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
+                rk.SetValue("Message", KernelCommand.GET_BATTERY_LEVEL.ToString(), RegistryValueKind.String);
+                rk.SetValue("Param", mac.ToString(), RegistryValueKind.String);
+                rk.Flush();
+                rk.Close();   
+                registryLock.Release();
+                namedEvent.Send(channel + "-kernel");
+                success = true;
+            }
+            return success;
+        }
+
+        public static bool GET_BATTERY_PERCENT(string channel, string mac)
+        {
+            bool success = false;
+            if ((_Registered) && (_Connected))
+            {
+                string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + channel + "}";
+                NamedEvents namedEvent = new NamedEvents();
+                registryLock.WaitOne();
+                RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
+                rk.SetValue("Message", KernelCommand.GET_BATTERY_PERCENT.ToString(), RegistryValueKind.String);
+                rk.SetValue("Param", mac.ToString(), RegistryValueKind.String);
+                rk.Flush();
+                rk.Close();
+                registryLock.Release();
+                namedEvent.Send(channel + "-kernel");
+                success = true;
+            }
+            return success;
+        }
+
+        public static bool GET_PDU_COUNT(string channel, string mac)
+        {
+            bool success = false;
+            if ((_Registered) && (_Connected))
+            {
+                string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + channel + "}";
+                NamedEvents namedEvent = new NamedEvents();
+                registryLock.WaitOne();
+                RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
+                rk.SetValue("Message", KernelCommand.GET_PDU_COUNT.ToString(), RegistryValueKind.String);
+                rk.SetValue("Param", mac.ToString(), RegistryValueKind.String);
+                rk.Flush();
+                rk.Close();
+                registryLock.Release();
+                namedEvent.Send(channel + "-kernel");
+                success = true;
+            }
+            return success;
+        }
+
+
+        public static bool GET_WOCKET_SENSITIVITY(string channel, string mac)
+        {
+            bool success = false;
+            if ((_Registered) && (_Connected))
+            {
+                string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + channel + "}";
+                NamedEvents namedEvent = new NamedEvents();
+                registryLock.WaitOne();
+                RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
+                rk.SetValue("Message", KernelCommand.GET_WOCKET_SENSITIVITY.ToString(), RegistryValueKind.String);
+                rk.SetValue("Param", mac.ToString(), RegistryValueKind.String);
+                rk.Flush();
+                rk.Close();
+                registryLock.Release();
+                namedEvent.Send(channel + "-kernel");
+                success = true;
+            }
+            return success;
+        }
+
+
+        public static bool SET_WOCKET_SENSITIVITY(string channel, string mac,Sensitivity sensitivity)
+        {
+            bool success = false;
+            if ((_Registered) && (_Connected))
+            {
+                string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + channel + "}";
+                NamedEvents namedEvent = new NamedEvents();
+                registryLock.WaitOne();
+                RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
+                rk.SetValue("Message", KernelCommand.SET_WOCKET_SENSITIVITY.ToString(), RegistryValueKind.String);
+                rk.SetValue("Param", mac.ToString()+":"+sensitivity.ToString(), RegistryValueKind.String);
+                rk.Flush();
+                rk.Close();
+                registryLock.Release();
+                namedEvent.Send(channel + "-kernel");
+                success = true;
+            }
+            return success;
+        }
+
+        public static bool GET_WOCKET_CALIBRATION(string channel, string mac)
+        {
+            bool success = false;
+            if ((_Registered) && (_Connected))
+            {
+                string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + channel + "}";
+                NamedEvents namedEvent = new NamedEvents();
+                registryLock.WaitOne();
+                RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
+                rk.SetValue("Message", KernelCommand.GET_WOCKET_CALIBRATION.ToString(), RegistryValueKind.String);
+                rk.SetValue("Param", mac.ToString(), RegistryValueKind.String);
+                rk.Flush();
+                rk.Close();
+                registryLock.Release();
+                namedEvent.Send(channel + "-kernel");
+                success = true;
+            }
+            return success;
+        }
+
+
+        public static bool SET_WOCKET_CALIBRATION(string channel, string mac, string calibration)
+        {
+            bool success = false;
+            if ((_Registered) && (_Connected))
+            {
+                string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + channel + "}";
+                NamedEvents namedEvent = new NamedEvents();
+                registryLock.WaitOne();
+                RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
+                rk.SetValue("Message", KernelCommand.GET_BATTERY_PERCENT.ToString(), RegistryValueKind.String);
+                rk.SetValue("Param", mac.ToString()+":"+calibration.ToString(), RegistryValueKind.String);
+                rk.Flush();
+                rk.Close();
+                registryLock.Release();
+                namedEvent.Send(channel + "-kernel");
+                success = true;
+            }
+            return success;
+        }
+
+
+        public static bool GET_WOCKET_SAMPLING_RATE(string channel, string mac)
+        {
+            bool success = false;
+            if ((_Registered) && (_Connected))
+            {
+                string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + channel + "}";
+                NamedEvents namedEvent = new NamedEvents();
+                registryLock.WaitOne();
+                RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
+                rk.SetValue("Message", KernelCommand.GET_WOCKET_SAMPLING_RATE.ToString(), RegistryValueKind.String);
+                rk.SetValue("Param", mac.ToString(), RegistryValueKind.String);
+                rk.Flush();
+                rk.Close();
+                registryLock.Release();
+                namedEvent.Send(channel + "-kernel");
+                success = true;
+            }
+            return success;
+        }
+
+
+        public static bool SET_WOCKET_SAMPLING_RATE(string channel, string mac, int sr)
+        {
+            bool success = false;
+            if ((_Registered) && (_Connected))
+            {
+                string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + channel + "}";
+                NamedEvents namedEvent = new NamedEvents();
+                registryLock.WaitOne();
+                RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
+                rk.SetValue("Message", KernelCommand.GET_BATTERY_PERCENT.ToString(), RegistryValueKind.String);
+                rk.SetValue("Param", mac.ToString() + ":" + sr.ToString(), RegistryValueKind.String);
+                rk.Flush();
+                rk.Close();
+                registryLock.Release();
+                namedEvent.Send(channel + "-kernel");
+                success = true;
+            }
+            return success;
+        }
+
+
+        public static bool GET_WOCKET_POWERDOWN_TIMEOUT(string channel, string mac)
+        {
+            bool success = false;
+            if ((_Registered) && (_Connected))
+            {
+                string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + channel + "}";
+                NamedEvents namedEvent = new NamedEvents();
+                registryLock.WaitOne();
+                RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
+                rk.SetValue("Message", KernelCommand.GET_WOCKET_POWERDOWN_TIMEOUT.ToString(), RegistryValueKind.String);
+                rk.SetValue("Param", mac.ToString(), RegistryValueKind.String);
+                rk.Flush();
+                rk.Close();
+                registryLock.Release();
+                namedEvent.Send(channel + "-kernel");
+                success = true;
+            }
+            return success;
+        }
+
+
+        public static bool SET_WOCKET_POWERDOWN_TIMEOUT(string channel, string mac, int timeout)
+        {
+            bool success = false;
+            if ((_Registered) && (_Connected))
+            {
+                string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + channel + "}";
+                NamedEvents namedEvent = new NamedEvents();
+                registryLock.WaitOne();
+                RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
+                rk.SetValue("Message", KernelCommand.SET_WOCKET_POWERDOWN_TIMEOUT.ToString(), RegistryValueKind.String);
+                rk.SetValue("Param", mac.ToString() + ":" + timeout.ToString(), RegistryValueKind.String);
+                rk.Flush();
+                rk.Close();
+                registryLock.Release();
+                namedEvent.Send(channel + "-kernel");
+                success = true;
+            }
+            return success;
+        }
+
+
+        public static bool GET_TRANSMISSION_MODE(string channel, string mac)
+        {
+            bool success = false;
+            if ((_Registered) && (_Connected))
+            {
+                string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + channel + "}";
+                NamedEvents namedEvent = new NamedEvents();
+                registryLock.WaitOne();
+                RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
+                rk.SetValue("Message", KernelCommand.GET_TRANSMISSION_MODE.ToString(), RegistryValueKind.String);
+                rk.SetValue("Param", mac.ToString(), RegistryValueKind.String);
+                rk.Flush();
+                rk.Close();
+                registryLock.Release();
+                namedEvent.Send(channel + "-kernel");
+                success = true;
+            }
+            return success;
+        }
+
+
+        public static bool SET_TRANSMISSION_MODE(string channel, string mac, TransmissionMode mode)
+        {
+            bool success = false;
+            if ((_Registered) && (_Connected))
+            {
+                string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + channel + "}";
+                NamedEvents namedEvent = new NamedEvents();
+                registryLock.WaitOne();
+                RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
+                rk.SetValue("Message", KernelCommand.SET_WOCKET_POWERDOWN_TIMEOUT.ToString(), RegistryValueKind.String);
+                rk.SetValue("Param", mac.ToString() + ":" + mode.ToString(), RegistryValueKind.String);
+                rk.Flush();
+                rk.Close();
+                registryLock.Release();
+                namedEvent.Send(channel + "-kernel");
+                success = true;
+            }
+            return success;
+        }
+
+
+        public static bool GET_MEMORY_MODE(string channel, string mac)
+        {
+            bool success = false;
+            if ((_Registered) && (_Connected))
+            {
+                string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + channel + "}";
+                NamedEvents namedEvent = new NamedEvents();
+                registryLock.WaitOne();
+                RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
+                rk.SetValue("Message", KernelCommand.GET_MEMORY_MODE.ToString(), RegistryValueKind.String);
+                rk.SetValue("Param", mac.ToString(), RegistryValueKind.String);
+                rk.Flush();
+                rk.Close();
+                registryLock.Release();
+                namedEvent.Send(channel + "-kernel");
+                success = true;
+            }
+            return success;
+        }
+
+
+        public static bool SET_TRANSMISSION_MODE(string channel, string mac, MemoryMode mode)
+        {
+            bool success = false;
+            if ((_Registered) && (_Connected))
+            {
+                string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + channel + "}";
+                NamedEvents namedEvent = new NamedEvents();
+                registryLock.WaitOne();
+                RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
+                rk.SetValue("Message", KernelCommand.SET_MEMORY_MODE.ToString(), RegistryValueKind.String);
+                rk.SetValue("Param", mac.ToString() + ":" + mode.ToString(), RegistryValueKind.String);
+                rk.Flush();
+                rk.Close();
+                registryLock.Release();
+                namedEvent.Send(channel + "-kernel");
+                success = true;
             }
             return success;
         }

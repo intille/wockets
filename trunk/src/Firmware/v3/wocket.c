@@ -210,11 +210,11 @@ void _wocket_initialize(void)
 	{
 
 		// Set the sampling rate to 90Hz
-		//_SAMPLING_RATE=40;
-		//_wTM=_TM_Burst_60;
+		_SAMPLING_RATE=40;
+		_wTM=_TM_Burst_60;
 
-		_SAMPLING_RATE=90;
-		_wTM=_TM_Continuous;
+		//_SAMPLING_RATE=90;
+		//_wTM=_TM_Continuous;
 	
 		// Write the sampling rate to the EEPROM
 		if (battery>300)

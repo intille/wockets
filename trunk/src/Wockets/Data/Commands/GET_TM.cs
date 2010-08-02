@@ -8,8 +8,7 @@ namespace Wockets.Data.Commands
     {
         public GET_TM()
         {
-            this.cmd = new byte[] { (byte)0xb2 };
-            this.type = CommandTypes.GET_TM;
+            this._Bytes = new byte[] { (byte)0xa0 | (byte)CommandTypes.GET_TM};
         }
     }
 }

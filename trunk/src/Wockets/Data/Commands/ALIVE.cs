@@ -8,8 +8,7 @@ namespace Wockets.Data.Commands
     {
         public ALIVE()
         {
-            this.cmd = new byte[] { (byte)0xaf };
-            this.type = CommandTypes.ALIVE;
+            this._Bytes = new byte[] { (byte)0xa0 | (byte)CommandTypes.ALIVE };
         }
     }
 }

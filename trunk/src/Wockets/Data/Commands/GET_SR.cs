@@ -6,10 +6,9 @@ namespace Wockets.Data.Commands
 {
     public class GET_SR: Command
     {
-        public GET_SR()
+         public GET_SR()
         {
-            this.cmd = new byte[] { (byte)0xa8 };
-            this.type = CommandTypes.GET_SR;
+            this._Bytes = new byte[] { (byte)0xa0 | (byte)CommandTypes.GET_SR};
         }
     }
 }

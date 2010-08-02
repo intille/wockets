@@ -8,8 +8,7 @@ namespace Wockets.Data.Commands
     {
         public GET_PC()
         {
-            this.cmd = new byte[] { (byte)0xa2 };
-            this.type = CommandTypes.GET_PC;
+            this._Bytes = new byte[] { (byte)0xa0 | (byte)CommandTypes.GET_PC };
         }
     }
 }

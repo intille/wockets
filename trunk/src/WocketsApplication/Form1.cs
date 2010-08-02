@@ -305,7 +305,7 @@ namespace WocketsApplication
                    CurrentWockets._Configuration.FromXML(Core._StoragePath + "\\Configuration.xml");
                    CurrentWockets._Configuration._MemoryMode = MemoryConfiguration.SHARED;
                    CurrentWockets._Controller = new WocketsController("", "", "");
-                   CurrentWockets._Controller._Mode = MemoryMode.SharedToLocal;
+                   CurrentWockets._Controller._Mode = Wockets.MemoryMode.SharedToLocal;
                    CurrentWockets._Controller.FromXML(Core._StoragePath + "\\SensorData.xml");
                    CurrentWockets._Controller.Initialize();
                    //plotterTimer.Enabled = true;
@@ -1436,7 +1436,7 @@ namespace WocketsApplication
             //CurrentWockets._Configuration.FromXML(modelDirectory + "\\Configuration.xml");
             //CurrentWockets._Configuration._MemoryMode = MemoryConfiguration.SHARED;
             CurrentWockets._Controller = new WocketsController("", "", "");
-            CurrentWockets._Controller._Mode = MemoryMode.SharedToLocal;
+            CurrentWockets._Controller._Mode = Wockets.MemoryMode.SharedToLocal;
             CurrentWockets._Controller.FromXML(modelDirectory + "\\SensorData.xml");
             CurrentWockets._Controller.Initialize();
 

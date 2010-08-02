@@ -8,8 +8,7 @@ namespace Wockets.Data.Commands
     {
         public GET_BTCAL()
         {
-            this.cmd = new byte[] { (byte)0xb4 };
-            this.type = CommandTypes.GET_BTCAL;
+            this._Bytes = new byte[] { (byte)0xa0 | (byte)CommandTypes.GET_BTCAL };
         }
     }
 }

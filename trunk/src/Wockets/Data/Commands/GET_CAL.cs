@@ -6,10 +6,9 @@ namespace Wockets.Data.Commands
 {
     public class GET_CAL : Command
     {
-        public GET_CAL()
+         public GET_CAL()
         {
-            this.cmd = new byte[] { (byte)0xa6 };
-            this.type = CommandTypes.GET_CAL;
+            this._Bytes = new byte[] { (byte)0xa0 | (byte)CommandTypes.GET_CAL };
         }
     }
 }

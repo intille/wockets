@@ -1,14 +1,15 @@
 ﻿using System;
+
 using System.Collections.Generic;
 using System.Text;
 
 namespace Wockets.Data.Commands
 {
-    public class RESUME : Command
+    public class GET_ALT : Command
     {
-        public RESUME()
+        public GET_ALT()
         {
-            this._Bytes = new byte[] { (byte)0xa0 | (byte)CommandTypes.RESUME};
+            this._Bytes = new byte[] { (byte)0xa0 | (byte)CommandTypes.GET_ALT };
         }
     }
 }

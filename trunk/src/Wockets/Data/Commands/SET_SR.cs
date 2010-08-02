@@ -8,9 +8,8 @@ namespace Wockets.Data.Commands
     {
         public SET_SR(int sr)
         {
-            this.cmd = new byte[] { (byte)0xa9, (byte)0 };
-            cmd[1] = (byte) (((byte)sr) & ((byte)0x7f));
-            this.type = CommandTypes.SET_SR;
+            this._Bytes = new byte[] { (byte)0xa0 | (byte)CommandTypes.SET_SR,
+                                  (byte) (sr&0x7f)};
         }
     }
 }
