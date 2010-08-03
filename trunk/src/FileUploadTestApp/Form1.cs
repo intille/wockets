@@ -12,8 +12,8 @@ using System.Threading;
 
 using Microsoft.WindowsCE.Forms;
 using System.Runtime.InteropServices;
-using System.Diagnostics;
-//using Wockets.Utils.IPC;
+//using System.Diagnostics;
+
 
 
 
@@ -39,21 +39,7 @@ namespace FileUploadTestApp
 
         protected override void WndProc(ref Message m)
         {
-            #region commented 
-            //referedForm.textBox1.Text = referedForm.textBox1.Text + "\r\n \r\n" +
-            //                                "Message Received: result= " + m.Result + 
-            //                                ", msg ptr= " + m.HWnd.ToString() +
-            //                                ", msg = "+ m.Msg.ToString() +
-            //                                ", L= " + m.LParam.ToString() +
-            //                                ", W= " + m.WParam.ToString() + "\r\n";
-
-            //referedForm.textBox1.Text = referedForm.textBox1.Text + "\r\n" +
-            //                               string.Format("This process ID: {0} ", Process.GetCurrentProcess().Id) + "\r\n" +
-            //                               " , Handle=" + Process.GetCurrentProcess().MainWindowHandle.ToInt64().ToString() + "\r\n" +
-            //                               " , Name=" + Process.GetCurrentProcess().StartInfo.FileName + "\r\n";
-            //referedForm.Refresh();
-            #endregion
-
+          
             //filter the Terminate Message
             if (m.Msg == TERMINATE_MESSAGE)
             {
@@ -63,6 +49,7 @@ namespace FileUploadTestApp
                                             "Terminate Message Received.";
                  referedForm.Refresh();
             }
+
             //be sure to pass along all messages to the base also
             base.WndProc(ref m);
         }
@@ -92,10 +79,14 @@ namespace FileUploadTestApp
             this.messageWindow = new internalMessageWindow(this);
             this.Text = "WocketsAppWindow";
 
+
+            #region Commented
             //wndPtr = this.messageWindow.Hwnd;
             //textBox1.Text = string.Format("This process ID: {0} ", Process.GetCurrentProcess().Id) + "\r\n" +
             //                Process.GetCurrentProcess().MainWindowHandle.ToInt64().ToString() + "\r\n" +
             //                " , wndPtr= " + wndPtr.ToString() + "\r\n" ;
+            #endregion
+
 
             #region commented
 
