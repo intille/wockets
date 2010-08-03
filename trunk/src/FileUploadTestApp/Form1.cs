@@ -11,7 +11,8 @@ using FileUploadLib;
 using System.Threading;
 
 using Microsoft.WindowsCE.Forms;
-
+using System.Runtime.InteropServices;
+using System.Diagnostics;
 //using Wockets.Utils.IPC;
 
 
@@ -24,6 +25,7 @@ namespace FileUploadTestApp
     public class internalMessageWindow : MessageWindow
     {
         private const int TERMINATE_MESSAGE = 0xA123;
+        private const int MIN_WND_MESSAGE = 0xC00D;
 
         Form1 referedForm;
         
@@ -31,18 +33,35 @@ namespace FileUploadTestApp
         public internalMessageWindow(Form1 referedForm)
         {
             this.referedForm = referedForm;
+            this.Text = "WocketsMessageWindow";
         }
 
 
         protected override void WndProc(ref Message m)
         {
+            #region commented 
+            //referedForm.textBox1.Text = referedForm.textBox1.Text + "\r\n \r\n" +
+            //                                "Message Received: result= " + m.Result + 
+            //                                ", msg ptr= " + m.HWnd.ToString() +
+            //                                ", msg = "+ m.Msg.ToString() +
+            //                                ", L= " + m.LParam.ToString() +
+            //                                ", W= " + m.WParam.ToString() + "\r\n";
+
+            //referedForm.textBox1.Text = referedForm.textBox1.Text + "\r\n" +
+            //                               string.Format("This process ID: {0} ", Process.GetCurrentProcess().Id) + "\r\n" +
+            //                               " , Handle=" + Process.GetCurrentProcess().MainWindowHandle.ToInt64().ToString() + "\r\n" +
+            //                               " , Name=" + Process.GetCurrentProcess().StartInfo.FileName + "\r\n";
+            //referedForm.Refresh();
+            #endregion
+
             //filter the Terminate Message
             if (m.Msg == TERMINATE_MESSAGE)
             {
                 //display that we recieved the message, of course we could do
                 //something else more important here.
-               referedForm.textBox1.Text  = "Terminate Message Received: " + TERMINATE_MESSAGE;
-               referedForm.Refresh();
+                referedForm.textBox1.Text = referedForm.textBox1.Text + "\r\n" +
+                                            "Terminate Message Received.";
+                 referedForm.Refresh();
             }
             //be sure to pass along all messages to the base also
             base.WndProc(ref m);
@@ -59,18 +78,26 @@ namespace FileUploadTestApp
 
     public partial class Form1 : Form
     {
-        private const String fileUploadSeverURL = "http://citytesting.scripts.mit.edu/upload/upload.php";
+        //private const String fileUploadSeverURL = "http://citytesting.scripts.mit.edu/upload/upload.php";
         private const String logFilePath = "\\Wockets\\FUlog.txt";
+        
         private internalMessageWindow messageWindow;
-       
+        public IntPtr wndPtr;
 
 
         public Form1()
         {
             InitializeComponent();
 
-            this.messageWindow = new internalMessageWindow(this); 
+            this.messageWindow = new internalMessageWindow(this);
+            this.Text = "WocketsAppWindow";
 
+            //wndPtr = this.messageWindow.Hwnd;
+            //textBox1.Text = string.Format("This process ID: {0} ", Process.GetCurrentProcess().Id) + "\r\n" +
+            //                Process.GetCurrentProcess().MainWindowHandle.ToInt64().ToString() + "\r\n" +
+            //                " , wndPtr= " + wndPtr.ToString() + "\r\n" ;
+
+            #region commented
 
             /*
             if (!File.Exists(logFilePath))
@@ -79,46 +106,50 @@ namespace FileUploadTestApp
             }
             */
 
-            FileStream logFile = new FileStream(logFilePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
-            StreamWriter logWriter = new StreamWriter(logFile);
+            //FileStream logFile = new FileStream(logFilePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
+            //StreamWriter logWriter = new StreamWriter(logFile);
 
-            // Use "\\" for local file path.
-            // Use "/" for remote file path.
+            //// Use "\\" for local file path.
+            //// Use "/" for remote file path.
 
-            FileUploadManager.enableLogger(logWriter);
-            //FileUploadManager.uploadFile(fileUploadSeverURL, @"/uploaddata.csv", "cityproject", "1", "raw_data", "", "This is wockets project file 1");
-            //FileUploadManager.uploadFile(fileUploadSeverURL, @"/WocketsAccelBytes.2010-6-14-10-0-0-0.3.PLFormat", "cityproject", "1", "raw_data", "Subfolder\\subsubfolder", "This is another project file 2");
+            //FileUploadManager.enableLogger(logWriter);
+            ////FileUploadManager.uploadFile(fileUploadSeverURL, @"/uploaddata.csv", "cityproject", "1", "raw_data", "", "This is wockets project file 1");
+            ////FileUploadManager.uploadFile(fileUploadSeverURL, @"/WocketsAccelBytes.2010-6-14-10-0-0-0.3.PLFormat", "cityproject", "1", "raw_data", "Subfolder\\subsubfolder", "This is another project file 2");
             
-            String[] excludedDirectories = {"\\wockets_data\\data\\raw\\PLFormat"};
+            //String[] excludedDirectories = {"\\wockets_data\\data\\raw\\PLFormat"};
 
-            // upload the WHOLE DIRECTORY structure recursively BUT THE PLFORMAT directory
-            // documentation in the city project wiki
-            // Parameters: (folder to upload, predefined project name "wockets", subject id, 
-            //             type of data "raw_data", subfolder after the uploaded folder, 
-            //             excluded directories: list of paths that will not be uploaded,
-            //             note that will be written in the database)
-            FileUploadManager.uploadAllFilesInDirectory(fileUploadSeverURL, "\\Wockets\\wockets", "wockets", "1", "raw_data", "wockets", excludedDirectories, "Uploaded in batch");
-            FileUploadManager.uploadAllFilesInDirectory(fileUploadSeverURL, "\\Wockets\\wockets\\data\\raw\\PLFormat\\2010-06-14", "wockets", "1", "raw_data", "wockets\\data\\raw\\PLFormat\\2010-06-14", null, "Uploaded in batch");
+            //// upload the WHOLE DIRECTORY structure recursively BUT THE PLFORMAT directory
+            //// documentation in the city project wiki
+            //// Parameters: (folder to upload, predefined project name "wockets", subject id, 
+            ////             type of data "raw_data", subfolder after the uploaded folder, 
+            ////             excluded directories: list of paths that will not be uploaded,
+            ////             note that will be written in the database)
+            //FileUploadManager.uploadAllFilesInDirectory(fileUploadSeverURL, "\\Wockets\\wockets", "wockets", "1", "raw_data", "wockets", excludedDirectories, "Uploaded in batch");
+            //FileUploadManager.uploadAllFilesInDirectory(fileUploadSeverURL, "\\Wockets\\wockets\\data\\raw\\PLFormat\\2010-06-14", "wockets", "1", "raw_data", "wockets\\data\\raw\\PLFormat\\2010-06-14", null, "Uploaded in batch");
+            #endregion commented
         }
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            FileStream logFile = new FileStream(logFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);        
-            String buffer = "";
+            #region fileuploader
+            //FileStream logFile = new FileStream(logFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);        
+            //String buffer = "";
            
-            // create reader & open file
-            TextReader tr = new StreamReader(logFile);
+            //// create reader & open file
+            //TextReader tr = new StreamReader(logFile);
             
-            String line = "";
-            while ((line = tr.ReadLine()) != null)
-            {
-                buffer += line + "\r\n";;
-            }
-            tr.Close();
+            //String line = "";
+            //while ((line = tr.ReadLine()) != null)
+            //{
+            //    buffer += line + "\r\n";;
+            //}
+            //tr.Close();
 
-            textBox1.Text = buffer;
-            textBox1.SelectionStart = textBox1.Text.Length;
-            textBox1.ScrollToCaret();
+            //textBox1.Text = buffer;
+            //textBox1.SelectionStart = textBox1.Text.Length;
+            //textBox1.ScrollToCaret();
+            #endregion
+
         }
     }
 }
