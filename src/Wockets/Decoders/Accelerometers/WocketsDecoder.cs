@@ -30,6 +30,8 @@ namespace Wockets.Decoders.Accelerometers
         private ResponseTypes responseType;
         private double lastTimestamp;
         public int _ExpectedBatchCount = 0;
+        public int[] _ActivityCounts = new int[960];
+        public int _ActivityCountIndex = 0;
         public int _ExpectedSamplingRate = 0;
         public double _ReferenceTime = 0;
 
@@ -432,6 +434,14 @@ namespace Wockets.Decoders.Accelerometers
                                     }
                                     lastDecodedSampleTime = ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[this._ID])._CurrentConnectionUnixTime;
                                     FireEvent(bc);
+                                    break;
+
+                                case ResponseTypes.AC_RSP:
+                                    AC_RSP ac = new AC_RSP(this._ID);
+                                    for (int i = 0; (i < bytesToRead); i++)
+                                        ac.RawBytes[i] = this.packet[i];
+                                    ac._Count = ((this.packet[1] & 0x7f) << 7) | (this.packet[2] & 0x7f);
+                                    this._ActivityCounts[this._ActivityCountIndex++] = ac._Count;    
                                     break;
                                 default:
                                     break;

@@ -5,10 +5,13 @@ using System.IO;
 using Wockets;
 using Wockets.Utils;
 using Wockets.Receivers;
+using Wockets.Decoders;
 using Wockets.Utils.network;
+using Wockets.Data.Responses;
 using Wockets.Kernel.Types;
 using Wockets.Utils.IPC;
 using Wockets.Data.Commands;
+using Wockets.Data.Types;
 using Wockets.Sensors.Accelerometers;
 using Microsoft.Win32;
 using InTheHand.Net.Sockets;
@@ -34,6 +37,7 @@ namespace Wockets.Kernel
         private static string rootStorageDirectory = "";
         private static string storageDirectory = "";
         private static string path = "";
+
 
         static Booter()
         {
@@ -86,6 +90,7 @@ namespace Wockets.Kernel
                         commandThread = new Thread(new ThreadStart(CommandHandler));
                         commandThread.Start();
                         _Running = true;
+                        Broadcast(KernelResponse.STARTED);
                         commandThread.Join();
 
                     }
@@ -102,7 +107,120 @@ namespace Wockets.Kernel
             }
         }
 
-        
+
+        private static void DecoderCallback(object e)
+        {
+            Response response = (Response)e;
+            switch (response._Type)
+            {
+                case ResponseTypes.BL_RSP: //write to the registry
+                    try
+                    {
+                        BL_RSP bl = (BL_RSP)response;
+                        registryLock.WaitOne();
+                        RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + bl._SensorID.ToString("0"));
+                        rk.SetValue("BATTERY_LEVEL", bl._BatteryLevel, RegistryValueKind.String);
+                        rk.Close();
+                        registryLock.Release();
+                        Broadcast(KernelResponse.BATTERY_LEVEL_UPDATED);
+                    }
+                    catch
+                    {
+                        registryLock.Release();
+                    }
+                    break;
+
+                case ResponseTypes.BP_RSP: //write to the registry
+                    try
+                    {
+                        BP_RSP bp = (BP_RSP)response;
+                        registryLock.WaitOne();
+                        RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + bp._SensorID.ToString("0"));
+                        rk.SetValue("BATTERY_PERCENT", bp._Percent, RegistryValueKind.String);
+                        rk.Close();
+                        registryLock.Release();
+                        Broadcast(KernelResponse.BATTERY_PERCENT_UPDATED);
+                    }
+                    catch
+                    {
+                        registryLock.Release();
+                    }
+                    break;
+
+                case ResponseTypes.PC_RSP: //write to the registry
+                    try
+                    {
+                        PC_RSP pc = (PC_RSP)response;
+                        registryLock.WaitOne();
+                        RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + pc._SensorID.ToString("0"));
+                        rk.SetValue("PDU_COUNT", pc._Count, RegistryValueKind.String);
+                        rk.Close();
+                        registryLock.Release();
+                        Broadcast(KernelResponse.PC_COUNT_UPDATED);
+                    }
+                    catch
+                    {
+                        registryLock.Release();
+                    }
+                    break;
+                case ResponseTypes.SENS_RSP: //write to the registry
+                    try
+                    {
+                        SENS_RSP sen = (SENS_RSP)response;
+                        registryLock.WaitOne();
+                        RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + sen._SensorID.ToString("0"));
+                        rk.SetValue("SENSITIVITY", sen._Sensitivity, RegistryValueKind.String);
+                        rk.Close();
+                        registryLock.Release();
+                        Broadcast(KernelResponse.SENSITIVITY_UPDATED);
+                    }
+                    catch
+                    {
+                        registryLock.Release();
+                    }
+                    break;
+                case ResponseTypes.CAL_RSP: //write to the registry
+                    try
+                    {
+                        CAL_RSP cal = (CAL_RSP)response;
+                        registryLock.WaitOne();
+                        RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + cal._SensorID.ToString("0"));
+                        rk.SetValue("_X1G", cal._X1G, RegistryValueKind.String);
+                        rk.SetValue("_XN1G", cal._XN1G, RegistryValueKind.String);
+                        rk.SetValue("_Y1G", cal._Y1G, RegistryValueKind.String);
+                        rk.SetValue("_YN1G", cal._YN1G, RegistryValueKind.String);
+                        rk.SetValue("_Z1G", cal._Z1G, RegistryValueKind.String);
+                        rk.SetValue("_ZN1G", cal._ZN1G, RegistryValueKind.String);
+                        rk.Close();
+                        registryLock.Release();
+                        Broadcast(KernelResponse.CALIBRATION_UPDATED);
+                    }
+                    catch
+                    {
+                        registryLock.Release();
+                    }
+                    break;
+
+                case ResponseTypes.SR_RSP: //write to the registry
+                    try
+                    {
+                        SR_RSP sr = (SR_RSP)response;
+                        registryLock.WaitOne();
+                        RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + sr._SensorID.ToString("0"));
+                        rk.SetValue("SAMPLING_RATE", sr._SamplingRate, RegistryValueKind.String);
+                        rk.Close();
+                        registryLock.Release();
+                        Broadcast(KernelResponse.SAMPLING_RATE_UPDATED);
+                    }
+                    catch
+                    {
+                        registryLock.Release();
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
 
         public static void ApplicationHandler()
         {
@@ -127,129 +245,133 @@ namespace Wockets.Kernel
                 //same time from multiple applications
                 lock (kernelLock)
                 {
-                    /*if (msg == KernelCommand.SET_SNIFF.ToString())
-                    {
-                        if (_WocketsRunning)
-                        {                           
-                            EnterCommandMode enter = new EnterCommandMode();
-                            BT_RST reset = new BT_RST();
-                            ushort tsniff=0;
-                            if (param == SleepModes.Sleep1Second.ToString())
-                                tsniff = 1000;
-                            else if (param == SleepModes.Sleep2Seconds.ToString())
-                                tsniff = 2000;
-                                
-                            SET_SM sniff=new SET_SM(tsniff);
-                            PAUSE pause = new PAUSE();
-                            for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
-                            {
-                                ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(pause._Bytes);
-                                Thread.Sleep(500);
-                                ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(enter._Bytes);
-                                ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(sniff._Bytes);
-                                ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(reset._Bytes);
-                            }
-                        }
-                    }
-                    else*/
-
 
                     #region CONNECT
                     if (msg == KernelCommand.CONNECT.ToString())
                     {
-                        if (!_WocketsRunning)
+                        try
                         {
-
-
-                            storageDirectory = rootStorageDirectory + "Session" + DateTime.Now.Month + "-" + DateTime.Now.Day + "-" + DateTime.Now.Hour + "-" + DateTime.Now.Minute + "-" + DateTime.Now.Second;
-                            if (!Directory.Exists(storageDirectory))
-                                Directory.CreateDirectory(storageDirectory);
-                            try
+                            if (!_WocketsRunning)
                             {
-                                File.Copy(path + "//NeededFiles//Master//Configuration.xml", storageDirectory + "\\Configuration.xml");
-                            }
-                            catch (Exception e)
-                            {
-                            }
 
-                            CurrentWockets._Configuration = new Wockets.Data.Configuration.WocketsConfiguration();
-                            CurrentWockets._Configuration.FromXML(storageDirectory + "\\Configuration.xml");
-                            CurrentWockets._Configuration._MemoryMode = Wockets.Data.Configuration.MemoryConfiguration.SHARED;
 
-                            //load local wockets controller
-                            CurrentWockets._Controller = new WocketsController("", "", "");
-                            CurrentWockets._Controller.FromXML(path + "//NeededFiles//Master//SensorData.xml");
-                            CurrentWockets._Controller._Mode = MemoryMode.BluetoothToShared;
-                            int index = 0;
-                            for (int i = 0; (i < Booter.wcontroller._Sensors.Count); i++)
-                            {
-                                if (Booter.wcontroller._Sensors[i]._Loaded)
+                                storageDirectory = rootStorageDirectory + "Session" + DateTime.Now.Month + "-" + DateTime.Now.Day + "-" + DateTime.Now.Hour + "-" + DateTime.Now.Minute + "-" + DateTime.Now.Second;
+                                if (!Directory.Exists(storageDirectory))
+                                    Directory.CreateDirectory(storageDirectory);
+                                try
                                 {
-                                    CurrentWockets._Controller._Receivers[index]._ID = index;
-                                    ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[index])._Address = ((RFCOMMReceiver)Booter.wcontroller._Receivers[i])._Address;
-                                    CurrentWockets._Controller._Decoders[index]._ID = index;
-                                    CurrentWockets._Controller._Sensors[index]._ID = index;
-                                    CurrentWockets._Controller._Sensors[index]._Receiver = CurrentWockets._Controller._Receivers[index];
-                                    CurrentWockets._Controller._Sensors[index]._Decoder = CurrentWockets._Controller._Decoders[index];
-                                    CurrentWockets._Controller._Sensors[index]._Loaded = true;
-                                    index++;
+                                    File.Copy(path + "//NeededFiles//Master//Configuration.xml", storageDirectory + "\\Configuration.xml");
                                 }
-                            }
-                            CurrentWockets._Controller._storageDirectory = storageDirectory;
-                            for (int i = CurrentWockets._Controller._Sensors.Count - 1; (i >= 0); i--)
-                            {
-                                if (!CurrentWockets._Controller._Sensors[i]._Loaded)
+                                catch (Exception e)
                                 {
-                                    CurrentWockets._Controller._Receivers.RemoveAt(i);
-                                    CurrentWockets._Controller._Sensors.RemoveAt(i);
-                                    CurrentWockets._Controller._Decoders.RemoveAt(i);
                                 }
-                                else
+
+                                CurrentWockets._Configuration = new Wockets.Data.Configuration.WocketsConfiguration();
+                                CurrentWockets._Configuration.FromXML(storageDirectory + "\\Configuration.xml");
+                                CurrentWockets._Configuration._MemoryMode = Wockets.Data.Configuration.MemoryConfiguration.SHARED;
+
+                                //load local wockets controller
+                                CurrentWockets._Controller = new WocketsController("", "", "");
+                                CurrentWockets._Controller.FromXML(path + "//NeededFiles//Master//SensorData.xml");
+                                CurrentWockets._Controller._Mode = MemoryMode.BluetoothToShared;
+                                int index = 0;
+                                for (int i = 0; (i < Booter.wcontroller._Sensors.Count); i++)
                                 {
-                                    CurrentWockets._Controller._Sensors[i]._RootStorageDirectory = storageDirectory + "\\data\\raw\\PLFormat\\";
+                                    if (Booter.wcontroller._Sensors[i]._Loaded)
+                                    {
+                                        CurrentWockets._Controller._Receivers[index]._ID = index;
+                                        ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[index])._Address = ((RFCOMMReceiver)Booter.wcontroller._Receivers[i])._Address;
+                                        CurrentWockets._Controller._Decoders[index]._ID = index;
+                                        CurrentWockets._Controller._Sensors[index]._ID = index;
+                                        CurrentWockets._Controller._Sensors[index]._Receiver = CurrentWockets._Controller._Receivers[index];
+                                        CurrentWockets._Controller._Sensors[index]._Decoder = CurrentWockets._Controller._Decoders[index];
+                                        CurrentWockets._Controller._Sensors[index]._Loaded = true;
+                                        index++;
+                                    }
                                 }
+                                CurrentWockets._Controller._storageDirectory = storageDirectory;
+                                for (int i = CurrentWockets._Controller._Sensors.Count - 1; (i >= 0); i--)
+                                {
+                                    if (!CurrentWockets._Controller._Sensors[i]._Loaded)
+                                    {
+                                        CurrentWockets._Controller._Receivers.RemoveAt(i);
+                                        CurrentWockets._Controller._Sensors.RemoveAt(i);
+                                        CurrentWockets._Controller._Decoders.RemoveAt(i);
+                                    }
+                                    else
+                                    {
+                                        CurrentWockets._Controller._Sensors[i]._RootStorageDirectory = storageDirectory + "\\data\\raw\\PLFormat\\";
+                                    }
+                                }
+
+                                CurrentWockets._Controller._Receivers.SortByAddress();
+                                for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
+                                    ((Wocket)CurrentWockets._Controller._Sensors[i])._Receiver = CurrentWockets._Controller._Receivers[i];
+
+                                if (CurrentWockets._Controller._Sensors.Count > 0)
+                                {
+                                    registryLock.WaitOne();
+                                    rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_KERNEL_PATH, true);
+                                    rk.SetValue("Storage", storageDirectory);
+                                    rk.Close();
+                                    registryLock.Release();
+
+                                    TextWriter tw = new StreamWriter(storageDirectory + "\\SensorData.xml");
+                                    tw.WriteLine(CurrentWockets._Controller.ToXML());
+                                    tw.Close();
+
+                                    _WocketsRunning = true;
+                                    CurrentWockets._Controller.Initialize();
+
+                                    //Subscribe to all callback events
+                                    foreach (Decoder d in CurrentWockets._Controller._Decoders)
+                                    {
+                                        d.Subscribe(ResponseTypes.BL_RSP, new Decoder.ResponseHandler(DecoderCallback));
+                                        d.Subscribe(ResponseTypes.BP_RSP, new Decoder.ResponseHandler(DecoderCallback));
+                                        d.Subscribe(ResponseTypes.PC_RSP, new Decoder.ResponseHandler(DecoderCallback));
+                                        d.Subscribe(ResponseTypes.SENS_RSP, new Decoder.ResponseHandler(DecoderCallback));
+                                        d.Subscribe(ResponseTypes.CAL_RSP, new Decoder.ResponseHandler(DecoderCallback));
+                                        d.Subscribe(ResponseTypes.SR_RSP, new Decoder.ResponseHandler(DecoderCallback));
+                                    }
+                                    Send(KernelResponse.CONNECTED, applicationGuid);
+                                }
+                              //  else
+                                //    Send(ApplicationResponse.CONNECT_FAILURE, applicationGuid);
+
+                                Broadcast(KernelResponse.CONNECTED);
+
                             }
-
-                            CurrentWockets._Controller._Receivers.SortByAddress();
-                            for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
-                                ((Wocket)CurrentWockets._Controller._Sensors[i])._Receiver = CurrentWockets._Controller._Receivers[i];
-
-                            if (CurrentWockets._Controller._Sensors.Count > 0)
-                            {
-                                registryLock.WaitOne();
-                                rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_KERNEL_PATH, true);
-                                rk.SetValue("Storage", storageDirectory);
-                                rk.Close();
-                                registryLock.Release();
-
-                                TextWriter tw = new StreamWriter(storageDirectory + "\\SensorData.xml");
-                                tw.WriteLine(CurrentWockets._Controller.ToXML());
-                                tw.Close();
-
-                                _WocketsRunning = true;
-                                CurrentWockets._Controller.Initialize();
-                                Send(ApplicationResponse.CONNECT_SUCCESS, applicationGuid);
-                            }
-                            else
-                                Send(ApplicationResponse.CONNECT_FAILURE, applicationGuid);
-
+                           // else
+                             //   Send(ApplicationResponse.CONNECT_FAILURE, applicationGuid);
                         }
-                        else
-                            Send(ApplicationResponse.CONNECT_FAILURE, applicationGuid);
+                        catch (Exception e)
+                        {
+                            Broadcast(KernelResponse.DISCONNECTED);
+                            Logger.Error("Failure: Booter.cs: CONNECT:" + e.ToString());
+                        }
                     }
                     #endregion CONNECT
 
                     #region DISCONNECT
                     else if (msg == KernelCommand.DISCONNECT.ToString())
                     {
-                        if (_WocketsRunning)
+                        try
                         {
-                            CurrentWockets._Controller.Dispose();
-                            _WocketsRunning = false;
-                            Send(ApplicationResponse.DISCONNECT_SUCCESS, applicationGuid);
+                            if (_WocketsRunning)
+                            {
+                                CurrentWockets._Controller.Dispose();
+                                _WocketsRunning = false;
+                                Send(KernelResponse.DISCONNECTED, applicationGuid);
+                                Broadcast(KernelResponse.DISCONNECTED);
+                            }
+                           // else
+                             //   Send(ApplicationResponse.DISCONNECT_FAILURE, applicationGuid);
+                           
                         }
-                        else
-                            Send(ApplicationResponse.DISCONNECT_FAILURE, applicationGuid);
+                        catch (Exception e)
+                        {
+                            Logger.Error("Failure: Booter.cs: DISCONNECT:" + e.ToString());
+                        }
 
                     }
                     #endregion DISCONNECT
@@ -257,29 +379,37 @@ namespace Wockets.Kernel
                     #region SET_WOCKETS
                     else if (msg == KernelCommand.SET_WOCKETS.ToString())
                     {
-                        if (!_WocketsRunning)
+                        try
                         {
-                            registryLock.WaitOne();
-                            int index = 0;
-                            for (int i = 0; (i < 5); i++)
+                            if (!_WocketsRunning)
                             {
-                                rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + i.ToString("0"));
-                                int status = (int)rk.GetValue("Status");
-                                if (status == 1)
+                                registryLock.WaitOne();
+                                int index = 0;
+                                for (int i = 0; (i < 5); i++)
                                 {
-                                    string mac = (string)rk.GetValue("MacAddress");
+                                    rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + i.ToString("0"));
+                                    int status = (int)rk.GetValue("Status");
+                                    if (status == 1)
+                                    {
+                                        string mac = (string)rk.GetValue("MacAddress");
 
-                                    ((RFCOMMReceiver)Booter.wcontroller._Receivers[index])._Address = mac;
-                                    Booter.wcontroller._Sensors[index++]._Loaded = true;
+                                        ((RFCOMMReceiver)Booter.wcontroller._Receivers[index])._Address = mac;
+                                        Booter.wcontroller._Sensors[index++]._Loaded = true;
 
+                                    }
+                                    rk.Close();
                                 }
-                                rk.Close();
+                                registryLock.Release();
+                                Send(KernelResponse.SENSORS_UPDATED, applicationGuid);
+                                Broadcast(KernelResponse.SENSORS_UPDATED);
                             }
-                            registryLock.Release();
-                            Send(ApplicationResponse.SET_SENSORS_SUCCESS, applicationGuid);
+                            //else
+                              //  Send(ApplicationResponse.SET_SENSORS_FAILURE, applicationGuid);
                         }
-                        else
-                            Send(ApplicationResponse.SET_SENSORS_FAILURE, applicationGuid);
+                        catch (Exception e)
+                        {
+                            Logger.Error("Failure: Booter.cs: SET_WOCKETS:" + e.ToString());
+                        }
                     }
                     #endregion SET_WOCKETS
 
@@ -288,16 +418,23 @@ namespace Wockets.Kernel
                     {
                         if (_WocketsRunning)
                         {
-                            Command command = new GET_BT();                         
-                            for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+                            try
                             {
-                                if (param=="all")
-                                    ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
-                                else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == param)
+                                Command command = new GET_BT();
+                                for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
                                 {
-                                    ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
-                                    break;
+                                    if (param == "all")
+                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                    else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == param)
+                                    {
+                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                        break;
+                                    }
                                 }
+                            }
+                            catch (Exception e)
+                            {
+                                Logger.Error("Failure: Booter.cs: GET_BATTERY_LEVEL:" + e.ToString());
                             }
                         }
                     }
@@ -308,16 +445,24 @@ namespace Wockets.Kernel
                     {
                         if (_WocketsRunning)
                         {
-                            Command command = new GET_BP();
-                            for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+                            try
                             {
-                                if (param == "all")
-                                    ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
-                                else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == param)
+                                Command command = new GET_BP();
+                                for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
                                 {
-                                    ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
-                                    break;
+                                    if (param == "all")
+                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                    else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == param)
+                                    {
+                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                        break;
+                                    }
                                 }
+
+                            }
+                            catch (Exception e)
+                            {
+                                Logger.Error("Failure: Booter.cs: SET_BATTERY_PERCENT:" + e.ToString());
                             }
                         }
                     }
@@ -328,16 +473,23 @@ namespace Wockets.Kernel
                     {
                         if (_WocketsRunning)
                         {
-                            Command command = new GET_PC();
-                            for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+                            try
                             {
-                                if (param == "all")
-                                    ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
-                                else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == param)
+                                Command command = new GET_PC();
+                                for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
                                 {
-                                    ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
-                                    break;
+                                    if (param == "all")
+                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                    else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == param)
+                                    {
+                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                        break;
+                                    }
                                 }
+                            }
+                            catch (Exception e)
+                            {
+                                Logger.Error("Failure: Booter.cs: GET_PDU_COUNT:" + e.ToString());
                             }
                         }
                     }
@@ -348,16 +500,23 @@ namespace Wockets.Kernel
                     {
                         if (_WocketsRunning)
                         {
-                            Command command = new GET_SEN();
-                            for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+                            try
                             {
-                                if (param == "all")
-                                    ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
-                                else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == param)
+                                Command command = new GET_SEN();
+                                for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
                                 {
-                                    ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
-                                    break;
+                                    if (param == "all")
+                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                    else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == param)
+                                    {
+                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                        break;
+                                    }
                                 }
+                            }
+                            catch (Exception e)
+                            {
+                                Logger.Error("Failure: Booter.cs: GET_WOCKET_SENSITIVITY:" + e.ToString());
                             }
                         }
                     }
@@ -365,25 +524,313 @@ namespace Wockets.Kernel
                     #endregion GET_WOCKET_SENSITIVITY
 
                     #region SET_WOCKET_SENSITIVITY
-                    else if (msg == KernelCommand.GET_WOCKET_SENSITIVITY.ToString())
+                    else if (msg == KernelCommand.SET_WOCKET_SENSITIVITY.ToString())
                     {
-                       /* if (_WocketsRunning)
+                        if (_WocketsRunning)
                         {
-                            
-                            Command command = new SET_SEN();
-                            for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+
+                            try
                             {
-                                if (param == "all")
-                                    ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
-                                else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == param)
+                                Sensitivity sensitivity = (Sensitivity)Enum.Parse(typeof(Sensitivity),
+                                    param.Split(new char[] { ':' })[1], true);
+                                Command command = new SET_SEN(sensitivity);
+                                for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
                                 {
-                                    ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
-                                    break;
+                                    if (param == "all")
+                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                    else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == param)
+                                    {
+                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                        break;
+                                    }
                                 }
                             }
-                        }*/
+                            catch (Exception e)
+                            {
+                                Logger.Error("Failure: Booter.cs: SET_WOCKET_SENSITIVITY:" + e.ToString());
+                            }
+                        }
                     }
                     #endregion SET_WOCKET_SENSITIVITY
+
+                    #region GET_WOCKET_CALIBRATION
+                    else if (msg == KernelCommand.GET_WOCKET_CALIBRATION.ToString())
+                    {
+                        if (_WocketsRunning)
+                        {
+                            try
+                            {
+                                Command command = new GET_CAL();
+                                for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+                                {
+                                    if (param == "all")
+                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                    else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == param)
+                                    {
+                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                        break;
+                                    }
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                Logger.Error("Failure: Booter.cs: GET_WOCKET_CALIBRATION:" + e.ToString());
+                            }
+                        }
+                    }
+
+                    #endregion GET_WOCKET_CALIBRATION
+
+                    #region SET_WOCKET_CALIBRATION
+                    else if (msg == KernelCommand.SET_WOCKET_CALIBRATION.ToString())
+                    {
+                        if (_WocketsRunning)
+                        {
+
+                            try
+                            {
+                                string[] tokens = param.Split(new char[] { ':' });
+                                string mac = tokens[0];
+                                Calibration calibration = new Calibration();
+                                calibration._X1G = (ushort) Convert.ToUInt32(tokens[1]);
+                                calibration._XN1G = (ushort)Convert.ToUInt32(tokens[2]);
+                                calibration._Y1G = (ushort)Convert.ToUInt32(tokens[3]);
+                                calibration._YN1G = (ushort)Convert.ToUInt32(tokens[4]);
+                                calibration._Z1G = (ushort)Convert.ToUInt32(tokens[5]);
+                                calibration._ZN1G = (ushort)Convert.ToUInt32(tokens[6]);
+                                Command command = new SET_CAL(calibration);
+                                for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+                                {
+                                     if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == mac)
+                                    {
+                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                        break;
+                                    }
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                Logger.Error("Failure: Booter.cs: SET_WOCKET_CALIBRATION:" + e.ToString());
+                            }
+                        }
+                    }
+                    #endregion SET_WOCKET_CALIBRATION
+
+
+                    #region GET_WOCKET_SAMPLING_RATE
+                    else if (msg == KernelCommand.GET_WOCKET_SAMPLING_RATE.ToString())
+                    {
+                        if (_WocketsRunning)
+                        {
+                            try
+                            {
+                                Command command = new GET_SR();
+                                for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+                                {
+                                    if (param == "all")
+                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                    else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == param)
+                                    {
+                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                        break;
+                                    }
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                Logger.Error("Failure: Booter.cs: GET_WOCKET_SAMPLING_RATE:" + e.ToString());
+                            }
+                        }
+                    }
+
+                    #endregion GET_WOCKET_SAMPLING_RATE
+
+                    #region SET_WOCKET_SAMPLING_RATE
+                    else if (msg == KernelCommand.SET_WOCKET_SAMPLING_RATE.ToString())
+                    {
+                        if (_WocketsRunning)
+                        {
+
+                            try
+                            {
+                                string[] tokens = param.Split(new char[] { ':' });
+                                string mac = tokens[0];                
+                                Command command = new SET_SR(Convert.ToInt32(tokens[1]));
+                                for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+                                {
+                                    if (param == "all")
+                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                    else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == mac)
+                                    {
+                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                        break;
+                                    }
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                Logger.Error("Failure: Booter.cs: SET_WOCKET_SAMPLING_RATE:" + e.ToString());
+                            }
+                        }
+                    }
+                    #endregion SET_WOCKET_SAMPLING_RATE
+
+
+                    #region GET_WOCKET_POWERDOWN_TIMEOUT
+                    else if (msg == KernelCommand.GET_WOCKET_POWERDOWN_TIMEOUT.ToString())
+                    {
+                        if (_WocketsRunning)
+                        {
+                            try
+                            {
+                                Command command = new GET_PDT();
+                                for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+                                {
+                                    if (param == "all")
+                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                    else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == param)
+                                    {
+                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                        break;
+                                    }
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                Logger.Error("Failure: Booter.cs: GET_WOCKET_SAMPLING_RATE:" + e.ToString());
+                            }
+                        }
+                    }
+
+                    #endregion GET_WOCKET_POWERDOWN_TIMEOUT
+
+                    #region SET_WOCKET_POWERDOWN_TIMEOUT
+                    else if (msg == KernelCommand.SET_WOCKET_POWERDOWN_TIMEOUT.ToString())
+                    {
+                        if (_WocketsRunning)
+                        {
+
+                            try
+                            {
+                                string[] tokens = param.Split(new char[] { ':' });
+                                string mac = tokens[0];
+                                Command command = new SET_PDT(Convert.ToInt32(tokens[1]));
+                                for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+                                {
+                                    if (param == "all")
+                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                    else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == mac)
+                                    {
+                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                        break;
+                                    }
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                Logger.Error("Failure: Booter.cs: SET_WOCKET_SAMPLING_RATE:" + e.ToString());
+                            }
+                        }
+                    }
+                    #endregion SET_WOCKET_POWERDOWN_TIMEOUT
+
+
+                    #region GET_TRANSMISSION_MODE
+                    else if (msg == KernelCommand.GET_TRANSMISSION_MODE.ToString())
+                    {
+                        if (_WocketsRunning)
+                        {
+                            try
+                            {
+                                Command command = new GET_TM();
+                                for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+                                {
+                                    if (param == "all")
+                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                    else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == param)
+                                    {
+                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                        break;
+                                    }
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                Logger.Error("Failure: Booter.cs: GET_TRANSMISSION_MODE:" + e.ToString());
+                            }
+                        }
+                    }
+
+                    #endregion GET_TRANSMISSION_MODE
+
+                    #region SET_TRANSMISSION_MODE
+                    else if (msg == KernelCommand.SET_TRANSMISSION_MODE.ToString())
+                    {
+                        if (_WocketsRunning)
+                        {
+
+                            try
+                            {
+                                TransmissionMode mode = (TransmissionMode)Enum.Parse(typeof(TransmissionMode),
+                                    param.Split(new char[] { ':' })[1], true);
+                                Command command = new SET_TM(mode);
+                                for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+                                {
+                                    if (param == "all")
+                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                    else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == param)
+                                    {
+                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                        break;
+                                    }
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                Logger.Error("Failure: Booter.cs: SET_TRANSMISSION_MODE:" + e.ToString());
+                            }
+                        }
+                    }
+                    #endregion SET_TRANSMISSION_MODE
+
+
+
+                    #region GET_MEMORY_MODE
+                    else if (msg == KernelCommand.GET_MEMORY_MODE.ToString())
+                    {
+                        if (_WocketsRunning)
+                        {
+                            try
+                            {                            
+                            }
+                            catch (Exception e)
+                            {
+                                Logger.Error("Failure: Booter.cs: GET_TRANSMISSION_MODE:" + e.ToString());
+                            }
+                        }
+                    }
+
+                    #endregion GET_MEMORY_MODE
+
+                    #region SET_MEMORY_MODE
+                    else if (msg == KernelCommand.SET_MEMORY_MODE.ToString())
+                    {
+                        if (_WocketsRunning)
+                        {
+
+                            try
+                            {
+                                MemoryMode mode = (MemoryMode)Enum.Parse(typeof(MemoryMode),
+                                    param.Split(new char[] { ':' })[1], true);
+                                CurrentWockets._Controller._Mode = mode;                          
+                            }
+                            catch (Exception e)
+                            {
+                                Logger.Error("Failure: Booter.cs: SET_MEMORY_MODE:" + e.ToString());
+                            }
+                        }
+                    }
+                    #endregion SET_MEMORY_MODE
                 }
 
                 namedEvent.Reset();
@@ -434,6 +881,7 @@ namespace Wockets.Kernel
                         rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_REGISTERED_APPLICATIONS_PATH);                                                                  
                         rk.SetValue("Count", _NumRegistrations, RegistryValueKind.DWord);
                         rk.Close();
+                        Broadcast(KernelResponse.REGISTERED);
                     }
                     else if (msg == KernelCommand.UNREGISTER.ToString())
                     {
@@ -450,6 +898,7 @@ namespace Wockets.Kernel
                         rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_REGISTERED_APPLICATIONS_PATH);                        
                         rk.SetValue("Count", _NumRegistrations, RegistryValueKind.DWord);
                         rk.Close();
+                        Broadcast(KernelResponse.UNREGISTERED);
                     }
                     else if (msg == KernelCommand.DISCOVER.ToString())
                     {
@@ -507,13 +956,14 @@ namespace Wockets.Kernel
 
 
                 //Send to the appropriate application a response
-                Send(ApplicationResponse.DISCOVERY_COMPLETED, discoveryGuid);
+                Send(KernelResponse.DISCOVERED, discoveryGuid);
+                Broadcast(KernelResponse.DISCOVERED);
 
             }
         }
 
-        //send a response to an application
-        public static void Send(ApplicationResponse response, string senderGuid)
+        //send a response to a specific application
+        public static void Send(KernelResponse response, string senderGuid)
         {
             registryLock.WaitOne();
             RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + senderGuid + "}");
@@ -521,9 +971,15 @@ namespace Wockets.Kernel
             rk.SetValue("Param", "", RegistryValueKind.String);
             rk.Close();
             registryLock.Release();
-
             NamedEvents namedEvent = new NamedEvents();
             namedEvent.Send(senderGuid);
+        }
+
+        //Broadcast the response to everyone
+        public static void Broadcast(KernelResponse response)
+        {
+            NamedEvents namedEvent = new NamedEvents();
+            namedEvent.Send(Core.BROADCAST_EVENT_PREFIX + response.ToString());
         }
 
         /* Initializes the kernel */

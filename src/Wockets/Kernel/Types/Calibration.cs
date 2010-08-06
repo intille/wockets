@@ -9,8 +9,8 @@ namespace Wockets.Data.Types
         public ushort _X1G;
         public ushort _XN1G;
         public ushort _Y1G;
-        public ushort _Y1NG;
+        public ushort _YN1G;
         public ushort _Z1G;
-        public ushort _Z1NG;
+        public ushort _ZN1G;
     }
 }
