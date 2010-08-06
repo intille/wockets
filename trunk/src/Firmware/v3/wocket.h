@@ -188,6 +188,7 @@ typedef struct{
 #define HV_RSP	 	0b01010
 #define FV_RSP	 	0b01011
 #define BC_RSP		0b01100
+#define AC_RSP 		0B01101
 
 /* Macros for Wockets Responses */
 
@@ -291,6 +292,15 @@ typedef struct{
 #define m_BC_RSP_BYTE0			RESPONSE_HEADER(BC_RSP)
 #define m_BC_RSP_BYTE1(count)	((count>>7) &0x7f)
 #define m_BC_RSP_BYTE2(count)	(count & 0x7f)
+
+
+
+
+/* AC_RSP Macros */
+#define m_AC_RSP_BYTE0			RESPONSE_HEADER(AC_RSP)
+#define m_AC_RSP_BYTE1(count)	((count>>9) &0x7f)
+#define m_AC_RSP_BYTE2(count)	((count>>2) & 0x7f)
+#define m_AC_RSP_BYTE3(count)	((count & 0x03)<<5)
 
 
 #define m_SUCCESS_RESPONSE_BYTE1			RESPONSE_HEADER(SUCCESS_RESPONSE)
@@ -407,6 +417,7 @@ void _wocket_set_flag(unsigned char flag);
 void _send_data(void);
 void _receive_data(void);
 void _send_batch_count(unsigned short count);
+void _send_summary_count(unsigned short count);
 void _send_data_bufferred(void);
 
 unsigned char _wocket_get_baudrate(void);

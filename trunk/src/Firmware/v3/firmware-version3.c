@@ -44,7 +44,10 @@ data_unit data7[50];*/
 //unsigned short zs[3000];
 
 data_unit data[750];
-//unsigned short acount[1440];
+unsigned short acount[960]; //16 hours
+unsigned short summaryindex=0;
+unsigned short summary_count=2400;
+
 //data_unit pose[360];
 
 unsigned short x;
@@ -74,6 +77,38 @@ unsigned char interrupts_passed=0;
 
 unsigned char interrupt_reps=0;
 unsigned short docking_counter=0;
+
+
+/* Butterworth Filter */
+double b[5]= {0.0051,0.0,-0.0103,0.0,0.0051};
+double a[5]= { 1.00, -3.7856, 5.3793, -3.4016, 0.8079};
+double xv[3][5];
+double yv[3][5];
+
+double Filter(double data,int axis)
+{
+     double filtered=0;
+     int j=0;           
+     for (; (j < 4); j++)
+          xv[axis][j] = xv[axis][j + 1];
+      xv[axis][j] = data;
+
+      j = 0;
+      for (; (j < 4); j++)
+           yv[axis][j] = yv[axis][j + 1];
+      yv[axis][j] = 0;
+
+
+      for (int k = 0; (k < 5); k++)
+         yv[axis][j] += b[k] * xv[axis][k];
+      for (int k = 1; (k < 5); k++)
+            yv[axis][j] -= a[k] * yv[axis][4 - k];
+
+      filtered= yv[axis][j];            
+      return filtered;
+}
+
+
 
 static __inline__ void _send_pdu(unsigned short x, unsigned short y, unsigned short z){	
 	if(compress)
@@ -150,8 +185,30 @@ scounter=0;
 			_atmega_adc_turn_on();
 #ifdef _VERSION ==3
 			x=_atmega_a2dConvert10bit(ADC2);
+		
 			y=_atmega_a2dConvert10bit(ADC1);
+
 			z=_atmega_a2dConvert10bit(ADC0);
+	
+
+		if (_wTM!=_TM_Continuous)
+			{
+
+
+			acount[summaryindex]+=(int)Filter(x,0);
+			acount[summaryindex]+=(int) Filter(y,1);
+			acount[summaryindex]+=(int) Filter(z,2);
+
+			if (summary_count==0)
+			{
+				++summaryindex;
+				if (summaryindex==960)
+					summaryindex=0;
+				acount[summaryindex]=0;
+				summary_count=2400;
+			}else
+				summary_count--;
+			}
 #else
 			x=_atmega_a2dConvert10bit(ADC3);
 			y=_atmega_a2dConvert10bit(ADC2);
@@ -215,6 +272,11 @@ scounter=0;
 					_send_batch_count(batch_counter*4);
 
 
+					for (int i=0;(i<summaryindex);i++)
+						_send_summary_count(acount[i]);
+					summaryindex=0;
+
+					
 					if (batch_counter<750) // Go from 0 up to batch_counter
 					{						
 						for (int i=0;(i<batch_counter);i++)

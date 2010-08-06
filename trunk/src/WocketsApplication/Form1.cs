@@ -294,11 +294,11 @@ namespace WocketsApplication
                 string response = (string)rk.GetValue("Message");
                 rk.Close();
 
-              if (response == ApplicationResponse.DISCOVERY_COMPLETED.ToString())
+              if (response == KernelResponse.DISCOVERED.ToString())
                 {
                     UpdatewWocketsList();
                 }
-                else if (response == ApplicationResponse.CONNECT_SUCCESS.ToString())
+                else if (response == KernelResponse.CONNECTED.ToString())
                 {
                    Core._Connected= true;
                    CurrentWockets._Configuration = new WocketsConfiguration();//new DTConfiguration();
@@ -331,7 +331,7 @@ namespace WocketsApplication
                   soundThread.Start();
             
                 }
-                else if (response == ApplicationResponse.DISCONNECT_SUCCESS.ToString())
+                else if (response == KernelResponse.DISCONNECTED.ToString())
                 {
                     Core._Connected = false;
                     this.selectedActivityProtocol = -1;

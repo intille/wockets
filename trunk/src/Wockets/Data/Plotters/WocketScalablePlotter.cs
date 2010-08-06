@@ -59,7 +59,6 @@ namespace Wockets.Data.Plotters
             graphSize = (int)Math.Floor((plotAreaSize.Height / ((double)numSensors)));
 
 
-
             scaleFactors = new double[numSensors];
             currentColumns = new int[numSensors];
             firstColumn = new int[numSensors];
@@ -206,7 +205,7 @@ namespace Wockets.Data.Plotters
                 {
                     aPanel.Invalidate();
                     requiresFullRedraw = false;
-                    this.aPanel.Width = this.aPanel.Width;
+                    //aPanel.Width = this.aPanel.Width;
                     for (int k = 0; (k < CurrentWockets._Controller._Sensors.Count); k++)
                     {
                         this.currentColumns[k] = 0;

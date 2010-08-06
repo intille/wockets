@@ -416,6 +416,18 @@ void _send_batch_count(unsigned short count)
  
 }
 
+void _send_summary_count(unsigned short count)
+{
+ 
+    aBuffer[0]=m_AC_RSP_BYTE0;
+    aBuffer[1]=m_AC_RSP_BYTE1(count);
+    aBuffer[2]=m_AC_RSP_BYTE2(count);
+	aBuffer[3]=m_AC_RSP_BYTE3(count);
+	for (int i=0;(i<4);i++)                                                                                       
+       	_bluetooth_transmit_uart0_byte(aBuffer[i]); 
+ 
+}
+
 void _send_sr()
 {
  

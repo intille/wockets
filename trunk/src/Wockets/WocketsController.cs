@@ -276,19 +276,11 @@ namespace Wockets
         {
 
 
-            if (aPollingThread != null)
-            {
-                polling = false;
-                aPollingThread.Join();
-                aPollingThread.Abort();
-            }
+            if (aPollingThread != null)            
+                aPollingThread.Abort();            
 
-            if (aSavingThread != null)
-            {
-                _Saving = false;
-                aSavingThread.Join();
-                aSavingThread.Abort();
-            }
+            if (aSavingThread != null)                            
+                aSavingThread.Abort();            
 
         
             if (trainingTW != null)

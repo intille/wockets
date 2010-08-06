@@ -46,6 +46,20 @@ namespace Wockets.Utils.IPC
 
         HANDLE p;
 
+
+        /// <summary>
+        /// Send an event
+        /// </summary>
+        /// <param name="name"> Name of the event</param>
+        public void Broadcast(string name)
+        {
+            p = CreateEvent(HANDLE.Zero, false, false, name);
+            SetEvent(p);
+            Thread.Sleep(500);
+            CloseHandle(p);
+
+        }
+
         /// <summary>
         /// Send an event
         /// </summary>
@@ -79,5 +93,6 @@ namespace Wockets.Utils.IPC
             Thread.Sleep(500);
             CloseHandle(p);
         }
+
     }
 }

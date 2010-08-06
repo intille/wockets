@@ -8,6 +8,10 @@ using Wockets.Data.Commands;
 using Wockets.Kernel.Types;
 using Wockets.Utils;
 using Microsoft.Win32;
+using Wockets.Data.Configuration;
+using Wockets.Receivers;
+using Wockets.Decoders.Accelerometers;
+using Wockets.Sensors.Accelerometers;
 
 namespace Wockets.Kernel
 {
@@ -22,6 +26,7 @@ namespace Wockets.Kernel
         public static string REGISTRY_LOCK = "WocketsRLock";
         public static string KERNEL_PATH = @"\Program Files\wockets\";
         public static string KERNEL_EXECUTABLE = "Kernel.exe";
+        public static string BROADCAST_EVENT_PREFIX = "WOCKET_BROADCAST_";
         private static Semaphore registryLock;
         public static bool _Registered = false;
         public static string _KernelGuid = null;
@@ -70,6 +75,67 @@ namespace Wockets.Kernel
                    storagePath = "";               
                return storagePath;
            }
+       }
+
+       public static void InitializeConfiguration()
+       {
+           CurrentWockets._Configuration = new Wockets.Data.Configuration.WocketsConfiguration();           
+           CurrentWockets._Configuration._ErrorWindowSize = 1000;
+           CurrentWockets._Configuration._FeatureWindowOverlap = 0.5;
+           CurrentWockets._Configuration._FeatureWindowSize = 1000;
+           CurrentWockets._Configuration._FFTInterpolationPower = 7;
+           CurrentWockets._Configuration._FFTMaximumFrequencies = 2;
+           CurrentWockets._Configuration._MaximumConsecutivePacketLoss = 20;
+           CurrentWockets._Configuration._MaximumNonconsecutivePacketLoss = 0.5;
+           CurrentWockets._Configuration._SmoothWindowCount = 5;
+           CurrentWockets._Configuration._MemoryMode = MemoryConfiguration.SHARED;
+           CurrentWockets._Configuration._SoftwareMode = SoftwareConfiguration.DEBUG;
+
+       }
+
+       public static void InitializeController()
+       {
+           CurrentWockets._Controller = new WocketsController("", "", "");
+           CurrentWockets._Controller._Mode = Wockets.MemoryMode.SharedToLocal;
+           CurrentWockets._Controller._Receivers = new Wockets.Receivers.ReceiverList();
+
+
+           RegistryKey rk = null;
+           registryLock.WaitOne();
+           for (int i = 0; (i < 5); i++)
+           {
+               try
+               {
+                   rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + i.ToString("0"));
+                   int status = (int)rk.GetValue("Status");
+                   if (status == 1)
+                   {
+                       string mac = (string)rk.GetValue("MacAddress");
+                       RFCOMMReceiver receiver = new RFCOMMReceiver();
+                       receiver._ID = 0;
+                       receiver._Address = mac;
+                       CurrentWockets._Controller._Receivers.Add(receiver);
+                       WocketsDecoder decoder = new WocketsDecoder();
+                       decoder._ID = 0;
+                       CurrentWockets._Controller._Decoders.Add(decoder);
+                       Wocket wocket = new Wocket();
+                       wocket._ID = 0;
+                       wocket._Loaded = true;
+                       wocket._Decoder = decoder;
+                       wocket._Receiver = receiver;
+                       CurrentWockets._Controller._Sensors.Add(wocket);
+
+                   }
+                   rk.Close();
+               }
+               catch
+               {
+               }
+           }
+           registryLock.Release();
+
+          
+           CurrentWockets._Controller.Initialize();
        }
         public static void Start()
         {
@@ -187,6 +253,7 @@ namespace Wockets.Kernel
                 rk.Close();
                 registryLock.Release();
                 namedEvent.Send(channel + "-kernel");
+               
             }
             return success;
         }
@@ -291,6 +358,47 @@ namespace Wockets.Kernel
             return success;
         }
 
+        public static Hashtable READ_BATTERY_LEVEL()
+        {
+            try
+            {
+                Hashtable blevels = new Hashtable();
+                RegistryKey rk = null;
+                registryLock.WaitOne();
+                for (int i = 0; (i < 5); i++)
+                {
+                    try
+                    {
+                        rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + i.ToString("0"));
+                        int status = (int)rk.GetValue("Status");
+                        if (status == 1)
+                        {
+                            int batteryLevel = Convert.ToInt32(rk.GetValue("BATTERY_LEVEL"));
+                            string mac = (string)rk.GetValue("MacAddress");
+                            blevels.Add(mac, batteryLevel);
+
+                        }
+                        rk.Close();
+                    }
+                    catch
+                    {
+                    }
+                }
+                registryLock.Release();
+
+                if (blevels.Count > 0)
+                    return blevels;
+                else
+                    return null;
+             
+            }
+            catch
+            {
+                registryLock.Release();
+            }
+            return null;
+        }
+
         public static bool GET_BATTERY_PERCENT(string channel, string mac)
         {
             bool success = false;
@@ -311,6 +419,47 @@ namespace Wockets.Kernel
             return success;
         }
 
+
+        public static Hashtable READ_BATTERY_PERCENT()
+        {
+            try
+            {
+                Hashtable bpercents = new Hashtable();
+                RegistryKey rk = null;
+                registryLock.WaitOne();
+                for (int i = 0; (i < 5); i++)
+                {
+                    try
+                    {
+                        rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + i.ToString("0"));
+                        int status = (int)rk.GetValue("Status");
+                        if (status == 1)
+                        {
+                            int batterypercent = Convert.ToInt32(rk.GetValue("BATTERY_PERCENT"));
+                            string mac = (string)rk.GetValue("MacAddress");
+                            bpercents.Add(mac, batterypercent);
+
+                        }
+                        rk.Close();
+                    }
+                    catch
+                    {
+                    }
+                }
+                registryLock.Release();
+
+                if (bpercents.Count > 0)
+                    return bpercents;
+                else
+                    return null;
+
+            }
+            catch
+            {
+                registryLock.Release();
+            }
+            return null;
+        }
         public static bool GET_PDU_COUNT(string channel, string mac)
         {
             bool success = false;
@@ -331,6 +480,46 @@ namespace Wockets.Kernel
             return success;
         }
 
+        public static Hashtable READ_PDU_COUNT()
+        {
+            try
+            {
+                Hashtable pducounts = new Hashtable();
+                RegistryKey rk = null;
+                registryLock.WaitOne();
+                for (int i = 0; (i < 5); i++)
+                {
+                    try
+                    {
+                        rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + i.ToString("0"));
+                        int status = (int)rk.GetValue("Status");
+                        if (status == 1)
+                        {
+                            int pducount = Convert.ToInt32(rk.GetValue("PDU_COUNT"));
+                            string mac = (string)rk.GetValue("MacAddress");
+                            pducounts.Add(mac, pducount);
+
+                        }
+                        rk.Close();
+                    }
+                    catch
+                    {
+                    }
+                }
+                registryLock.Release();
+
+                if (pducounts.Count > 0)
+                    return pducounts;
+                else
+                    return null;
+
+            }
+            catch
+            {
+                registryLock.Release();
+            }
+            return null;
+        }
 
         public static bool GET_WOCKET_SENSITIVITY(string channel, string mac)
         {
@@ -352,6 +541,46 @@ namespace Wockets.Kernel
             return success;
         }
 
+        public static Hashtable READ_SENSITIVITY()
+        {
+            try
+            {
+                Hashtable sensitivities = new Hashtable();
+                RegistryKey rk = null;
+                registryLock.WaitOne();
+                for (int i = 0; (i < 5); i++)
+                {
+                    try
+                    {
+                        rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + i.ToString("0"));
+                        int status = (int)rk.GetValue("Status");
+                        if (status == 1)
+                        {
+                            Sensitivity s = (Sensitivity)Enum.Parse(typeof(Sensitivity), (string)rk.GetValue("SENSITIVITY"), true);
+                            string mac = (string)rk.GetValue("MacAddress");
+                            sensitivities.Add(mac, s);
+
+                        }
+                        rk.Close();
+                    }
+                    catch
+                    {
+                    }
+                }
+                registryLock.Release();
+
+                if (sensitivities.Count > 0)
+                    return sensitivities;
+                else
+                    return null;
+
+            }
+            catch
+            {
+                registryLock.Release();
+            }
+            return null;
+        }
 
         public static bool SET_WOCKET_SENSITIVITY(string channel, string mac,Sensitivity sensitivity)
         {
@@ -393,6 +622,54 @@ namespace Wockets.Kernel
             return success;
         }
 
+
+
+        public static Hashtable READ_CALIBRATION()
+        {
+            try
+            {
+                Hashtable calibrations = new Hashtable();
+                RegistryKey rk = null;
+                registryLock.WaitOne();
+                for (int i = 0; (i < 5); i++)
+                {
+                    try
+                    {
+                        rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + i.ToString("0"));
+                        int status = (int)rk.GetValue("Status");
+                        if (status == 1)
+                        {
+                            Calibration calibration = new Calibration();
+                            calibration._X1G=(ushort) Convert.ToUInt16(rk.GetValue("_X1G"));
+                            calibration._XN1G = (ushort)Convert.ToUInt16(rk.GetValue("_XN1G"));
+                            calibration._Y1G = (ushort)Convert.ToUInt16(rk.GetValue("_Y1G"));
+                            calibration._YN1G = (ushort)Convert.ToUInt16(rk.GetValue("_YN1G"));
+                            calibration._Z1G = (ushort)Convert.ToUInt16(rk.GetValue("_Z1G"));
+                            calibration._ZN1G = (ushort)Convert.ToUInt16(rk.GetValue("_ZN1G"));
+                            string mac = (string)rk.GetValue("MacAddress");
+                            calibrations.Add(mac, calibration);
+
+                        }
+                        rk.Close();
+                    }
+                    catch
+                    {
+                    }
+                }
+                registryLock.Release();
+
+                if (calibrations.Count > 0)
+                    return calibrations;
+                else
+                    return null;
+
+            }
+            catch
+            {
+                registryLock.Release();
+            }
+            return null;
+        }
 
         public static bool SET_WOCKET_CALIBRATION(string channel, string mac, string calibration)
         {
@@ -454,6 +731,47 @@ namespace Wockets.Kernel
                 success = true;
             }
             return success;
+        }
+
+        public static Hashtable READ_SAMPLING_RATE()
+        {
+            try
+            {
+                Hashtable srs = new Hashtable();
+                RegistryKey rk = null;
+                registryLock.WaitOne();
+                for (int i = 0; (i < 5); i++)
+                {
+                    try
+                    {
+                        rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + i.ToString("0"));
+                        int status = (int)rk.GetValue("Status");
+                        if (status == 1)
+                        {
+                            int sr = Convert.ToInt32((string)rk.GetValue("SAMPLING_RATE"));
+                            string mac = (string)rk.GetValue("MacAddress");
+                            srs.Add(mac, sr);
+
+                        }
+                        rk.Close();
+                    }
+                    catch
+                    {
+                    }
+                }
+                registryLock.Release();
+
+                if (srs.Count > 0)
+                    return srs;
+                else
+                    return null;
+
+            }
+            catch
+            {
+                registryLock.Release();
+            }
+            return null;
         }
 
 
