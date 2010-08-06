@@ -169,6 +169,9 @@ namespace Wockets.Decoders.Accelerometers
                                     case ResponseTypes.BC_RSP:
                                         bytesToRead = 3;                 
                                         break;
+                                    case ResponseTypes.AC_RSP:                                    
+                                        bytesToRead = 4;
+                                        break;
                                     case ResponseTypes.PC_RSP:
                                         bytesToRead = 6;
                                         break;
@@ -440,7 +443,7 @@ namespace Wockets.Decoders.Accelerometers
                                     AC_RSP ac = new AC_RSP(this._ID);
                                     for (int i = 0; (i < bytesToRead); i++)
                                         ac.RawBytes[i] = this.packet[i];
-                                    ac._Count = ((this.packet[1] & 0x7f) << 7) | (this.packet[2] & 0x7f);
+                                    ac._Count = ((this.packet[1] & 0x7f) << 9) | ((this.packet[2] & 0x7f)<<2) | ((this.packet[3]>>5)&0x03);
                                     this._ActivityCounts[this._ActivityCountIndex++] = ac._Count;    
                                     break;
                                 default:
