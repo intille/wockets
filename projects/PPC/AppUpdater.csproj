@@ -51,6 +51,7 @@
     <Reference Include="Microsoft.WindowsMobile, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" />
     <Reference Include="Microsoft.WindowsMobile.Status, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" />
     <Reference Include="mscorlib" />
+    <Reference Include="SMSLib, Version=1.0.3871.20264, Culture=neutral, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -92,12 +93,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\..\src\AppUpdater\settings\updater_wockets_project.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="SMSManager.csproj">
-      <Project>{1E1AE2F5-4865-4BA9-8348-924A6364DACB}</Project>
-      <Name>SMSManager</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />
   <ProjectExtensions>
