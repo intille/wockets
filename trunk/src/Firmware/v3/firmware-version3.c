@@ -424,21 +424,29 @@ ISR(TIMER2_OVF_vect)
 
 	/* If the wocket is docked in shut it down */
 
-/*	if (_is_docked())
+	if (_is_docked())
 	{
 		docking_counter++;
 
-		if (docking_counter>900)
+		if (docking_counter>2)
 		{
-			_yellowled_turn_on();
+			_yellowled_turn_on();			
+			for (int i=0;(i<200);i++)
+				_delay_ms(5);
+			//_atmega_finalize();
+			docking_counter=0;
+		}else{
+			
 			for (int i=0;(i<1000);i++)
 				_delay_ms(5);
-			_atmega_finalize();
 		}
+			_yellowled_turn_off();
+			
+	//	}
 	}
 	else if (docking_counter>0)
 		docking_counter=0;
-*/
+
 		
 	/* Skip sampling depending on the sampling rate variables/timers */
  	if (interrupt_reps==0)
