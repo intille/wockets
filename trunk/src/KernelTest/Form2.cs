@@ -28,6 +28,7 @@ namespace KernelTest
         string mac = "";
         string kernelresponse = "";
         Sensitivity mysen=Sensitivity._4G;
+        Wockets.Data.Types.TransmissionMode mytm = Wockets.Data.Types.TransmissionMode.Continuous;
         int mysr = 90;
 
         public Form2()
@@ -72,6 +73,11 @@ namespace KernelTest
             t = new Thread(EventListener);
             threads.Add(t.ManagedThreadId, t);
             events.Add(t.ManagedThreadId, KernelResponse.SAMPLING_RATE_UPDATED);
+            t.Start();
+
+            t = new Thread(EventListener);
+            threads.Add(t.ManagedThreadId, t);
+            events.Add(t.ManagedThreadId, KernelResponse.TRANSMISSION_MODE_UPDATED);
             t.Start();
 
         }
@@ -176,6 +182,21 @@ namespace KernelTest
 
                         UpdateForm(myevent);
                         break;
+
+                    case (KernelResponse)KernelResponse.TRANSMISSION_MODE_UPDATED:
+                        Hashtable tms = Core.READ_TRANSMISSION_MODE();
+                        kernelresponse = "";
+                        if (tms != null)
+                        {
+                            foreach (string s in tms.Keys)
+                            {
+                                mytm = (Wockets.Data.Types.TransmissionMode)tms[s];
+                                kernelresponse += s + " - " + mytm.ToString() + "\r\n";
+                            }
+                        }
+
+                        UpdateForm(myevent);
+                        break;
                     default:
                         break;
                 }
@@ -241,6 +262,30 @@ namespace KernelTest
                                 break;
                             default:
                                 this.label3.Text = "Received: " + kernelresponse;
+                                break;
+
+                        }
+                        break;
+                    case KernelResponse.TRANSMISSION_MODE_UPDATED:
+                        this.menuItem22.Checked = this.menuItem23.Checked = this.menuItem25.Checked = this.menuItem26.Checked = this.menuItem27.Checked = false;
+                        switch (mytm)
+                        {
+                            case Wockets.Data.Types.TransmissionMode.Continuous:
+                                this.menuItem12.Checked = true;
+                                break;
+                            case Wockets.Data.Types.TransmissionMode.Bursty30:
+                                this.menuItem23.Checked = true;
+                                break;
+                            case Wockets.Data.Types.TransmissionMode.Bursty60:
+                                this.menuItem25.Checked = true;
+                                break;
+                            case Wockets.Data.Types.TransmissionMode.Bursty90:
+                                this.menuItem26.Checked = true;
+                                break;
+                            case Wockets.Data.Types.TransmissionMode.Bursty120:
+                                this.menuItem27.Checked = true;
+                                break;
+                            default:
                                 break;
 
                         }
@@ -433,6 +478,20 @@ namespace KernelTest
         {
             if (Core._KernelGuid != null)
                 Core.SET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac, 90); 
+        }
+
+        private void menuItem24_Click(object sender, EventArgs e)
+        {
+            if (Core._KernelGuid != null)
+            {
+                Core.GET_TRANSMISSION_MODE(Core._KernelGuid, mac);
+                this.label2.Text = "Sent: GET_TRANSMISSION_MODE";
+            }
+        }
+
+        private void menuItem23_Click(object sender, EventArgs e)
+        {
+
         }
 
 
