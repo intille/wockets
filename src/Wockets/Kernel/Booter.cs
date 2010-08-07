@@ -217,6 +217,22 @@ namespace Wockets.Kernel
                         registryLock.Release();
                     }
                     break;
+                case ResponseTypes.TM_RSP: //write to the registry
+                    try
+                    {
+                        TM_RSP tm = (TM_RSP)response;
+                        registryLock.WaitOne();
+                        RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + tm._SensorID.ToString("0"));
+                        rk.SetValue("TRANSMISSION_MODE", tm._TransmissionMode.ToString(), RegistryValueKind.String);
+                        rk.Close();
+                        registryLock.Release();
+                        Broadcast(KernelResponse.TRANSMISSION_MODE_UPDATED);
+                    }
+                    catch
+                    {
+                        registryLock.Release();
+                    }
+                    break;
                 default:
                     break;
             }
