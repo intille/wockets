@@ -350,8 +350,7 @@ namespace Wockets.Decoders.Accelerometers
                                     SR_RSP sr = new SR_RSP(this._ID);
                                     for (int i = 0; (i < bytesToRead); i++)
                                         sr.RawBytes[i] = this.packet[i];
-                                    //sr._SamplingRate= (this.packet[1]&0x7f);
-                                    sr._SamplingRate = 42;
+                                    sr._SamplingRate= (this.packet[1]&0x7f);                  
                                     this._ExpectedSamplingRate = sr._SamplingRate;
                                     FireEvent(sr);
                                     break;

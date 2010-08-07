@@ -334,7 +334,15 @@ namespace KernelTest
         private void menuItem11_Click(object sender, EventArgs e)
         {
             if (Core._KernelGuid != null)
-                Core.SET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac, 40); 
+            {
+                Core.SET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac, 40);
+                this.menuItem9.Checked = false;
+                this.menuItem10.Checked = false;
+                this.menuItem11.Checked = false;
+                this.menuItem12.Checked = false;
+                this.menuItem13.Checked = false;
+                Core.GET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac);
+            }
         }
 
         private void menuItem14_Click(object sender, EventArgs e)
@@ -382,19 +390,43 @@ namespace KernelTest
         private void menuItem9_Click(object sender, EventArgs e)
         {
             if (Core._KernelGuid != null)
-                Core.SET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac, 20); 
+            {
+                Core.SET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac, 20);
+                this.menuItem9.Checked = false;
+                this.menuItem10.Checked = false;
+                this.menuItem11.Checked = false;
+                this.menuItem12.Checked = false;
+                this.menuItem13.Checked = false;
+                Core.GET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac);
+            }
         }
 
         private void menuItem10_Click(object sender, EventArgs e)
         {
             if (Core._KernelGuid != null)
-                Core.SET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac, 30); 
+            {
+                Core.SET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac, 30);
+                this.menuItem9.Checked = false;
+                this.menuItem10.Checked = false;
+                this.menuItem11.Checked = false;
+                this.menuItem12.Checked = false;
+                this.menuItem13.Checked = false;
+                Core.GET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac);
+            }
         }
 
         private void menuItem12_Click(object sender, EventArgs e)
         {
             if (Core._KernelGuid != null)
-                Core.SET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac, 80); 
+            {
+                Core.SET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac, 80);
+                this.menuItem9.Checked = false;
+                this.menuItem10.Checked = false;
+                this.menuItem11.Checked = false;
+                this.menuItem12.Checked = false;
+                this.menuItem13.Checked = false;
+                Core.GET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac);
+            }
         }
 
         private void menuItem13_Click(object sender, EventArgs e)

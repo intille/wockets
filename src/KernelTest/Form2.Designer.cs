@@ -35,26 +35,26 @@
             this.menuItem4 = new System.Windows.Forms.MenuItem();
             this.menuItem5 = new System.Windows.Forms.MenuItem();
             this.menuItem6 = new System.Windows.Forms.MenuItem();
-            this.menuItem7 = new System.Windows.Forms.MenuItem();
-            this.menuItem8 = new System.Windows.Forms.MenuItem();
-            this.menuItem9 = new System.Windows.Forms.MenuItem();
-            this.menuItem10 = new System.Windows.Forms.MenuItem();
-            this.menuItem11 = new System.Windows.Forms.MenuItem();
-            this.menuItem2 = new System.Windows.Forms.MenuItem();
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.label1 = new System.Windows.Forms.Label();
-            this.timer1 = new System.Windows.Forms.Timer();
-            this.label2 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.menuItem12 = new System.Windows.Forms.MenuItem();
-            this.menuItem13 = new System.Windows.Forms.MenuItem();
             this.menuItem14 = new System.Windows.Forms.MenuItem();
             this.menuItem15 = new System.Windows.Forms.MenuItem();
             this.menuItem16 = new System.Windows.Forms.MenuItem();
             this.menuItem17 = new System.Windows.Forms.MenuItem();
             this.menuItem18 = new System.Windows.Forms.MenuItem();
             this.menuItem19 = new System.Windows.Forms.MenuItem();
+            this.menuItem7 = new System.Windows.Forms.MenuItem();
+            this.menuItem8 = new System.Windows.Forms.MenuItem();
             this.menuItem20 = new System.Windows.Forms.MenuItem();
+            this.menuItem9 = new System.Windows.Forms.MenuItem();
+            this.menuItem10 = new System.Windows.Forms.MenuItem();
+            this.menuItem11 = new System.Windows.Forms.MenuItem();
+            this.menuItem12 = new System.Windows.Forms.MenuItem();
+            this.menuItem13 = new System.Windows.Forms.MenuItem();
+            this.menuItem2 = new System.Windows.Forms.MenuItem();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.label1 = new System.Windows.Forms.Label();
+            this.timer1 = new System.Windows.Forms.Timer();
+            this.label2 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // mainMenu1
@@ -98,6 +98,35 @@
             this.menuItem6.Text = "Sensitivity";
             this.menuItem6.Click += new System.EventHandler(this.menuItem6_Click);
             // 
+            // menuItem14
+            // 
+            this.menuItem14.Text = "Update";
+            this.menuItem14.Click += new System.EventHandler(this.menuItem14_Click);
+            // 
+            // menuItem15
+            // 
+            this.menuItem15.Text = "1.5 G";
+            this.menuItem15.Click += new System.EventHandler(this.menuItem15_Click);
+            // 
+            // menuItem16
+            // 
+            this.menuItem16.Text = "2 G";
+            this.menuItem16.Click += new System.EventHandler(this.menuItem16_Click);
+            // 
+            // menuItem17
+            // 
+            this.menuItem17.Text = "4 G";
+            this.menuItem17.Click += new System.EventHandler(this.menuItem17_Click);
+            // 
+            // menuItem18
+            // 
+            this.menuItem18.Text = "8 G";
+            this.menuItem18.Click += new System.EventHandler(this.menuItem18_Click);
+            // 
+            // menuItem19
+            // 
+            this.menuItem19.Text = "12 G";
+            // 
             // menuItem7
             // 
             this.menuItem7.Text = "Get Calibration";
@@ -113,6 +142,11 @@
             this.menuItem8.MenuItems.Add(this.menuItem13);
             this.menuItem8.Text = "Sampling Rate";
             // 
+            // menuItem20
+            // 
+            this.menuItem20.Text = "Update";
+            this.menuItem20.Click += new System.EventHandler(this.menuItem20_Click);
+            // 
             // menuItem9
             // 
             this.menuItem9.Text = "20";
@@ -127,6 +161,16 @@
             // 
             this.menuItem11.Text = "40";
             this.menuItem11.Click += new System.EventHandler(this.menuItem11_Click);
+            // 
+            // menuItem12
+            // 
+            this.menuItem12.Text = "80";
+            this.menuItem12.Click += new System.EventHandler(this.menuItem12_Click);
+            // 
+            // menuItem13
+            // 
+            this.menuItem13.Text = "90";
+            this.menuItem13.Click += new System.EventHandler(this.menuItem13_Click);
             // 
             // menuItem2
             // 
@@ -167,50 +211,6 @@
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(223, 46);
             this.label3.Text = "Received:";
-            // 
-            // menuItem12
-            // 
-            this.menuItem12.Text = "80";
-            this.menuItem12.Click += new System.EventHandler(this.menuItem12_Click);
-            // 
-            // menuItem13
-            // 
-            this.menuItem13.Text = "90";
-            this.menuItem13.Click += new System.EventHandler(this.menuItem13_Click);
-            // 
-            // menuItem14
-            // 
-            this.menuItem14.Text = "Update";
-            this.menuItem14.Click += new System.EventHandler(this.menuItem14_Click);
-            // 
-            // menuItem15
-            // 
-            this.menuItem15.Text = "1.5 G";
-            this.menuItem15.Click += new System.EventHandler(this.menuItem15_Click);
-            // 
-            // menuItem16
-            // 
-            this.menuItem16.Text = "2 G";
-            this.menuItem16.Click += new System.EventHandler(this.menuItem16_Click);
-            // 
-            // menuItem17
-            // 
-            this.menuItem17.Text = "4 G";
-            this.menuItem17.Click += new System.EventHandler(this.menuItem17_Click);
-            // 
-            // menuItem18
-            // 
-            this.menuItem18.Text = "8 G";
-            this.menuItem18.Click += new System.EventHandler(this.menuItem18_Click);
-            // 
-            // menuItem19
-            // 
-            this.menuItem19.Text = "12 G";
-            // 
-            // menuItem20
-            // 
-            this.menuItem20.Text = "Update";
-            this.menuItem20.Click += new System.EventHandler(this.menuItem20_Click);
             // 
             // Form2
             // 
