@@ -838,6 +838,49 @@ namespace Wockets.Kernel
         }
 
 
+
+        public static Hashtable READ_TRANSMISSION_MODE()
+        {
+            try
+            {
+                Hashtable tms = new Hashtable();
+                RegistryKey rk = null;
+                registryLock.WaitOne();
+                for (int i = 0; (i < 5); i++)
+                {
+                    try
+                    {
+                        rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + i.ToString("0"));
+                        int status = (int)rk.GetValue("Status");
+                        if (status == 1)
+                        {
+                            TransmissionMode tm = (TransmissionMode)Enum.Parse(typeof(TransmissionMode), (string)rk.GetValue("TRANSMISSION_MODE"), true);
+                            string mac = (string)rk.GetValue("MacAddress");
+                            tms.Add(mac, tm);
+
+                        }
+                        rk.Close();
+                    }
+                    catch
+                    {
+                    }
+                }
+                registryLock.Release();
+
+                if (tms.Count > 0)
+                    return tms;
+                else
+                    return null;
+
+            }
+            catch
+            {
+                registryLock.Release();
+            }
+            return null;
+        }
+
+
         public static bool SET_TRANSMISSION_MODE(string channel, string mac, TransmissionMode mode)
         {
             bool success = false;
@@ -847,7 +890,7 @@ namespace Wockets.Kernel
                 NamedEvents namedEvent = new NamedEvents();
                 registryLock.WaitOne();
                 RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
-                rk.SetValue("Message", KernelCommand.SET_WOCKET_POWERDOWN_TIMEOUT.ToString(), RegistryValueKind.String);
+                rk.SetValue("Message", KernelCommand.SET_TRANSMISSION_MODE.ToString(), RegistryValueKind.String);
                 rk.SetValue("Param", mac.ToString() + ":" + mode.ToString(), RegistryValueKind.String);
                 rk.Flush();
                 rk.Close();
