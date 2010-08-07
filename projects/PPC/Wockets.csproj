@@ -1,4 +1,4 @@
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -311,14 +311,11 @@
     <Compile Include="..\..\src\Wockets\Kernel\Types\ApplicationResponse.cs">
       <Link>Kernel\Types\ApplicationResponse.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Kernel\Types\BaudRates.cs">
-      <Link>Kernel\Types\BaudRates.cs</Link>
-    </Compile>
     <Compile Include="..\..\src\Wockets\Kernel\Booter.cs">
       <Link>Kernel\Booter.cs</Link>
     </Compile>
     <Compile Include="..\..\src\Wockets\Kernel\Types\Calibration.cs">
-      <Link>Kernel\Types\Calibration.cs</Link>
+      <Link>Data\Types\Calibration.cs</Link>
     </Compile>
     <Compile Include="..\..\src\Wockets\Kernel\Types\Channels.cs">
       <Link>Kernel\Types\Channels.cs</Link>
@@ -329,26 +326,14 @@
     <Compile Include="..\..\src\Wockets\Kernel\Types\KernelCommand.cs">
       <Link>Kernel\Types\KernelCommand.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Kernel\Types\KernelNamedEvents.cs">
-      <Link>Kernel\Types\KernelNamedEvents.cs</Link>
-    </Compile>
     <Compile Include="..\..\src\Wockets\Kernel\Types\Placements.cs">
       <Link>Kernel\Types\Placements.cs</Link>
     </Compile>
     <Compile Include="..\..\src\Wockets\Kernel\Types\SamplingRates.cs">
       <Link>Kernel\Types\SamplingRates.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Kernel\Types\Sensitivities.cs">
-      <Link>Kernel\Types\Sensitivities.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Kernel\Types\SleepModes.cs">
-      <Link>Kernel\Types\SleepModes.cs</Link>
-    </Compile>
     <Compile Include="..\..\src\Wockets\Kernel\Types\Timeouts.cs">
       <Link>Kernel\Types\Timeouts.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Kernel\Types\TransmissionPowers.cs">
-      <Link>Kernel\Types\TransmissionPowers.cs</Link>
     </Compile>
     <Compile Include="..\..\src\Wockets\Utils\Process.cs">
       <Link>Utils\Process.cs</Link>
@@ -534,9 +519,6 @@
     <Compile Include="..\..\src\Wockets\Data\Responses\ResponseTypes.cs">
       <Link>Data\Responses\ResponseTypes.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Responses\Sensitivity.cs">
-      <Link>Data\Responses\Sensitivity.cs</Link>
-    </Compile>
     <Compile Include="..\..\src\Wockets\Data\Responses\SENS_RSP.cs">
       <Link>Data\Responses\SENS_RSP.cs</Link>
     </Compile>
@@ -545,9 +527,6 @@
     </Compile>
     <Compile Include="..\..\src\Wockets\Data\Responses\TM_RSP.cs">
       <Link>Data\Responses\TM_RSP.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Responses\TransmissionModes.cs">
-      <Link>Data\Responses\TransmissionModes.cs</Link>
     </Compile>
     <Compile Include="..\..\src\Wockets\Data\Responses\BC_RSP.cs">
       <Link>Data\Responses\BC_RSP.cs</Link>
@@ -564,9 +543,41 @@
     <Compile Include="..\..\src\Wockets\Utils\Math.cs">
       <Link>Utils\Math.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\TransmissionMode.cs" >
+    <Compile Include="..\..\src\Wockets\TransmissionMode.cs">
       <Link>TransmissionMode.cs</Link>
     </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Types\BatteryCalibration.cs">
+      <Link>Data\Types\BatteryCalibration.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_ALT.cs">
+      <Link>Data\Commands\GET_ALT.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\RST_BT.cs">
+      <Link>Data\Commands\RST_BT.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\SET_ALT.cs">
+      <Link>Data\Commands\SET_ALT.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\SET_CAL.cs">
+      <Link>Data\Commands\SET_CAL.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\SET_SEN.cs">
+      <Link>Data\Commands\SET_SEN.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\SET_TM.cs">
+      <Link>Data\Commands\SET_TM.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Kernel\Types\MemoryMode.cs">
+      <Link>Kernel\Types\MemoryMode.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Types\Sensitivity.cs">
+      <Link>Data\Types\Sensitivity.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Types\TransmissionMode.cs">
+      <Link>Data\Types\TransmissionMode.cs</Link>
+    </Compile>
+    <Compile Include="Data\Responses\AC_RSP.cs" />
+    <Compile Include="Kernel\Types\KernelResponse.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="WocketsWeka.csproj">
