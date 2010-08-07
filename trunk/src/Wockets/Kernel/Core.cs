@@ -722,7 +722,7 @@ namespace Wockets.Kernel
                 NamedEvents namedEvent = new NamedEvents();
                 registryLock.WaitOne();
                 RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
-                rk.SetValue("Message", KernelCommand.GET_BATTERY_PERCENT.ToString(), RegistryValueKind.String);
+                rk.SetValue("Message", KernelCommand.SET_WOCKET_SAMPLING_RATE.ToString(), RegistryValueKind.String);
                 rk.SetValue("Param", mac.ToString() + ":" + sr.ToString(), RegistryValueKind.String);
                 rk.Flush();
                 rk.Close();

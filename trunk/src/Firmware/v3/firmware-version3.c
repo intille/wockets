@@ -80,23 +80,33 @@ unsigned short docking_counter=0;
 
 
 /* Butterworth Filter */
-double b[5]= {0.0051,0.0,-0.0103,0.0,0.0051};
-double a[5]= { 1.00, -3.7856, 5.3793, -3.4016, 0.8079};
-double xv[3][5];
-double yv[3][5];
+//double b[5]= {0.0051,0.0,-0.0103,0.0,0.0051};
+//double a[5]= { 1.00, -3.7856, 5.3793, -3.4016, 0.8079};
+unsigned short xv[3][5];
+//double yv[3][5];
+unsigned long vmag;
+unsigned short val;
 
-double Filter(double data,int axis)
+unsigned short Filter(unsigned short data,int axis)
 {
-     double filtered=0;
+//     double filtered=0;
+	 unsigned short mean=0;
      int j=0;           
-     for (; (j < 4); j++)
+     for (; (j < 4); j++){
           xv[axis][j] = xv[axis][j + 1];
+		  mean+=xv[axis][j];
+		  }
+mean=mean/4;
       xv[axis][j] = data;
 
-      j = 0;
+      /*j = 0;
       for (; (j < 4); j++)
+	  {
            yv[axis][j] = yv[axis][j + 1];
+		   mean+=yv[axis][j];
+		}
       yv[axis][j] = 0;
+	  mean=mean/4;
 
 
       for (int k = 0; (k < 5); k++)
@@ -104,8 +114,8 @@ double Filter(double data,int axis)
       for (int k = 1; (k < 5); k++)
             yv[axis][j] -= a[k] * yv[axis][4 - k];
 
-      filtered= yv[axis][j];            
-      return filtered;
+      filtered= yv[axis][j];    */	         
+      return (data-mean);
 }
 
 
@@ -194,10 +204,22 @@ scounter=0;
 		if (_wTM!=_TM_Continuous)
 			{
 
-
-			acount[summaryindex]+=(int)Filter(x,0);
-			acount[summaryindex]+=(int) Filter(y,1);
-			acount[summaryindex]+=(int) Filter(z,2);
+			val=Filter(x,0);
+			val=val*val;
+			vmag=val;
+			val= Filter(y,1);
+			val=val*val;
+			vmag+=val;
+			val = Filter(z,2);
+			val=val*val;
+			vmag+=val;
+			
+			vmag=(unsigned short) sqrt(vmag);
+			if ((acount[summaryindex]+vmag)>(unsigned long)65536)
+				acount[summaryindex]+=65535;
+			else
+				acount[summaryindex]+=(unsigned short)vmag;
+			
 
 			if (summary_count==0)
 			{
@@ -272,8 +294,10 @@ scounter=0;
 					_send_batch_count(batch_counter*4);
 
 
-					for (int i=0;(i<summaryindex);i++)
+					for (int i=0;(i<summaryindex);i++){
 						_send_summary_count(acount[i]);
+						acount[i]=0;
+					}
 					summaryindex=0;
 
 					
@@ -424,7 +448,7 @@ ISR(TIMER2_OVF_vect)
 
 	/* If the wocket is docked in shut it down */
 
-	if (_is_docked())
+/*	if (_is_docked())
 	{
 		docking_counter++;
 
@@ -447,7 +471,7 @@ ISR(TIMER2_OVF_vect)
 	else if (docking_counter>0)
 		docking_counter=0;
 
-		
+*/		
 	/* Skip sampling depending on the sampling rate variables/timers */
  	if (interrupt_reps==0)
 	{	
