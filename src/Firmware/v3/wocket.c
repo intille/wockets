@@ -419,6 +419,7 @@ void _send_batch_count(unsigned short count)
 void _send_summary_count(unsigned short count)
 {
  
+ 	count=65321;
     aBuffer[0]=m_AC_RSP_BYTE0;
     aBuffer[1]=m_AC_RSP_BYTE1(count);
     aBuffer[2]=m_AC_RSP_BYTE2(count);
