@@ -204,19 +204,15 @@ scounter=0;
 		if (_wTM!=_TM_Continuous)
 			{
 
-			val=Filter(x,0);
-			val=val*val;
+			val=Filter(x,0);			
 			vmag=val;
-			val= Filter(y,1);
-			val=val*val;
+			val= Filter(y,1);			
 			vmag+=val;
-			val = Filter(z,2);
-			val=val*val;
+			val = Filter(z,2);			
 			vmag+=val;
-			
-			vmag=(unsigned short) sqrt(vmag);
-			if ((acount[summaryindex]+vmag)>(unsigned long)65536)
-				acount[summaryindex]+=65535;
+						
+			if ((acount[summaryindex]+vmag)>(unsigned long)65535)
+				acount[summaryindex]=65535;
 			else
 				acount[summaryindex]+=(unsigned short)vmag;
 			
