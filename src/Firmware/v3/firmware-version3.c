@@ -82,21 +82,22 @@ unsigned short docking_counter=0;
 /* Butterworth Filter */
 //double b[5]= {0.0051,0.0,-0.0103,0.0,0.0051};
 //double a[5]= { 1.00, -3.7856, 5.3793, -3.4016, 0.8079};
-unsigned short xv[3][5];
+double xv[3][40];
 //double yv[3][5];
-unsigned long vmag;
+double vmag;
+unsigned short vmags;
 unsigned short val;
 
-unsigned short Filter(unsigned short data,int axis)
+double Filter(unsigned short data,int axis)
 {
 //     double filtered=0;
-	 unsigned short mean=0;
+	 double mean=0;
      int j=0;           
-     for (; (j < 4); j++){
+     for (; (j < 39); j++){
           xv[axis][j] = xv[axis][j + 1];
 		  mean+=xv[axis][j];
 		  }
-mean=mean/4;
+	mean=mean/39;
       xv[axis][j] = data;
 
       /*j = 0;
@@ -210,11 +211,12 @@ scounter=0;
 			vmag+=val;
 			val = Filter(z,2);			
 			vmag+=val;
-						
-			if ((acount[summaryindex]+vmag)>(unsigned long)65535)
+			vmags=vmag+acount[summaryindex];
+			
+			if (vmags>65535.0)
 				acount[summaryindex]=65535;
 			else
-				acount[summaryindex]+=(unsigned short)vmag;
+				acount[summaryindex]=(unsigned short)vmags;//+=(unsigned short)vmag;
 			
 
 			if (summary_count==0)
@@ -294,8 +296,10 @@ scounter=0;
 						_send_summary_count(acount[i]);
 						acount[i]=0;
 					}
-					summaryindex=0;
 
+					if (summaryindex<960)
+						acount[0]=acount[summaryindex];
+					summaryindex=0;
 					
 					if (batch_counter<750) // Go from 0 up to batch_counter
 					{						
