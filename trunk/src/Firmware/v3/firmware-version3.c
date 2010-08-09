@@ -93,6 +93,7 @@ double Filter(unsigned short data,int axis)
 //     double filtered=0;
 	 double mean=0;
      int j=0;           
+	 double ac=0;
      for (; (j < 39); j++){
           xv[axis][j] = xv[axis][j + 1];
 		  mean+=xv[axis][j];
@@ -116,7 +117,11 @@ double Filter(unsigned short data,int axis)
             yv[axis][j] -= a[k] * yv[axis][4 - k];
 
       filtered= yv[axis][j];    */	         
-      return (data-mean);
+      ac=(data-mean);
+
+	  if (ac<0)
+	  	return -1*ac;
+	  return ac;
 }
 
 
