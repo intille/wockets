@@ -30,6 +30,7 @@ namespace KernelTest
         Sensitivity mysen=Sensitivity._4G;
         Wockets.Data.Types.TransmissionMode mytm = Wockets.Data.Types.TransmissionMode.Continuous;
         int mysr = 90;
+        int myac = 0;
 
         public Form2()
         {
@@ -78,6 +79,11 @@ namespace KernelTest
             t = new Thread(EventListener);
             threads.Add(t.ManagedThreadId, t);
             events.Add(t.ManagedThreadId, KernelResponse.TRANSMISSION_MODE_UPDATED);
+            t.Start();
+
+            t = new Thread(EventListener);
+            threads.Add(t.ManagedThreadId, t);
+            events.Add(t.ManagedThreadId, KernelResponse.ACTIVITY_COUNT_UPDATED);
             t.Start();
 
         }
@@ -197,6 +203,22 @@ namespace KernelTest
 
                         UpdateForm(myevent);
                         break;
+
+
+                    case (KernelResponse)KernelResponse.ACTIVITY_COUNT_UPDATED:
+                        Hashtable acs = Core.READ_ACTIVITY_COUNT();
+                        kernelresponse = "";
+                        if (acs != null)
+                        {
+                            foreach (string s in acs.Keys)
+                            {
+                                myac = (int)acs[s];
+                                kernelresponse += s + " - " + myac.ToString() + "\r\n";
+                            }
+                        }
+
+                        UpdateForm(myevent);
+                        break;
                     default:
                         break;
                 }
@@ -271,7 +293,7 @@ namespace KernelTest
                         switch (mytm)
                         {
                             case Wockets.Data.Types.TransmissionMode.Continuous:
-                                this.menuItem12.Checked = true;
+                                this.menuItem22.Checked = true;
                                 break;
                             case Wockets.Data.Types.TransmissionMode.Bursty30:
                                 this.menuItem23.Checked = true;
@@ -491,6 +513,38 @@ namespace KernelTest
 
         private void menuItem23_Click(object sender, EventArgs e)
         {
+
+        }
+
+        private void menuItem25_Click(object sender, EventArgs e)
+        {
+            if (Core._KernelGuid != null)
+            {
+                Core.SET_TRANSMISSION_MODE(Core._KernelGuid, mac, TransmissionMode.Bursty60);
+                this.menuItem9.Checked = false;
+                this.menuItem10.Checked = false;
+                this.menuItem11.Checked = false;
+                this.menuItem12.Checked = false;
+                this.menuItem13.Checked = false;                
+            }
+            
+        }
+
+        private void menuItem28_Click(object sender, EventArgs e)
+        {    
+        }
+
+        private void menuItem22_Click(object sender, EventArgs e)
+        {
+            if (Core._KernelGuid != null)
+            {
+                Core.SET_TRANSMISSION_MODE(Core._KernelGuid, mac, TransmissionMode.Continuous);
+                this.menuItem9.Checked = false;
+                this.menuItem10.Checked = false;
+                this.menuItem11.Checked = false;
+                this.menuItem12.Checked = false;
+                this.menuItem13.Checked = false;
+            }
 
         }
 
