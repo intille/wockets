@@ -116,117 +116,74 @@ namespace Wockets.Kernel
                 case ResponseTypes.BL_RSP: //write to the registry
                     try
                     {
-                        BL_RSP bl = (BL_RSP)response;
-                        registryLock.WaitOne();
-                        RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + bl._SensorID.ToString("0"));
-                        rk.SetValue("BATTERY_LEVEL", bl._BatteryLevel, RegistryValueKind.String);
-                        rk.Close();
-                        registryLock.Release();
                         Broadcast(KernelResponse.BATTERY_LEVEL_UPDATED);
                     }
                     catch
-                    {
-                        registryLock.Release();
+                    {                        
                     }
                     break;
 
                 case ResponseTypes.BP_RSP: //write to the registry
                     try
                     {
-                        BP_RSP bp = (BP_RSP)response;
-                        registryLock.WaitOne();
-                        RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + bp._SensorID.ToString("0"));
-                        rk.SetValue("BATTERY_PERCENT", bp._Percent, RegistryValueKind.String);
-                        rk.Close();
-                        registryLock.Release();
                         Broadcast(KernelResponse.BATTERY_PERCENT_UPDATED);
                     }
                     catch
-                    {
-                        registryLock.Release();
+                    {                        
                     }
                     break;
 
                 case ResponseTypes.PC_RSP: //write to the registry
                     try
-                    {
-                        PC_RSP pc = (PC_RSP)response;
-                        registryLock.WaitOne();
-                        RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + pc._SensorID.ToString("0"));
-                        rk.SetValue("PDU_COUNT", pc._Count, RegistryValueKind.String);
-                        rk.Close();
-                        registryLock.Release();
+                    {           
                         Broadcast(KernelResponse.PC_COUNT_UPDATED);
                     }
                     catch
-                    {
-                        registryLock.Release();
+                    {                        
                     }
                     break;
                 case ResponseTypes.SENS_RSP: //write to the registry
                     try
-                    {
-                        SENS_RSP sen = (SENS_RSP)response;
-                        registryLock.WaitOne();
-                        RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + sen._SensorID.ToString("0"));
-                        rk.SetValue("SENSITIVITY", sen._Sensitivity, RegistryValueKind.String);
-                        rk.Close();
-                        registryLock.Release();
+                    {        
                         Broadcast(KernelResponse.SENSITIVITY_UPDATED);
                     }
                     catch
-                    {
-                        registryLock.Release();
+                    {                        
                     }
                     break;
                 case ResponseTypes.CAL_RSP: //write to the registry
                     try
-                    {
-                        CAL_RSP cal = (CAL_RSP)response;
-                        registryLock.WaitOne();
-                        RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + cal._SensorID.ToString("0"));
-                        rk.SetValue("_X1G", cal._X1G, RegistryValueKind.String);
-                        rk.SetValue("_XN1G", cal._XN1G, RegistryValueKind.String);
-                        rk.SetValue("_Y1G", cal._Y1G, RegistryValueKind.String);
-                        rk.SetValue("_YN1G", cal._YN1G, RegistryValueKind.String);
-                        rk.SetValue("_Z1G", cal._Z1G, RegistryValueKind.String);
-                        rk.SetValue("_ZN1G", cal._ZN1G, RegistryValueKind.String);
-                        rk.Close();
-                        registryLock.Release();
+                    {     
                         Broadcast(KernelResponse.CALIBRATION_UPDATED);
                     }
                     catch
-                    {
-                        registryLock.Release();
+                    {                        
                     }
                     break;
 
                 case ResponseTypes.SR_RSP: //write to the registry
                     try
                     {
-                        SR_RSP sr = (SR_RSP)response;
-                        registryLock.WaitOne();
-                        RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + sr._SensorID.ToString("0"));
-                        rk.SetValue("SAMPLING_RATE", sr._SamplingRate, RegistryValueKind.String);
-                        rk.Close();
-                        registryLock.Release();
                         Broadcast(KernelResponse.SAMPLING_RATE_UPDATED);
                     }
                     catch
-                    {
-                        registryLock.Release();
+                    {                        
                     }
                     break;
                 case ResponseTypes.TM_RSP: //write to the registry
                     try
                     {
-                        TM_RSP tm = (TM_RSP)response;
-                        registryLock.WaitOne();
-                        RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + tm._SensorID.ToString("0"));
-                        rk.SetValue("TRANSMISSION_MODE", tm._TransmissionMode.ToString(), RegistryValueKind.String);
-                        rk.Close();
-                        registryLock.Release();
                         Broadcast(KernelResponse.TRANSMISSION_MODE_UPDATED);
+                    }
+                    catch
+                    {                     
+                    }
+                    break;
+
+                case ResponseTypes.AC_RSP: //write to the registry
+                    try
+                    {                       
+                        Broadcast(KernelResponse.ACTIVITY_COUNT_UPDATED);
                     }
                     catch
                     {
@@ -348,14 +305,14 @@ namespace Wockets.Kernel
                                         d.Subscribe(ResponseTypes.SENS_RSP, new Decoder.ResponseHandler(DecoderCallback));
                                         d.Subscribe(ResponseTypes.CAL_RSP, new Decoder.ResponseHandler(DecoderCallback));
                                         d.Subscribe(ResponseTypes.SR_RSP, new Decoder.ResponseHandler(DecoderCallback));
+                                        d.Subscribe(ResponseTypes.TM_RSP, new Decoder.ResponseHandler(DecoderCallback));
                                     }
                                     Send(KernelResponse.CONNECTED, applicationGuid);
                                 }
                               //  else
                                 //    Send(ApplicationResponse.CONNECT_FAILURE, applicationGuid);
 
-                                Broadcast(KernelResponse.CONNECTED);
-
+                                Broadcast(KernelResponse.CONNECTED);                                
                             }
                            // else
                              //   Send(ApplicationResponse.CONNECT_FAILURE, applicationGuid);
@@ -547,14 +504,15 @@ namespace Wockets.Kernel
 
                             try
                             {
+                                string[] tokens = param.Split(new char[] { ':' });
                                 Sensitivity sensitivity = (Sensitivity)Enum.Parse(typeof(Sensitivity),
-                                    param.Split(new char[] { ':' })[1], true);
+                                   tokens[1], true);
                                 Command command = new SET_SEN(sensitivity);
                                 for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
                                 {
-                                    if (param == "all")
+                                    if (tokens[0] == "all")
                                         ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
-                                    else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == param)
+                                    else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address ==tokens[0])
                                     {
                                         ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
                                         break;
@@ -669,14 +627,13 @@ namespace Wockets.Kernel
 
                             try
                             {
-                                string[] tokens = param.Split(new char[] { ':' });
-                                string mac = tokens[0];                
+                                string[] tokens = param.Split(new char[] { ':' });                                         
                                 Command command = new SET_SR(Convert.ToInt32(tokens[1]));
                                 for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
                                 {
-                                    if (param == "all")
+                                    if (tokens[0] == "all")
                                         ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
-                                    else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == mac)
+                                    else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == tokens[0])
                                     {
                                         ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
                                         break;
@@ -728,14 +685,13 @@ namespace Wockets.Kernel
 
                             try
                             {
-                                string[] tokens = param.Split(new char[] { ':' });
-                                string mac = tokens[0];
+                                string[] tokens = param.Split(new char[] { ':' });                                
                                 Command command = new SET_PDT(Convert.ToInt32(tokens[1]));
                                 for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
                                 {
-                                    if (param == "all")
+                                    if (tokens[0] == "all")
                                         ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
-                                    else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == mac)
+                                    else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == tokens[0])
                                     {
                                         ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
                                         break;
@@ -787,14 +743,19 @@ namespace Wockets.Kernel
 
                             try
                             {
+                                string[] tokens = param.Split(new char[] { ':' });
+
                                 TransmissionMode mode = (TransmissionMode)Enum.Parse(typeof(TransmissionMode),
-                                    param.Split(new char[] { ':' })[1], true);
+                                    tokens[1], true);
+
+                                if (mode == TransmissionMode.Continuous)
+                                    CurrentWockets._Continuous = true;                               
                                 Command command = new SET_TM(mode);
                                 for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
                                 {
-                                    if (param == "all")
+                                    if (tokens[0] == "all")
                                         ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
-                                    else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == param)
+                                    else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == tokens[0])
                                     {
                                         ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
                                         break;

@@ -19,6 +19,8 @@ namespace Wockets
         /// </summary>
         public static WocketsConfiguration _Configuration=null;
 
+        public static bool _Continuous = false;
+
         /// <summary>
         /// The version number of the wockets software
         /// </summary>

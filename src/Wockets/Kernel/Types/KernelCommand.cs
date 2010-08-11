@@ -27,7 +27,7 @@ namespace Wockets.Kernel.Types
         GET_TRANSMISSION_MODE,
         SET_TRANSMISSION_MODE,
         GET_MEMORY_MODE,
-        SET_MEMORY_MODE,        
+        SET_MEMORY_MODE,
         TERMINATE
     }
 }

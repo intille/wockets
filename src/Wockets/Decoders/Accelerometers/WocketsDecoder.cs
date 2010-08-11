@@ -9,6 +9,7 @@ using Wockets.Data.Types;
 using Wockets.Data.Responses;
 using Wockets.Utils;
 using Wockets.Exceptions;
+using Wockets.Kernel;
 
 #if (PocketPC)
 using Wockets.Utils.IPC.MMF;
@@ -314,14 +315,10 @@ namespace Wockets.Decoders.Accelerometers
                                     BL_RSP br = new BL_RSP(this._ID);
                                     for (int i = 0; (i < bytesToRead); i++)
                                         br.RawBytes[i] = this.packet[i];
-                                    br._BatteryLevel = (((int)this.packet[1]) << 3) | ((this.packet[2] >> 4) & 0x07);                                    
+                                    br._BatteryLevel = (((int)this.packet[1]) << 3) | ((this.packet[2] >> 4) & 0x07);
+                                    Core.WRITE_BATTERY_LEVEL(br);
                                     FireEvent(br);
-                                    break;
-                                /*case ResponseTypes.PC_RSP:
-                                    this._ExpectedPacketCount = 0;
-                                    this._ExpectedPacketCount = ((this.packet[1] & 0x7f) << 9) | ((this.packet[2] & 0x7f) << 2) |
-                                        ((this.packet[3] & 0x60) >> 5);
-                                    break;*/
+                                    break;                                
                                 case ResponseTypes.CAL_RSP:
                                     CAL_RSP cal = new CAL_RSP(this._ID);
                                     for (int i = 0; (i < bytesToRead); i++)
@@ -331,7 +328,8 @@ namespace Wockets.Decoders.Accelerometers
                                     cal._Y1G = ((this.packet[3] & 0x01) << 9) | ((this.packet[4] & 0x7f) << 2) | ((this.packet[5] & 0x60) >> 5);
                                     cal._YN1G = ((this.packet[5] & 0x1f) << 5) | ((this.packet[6] & 0x7c) >> 2);
                                     cal._Z1G = ((this.packet[6] & 0x03) << 8) | ((this.packet[7] & 0x7f) << 1) | ((this.packet[8] & 0x40) >> 6);
-                                    cal._ZN1G = ((this.packet[8] & 0x3f) << 4) | ((this.packet[9] & 0x78) >> 3);                                                                        
+                                    cal._ZN1G = ((this.packet[8] & 0x3f) << 4) | ((this.packet[9] & 0x78) >> 3);
+                                    Core.WRITE_CALIBRATION(cal);
                                     FireEvent(cal);
                                     break;
                                 case ResponseTypes.BTCAL_RSP:
@@ -352,6 +350,7 @@ namespace Wockets.Decoders.Accelerometers
                                         sr.RawBytes[i] = this.packet[i];
                                     sr._SamplingRate= (this.packet[1]&0x7f);                  
                                     this._ExpectedSamplingRate = sr._SamplingRate;
+                                    Core.WRITE_SAMPLING_RATE(sr);
                                     FireEvent(sr);
                                     break;
                                 case ResponseTypes.BP_RSP:
@@ -359,6 +358,7 @@ namespace Wockets.Decoders.Accelerometers
                                     for (int i = 0; (i < bytesToRead); i++)
                                         bp.RawBytes[i] = this.packet[i];
                                     bp._Percent= (this.packet[1] & 0x7f);
+                                    Core.WRITE_BATTERY_PERCENT(bp);
                                     FireEvent(bp);
                                     break;
                                 case ResponseTypes.TM_RSP:
@@ -366,6 +366,7 @@ namespace Wockets.Decoders.Accelerometers
                                     for (int i = 0; (i < bytesToRead); i++)
                                         tm.RawBytes[i] = this.packet[i];
                                     tm._TransmissionMode = (TransmissionMode)((this.packet[1]>>4) & 0x07);
+                                    Core.WRITE_TRANSMISSION_MODE(tm);
                                     FireEvent(tm);
                                     break;
 
@@ -374,6 +375,7 @@ namespace Wockets.Decoders.Accelerometers
                                     for (int i = 0; (i < bytesToRead); i++)
                                         sen.RawBytes[i] = this.packet[i];
                                     sen._Sensitivity = (Sensitivity)((this.packet[1] >> 4) & 0x07);
+                                    Core.WRITE_SENSITIVITY(sen);
                                     FireEvent(sen);
                                     break;
                                 case ResponseTypes.PC_RSP:
@@ -381,6 +383,7 @@ namespace Wockets.Decoders.Accelerometers
                                     for (int i = 0; (i < bytesToRead); i++)
                                         pc.RawBytes[i] = this.packet[i];
                                     pc._Count = ((this.packet[1] & 0x7f) << 25) | ((this.packet[2] & 0x7f) << 18) | ((this.packet[3] & 0x7f) << 11) | ((this.packet[4] & 0x7f) << 4) | ((this.packet[5] & 0x7f) >> 3);
+                                    Core.WRITE_PDU_COUNT(pc);                                            
                                     FireEvent(pc);
                                     break;
                                 case ResponseTypes.PDT_RSP:
@@ -443,7 +446,9 @@ namespace Wockets.Decoders.Accelerometers
                                     for (int i = 0; (i < bytesToRead); i++)
                                         ac.RawBytes[i] = this.packet[i];
                                     ac._Count = ((this.packet[1] & 0x7f) << 9) | ((this.packet[2] & 0x7f)<<2) | ((this.packet[3]>>5)&0x03);
-                                    this._ActivityCounts[this._ActivityCountIndex++] = ac._Count;    
+                                    this._ActivityCounts[this._ActivityCountIndex++] = ac._Count;
+                                    Core.WRITE_ACTIVITY_COUNT(ac);
+                                    FireEvent(ac);
                                     break;
                                 default:
                                     break;

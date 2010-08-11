@@ -176,7 +176,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                     btStream.socket.Connect(btStream._RemoteEP);       
                     btStream._CurrentConnectionUnixTime = WocketsTimer.GetUnixTime(DateTime.Now);
                     btStream._ConnectionTime = btStream._CurrentConnectionUnixTime - btStream._ConnectionTime;
-                    btStream.nstream = new NetworkStream(btStream.socket, true);
+                    btStream.nstream = new NetworkStream(btStream.socket, true);                   
                 }
 
 
@@ -212,7 +212,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
             byte[] sendByte = new byte[1];
             this._Status = BluetoothStatus.Connected;
             byte[] singleReadBuffer = new byte[LOCAL_BUFFER_SIZE];
-
+          
             
             if (CurrentWockets._Configuration._SoftwareMode == SoftwareConfiguration.DEBUG)
                 Logger.Debug("MicrosoftBluetoothStream: Process: Processing thread started for connection " + this._HexAddress);
@@ -223,6 +223,13 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
 
                 try
                 {
+                    if (CurrentWockets._Continuous)
+                    {
+                        Wockets.Data.Commands.SET_TM tm = new Wockets.Data.Commands.SET_TM(Wockets.Data.Types.TransmissionMode.Continuous);
+                        socket.Send(tm._Bytes);
+                        CurrentWockets._Continuous = false;
+                        Thread.Sleep(1000);
+                    }
 
                     // Transmit data if needed 1 byte at a time, for a maximum of 10 bytes in each iteration
                     // then receive to avoid substantial delays

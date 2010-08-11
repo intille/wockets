@@ -8,6 +8,7 @@ using Wockets.Data.Commands;
 using Wockets.Kernel.Types;
 using Wockets.Utils;
 using Microsoft.Win32;
+using Wockets.Data.Responses;
 using Wockets.Data.Configuration;
 using Wockets.Receivers;
 using Wockets.Decoders.Accelerometers;
@@ -358,6 +359,21 @@ namespace Wockets.Kernel
             return success;
         }
 
+        public static void WRITE_BATTERY_LEVEL(BL_RSP bl)
+        {
+            try
+            {                
+                registryLock.WaitOne();
+                RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + bl._SensorID.ToString("0"));
+                rk.SetValue("BATTERY_LEVEL", bl._BatteryLevel, RegistryValueKind.String);
+                rk.Close();
+                registryLock.Release();                
+            }
+            catch
+            {
+                registryLock.Release();
+            }
+        }
         public static Hashtable READ_BATTERY_LEVEL()
         {
             try
@@ -419,6 +435,21 @@ namespace Wockets.Kernel
             return success;
         }
 
+        public static void WRITE_BATTERY_PERCENT(BP_RSP bp)
+        {
+            try
+            {            
+                registryLock.WaitOne();
+                RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + bp._SensorID.ToString("0"));
+                rk.SetValue("BATTERY_PERCENT", bp._Percent, RegistryValueKind.String);
+                rk.Close();
+                registryLock.Release();
+            }
+            catch
+            {
+                registryLock.Release();
+            }
+        }
 
         public static Hashtable READ_BATTERY_PERCENT()
         {
@@ -480,6 +511,21 @@ namespace Wockets.Kernel
             return success;
         }
 
+        public static void WRITE_PDU_COUNT(PC_RSP pc)
+        {
+            try
+            {                
+                registryLock.WaitOne();
+                RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + pc._SensorID.ToString("0"));
+                rk.SetValue("PDU_COUNT", pc._Count, RegistryValueKind.String);
+                rk.Close();
+                registryLock.Release();                
+            }
+            catch
+            {
+                registryLock.Release();
+            }
+        }
         public static Hashtable READ_PDU_COUNT()
         {
             try
@@ -541,6 +587,22 @@ namespace Wockets.Kernel
             return success;
         }
 
+        public static void WRITE_SENSITIVITY(SENS_RSP sen)
+        {
+            try
+            {                
+                registryLock.WaitOne();
+                RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + sen._SensorID.ToString("0"));
+                rk.SetValue("SENSITIVITY", sen._Sensitivity, RegistryValueKind.String);
+                rk.Close();
+                registryLock.Release();
+
+            }
+            catch
+            {
+                registryLock.Release();
+            }
+        }
         public static Hashtable READ_SENSITIVITY()
         {
             try
@@ -623,6 +685,26 @@ namespace Wockets.Kernel
         }
 
 
+        public static void WRITE_CALIBRATION(CAL_RSP cal)
+        {
+            try
+            {                
+                registryLock.WaitOne();
+                RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + cal._SensorID.ToString("0"));
+                rk.SetValue("_X1G", cal._X1G, RegistryValueKind.String);
+                rk.SetValue("_XN1G", cal._XN1G, RegistryValueKind.String);
+                rk.SetValue("_Y1G", cal._Y1G, RegistryValueKind.String);
+                rk.SetValue("_YN1G", cal._YN1G, RegistryValueKind.String);
+                rk.SetValue("_Z1G", cal._Z1G, RegistryValueKind.String);
+                rk.SetValue("_ZN1G", cal._ZN1G, RegistryValueKind.String);
+                rk.Close();
+                registryLock.Release();                
+            }
+            catch
+            {
+                registryLock.Release();
+            }
+        }
 
         public static Hashtable READ_CALIBRATION()
         {
@@ -733,6 +815,22 @@ namespace Wockets.Kernel
             return success;
         }
 
+        public static void WRITE_SAMPLING_RATE(SR_RSP sr)
+        {
+            try
+            {    
+                registryLock.WaitOne();
+                RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + sr._SensorID.ToString("0"));
+                rk.SetValue("SAMPLING_RATE", sr._SamplingRate, RegistryValueKind.String);
+                rk.Close();
+                registryLock.Release();
+             
+            }
+            catch
+            {
+                registryLock.Release();
+            }
+        }
         public static Hashtable READ_SAMPLING_RATE()
         {
             try
@@ -774,6 +872,62 @@ namespace Wockets.Kernel
             return null;
         }
 
+        public static void WRITE_ACTIVITY_COUNT(AC_RSP ac)
+        {
+            try
+            {                
+                registryLock.WaitOne();
+                RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + ac._SensorID.ToString("0"));
+                rk.SetValue("ACTIVITY_COUNT", ac._Count, RegistryValueKind.String);
+                rk.Close();
+                registryLock.Release();                
+            }
+            catch
+            {
+                registryLock.Release();
+            }
+        }
+
+        public static Hashtable READ_ACTIVITY_COUNT()
+        {
+            try
+            {
+                Hashtable acs = new Hashtable();
+                RegistryKey rk = null;
+                registryLock.WaitOne();
+                for (int i = 0; (i < 5); i++)
+                {
+                    try
+                    {
+                        rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + i.ToString("0"));
+                        int status = (int)rk.GetValue("Status");
+                        if (status == 1)
+                        {
+                            int sr = Convert.ToInt32((string)rk.GetValue("ACTIVITY_COUNT"));
+                            string mac = (string)rk.GetValue("MacAddress");
+                            acs.Add(mac, sr);
+
+                        }
+                        rk.Close();
+                    }
+                    catch
+                    {
+                    }
+                }
+                registryLock.Release();
+
+                if (acs.Count > 0)
+                    return acs;
+                else
+                    return null;
+
+            }
+            catch
+            {
+                registryLock.Release();
+            }
+            return null;
+        }
 
         public static bool GET_WOCKET_POWERDOWN_TIMEOUT(string channel, string mac)
         {
@@ -817,6 +971,8 @@ namespace Wockets.Kernel
         }
 
 
+
+
         public static bool GET_TRANSMISSION_MODE(string channel, string mac)
         {
             bool success = false;
@@ -837,7 +993,20 @@ namespace Wockets.Kernel
             return success;
         }
 
-
+        public static void WRITE_TRANSMISSION_MODE(TM_RSP tm)
+        {
+            try
+            {                
+                registryLock.WaitOne();
+                RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + tm._SensorID.ToString("0"));
+                rk.SetValue("TRANSMISSION_MODE", tm._TransmissionMode.ToString(), RegistryValueKind.String);
+                rk.Close();
+                registryLock.Release();                
+            }
+            catch
+            {                
+            }
+        }
 
         public static Hashtable READ_TRANSMISSION_MODE()
         {
@@ -923,7 +1092,7 @@ namespace Wockets.Kernel
         }
 
 
-        public static bool SET_TRANSMISSION_MODE(string channel, string mac, MemoryMode mode)
+        public static bool SET_MEMORY_MODE(string channel, string mac, MemoryMode mode)
         {
             bool success = false;
             if ((_Registered) && (_Connected))
