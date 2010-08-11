@@ -1,4 +1,4 @@
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -543,9 +543,6 @@
     <Compile Include="..\..\src\Wockets\Utils\Math.cs">
       <Link>Utils\Math.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\TransmissionMode.cs">
-      <Link>TransmissionMode.cs</Link>
-    </Compile>
     <Compile Include="..\..\src\Wockets\Data\Types\BatteryCalibration.cs">
       <Link>Data\Types\BatteryCalibration.cs</Link>
     </Compile>
@@ -576,10 +573,10 @@
     <Compile Include="..\..\src\Wockets\Data\Types\TransmissionMode.cs">
       <Link>Data\Types\TransmissionMode.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Responses\AC_RSP.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Responses\AC_RSP.cs">
       <Link>Data\Responses\AC_RSP.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Kernel\Types\KernelResponse.cs" >
+    <Compile Include="..\..\src\Wockets\Kernel\Types\KernelResponse.cs">
       <Link>Kernel\Types\KernelResponse.cs</Link>
     </Compile>
   </ItemGroup>
