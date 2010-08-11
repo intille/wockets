@@ -186,8 +186,7 @@ namespace Wockets.Kernel
                         Broadcast(KernelResponse.ACTIVITY_COUNT_UPDATED);
                     }
                     catch
-                    {
-                        registryLock.Release();
+                    {                        
                     }
                     break;
                 default:
@@ -306,6 +305,7 @@ namespace Wockets.Kernel
                                         d.Subscribe(ResponseTypes.CAL_RSP, new Decoder.ResponseHandler(DecoderCallback));
                                         d.Subscribe(ResponseTypes.SR_RSP, new Decoder.ResponseHandler(DecoderCallback));
                                         d.Subscribe(ResponseTypes.TM_RSP, new Decoder.ResponseHandler(DecoderCallback));
+                                        d.Subscribe(ResponseTypes.AC_RSP, new Decoder.ResponseHandler(DecoderCallback));
                                     }
                                     Send(KernelResponse.CONNECTED, applicationGuid);
                                 }
