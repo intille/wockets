@@ -15,6 +15,7 @@ using Wockets.Data.Commands;
 using Wockets.Data.Accelerometers;
 using Wockets.Data.Annotation;
 using Wockets.Data.Features;
+using Wockets.Data.Types;
 
 
 using WocketsWeka;
