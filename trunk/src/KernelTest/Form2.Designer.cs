@@ -49,19 +49,19 @@
             this.menuItem11 = new System.Windows.Forms.MenuItem();
             this.menuItem12 = new System.Windows.Forms.MenuItem();
             this.menuItem13 = new System.Windows.Forms.MenuItem();
+            this.menuItem21 = new System.Windows.Forms.MenuItem();
+            this.menuItem24 = new System.Windows.Forms.MenuItem();
+            this.menuItem22 = new System.Windows.Forms.MenuItem();
+            this.menuItem23 = new System.Windows.Forms.MenuItem();
+            this.menuItem25 = new System.Windows.Forms.MenuItem();
+            this.menuItem26 = new System.Windows.Forms.MenuItem();
+            this.menuItem27 = new System.Windows.Forms.MenuItem();
             this.menuItem2 = new System.Windows.Forms.MenuItem();
             this.panel1 = new System.Windows.Forms.Panel();
             this.label1 = new System.Windows.Forms.Label();
             this.timer1 = new System.Windows.Forms.Timer();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
-            this.menuItem21 = new System.Windows.Forms.MenuItem();
-            this.menuItem22 = new System.Windows.Forms.MenuItem();
-            this.menuItem23 = new System.Windows.Forms.MenuItem();
-            this.menuItem24 = new System.Windows.Forms.MenuItem();
-            this.menuItem25 = new System.Windows.Forms.MenuItem();
-            this.menuItem26 = new System.Windows.Forms.MenuItem();
-            this.menuItem27 = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // mainMenu1
@@ -180,6 +180,44 @@
             this.menuItem13.Text = "90";
             this.menuItem13.Click += new System.EventHandler(this.menuItem13_Click);
             // 
+            // menuItem21
+            // 
+            this.menuItem21.MenuItems.Add(this.menuItem24);
+            this.menuItem21.MenuItems.Add(this.menuItem22);
+            this.menuItem21.MenuItems.Add(this.menuItem23);
+            this.menuItem21.MenuItems.Add(this.menuItem25);
+            this.menuItem21.MenuItems.Add(this.menuItem26);
+            this.menuItem21.MenuItems.Add(this.menuItem27);
+            this.menuItem21.Text = "Mode";
+            // 
+            // menuItem24
+            // 
+            this.menuItem24.Text = "Update";
+            this.menuItem24.Click += new System.EventHandler(this.menuItem24_Click);
+            // 
+            // menuItem22
+            // 
+            this.menuItem22.Text = "Continuous";
+            this.menuItem22.Click += new System.EventHandler(this.menuItem22_Click);
+            // 
+            // menuItem23
+            // 
+            this.menuItem23.Text = "Efficient 30";
+            this.menuItem23.Click += new System.EventHandler(this.menuItem23_Click);
+            // 
+            // menuItem25
+            // 
+            this.menuItem25.Text = "Efficient 60";
+            this.menuItem25.Click += new System.EventHandler(this.menuItem25_Click);
+            // 
+            // menuItem26
+            // 
+            this.menuItem26.Text = "Efficient 90";
+            // 
+            // menuItem27
+            // 
+            this.menuItem27.Text = "Efficient 120";
+            // 
             // menuItem2
             // 
             this.menuItem2.Text = "Disconnect";
@@ -219,42 +257,6 @@
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(223, 46);
             this.label3.Text = "Received:";
-            // 
-            // menuItem21
-            // 
-            this.menuItem21.MenuItems.Add(this.menuItem24);
-            this.menuItem21.MenuItems.Add(this.menuItem22);
-            this.menuItem21.MenuItems.Add(this.menuItem23);
-            this.menuItem21.MenuItems.Add(this.menuItem25);
-            this.menuItem21.MenuItems.Add(this.menuItem26);
-            this.menuItem21.MenuItems.Add(this.menuItem27);
-            this.menuItem21.Text = "Mode";
-            // 
-            // menuItem22
-            // 
-            this.menuItem22.Text = "Continuous";
-            // 
-            // menuItem23
-            // 
-            this.menuItem23.Text = "Efficient 30";
-            this.menuItem23.Click += new System.EventHandler(this.menuItem23_Click);
-            // 
-            // menuItem24
-            // 
-            this.menuItem24.Text = "Update";
-            this.menuItem24.Click += new System.EventHandler(this.menuItem24_Click);
-            // 
-            // menuItem25
-            // 
-            this.menuItem25.Text = "Efficient 60";
-            // 
-            // menuItem26
-            // 
-            this.menuItem26.Text = "Efficient 90";
-            // 
-            // menuItem27
-            // 
-            this.menuItem27.Text = "Efficient 120";
             // 
             // Form2
             // 
