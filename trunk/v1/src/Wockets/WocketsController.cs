@@ -296,12 +296,12 @@ namespace Wockets
 
             polling = true;
 
-            if (!_Bursty)
+           if (!_Bursty)
             {
-                saving = true;
-                aSavingThread = new Thread(new ThreadStart(Save));
-                aSavingThread.Priority = ThreadPriority.Highest;
-                aSavingThread.Start();
+                //saving = true;
+                //aSavingThread = new Thread(new ThreadStart(Save));
+                //aSavingThread.Priority = ThreadPriority.Highest;
+                //aSavingThread.Start();
             }
 
             //classifying = true;
@@ -374,7 +374,7 @@ namespace Wockets
                     {
 
                         this._Sensors[i].Save();
-                        Thread.Sleep(1000);
+                        Thread.Sleep(200);
 
                         //FOR power efficient
                         //if (this._Sensors[i].SavedPackets == 2400) 
@@ -675,6 +675,8 @@ namespace Wockets
             //int quantum= CeGetThreadQuantum(new IntPtr(aPollingThread.ManagedThreadId));
 
             bool allWocketsDisconnected = true;
+            int disconnectedCounter= 0;
+            int connectedCounter = 0;
             bool bluetoothIsReset = false;
             Receiver currentReceiver = null;
             Sensor sensor = null;
@@ -704,7 +706,8 @@ namespace Wockets
 
                 allWocketsDisconnected = true;
                 pollCounter++;
-
+                disconnectedCounter=0;
+                connectedCounter = 0;
                 for (int i = 0; (i < this._Sensors.Count); i++)
                 {
                     sensor = this._Sensors[i];
@@ -722,9 +725,12 @@ namespace Wockets
                             currentReceiver.Update();
 
 
+                        //if (currentReceiver._Status != ReceiverStatus.Connected)
+                         //   disconnectedCounter++;
 
                         if (currentReceiver._Status == ReceiverStatus.Connected)
                         {
+                          
                             Decoder decoder = sensor._Decoder;
                             int numDecodedPackets = 0;
                             int tail = currentReceiver._Buffer._Tail;
@@ -739,7 +745,7 @@ namespace Wockets
                             {
                                 if (bluetoothIsReset)
                                     bluetoothIsReset = false;
-
+                                //connectedCounter++;
                                 if (allWocketsDisconnected)
                                     allWocketsDisconnected = false;
                             }
@@ -769,7 +775,7 @@ namespace Wockets
                                     if (alive[i] <= 0)
                                     {
                                         ((SerialReceiver)currentReceiver).Write(ALIVE_CMD._Bytes);
-                                        alive[i] = 200;// + i * 10;
+                                        alive[i] = 10;// + i * 10;
                                     }
                                     #endregion Alive
 
@@ -783,8 +789,8 @@ namespace Wockets
                                     #endregion Read Data
                                 }
 
-                                //     if (numDecodedPackets>0)
-                                //        sensor.Save();
+                                     if (numDecodedPackets>0)
+                                       sensor.Save();
 
                             }
 
@@ -814,7 +820,22 @@ namespace Wockets
                     }
                 }
 
+                //if (connectedCounter > 4)
+                  //  bluetoothIsReset = false;
                 //reset bluetooth stack once if all wockets are disconnected
+                /*if ((!_Bursty) && (!bluetoothIsReset) && (disconnectedCounter >= 3))
+                {
+                    try
+                    {
+                        Logger.Debug("All Wockets Disconnected. BT Reset.");
+                        NetworkStacks._BluetoothStack.Dispose();
+                        NetworkStacks._BluetoothStack.Initialize();
+                        bluetoothIsReset = true;
+                    }
+                    catch
+                    {
+                    }
+                }*/
                 
                 if ((!_Bursty)&& (!bluetoothIsReset) && (allWocketsDisconnected))
                 {
@@ -829,7 +850,7 @@ namespace Wockets
                     }
                 }
 
-                Thread.Sleep(10);
+                Thread.Sleep(500);
             }
 
 
