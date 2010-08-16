@@ -1,4 +1,4 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -78,7 +78,7 @@
     <EmbeddedResource Include="..\..\src\WocketsAppNS\WocketsForm.resx">
       <DependentUpon>WocketsForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="PortableProgressBar.resx">
+    <EmbeddedResource Include="..\..\src\WocketsAppNS\PortableProgressBar.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>PortableProgressBar.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
@@ -103,7 +103,7 @@
     <Compile Include="..\..\src\WocketsAppNS\WocketsForm.designer.cs">
       <DependentUpon>WocketsForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="PortableProgressBar.Designer.cs">
+    <Compile Include="..\..\src\WocketsAppNS\PortableProgressBar.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>PortableProgressBar.resx</DependentUpon>
