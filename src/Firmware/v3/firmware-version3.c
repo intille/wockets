@@ -66,6 +66,7 @@ unsigned short batch_counter=0;
 
 /* Interrupt Service Routines */
 unsigned int seconds_passed=0;
+unsigned int seconds_passed2=0;
 unsigned int counter=0;
 
 unsigned char skip_interrupt_counter=0;
@@ -82,11 +83,12 @@ unsigned short docking_counter=0;
 /* Butterworth Filter */
 //double b[5]= {0.0051,0.0,-0.0103,0.0,0.0051};
 //double a[5]= { 1.00, -3.7856, 5.3793, -3.4016, 0.8079};
-double xv[3][40];
+double xv[3][5];
 //double yv[3][5];
 double vmag;
 unsigned short vmags;
 unsigned short val;
+unsigned char justconnected=0;
 
 double Filter(unsigned short data,int axis)
 {
@@ -94,11 +96,11 @@ double Filter(unsigned short data,int axis)
 	 double mean=0;
      int j=0;           
 	 double ac=0;
-     for (; (j < 39); j++){
+     for (; (j < 4); j++){
           xv[axis][j] = xv[axis][j + 1];
 		  mean+=xv[axis][j];
 		  }
-	mean=mean/39;
+	mean=mean/4;
       xv[axis][j] = data;
 
       /*j = 0;
@@ -171,10 +173,14 @@ static __inline__ void _send_pdu(unsigned short x, unsigned short y, unsigned sh
 
 int main()
 {
+
+	if (_is_docked()){
+		for(int j=0;(j<10);j++)
+			for(int i=0;(i<200);i++)
+				_delay_ms(5);
+	}
 				
-scounter=0;
-
-
+	scounter=0;
 	//Initialized data buffer
 	dataIndex=0;
 	dataSubindex=0;
@@ -206,9 +212,8 @@ scounter=0;
 
 			z=_atmega_a2dConvert10bit(ADC0);
 	
-
-		if (_wTM!=_TM_Continuous)
-			{
+	//if (_wTM!=_TM_Continuous)
+	//		{
 
 			val=Filter(x,0);			
 			vmag=val;
@@ -233,7 +238,8 @@ scounter=0;
 				summary_count=2400;
 			}else
 				summary_count--;
-			}
+	//	}
+		
 #else
 			x=_atmega_a2dConvert10bit(ADC3);
 			y=_atmega_a2dConvert10bit(ADC2);
@@ -255,8 +261,7 @@ scounter=0;
 
 			if (_wTM==_TM_Continuous)
 			{
-
-				
+									
 				switch(dataSubindex){
 				case 1:
 						m_GET_X(x,data[dataIndex].byte1,data[dataIndex].byte2,0);
@@ -283,7 +288,23 @@ scounter=0;
 				//_transmit_packet(_encode_packet( x, y, z));	
 				//_send_uncompressed_pdu(x, y, z);
 				//_send_pdu(x,y,z);
+				if (justconnected==1)
+				{
+					_send_tm();
+					justconnected=2;
+				}
 				_send_pdu(x,y,z);
+
+				
+					//Send summary activity count
+					for (int i=0;(i<summaryindex);i++){
+						_send_summary_count(acount[i]);
+						acount[i]=0;
+					}
+					if (summaryindex<960){
+						acount[0]=acount[summaryindex];
+						summaryindex=0;
+					}
 
 			}
 			else 
@@ -293,18 +314,21 @@ scounter=0;
 				if (connected){
 					_greenled_turn_on();
 					
-					_send_sr();
+					_send_sr();					
+					_send_tm();
 					_send_batch_count(batch_counter*4);
 
 
+					//Send summary activity count
 					for (int i=0;(i<summaryindex);i++){
 						_send_summary_count(acount[i]);
 						acount[i]=0;
 					}
-
-					if (summaryindex<960)
+					if (summaryindex<960){
 						acount[0]=acount[summaryindex];
-					summaryindex=0;
+						summaryindex=0;
+					}
+
 					
 					if (batch_counter<750) // Go from 0 up to batch_counter
 					{						
@@ -337,6 +361,10 @@ scounter=0;
 							//_transmit_packet(_encode_packet(x,y,z));
 							//_send_uncompressed_pdu(x, y, z);
 							_send_pdu(x,y,z);
+
+							_receive_data();
+							//if (_wTM==_TM_Continuous)
+								//break;
 						}
 					}else{
 
@@ -377,6 +405,8 @@ scounter=0;
 							current++;
 							if (current==750)
 								current=0;
+
+							_receive_data();
 						}
 
 						//copy end item into start
@@ -498,8 +528,12 @@ ISR(TIMER2_OVF_vect)
 	sampleFlag=1;
 	if (_wTM==_TM_Continuous)
 	{
+
+		_wPC++;
+
 		if (!_bluetooth_is_connected())
 		{
+			justconnected=0;
 			compress=0; //false
 			if (_wPDT!=0){
 				_wShutdownTimer--;
@@ -507,12 +541,11 @@ ISR(TIMER2_OVF_vect)
 					_atmega_finalize();
 			}
 			return;		
-		}
+		}else if (justconnected==0)
+			justconnected=1;
 
 		if (_wShutdownTimer!=_DEFAULT_SHUTDOWN)
 			_wShutdownTimer=_DEFAULT_SHUTDOWN;
-
-		 _wPC++;
 
 
 		_receive_data();
@@ -542,6 +575,18 @@ ISR(TIMER2_OVF_vect)
 		//reset shutdown timer if connected
 		if ((_wPDT!=0) && (_wShutdownTimer!=_DEFAULT_SHUTDOWN))
 			_wShutdownTimer=_DEFAULT_SHUTDOWN;
+
+
+		/*seconds_passed2=0;
+		while (seconds_passed2<20)
+		{
+			_delay_ms(5);
+			seconds_passed2++;
+			_receive_data();
+			if (_wTM==_TM_Continuous)
+				break;
+		}						
+*/
 
 		connected=1;
 		_receive_data();		
