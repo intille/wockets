@@ -4,16 +4,16 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{0F3D4EB2-7352-4869-A7F1-E0145BF3441B}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{1E1AE2F5-4865-4BA9-8348-924A6364DACB}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Kernel</RootNamespace>
-    <AssemblyName>Kernel</AssemblyName>
+    <RootNamespace>SMSLib</RootNamespace>
+    <AssemblyName>SMSLib</AssemblyName>
     <ProjectTypeGuids>{4D628B5B-2FBC-4AA6-8C16-197242AEB884};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <PlatformFamilyName>PocketPC</PlatformFamilyName>
     <PlatformID>4118C335-430C-497f-BE48-11C3316B135E</PlatformID>
     <OSVersion>5.1</OSVersion>
-    <DeployDirSuffix>Wockets</DeployDirSuffix>
+    <DeployDirSuffix>SMSLib</DeployDirSuffix>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <NativePlatformName>Windows Mobile 5.0 Pocket PC SDK</NativePlatformName>
     <FormFactorID>
@@ -31,6 +31,7 @@
     <FileAlignment>512</FileAlignment>
     <WarningLevel>4</WarningLevel>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+    <DocumentationFile>..\..\bin\PPC\SMSLib.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -45,6 +46,9 @@
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AppUpdaterLogger, Version=1.0.3866.28631, Culture=neutral, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.WindowsMobile, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" />
+    <Reference Include="Microsoft.WindowsMobile.PocketOutlook, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" />
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -54,14 +58,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\src\Kernel\Program.cs" />
-    <Compile Include="..\..\src\Kernel\Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="Wockets.csproj">
-      <Project>{5D98635F-251B-464F-9132-AF594E8D482B}</Project>
-      <Name>Wockets</Name>
-    </ProjectReference>
+    <Compile Include="..\..\src\SMSLib\EmailSender.cs" />
+    <Compile Include="..\..\src\SMSLib\HttpPostDataManager.cs" />
+    <Compile Include="..\..\src\SMSLib\MessageToResend.cs" />
+    <Compile Include="..\..\src\SMSLib\ReceivedMessage.cs" />
+    <Compile Include="..\..\src\SMSLib\SentMessage.cs" />
+    <Compile Include="..\..\src\SMSLib\SMSManager.cs" />
+    <Compile Include="..\..\src\SMSLib\Properties\AssemblyInfo.cs" />
+    <Compile Include="..\..\src\SMSLib\Util.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />
   <ProjectExtensions>

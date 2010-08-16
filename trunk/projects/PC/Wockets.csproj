@@ -1,4 +1,4 @@
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -393,9 +393,6 @@
     <Compile Include="..\..\src\Wockets\Data\Commands\SET_PDT.cs">
       <Link>Data\Commands\SET_PDT.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Responses\Sensitivity.cs">
-      <Link>Data\Responses\Sensitivity.cs</Link>
-    </Compile>
     <Compile Include="..\..\src\Wockets\Data\Commands\GET_BTCAL.cs">
       <Link>Data\Commands\GET_BTCAL.cs</Link>
     </Compile>
@@ -405,36 +402,51 @@
     <Compile Include="..\..\src\Wockets\Data\Responses\BTCAL_RSP.cs">
       <Link>Data\Responses\BTCAL_RSP.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\GET_FV.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_FV.cs">
       <Link>Data\Commands\GET_FV.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\GET_HV.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_HV.cs">
       <Link>Data\Commands\GET_HV.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Responses\FV_RSP.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Responses\FV_RSP.cs">
       <Link>Data\Responses\FV_RSP.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Responses\HV_RSP.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Responses\HV_RSP.cs">
       <Link>Data\Responses\HV_RSP.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Responses\BC_RSP.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Responses\BC_RSP.cs">
       <Link>Data\Responses\BC_RSP.cs</Link>
-    </Compile>    
-    <Compile Include="..\..\src\Wockets\Data\Features\FeatureVector.cs" >
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Features\FeatureVector.cs">
       <Link>Data\Features\FeatureVector.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Features\SimpleFeatureVector.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Features\SimpleFeatureVector.cs">
       <Link>Data\Features\SimpleFeatureVector.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\MemoryMode.cs" >
+    <Compile Include="..\..\src\Wockets\MemoryMode.cs">
       <Link>MemoryMode.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Utils\Math.cs" >
+    <Compile Include="..\..\src\Wockets\Utils\Math.cs">
       <Link>Utils\Math.cs</Link>
-    </Compile>  
-  <Compile Include="..\..\src\Wockets\TransmissionMode.cs" >
-      <Link>TransmissionMode.cs</Link>
-    </Compile>    
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Types\BatteryCalibration.cs">
+      <Link>Data\Types\BatteryCalibration.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Types\Calibration.cs">
+      <Link>Data\Types\Calibration.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Types\Sensitivity.cs">
+      <Link>Data\Types\Sensitivity.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Types\TransmissionMode.cs">
+      <Link>Data\Types\TransmissionMode.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\AC_RSP.cs">
+      <Link>Data\Responses\AC_RSP.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\SET_TM.cs">
+      <Link>Data\Commands\SET_TM.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="WocketsWeka.csproj">
