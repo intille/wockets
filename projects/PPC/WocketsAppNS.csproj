@@ -81,6 +81,7 @@
     <EmbeddedResource Include="PortableProgressBar.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>PortableProgressBar.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <Compile Include="..\..\src\WocketsAppNS\Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
