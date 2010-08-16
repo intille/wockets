@@ -9,9 +9,10 @@ using Wockets.Data.Types;
 using Wockets.Data.Responses;
 using Wockets.Utils;
 using Wockets.Exceptions;
-using Wockets.Kernel;
+
 
 #if (PocketPC)
+using Wockets.Kernel;
 using Wockets.Utils.IPC.MMF;
 #endif
 
@@ -316,7 +317,9 @@ namespace Wockets.Decoders.Accelerometers
                                     for (int i = 0; (i < bytesToRead); i++)
                                         br.RawBytes[i] = this.packet[i];
                                     br._BatteryLevel = (((int)this.packet[1]) << 3) | ((this.packet[2] >> 4) & 0x07);
+#if (PocketPC)
                                     Core.WRITE_BATTERY_LEVEL(br);
+#endif
                                     FireEvent(br);
                                     break;                                
                                 case ResponseTypes.CAL_RSP:
@@ -329,7 +332,9 @@ namespace Wockets.Decoders.Accelerometers
                                     cal._YN1G = ((this.packet[5] & 0x1f) << 5) | ((this.packet[6] & 0x7c) >> 2);
                                     cal._Z1G = ((this.packet[6] & 0x03) << 8) | ((this.packet[7] & 0x7f) << 1) | ((this.packet[8] & 0x40) >> 6);
                                     cal._ZN1G = ((this.packet[8] & 0x3f) << 4) | ((this.packet[9] & 0x78) >> 3);
+#if (PocketPC)
                                     Core.WRITE_CALIBRATION(cal);
+#endif
                                     FireEvent(cal);
                                     break;
                                 case ResponseTypes.BTCAL_RSP:
@@ -350,7 +355,9 @@ namespace Wockets.Decoders.Accelerometers
                                         sr.RawBytes[i] = this.packet[i];
                                     sr._SamplingRate= (this.packet[1]&0x7f);                  
                                     this._ExpectedSamplingRate = sr._SamplingRate;
+#if (PocketPC)
                                     Core.WRITE_SAMPLING_RATE(sr);
+#endif
                                     FireEvent(sr);
                                     break;
                                 case ResponseTypes.BP_RSP:
@@ -358,7 +365,9 @@ namespace Wockets.Decoders.Accelerometers
                                     for (int i = 0; (i < bytesToRead); i++)
                                         bp.RawBytes[i] = this.packet[i];
                                     bp._Percent= (this.packet[1] & 0x7f);
+#if (PocketPC)
                                     Core.WRITE_BATTERY_PERCENT(bp);
+#endif
                                     FireEvent(bp);
                                     break;
                                 case ResponseTypes.TM_RSP:
@@ -366,7 +375,9 @@ namespace Wockets.Decoders.Accelerometers
                                     for (int i = 0; (i < bytesToRead); i++)
                                         tm.RawBytes[i] = this.packet[i];
                                     tm._TransmissionMode = (TransmissionMode)((this.packet[1]>>4) & 0x07);
+#if (PocketPC)
                                     Core.WRITE_TRANSMISSION_MODE(tm);
+#endif
                                     FireEvent(tm);
                                     break;
 
@@ -375,7 +386,9 @@ namespace Wockets.Decoders.Accelerometers
                                     for (int i = 0; (i < bytesToRead); i++)
                                         sen.RawBytes[i] = this.packet[i];
                                     sen._Sensitivity = (Sensitivity)((this.packet[1] >> 4) & 0x07);
+#if (PocketPC)
                                     Core.WRITE_SENSITIVITY(sen);
+#endif
                                     FireEvent(sen);
                                     break;
                                 case ResponseTypes.PC_RSP:
@@ -383,7 +396,9 @@ namespace Wockets.Decoders.Accelerometers
                                     for (int i = 0; (i < bytesToRead); i++)
                                         pc.RawBytes[i] = this.packet[i];
                                     pc._Count = ((this.packet[1] & 0x7f) << 25) | ((this.packet[2] & 0x7f) << 18) | ((this.packet[3] & 0x7f) << 11) | ((this.packet[4] & 0x7f) << 4) | ((this.packet[5] & 0x7f) >> 3);
+#if (PocketPC)
                                     Core.WRITE_PDU_COUNT(pc);                                            
+#endif
                                     FireEvent(pc);
                                     break;
                                 case ResponseTypes.PDT_RSP:
@@ -447,7 +462,9 @@ namespace Wockets.Decoders.Accelerometers
                                         ac.RawBytes[i] = this.packet[i];
                                     ac._Count = ((this.packet[1] & 0x7f) << 9) | ((this.packet[2] & 0x7f)<<2) | ((this.packet[3]>>5)&0x03);
                                     this._ActivityCounts[this._ActivityCountIndex++] = ac._Count;
+#if (PocketPC)
                                     Core.WRITE_ACTIVITY_COUNT(ac);
+#endif
                                     FireEvent(ac);
                                     break;
                                 default:

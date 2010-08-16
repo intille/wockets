@@ -213,8 +213,8 @@ void _wocket_initialize(void)
 		_SAMPLING_RATE=40;
 		_wTM=_TM_Burst_60;
 
-		//_SAMPLING_RATE=90;
-		//_wTM=_TM_Continuous;
+//		_SAMPLING_RATE=90;
+//		_wTM=_TM_Continuous;
 	
 		// Write the sampling rate to the EEPROM
 		if (battery>300)
@@ -437,6 +437,17 @@ void _send_sr()
        	_bluetooth_transmit_uart0_byte(aBuffer[i]); 
  
 }
+
+void _send_tm()
+{
+ 
+	aBuffer[0]=m_TM_RSP_BYTE0;
+    aBuffer[1]=m_TM_RSP_BYTE1(_wTM);
+	for (int i=0;(i<2);i++)                                                                                       
+       	_bluetooth_transmit_uart0_byte(aBuffer[i]); 
+ 
+}
+
 void _send_data_bufferred(void)
 {
 	
@@ -672,6 +683,8 @@ void _receive_data(void)
                    case (unsigned char) SET_TM:  
 				   		_wTM=m_SET_TM(aBuffer[1]);
 						eeprom_write_byte(&_NV_TM,_wTM);
+	//					_yellowled_turn_on();
+						_atmega_reset();
 						processed_counter=command_counter;
 						break;
                     case (unsigned char) SET_CAL:                                                                    
@@ -807,7 +820,7 @@ void _receive_data(void)
                     
             }
     } //if command timed out
-    else if (command_timer>=MAX_COMMAND_TIMER)
+    else if ((command_timer>=MAX_COMMAND_TIMER))
     {                            
             command_length=0;
             command_counter=0;

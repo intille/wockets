@@ -799,7 +799,7 @@ namespace WocketsApplication
             #region Classification Panel
             this.bestGuessLabel = new AlphaLabel();
             this.bestGuessLabel.Size = new Size(500, 60);
-            this.bestGuessLabel.Text = "EveryFit Tracker";
+            this.bestGuessLabel.Text = "Activity Classification";
             this.bestGuessLabel.ForeColor = Color.Black;
             this.bestGuessLabel.Font = new Font(FontFamily.GenericSerif, 14.0f, System.Drawing.FontStyle.Bold);
             this.bestGuessLabel.Visible = true;
@@ -1094,7 +1094,7 @@ namespace WocketsApplication
                 {
 
                     this.panels[ControlID.CLASSIFICATION_PANEL].Refresh();
-                    TimeSpan ts = TimeSpan.FromSeconds(activityTimer.Ticks);
+                    /*TimeSpan ts = TimeSpan.FromSeconds(activityTimer.Ticks);
                     ((Label)this.classifiedLabels["timer"]).Text = "Time Elapsed: "+ ts.Hours.ToString("00") + ":" + ts.Minutes.ToString("00") + ":" + ts.Seconds.ToString("00");
                     double hrs = (ts.Hours + ts.Minutes / 60.0 + ts.Seconds / 3600.0);
                     double difference=(hrs - prevHrs);
@@ -1102,6 +1102,7 @@ namespace WocketsApplication
                         totalCalories += (kcal_kg_hr * kgs * difference);
                     prevHrs = hrs;
                     ((Label)this.classifiedLabels["kcals"]).Text = "Calories Burned: " + totalCalories.ToString("0.0");
+                     */
                     //((Label)this.classifiedLabels["reps"]).Text = "Reps: " +reps;
                     //pieChart.SetTime(ts.Hours,ts.Minutes,ts.Seconds);
                     //pieChart.Invalidate();
@@ -1128,9 +1129,9 @@ namespace WocketsApplication
                 else
                 {
                     
-                    //((Label)this.classifiedLabels[activity]).ForeColor = Color.FromArgb((int)(250 * color), (int)(237 * color), (int)(221 * color));
-                    //((Label)this.classifiedLabels[activity]).Invalidate();
-                    if (prevActivity != activity)
+                    ((Label)this.classifiedLabels[activity]).ForeColor = Color.FromArgb((int)(250 * color), (int)(237 * color), (int)(221 * color));
+                    ((Label)this.classifiedLabels[activity]).Invalidate();
+                    /*if (prevActivity != activity)
                     {
                         ((AlphaPictureBox)this.activityPictures[activity]).Visible = true;
                         if (prevActivity == "Reconnecting")
@@ -1154,7 +1155,7 @@ namespace WocketsApplication
                         }
                         ((Label)this.classifiedLabels["classification"]).Invalidate();
                         this.panels[ControlID.CLASSIFICATION_PANEL].Refresh();
-                    }
+                    }*/
                     //pieChart.SetActivity(activity);                    
                     //pieChart.Invalidate();
                     //this.panels[ControlID.EE_PANEL].Invalidate();
@@ -1212,8 +1213,8 @@ namespace WocketsApplication
                 {
                     Thread.Sleep(1000);
                     missedExtractions++;
-                    if (missedExtractions>6)
-                        UpdateClassification("no-activity", 1); 
+                    //if (missedExtractions>6)
+                      //  UpdateClassification("no-activity", 1); 
                     continue;
                 }
 
@@ -1250,9 +1251,8 @@ namespace WocketsApplication
                             //indicate = Color.FromArgb(level, level, level);
                             //this.ActGUIlabels[j].ForeColor = indicate;
                             //this.ActGUIlabels[j].Invalidate();
-                            double intensity = (1.0 - ((double)labelCounters[j] / (double)5));
-                            //((Label)this.classifiedLabels[activityLabels[j]]).ForeColor = Color.FromArgb((int) (250 *intensity) , (int)(237 * intensity), (int)(221 * intensity));
-                            //UpdateClassification(activityLabels[j], intensity);
+                            double intensity = (1.0 - ((double)labelCounters[j] / (double)5));                            
+                            UpdateClassification(activityLabels[j], intensity);
                             if (labelCounters[j] > mostCount)
                             {
                                 mostActivity = activityLabels[j];
@@ -1263,12 +1263,12 @@ namespace WocketsApplication
                             labelCounters[j] = 0;
                         }
 
-                        if (previousActivity != mostActivity)
+                       /* if (previousActivity != mostActivity)
                         {
                             this.activityTimer.stop();
                             this.activityTimer.reset();
                             this.activityTimer.start();
-                        }
+                        }*/
 
                         UpdateClassification(mostActivity, 0);
 
@@ -1519,6 +1519,7 @@ namespace WocketsApplication
             }
 
             classifiedLabels = new Hashtable();
+            /*
             activityPictures = new Hashtable();
 
             AlphaPictureBox picture = new AlphaPictureBox();            
@@ -1613,7 +1614,8 @@ namespace WocketsApplication
             picture.Location = new Point(40, 90);
             activityPictures.Add(picture.Name, picture);
             this.panels[ControlID.CLASSIFICATION_PANEL].Controls.Add(picture);
-            
+            */
+            /*
             Label label = new Label();
             label.Size = new Size(500, 100);
             label.Text = "";
@@ -1624,8 +1626,8 @@ namespace WocketsApplication
             label.Location = new Point(30, this.Height-450);
             classifiedLabels.Add("classification", label);
             this.panels[ControlID.CLASSIFICATION_PANEL].Controls.Add(label);
-
-
+            */
+            /*
             label = new Label();
             label.Size = new Size(500, 70);
             label.Text = "";
@@ -1659,12 +1661,12 @@ namespace WocketsApplication
             label.Location = new Point(30, this.Height - 180);
             classifiedLabels.Add("reps", label);
             this.panels[ControlID.CLASSIFICATION_PANEL].Controls.Add(label);
-            
+            */
 
             //add the labels to the interface
-            //int yLocation=40;
+            int yLocation=40;
           
-            /*
+            
             for (int i = 0; (i < instances.classAttribute().numValues()); i++)
             {
                 string activity= instances.classAttribute().value_Renamed(i);
@@ -1680,7 +1682,7 @@ namespace WocketsApplication
                 classifiedLabels.Add(activity, label);
                 this.panels[ControlID.CLASSIFICATION_PANEL].Controls.Add(label);
                 yLocation += 70;
-            }*/
+            }
             this.activityStatus = ActivityStatus.Measuring;
            
             this.panels[ControlID.CLASSIFICATION_PANEL].Visible = true;

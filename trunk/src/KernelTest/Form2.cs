@@ -400,16 +400,15 @@ namespace KernelTest
 
         private void menuItem11_Click(object sender, EventArgs e)
         {
-            if (Core._KernelGuid != null)
-            {
+            if (Core._KernelGuid != null)            
                 Core.SET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac, 40);
-                this.menuItem9.Checked = false;
-                this.menuItem10.Checked = false;
-                this.menuItem11.Checked = false;
-                this.menuItem12.Checked = false;
-                this.menuItem13.Checked = false;
-                Core.GET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac);
-            }
+
+                //Core.GET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac);
+            this.menuItem9.Checked = false;
+            this.menuItem10.Checked = false;
+            this.menuItem11.Checked = false;
+            this.menuItem12.Checked = false;
+            this.menuItem13.Checked = false;
         }
 
         private void menuItem14_Click(object sender, EventArgs e)
@@ -459,13 +458,15 @@ namespace KernelTest
             if (Core._KernelGuid != null)
             {
                 Core.SET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac, 20);
-                this.menuItem9.Checked = false;
-                this.menuItem10.Checked = false;
-                this.menuItem11.Checked = false;
-                this.menuItem12.Checked = false;
-                this.menuItem13.Checked = false;
-                Core.GET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac);
+
+                //Core.GET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac);
             }
+
+            this.menuItem9.Checked = false;
+            this.menuItem10.Checked = false;
+            this.menuItem11.Checked = false;
+            this.menuItem12.Checked = false;
+            this.menuItem13.Checked = false;
         }
 
         private void menuItem10_Click(object sender, EventArgs e)
@@ -473,13 +474,15 @@ namespace KernelTest
             if (Core._KernelGuid != null)
             {
                 Core.SET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac, 30);
-                this.menuItem9.Checked = false;
-                this.menuItem10.Checked = false;
-                this.menuItem11.Checked = false;
-                this.menuItem12.Checked = false;
-                this.menuItem13.Checked = false;
-                Core.GET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac);
+
+//                Core.GET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac);
             }
+
+            this.menuItem9.Checked = false;
+            this.menuItem10.Checked = false;
+            this.menuItem11.Checked = false;
+            this.menuItem12.Checked = false;
+            this.menuItem13.Checked = false;
         }
 
         private void menuItem12_Click(object sender, EventArgs e)
@@ -487,19 +490,26 @@ namespace KernelTest
             if (Core._KernelGuid != null)
             {
                 Core.SET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac, 80);
-                this.menuItem9.Checked = false;
-                this.menuItem10.Checked = false;
-                this.menuItem11.Checked = false;
-                this.menuItem12.Checked = false;
-                this.menuItem13.Checked = false;
-                Core.GET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac);
+
+                //Core.GET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac);
             }
+
+            this.menuItem9.Checked = false;
+            this.menuItem10.Checked = false;
+            this.menuItem11.Checked = false;
+            this.menuItem12.Checked = false;
+            this.menuItem13.Checked = false;
         }
 
         private void menuItem13_Click(object sender, EventArgs e)
         {
             if (Core._KernelGuid != null)
-                Core.SET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac, 90); 
+                Core.SET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac, 90);
+            this.menuItem9.Checked = false;
+            this.menuItem10.Checked = false;
+            this.menuItem11.Checked = false;
+            this.menuItem12.Checked = false;
+            this.menuItem13.Checked = false;
         }
 
         private void menuItem24_Click(object sender, EventArgs e)
@@ -518,15 +528,14 @@ namespace KernelTest
 
         private void menuItem25_Click(object sender, EventArgs e)
         {
-            if (Core._KernelGuid != null)
-            {
+            if (Core._KernelGuid != null)            
                 Core.SET_TRANSMISSION_MODE(Core._KernelGuid, mac, TransmissionMode.Bursty60);
-                this.menuItem9.Checked = false;
-                this.menuItem10.Checked = false;
-                this.menuItem11.Checked = false;
-                this.menuItem12.Checked = false;
-                this.menuItem13.Checked = false;                
-            }
+
+            this.menuItem22.Checked = false;
+            this.menuItem23.Checked = false;
+            this.menuItem25.Checked = false;
+            this.menuItem26.Checked = false;
+            this.menuItem27.Checked = false;
             
         }
 
@@ -536,15 +545,14 @@ namespace KernelTest
 
         private void menuItem22_Click(object sender, EventArgs e)
         {
-            if (Core._KernelGuid != null)
-            {
+            this.menuItem22.Checked = false;
+            this.menuItem23.Checked = false;
+            this.menuItem25.Checked = false;
+            this.menuItem26.Checked = false;
+            this.menuItem27.Checked = false;
+            if (Core._KernelGuid != null)            
                 Core.SET_TRANSMISSION_MODE(Core._KernelGuid, mac, TransmissionMode.Continuous);
-                this.menuItem9.Checked = false;
-                this.menuItem10.Checked = false;
-                this.menuItem11.Checked = false;
-                this.menuItem12.Checked = false;
-                this.menuItem13.Checked = false;
-            }
+            
 
         }
 
