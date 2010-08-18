@@ -1,0 +1,298 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{E7B86B8C-09E4-4A15-9B49-773A98ED2070}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>KernelApp</RootNamespace>
+    <AssemblyName>KernelApp</AssemblyName>
+    <ProjectTypeGuids>{4D628B5B-2FBC-4AA6-8C16-197242AEB884};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <PlatformFamilyName>PocketPC</PlatformFamilyName>
+    <PlatformID>4118C335-430C-497f-BE48-11C3316B135E</PlatformID>
+    <OSVersion>5.1</OSVersion>
+    <DeployDirSuffix>Wockets</DeployDirSuffix>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <NativePlatformName>Windows Mobile 5.0 Pocket PC SDK</NativePlatformName>
+    <FormFactorID>
+    </FormFactorID>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\bin\PPC\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;$(PlatformFamilyName)</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <FileAlignment>512</FileAlignment>
+    <WarningLevel>4</WarningLevel>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\bin\PPC\Release\</OutputPath>
+    <DefineConstants>TRACE;$(PlatformFamilyName)</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <FileAlignment>512</FileAlignment>
+    <WarningLevel>4</WarningLevel>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.VisualBasic" />
+    <Reference Include="Microsoft.Windowsce.Forms" />
+    <Reference Include="mscorlib" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\src\KernelApp\Form1.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="..\..\src\KernelApp\Form1.Designer.cs">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </Compile>
+    <Compile Include="..\..\src\KernelApp\Form2.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="..\..\src\KernelApp\Form2.Designer.cs">
+      <DependentUpon>Form2.cs</DependentUpon>
+    </Compile>
+    <Compile Include="..\..\src\KernelApp\Program.cs" />
+    <Compile Include="..\..\src\KernelApp\Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="..\..\src\KernelApp\Form1.resx">
+      <DependentUpon>Form1.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\src\KernelApp\Form2.resx">
+      <DependentUpon>Form2.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\src\KernelApp\Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="..\..\src\KernelApp\Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="..\..\src\KernelApp\DisplayDataForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="..\..\src\KernelApp\DisplayDataForm.Designer.cs">
+      <DependentUpon>DisplayDataForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="..\..\src\KernelApp\AppGUI\ImageButtonClick.cs">
+      <SubType>Component</SubType>
+      <Link>AppGUI\ImageButtonClick.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\KernelApp\AppGUI\MainControlsPanel.cs">
+      <SubType>Component</SubType>
+      <Link>AppGUI\MainControlsPanel.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\KernelApp\AppGUI\PhonePanel.cs">
+      <SubType>Component</SubType>
+      <Link>AppGUI\PhonePanel.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\KernelApp\AppGUI\WocketsWall.cs">
+      <SubType>Component</SubType>
+      <Link>AppGUI\WocketsWall.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\KernelApp\AppGUI\ImageButton.cs">
+      <SubType>Component</SubType>
+      <Link>AppGUI\ImageButton.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\KernelApp\AppGUI\ActivityPanel.cs">
+      <SubType>Component</SubType>
+      <Link>AppGUI\ActivityPanel.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\KernelApp\AppGUI\SlidingList.cs">
+      <SubType>UserControl</SubType>
+      <Link>AppGUI\SlidingList.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\KernelApp\AppGUI\WocketListItem.cs">
+      <SubType>Component</SubType>
+      <Link>AppGUI\WocketListItem.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\KernelApp\AppGUI\Transitions.cs">
+      <Link>AppGUI\Transitions.cs</Link>
+    </Compile>
+    <Compile Include="AppGUI\DataPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="..\..\src\KernelApp\AppGUI\PlottingPanel.cs">
+      <SubType>Component</SubType>
+      <Link>AppGUI\PlottingPanel.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PPC\Wockets.csproj">
+      <Project>{5D98635F-251B-464F-9132-AF594E8D482B}</Project>
+      <Name>Wockets</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\src\KernelApp\Resources\YellowPlus_150.png">
+      <Link>AppGUI\Images\YellowPlus_150.png</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\src\KernelApp\Resources\ContinuousPressed.png">
+      <Link>AppGUI\Images\ContinuousPressed.png</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\src\KernelApp\Resources\ContinuousUnpressed.png">
+      <Link>AppGUI\Images\ContinuousUnpressed.png</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\src\KernelApp\Resources\EfficientPressed.png">
+      <Link>AppGUI\Images\EfficientPressed.png</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\src\KernelApp\Resources\EfficientUnpressed.png">
+      <Link>AppGUI\Images\EfficientUnpressed.png</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\src\KernelApp\Resources\GreenDiamond_150.png">
+      <Link>AppGUI\Images\GreenDiamond_150.png</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\src\KernelApp\Resources\menu_5.png">
+      <Link>AppGUI\Images\menu_5.png</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\src\KernelApp\Resources\menu_image.PNG">
+      <Link>AppGUI\Images\menu_image.PNG</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\src\KernelApp\Resources\RedSquare_150.png">
+      <Link>AppGUI\Images\RedSquare_150.png</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\src\KernelApp\Resources\right_2.png">
+      <Link>AppGUI\Images\right_2.png</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\src\KernelApp\Resources\right_image.PNG">
+      <Link>AppGUI\Images\right_image.PNG</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\src\KernelApp\Resources\left_image_Pressed2.PNG">
+      <Link>AppGUI\Images\left_image_Pressed2.PNG</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\src\KernelApp\Resources\left_image2.PNG">
+      <Link>AppGUI\Images\left_image2.PNG</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\src\KernelApp\Resources\PhoneIcon2.PNG">
+      <Link>AppGUI\Images\PhoneIcon2.PNG</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\src\KernelApp\Resources\right_image_Pressed2.PNG">
+      <Link>AppGUI\Images\right_image_Pressed2.PNG</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\src\KernelApp\Resources\ContinuousPressed2.PNG">
+      <Link>AppGUI\Images\ContinuousPressed2.PNG</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\src\KernelApp\Resources\ContinuousUnpressed2.PNG">
+      <Link>AppGUI\Images\ContinuousUnpressed2.PNG</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\src\KernelApp\Resources\EfficientPressed2.PNG">
+      <Link>AppGUI\Images\EfficientPressed2.PNG</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\src\KernelApp\Resources\EfficientUnpressed2.PNG">
+      <Link>AppGUI\Images\EfficientUnpressed2.PNG</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\src\KernelApp\Resources\menu_image2.PNG">
+      <Link>AppGUI\Images\menu_image2.PNG</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\src\KernelApp\Resources\menu_image_Pressed2.PNG">
+      <Link>AppGUI\Images\menu_image_Pressed2.PNG</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\src\KernelApp\Resources\right_image2.PNG">
+      <Link>AppGUI\Images\right_image2.PNG</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\src\KernelApp\Resources\BlueSquare_150.png">
+      <Link>AppGUI\Images\BlueSquare_150.png</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\src\KernelApp\Resources\BlueSquare_60.png">
+      <Link>AppGUI\Images\BlueSquare_60.png</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\src\KernelApp\Resources\RedSquare_60.png">
+      <Link>AppGUI\Images\RedSquare_60.png</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\src\KernelApp\Resources\RemoveUnpressed.png">
+      <Link>AppGUI\Images\RemoveUnpressed.png</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\src\KernelApp\Resources\AddUnpressed.png">
+      <Link>AppGUI\Images\AddUnpressed.png</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}">
+        <HostingProcess disable="1" />
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
