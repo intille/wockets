@@ -7,21 +7,22 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
-using FileUploadLib;
 using System.Threading;
 
 using Microsoft.WindowsCE.Forms;
 using System.Runtime.InteropServices;
-//using System.Diagnostics;
 
+using Wockets.Utils.HttpUploader;
+using Wockets.Utils.sms;
 
 
 
 namespace FileUploadTestApp
 {
 
-    #region Events
+    #region Internal message window (commented)
     
+    /*
     public class internalMessageWindow : MessageWindow
     {
         private const int TERMINATE_MESSAGE = 0xA123;
@@ -55,32 +56,34 @@ namespace FileUploadTestApp
         }
 
     }
-
+    */
     #endregion
-
-
 
 
 
 
     public partial class Form1 : Form
     {
-        //private const String fileUploadSeverURL = "http://citytesting.scripts.mit.edu/upload/upload.php";
+        private const String fileUploadSeverURL = "http://citytesting.scripts.mit.edu/upload/upload.php";
         private const String logFilePath = "\\Wockets\\FUlog.txt";
-        
-        private internalMessageWindow messageWindow;
-        public IntPtr wndPtr;
+
+
+        #region Internal Message window (commented)
+        //private internalMessageWindow messageWindow;
+        //public IntPtr wndPtr;
+        #endregion 
 
 
         public Form1()
         {
             InitializeComponent();
 
-            this.messageWindow = new internalMessageWindow(this);
-            this.Text = "WocketsAppWindow";
+            #region Internal Message window (commented)
+            //this.messageWindow = new internalMessageWindow(this);
+            //this.Text = "WocketsAppWindow";
 
 
-            #region Commented
+            // Debug info commented
             //wndPtr = this.messageWindow.Hwnd;
             //textBox1.Text = string.Format("This process ID: {0} ", Process.GetCurrentProcess().Id) + "\r\n" +
             //                Process.GetCurrentProcess().MainWindowHandle.ToInt64().ToString() + "\r\n" +
@@ -89,35 +92,40 @@ namespace FileUploadTestApp
 
 
             #region commented
-
             /*
             if (!File.Exists(logFilePath))
             {
                 File.Create(logFilePath);
             }
             */
+            #endregion 
 
-            //FileStream logFile = new FileStream(logFilePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
-            //StreamWriter logWriter = new StreamWriter(logFile);
 
-            //// Use "\\" for local file path.
-            //// Use "/" for remote file path.
+            //--- Create Log file ---
+            // Note:
+            // Use "\\" for local file path.
+            // Use "/" for remote file path.
+            FileStream logFile = new FileStream(logFilePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
+            StreamWriter logWriter = new StreamWriter(logFile);
 
-            //FileUploadManager.enableLogger(logWriter);
-            ////FileUploadManager.uploadFile(fileUploadSeverURL, @"/uploaddata.csv", "cityproject", "1", "raw_data", "", "This is wockets project file 1");
-            ////FileUploadManager.uploadFile(fileUploadSeverURL, @"/WocketsAccelBytes.2010-6-14-10-0-0-0.3.PLFormat", "cityproject", "1", "raw_data", "Subfolder\\subsubfolder", "This is another project file 2");
+
+          
+            //--- Add 
+            FileUploadManager.enableLogger(logWriter);
+            //FileUploadManager.uploadFile(fileUploadSeverURL, @"/uploaddata.csv", "cityproject", "1", "raw_data", "", "This is wockets project file 1");
+            //FileUploadManager.uploadFile(fileUploadSeverURL, @"/WocketsAccelBytes.2010-6-14-10-0-0-0.3.PLFormat", "cityproject", "1", "raw_data", "Subfolder\\subsubfolder", "This is another project file 2");
+
+            String[] excludedDirectories = { "\\wockets_data\\data\\raw\\PLFormat" };
+
+            // upload the WHOLE DIRECTORY structure recursively BUT THE PLFORMAT directory
+            // documentation in the city project wiki
+            // Parameters: (folder to upload, predefined project name "wockets", subject id, 
+            //             type of data "raw_data", subfolder after the uploaded folder, 
+            //             excluded directories: list of paths that will not be uploaded,
+            //             note that will be written in the database)
+            FileUploadManager.uploadAllFilesInDirectory(fileUploadSeverURL, "\\Wockets\\wockets", "wockets", "1", "raw_data", "wockets", excludedDirectories, "Uploaded in batch");
+            FileUploadManager.uploadAllFilesInDirectory(fileUploadSeverURL, "\\Wockets\\wockets\\data\\raw\\PLFormat\\2010-06-14", "wockets", "1", "raw_data", "wockets\\data\\raw\\PLFormat\\2010-06-14", null, "Uploaded in batch");
             
-            //String[] excludedDirectories = {"\\wockets_data\\data\\raw\\PLFormat"};
-
-            //// upload the WHOLE DIRECTORY structure recursively BUT THE PLFORMAT directory
-            //// documentation in the city project wiki
-            //// Parameters: (folder to upload, predefined project name "wockets", subject id, 
-            ////             type of data "raw_data", subfolder after the uploaded folder, 
-            ////             excluded directories: list of paths that will not be uploaded,
-            ////             note that will be written in the database)
-            //FileUploadManager.uploadAllFilesInDirectory(fileUploadSeverURL, "\\Wockets\\wockets", "wockets", "1", "raw_data", "wockets", excludedDirectories, "Uploaded in batch");
-            //FileUploadManager.uploadAllFilesInDirectory(fileUploadSeverURL, "\\Wockets\\wockets\\data\\raw\\PLFormat\\2010-06-14", "wockets", "1", "raw_data", "wockets\\data\\raw\\PLFormat\\2010-06-14", null, "Uploaded in batch");
-            #endregion commented
         }
 
         private void timer1_Tick(object sender, EventArgs e)
