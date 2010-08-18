@@ -68,6 +68,12 @@ namespace FileUploadTestApp
         private const String logFilePath = "\\Wockets\\FUlog.txt";
 
 
+        private int resendCounter = 0;
+        private int resendThreshold = 480; // 40 minutes
+        //private int resendThreshold = 5; // 25 seconds
+
+
+
         #region Internal Message window (commented)
         //private internalMessageWindow messageWindow;
         //public IntPtr wndPtr;
@@ -110,27 +116,47 @@ namespace FileUploadTestApp
 
 
           
-            //--- Add 
+            //--- Enable Logger -----
             FileUploadManager.enableLogger(logWriter);
-            //FileUploadManager.uploadFile(fileUploadSeverURL, @"/uploaddata.csv", "cityproject", "1", "raw_data", "", "This is wockets project file 1");
-            //FileUploadManager.uploadFile(fileUploadSeverURL, @"/WocketsAccelBytes.2010-6-14-10-0-0-0.3.PLFormat", "cityproject", "1", "raw_data", "Subfolder\\subsubfolder", "This is another project file 2");
+            HttpPostDataManager.enableLogger(logWriter);
 
+
+            //--- Indicate the root folder to scan for changes ----
+            FileUploadManager.scanLogFilesAndDelete("\\wockets_data", null);
+
+            //--- Indicate the subfolder to exclude ----
             String[] excludedDirectories = { "\\wockets_data\\data\\raw\\PLFormat" };
 
-            // upload the WHOLE DIRECTORY structure recursively BUT THE PLFORMAT directory
+
+
+            
+            #region upload the DIRECTORY structure recursively (Notes & Examples)
             // documentation in the city project wiki
             // Parameters: (folder to upload, predefined project name "wockets", subject id, 
             //             type of data "raw_data", subfolder after the uploaded folder, 
             //             excluded directories: list of paths that will not be uploaded,
             //             note that will be written in the database)
-            FileUploadManager.uploadAllFilesInDirectory(fileUploadSeverURL, "\\Wockets\\wockets", "wockets", "1", "raw_data", "wockets", excludedDirectories, "Uploaded in batch");
-            FileUploadManager.uploadAllFilesInDirectory(fileUploadSeverURL, "\\Wockets\\wockets\\data\\raw\\PLFormat\\2010-06-14", "wockets", "1", "raw_data", "wockets\\data\\raw\\PLFormat\\2010-06-14", null, "Uploaded in batch");
+            //Examples:
+            //FileUploadManager.uploadFile(fileUploadSeverURL, @"/uploaddata.csv", "cityproject", "1", "raw_data", "", "This is wockets project file 1");
+            //FileUploadManager.uploadFile(fileUploadSeverURL, @"/WocketsAccelBytes.2010-6-14-10-0-0-0.3.PLFormat", "cityproject", "1", "raw_data", "Subfolder\\subsubfolder", "This is another project file 2");
+            //FileUploadManager.uploadAllFilesInDirectory(fileUploadSeverURL, "\\wockets_data", "wockets", "6", "raw_data", "", excludedDirectories, "Uploaded in batch");
+            //
+            //Wockets Newer Examples:
+            //FileUploadManager.uploadAllFilesInDirectory(fileUploadSeverURL, "\\Wockets\\wockets", "wockets", "1", "raw_data", "wockets", excludedDirectories, "Uploaded in batch");
+            //FileUploadManager.uploadAllFilesInDirectory(fileUploadSeverURL, "\\Wockets\\wockets\\data\\raw\\PLFormat\\2010-06-14", "wockets", "1", "raw_data", "wockets\\data\\raw\\PLFormat\\2010-06-14", null, "Uploaded in batch");
+            #endregion 
+
+            // upload the WHOLE DIRECTORY structure recursively BUT THE PLFORMAT directory
+            FileUploadManager.uploadAllFilesInDirectory(fileUploadSeverURL, "\\wockets_data", "wockets", "1", "raw_data", "", excludedDirectories, "Uploaded in batch");
+            // upload a specific PLFORMAT directory
+            FileUploadManager.uploadAllFilesInDirectory(fileUploadSeverURL, "\\wockets_data\\data\\raw\\PLFormat\\2010-06-14", "wockets", "1", "raw_data", "data\\raw\\PLFormat\\2010-06-14", null, "Uploaded in batch");
             
+
         }
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            #region fileuploader
+            #region fileuploader (commented)
             //FileStream logFile = new FileStream(logFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);        
             //String buffer = "";
            
@@ -149,6 +175,99 @@ namespace FileUploadTestApp
             //textBox1.ScrollToCaret();
             #endregion
 
+
+            //---- Read the logfile  ----
+            FileStream logFile = new FileStream(logFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            String buffer = "";
+
+            // create reader & open file
+            TextReader tr = new StreamReader(logFile);
+            String line = "";
+
+            //load the contents to the logfile to buffer
+            while ((line = tr.ReadLine()) != null)
+            {
+                buffer += line + "\r\n"; ;
+            }
+            tr.Close();
+
+
+            //---- Show the context of the buffer on the textbox  -----
+            textBox1.Text = buffer;
+            textBox1.SelectionStart = textBox1.Text.Length;
+            textBox1.ScrollToCaret();
+
+
+            //----- Wait until the counter reaches the threshold to send files again ----
+            if (resendCounter >= resendThreshold)
+            {
+                #region commented
+                ////FileUploadManager.scanLogFilesAndDelete("\\w1", null);
+                ////FileUploadManager.uploadAllFilesInDirectory(fileUploadSeverURL, "\\w1", "wockets", "5", "raw_data", "", null, "Uploaded in batch");
+                #endregion commented
+
+                //---  Perform a delete and resend operation ---
+                FileUploadManager.scanLogFilesAndDelete("\\wockets_data", null);
+                String[] excludedDirectories = { "\\wockets_data\\data\\raw\\PLFormat" };
+
+                // upload the WHOLE DIRECTORY structure recursively BUT THE PLFORMAT directory
+                FileUploadManager.uploadAllFilesInDirectory(fileUploadSeverURL, "\\wockets_data", "wockets", "3", "raw_data", "", excludedDirectories, "Uploaded in batch");
+                // upload a specific PLFORMAT directory
+                FileUploadManager.uploadAllFilesInDirectory(fileUploadSeverURL, "\\wockets_data\\data\\raw\\PLFormat\\2010-06-14", "wockets", "3", "raw_data", "data\\raw\\PLFormat\\2010-06-14", null, "Uploaded in batch");
+
+                resendCounter = 0;
+            }
+            else
+            {
+                resendCounter++;
+            }
+
+
         }
+
+
+        //Reupload Files Click
+        private void menuItem1_Click(object sender, EventArgs e)
+        {
+
+            menuItem1.Enabled = false;
+
+            FileUploadManager.scanLogFilesAndDelete("\\wockets_data", null);
+            String[] excludedDirectories = { "\\wockets_data\\data\\raw\\PLFormat" };
+
+            // upload the WHOLE DIRECTORY structure recursively BUT THE PLFORMAT directory
+            FileUploadManager.uploadAllFilesInDirectory(fileUploadSeverURL, "\\wockets_data", "wockets", "3", "raw_data", "", excludedDirectories, "Uploaded in batch");
+            // upload a specific PLFORMAT directory
+            FileUploadManager.uploadAllFilesInDirectory(fileUploadSeverURL, "\\wockets_data\\data\\raw\\PLFormat\\2010-06-14", "wockets", "3", "raw_data", "data\\raw\\PLFormat\\2010-06-14", null, "Uploaded in batch");
+
+
+            menuItem1.Enabled = true;
+        }
+
+
+        //Start-Stop Uploading
+        private void menuItem2_Click(object sender, EventArgs e)
+        {
+            menuItem2.Enabled = false;
+
+            if (menuItem2.Text.Contains("Start"))
+            {
+                timer1.Enabled = true;
+                menuItem2.Text = "Stop Uploading";
+            }
+            else
+            {
+                timer1.Enabled = false;
+                menuItem2.Text = "Start Uploading";
+            
+            }
+
+            menuItem2.Enabled = true;
+
+        }
+
+
+
+
     }
 }
