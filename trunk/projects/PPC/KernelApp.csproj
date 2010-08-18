@@ -131,9 +131,6 @@
     <Compile Include="..\..\src\KernelApp\AppGUI\Transitions.cs">
       <Link>AppGUI\Transitions.cs</Link>
     </Compile>
-    <Compile Include="AppGUI\DataPanel.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="..\..\src\KernelApp\AppGUI\PlottingPanel.cs">
       <SubType>Component</SubType>
       <Link>AppGUI\PlottingPanel.cs</Link>
