@@ -1,8 +1,8 @@
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{5D98635F-251B-464F-9132-AF594E8D482B}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -578,6 +578,24 @@
     </Compile>
     <Compile Include="..\..\src\Wockets\Kernel\Types\KernelResponse.cs">
       <Link>Kernel\Types\KernelResponse.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\HttpUploader\Crc32.cs">
+      <Link>Utils\HttpUploader\Crc32.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\HttpUploader\FileUploader.cs">
+      <Link>Utils\HttpUploader\FileUploader.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\HttpUploader\HttpPostDataManager.cs">
+      <Link>Utils\HttpUploader\HttpPostDataManager.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\sms\SentMessage2.cs" >
+    <Link>Utils\sms\SentMessage2.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\sms\SMSManager2.cs" >
+    <Link>Utils\sms\SMSManager2.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\sms\Util2.cs" >
+    <Link>Utils\sms\Util2.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
