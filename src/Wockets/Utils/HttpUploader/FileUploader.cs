@@ -16,18 +16,30 @@ namespace Wockets.Utils.HttpUploader
 
     public class FileUploadManager
     {
+
+
+  #region Declare Variables
+
+       
+        //--- Upload Monitor ---
         private static Thread fileUploadMonitorThread;
-        private static List<FileToSend_Via_SMS> fileUploadQueue = new List<FileToSend_Via_SMS>();
-        private static List<FileToSend_Via_SMS> fileFailedToUploadList = new List<FileToSend_Via_SMS>();
         private const int sendFilePollingFreq = 30; // seconds
         private const int fileResendRetryTimes = 3;
-        private static String lastErrorMessage;
-        private const String fileUploadHistoryFileName = "flog.txt";
 
+        //Files to upload queue
+        private static List<FileToSend_Via_SMS> fileUploadQueue = new List<FileToSend_Via_SMS>();
+        private static List<FileToSend_Via_SMS> fileFailedToUploadList = new List<FileToSend_Via_SMS>();
+        
+
+        //--- Logs ---
+        private const String fileUploadHistoryFileName = "flog.txt";
         private static StreamReader fileUploadHistoryReader;
         private static StreamWriter fileUploadHistoryWriter, logWriter;
 
         private static bool enableLogging = false;
+
+
+        //Session variables
         private static String selectedDirectoryPath = "";
         private static String selectedSubDirectoryPath = "";
 
@@ -35,29 +47,44 @@ namespace Wockets.Utils.HttpUploader
         private static int sessionSuccessfullyUploadedCount = 0;
         private static int sessionFailedUploadCount = 0;
 
-        // sms related.
+        private static String sessionSubjectID = "";
+        private static String projectName = "";
+
+        //--- Errors ---
+        private static String lastErrorMessage;
+
+
+        //--- URL --------------
+        private static String uri = "http://wockets.scripts.mit.edu/monitoring/postData.php";
+
+
+        //--- sms related -----
         private static String gatewayNumber = "6173012490";
         private static char projectCode = 'W';
         private static char programCode = 'U';
-        
         private static SMSManager2 smsMgr;
         
 
-        private static String uri = "http://wockets.scripts.mit.edu/monitoring/postData.php";
-        
+        #endregion
+
+
         static FileUploadManager()
         {
+            //Initialize the file upload monitor
             fileUploadMonitorThread = new Thread(new ThreadStart(fileUploadMonitor));
             fileUploadMonitorThread.Start();
 
+            //if using sms, uncomment this line
             //smsMgr = new SMSManager2(projectCode, programCode);
         }
+
+
+
 
         public static void fileUploadMonitor()
         {
 
-            String sessionSubjectID = "";
-            String projectName = "";
+           
 
             while(true){
 
