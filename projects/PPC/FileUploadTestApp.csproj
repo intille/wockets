@@ -4,18 +4,18 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{22FFCD12-DB40-447A-AE8E-B5FD30F9A4E7}</ProjectGuid>
+    <ProjectGuid>{F8BDD2F8-4A56-443F-8EB6-CC623E06CC38}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>FileUploadTestApp</RootNamespace>
     <AssemblyName>FileUploadTestApp</AssemblyName>
     <ProjectTypeGuids>{4D628B5B-2FBC-4AA6-8C16-197242AEB884};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <PlatformFamilyName>PocketPC</PlatformFamilyName>
-    <PlatformID>b2c48bd2-963d-4549-9169-1fa021dce484</PlatformID>
-    <OSVersion>5.02</OSVersion>
+    <PlatformID>4118C335-430C-497f-BE48-11C3316B135E</PlatformID>
+    <OSVersion>5.1</OSVersion>
     <DeployDirSuffix>FileUploadTestApp</DeployDirSuffix>
-    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
-    <NativePlatformName>Windows Mobile 6 Professional SDK</NativePlatformName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <NativePlatformName>Windows Mobile 5.0 Pocket PC SDK</NativePlatformName>
     <FormFactorID>
     </FormFactorID>
   </PropertyGroup>
@@ -45,9 +45,11 @@
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.WindowsCE.Forms" />
     <Reference Include="mscorlib" />
     <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
@@ -57,14 +59,13 @@
     <Compile Include="..\..\src\FileUploadTestApp\Form1.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="..\..\src\FileUploadTestApp\Form1.Designer.cs">
+    <Compile Include="..\..\src\FileUploadTestApp\Form1.designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="..\..\src\FileUploadTestApp\Program.cs" />
     <Compile Include="..\..\src\FileUploadTestApp\Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="..\..\src\FileUploadTestApp\Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
-      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="..\..\src\FileUploadTestApp\Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
