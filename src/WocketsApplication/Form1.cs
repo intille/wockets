@@ -286,18 +286,16 @@ namespace WocketsApplication
             while (true)
             {
                 //ensures prior synchronization
-                namedEvent.Receive(Core._KernelGuid);
+                namedEvent.Receive(Core._IcomingChannel);
 
 
                 RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_REGISTERED_APPLICATIONS_PATH +
-                                                                         "\\{" + Core._KernelGuid + "}");
+                                                                         "\\{" + Core._IcomingChannel + "}");
                 string response = (string)rk.GetValue("Message");
                 rk.Close();
 
-              if (response == KernelResponse.DISCOVERED.ToString())
-                {
-                    UpdatewWocketsList();
-                }
+              if (response == KernelResponse.DISCOVERED.ToString())                
+                    UpdatewWocketsList();                
                 else if (response == KernelResponse.CONNECTED.ToString())
                 {
                    Core._Connected= true;
@@ -2378,7 +2376,7 @@ namespace WocketsApplication
                     {
                         s.Add(((WocketListItem)selectedWockets[i])._MacAddress);
                     }
-                    Core.SetSensors(Core._KernelGuid, s);
+                    Core.SetSensors(s);
                 }
                 else if (name == ControlID.WOCKETS_UP_BUTTON)
                     wocketsList.MoveDown();
@@ -2390,8 +2388,9 @@ namespace WocketsApplication
                     wocketsList.Controls.Clear();     
                     wocketsList._Status = "Searching for Wockets...";
                     wocketsList.Refresh();
-                    if (Core._KernelGuid != null)
-                        Core.Send(KernelCommand.DISCOVER, Core._KernelGuid);
+                   // if (Core._KernelGuid != null)
+                     //   Core.Send(KernelCommand.DISCOVER, Core._KernelGuid);
+                    Core.Discover();
                 }
                /* else if (name == ControlID.WOCKETS_SAVE_BUTTON)
                 {
@@ -2432,7 +2431,7 @@ namespace WocketsApplication
                         this.Refresh();
 
 
-                        if (!Core._KernelStarted)
+                        if (!Core._KernalStarted)
                             Core.Start();
                         else
                         {
@@ -2447,7 +2446,7 @@ namespace WocketsApplication
                         }
 
                         Thread.Sleep(5000);
-                        if (Core._KernelStarted)
+                        if (Core._KernalStarted)
                         {
                             if (!Core._Registered)
                             {
@@ -2479,7 +2478,7 @@ namespace WocketsApplication
                             this.panels[currentPanel]._ButtonPressed[ControlID.KERNEL_BUTTON] = false;
 
 
-                            if (Core._KernelStarted)
+                            if (Core._KernalStarted)
                             {
 
                                 if (soundThread != null)
@@ -2488,7 +2487,7 @@ namespace WocketsApplication
                                     soundThread = null;
                                 }
                                 
-                                Core.Disconnect(Core._KernelGuid);
+                                Core.Disconnect();
                                 Core._Connected = false;
                                 Core._Registered = false;
                                 selectedWockets.Clear();                              
@@ -2571,8 +2570,8 @@ namespace WocketsApplication
                 {
                     if (MessageBox.Show("Are you sure you want to exit?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
                     {
-                        if (Core._KernelGuid != null)
-                            Core.Unregister(Core._KernelGuid);
+                        
+                        Core.Unregister();
                         ScreenUtils.ShowTaskBar(true);
 
 
@@ -2593,8 +2592,9 @@ namespace WocketsApplication
                         CleanupML();
 
                         //Terminate the kernel
-                        if (Core._KernelGuid != null)
-                            Core.Send(KernelCommand.TERMINATE, Core._KernelGuid);
+                        //if (Core._KernelGuid != null)
+                          //  Core.Send(KernelCommand.TERMINATE, Core._KernelGuid);
+                        Core.Terminate();
 
                         Application.Exit();
                         System.Diagnostics.Process.GetCurrentProcess().Kill();
@@ -2611,7 +2611,7 @@ namespace WocketsApplication
                     this.panels[ControlID.SETTINGS_PANEL].Dock = DockStyle.None;
                     this.currentPanel = ControlID.SETTINGS_PANEL;*/
 
-                    if (!Core._KernelStarted)
+                    if (!Core._KernalStarted)
                         MessageBox.Show("Please start the kernel before changing the settings", "Confirm", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
                     else
                     {
@@ -2634,7 +2634,7 @@ namespace WocketsApplication
                 }
                 else if (name == ControlID.CONNECT_BUTTON)
                 {
-                    if (Core._KernelStarted)
+                    if (Core._KernalStarted)
                     {
                         if (Core._Registered)
                         {
@@ -2643,7 +2643,7 @@ namespace WocketsApplication
 
                                 if (!this.panels[currentPanel]._ButtonPressed[ControlID.CONNECT_BUTTON])
                                 {
-                                    Core.Connect(Core._KernelGuid);
+                                    Core.Connect();
                                     statusLabel.Text = "Connecting...";
 
                                     this.panels[currentPanel]._UnpressedButtonControls[ControlID.CONNECT_BUTTON].Enabled = false;
@@ -2686,7 +2686,7 @@ namespace WocketsApplication
                                             }
                                             activityButtons.Clear();
 
-                                            Core.Disconnect(Core._KernelGuid);
+                                            Core.Disconnect();
                                             plotter = null;
                                       
                                             this.panels[currentPanel]._PressedButtonControls[ControlID.CONNECT_BUTTON].Enabled = false;
@@ -2809,7 +2809,7 @@ namespace WocketsApplication
                 }
                 else if (name == ControlID.BLUETOOTH_BUTTON)
                 {
-                    if (!Core._KernelStarted)
+                    if (!Core._KernalStarted)
                         MessageBox.Show("Please start the kernel before selecting wockets", "Confirm", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
                     else
                     {

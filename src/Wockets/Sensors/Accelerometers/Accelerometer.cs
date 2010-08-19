@@ -8,6 +8,7 @@ using Wockets.Decoders;
 using Wockets.Receivers;
 using Wockets.Utils;
 using Wockets.Data.Configuration;
+using Wockets.Data.Types;
 #if (PocketPC)
 using Wockets.Utils.IPC.MMF;
 #endif
@@ -90,37 +91,8 @@ namespace Wockets.Sensors.Accelerometers
         #endregion Serialization Constants
 
         #region calibration data
-   
-        /// <summary>
-        /// The x axis value at 1G
-        /// </summary>
-        public double _X1g;
 
-        /// <summary>
-        /// The x axis value at -1G
-        /// </summary>
-        public double _Xn1g;
-
-        /// <summary>
-        /// The y axis value at 1G
-        /// </summary>
-        public double _Y1g;
-
-        /// <summary>
-        /// The y axis value at -1G
-        /// </summary>
-        public double _Yn1g;
-
-        /// <summary>
-        /// The z axis value at 1G
-        /// </summary>
-        public double _Z1g;
-
-        /// <summary>
-        /// The z axis value at -1G
-        /// </summary>
-        public double _Zn1g;
-
+        public Calibration _Calibration;
         /// <summary>
         /// The x axis standard deviation
         /// </summary>
@@ -146,6 +118,10 @@ namespace Wockets.Sensors.Accelerometers
         /// </summary>
         public double _Max;
         #endregion calibration data
+
+        public Sensitivity _Sensitivity= Sensitivity._4G;
+
+        public int _ActivityCount = 0;
 
         #region IO storage variables
         
@@ -262,6 +238,7 @@ namespace Wockets.Sensors.Accelerometers
         /// <param name="sensorclass">Specifies the class of the sensor (e.g. wocket, MITes)</param>
         public Accelerometer(SensorClasses sensorclass):base(SensorTypes.ACCEL,sensorclass)
         {
+            this._Calibration = new Calibration();
         }
 
         /// <summary>
@@ -554,11 +531,11 @@ namespace Wockets.Sensors.Accelerometers
         protected string ToXML(string innerXML)
         {
             innerXML += "<" + CALIBRATION_ELEMENT + " " + X1G_ATTRIBUTE +
-                "=\"" + this._X1g.ToString("0.00") + "\" " + XN1G_ATTRIBUTE + "=\"" + this._Xn1g.ToString("0.00") +
-                "\" " + Y1G_ATTRIBUTE + "=\"" + this._Y1g.ToString("0.00") + "\" " +
-                YN1G_ATTRIBUTE + "=\"" + this._Yn1g.ToString("0.00") + "\" " +
-                Z1G_ATTRIBUTE + "=\"" + this._Z1g.ToString("0.00") + "\" " +
-                ZN1G_ATTRIBUTE + "=\"" + this._Zn1g.ToString("0.00") + "\" " +
+                "=\"" + this._Calibration._X1G.ToString("0") + "\" " + XN1G_ATTRIBUTE + "=\"" + this._Calibration._XN1G.ToString("0.00") +
+                "\" " + Y1G_ATTRIBUTE + "=\"" + this._Calibration._Y1G.ToString("0.00") + "\" " +
+                YN1G_ATTRIBUTE + "=\"" + this._Calibration._YN1G.ToString("0.00") + "\" " +
+                Z1G_ATTRIBUTE + "=\"" + this._Calibration._Z1G.ToString("0.00") + "\" " +
+                ZN1G_ATTRIBUTE + "=\"" + this._Calibration._ZN1G.ToString("0.00") + "\" " +
                 XSTD_ATTRIBUTE + "=\"" + this._XStd.ToString("0.00") + "\" " +
                 YSTD_ATTRIBUTE + "=\"" + this._YStd.ToString("0.00") + "\" " +
                 ZSTD_ATTRIBUTE + "=\"" + this._ZStd.ToString("0.00") + "\" />\n";
@@ -584,17 +561,17 @@ namespace Wockets.Sensors.Accelerometers
                     foreach (XmlAttribute jAttribute in jNode.Attributes)
                     {                     
                         if ((jNode.Name == CALIBRATION_ELEMENT) && (jAttribute.Name == X1G_ATTRIBUTE))
-                            this._X1g = Convert.ToDouble(jAttribute.Value);
+                            this._Calibration._X1G = (ushort) Convert.ToDouble(jAttribute.Value);
                         else if ((jNode.Name == CALIBRATION_ELEMENT) && (jAttribute.Name == XN1G_ATTRIBUTE))
-                            this._Xn1g= Convert.ToDouble(jAttribute.Value);
+                            this._Calibration._XN1G = (ushort) Convert.ToDouble(jAttribute.Value);
                         else if ((jNode.Name == CALIBRATION_ELEMENT) && (jAttribute.Name == Y1G_ATTRIBUTE))
-                            this._Y1g = Convert.ToDouble(jAttribute.Value);
+                            this._Calibration._Y1G = (ushort)Convert.ToDouble(jAttribute.Value);
                         else if ((jNode.Name == CALIBRATION_ELEMENT) && (jAttribute.Name == YN1G_ATTRIBUTE))
-                            this._Yn1g = Convert.ToDouble(jAttribute.Value);
+                            this._Calibration._YN1G = (ushort)Convert.ToDouble(jAttribute.Value);
                         else if ((jNode.Name == CALIBRATION_ELEMENT) && (jAttribute.Name == Z1G_ATTRIBUTE))
-                            this._Z1g = Convert.ToDouble(jAttribute.Value);
+                            this._Calibration._Z1G = (ushort) Convert.ToDouble(jAttribute.Value);
                         else if ((jNode.Name == CALIBRATION_ELEMENT) && (jAttribute.Name == ZN1G_ATTRIBUTE))
-                            this._Zn1g = Convert.ToDouble(jAttribute.Value);
+                            this._Calibration._ZN1G = (ushort) Convert.ToDouble(jAttribute.Value);
                         else if ((jNode.Name == CALIBRATION_ELEMENT) && (jAttribute.Name == XSTD_ATTRIBUTE))
                             this._XStd = Convert.ToDouble(jAttribute.Value);
                         else if ((jNode.Name == CALIBRATION_ELEMENT) && (jAttribute.Name == YSTD_ATTRIBUTE))

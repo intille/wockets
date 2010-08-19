@@ -185,7 +185,7 @@ namespace KernelApp
 
                 mac = ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0])._Address;
                 WocketsWallList[0].SetMac(mac);
-                Core.SET_TRANSMISSION_MODE(Core._KernelGuid, mac, TransmissionMode.Continuous);
+                Core.SET_TRANSMISSION_MODE(mac, TransmissionMode.Continuous);
 
                 WocketsPlot_Height = WocketsPlot_Height + WocketsWall_Height;
 
@@ -202,7 +202,7 @@ namespace KernelApp
 
                 mac = ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0])._Address;
                 WocketsWallList[0].SetMac(mac);
-                Core.SET_TRANSMISSION_MODE(Core._KernelGuid, mac, TransmissionMode.Continuous);
+                Core.SET_TRANSMISSION_MODE( mac, TransmissionMode.Continuous);
 
                 //update location
                 location_y = ModeButtons_Height + PhoneWall_Height +WocketsWall_Height+ WocketsPlot_Height;
@@ -215,7 +215,7 @@ namespace KernelApp
 
                 mac = ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[1])._Address;
                 WocketsWallList[1].SetMac(mac);
-                Core.SET_TRANSMISSION_MODE(Core._KernelGuid, mac, TransmissionMode.Continuous); 
+                Core.SET_TRANSMISSION_MODE(mac, TransmissionMode.Continuous); 
 
             }
 
@@ -365,37 +365,33 @@ namespace KernelApp
         private void MainMenuButtonClick(object sender, EventArgs e)
         {
             if (MessageBox.Show("Are you sure you want to disconnect?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
-            {
-                if (Core._KernelGuid != null)
-                    Core.Disconnect(Core._KernelGuid);
-            }
+                Core.Disconnect();
         }
 
         //Update Wockets Parameters
         private void LeftButtonClick(object sender, EventArgs e)
         {
-            if (Core._KernelGuid != null)
+
+            for (int i = 0; i < CurrentWockets._Controller._Receivers.Count; i++)
             {
-                for (int i = 0; i < CurrentWockets._Controller._Receivers.Count; i++)
-                {
-                    string mac =WocketsWallList[i].GetMac();
+                string mac = WocketsWallList[i].GetMac();
 
-                    Core.GET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac);
-                    //Core.GET_BATTERY_PERCENT(Core._KernelGuid, mac);
-                    Core.GET_BATTERY_LEVEL(Core._KernelGuid, mac);
-                    Core.GET_PDU_COUNT(Core._KernelGuid, mac);
-                    Core.GET_WOCKET_SENSITIVITY(Core._KernelGuid, mac);
-                }
-
-
-                //Get the phone battery 
-                SYSTEM_POWER_STATUS_EX2 bpower = Battery.GetSystemPowerStatus();
-                int bt_percent = Convert.ToInt32(bpower.BatteryLifePercent);
-
-                    phoneWall.SetBTE(bt_percent, WocketsMode);
-                    phoneWall.UpdateBTE();
-                
+                Core.GET_WOCKET_SAMPLING_RATE(mac);
+                //Core.GET_BATTERY_PERCENT(Core._KernelGuid, mac);
+                Core.GET_BATTERY_LEVEL(mac);
+                Core.GET_PDU_COUNT(mac);
+                Core.GET_WOCKET_SENSITIVITY(mac);
             }
+
+
+            //Get the phone battery 
+            SYSTEM_POWER_STATUS_EX2 bpower = Battery.GetSystemPowerStatus();
+            int bt_percent = Convert.ToInt32(bpower.BatteryLifePercent);
+
+            phoneWall.SetBTE(bt_percent, WocketsMode);
+            phoneWall.UpdateBTE();
+
+
         }
 
 
@@ -429,7 +425,7 @@ namespace KernelApp
                 try
                 {
 
-                    
+
                     ContinuousButton.SetIsActive(true);
                     EfficientButton.SetIsActive(false);
                     ContinuousButton.refreshButton();
@@ -438,42 +434,41 @@ namespace KernelApp
                     ContinuousButton.Enabled = false;
                     EfficientButton.Enabled = false;
 
-                    
+
                     //Set to Continuous Mode
                     WocketsMode = TransmissionMode.Continuous;
-                    if (Core._KernelGuid != null)
-                    {
 
-                        #region commented 
-                        //         //Disconnect Wockets
+
+                    #region commented
+                    //         //Disconnect Wockets
                     //        Core.Disconnect(Core._KernelGuid);
                     //        Thread.Sleep(1000);
 
                     //        //Connect Wockets
                     //        Core.Connect(Core._KernelGuid);
                     //        Thread.Sleep(1000);
-                        //      
-                        #endregion 
-                       
+                    //      
+                    #endregion
 
-                        this.ActivityCountPlotter.Visible = false;
-                        this.ContPlotPanel.Visible = true;
-                        this.PlottingTimer.Enabled = true;
-                        
-                       for (int i = 0; i < CurrentWockets._Controller._Receivers.Count; i++)
-                        {
-                            Core.SET_TRANSMISSION_MODE(Core._KernelGuid, WocketsWallList[i].GetMac(), TransmissionMode.Continuous); 
-                        }
 
-                                      
+                    this.ActivityCountPlotter.Visible = false;
+                    this.ContPlotPanel.Visible = true;
+                    this.PlottingTimer.Enabled = true;
+
+                    for (int i = 0; i < CurrentWockets._Controller._Receivers.Count; i++)
+                    {
+                        Core.SET_TRANSMISSION_MODE(WocketsWallList[i].GetMac(), TransmissionMode.Continuous);
                     }
+
+
+
 
                     ContinuousButton.Enabled = true;
                     EfficientButton.Enabled = true;
 
                 }
                 catch
-                { 
+                {
                     //application failed to change mode, disconnect the wockets
                     //revert previous mode
                     ContinuousButton.Enabled = true;
@@ -500,31 +495,19 @@ namespace KernelApp
                     EfficientButton.SetIsActive(true);
                     ContinuousButton.refreshButton();
                     EfficientButton.refreshButton();
-                    
+
                     ContinuousButton.Enabled = false;
                     EfficientButton.Enabled = false;
                     Application.DoEvents();
 
                     //Efficient
                     WocketsMode = TransmissionMode.Bursty60;
+                    this.ContPlotPanel.Visible = false;
+                    this.PlottingTimer.Enabled = false;
+                    this.ActivityCountPlotter.Visible = true;
 
-                    if (Core._KernelGuid != null)
-                    {
-                        
-                        this.ContPlotPanel.Visible = false;
-                        this.PlottingTimer.Enabled = false;
-                        this.ActivityCountPlotter.Visible = true;
-                        
-
-                        for (int i = 0; i < CurrentWockets._Controller._Receivers.Count; i++)
-                         {
-                                Core.SET_TRANSMISSION_MODE(Core._KernelGuid, WocketsWallList[i].GetMac(), TransmissionMode.Bursty60); 
-                          
-                        }
-
-                       
-                       
-                    }
+                    for (int i = 0; i < CurrentWockets._Controller._Receivers.Count; i++)
+                        Core.SET_TRANSMISSION_MODE(WocketsWallList[i].GetMac(), TransmissionMode.Bursty60);
 
                     ContinuousButton.Enabled = true;
                     EfficientButton.Enabled = true;

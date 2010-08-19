@@ -19,8 +19,35 @@ namespace WocketsWeka.Utils.Filters
         {
             _Type = type;
             _Order = order;
-        }        
-        
+        }
+
+
+
+        public double Apply(double data)
+        {
+            double filtered = 0;
+
+            int j = 0;
+            for (; (j < xv.Length - 1); j++)
+                xv[j] = xv[j + 1];
+            xv[j] = data;
+
+            j = 0;
+            for (; (j < yv.Length - 1); j++)
+                yv[j] = yv[j + 1];
+            yv[j] = 0;
+
+
+            for (int k = 0; (k < xv.Length); k++)
+                yv[j] += b[k] * xv[k];
+            for (int k = 1; (k < yv.Length); k++)
+                yv[j] -= a[k] * yv[yv.Length - k - 1];
+
+            filtered = yv[j];
+
+            return filtered;
+        }
+
         public double[] Apply(double[] data)
         {
             double[] filtered = new double[data.Length];

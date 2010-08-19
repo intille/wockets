@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Text;
 using Wockets.Receivers;
 using Wockets.Decoders.Accelerometers;
+using Wockets.Data.Types;
 
 namespace Wockets.Sensors.Accelerometers
 {
     public sealed class Wocket: Accelerometer
     {
 
+        public TransmissionMode _TransmissionMode = TransmissionMode.Continuous;
         /// <summary>
         /// A constructor that instantiates a wocket accelerometer
         /// </summary>

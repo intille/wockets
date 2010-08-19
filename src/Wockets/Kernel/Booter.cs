@@ -219,7 +219,13 @@ namespace Wockets.Kernel
                 {
 
                     #region CONNECT
-                    if (msg == KernelCommand.CONNECT.ToString())
+                    if (msg == KernelCommand.DISCOVER.ToString())
+                    {
+                        Thread discovery = new Thread(new ThreadStart(Discover));
+                        discoveryGuid = param;
+                        discovery.Start();
+                    } 
+                    else if (msg == KernelCommand.CONNECT.ToString())
                     {
                         try
                         {
@@ -838,6 +844,7 @@ namespace Wockets.Kernel
                         rk.SetValue("Status", 0, RegistryValueKind.DWord);
                         rk.Close();                        
                         Logger.Close();
+                        Broadcast(KernelResponse.STOPPED);
                         System.Diagnostics.Process.GetCurrentProcess().Close();
                         System.Diagnostics.Process.GetCurrentProcess().Kill();
                     }
@@ -877,12 +884,7 @@ namespace Wockets.Kernel
                         rk.Close();
                         Broadcast(KernelResponse.UNREGISTERED);
                     }
-                    else if (msg == KernelCommand.DISCOVER.ToString())
-                    {
-                        Thread discovery = new Thread(new ThreadStart(Discover));
-                        discoveryGuid = param;
-                        discovery.Start();
-                    }                    
+                                    
                 }
 
 
@@ -962,9 +964,14 @@ namespace Wockets.Kernel
         /* Initializes the kernel */
         private static void Initialize()
         {
+
+            //If the kernel crashed or an application crashed while locking a semaphore then restarting the kernel should ensures
+            //that the lock is released            
+            //registryLock.Release();
+
             //Always attempt to delete registered applications
             //at the beginning
-            //this will fail only if the registry tree is being accessed at that time (i.e. not writable)
+            //this will fail only if the registry tree is being accessed at that time (i.e. not writable)            
             registryLock.WaitOne();
             try
             {
