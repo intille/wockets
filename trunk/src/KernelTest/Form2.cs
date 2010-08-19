@@ -16,6 +16,7 @@ using Wockets.Kernel.Types;
 using Wockets.Utils.IPC;
 using Microsoft.Win32;
 using Wockets.Data.Types;
+using Wockets.Sensors.Accelerometers;
 
 namespace KernelTest
 {
@@ -40,185 +41,124 @@ namespace KernelTest
             Core.InitializeConfiguration();
             Core.InitializeController();
             mac = ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0])._Address;
-            this.label1.Text = "Wocket " + mac+":";
-            
+            this.label1.Text = "Wocket " + mac + ":";
+
             //Initialize Plotter
             plotter = new WocketsScalablePlotter(this.panel1);
             this.timer1.Enabled = true;
 
-            Thread t = new Thread(EventListener);
-            threads.Add(t.ManagedThreadId, t);
-            events.Add(t.ManagedThreadId, KernelResponse.BATTERY_LEVEL_UPDATED);
-            t.Start();
-
-            t = new Thread(EventListener);
-            threads.Add(t.ManagedThreadId, t);
-            events.Add(t.ManagedThreadId, KernelResponse.BATTERY_PERCENT_UPDATED);
-            t.Start();
-
-            t = new Thread(EventListener);
-            threads.Add(t.ManagedThreadId, t);
-            events.Add(t.ManagedThreadId, KernelResponse.PC_COUNT_UPDATED);
-            t.Start();
-
-            t = new Thread(EventListener);
-            threads.Add(t.ManagedThreadId, t);
-            events.Add(t.ManagedThreadId, KernelResponse.SENSITIVITY_UPDATED);
-            t.Start();
-
-            t = new Thread(EventListener);
-            threads.Add(t.ManagedThreadId, t);
-            events.Add(t.ManagedThreadId, KernelResponse.CALIBRATION_UPDATED);
-            t.Start();
-
-            t = new Thread(EventListener);
-            threads.Add(t.ManagedThreadId, t);
-            events.Add(t.ManagedThreadId, KernelResponse.SAMPLING_RATE_UPDATED);
-            t.Start();
-
-            t = new Thread(EventListener);
-            threads.Add(t.ManagedThreadId, t);
-            events.Add(t.ManagedThreadId, KernelResponse.TRANSMISSION_MODE_UPDATED);
-            t.Start();
-
-            t = new Thread(EventListener);
-            threads.Add(t.ManagedThreadId, t);
-            events.Add(t.ManagedThreadId, KernelResponse.ACTIVITY_COUNT_UPDATED);
-            t.Start();
+            Core.SubscribeEvent(KernelResponse.BATTERY_LEVEL_UPDATED, EventListener);
+            Core.SubscribeEvent(KernelResponse.BATTERY_PERCENT_UPDATED, EventListener);
+            Core.SubscribeEvent(KernelResponse.PC_COUNT_UPDATED, EventListener);
+            Core.SubscribeEvent(KernelResponse.SENSITIVITY_UPDATED, EventListener);
+            Core.SubscribeEvent(KernelResponse.CALIBRATION_UPDATED, EventListener);
+            Core.SubscribeEvent(KernelResponse.SAMPLING_RATE_UPDATED, EventListener);
+            Core.SubscribeEvent(KernelResponse.TRANSMISSION_MODE_UPDATED, EventListener);
+            Core.SubscribeEvent(KernelResponse.ACTIVITY_COUNT_UPDATED, EventListener);
 
         }
 
-        protected override void OnClosed(EventArgs e)
-        {
-            foreach (Thread t in threads.Values)
-                t.Abort();
-        }
 
-        private void EventListener()
+
+        private void EventListener(KernelResponse rsp)
         {
-            int myid = System.Threading.Thread.CurrentThread.ManagedThreadId;
-            KernelResponse myevent = (KernelResponse)events[myid];
-            string eventName = Core.BROADCAST_EVENT_PREFIX + myevent.ToString();
-            NamedEvents namedEvent = new NamedEvents();
-            RegistryKey rk = null;
-            Thread.Sleep(3000);
-            while (true)
+                    // InvokeRequired required compares the thread ID of the
+            // calling thread to the thread ID of the creating thread.
+            // If these threads are different, it returns true.
+            if (this.InvokeRequired || this.InvokeRequired)
             {
-                namedEvent.Receive(eventName);
-
-                switch (myevent)
+                UpdateFormCallback d = new UpdateFormCallback(EventListener);
+                this.Invoke(d, new object[] { rsp });
+            }
+            else
+            {
+                switch (rsp)
                 {
-                    case (KernelResponse)KernelResponse.BATTERY_LEVEL_UPDATED:
-                        Hashtable levels=Core.READ_BATTERY_LEVEL();
+                    case KernelResponse.BATTERY_LEVEL_UPDATED:
                         kernelresponse = "";
-                        if (levels != null)
-                        {
-                            foreach (string s in levels.Keys)
-                                kernelresponse += s + " - " + levels[s] + "\r\n";
-                        }
-                 
-                        UpdateForm(myevent);
+                        for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
+                            kernelresponse += ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address + " - " +
+                                CurrentWockets._Controller._Sensors[i]._BatteryLevel + "\r\n";
+                        this.label3.Text = "Received: " + kernelresponse;
                         break;
                     case (KernelResponse)KernelResponse.BATTERY_PERCENT_UPDATED:
-                        Hashtable percents = Core.READ_BATTERY_PERCENT();
                         kernelresponse = "";
-                        if (percents != null)
-                        {
-                            foreach (string s in percents.Keys)
-                                kernelresponse += s + " - " + percents[s] + "\r\n";
-                        }
-
-                        UpdateForm(myevent);
+                        for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
+                            kernelresponse += ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address + " - " +
+                                CurrentWockets._Controller._Sensors[i]._BatteryPercent + "\r\n";
+                        this.label3.Text = "Received: " + kernelresponse;
                         break;
                     case (KernelResponse)KernelResponse.PC_COUNT_UPDATED:
-                        Hashtable counts = Core.READ_PDU_COUNT();
                         kernelresponse = "";
-                        if (counts != null)
-                        {
-                            foreach (string s in counts.Keys)
-                                kernelresponse += s + " - " + counts[s] + "\r\n";
-                        }
-
-                        UpdateForm(myevent);
+                        for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
+                            kernelresponse += ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address + " - " +
+                                CurrentWockets._Controller._Sensors[i]._PDUCount + "\r\n";
+                        this.label3.Text = "Received: " + kernelresponse;
                         break;
                     case (KernelResponse)KernelResponse.SENSITIVITY_UPDATED:
-                        Hashtable sensitivities = Core.READ_SENSITIVITY();
                         kernelresponse = "";
-                        if (sensitivities != null)
+                        for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
                         {
-                            foreach (string s in sensitivities.Keys)
+                            kernelresponse += ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address + " - " +
+                                ((Accelerometer)CurrentWockets._Controller._Sensors[i])._Sensitivity.ToString() + "\r\n";
+
+                            this.menuItem15.Checked = this.menuItem16.Checked = this.menuItem17.Checked = this.menuItem18.Checked = false;
+                            switch (((Accelerometer)CurrentWockets._Controller._Sensors[i])._Sensitivity)
                             {
-                                mysen=(Sensitivity)sensitivities[s];
-                                kernelresponse += s + " - " + mysen.ToString() + "\r\n";                                
+                                case Sensitivity._1_5G:
+                                    this.menuItem15.Checked = true;
+                                    break;
+                                case Sensitivity._2G:
+                                    this.menuItem16.Checked = true;
+                                    break;
+                                case Sensitivity._4G:
+                                    this.menuItem17.Checked = true;
+                                    break;
+                                case Sensitivity._8G:
+                                    this.menuItem18.Checked = true;
+                                    break;
+                                default:
+                                    break;
+
                             }
                         }
-
-                        UpdateForm(myevent);
+                        this.label3.Text = "Received: " + kernelresponse;
                         break;
                     case (KernelResponse)KernelResponse.CALIBRATION_UPDATED:
-                        Hashtable calibrations = Core.READ_CALIBRATION();
                         kernelresponse = "";
-                        if (calibrations != null)
+                        for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
                         {
-                            foreach (string s in calibrations.Keys)
-                            {
-                                kernelresponse += s + " - " + ((Calibration)calibrations[s])._X1G +" -"  +
-                                    ((Calibration)calibrations[s])._XN1G + " -" +
-                                    ((Calibration)calibrations[s])._Y1G + " -" +
-                                    ((Calibration)calibrations[s])._YN1G + " -" +
-                                    ((Calibration)calibrations[s])._Z1G + " -" +
-                                    ((Calibration)calibrations[s])._ZN1G + " -" + "\r\n";
-                            }
+                            kernelresponse += ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address +
+                                " - " + ((Accelerometer)CurrentWockets._Controller._Sensors[i])._Calibration._X1G + " -" +
+                                    ((Accelerometer)CurrentWockets._Controller._Sensors[i])._Calibration._XN1G + " -" +
+                                    ((Accelerometer)CurrentWockets._Controller._Sensors[i])._Calibration._Y1G + " -" +
+                                    ((Accelerometer)CurrentWockets._Controller._Sensors[i])._Calibration._YN1G + " -" +
+                                    ((Accelerometer)CurrentWockets._Controller._Sensors[i])._Calibration._Z1G + " -" +
+                                    ((Accelerometer)CurrentWockets._Controller._Sensors[i])._Calibration._ZN1G + " -" + "\r\n";
                         }
-
-                        UpdateForm(myevent);
+                        this.label3.Text = "Received: " + kernelresponse;
                         break;
-
                     case (KernelResponse)KernelResponse.SAMPLING_RATE_UPDATED:
-                        Hashtable srs = Core.READ_SAMPLING_RATE();
                         kernelresponse = "";
-                        if (srs != null)
-                        {
-                            foreach (string s in srs.Keys)
-                            {
-                                mysr =(int) srs[s];
-                                kernelresponse += s + " - " + mysr.ToString() + "\r\n";
-                            }
-                        }
-
-                        UpdateForm(myevent);
+                        for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
+                            kernelresponse += ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address + " - " +
+                                CurrentWockets._Controller._Sensors[i]._SamplingRate + "\r\n";
+                        this.label3.Text = "Received: " + kernelresponse;
                         break;
-
                     case (KernelResponse)KernelResponse.TRANSMISSION_MODE_UPDATED:
-                        Hashtable tms = Core.READ_TRANSMISSION_MODE();
                         kernelresponse = "";
-                        if (tms != null)
-                        {
-                            foreach (string s in tms.Keys)
-                            {
-                                mytm = (Wockets.Data.Types.TransmissionMode)tms[s];
-                                kernelresponse += s + " - " + mytm.ToString() + "\r\n";
-                            }
-                        }
-
-                        UpdateForm(myevent);
+                        for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
+                            kernelresponse += ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address + " - " +
+                                ((Wocket)CurrentWockets._Controller._Sensors[i])._TransmissionMode.ToString() + "\r\n";
+                        this.label3.Text = "Received: " + kernelresponse;
                         break;
-
-
                     case (KernelResponse)KernelResponse.ACTIVITY_COUNT_UPDATED:
-                        Hashtable acs = Core.READ_ACTIVITY_COUNT();
                         kernelresponse = "";
-                        if (acs != null)
-                        {
-                            foreach (string s in acs.Keys)
-                            {
-                                myac = (int)acs[s];
-                                kernelresponse += s + " - " + myac.ToString() + "\r\n";
-                            }
-                        }
-
-                        UpdateForm(myevent);
-                        break;
+                        for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
+                            kernelresponse += ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address + " - " +
+                                ((Wocket)CurrentWockets._Controller._Sensors[i])._ActivityCount.ToString() + "\r\n";
+                        this.label3.Text = "Received: " + kernelresponse;
+                        break;   
                     default:
                         break;
                 }
@@ -227,7 +167,7 @@ namespace KernelTest
 
 
         delegate void UpdateFormCallback(KernelResponse response);
-        public void UpdateForm(KernelResponse response)
+      /*  public void UpdateForm(KernelResponse response)
         {
             // InvokeRequired required compares the thread ID of the
             // calling thread to the thread ID of the creating thread.
@@ -319,7 +259,7 @@ namespace KernelTest
 
             }
 
-        }
+        }*/
 
         void panel1_Paint(object sender, System.Windows.Forms.PaintEventArgs e)
         {
@@ -351,37 +291,25 @@ namespace KernelTest
         private void menuItem2_Click(object sender, EventArgs e)
         {
             if (MessageBox.Show("Are you sure you want to disconnect?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
-            {
-                if (Core._KernelGuid != null)
-                    Core.Disconnect(Core._KernelGuid);
-            }
+                Core.Disconnect();
         }
 
         private void menuItem3_Click(object sender, EventArgs e)
         {
-            if (Core._KernelGuid != null)
-            {
-                Core.GET_BATTERY_LEVEL(Core._KernelGuid, mac);
-                this.label2.Text = "Sent: GET_BATTERY_LEVEL";
-            }
+            Core.GET_BATTERY_LEVEL(mac);
+            this.label2.Text = "Sent: GET_BATTERY_LEVEL";
         }
 
         private void menuItem4_Click(object sender, EventArgs e)
         {
-            if (Core._KernelGuid != null)
-            {
-                Core.GET_BATTERY_PERCENT(Core._KernelGuid, mac);
-                this.label2.Text = "Sent: GET_BATTERY_PERCENT";
-            }
+            Core.GET_BATTERY_PERCENT(mac);
+            this.label2.Text = "Sent: GET_BATTERY_PERCENT";
         }
 
         private void menuItem5_Click(object sender, EventArgs e)
         {
-            if (Core._KernelGuid != null)
-            {
-                Core.GET_PDU_COUNT(Core._KernelGuid, mac);
-                this.label2.Text = "Sent: GET_PDU_COUNT";
-            }
+            Core.GET_PDU_COUNT(mac);
+            this.label2.Text = "Sent: GET_PDU_COUNT";
         }
 
         private void menuItem6_Click(object sender, EventArgs e)
@@ -391,19 +319,13 @@ namespace KernelTest
 
         private void menuItem7_Click(object sender, EventArgs e)
         {
-            if (Core._KernelGuid != null)
-            {
-                Core.GET_WOCKET_CALIBRATION(Core._KernelGuid, mac);
-                this.label2.Text = "Sent: GET_CALIBRATION";
-            }
+            Core.GET_WOCKET_CALIBRATION(mac);
+            this.label2.Text = "Sent: GET_CALIBRATION";
         }
 
         private void menuItem11_Click(object sender, EventArgs e)
         {
-            if (Core._KernelGuid != null)            
-                Core.SET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac, 40);
-
-                //Core.GET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac);
+            Core.SET_WOCKET_SAMPLING_RATE(mac, 40);
             this.menuItem9.Checked = false;
             this.menuItem10.Checked = false;
             this.menuItem11.Checked = false;
@@ -413,55 +335,39 @@ namespace KernelTest
 
         private void menuItem14_Click(object sender, EventArgs e)
         {
-            if (Core._KernelGuid != null)
-            {
-                Core.GET_WOCKET_SENSITIVITY(Core._KernelGuid, mac);
-                this.label2.Text = "Sent: GET_SENSITIVITY";
-            }
+            Core.GET_WOCKET_SENSITIVITY(mac);
+            this.label2.Text = "Sent: GET_SENSITIVITY";
         }
 
         private void menuItem15_Click(object sender, EventArgs e)
         {
-            if (Core._KernelGuid != null)            
-                Core.SET_WOCKET_SENSITIVITY(Core._KernelGuid, mac,Sensitivity._1_5G);            
+            Core.SET_WOCKET_SENSITIVITY(mac, Sensitivity._1_5G);
         }
 
         private void menuItem16_Click(object sender, EventArgs e)
         {
-            if (Core._KernelGuid != null)
-                Core.SET_WOCKET_SENSITIVITY(Core._KernelGuid, mac, Sensitivity._2G);       
+            Core.SET_WOCKET_SENSITIVITY(mac, Sensitivity._2G);
         }
 
         private void menuItem17_Click(object sender, EventArgs e)
         {
-            if (Core._KernelGuid != null)
-                Core.SET_WOCKET_SENSITIVITY(Core._KernelGuid, mac, Sensitivity._4G);       
+            Core.SET_WOCKET_SENSITIVITY(mac, Sensitivity._4G);
         }
 
         private void menuItem18_Click(object sender, EventArgs e)
         {
-            if (Core._KernelGuid != null)
-                Core.SET_WOCKET_SENSITIVITY(Core._KernelGuid, mac, Sensitivity._8G);       
+            Core.SET_WOCKET_SENSITIVITY(mac, Sensitivity._8G);
         }
 
         private void menuItem20_Click(object sender, EventArgs e)
         {
-            if (Core._KernelGuid != null)
-            {
-                Core.GET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac);
-                this.label2.Text = "Sent: GET_SAMPLING_RATE";
-            }
+            Core.GET_WOCKET_SAMPLING_RATE(mac);
+            this.label2.Text = "Sent: GET_SAMPLING_RATE";
         }
 
         private void menuItem9_Click(object sender, EventArgs e)
         {
-            if (Core._KernelGuid != null)
-            {
-                Core.SET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac, 20);
-
-                //Core.GET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac);
-            }
-
+            Core.SET_WOCKET_SAMPLING_RATE(mac, 20);
             this.menuItem9.Checked = false;
             this.menuItem10.Checked = false;
             this.menuItem11.Checked = false;
@@ -471,13 +377,7 @@ namespace KernelTest
 
         private void menuItem10_Click(object sender, EventArgs e)
         {
-            if (Core._KernelGuid != null)
-            {
-                Core.SET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac, 30);
-
-//                Core.GET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac);
-            }
-
+            Core.SET_WOCKET_SAMPLING_RATE(mac, 30);
             this.menuItem9.Checked = false;
             this.menuItem10.Checked = false;
             this.menuItem11.Checked = false;
@@ -487,13 +387,7 @@ namespace KernelTest
 
         private void menuItem12_Click(object sender, EventArgs e)
         {
-            if (Core._KernelGuid != null)
-            {
-                Core.SET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac, 80);
-
-                //Core.GET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac);
-            }
-
+            Core.SET_WOCKET_SAMPLING_RATE(mac, 80);
             this.menuItem9.Checked = false;
             this.menuItem10.Checked = false;
             this.menuItem11.Checked = false;
@@ -502,9 +396,8 @@ namespace KernelTest
         }
 
         private void menuItem13_Click(object sender, EventArgs e)
-        {
-            if (Core._KernelGuid != null)
-                Core.SET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac, 90);
+        {  
+            Core.SET_WOCKET_SAMPLING_RATE(mac, 90);
             this.menuItem9.Checked = false;
             this.menuItem10.Checked = false;
             this.menuItem11.Checked = false;
@@ -514,11 +407,8 @@ namespace KernelTest
 
         private void menuItem24_Click(object sender, EventArgs e)
         {
-            if (Core._KernelGuid != null)
-            {
-                Core.GET_TRANSMISSION_MODE(Core._KernelGuid, mac);
-                this.label2.Text = "Sent: GET_TRANSMISSION_MODE";
-            }
+            Core.GET_TRANSMISSION_MODE(mac);
+            this.label2.Text = "Sent: GET_TRANSMISSION_MODE";
         }
 
         private void menuItem23_Click(object sender, EventArgs e)
@@ -528,15 +418,12 @@ namespace KernelTest
 
         private void menuItem25_Click(object sender, EventArgs e)
         {
-            if (Core._KernelGuid != null)            
-                Core.SET_TRANSMISSION_MODE(Core._KernelGuid, mac, TransmissionMode.Bursty60);
-
+            Core.SET_TRANSMISSION_MODE(mac, TransmissionMode.Bursty60);
             this.menuItem22.Checked = false;
             this.menuItem23.Checked = false;
             this.menuItem25.Checked = false;
             this.menuItem26.Checked = false;
             this.menuItem27.Checked = false;
-            
         }
 
         private void menuItem28_Click(object sender, EventArgs e)
@@ -550,14 +437,7 @@ namespace KernelTest
             this.menuItem25.Checked = false;
             this.menuItem26.Checked = false;
             this.menuItem27.Checked = false;
-            if (Core._KernelGuid != null)            
-                Core.SET_TRANSMISSION_MODE(Core._KernelGuid, mac, TransmissionMode.Continuous);
-            
-
+            Core.SET_TRANSMISSION_MODE(mac, TransmissionMode.Continuous);
         }
-
-
-
-
     }
 }

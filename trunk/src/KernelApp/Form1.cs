@@ -97,7 +97,6 @@ namespace KernelApp
             events.Add(t.ManagedThreadId, KernelResponse.STOPPED);
             t.Start();
 
-
             t = new Thread(EventListener);
             threads.Add(t.ManagedThreadId, t);
             events.Add(t.ManagedThreadId, KernelResponse.DISCOVERED);
@@ -344,12 +343,11 @@ namespace KernelApp
         {
             if (MessageBox.Show("Are you sure you want to exit?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
             {
-                if (Core._KernelGuid != null)
-                    Core.Unregister(Core._KernelGuid);
-   
+                    
+                Core.Unregister();   
                 //Terminate the kernel
-                if (Core._KernelGuid != null)
-                    Core.Send(KernelCommand.TERMINATE, Core._KernelGuid);
+                Core.Terminate();
+
                 Application.Exit();
                 System.Diagnostics.Process.GetCurrentProcess().Kill();
             }
@@ -418,15 +416,14 @@ namespace KernelApp
         //Discover
         private void menuItem3_Click(object sender, EventArgs e)
         {
-            if (Core._KernelGuid != null)
-            {
-                this.menuItem4.Enabled = false;
-                //this.listBox1.Enabled = false;
-                this.wocketsList.Enabled = false;
 
-                this.status.Text = "Discovery started...";
-                Core.Send(KernelCommand.DISCOVER, Core._KernelGuid);
-            }
+            this.menuItem4.Enabled = false;
+            //this.listBox1.Enabled = false;
+            this.wocketsList.Enabled = false;
+
+            this.status.Text = "Discovery started...";
+            Core.Discover();
+
         }
 
 
@@ -443,7 +440,7 @@ namespace KernelApp
                 }
             }
 
-            Core.SetSensors(Core._KernelGuid, s);
+            Core.SetSensors(s);
         }
 
 
@@ -457,7 +454,7 @@ namespace KernelApp
             //this.menuItem3.Enabled = false;
            // this.menuItem4.Enabled = false;
             this.status.Text = "Connecting ... please wait";
-            Core.Connect(Core._KernelGuid);
+            Core.Connect();
 
            
         }

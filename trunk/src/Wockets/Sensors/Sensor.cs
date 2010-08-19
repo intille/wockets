@@ -137,7 +137,12 @@ namespace Wockets.Sensors
         public bool _Loaded = false;
 
         public SensorModes _Mode = SensorModes.Data;
+
+        public int _BatteryLevel = 0;
+
+        public int _BatteryPercent = 0;
         
+        public int _PDUCount = 0;
 
         /// <summary>
         /// A constructor that initializes the sensor type and class

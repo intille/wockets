@@ -383,37 +383,26 @@ namespace KernelApp
         private void menuItem2_Click(object sender, EventArgs e)
         {
             if (MessageBox.Show("Are you sure you want to disconnect?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
-            {
-                if (Core._KernelGuid != null)
-                    Core.Disconnect(Core._KernelGuid);
-            }
+                Core.Disconnect();
+
         }
 
         private void menuItem3_Click(object sender, EventArgs e)
         {
-            if (Core._KernelGuid != null)
-            {
-                Core.GET_BATTERY_LEVEL(Core._KernelGuid, mac);
-                this.label2.Text = "Sent: GET_BATTERY_LEVEL";
-            }
+            Core.GET_BATTERY_LEVEL(mac);
+            this.label2.Text = "Sent: GET_BATTERY_LEVEL";
         }
 
         private void menuItem4_Click(object sender, EventArgs e)
         {
-            if (Core._KernelGuid != null)
-            {
-                Core.GET_BATTERY_PERCENT(Core._KernelGuid, mac);
-                this.label2.Text = "Sent: GET_BATTERY_PERCENT";
-            }
+            Core.GET_BATTERY_PERCENT(mac);
+            this.label2.Text = "Sent: GET_BATTERY_PERCENT";
         }
 
         private void menuItem5_Click(object sender, EventArgs e)
         {
-            if (Core._KernelGuid != null)
-            {
-                Core.GET_PDU_COUNT(Core._KernelGuid, mac);
-                this.label2.Text = "Sent: GET_PDU_COUNT";
-            }
+            Core.GET_PDU_COUNT(mac);
+            this.label2.Text = "Sent: GET_PDU_COUNT";
         }
 
         private void menuItem6_Click(object sender, EventArgs e)
@@ -423,124 +412,100 @@ namespace KernelApp
 
         private void menuItem7_Click(object sender, EventArgs e)
         {
-            if (Core._KernelGuid != null)
-            {
-                Core.GET_WOCKET_CALIBRATION(Core._KernelGuid, mac);
-                this.label2.Text = "Sent: GET_CALIBRATION";
-            }
+            Core.GET_WOCKET_CALIBRATION(mac);
+            this.label2.Text = "Sent: GET_CALIBRATION";
         }
 
         private void menuItem11_Click(object sender, EventArgs e)
         {
-            if (Core._KernelGuid != null)
-            {
-                Core.SET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac, 40);
-                this.menuItem9.Checked = false;
-                this.menuItem10.Checked = false;
-                this.menuItem11.Checked = false;
-                this.menuItem12.Checked = false;
-                this.menuItem13.Checked = false;
-                Core.GET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac);
-            }
+            Core.SET_WOCKET_SAMPLING_RATE(mac, 40);
+            this.menuItem9.Checked = false;
+            this.menuItem10.Checked = false;
+            this.menuItem11.Checked = false;
+            this.menuItem12.Checked = false;
+            this.menuItem13.Checked = false;
+            Core.GET_WOCKET_SAMPLING_RATE(mac);
         }
 
         private void menuItem14_Click(object sender, EventArgs e)
         {
-            if (Core._KernelGuid != null)
-            {
-                Core.GET_WOCKET_SENSITIVITY(Core._KernelGuid, mac);
-                this.label2.Text = "Sent: GET_SENSITIVITY";
-            }
+
+            Core.GET_WOCKET_SENSITIVITY(mac);
+            this.label2.Text = "Sent: GET_SENSITIVITY";
         }
 
         private void menuItem15_Click(object sender, EventArgs e)
         {
-            if (Core._KernelGuid != null)            
-                Core.SET_WOCKET_SENSITIVITY(Core._KernelGuid, mac,Sensitivity._1_5G);            
+            Core.SET_WOCKET_SENSITIVITY(mac, Sensitivity._1_5G);
         }
 
         private void menuItem16_Click(object sender, EventArgs e)
         {
-            if (Core._KernelGuid != null)
-                Core.SET_WOCKET_SENSITIVITY(Core._KernelGuid, mac, Sensitivity._2G);       
+            Core.SET_WOCKET_SENSITIVITY(mac, Sensitivity._2G);
         }
 
         private void menuItem17_Click(object sender, EventArgs e)
         {
-            if (Core._KernelGuid != null)
-                Core.SET_WOCKET_SENSITIVITY(Core._KernelGuid, mac, Sensitivity._4G);       
+            Core.SET_WOCKET_SENSITIVITY(mac, Sensitivity._4G);
         }
 
         private void menuItem18_Click(object sender, EventArgs e)
         {
-            if (Core._KernelGuid != null)
-                Core.SET_WOCKET_SENSITIVITY(Core._KernelGuid, mac, Sensitivity._8G);       
+            Core.SET_WOCKET_SENSITIVITY(mac, Sensitivity._8G);
         }
 
         private void menuItem20_Click(object sender, EventArgs e)
         {
-            if (Core._KernelGuid != null)
-            {
-                Core.GET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac);
-                this.label2.Text = "Sent: GET_SAMPLING_RATE";
-            }
+            Core.GET_WOCKET_SAMPLING_RATE(mac);
+            this.label2.Text = "Sent: GET_SAMPLING_RATE";
         }
 
         private void menuItem9_Click(object sender, EventArgs e)
         {
-            if (Core._KernelGuid != null)
-            {
-                Core.SET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac, 20);
-                this.menuItem9.Checked = false;
-                this.menuItem10.Checked = false;
-                this.menuItem11.Checked = false;
-                this.menuItem12.Checked = false;
-                this.menuItem13.Checked = false;
-                Core.GET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac);
-            }
+
+            Core.SET_WOCKET_SAMPLING_RATE(mac, 20);
+            this.menuItem9.Checked = false;
+            this.menuItem10.Checked = false;
+            this.menuItem11.Checked = false;
+            this.menuItem12.Checked = false;
+            this.menuItem13.Checked = false;
+            Core.GET_WOCKET_SAMPLING_RATE(mac);
         }
 
         private void menuItem10_Click(object sender, EventArgs e)
         {
-            if (Core._KernelGuid != null)
-            {
-                Core.SET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac, 30);
-                this.menuItem9.Checked = false;
-                this.menuItem10.Checked = false;
-                this.menuItem11.Checked = false;
-                this.menuItem12.Checked = false;
-                this.menuItem13.Checked = false;
-                Core.GET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac);
-            }
+
+            Core.SET_WOCKET_SAMPLING_RATE(mac, 30);
+            this.menuItem9.Checked = false;
+            this.menuItem10.Checked = false;
+            this.menuItem11.Checked = false;
+            this.menuItem12.Checked = false;
+            this.menuItem13.Checked = false;
+            Core.GET_WOCKET_SAMPLING_RATE(mac);
         }
 
         private void menuItem12_Click(object sender, EventArgs e)
         {
-            if (Core._KernelGuid != null)
-            {
-                Core.SET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac, 80);
-                this.menuItem9.Checked = false;
-                this.menuItem10.Checked = false;
-                this.menuItem11.Checked = false;
-                this.menuItem12.Checked = false;
-                this.menuItem13.Checked = false;
-                Core.GET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac);
-            }
+            Core.SET_WOCKET_SAMPLING_RATE(mac, 80);
+            this.menuItem9.Checked = false;
+            this.menuItem10.Checked = false;
+            this.menuItem11.Checked = false;
+            this.menuItem12.Checked = false;
+            this.menuItem13.Checked = false;
+            Core.GET_WOCKET_SAMPLING_RATE(mac);
         }
 
         private void menuItem13_Click(object sender, EventArgs e)
         {
-            if (Core._KernelGuid != null)
-                Core.SET_WOCKET_SAMPLING_RATE(Core._KernelGuid, mac, 90); 
+            Core.SET_WOCKET_SAMPLING_RATE(mac, 90);
         }
 
         private void menuItem24_Click(object sender, EventArgs e)
         {
-            if (Core._KernelGuid != null)
-            {
-                Core.GET_TRANSMISSION_MODE(Core._KernelGuid, mac);
-                this.label2.Text = "Sent: GET_TRANSMISSION_MODE";
-            }
+
+            Core.GET_TRANSMISSION_MODE(mac);
+            this.label2.Text = "Sent: GET_TRANSMISSION_MODE";
+
         }
 
         private void menuItem23_Click(object sender, EventArgs e)

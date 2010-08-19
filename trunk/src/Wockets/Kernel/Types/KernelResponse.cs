@@ -5,25 +5,25 @@ using System.Text;
 
 namespace Wockets.Kernel.Types
 {
-    public enum KernelResponse
+    public enum KernelResponse: byte
     {
-        STARTED,
-        STOPPED,
-        DISCOVERED,        
-        CONNECTED,        
-        DISCONNECTED,                
-        SENSORS_UPDATED,        
-        REGISTERED,        
-        UNREGISTERED,        
-        BATTERY_LEVEL_UPDATED,
-        BATTERY_PERCENT_UPDATED,
-        PC_COUNT_UPDATED,
-        SENSITIVITY_UPDATED,
-        CALIBRATION_UPDATED,
-        SAMPLING_RATE_UPDATED,
-        POWERDOWN_TIMEOUT_UPDATED,
-        TRANSMISSION_MODE_UPDATED,
-        MEMORY_MODE_UPDATED,
-        ACTIVITY_COUNT_UPDATED
+        STARTED=0,
+        STOPPED=1,
+        DISCOVERED=2,        
+        CONNECTED=3,        
+        DISCONNECTED=4,                
+        SENSORS_UPDATED=5,        
+        REGISTERED=6,        
+        UNREGISTERED=7,        
+        BATTERY_LEVEL_UPDATED=8,
+        BATTERY_PERCENT_UPDATED=9,
+        PC_COUNT_UPDATED=10,
+        SENSITIVITY_UPDATED=11,
+        CALIBRATION_UPDATED=12,
+        SAMPLING_RATE_UPDATED=13,
+        POWERDOWN_TIMEOUT_UPDATED=14,
+        TRANSMISSION_MODE_UPDATED=15,
+        MEMORY_MODE_UPDATED=16,
+        ACTIVITY_COUNT_UPDATED=17
     }
 }
