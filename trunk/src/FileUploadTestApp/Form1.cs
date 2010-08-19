@@ -9,7 +9,7 @@ using System.Windows.Forms;
 using System.IO;
 using System.Threading;
 
-using Microsoft.WindowsCE.Forms;
+//using Microsoft.WindowsCE.Forms;
 using System.Runtime.InteropServices;
 
 using Wockets.Utils.HttpUploader;
