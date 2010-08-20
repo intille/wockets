@@ -5,6 +5,8 @@ using System.Net;
 using System.IO;
 using System.Threading;
 
+
+
 namespace Wockets.Utils.HttpUploader
 {
 
@@ -13,7 +15,7 @@ namespace Wockets.Utils.HttpUploader
     /// </summary>
     public class HttpPostDataManager
     {
-        private static List<FileToSend> postQueue = new List<FileToSend>();
+        private static List<PostDataToSend> postQueue = new List<PostDataToSend>();
 
         // retry connection count
         private static int retryCount = 3;
@@ -55,6 +57,9 @@ namespace Wockets.Utils.HttpUploader
             }
         }
 
+
+
+
         /// <summary>
         /// The HTTP Send function is blocking. 
         /// </summary>
@@ -83,7 +88,7 @@ namespace Wockets.Utils.HttpUploader
             {
                 while (postQueue.Count > 0)
                 {
-                    FileToSend postMessage = postQueue[0];
+                    PostDataToSend postMessage = postQueue[0];
                     if (HttpPostDataManager.constructPostAndSend(postMessage.uri, postMessage.subjectId, postMessage.project, postMessage.dbTable, postMessage.unixTime, postMessage.logLevel, postMessage.logContent))
                     {
                         if (enableLogging)
@@ -177,7 +182,7 @@ namespace Wockets.Utils.HttpUploader
         /// <param name="msgContent">message content to send</param>
         public static void SendData(String uri, String subjectId, String project, String dbTable, String unixTime, String logLevel, String logContent)
         {
-            postQueue.Add(new FileToSend(uri, subjectId, project, dbTable, unixTime, logLevel, logContent));
+            postQueue.Add(new PostDataToSend(uri, subjectId, project, dbTable, unixTime, logLevel, logContent));
         }
 
         // HTTP Post method from http://en.csharp-online.net/HTTP_Post
@@ -251,12 +256,13 @@ namespace Wockets.Utils.HttpUploader
         
     }
 
-    internal class FileToSend
+
+    internal class PostDataToSend
     {
         internal String uri, subjectId, project, dbTable, unixTime, logLevel, logContent;
         public int failedCount = 0;
 
-        public FileToSend(String uri, String subjectId, String project, String dbTable, String unixTime, String logLevel, String logContent)
+        public PostDataToSend(String uri, String subjectId, String project, String dbTable, String unixTime, String logLevel, String logContent)
         {
             this.uri = uri;
             this.subjectId = subjectId;
@@ -268,6 +274,8 @@ namespace Wockets.Utils.HttpUploader
         }
 
     }
+
+
 
     /*
     internal class MessageToSend

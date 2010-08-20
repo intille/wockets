@@ -27,8 +27,8 @@ namespace Wockets.Utils.HttpUploader
         private const int fileResendRetryTimes = 3;
 
         //Files to upload queue
-        private static List<FileToSend_Via_SMS> fileUploadQueue = new List<FileToSend_Via_SMS>();
-        private static List<FileToSend_Via_SMS> fileFailedToUploadList = new List<FileToSend_Via_SMS>();
+        private static List<FileToSend> fileUploadQueue = new List<FileToSend>();
+        private static List<FileToSend> fileFailedToUploadList = new List<FileToSend>();
         
 
         //--- Logs ---
@@ -86,12 +86,14 @@ namespace Wockets.Utils.HttpUploader
 
            
 
-            while(true){
+            while(true)
+            {
 
+                //lock this variable
                 while (fileUploadQueue.Count > 0)
                 {
                     //FileToSend fileToSend = fileUploadQueue[0];
-                    FileToSend_Via_SMS fileToSend = fileUploadQueue[0];
+                    FileToSend fileToSend = fileUploadQueue[0];
                     String sendFileResult = fileToSend.sendFile();
 
                     if (sendFileResult == "success")
@@ -145,10 +147,13 @@ namespace Wockets.Utils.HttpUploader
                             fileToSend.failedCount++;
 
                             // retry a little later every time
+                            // Sleep before trying again
                             Thread.Sleep(sendFilePollingFreq * fileToSend.failedCount * 1000);
                         }
                     }
                 }
+
+
 
                 if (fileUploadSessionRunning)
                 {
@@ -159,6 +164,9 @@ namespace Wockets.Utils.HttpUploader
                         
                     }
 
+
+
+                    #region commented for sms
                     // construct sms 
                     /*
                     String txtToSend =  "1,2010-08-07 10:10:10,1281175810000,log,AppUpdater,8:1";
@@ -170,7 +178,14 @@ namespace Wockets.Utils.HttpUploader
                         logWriter.Flush();
                     }
                      */
+                    #endregion 
 
+
+                    // Simple test to see if there is network available (check if works robustly)
+                    // If successfull, the HttPost sends the summary log to the webserver/database 
+                    // it sends the info as parameters/variable in the database
+                    // the parser is located in the uri varable (check parameter list in this file)
+                    // the parameters are in the SendData function of the HttpPostManager Paramenters
                     if (HttpPostDataManager.IsIpAcquired)
                     {
                         // USE LAST SUBJECT ID . ONLY one subject available.
@@ -186,6 +201,8 @@ namespace Wockets.Utils.HttpUploader
                      
                 }
 
+
+                //this is for repeating the operation later/
                 Thread.Sleep(sendFilePollingFreq * 1000);
             }
         }
@@ -206,7 +223,7 @@ namespace Wockets.Utils.HttpUploader
         public static void uploadFile(String postFileURL, String pathToFile, String projectName, String subjectId, String dataType, String subDirectoryPath, String notes)
         {
             //FileToSend fileToSend = new FileToSend(postFileURL, pathToFile, projectName, subjectId, dataType, subDirectoryPath, notes);
-            FileToSend_Via_SMS fileToSend = new FileToSend_Via_SMS(postFileURL, pathToFile, projectName, subjectId, dataType, subDirectoryPath, notes);
+            FileToSend fileToSend = new FileToSend(postFileURL, pathToFile, projectName, subjectId, dataType, subDirectoryPath, notes);
             fileUploadQueue.Add(fileToSend);
         }
         
@@ -230,6 +247,8 @@ namespace Wockets.Utils.HttpUploader
                 }
 
                 scanFilesAndUpload(postFileURL, selectedDirectoryPath, projectName, subjectId, dataType, selectedSubDirectoryPath, excludeDirectoryPaths, notes);
+
+
 
                 /*
                 // construct sms 
@@ -426,7 +445,7 @@ namespace Wockets.Utils.HttpUploader
                                         {
                                             // time not equal, upload required.
                                             //FileToSend fileToSend = new FileToSend(postFileURL, directoryPath + "/" + fileList[i], projectName, subjectId, dataType, subDirectoryPath, notes);
-                                            FileToSend_Via_SMS fileToSend = new FileToSend_Via_SMS(postFileURL, directoryPath + "/" + fileList[i], projectName, subjectId, dataType, subDirectoryPath, notes);
+                                            FileToSend fileToSend = new FileToSend(postFileURL, directoryPath + "/" + fileList[i], projectName, subjectId, dataType, subDirectoryPath, notes);
                                             fileUploadQueue.Add(fileToSend);
                                         }
                                         else
@@ -442,7 +461,7 @@ namespace Wockets.Utils.HttpUploader
                                     {
                                         // new file, upload required.
                                         //FileToSend fileToSend = new FileToSend(postFileURL, fileList[i], projectName, subjectId, dataType, subDirectoryPath, notes);
-                                        FileToSend_Via_SMS fileToSend = new FileToSend_Via_SMS(postFileURL, fileList[i], projectName, subjectId, dataType, subDirectoryPath, notes);
+                                        FileToSend fileToSend = new FileToSend(postFileURL, fileList[i], projectName, subjectId, dataType, subDirectoryPath, notes);
                                         fileUploadQueue.Add(fileToSend);
                                     }
                                 }
@@ -454,7 +473,7 @@ namespace Wockets.Utils.HttpUploader
                                 for (int i = 0; i < fileList.Length; i++)
                                 {
                                     //FileToSend fileToSend = new FileToSend(postFileURL, fileList[i], projectName, subjectId, dataType, subDirectoryPath, notes);
-                                    FileToSend_Via_SMS fileToSend = new FileToSend_Via_SMS(postFileURL, fileList[i], projectName, subjectId, dataType, subDirectoryPath, notes);
+                                    FileToSend fileToSend = new FileToSend(postFileURL, fileList[i], projectName, subjectId, dataType, subDirectoryPath, notes);
                                     
                                     fileUploadQueue.Add(fileToSend);
                                 }
@@ -646,7 +665,7 @@ namespace Wockets.Utils.HttpUploader
     }
 
     // class for sending text through SMS
-    internal class FileToSend_Via_SMS
+    internal class FileToSend
     {
         private const int httpWebrequestTimeout = 600; // in seconds
         internal String postFileURL, filePath, projectName, subjectId, dataType, dateString, subDirectoryPath, notes;
@@ -654,7 +673,7 @@ namespace Wockets.Utils.HttpUploader
         public int failedCount = 0;
         private String checkSum;
 
-        public FileToSend_Via_SMS(String postFileURL, String filePath, String projectName, String subjectId, String dataType, String subDirectoryPath, String notes)
+        public FileToSend(String postFileURL, String filePath, String projectName, String subjectId, String dataType, String subDirectoryPath, String notes)
         {
             this.postFileURL = postFileURL;
             this.filePath = filePath;
