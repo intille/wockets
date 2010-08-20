@@ -23,7 +23,7 @@ using Wockets.Sensors;
 using Wockets.Sensors.Accelerometers;
 using Wockets.Data.Commands;
 using Wockets.Data.Responses;
-
+using Wockets.Data.Plotters;
 
 namespace WocketConfigurationApp
 {
@@ -42,8 +42,8 @@ namespace WocketConfigurationApp
         private string current_command = "";
 
         //----- calibration panel variables  ------------
-        private double[] xyzP = new double[3] { 0.0, 0.0, 0.0 };
-        private double[] xyzN = new double[3] { 0.0, 0.0, 0.0 };
+        private ushort[] xyzP = new ushort[3] { 0, 0, 0 };
+        private ushort[] xyzN = new ushort[3] { 0, 0, 0 };
         private double[] xyzSTD = new double[3] { 0.0, 0.0, 0.0 };
 
         public static string NEEDED_FILES_PATH = "C:\\Data\\Project\\Google Code\\GoogleCode version 3\\bin\\NeededFiles\\";
@@ -111,6 +111,8 @@ namespace WocketConfigurationApp
             this.test_timer.Enabled = false;
             this.test_timer.Stop();
 
+            //disable plotter timer
+            timerPlotter.Enabled = false;
 
             //load status panels
             this.panel_status.Visible = true;
@@ -542,10 +544,7 @@ namespace WocketConfigurationApp
 
         }
 
-
-
-       
-       private void process_sr_response()
+        private void process_sr_response()
         {
             if ((current_command.CompareTo("sampling_rate") == 0)
                 && (!is_test_finished))
@@ -609,43 +608,136 @@ namespace WocketConfigurationApp
 
         #region Plot Signal
 
-            Form3 plotterForm = null;
-            private void plotToolStripMenuItem_Click(object sender, EventArgs e)
-            {
-                plotData();
-            }
+        
+        private void plotToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            plotData();
+        }
 
-            private void plotData()
-            {
 
-              if (CurrentWockets._Controller != null)
+        #region commented
+        Form3 plotterForm = null;
+        private void plotData()
+        {
+            if (CurrentWockets._Controller != null)
+            {
+                if (!plotToolStripMenuItem.Checked)
                 {
-                    if (!plotToolStripMenuItem.Checked)
-                    {
-                        if ((plotterForm == null) || (!plotterForm.Visible))
-                            plotterForm = new Form3();
-                        if (!plotterForm.Visible)
-                            plotterForm.Show();
-                    }
-                    else
-                    {
+                    if ((plotterForm == null) || (!plotterForm.Visible))
+                        plotterForm = new Form3();
+                    if (!plotterForm.Visible)
+                        plotterForm.Show();
+                }
+                else
+                {
 
-                        if (plotterForm != null)
-                        {
-                            plotterForm.Close();
-                            plotterForm = null;
-                        }
+                    if (plotterForm != null)
+                    {
+                        plotterForm.Close();
+                        plotterForm = null;
                     }
                 }
-
             }
+
+        }
+        #endregion commented
+
+
+        #region commented new graphing
+        /*
+        private WocketsScalablePlotter rawdataPlotter;
+        private Bitmap backBuffer = null;
+        //private bool isResized = false;
+        
+        private void plotData()
+        {
+          if (CurrentWockets._Controller != null)
+            {
+                if (!plotToolStripMenuItem.Checked)
+                {
+                    if ((rawdataPlotter == null) || (!panelPlotter.Visible))
+                    {
+                        rawdataPlotter = new WocketsScalablePlotter(this.panelPlotter, CurrentWockets._Controller);
+                        timerPlotter.Enabled = true;
+                       
+                        if (!panelPlotter.Visible)
+                            panelPlotter.Visible = true;
+                    }
+
+                }
+                else
+                {
+
+                    if (rawdataPlotter != null)
+                    {
+                        panelPlotter.Visible = false;
+                        timerPlotter.Enabled = false;
+                    }
+                }
+            }
+        }
+
+
+
+       private void timerPlotter_Tick(object sender, EventArgs e)
+       {
+           GraphAccelerometerValues();
+       }
+
+
+       
+       /// <param name="pevent"></param>
+       //protected override void OnPaintBackground(PaintEventArgs pevent)
+       //{
+       //}
+
+       void panelPlotter_Paint(object sender, System.Windows.Forms.PaintEventArgs e)
+       {
+           if ((this.panelPlotter.Visible) && (backBuffer != null))
+               e.Graphics.DrawImage(backBuffer, 0, 0);
+       }
+
+
+       #region commented
+       //void Form3_Resize(object sender, System.EventArgs e)
+       //{
+       //    this.timer1.Enabled = false;
+       //    this.panel1.Width = this.Width;
+       //    this.panel1.Height = this.Height;
+       //    aPlotter = new WocketsScalablePlotter(this.panel1, CurrentWockets._Controller);
+       //    isResized = true;
+       //    this.timer1.Enabled = true;
+       //}
+       #endregion commented
+
+
+       private void GraphAccelerometerValues()
+       {
+           if ( backBuffer == null ) //|| (isResized))
+           {
+               backBuffer = new Bitmap((int)this.panelPlotter.Width, (int)this.panelPlotter.Height);
+               //isResized = false;
+           }
+           using (Graphics g = Graphics.FromImage(backBuffer))
+           {
+               rawdataPlotter.Draw(g);
+               g.Dispose();
+           }
+
+       }
+
+        */
+        #endregion 
+
+
+
 
         #endregion
 
 
-        #region Text Fields Functions
-        
-        private void change_status_field(Label cur_label,TextBox cur_field, Keys value, string cur_cmd)
+       #region Text Fields Functions
+
+       private void change_status_field(Label cur_label,TextBox cur_field, Keys value, string cur_cmd)
         {
 
             if (current_command.CompareTo("all") != 0)
@@ -1660,6 +1752,7 @@ namespace WocketConfigurationApp
 
         }
 
+        
         //---- Sampling Rate Test -----
         private void start_SamplingRate_test(int test_time)
         {
@@ -1704,7 +1797,6 @@ namespace WocketConfigurationApp
 
 
         }
-
 
         private string stop_SamplingRate_test()
         {
@@ -1793,7 +1885,7 @@ namespace WocketConfigurationApp
 
 
 
-        //--- Process the test steps ----
+        //--- Process the test ----
         private void process_calibration()
         {
             if (current_command.CompareTo("calibration") == 0)
@@ -2322,13 +2414,13 @@ namespace WocketConfigurationApp
                 //clean cal values arrays 
                 if (clean_array)
                 {
-                    xyzP[0] = 0.0;
-                    xyzP[1] = 0.0;
-                    xyzP[2] = 0.0;
+                    xyzP[0] = 0;
+                    xyzP[1] = 0;
+                    xyzP[2] = 0;
 
-                    xyzN[0] = 0.0;
-                    xyzN[1] = 0.0;
-                    xyzN[2] = 0.0;
+                    xyzN[0] = 0;
+                    xyzN[1] = 0;
+                    xyzN[2] = 0;
 
                     xyzSTD[0] = 0.0;
                     xyzSTD[1] = 0.0;
@@ -2376,6 +2468,8 @@ namespace WocketConfigurationApp
             }
         }
 
+
+
         #endregion 
 
 
@@ -2400,17 +2494,18 @@ namespace WocketConfigurationApp
                 Accelerometer acc_sensor = (Accelerometer)wc_cal._Sensors[0];
 
                 //load the fields
-                acc_sensor._X1g = xyzP[0];
-                acc_sensor._Y1g = xyzP[1];
-                acc_sensor._Z1g = xyzP[2];
+                acc_sensor._Calibration._X1G = xyzP[0];
+                acc_sensor._Calibration._Y1G = xyzP[1];
+                acc_sensor._Calibration._Z1G = xyzP[2];
 
-                acc_sensor._Xn1g = xyzN[0];
-                acc_sensor._Yn1g = xyzN[1];
-                acc_sensor._Zn1g = xyzN[2];
+                acc_sensor._Calibration._XN1G = xyzN[0];
+                acc_sensor._Calibration._YN1G = xyzN[1];
+                acc_sensor._Calibration._ZN1G = xyzN[2];
 
                 acc_sensor._XStd = xyzSTD[0];
                 acc_sensor._YStd = xyzSTD[1];
                 acc_sensor._ZStd = xyzSTD[2];
+
 
                 //save to file
                 tw = new StreamWriter(fpath);
@@ -2568,13 +2663,13 @@ namespace WocketConfigurationApp
                 Accelerometer acc_sensor = (Accelerometer)wc_cal._Sensors[0];
 
                 //set the ACC calibration values
-                acc_sensor._X1g = xyzP[0];
-                acc_sensor._Y1g = xyzP[1];
-                acc_sensor._Z1g = xyzP[2];
+                acc_sensor._Calibration._X1G = xyzP[0];
+                acc_sensor._Calibration._Y1G = xyzP[1];
+                acc_sensor._Calibration._Z1G = xyzP[2];
 
-                acc_sensor._Xn1g = xyzN[0];
-                acc_sensor._Yn1g = xyzN[1];
-                acc_sensor._Zn1g = xyzN[2];
+                acc_sensor._Calibration._XN1G = xyzN[0];
+                acc_sensor._Calibration._YN1G = xyzN[1];
+                acc_sensor._Calibration._ZN1G = xyzN[2];
 
                 acc_sensor._XStd = xyzSTD[0];
                 acc_sensor._YStd = xyzSTD[1];
@@ -2605,7 +2700,8 @@ namespace WocketConfigurationApp
 
         #endregion
 
-        
+       
+
         #region Close Form
 
             private void Form7_FormClosing(object sender, FormClosingEventArgs e)
@@ -2620,14 +2716,16 @@ namespace WocketConfigurationApp
             }
 
             private void close_form()
-        {
-            if (plotterForm != null)
             {
-                plotterForm.Close();
-                plotterForm = null;
-            }
+                #region comment
+                //if (plotterForm != null)
+                //{
+                //    plotterForm.Close();
+                //    plotterForm = null;
+                //}
+                #endregion comment
 
-            //write the test results & Xml to file
+                //write the test results & Xml to file
             if (!write_results_to_file(TestResults))
             { Console.WriteLine("problem writing to test results file"); }
 
@@ -2686,7 +2784,11 @@ namespace WocketConfigurationApp
     }
 
 
-  
+
+
+    #region commented
+
+    /*
     private void ReadingLoop()
     {
         
@@ -2711,9 +2813,13 @@ namespace WocketConfigurationApp
         clean_data_buffer();
 
         //Initialize buffer pointers
-        int myHead = wc._Decoders[0]._Head;
+        //The wockets controller doesn't keep track of the head
+        int myHead = wc._Decoders[0]._Head; 
         int myTail = myHead;
         Wockets.Data.Accelerometers.AccelerationData data;
+
+
+
 
         #region commented
         ////Initialize the acceleration data 
@@ -2739,7 +2845,7 @@ namespace WocketConfigurationApp
             
             #region Get Data Samples
 
-            while ( //(myTail != myHead) && 
+            while ( (myTail != myHead) && 
                     //(data.UnixTimeStamp > 0) &&
                     (DecodedPackets < MaxSamples -1) && 
                     (is_reading))
@@ -2750,6 +2856,7 @@ namespace WocketConfigurationApp
                 //if (myTail == myHead)
                 //{  System.Threading.Thread.Sleep(1000); }
                 //System.Threading.Thread.Sleep(10);
+
                 #endregion 
 
 
@@ -2871,6 +2978,225 @@ namespace WocketConfigurationApp
 
     }//function ends
 
+    */
+    #endregion commented
+
+
+    
+    private void ReadingLoop()
+    {
+
+
+        #region commented
+        // Initialize time stamps 
+        // DateTime data_initial_time;
+        // TimeSpan data_elapsed_time;
+        // double curUnixTime = 0.0;
+        #endregion commented
+
+        MaxSamples = 1000;
+
+        // Initialize the means
+        double[] accMeans = new double[3] { 0.0, 0.0, 0.0 };
+        RMEANS[0] = 0.0;
+        RMEANS[1] = 0.0;
+        RMEANS[2] = 0.0;
+        RSTD[0] = 0.0;
+        RSTD[1] = 0.0;
+        RSTD[2] = 0.0;
+
+
+
+        // Initialize the buffer 
+        // where the decoded data will be temp. storaged
+        clean_data_buffer();
+
+        // Initialize counter
+        DecodedPackets = 0;
+         
+        // Initialize buffer pointers
+        // The wockets controller doesn't keep track of the tail
+        // it needs to be initialized to the head
+        int myHead = wc._Decoders[0]._Head; 
+        int myTail = myHead;
+        Wockets.Data.Accelerometers.AccelerationData data;
+
+
+
+
+        #region commented
+        ////Initialize the acceleration data 
+        //Wockets.Data.Accelerometers.AccelerationData data = ((Wockets.Data.Accelerometers.AccelerationData)wc._Decoders[0]._Data[myHead]);
+
+        //cbuffer[DecodedPackets,0] = data._X;
+        //cbuffer[DecodedPackets,1] = data._Y;
+        //cbuffer[DecodedPackets,2] = data._Z;
+
+        ////update the tail
+        //myTail++;
+        #endregion commented
+
+
+
+        try
+        {
+            is_reading = true;
+
+            #region commented
+            //sampling rate initial time
+            //data_initial_time = DateTime.Now;
+            #endregion commented
+
+
+
+            #region Get Data Samples
+
+            //-- Loop until the desired number of samples ---
+            while ( //(myTail != myHead) && 
+                    //(data.UnixTimeStamp > 0) &&
+                    //(DecodedPackets < MaxSamples-1) && 
+                    (DecodedPackets < MaxSamples) && 
+                    (is_reading))
+            {
+
+                
+                //wait and update the head, when the tail has reached the head 
+                if (myTail == myHead)
+                {  System.Threading.Thread.Sleep(1000);
+                   myHead = wc._Decoders[0]._Head; 
+                }
+                
+                 
+                //get data
+                data = ((Wockets.Data.Accelerometers.AccelerationData)wc._Decoders[0]._Data[myTail]);
+
+                
+                //check that the unix time stam
+                if (data.UnixTimeStamp > 0.0)
+                {
+                    #region commented
+                    //check if the ACC data is valid
+                    //curUnixTime = data.UnixTimeStamp;
+
+                    #region commented
+                    //sampling rate
+                    //if (final_time <= curUnixTime)
+                    //{
+                    //    final_time = curUnixTime + 1000;
+
+                    //    Math.DivRem(sr_counter, Max_SR_Samples-1, out sr_counter);
+                    //    SR[sr_counter] = _sr;
+                    //    sr_counter++;
+                    //    _sr = 0;
+                    //}
+
+
+                    //if (curUnixTime < lastUnixTime)
+                    //{
+                    //    MessageBox.Show("Data overwritten without decoding");
+                    //    break;
+                    //}
+                    #endregion
+
+                    //update data & time stamps 
+                    //lastUnixTime = curUnixTime;
+                    #endregion commented
+
+
+                    //add data values to counters
+                    accMeans[0] = accMeans[0] + data._X;
+                    accMeans[1] = accMeans[1] + data._Y;
+                    accMeans[2] = accMeans[2] + data._Z;
+
+                    //add data to buffer
+                    cbuffer[DecodedPackets, 0] = data._X;
+                    cbuffer[DecodedPackets, 1] = data._Y;
+                    cbuffer[DecodedPackets, 2] = data._Z;
+                    cbuffer[DecodedPackets, 3] = data.UnixTimeStamp;
+
+                    //update the number of decoded packets
+                    DecodedPackets++;
+
+
+
+                }
+                else
+                { }
+
+
+                //update the tail
+                if (myTail >= wc._Decoders[0]._Data.Length - 1)
+                    myTail = 0;
+                else
+                    myTail++;
+
+            }//ends while
+
+
+            #region commented
+            #region commented
+            //sampling rate final time
+            //data_elapsed_time = DateTime.Now.Subtract(data_initial_time);
+            //SR = (int)Math.Floor(MaxSamples / data_elapsed_time.TotalSeconds);
+            #endregion 
+
+           // double unix_elapsed_time = cbuffer[DecodedPackets-1,3] - cbuffer[0,3];
+            // SR = (int)Math.Abs(Math.Floor(MaxSamples / unix_elapsed_time));
+            #endregion commented
+
+
+            //compute the final mean result
+            if (DecodedPackets > 1)
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    //compute the mean
+                    RMEANS[i] = accMeans[i] / DecodedPackets;
+                }
+
+
+                //if (CALIBRATE_STD)
+                if(true)
+                {   //compute the standard deviation
+                    for (int k = 0; k < 3; k++)
+                    {
+                        for (int j = 0; j < DecodedPackets; j++)
+                        {
+                            RSTD[k] = RSTD[k] + Math.Pow(cbuffer[j, k] - RMEANS[k], 2.0);
+                        }
+                        
+                        RSTD[k] = Math.Sqrt(RSTD[k] / DecodedPackets);
+                        
+                    }
+                }
+            }
+
+            
+            //Finish Test & Update Delegate
+            calibration_step = calibration_step + 1;
+
+
+        }//ends try
+        catch
+        {
+            DecodedPackets = -1;
+        }
+             
+
+        #endregion 
+
+
+       
+       
+       //Indicate that the reading loop ended
+        is_reading = false;
+        is_test_finished = true;
+        
+
+    }//function ends
+
+    
+
 
     private int compute_calibration_stats(string axis_id, out string st_result)
     {
@@ -2889,38 +3215,38 @@ namespace WocketConfigurationApp
             switch (axis_id)
             {
                 case "X +G":
-                    xyzP[0] = RMEANS[0];
+                    xyzP[0] = Convert.ToUInt16(RMEANS[0]);
                     st_result = String.Format("{0:0.00} ", xyzP[0]);
                     break;
                 case "X -G":
-                    xyzN[0] = RMEANS[0];
+                    xyzN[0] = Convert.ToUInt16(RMEANS[0]);
                     st_result = String.Format("{0:0.00} ", xyzN[0]);
                     break;
                 case "Y +G":
-                    xyzP[1] = RMEANS[1];
+                    xyzP[1] = Convert.ToUInt16(RMEANS[1]);
                     st_result = String.Format("{0:0.00} ", xyzP[1]);
                     break;
                 case "Y -G":
-                    xyzN[1] = RMEANS[1];
+                    xyzN[1] = Convert.ToUInt16(RMEANS[1]);
                     st_result = String.Format("{0:0.00} ", xyzN[1]);
                     break;
                 case "Z +G":
-                    xyzP[2] = RMEANS[2];
+                    xyzP[2] = Convert.ToUInt16(RMEANS[2]);
                     st_result = String.Format("{0:0.00} ", xyzP[2]);
                     break;
                 case "Z -G":
-                    xyzN[2] = RMEANS[2];
+                    xyzN[2] = Convert.ToUInt16(RMEANS[2]);
                     st_result = String.Format("{0:0.00} ", xyzN[2]);
                     break;
                 case "all":
-                    xyzP[0] = RMEANS[0];
-                    xyzP[1] = RMEANS[1];
-                    xyzP[2] = RMEANS[2];
+                    xyzP[0] = Convert.ToUInt16(RMEANS[0]);
+                    xyzP[1] = Convert.ToUInt16(RMEANS[1]);
+                    xyzP[2] = Convert.ToUInt16(RMEANS[2]);
 
 
-                    st_result = String.Format("{0:0.00} ", xyzP[0]) + "," +
-                                String.Format("{0:0.00} ", xyzP[1]) + "," +
-                                String.Format("{0:0.00} ", xyzP[2]) + ",";
+                    st_result = String.Format("{0:0} ", xyzP[0]) + "," +
+                                String.Format("{0:0} ", xyzP[1]) + "," +
+                                String.Format("{0:0} ", xyzP[2]) + ",";
                     break;
                 default:
                     break;
@@ -2954,6 +3280,8 @@ namespace WocketConfigurationApp
 
 
     #endregion 
+
+  
 
    
 
