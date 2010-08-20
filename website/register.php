@@ -125,9 +125,16 @@ $totalRows_rsACCOUNTS = mysql_num_rows($rsACCOUNTS);
 <script src="includes/common/js/utility.js" type="text/javascript"></script>
 <script src="includes/skins/style.js" type="text/javascript"></script>
 <?php echo $tNGs->displayValidationRules();?>
+<style type="text/css">
+<!--
+.style1 {font-size: x-large}
+-->
+</style>
 </head>
 
 <body>
+<p class="style1">
+<img src="images/logo.png" alt="Wockets" width="128" height="136" />New Member Registration</p>
 <?php
 	echo $tNGs->getErrorMsg();
 ?>
