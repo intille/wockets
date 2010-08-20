@@ -37,6 +37,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\bin\NeededFiles\dlls\PC\InTheHand.Net.Personal.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Build.Engine" />
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
