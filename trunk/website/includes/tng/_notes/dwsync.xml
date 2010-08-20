@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<dwsync>
+<file name="tNG.inc.php" local="129249824820671688" remote="129267573440000000" testing="129267573440000000" />
+<file name="tNG_config.inc.php" local="129249812569600967" remote="129267573440000000" testing="129267573440000000" />
+<file name="tNG.class.php" local="129249359729360558" remote="129267573440000000" testing="129267573440000000" />
+<file name="tNG_custom.class.php" local="129249359729810584" remote="129267573450000000" testing="129267573450000000" />
+<file name="tNG_delete.class.php" local="129249359729850586" remote="129267573450000000" testing="129267573450000000" />
+<file name="tNG_dispatcher.class.php" local="129249359729890588" remote="129267573450000000" testing="129267573450000000" />
+<file name="tNG_error.class.php" local="129249359729930591" remote="129267573460000000" testing="129267573460000000" />
+<file name="tNG_fields.class.php" local="129249359729980594" remote="129267573460000000" testing="129267573460000000" />
+<file name="tNG_functions.inc.php" local="129249359730020596" remote="129267573470000000" testing="129267573470000000" />
+<file name="tNG_import.class.php" local="129249359730370616" remote="129267573470000000" testing="129267573470000000" />
+<file name="tNG_insert.class.php" local="129249359730620630" remote="129267573480000000" testing="129267573480000000" />
+<file name="tNG_log.class.php" local="129249359730670633" remote="129267573480000000" testing="129267573480000000" />
+<file name="tNG_login.class.php" local="129249759393329458" remote="129267573480000000" testing="129267573480000000" />
+<file name="tNG_logoutTransaction.class.php" local="129249759393459466" remote="129267573480000000" testing="129267573480000000" />
+<file name="tNG_multiple.class.php" local="129249359730730636" remote="129267573490000000" testing="129267573490000000" />
+<file name="tNG_update.class.php" local="129249359730780639" remote="129267573500000000" testing="129267573500000000" />
+<file name="tNG_multipleDelete.class.php" local="129249824819851641" remote="129267573490000000" testing="129267573490000000" />
+<file name="tNG_multipleInsert.class.php" local="129249824820051653" remote="129267573490000000" testing="129267573490000000" />
+<file name="tNG_multipleUpdate.class.php" local="129249824820081654" remote="129267573500000000" testing="129267573500000000" />
+</dwsync>

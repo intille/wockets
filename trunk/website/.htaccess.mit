@@ -1,0 +1,9 @@
+# The web_scripts directory contains dynamic content for 
+# scripts.mit.edu, and should not be accessed via web.mit.edu.  This
+# .htaccess.mit file is symlinked into web_scripts directories to
+# prevent confusion.                                        
+
+<Limit GET>
+Require user scripts
+</Limit>
+ErrorDocument 403 /afs/athena.mit.edu/contrib/scripts/www/web_scripts.html
