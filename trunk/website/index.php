@@ -90,7 +90,7 @@ $totalRows_rscustom = mysql_num_rows($rscustom);
       </td>
     </tr>
   </table>
-  <a href="forgot_password.php">Forgot your password?</a>
+  <a href="forgot_password.php">Forgot your password?</a> &nbsp;   <a href="register.php">New member Registration</a>
 </form>
 <p>&nbsp;</p>
 </p>
