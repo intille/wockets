@@ -69,112 +69,117 @@ namespace KernelTest
             Core.UnsubscribeEvent(KernelResponse.CALIBRATION_UPDATED);
             Core.UnsubscribeEvent(KernelResponse.SAMPLING_RATE_UPDATED);
             Core.UnsubscribeEvent(KernelResponse.TRANSMISSION_MODE_UPDATED);
-            Core.UnsubscribeEvent(KernelResponse.ACTIVITY_COUNT_UPDATED);
+            Core.UnsubscribeEvent(KernelResponse.ACTIVITY_COUNT_UPDATED);   
         }
 
 
         private void EventListener(KernelResponse rsp)
         {
-                    // InvokeRequired required compares the thread ID of the
-            // calling thread to the thread ID of the creating thread.
-            // If these threads are different, it returns true.
-            if (this.InvokeRequired || this.InvokeRequired)
+            //It is important to put this event listener in a try and catch because with an event based system, there is a chance
+            //when unsubscribing to kernel events that there would be an event being handled and this can cause an object disposed
+            //exception
+            try
             {
-                UpdateFormCallback d = new UpdateFormCallback(EventListener);
-                this.Invoke(d, new object[] { rsp });
-            }
-            else
-            {
-                switch (rsp)
+                if (this.InvokeRequired || this.InvokeRequired)
                 {
-                    case KernelResponse.BATTERY_LEVEL_UPDATED:
-                        kernelresponse = "";
-                        for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
-                            kernelresponse += ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address + " - " +
-                                CurrentWockets._Controller._Sensors[i]._BatteryLevel + "\r\n";
-                        this.label3.Text = "Received: " + kernelresponse;
-                        break;
-                    case (KernelResponse)KernelResponse.BATTERY_PERCENT_UPDATED:
-                        kernelresponse = "";
-                        for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
-                            kernelresponse += ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address + " - " +
-                                CurrentWockets._Controller._Sensors[i]._BatteryPercent + "\r\n";
-                        this.label3.Text = "Received: " + kernelresponse;
-                        break;
-                    case (KernelResponse)KernelResponse.PC_COUNT_UPDATED:
-                        kernelresponse = "";
-                        for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
-                            kernelresponse += ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address + " - " +
-                                CurrentWockets._Controller._Sensors[i]._PDUCount + "\r\n";
-                        this.label3.Text = "Received: " + kernelresponse;
-                        break;
-                    case (KernelResponse)KernelResponse.SENSITIVITY_UPDATED:
-                        kernelresponse = "";
-                        for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
-                        {
-                            kernelresponse += ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address + " - " +
-                                ((Accelerometer)CurrentWockets._Controller._Sensors[i])._Sensitivity.ToString() + "\r\n";
-
-                            this.menuItem15.Checked = this.menuItem16.Checked = this.menuItem17.Checked = this.menuItem18.Checked = false;
-                            switch (((Accelerometer)CurrentWockets._Controller._Sensors[i])._Sensitivity)
-                            {
-                                case Sensitivity._1_5G:
-                                    this.menuItem15.Checked = true;
-                                    break;
-                                case Sensitivity._2G:
-                                    this.menuItem16.Checked = true;
-                                    break;
-                                case Sensitivity._4G:
-                                    this.menuItem17.Checked = true;
-                                    break;
-                                case Sensitivity._8G:
-                                    this.menuItem18.Checked = true;
-                                    break;
-                                default:
-                                    break;
-
-                            }
-                        }
-                        this.label3.Text = "Received: " + kernelresponse;
-                        break;
-                    case (KernelResponse)KernelResponse.CALIBRATION_UPDATED:
-                        kernelresponse = "";
-                        for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
-                        {
-                            kernelresponse += ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address +
-                                " - " + ((Accelerometer)CurrentWockets._Controller._Sensors[i])._Calibration._X1G + " -" +
-                                    ((Accelerometer)CurrentWockets._Controller._Sensors[i])._Calibration._XN1G + " -" +
-                                    ((Accelerometer)CurrentWockets._Controller._Sensors[i])._Calibration._Y1G + " -" +
-                                    ((Accelerometer)CurrentWockets._Controller._Sensors[i])._Calibration._YN1G + " -" +
-                                    ((Accelerometer)CurrentWockets._Controller._Sensors[i])._Calibration._Z1G + " -" +
-                                    ((Accelerometer)CurrentWockets._Controller._Sensors[i])._Calibration._ZN1G + " -" + "\r\n";
-                        }
-                        this.label3.Text = "Received: " + kernelresponse;
-                        break;
-                    case (KernelResponse)KernelResponse.SAMPLING_RATE_UPDATED:
-                        kernelresponse = "";
-                        for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
-                            kernelresponse += ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address + " - " +
-                                CurrentWockets._Controller._Sensors[i]._SamplingRate + "\r\n";
-                        this.label3.Text = "Received: " + kernelresponse;
-                        break;
-                    case (KernelResponse)KernelResponse.TRANSMISSION_MODE_UPDATED:
-                        kernelresponse = "";
-                        for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
-                            kernelresponse += ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address + " - " +
-                                ((Wocket)CurrentWockets._Controller._Sensors[i])._TransmissionMode.ToString() + "\r\n";
-                        this.label3.Text = "Received: " + kernelresponse;
-                        break;
-                    case (KernelResponse)KernelResponse.ACTIVITY_COUNT_UPDATED:
-                        kernelresponse = "";
-                        for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
-                            kernelresponse += ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address + " - " +
-                                ((Wocket)CurrentWockets._Controller._Sensors[i])._ActivityCount.ToString() + "\r\n";
-                        this.label3.Text = "Received: " + kernelresponse;
-                        break;   
-                    default:
-                        break;
+                    UpdateFormCallback d = new UpdateFormCallback(EventListener);
+                    this.Invoke(d, new object[] { rsp });
                 }
+                else
+                {
+                    switch (rsp)
+                    {
+                        case KernelResponse.BATTERY_LEVEL_UPDATED:
+                            kernelresponse = "";
+                            for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
+                                kernelresponse += ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address + " - " +
+                                    CurrentWockets._Controller._Sensors[i]._BatteryLevel + "\r\n";
+                            this.label3.Text = "Received: " + kernelresponse;
+                            break;
+                        case (KernelResponse)KernelResponse.BATTERY_PERCENT_UPDATED:
+                            kernelresponse = "";
+                            for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
+                                kernelresponse += ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address + " - " +
+                                    CurrentWockets._Controller._Sensors[i]._BatteryPercent + "\r\n";
+                            this.label3.Text = "Received: " + kernelresponse;
+                            break;
+                        case (KernelResponse)KernelResponse.PC_COUNT_UPDATED:
+                            kernelresponse = "";
+                            for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
+                                kernelresponse += ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address + " - " +
+                                    CurrentWockets._Controller._Sensors[i]._PDUCount + "\r\n";
+                            this.label3.Text = "Received: " + kernelresponse;
+                            break;
+                        case (KernelResponse)KernelResponse.SENSITIVITY_UPDATED:
+                            kernelresponse = "";
+                            for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
+                            {
+                                kernelresponse += ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address + " - " +
+                                    ((Accelerometer)CurrentWockets._Controller._Sensors[i])._Sensitivity.ToString() + "\r\n";
+
+                                this.menuItem15.Checked = this.menuItem16.Checked = this.menuItem17.Checked = this.menuItem18.Checked = false;
+                                switch (((Accelerometer)CurrentWockets._Controller._Sensors[i])._Sensitivity)
+                                {
+                                    case Sensitivity._1_5G:
+                                        this.menuItem15.Checked = true;
+                                        break;
+                                    case Sensitivity._2G:
+                                        this.menuItem16.Checked = true;
+                                        break;
+                                    case Sensitivity._4G:
+                                        this.menuItem17.Checked = true;
+                                        break;
+                                    case Sensitivity._8G:
+                                        this.menuItem18.Checked = true;
+                                        break;
+                                    default:
+                                        break;
+
+                                }
+                            }
+                            this.label3.Text = "Received: " + kernelresponse;
+                            break;
+                        case (KernelResponse)KernelResponse.CALIBRATION_UPDATED:
+                            kernelresponse = "";
+                            for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
+                            {
+                                kernelresponse += ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address +
+                                    " - " + ((Accelerometer)CurrentWockets._Controller._Sensors[i])._Calibration._X1G + " -" +
+                                        ((Accelerometer)CurrentWockets._Controller._Sensors[i])._Calibration._XN1G + " -" +
+                                        ((Accelerometer)CurrentWockets._Controller._Sensors[i])._Calibration._Y1G + " -" +
+                                        ((Accelerometer)CurrentWockets._Controller._Sensors[i])._Calibration._YN1G + " -" +
+                                        ((Accelerometer)CurrentWockets._Controller._Sensors[i])._Calibration._Z1G + " -" +
+                                        ((Accelerometer)CurrentWockets._Controller._Sensors[i])._Calibration._ZN1G + " -" + "\r\n";
+                            }
+                            this.label3.Text = "Received: " + kernelresponse;
+                            break;
+                        case (KernelResponse)KernelResponse.SAMPLING_RATE_UPDATED:
+                            kernelresponse = "";
+                            for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
+                                kernelresponse += ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address + " - " +
+                                    CurrentWockets._Controller._Sensors[i]._SamplingRate + "\r\n";
+                            this.label3.Text = "Received: " + kernelresponse;
+                            break;
+                        case (KernelResponse)KernelResponse.TRANSMISSION_MODE_UPDATED:
+                            kernelresponse = "";
+                            for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
+                                kernelresponse += ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address + " - " +
+                                    ((Wocket)CurrentWockets._Controller._Sensors[i])._TransmissionMode.ToString() + "\r\n";
+                            this.label3.Text = "Received: " + kernelresponse;
+                            break;
+                        case (KernelResponse)KernelResponse.ACTIVITY_COUNT_UPDATED:
+                            kernelresponse = "";
+                            for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
+                                kernelresponse += ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address + " - " +
+                                    ((Wocket)CurrentWockets._Controller._Sensors[i])._ActivityCount.ToString() + "\r\n";
+                            this.label3.Text = "Received: " + kernelresponse;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }catch
+            {
             }
         }
 

@@ -43,155 +43,161 @@ namespace KernelTest
 
         private void EventListener(KernelResponse rsp)
         {
-            // InvokeRequired required compares the thread ID of the
-            // calling thread to the thread ID of the creating thread.
-            // If these threads are different, it returns true.
-            if (this.InvokeRequired || this.InvokeRequired)
+            try
             {
-                UpdateFormCallback d = new UpdateFormCallback(EventListener);
-                this.Invoke(d, new object[] { rsp });
-            }
-            else
-            {
-
-                switch (rsp)
+                // InvokeRequired required compares the thread ID of the
+                // calling thread to the thread ID of the creating thread.
+                // If these threads are different, it returns true.
+                if (this.InvokeRequired || this.InvokeRequired)
                 {
-                    case KernelResponse.PING_RESPONSE:
-                        this.status.Text = "Kernel ... started";
-                        this.menukernel.Enabled = true;
-                        this.menukernelstart.Enabled = false;
-                        this.menukernelstop.Enabled = true;
-                        this.menuApp.Enabled = true;
-                        this.menuAppRegister.Enabled = true;
-                        this.menuAppUnregister.Enabled = false;
-                        this.menuWocket.Enabled = false;
-                        this.menuWocketConnect.Enabled = false;
-                        this.menuWocketDisconnect.Enabled = false;
-                        this.menuWocketDiscover.Enabled = false;
-                        this.menuItem2.Enabled = false;
-                        break;
-                    case KernelResponse.STARTED:
-                        this.status.Text = "Kernel ... started";
-                        this.menukernel.Enabled = true;
-                        this.menukernelstart.Enabled = false;
-                        this.menukernelstop.Enabled = true;
-                        this.menuApp.Enabled = true;
-                        this.menuAppRegister.Enabled = true;
-                        this.menuAppUnregister.Enabled = false;
-                        this.menuWocket.Enabled = false;
-                        this.menuWocketConnect.Enabled = false;
-                        this.menuWocketDisconnect.Enabled = false;
-                        this.menuWocketDiscover.Enabled = false;
-                        this.menuItem2.Enabled = false;
-                        break;
-                    case KernelResponse.STOPPED:
-                        this.status.Text = "Kernel ... stopped";
-                        this.menukernel.Enabled = true;
-                        this.menukernelstart.Enabled = true;
-                        this.menukernelstop.Enabled = false;
-                        this.menuApp.Enabled = false;
-                        this.menuAppRegister.Enabled = false;
-                        this.menuAppUnregister.Enabled = false;
-                        this.menuWocket.Enabled = false;
-                        this.menuWocketConnect.Enabled = false;
-                        this.menuWocketDisconnect.Enabled = false;
-                        this.menuWocketDiscover.Enabled = false;
-                        this.menuItem2.Enabled = true;
-                        break;
-                    case KernelResponse.REGISTERED:
-                        this.status.Text = "Kernel ... registered";
-                        this.menukernel.Enabled = true;
-                        this.menukernelstart.Enabled = false;
-                        this.menukernelstop.Enabled = true;
-                        this.menuApp.Enabled = true;
-                        this.menuAppRegister.Enabled = false;
-                        this.menuAppUnregister.Enabled = true;
-                        this.menuWocket.Enabled = true;
-                        this.menuWocketConnect.Enabled = false;
-                        this.menuWocketDisconnect.Enabled = false;
-                        this.menuWocketDiscover.Enabled = true;
-                        break;
-                    case KernelResponse.UNREGISTERED:
-                        this.status.Text = "Kernel ... unregistered";
-                        this.menukernel.Enabled = true;
-                        this.menukernelstart.Enabled = false;
-                        this.menukernelstop.Enabled = true;
-                        this.menuApp.Enabled = true;
-                        this.menuAppRegister.Enabled = true;
-                        this.menuAppUnregister.Enabled = false;
-                        this.menuWocket.Enabled = false;
-                        this.menuWocketConnect.Enabled = false;
-                        this.menuWocketDisconnect.Enabled = false;
-                        this.menuWocketDiscover.Enabled = false;
-                        break;
-                    case KernelResponse.DISCOVERED:
-                        this.listBox1.Items.Clear();
-                        foreach (string mac in Core._DiscoveredSensors.Values)
-                            this.listBox1.Items.Add(mac);
-                        if (Core._DiscoveredSensors.Count > 0)
-                            this.listBox1.Enabled = true;
-
-                        this.status.Text = "Kernel ... discovered";
-                        this.menukernel.Enabled = true;
-                        this.menukernelstart.Enabled = false;
-                        this.menukernelstop.Enabled = true;
-                        this.menuApp.Enabled = true;
-                        this.menuAppRegister.Enabled = false;
-                        this.menuAppUnregister.Enabled = true;
-                        this.menuWocket.Enabled = true;
-                        this.menuWocketConnect.Enabled = false;
-                        this.menuWocketDisconnect.Enabled = false;
-                        this.menuWocketDiscover.Enabled = true;
-                        break;
-                    case KernelResponse.DISCONNECTED:
-                        this.status.Text = "Kernel ... disconnected";
-                        this.menukernel.Enabled = true;
-                        this.menukernelstart.Enabled = false;
-                        this.menukernelstop.Enabled = true;
-                        this.menuApp.Enabled = true;
-                        this.menuAppRegister.Enabled = false;
-                        this.menuAppUnregister.Enabled = true;
-                        this.menuWocket.Enabled = true;
-                        this.menuWocketConnect.Enabled = true;
-                        this.menuWocketDisconnect.Enabled = false;
-                        this.menuWocketDiscover.Enabled = true;
-                        this.Visible = true;
-                        form2.Close();
-                        break;
-                    case KernelResponse.CONNECTED:
-                        this.status.Text = "Kernel ... connected";
-                        this.menukernel.Enabled = true;
-                        this.menukernelstart.Enabled = false;
-                        this.menukernelstop.Enabled = true;
-                        this.menuApp.Enabled = true;
-                        this.menuAppRegister.Enabled = false;
-                        this.menuAppUnregister.Enabled = true;
-                        this.menuWocket.Enabled = true;
-                        this.menuWocketConnect.Enabled = false;
-                        this.menuWocketDisconnect.Enabled = true;
-                        this.menuWocketDiscover.Enabled = false;
-                        form2 = new Form2();
-                        form2.Text = "Wocket - " + (string)this.listBox1.Items[this.listBox1.SelectedIndex];
-                        this.Visible = false;
-                        form2.Show();
-                        break;
-                    case KernelResponse.SENSORS_UPDATED:
-                        this.status.Text = "Kernel ... sensors updated " + ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0])._Address;
-                        this.menukernel.Enabled = true;
-                        this.menukernelstart.Enabled = false;
-                        this.menukernelstop.Enabled = true;
-                        this.menuApp.Enabled = true;
-                        this.menuAppRegister.Enabled = false;
-                        this.menuAppUnregister.Enabled = true;
-                        this.menuWocket.Enabled = true;
-                        this.menuWocketConnect.Enabled = true;
-                        this.menuWocketDisconnect.Enabled = false;
-                        this.menuWocketDiscover.Enabled = true;
-                        break;
-                    default:
-                        break;
+                    UpdateFormCallback d = new UpdateFormCallback(EventListener);
+                    this.Invoke(d, new object[] { rsp });
                 }
+                else
+                {
 
+                    switch (rsp)
+                    {
+                        case KernelResponse.PING_RESPONSE:
+                            this.status.Text = "Kernel ... started";
+                            this.menukernel.Enabled = true;
+                            this.menukernelstart.Enabled = false;
+                            this.menukernelstop.Enabled = true;
+                            this.menuApp.Enabled = true;
+                            this.menuAppRegister.Enabled = true;
+                            this.menuAppUnregister.Enabled = false;
+                            this.menuWocket.Enabled = false;
+                            this.menuWocketConnect.Enabled = false;
+                            this.menuWocketDisconnect.Enabled = false;
+                            this.menuWocketDiscover.Enabled = false;
+                            this.menuItem2.Enabled = false;
+                            break;
+                        case KernelResponse.STARTED:
+                            this.status.Text = "Kernel ... started";
+                            this.menukernel.Enabled = true;
+                            this.menukernelstart.Enabled = false;
+                            this.menukernelstop.Enabled = true;
+                            this.menuApp.Enabled = true;
+                            this.menuAppRegister.Enabled = true;
+                            this.menuAppUnregister.Enabled = false;
+                            this.menuWocket.Enabled = false;
+                            this.menuWocketConnect.Enabled = false;
+                            this.menuWocketDisconnect.Enabled = false;
+                            this.menuWocketDiscover.Enabled = false;
+                            this.menuItem2.Enabled = false;
+                            break;
+                        case KernelResponse.STOPPED:
+                            this.status.Text = "Kernel ... stopped";
+                            this.menukernel.Enabled = true;
+                            this.menukernelstart.Enabled = true;
+                            this.menukernelstop.Enabled = false;
+                            this.menuApp.Enabled = false;
+                            this.menuAppRegister.Enabled = false;
+                            this.menuAppUnregister.Enabled = false;
+                            this.menuWocket.Enabled = false;
+                            this.menuWocketConnect.Enabled = false;
+                            this.menuWocketDisconnect.Enabled = false;
+                            this.menuWocketDiscover.Enabled = false;
+                            this.menuItem2.Enabled = true;
+                            break;
+                        case KernelResponse.REGISTERED:
+                            this.status.Text = "Kernel ... registered";
+                            this.menukernel.Enabled = true;
+                            this.menukernelstart.Enabled = false;
+                            this.menukernelstop.Enabled = true;
+                            this.menuApp.Enabled = true;
+                            this.menuAppRegister.Enabled = false;
+                            this.menuAppUnregister.Enabled = true;
+                            this.menuWocket.Enabled = true;
+                            this.menuWocketConnect.Enabled = false;
+                            this.menuWocketDisconnect.Enabled = false;
+                            this.menuWocketDiscover.Enabled = true;
+                            break;
+                        case KernelResponse.UNREGISTERED:
+                            this.status.Text = "Kernel ... unregistered";
+                            this.menukernel.Enabled = true;
+                            this.menukernelstart.Enabled = false;
+                            this.menukernelstop.Enabled = true;
+                            this.menuApp.Enabled = true;
+                            this.menuAppRegister.Enabled = true;
+                            this.menuAppUnregister.Enabled = false;
+                            this.menuWocket.Enabled = false;
+                            this.menuWocketConnect.Enabled = false;
+                            this.menuWocketDisconnect.Enabled = false;
+                            this.menuWocketDiscover.Enabled = false;
+                            break;
+                        case KernelResponse.DISCOVERED:
+                            this.listBox1.Items.Clear();
+                            foreach (string mac in Core._DiscoveredSensors.Values)
+                                this.listBox1.Items.Add(mac);
+                            if (Core._DiscoveredSensors.Count > 0)
+                                this.listBox1.Enabled = true;
+
+                            this.status.Text = "Kernel ... discovered";
+                            this.menukernel.Enabled = true;
+                            this.menukernelstart.Enabled = false;
+                            this.menukernelstop.Enabled = true;
+                            this.menuApp.Enabled = true;
+                            this.menuAppRegister.Enabled = false;
+                            this.menuAppUnregister.Enabled = true;
+                            this.menuWocket.Enabled = true;
+                            this.menuWocketConnect.Enabled = false;
+                            this.menuWocketDisconnect.Enabled = false;
+                            this.menuWocketDiscover.Enabled = true;
+                            break;
+                        case KernelResponse.DISCONNECTED:
+                            this.status.Text = "Kernel ... disconnected";
+                            this.menukernel.Enabled = true;
+                            this.menukernelstart.Enabled = false;
+                            this.menukernelstop.Enabled = true;
+                            this.menuApp.Enabled = true;
+                            this.menuAppRegister.Enabled = false;
+                            this.menuAppUnregister.Enabled = true;
+                            this.menuWocket.Enabled = true;
+                            this.menuWocketConnect.Enabled = true;
+                            this.menuWocketDisconnect.Enabled = false;
+                            this.menuWocketDiscover.Enabled = true;
+                            this.Visible = true;
+                            form2.Close();
+                            break;
+                        case KernelResponse.CONNECTED:
+                            this.status.Text = "Kernel ... connected";
+                            this.menukernel.Enabled = true;
+                            this.menukernelstart.Enabled = false;
+                            this.menukernelstop.Enabled = true;
+                            this.menuApp.Enabled = true;
+                            this.menuAppRegister.Enabled = false;
+                            this.menuAppUnregister.Enabled = true;
+                            this.menuWocket.Enabled = true;
+                            this.menuWocketConnect.Enabled = false;
+                            this.menuWocketDisconnect.Enabled = true;
+                            this.menuWocketDiscover.Enabled = false;
+                            form2 = new Form2();
+                            form2.Text = "Wocket - " + (string)this.listBox1.Items[this.listBox1.SelectedIndex];
+                            this.Visible = false;
+                            form2.Show();
+                            break;
+                        case KernelResponse.SENSORS_UPDATED:
+                            this.status.Text = "Kernel ... sensors updated " + ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0])._Address;
+                            this.menukernel.Enabled = true;
+                            this.menukernelstart.Enabled = false;
+                            this.menukernelstop.Enabled = true;
+                            this.menuApp.Enabled = true;
+                            this.menuAppRegister.Enabled = false;
+                            this.menuAppUnregister.Enabled = true;
+                            this.menuWocket.Enabled = true;
+                            this.menuWocketConnect.Enabled = true;
+                            this.menuWocketDisconnect.Enabled = false;
+                            this.menuWocketDiscover.Enabled = true;
+                            break;
+                        default:
+                            break;
+                    }
+
+                }
+            }
+            catch
+            {
             }
         }
 
@@ -200,6 +206,7 @@ namespace KernelTest
 
    
         Form2 form2;
+
 
 
         private void menuItem2_Click(object sender, EventArgs e)
