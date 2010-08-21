@@ -28,6 +28,7 @@ namespace KernelTest
         {
             InitializeComponent();
 
+            // Kernel response events that the application wants to listen to
             Core.SubscribeEvent(KernelResponse.STARTED, EventListener);
             Core.SubscribeEvent(KernelResponse.REGISTERED, EventListener);
             Core.SubscribeEvent(KernelResponse.UNREGISTERED, EventListener);
@@ -41,6 +42,10 @@ namespace KernelTest
 
         delegate void UpdateFormCallback(KernelResponse response);
 
+        /// <summary>
+        /// Handles kernel response events
+        /// </summary>
+        /// <param name="rsp"></param>
         private void EventListener(KernelResponse rsp)
         {
             try

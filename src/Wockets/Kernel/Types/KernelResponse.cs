@@ -40,7 +40,7 @@ namespace Wockets.Kernel.Types
         /// <summary>
         /// Wockets to connect to got updated
         /// </summary>
-        SENSORS_UPDATED=5,        
+        SENSORS_UPDATED=5,       
 
 
         /// <summary>
@@ -106,6 +106,10 @@ namespace Wockets.Kernel.Types
         /// <summary>
         /// Ping response
         /// </summary>
-        PING_RESPONSE=18
+        PING_RESPONSE=18,
+
+        CONNECT_FAILED=19,
+        DISCONNECT_FAILED=20,
+        SENSORS_UPDATED_FAILED=21
     }
 }
