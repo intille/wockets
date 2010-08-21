@@ -29,7 +29,7 @@ namespace Wockets.Kernel
         public static string REGISTRY_DISCOVERED_SENSORS_PATH = REGISTRY_WOCKETS_PATH + "\\Discovered";
         public static string COMMAND_CHANNEL = Core.REGISTRY_WOCKETS_PATH + "\\Command";
         public static string REGISTRY_KERNEL_PATH = REGISTRY_WOCKETS_PATH + "\\Kernel";
-        public static string REGISTRY_LOCK = "WocketsRLock";
+        public static string KERNEL_LOCK = "WocketsKLock";
         public static string KERNEL_PATH = @"\Program Files\wockets\";
         public static string KERNEL_EXECUTABLE = "Kernel.exe";
         public static string BROADCAST_EVENT_PREFIX = "WOCKET_BROADCAST_";
@@ -37,7 +37,7 @@ namespace Wockets.Kernel
         /// <summary>
         /// A system-wide semaphore that serializes writes to the registry
         /// </summary>
-        private static Semaphore registryLock;
+        private static Semaphore kernelLock;
 
         /// <summary>
         /// Indicates if an application is registered with the wockets kernel. True if the application is registered otherwise
@@ -98,12 +98,12 @@ namespace Wockets.Kernel
         /// <summary>
         /// An array that can hold up to the maximum number of kernel response that an application might be interested in.
         /// </summary>
-        protected static KernelResponseHandler[] delegates = new KernelResponseHandler[20];
+        protected static KernelResponseHandler[] delegates = new KernelResponseHandler[30];
 
         /// <summary>
         /// An array indicating if an application is interested in a particular kernel response
         /// </summary>
-        protected static bool[] subscribed = new bool[] { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false };
+        protected static bool[] subscribed = new bool[] { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false };
 
         /// <summary>
         /// Fires events based on kernel response events to subscribed event handlers that are provided by applications
@@ -147,9 +147,15 @@ namespace Wockets.Kernel
         /// </summary>
         static Core()
         {            
-            registryLock = new Semaphore(1, 1, REGISTRY_LOCK);
+            kernelLock = new Semaphore(1, 1, KERNEL_LOCK);
             _IcomingChannel = Guid.NewGuid().ToString();
             _OutgoingChannel = _IcomingChannel + "-kernel";
+
+            RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + Core._IcomingChannel + "}");
+            rk.SetValue("Message", "", RegistryValueKind.String);
+            rk.SetValue("Param", "", RegistryValueKind.String);
+            rk.Close();
+
             Core.Ping();
 
 /*            Thread t = new Thread(EventListener);
@@ -265,7 +271,7 @@ namespace Wockets.Kernel
         {
             int myid = System.Threading.Thread.CurrentThread.ManagedThreadId;
             KernelResponse myevent = (KernelResponse)events[myid];
-            string eventName = Core.BROADCAST_EVENT_PREFIX + myevent.ToString();
+            string eventName = Core._IcomingChannel +"-"+ myevent.ToString();
             NamedEvents namedEvent = new NamedEvents();
             RegistryKey rk = null;
             while (true)
@@ -312,7 +318,7 @@ namespace Wockets.Kernel
                         CurrentWockets._Controller._Mode = Wockets.MemoryMode.SharedToLocal;
                         CurrentWockets._Controller._Receivers = new Wockets.Receivers.ReceiverList();
                         rk = null;
-                        registryLock.WaitOne();
+                        kernelLock.WaitOne();
                         for (int i = 0; (i < 5); i++)
                         {
                             try
@@ -343,7 +349,7 @@ namespace Wockets.Kernel
                             {
                             }
                         }                        
-                        registryLock.Release();
+                        kernelLock.Release();
                         break;
                     case (KernelResponse)KernelResponse.CONNECTED:                        
                         CurrentWockets._Controller.Initialize();
@@ -392,20 +398,29 @@ namespace Wockets.Kernel
         {
             get
             {
-                if (_Connected)
+                kernelLock.WaitOne();
+                try
                 {
-                    if (storagePath == "")
+                    if (_Connected)
                     {
-                        registryLock.WaitOne();
-                        RegistryKey rk = Registry.LocalMachine.OpenSubKey(REGISTRY_KERNEL_PATH);
-                        storagePath = (string)rk.GetValue("Storage");
-                        rk.Close();
-                        registryLock.Release();
-                    }
+                        if (storagePath == "")
+                        {
+                            kernelLock.WaitOne();
+                            RegistryKey rk = Registry.LocalMachine.OpenSubKey(REGISTRY_KERNEL_PATH);
+                            storagePath = (string)rk.GetValue("Storage");
+                            rk.Close();
+                            kernelLock.Release();
+                        }
 
+                    }
+                    else
+                        storagePath = "";
                 }
-                else
-                    storagePath = "";
+                catch (Exception e)
+                {
+                    Logger.Error("Core.cs:_StoragePath:" + e.ToString());
+                }
+                kernelLock.Release();
                 return storagePath;
             }
         }
@@ -495,13 +510,13 @@ namespace Wockets.Kernel
         public static void Send(KernelCommand command)
         {
             NamedEvents namedEvent = new NamedEvents();
-            registryLock.WaitOne();
+            kernelLock.WaitOne();
             RegistryKey rk = Registry.LocalMachine.OpenSubKey(COMMAND_CHANNEL, true);
             rk.SetValue("Message", command.ToString(), RegistryValueKind.String);
             rk.SetValue("Param", Core.COMMAND_CHANNEL.ToString(), RegistryValueKind.String);
             rk.Flush();
             rk.Close();
-            registryLock.Release();
+            kernelLock.Release();
             namedEvent.Send(Channels.COMMAND.ToString());
         }
 
@@ -517,7 +532,7 @@ namespace Wockets.Kernel
             {
                 string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + _IcomingChannel + "}";
                 NamedEvents namedEvent = new NamedEvents();
-                registryLock.WaitOne();
+                kernelLock.WaitOne();
                 RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
                 rk.SetValue("Message", KernelCommand.SET_WOCKETS.ToString(), RegistryValueKind.String);
                 rk.Flush();
@@ -535,7 +550,7 @@ namespace Wockets.Kernel
                     rk.Flush();
                     rk.Close();
                 }
-                registryLock.Release();
+                kernelLock.Release();
                 namedEvent.Send(Core._OutgoingChannel);
                 return true;
             }
@@ -555,13 +570,13 @@ namespace Wockets.Kernel
                 storagePath = "";
                 string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + _IcomingChannel + "}";
                 NamedEvents namedEvent = new NamedEvents();
-                registryLock.WaitOne();
+                kernelLock.WaitOne();
                 RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
                 rk.SetValue("Message", KernelCommand.DISCONNECT.ToString(), RegistryValueKind.String);
                 rk.SetValue("Param", "all", RegistryValueKind.String);
                 rk.Flush();
                 rk.Close();
-                registryLock.Release();
+                kernelLock.Release();
                 namedEvent.Send(Core._OutgoingChannel);
                 return true;               
             }
@@ -579,13 +594,13 @@ namespace Wockets.Kernel
                 string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + _IcomingChannel + "}";
                 NamedEvents namedEvent = new NamedEvents();
 
-                registryLock.WaitOne();
+                kernelLock.WaitOne();
                 RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
                 rk.SetValue("Message", KernelCommand.DISCOVER.ToString(), RegistryValueKind.String);
                 rk.SetValue("Param", "all", RegistryValueKind.String);
                 rk.Flush();
                 rk.Close();
-                registryLock.Release();
+                kernelLock.Release();
                 namedEvent.Send(Core._OutgoingChannel);
                 return true;
             }
@@ -602,13 +617,13 @@ namespace Wockets.Kernel
             {
                 string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + _IcomingChannel + "}";
                 NamedEvents namedEvent = new NamedEvents();                
-                registryLock.WaitOne();
+                kernelLock.WaitOne();
                 RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
                 rk.SetValue("Message", KernelCommand.CONNECT.ToString(), RegistryValueKind.String);
                 rk.SetValue("Param", "all", RegistryValueKind.String);
                 rk.Flush();
                 rk.Close();
-                registryLock.Release();
+                kernelLock.Release();
                 namedEvent.Send(Core._OutgoingChannel);
                 return true;
             }
@@ -621,15 +636,15 @@ namespace Wockets.Kernel
         public static bool Register()
         {
             if (_KernalStarted)
-            {
+            {       
                 NamedEvents namedEvent = new NamedEvents();                
-                registryLock.WaitOne();
+                kernelLock.WaitOne();
                 RegistryKey rk = Registry.LocalMachine.OpenSubKey(COMMAND_CHANNEL, true);
                 rk.SetValue("Message", KernelCommand.REGISTER.ToString(), RegistryValueKind.String);
                 rk.SetValue("Param", _IcomingChannel.ToString(), RegistryValueKind.String);
                 rk.Flush();
                 rk.Close();
-                registryLock.Release();
+                kernelLock.Release();
                 namedEvent.Send(Channels.COMMAND.ToString());
                 return true;
             }
@@ -640,13 +655,13 @@ namespace Wockets.Kernel
         public static bool Ping()
         {
             NamedEvents namedEvent = new NamedEvents();
-            registryLock.WaitOne();
+            kernelLock.WaitOne();
             RegistryKey rk = Registry.LocalMachine.OpenSubKey(COMMAND_CHANNEL, true);
             rk.SetValue("Message", KernelCommand.PING.ToString(), RegistryValueKind.String);
             rk.SetValue("Param", _IcomingChannel.ToString(), RegistryValueKind.String);
             rk.Flush();
             rk.Close();
-            registryLock.Release();
+            kernelLock.Release();
             namedEvent.Send(Channels.COMMAND.ToString());
             return true;
         }
@@ -659,13 +674,13 @@ namespace Wockets.Kernel
             if (_Registered)
             {
                 NamedEvents namedEvent = new NamedEvents();               
-                registryLock.WaitOne();
+                kernelLock.WaitOne();
                 RegistryKey rk = Registry.LocalMachine.OpenSubKey(COMMAND_CHANNEL, true);
                 rk.SetValue("Message", KernelCommand.UNREGISTER.ToString(), RegistryValueKind.String);
                 rk.SetValue("Param", Core._IcomingChannel.ToString(), RegistryValueKind.String);
                 rk.Flush();
                 rk.Close();
-                registryLock.Release();
+                kernelLock.Release();
                 namedEvent.Send(Channels.COMMAND.ToString());
                 _Registered = false;
                 return true;
@@ -684,13 +699,13 @@ namespace Wockets.Kernel
             {
                 string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + _IcomingChannel + "}";
                 NamedEvents namedEvent = new NamedEvents();
-                registryLock.WaitOne();
+                kernelLock.WaitOne();
                 RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
                 rk.SetValue("Message", KernelCommand.GET_BATTERY_LEVEL.ToString(), RegistryValueKind.String);
                 rk.SetValue("Param", mac.ToString(), RegistryValueKind.String);
                 rk.Flush();
                 rk.Close();   
-                registryLock.Release();
+                kernelLock.Release();
                 namedEvent.Send(Core._OutgoingChannel);
                 return true;
             }
@@ -703,18 +718,19 @@ namespace Wockets.Kernel
         /// <param name="bl">Battery level response PDU</param>
         public static void WRITE_BATTERY_LEVEL(BL_RSP bl)
         {
+            kernelLock.WaitOne();
             try
             {                
-                registryLock.WaitOne();
+                
                 RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + bl._SensorID.ToString("0"));
                 rk.SetValue("BATTERY_LEVEL", bl._BatteryLevel, RegistryValueKind.String);
-                rk.Close();
-                registryLock.Release();                
+                rk.Close();                
             }
-            catch
+            catch (Exception e)
             {
-                registryLock.Release();
+                Logger.Error("Core.cs:WRITE_BATTERY_LEVEL: " + e.ToString());
             }
+            kernelLock.Release();                
         }
 
         /// <summary>
@@ -723,10 +739,11 @@ namespace Wockets.Kernel
         /// <returns>True if battery levels are read, otherwise false</returns>
         public static bool READ_BATTERY_LEVEL()
         {
+            bool success = false;
+            kernelLock.WaitOne();
             try
             {
-                RegistryKey rk = null;
-                registryLock.WaitOne();
+                RegistryKey rk = null;                
                 for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
                 {
                     try
@@ -741,14 +758,15 @@ namespace Wockets.Kernel
                     {
                     }
                 }
-                registryLock.Release();
-                return true;             
+                success = true;
             }
-            catch
+            catch (Exception e)
             {
-                registryLock.Release();
+                Logger.Error("Core.cs: READ_BATTERY_LEVEL: " + e.ToString());
             }
-            return false;
+
+            kernelLock.Release();
+            return success;
         }
 
         /// <summary>
@@ -757,42 +775,52 @@ namespace Wockets.Kernel
         /// <param name="mac">MAC address for the wocket</param>
         /// <returns>True if the request is successfully sent, otherwise false</returns>
         public static bool GET_BATTERY_PERCENT(string mac)
-        {            
-            if ((_Registered) && (_Connected))
+        {
+            bool success = false;
+            kernelLock.WaitOne();
+            try
             {
-                string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + _IcomingChannel + "}";
-                NamedEvents namedEvent = new NamedEvents();
-                registryLock.WaitOne();
-                RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
-                rk.SetValue("Message", KernelCommand.GET_BATTERY_PERCENT.ToString(), RegistryValueKind.String);
-                rk.SetValue("Param", mac.ToString(), RegistryValueKind.String);
-                rk.Flush();
-                rk.Close();
-                registryLock.Release();
-                namedEvent.Send(Core._OutgoingChannel);
-                return true;
+                if ((_Registered) && (_Connected))
+                {
+                    string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + _IcomingChannel + "}";
+                    NamedEvents namedEvent = new NamedEvents();
+
+                    RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
+                    rk.SetValue("Message", KernelCommand.GET_BATTERY_PERCENT.ToString(), RegistryValueKind.String);
+                    rk.SetValue("Param", mac.ToString(), RegistryValueKind.String);
+                    rk.Flush();
+                    rk.Close();
+                    namedEvent.Send(Core._OutgoingChannel);
+                    success = true;
+                }
             }
-            return false;
+            catch (Exception e)
+            {
+                Logger.Error("Core.cs: GET_BATTERY_PERCENT: " + e.ToString());
+            }
+            kernelLock.Release();
+            return success;
         }
 
         /// <summary>
         /// Writes to the registry a battery percent
         /// </summary>
         /// <param name="bp">Battery percent response PDU</param>
-        public static void WRITE_BATTERY_PERCENT(BP_RSP bp)
+        public static void WRITE_BATTERY_PERCENT(BP_RSP bp)        
         {
+            kernelLock.WaitOne();
             try
-            {            
-                registryLock.WaitOne();
+            {                            
                 RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + bp._SensorID.ToString("0"));
                 rk.SetValue("BATTERY_PERCENT", bp._Percent, RegistryValueKind.String);
-                rk.Close();
-                registryLock.Release();
+                rk.Close();                
             }
-            catch
+            catch(Exception e)
             {
-                registryLock.Release();
+                Logger.Error("Core.cs:WRITE_BATTERY_PERCENT:" + e.ToString());
             }
+
+            kernelLock.Release();
         }
 
 
@@ -802,10 +830,13 @@ namespace Wockets.Kernel
         /// <returns>True if battery percents are read and updated in the singelton wockets controller, otherwise false</returns>
         public static bool READ_BATTERY_PERCENT()
         {
+            bool success = false;
+
+            kernelLock.WaitOne();
             try
             {
                 RegistryKey rk = null;
-                registryLock.WaitOne();
+
                 for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
                 {
                     try
@@ -820,14 +851,16 @@ namespace Wockets.Kernel
                     {
                     }
                 }
-                registryLock.Release();
-                return true;
+
+                success = true;
             }
-            catch
+            catch (Exception e)
             {
-                registryLock.Release();
+                Logger.Error("Core.cs:READ_BATTERY_PERCENT:" + e.ToString());
+
             }
-            return false;
+            kernelLock.Release();
+            return success;
         }
 
         /// <summary>
@@ -836,22 +869,30 @@ namespace Wockets.Kernel
         /// <param name="mac">A mac address for a wocket</param>
         /// <returns>True if the request is successfully sent, otherwise false</returns>
         public static bool GET_PDU_COUNT(string mac)
-        {            
-            if ((_Registered) && (_Connected))
+        {
+            bool success = false;
+            kernelLock.WaitOne();
+            try
             {
-                string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + _IcomingChannel + "}";
-                NamedEvents namedEvent = new NamedEvents();
-                registryLock.WaitOne();
-                RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
-                rk.SetValue("Message", KernelCommand.GET_PDU_COUNT.ToString(), RegistryValueKind.String);
-                rk.SetValue("Param", mac.ToString(), RegistryValueKind.String);
-                rk.Flush();
-                rk.Close();
-                registryLock.Release();
-                namedEvent.Send(Core._OutgoingChannel);
-                return true;
+                if ((_Registered) && (_Connected))
+                {
+                    string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + _IcomingChannel + "}";
+                    NamedEvents namedEvent = new NamedEvents();
+                    RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
+                    rk.SetValue("Message", KernelCommand.GET_PDU_COUNT.ToString(), RegistryValueKind.String);
+                    rk.SetValue("Param", mac.ToString(), RegistryValueKind.String);
+                    rk.Flush();
+                    rk.Close();
+                    namedEvent.Send(Core._OutgoingChannel);
+                    success = true;
+                }
             }
-            return false;
+            catch (Exception e)
+            {
+                Logger.Error("Core.cs:GET_PDU_COUNT:" + e.ToString());
+            }
+            kernelLock.Release();
+            return success;
         }
 
         /// <summary>
@@ -860,18 +901,19 @@ namespace Wockets.Kernel
         /// <param name="pc">Packet count response PDU</param>
         public static void WRITE_PDU_COUNT(PC_RSP pc)
         {
+            kernelLock.WaitOne();
             try
             {                
-                registryLock.WaitOne();
+                
                 RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + pc._SensorID.ToString("0"));
                 rk.SetValue("PDU_COUNT", pc._Count, RegistryValueKind.String);
-                rk.Close();
-                registryLock.Release();                
+                rk.Close();                
             }
-            catch
+            catch (Exception e)
             {
-                registryLock.Release();
+                Logger.Error("Core.cs:WRITE_PDU_COUNT:" + e.ToString());
             }
+            kernelLock.Release();                
         }
 
         /// <summary>
@@ -880,10 +922,12 @@ namespace Wockets.Kernel
         /// <returns>True if the PDU counts are read, otherwise false</returns>
         public static bool READ_PDU_COUNT()
         {
+            bool success = false;
+            kernelLock.WaitOne();
             try
             {
                 RegistryKey rk = null;
-                registryLock.WaitOne();
+                
                 for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
                 {
                     try
@@ -898,15 +942,16 @@ namespace Wockets.Kernel
                     {
                     }
                 }
-                registryLock.Release();
-                return true;
+                
+                success = true;
 
             }
-            catch
+            catch (Exception e)
             {
-                registryLock.Release();
+                Logger.Error("Core.cs:READ_PDU_COUNT:" + e.ToString());
             }
-            return false;
+            kernelLock.Release();
+            return success;
         }
 
         /// <summary>
@@ -915,22 +960,30 @@ namespace Wockets.Kernel
         /// <param name="mac">The mac address for the wocket</param>
         /// <returns>True it the request is successfully sent, otherwise false</returns>
         public static bool GET_WOCKET_SENSITIVITY(string mac)
-        {            
-            if ((_Registered) && (_Connected))
+        {
+            bool success = false;
+            kernelLock.WaitOne();
+            try
             {
-                string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + _IcomingChannel + "}";
-                NamedEvents namedEvent = new NamedEvents();
-                registryLock.WaitOne();
-                RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
-                rk.SetValue("Message", KernelCommand.GET_WOCKET_SENSITIVITY.ToString(), RegistryValueKind.String);
-                rk.SetValue("Param", mac.ToString(), RegistryValueKind.String);
-                rk.Flush();
-                rk.Close();
-                registryLock.Release();
-                namedEvent.Send(Core._OutgoingChannel);
-                return true;
+                if ((_Registered) && (_Connected))
+                {
+                    string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + _IcomingChannel + "}";
+                    NamedEvents namedEvent = new NamedEvents();
+                    RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
+                    rk.SetValue("Message", KernelCommand.GET_WOCKET_SENSITIVITY.ToString(), RegistryValueKind.String);
+                    rk.SetValue("Param", mac.ToString(), RegistryValueKind.String);
+                    rk.Flush();
+                    rk.Close();
+                    namedEvent.Send(Core._OutgoingChannel);
+                    success = true;
+                }
             }
-            return false;
+            catch (Exception e)
+            {
+                Logger.Error("Core.cs:GET_WOCKET_SENSITIVITY:" + e.ToString());
+            }
+            kernelLock.Release();
+            return success;
         }
 
         /// <summary>
@@ -939,19 +992,21 @@ namespace Wockets.Kernel
         /// <param name="sen">Sensitivity response PDU</param>
         public static void WRITE_SENSITIVITY(SENS_RSP sen)
         {
+            kernelLock.WaitOne();
             try
             {                
-                registryLock.WaitOne();
+                
                 RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + sen._SensorID.ToString("0"));
                 rk.SetValue("SENSITIVITY", sen._Sensitivity, RegistryValueKind.String);
-                rk.Close();
-                registryLock.Release();
+                rk.Close();                
 
             }
-            catch
+            catch (Exception e)
             {
-                registryLock.Release();
+                Logger.Error("Core.cs:WRITE_SENSITIVITY:" + e.ToString());
             }
+
+            kernelLock.Release();
         }
         
         /// <summary>
@@ -960,10 +1015,11 @@ namespace Wockets.Kernel
         /// <returns>True if the sensitivities are read from the registry, otherwise false</returns>
         public static bool READ_SENSITIVITY()
         {
+            bool success = false;
+            kernelLock.WaitOne();
             try
             {
-                RegistryKey rk = null;
-                registryLock.WaitOne();
+                RegistryKey rk = null;                
                 for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
                 {
                     try
@@ -978,15 +1034,15 @@ namespace Wockets.Kernel
                     {
                     }
                 }
-                registryLock.Release();
-                return true;
+                success = true;
 
             }
-            catch
+            catch (Exception e)
             {
-                registryLock.Release();
+                Logger.Error("Core.cs:READ_SENSITIVITY:" + e.ToString());
             }
-            return false;
+            kernelLock.Release();
+            return success;
         }
 
 
@@ -997,22 +1053,33 @@ namespace Wockets.Kernel
         /// <param name="sensitivity">Sensitivity of the wocket</param>
         /// <returns>True if the request is sent successfully, otherwise false</returns>
         public static bool SET_WOCKET_SENSITIVITY(string mac,Sensitivity sensitivity)
-        {            
-            if ((_Registered) && (_Connected))
+        {
+            bool success = false;
+            kernelLock.WaitOne();
+            try
             {
-                string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + _IcomingChannel + "}";
-                NamedEvents namedEvent = new NamedEvents();
-                registryLock.WaitOne();
-                RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
-                rk.SetValue("Message", KernelCommand.SET_WOCKET_SENSITIVITY.ToString(), RegistryValueKind.String);
-                rk.SetValue("Param", mac.ToString()+":"+sensitivity.ToString(), RegistryValueKind.String);
-                rk.Flush();
-                rk.Close();
-                registryLock.Release();
-                namedEvent.Send(Core._OutgoingChannel);
-                return true;
+                if ((_Registered) && (_Connected))
+                {
+                    string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + _IcomingChannel + "}";
+                    NamedEvents namedEvent = new NamedEvents();
+
+                    RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
+                    rk.SetValue("Message", KernelCommand.SET_WOCKET_SENSITIVITY.ToString(), RegistryValueKind.String);
+                    rk.SetValue("Param", mac.ToString() + ":" + sensitivity.ToString(), RegistryValueKind.String);
+                    rk.Flush();
+                    rk.Close();
+
+                    namedEvent.Send(Core._OutgoingChannel);
+                    success = true;
+                }
             }
-            return false;
+            catch (Exception e)
+            {
+                Logger.Error("Core.cs:SET_WOCKET_SENSITIVITY:" + e.ToString());
+            }
+                
+            kernelLock.Release();
+            return success;
         }
 
         /// <summary>
@@ -1021,22 +1088,30 @@ namespace Wockets.Kernel
         /// <param name="mac">MAC address of the wocket</param>
         /// <returns>True if the request is successfully sent, otherwise false</returns>
         public static bool GET_WOCKET_CALIBRATION(string mac)
-        {            
-            if ((_Registered) && (_Connected))
+        {
+            bool success = false;
+            kernelLock.WaitOne();
+            try
             {
-                string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + _IcomingChannel + "}";
-                NamedEvents namedEvent = new NamedEvents();
-                registryLock.WaitOne();
-                RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
-                rk.SetValue("Message", KernelCommand.GET_WOCKET_CALIBRATION.ToString(), RegistryValueKind.String);
-                rk.SetValue("Param", mac.ToString(), RegistryValueKind.String);
-                rk.Flush();
-                rk.Close();
-                registryLock.Release();
-                namedEvent.Send(Core._OutgoingChannel);
-                return true;
+                if ((_Registered) && (_Connected))
+                {
+                    string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + _IcomingChannel + "}";
+                    NamedEvents namedEvent = new NamedEvents();                    
+                    RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
+                    rk.SetValue("Message", KernelCommand.GET_WOCKET_CALIBRATION.ToString(), RegistryValueKind.String);
+                    rk.SetValue("Param", mac.ToString(), RegistryValueKind.String);
+                    rk.Flush();
+                    rk.Close();                    
+                    namedEvent.Send(Core._OutgoingChannel);
+                    success = true;
+                }
             }
-            return false;
+            catch (Exception e)
+            {
+                Logger.Error("Core.cs:GET_WOCKET_CALIBRATION:" + e.ToString());
+            }
+            kernelLock.Release();
+            return success;
         }
 
 
@@ -1046,9 +1121,10 @@ namespace Wockets.Kernel
         /// <param name="cal">Calibration response PDU</param>
         public static void WRITE_CALIBRATION(CAL_RSP cal)
         {
+            kernelLock.WaitOne();
             try
             {                
-                registryLock.WaitOne();
+                
                 RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + cal._SensorID.ToString("0"));
                 rk.SetValue("_X1G", cal._X1G, RegistryValueKind.String);
                 rk.SetValue("_XN1G", cal._XN1G, RegistryValueKind.String);
@@ -1056,13 +1132,14 @@ namespace Wockets.Kernel
                 rk.SetValue("_YN1G", cal._YN1G, RegistryValueKind.String);
                 rk.SetValue("_Z1G", cal._Z1G, RegistryValueKind.String);
                 rk.SetValue("_ZN1G", cal._ZN1G, RegistryValueKind.String);
-                rk.Close();
-                registryLock.Release();                
+                rk.Close();                
             }
-            catch
+            catch (Exception e)
             {
-                registryLock.Release();
+                Logger.Error("Core.cs:WRITE_CALIBRATION:" + e.ToString());
             }
+
+            kernelLock.Release();                
         }
 
         /// <summary>
@@ -1071,10 +1148,11 @@ namespace Wockets.Kernel
         /// <returns>True if the registry is read successfully, otherwise false</returns>
         public static bool READ_CALIBRATION()
         {
+            bool success = false;
+            kernelLock.WaitOne();
             try
             {
                 RegistryKey rk = null;
-                registryLock.WaitOne();
                 for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
                 {
                     try
@@ -1083,7 +1161,7 @@ namespace Wockets.Kernel
                         int status = (int)rk.GetValue("Status");
                         if (status == 1)
                         {
-                            ((Accelerometer)CurrentWockets._Controller._Sensors[i])._Calibration._X1G=(ushort) Convert.ToUInt16(rk.GetValue("_X1G"));
+                            ((Accelerometer)CurrentWockets._Controller._Sensors[i])._Calibration._X1G = (ushort)Convert.ToUInt16(rk.GetValue("_X1G"));
                             ((Accelerometer)CurrentWockets._Controller._Sensors[i])._Calibration._XN1G = (ushort)Convert.ToUInt16(rk.GetValue("_XN1G"));
                             ((Accelerometer)CurrentWockets._Controller._Sensors[i])._Calibration._Y1G = (ushort)Convert.ToUInt16(rk.GetValue("_Y1G"));
                             ((Accelerometer)CurrentWockets._Controller._Sensors[i])._Calibration._YN1G = (ushort)Convert.ToUInt16(rk.GetValue("_YN1G"));
@@ -1096,15 +1174,16 @@ namespace Wockets.Kernel
                     {
                     }
                 }
-                registryLock.Release();
-                return true;
+
+                success = true;
 
             }
-            catch
+            catch (Exception e)
             {
-                registryLock.Release();
+                Logger.Error("Core.cs:READ_CALIBRATION:" + e.ToString());
             }
-            return false;
+            kernelLock.Release();
+            return success;
         }
 
         /// <summary>
@@ -1114,22 +1193,32 @@ namespace Wockets.Kernel
         /// <param name="calibration">A string specifiying the calibration values</param>
         /// <returns>True if the request is sent successfully, otherwise false</returns>
         public static bool SET_WOCKET_CALIBRATION(string mac, string calibration)
-        {            
-            if ((_Registered) && (_Connected))
+        {
+            bool success = false;
+            kernelLock.WaitOne();
+            try
             {
-                string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + _IcomingChannel + "}";
-                NamedEvents namedEvent = new NamedEvents();
-                registryLock.WaitOne();
-                RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
-                rk.SetValue("Message", KernelCommand.GET_BATTERY_PERCENT.ToString(), RegistryValueKind.String);
-                rk.SetValue("Param", mac.ToString()+":"+calibration.ToString(), RegistryValueKind.String);
-                rk.Flush();
-                rk.Close();
-                registryLock.Release();
-                namedEvent.Send(Core._OutgoingChannel);
-                return true;
+                if ((_Registered) && (_Connected))
+                {
+                    string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + _IcomingChannel + "}";
+                    NamedEvents namedEvent = new NamedEvents();
+
+                    RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
+                    rk.SetValue("Message", KernelCommand.GET_BATTERY_PERCENT.ToString(), RegistryValueKind.String);
+                    rk.SetValue("Param", mac.ToString() + ":" + calibration.ToString(), RegistryValueKind.String);
+                    rk.Flush();
+                    rk.Close();
+
+                    namedEvent.Send(Core._OutgoingChannel);
+                    success = true;
+                }
             }
-            return false;
+            catch (Exception e)
+            {
+                Logger.Error("Core.cs:SET_WOCKET_CALIBRATION:" + e.ToString());
+            }
+            kernelLock.Release();
+            return success;
         }
 
         /// <summary>
@@ -1138,22 +1227,30 @@ namespace Wockets.Kernel
         /// <param name="mac">MAC address for the wocket</param>
         /// <returns>True if the request is sent successfully, otherwise false</returns>
         public static bool GET_WOCKET_SAMPLING_RATE(string mac)
-        {            
-            if ((_Registered) && (_Connected))
+        {
+            bool success = false;
+            kernelLock.WaitOne();
+            try
             {
-                string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + _IcomingChannel + "}";
-                NamedEvents namedEvent = new NamedEvents();
-                registryLock.WaitOne();
-                RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
-                rk.SetValue("Message", KernelCommand.GET_WOCKET_SAMPLING_RATE.ToString(), RegistryValueKind.String);
-                rk.SetValue("Param", mac.ToString(), RegistryValueKind.String);
-                rk.Flush();
-                rk.Close();
-                registryLock.Release();
-                namedEvent.Send(Core._OutgoingChannel);
-                return true;
+                if ((_Registered) && (_Connected))
+                {
+                    string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + _IcomingChannel + "}";
+                    NamedEvents namedEvent = new NamedEvents();
+                    RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
+                    rk.SetValue("Message", KernelCommand.GET_WOCKET_SAMPLING_RATE.ToString(), RegistryValueKind.String);
+                    rk.SetValue("Param", mac.ToString(), RegistryValueKind.String);
+                    rk.Flush();
+                    rk.Close();
+                    namedEvent.Send(Core._OutgoingChannel);
+                    success = true;
+                }
             }
-            return false;
+            catch (Exception e)
+            {
+                Logger.Error("Core.cs:GET_WOCKET_SAMPLING_RATE:"+e.ToString());
+            }
+            kernelLock.Release();
+            return success;
         }
 
 
@@ -1164,22 +1261,31 @@ namespace Wockets.Kernel
         /// <param name="sr">Sampling rate of the wocket</param>
         /// <returns>True if the request is successfully sent to the kernel, otherwise false</returns>
         public static bool SET_WOCKET_SAMPLING_RATE(string mac, int sr)
-        {            
-            if ((_Registered) && (_Connected))
+        {
+            bool success = false;
+            kernelLock.WaitOne();
+
+            try
             {
-                string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + _IcomingChannel + "}";
-                NamedEvents namedEvent = new NamedEvents();
-                registryLock.WaitOne();
-                RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
-                rk.SetValue("Message", KernelCommand.SET_WOCKET_SAMPLING_RATE.ToString(), RegistryValueKind.String);
-                rk.SetValue("Param", mac.ToString() + ":" + sr.ToString(), RegistryValueKind.String);
-                rk.Flush();
-                rk.Close();
-                registryLock.Release();
-                namedEvent.Send(Core._OutgoingChannel);
-                return true;
+                if ((_Registered) && (_Connected))
+                {
+                    string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + _IcomingChannel + "}";
+                    NamedEvents namedEvent = new NamedEvents();
+                    RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
+                    rk.SetValue("Message", KernelCommand.SET_WOCKET_SAMPLING_RATE.ToString(), RegistryValueKind.String);
+                    rk.SetValue("Param", mac.ToString() + ":" + sr.ToString(), RegistryValueKind.String);
+                    rk.Flush();
+                    rk.Close();
+                    namedEvent.Send(Core._OutgoingChannel);
+                    success = true;
+                }
             }
-            return false;
+            catch (Exception e)
+            {
+                Logger.Error("Core.cs:SET_WOCKET_SAMPLING_RATE:" + e.ToString());
+            }
+            kernelLock.Release();
+            return success;
         }
 
 
@@ -1189,19 +1295,18 @@ namespace Wockets.Kernel
         /// <param name="sr">Sampling rate response PDU</param>
         public static void WRITE_SAMPLING_RATE(SR_RSP sr)
         {
+            kernelLock.WaitOne();
             try
-            {    
-                registryLock.WaitOne();
+            {                   
                 RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + sr._SensorID.ToString("0"));
                 rk.SetValue("SAMPLING_RATE", sr._SamplingRate, RegistryValueKind.String);
-                rk.Close();
-                registryLock.Release();
-             
+                rk.Close();                            
             }
-            catch
+            catch (Exception    e)
             {
-                registryLock.Release();
+                Logger.Error("Core.cs:WRITE_SAMPLING_RATE:" + e.ToString());
             }
+            kernelLock.Release();
         }
 
         /// <summary>
@@ -1210,10 +1315,11 @@ namespace Wockets.Kernel
         /// <returns>True if the read is successful, otherwise false</returns>
         public static bool READ_SAMPLING_RATE()
         {
+            bool success = false;
+            kernelLock.WaitOne();
             try
             {
-                RegistryKey rk = null;
-                registryLock.WaitOne();
+                RegistryKey rk = null;                
                 for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
                 {
                     try
@@ -1228,14 +1334,14 @@ namespace Wockets.Kernel
                     {
                     }
                 }
-                registryLock.Release();
-                return true;
+                success = true;
             }
-            catch
+            catch (Exception e)
             {
-                registryLock.Release();
+                Logger.Error("Core.cs:READ_SAMPLING_RATE:" + e.ToString());
             }
-            return false;
+            kernelLock.Release();
+            return success;
         }
 
 
@@ -1245,18 +1351,21 @@ namespace Wockets.Kernel
         /// <param name="ac">Activity count response packet</param>
         public static void WRITE_ACTIVITY_COUNT(AC_RSP ac)
         {
+            kernelLock.WaitOne();
             try
             {                
-                registryLock.WaitOne();
+                
                 RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + ac._SensorID.ToString("0"));
                 rk.SetValue("ACTIVITY_COUNT", ac._Count, RegistryValueKind.String);
                 rk.Close();
-                registryLock.Release();                
+                
             }
-            catch
+            catch (Exception e)
             {
-                registryLock.Release();
+                Logger.Error("Core.cs:WRITE_ACTIVITY_COUNT:" + e.ToString());
             }
+
+            kernelLock.Release();                
         }
 
 
@@ -1266,10 +1375,11 @@ namespace Wockets.Kernel
         /// <returns>True if the request is successful, otherwise false</returns>
         public static bool READ_ACTIVITY_COUNT()
         {
+            bool success = false;
+            kernelLock.WaitOne();
             try
             {
-                RegistryKey rk = null;
-                registryLock.WaitOne();
+                RegistryKey rk = null;                
                 for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
                 {
                     try
@@ -1284,14 +1394,15 @@ namespace Wockets.Kernel
                     {
                     }
                 }
-                registryLock.Release();
-                return true;
+                
+                success = true;
             }
-            catch
+            catch (Exception e)
             {
-                registryLock.Release();
+                Logger.Error("Core.cs:READ_ACTIVITY_COUNT:" + e.ToString());
             }
-            return false;
+            kernelLock.Release();
+            return success;
         }
 
 
@@ -1301,22 +1412,30 @@ namespace Wockets.Kernel
         /// <param name="mac">MAC address for the wocket</param>
         /// <returns>True if the request is successfully sent, otherwise false</returns>
         public static bool GET_WOCKET_POWERDOWN_TIMEOUT(string mac)
-        {            
-            if ((_Registered) && (_Connected))
+        {
+            bool success = false;
+            kernelLock.WaitOne();
+            try
             {
-                string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + _IcomingChannel + "}";
-                NamedEvents namedEvent = new NamedEvents();
-                registryLock.WaitOne();
-                RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
-                rk.SetValue("Message", KernelCommand.GET_WOCKET_POWERDOWN_TIMEOUT.ToString(), RegistryValueKind.String);
-                rk.SetValue("Param", mac.ToString(), RegistryValueKind.String);
-                rk.Flush();
-                rk.Close();
-                registryLock.Release();
-                namedEvent.Send(Core._OutgoingChannel);
-                return true;
+                if ((_Registered) && (_Connected))
+                {
+                    string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + _IcomingChannel + "}";
+                    NamedEvents namedEvent = new NamedEvents();
+                    RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
+                    rk.SetValue("Message", KernelCommand.GET_WOCKET_POWERDOWN_TIMEOUT.ToString(), RegistryValueKind.String);
+                    rk.SetValue("Param", mac.ToString(), RegistryValueKind.String);
+                    rk.Flush();
+                    rk.Close();
+                    namedEvent.Send(Core._OutgoingChannel);
+                    success = true;
+                }
             }
-            return false;
+            catch (Exception e)
+            {
+                Logger.Error("Core.cs:GET_WOCKET_POWERDOWN_TIMEOUT:" + e.ToString());
+            }
+            kernelLock.Release();
+            return success;
         }
 
         /// <summary>
@@ -1326,22 +1445,30 @@ namespace Wockets.Kernel
         /// <param name="timeout">Timeout for powering down in ?</param>
         /// <returns>True if the request is successfully sent, otherwise false</returns>
         public static bool SET_WOCKET_POWERDOWN_TIMEOUT(string mac, int timeout)
-        {            
-            if ((_Registered) && (_Connected))
+        {
+            bool success = false;
+            kernelLock.WaitOne();
+            try
             {
-                string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + _IcomingChannel + "}";
-                NamedEvents namedEvent = new NamedEvents();
-                registryLock.WaitOne();
-                RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
-                rk.SetValue("Message", KernelCommand.SET_WOCKET_POWERDOWN_TIMEOUT.ToString(), RegistryValueKind.String);
-                rk.SetValue("Param", mac.ToString() + ":" + timeout.ToString(), RegistryValueKind.String);
-                rk.Flush();
-                rk.Close();
-                registryLock.Release();
-                namedEvent.Send(Core._OutgoingChannel);
-                return true;
+                if ((_Registered) && (_Connected))
+                {
+                    string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + _IcomingChannel + "}";
+                    NamedEvents namedEvent = new NamedEvents();
+                    RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
+                    rk.SetValue("Message", KernelCommand.SET_WOCKET_POWERDOWN_TIMEOUT.ToString(), RegistryValueKind.String);
+                    rk.SetValue("Param", mac.ToString() + ":" + timeout.ToString(), RegistryValueKind.String);
+                    rk.Flush();
+                    rk.Close();
+                    namedEvent.Send(Core._OutgoingChannel);
+                    success = true;
+                }
             }
-            return false;
+            catch (Exception e)
+            {
+                Logger.Error("Core.cs:SET_WOCKET_POWERDOWN_TIMEOUT:" + e.ToString());
+            }
+            kernelLock.Release();
+            return success;
         }
 
 
@@ -1351,22 +1478,30 @@ namespace Wockets.Kernel
         /// <param name="mac">MAC address of the wocket</param>
         /// <returns>True if the request is successfully sent, otherwise false</returns>
         public static bool GET_TRANSMISSION_MODE( string mac)
-        {            
-            if ((_Registered) && (_Connected))
+        {
+            bool success = false;
+            kernelLock.WaitOne();
+            try
             {
-                string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + _IcomingChannel + "}";
-                NamedEvents namedEvent = new NamedEvents();
-                registryLock.WaitOne();
-                RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
-                rk.SetValue("Message", KernelCommand.GET_TRANSMISSION_MODE.ToString(), RegistryValueKind.String);
-                rk.SetValue("Param", mac.ToString(), RegistryValueKind.String);
-                rk.Flush();
-                rk.Close();
-                registryLock.Release();
-                namedEvent.Send(Core._OutgoingChannel);
-                return true;
+                if ((_Registered) && (_Connected))
+                {
+                    string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + _IcomingChannel + "}";
+                    NamedEvents namedEvent = new NamedEvents();
+                    RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
+                    rk.SetValue("Message", KernelCommand.GET_TRANSMISSION_MODE.ToString(), RegistryValueKind.String);
+                    rk.SetValue("Param", mac.ToString(), RegistryValueKind.String);
+                    rk.Flush();
+                    rk.Close();
+                    namedEvent.Send(Core._OutgoingChannel);
+                    success = true;
+                }
             }
-            return false;
+            catch (Exception e)
+            {
+                Logger.Error("Core.cs:GET_TRANSMISSION_MODE:" + e.ToString());
+            }
+            kernelLock.Release();
+            return success;
         }
 
         /// <summary>
@@ -1375,17 +1510,20 @@ namespace Wockets.Kernel
         /// <param name="tm">Transmission Mode response PDU</param>
         public static void WRITE_TRANSMISSION_MODE(TM_RSP tm)
         {
+            kernelLock.WaitOne();
             try
             {                
-                registryLock.WaitOne();
+                
                 RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + tm._SensorID.ToString("0"));
                 rk.SetValue("TRANSMISSION_MODE", tm._TransmissionMode.ToString(), RegistryValueKind.String);
                 rk.Close();
-                registryLock.Release();                
+                
             }
-            catch
-            {                
+            catch (Exception e)
+            {
+                Logger.Error("Core.cs:WRITE_TRANSMISSION_MODE:" + e.ToString());
             }
+            kernelLock.Release();                
         }
 
 
@@ -1395,10 +1533,11 @@ namespace Wockets.Kernel
         /// <returns>True if the registry is successfully read, otherwise is false</returns>
         public static bool READ_TRANSMISSION_MODE()
         {
+            bool success = false;
+            kernelLock.WaitOne();
             try
             {
-                RegistryKey rk = null;
-                registryLock.WaitOne();
+                RegistryKey rk = null;                
                 for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
                 {
                     try
@@ -1413,16 +1552,14 @@ namespace Wockets.Kernel
                     {
                     }
                 }
-                registryLock.Release();
-
-                return true;
-
+                success = true;
             }
-            catch
+            catch (Exception e)
             {
-                registryLock.Release();
+                Logger.Error("Core.cs:READ_TRANSMISSION_MODE:" + e.ToString());
             }
-            return false;
+            kernelLock.Release();
+            return success;
         }
 
 
@@ -1433,22 +1570,32 @@ namespace Wockets.Kernel
         /// <param name="mode">Mode of transmission</param>
         /// <returns>True if the request is successfully sent, otherwise false</returns>
         public static bool SET_TRANSMISSION_MODE(string mac, TransmissionMode mode)
-        {            
-            if ((_Registered) && (_Connected))
+        {
+            bool success = false;
+            kernelLock.WaitOne();
+            try
             {
-                string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + _IcomingChannel + "}";
-                NamedEvents namedEvent = new NamedEvents();
-                registryLock.WaitOne();
-                RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
-                rk.SetValue("Message", KernelCommand.SET_TRANSMISSION_MODE.ToString(), RegistryValueKind.String);
-                rk.SetValue("Param", mac.ToString() + ":" + mode.ToString(), RegistryValueKind.String);
-                rk.Flush();
-                rk.Close();
-                registryLock.Release();
-                namedEvent.Send(Core._OutgoingChannel);
-                return true;
+                if ((_Registered) && (_Connected))
+                {
+                    string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + _IcomingChannel + "}";
+                    NamedEvents namedEvent = new NamedEvents();
+
+                    RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
+                    rk.SetValue("Message", KernelCommand.SET_TRANSMISSION_MODE.ToString(), RegistryValueKind.String);
+                    rk.SetValue("Param", mac.ToString() + ":" + mode.ToString(), RegistryValueKind.String);
+                    rk.Flush();
+                    rk.Close();
+                    namedEvent.Send(Core._OutgoingChannel);
+                    success = true;
+                }
             }
-            return false;
+            catch (Exception e)
+            {
+                Logger.Error("Core.cs:SET_TRANSMISSION_MODE:" + e.ToString());
+            }
+
+            kernelLock.Release();
+            return success;
         }
 
 
@@ -1458,22 +1605,32 @@ namespace Wockets.Kernel
         /// <param name="mac">MAC address of the wocket</param>
         /// <returns>True if the request is successfully sent, otherwise false</returns>
         public static bool GET_MEMORY_MODE(string mac)
-        {           
-            if ((_Registered) && (_Connected))
+        {
+            bool success = false;
+            kernelLock.WaitOne();
+            try
             {
-                string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + _IcomingChannel + "}";
-                NamedEvents namedEvent = new NamedEvents();
-                registryLock.WaitOne();
-                RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
-                rk.SetValue("Message", KernelCommand.GET_MEMORY_MODE.ToString(), RegistryValueKind.String);
-                rk.SetValue("Param", mac.ToString(), RegistryValueKind.String);
-                rk.Flush();
-                rk.Close();
-                registryLock.Release();
-                namedEvent.Send(Core._OutgoingChannel);
-                return true;
+                if ((_Registered) && (_Connected))
+                {
+                    string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + _IcomingChannel + "}";
+                    NamedEvents namedEvent = new NamedEvents();
+
+                    RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
+                    rk.SetValue("Message", KernelCommand.GET_MEMORY_MODE.ToString(), RegistryValueKind.String);
+                    rk.SetValue("Param", mac.ToString(), RegistryValueKind.String);
+                    rk.Flush();
+                    rk.Close();
+
+                    namedEvent.Send(Core._OutgoingChannel);
+                    success = true;
+                }
             }
-            return false;
+            catch (Exception e)
+            {
+                Logger.Error("Core.cs:GET_MEMORY_MODE:" + e.ToString());
+            }
+            kernelLock.Release();
+            return success;
         }
 
         /// <summary>
@@ -1483,22 +1640,33 @@ namespace Wockets.Kernel
         /// <param name="mode">Memory mode</param>
         /// <returns>True if the request is sent successfully, otherwise false</returns>
         public static bool SET_MEMORY_MODE(string mac, MemoryMode mode)
-        {            
-            if ((_Registered) && (_Connected))
+        {
+            bool success = false;
+            kernelLock.WaitOne();
+            try
             {
-                string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + _IcomingChannel + "}";
-                NamedEvents namedEvent = new NamedEvents();
-                registryLock.WaitOne();
-                RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
-                rk.SetValue("Message", KernelCommand.SET_MEMORY_MODE.ToString(), RegistryValueKind.String);
-                rk.SetValue("Param", mac.ToString() + ":" + mode.ToString(), RegistryValueKind.String);
-                rk.Flush();
-                rk.Close();
-                registryLock.Release();
-                namedEvent.Send(Core._OutgoingChannel);
-                return true;
+                if ((_Registered) && (_Connected))
+                {
+                    string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + _IcomingChannel + "}";
+                    NamedEvents namedEvent = new NamedEvents();
+
+                    RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
+                    rk.SetValue("Message", KernelCommand.SET_MEMORY_MODE.ToString(), RegistryValueKind.String);
+                    rk.SetValue("Param", mac.ToString() + ":" + mode.ToString(), RegistryValueKind.String);
+                    rk.Flush();
+                    rk.Close();
+
+                    namedEvent.Send(Core._OutgoingChannel);
+                    success = true;
+                }
             }
-            return false;
+            catch (Exception e)
+            {
+                Logger.Error("Core.cs:SET_MEMORY_MODE:" + e.ToString());
+            }
+
+            kernelLock.Release();
+            return success;
         }
     }
 }
