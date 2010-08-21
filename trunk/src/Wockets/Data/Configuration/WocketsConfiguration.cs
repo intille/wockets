@@ -179,9 +179,9 @@ namespace Wockets.Data.Configuration
                     if (iNode.Name == SOFTWARE_ELEMENT)
                     {
                         foreach (XmlAttribute iAttribute in iNode.Attributes)
-                            if (iAttribute.Name == VERSION_ATTRIBUTE)
+                            /*if (iAttribute.Name == VERSION_ATTRIBUTE)
                                 CurrentWockets._Version = iAttribute.Value;                  
-                            else if (iAttribute.Name == MODE_ATTRIBUTE)
+                            else*/ if (iAttribute.Name == MODE_ATTRIBUTE)
                                 this._SoftwareMode = ((String.Compare(iAttribute.Value, SoftwareConfiguration.DEBUG.ToString(), true) == 0) ? SoftwareConfiguration.DEBUG : SoftwareConfiguration.RELEASE);
                             else if (iAttribute.Name == MEMORY_MODE_ATTRIBUTE)
                                 this._MemoryMode = ((String.Compare(iAttribute.Value, MemoryConfiguration.NON_SHARED.ToString(), true) == 0) ? MemoryConfiguration.NON_SHARED : MemoryConfiguration.SHARED);

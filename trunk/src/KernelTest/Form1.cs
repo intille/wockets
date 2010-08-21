@@ -35,7 +35,8 @@ namespace KernelTest
             Core.SubscribeEvent(KernelResponse.DISCOVERED, EventListener);
             Core.SubscribeEvent(KernelResponse.CONNECTED, EventListener);
             Core.SubscribeEvent(KernelResponse.DISCONNECTED, EventListener);
-            Core.SubscribeEvent(KernelResponse.SENSORS_UPDATED, EventListener);   
+            Core.SubscribeEvent(KernelResponse.SENSORS_UPDATED, EventListener);
+            Core.SubscribeEvent(KernelResponse.PING_RESPONSE, EventListener);
         }
 
         delegate void UpdateFormCallback(KernelResponse response);
@@ -52,8 +53,23 @@ namespace KernelTest
             }
             else
             {
+
                 switch (rsp)
                 {
+                    case KernelResponse.PING_RESPONSE:
+                        this.status.Text = "Kernel ... started";
+                        this.menukernel.Enabled = true;
+                        this.menukernelstart.Enabled = false;
+                        this.menukernelstop.Enabled = true;
+                        this.menuApp.Enabled = true;
+                        this.menuAppRegister.Enabled = true;
+                        this.menuAppUnregister.Enabled = false;
+                        this.menuWocket.Enabled = false;
+                        this.menuWocketConnect.Enabled = false;
+                        this.menuWocketDisconnect.Enabled = false;
+                        this.menuWocketDiscover.Enabled = false;
+                        this.menuItem2.Enabled = false;
+                        break;
                     case KernelResponse.STARTED:
                         this.status.Text = "Kernel ... started";
                         this.menukernel.Enabled = true;
@@ -66,6 +82,7 @@ namespace KernelTest
                         this.menuWocketConnect.Enabled = false;
                         this.menuWocketDisconnect.Enabled = false;
                         this.menuWocketDiscover.Enabled = false;
+                        this.menuItem2.Enabled = false;
                         break;
                     case KernelResponse.STOPPED:
                         this.status.Text = "Kernel ... stopped";
@@ -79,6 +96,7 @@ namespace KernelTest
                         this.menuWocketConnect.Enabled = false;
                         this.menuWocketDisconnect.Enabled = false;
                         this.menuWocketDiscover.Enabled = false;
+                        this.menuItem2.Enabled = true;
                         break;
                     case KernelResponse.REGISTERED:
                         this.status.Text = "Kernel ... registered";
@@ -110,9 +128,9 @@ namespace KernelTest
                         this.listBox1.Items.Clear();
                         foreach (string mac in Core._DiscoveredSensors.Values)
                             this.listBox1.Items.Add(mac);
-                        if (Core._DiscoveredSensors.Count > 0)                        
+                        if (Core._DiscoveredSensors.Count > 0)
                             this.listBox1.Enabled = true;
-                                   
+
                         this.status.Text = "Kernel ... discovered";
                         this.menukernel.Enabled = true;
                         this.menukernelstart.Enabled = false;
@@ -137,6 +155,8 @@ namespace KernelTest
                         this.menuWocketConnect.Enabled = true;
                         this.menuWocketDisconnect.Enabled = false;
                         this.menuWocketDiscover.Enabled = true;
+                        this.Visible = true;
+                        form2.Close();
                         break;
                     case KernelResponse.CONNECTED:
                         this.status.Text = "Kernel ... connected";
@@ -153,10 +173,10 @@ namespace KernelTest
                         form2 = new Form2();
                         form2.Text = "Wocket - " + (string)this.listBox1.Items[this.listBox1.SelectedIndex];
                         this.Visible = false;
-                        form2.Show();              
+                        form2.Show();
                         break;
                     case KernelResponse.SENSORS_UPDATED:
-                        this.status.Text = "Kernel ... sensors updated " +((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0])._Address;
+                        this.status.Text = "Kernel ... sensors updated " + ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0])._Address;
                         this.menukernel.Enabled = true;
                         this.menukernelstart.Enabled = false;
                         this.menukernelstop.Enabled = true;
@@ -171,6 +191,7 @@ namespace KernelTest
                     default:
                         break;
                 }
+
             }
         }
 
@@ -185,13 +206,11 @@ namespace KernelTest
         {
             if (MessageBox.Show("Are you sure you want to exit?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
             {
-                if (Core._Registered)
-                    Core.Unregister();
-                //Terminate the kernel
-                if (Core._OutgoingChannel != null)
-                    Core.Terminate();
-                Application.Exit();
-                System.Diagnostics.Process.GetCurrentProcess().Kill();
+                if (!Core._KernalStarted)
+                {
+                    Application.Exit();
+                    System.Diagnostics.Process.GetCurrentProcess().Kill();
+                }
             }
         }
 
@@ -271,6 +290,11 @@ namespace KernelTest
         {
             if (MessageBox.Show("Are you sure you want to disconnect?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
                 Core.Disconnect();
+        }
+
+        private void menuItem3_Click(object sender, EventArgs e)
+        {
+            Core.Ping();
         }
     }
 }

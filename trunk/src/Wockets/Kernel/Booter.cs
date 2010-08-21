@@ -21,24 +21,80 @@ namespace Wockets.Kernel
 {
     public class Booter
     {
+        /// <summary>
+        /// Specifies if the kernel is running
+        /// </summary>
         public static bool _Running = false;
+
+        /// <summary>
+        /// Specifies if the wockets are running
+        /// </summary>
         public static bool _WocketsRunning = false;
+
+        /// <summary>
+        /// Locks the kernel during booting to ensure that only 1 instance is ever running
+        /// </summary>
         private static object booterLock = new object();
-        private static object kernelLock = new object();
-        //private static object registryLock = new object();
+
+        /// <summary>
+        /// Locks the processing of a command from an application to avoid processing multiple commands simultaneously
+        /// </summary>
+        private static object kernelLock = new object();        
+
+        /// <summary>
+        /// Locks the discovery of wockets to avoid multiple requests at the same time
+        /// </summary>
         private static object discoveryLock = new object();
+
+        /// <summary>
+        /// Processes pre-registration requests from applications
+        /// </summary>
         private static Thread commandThread;
+
+        /// <summary>
+        /// Stores the number of registered applications
+        /// </summary>
         public static int _NumRegistrations = 0;
 
+        /// <summary>
+        /// Stores applications guids
+        /// </summary>
         private static Hashtable applicationPaths = new Hashtable();
+
+        /// <summary>
+        /// Stores application command handler threads
+        /// </summary>
         private static Hashtable applicationThreads = new Hashtable();
+
+        /// <summary>
+        /// A system wide semaphore to lock the registry
+        /// </summary>
         private static Semaphore registryLock;
+
+        /// <summary>
+        /// An instance of the wockets controller
+        /// </summary>
         private static WocketsController wcontroller = null;
+
+        /// <summary>
+        /// Root storage path for the wockets data
+        /// </summary>
         private static string rootStorageDirectory = "";
+
+        /// <summary>
+        /// Storage path for the wockets data
+        /// </summary>
         private static string storageDirectory = "";
+
+        /// <summary>
+        /// Application path
+        /// </summary>
         private static string path = "";
 
 
+        /// <summary>
+        /// Constructor for initializing the kernel
+        /// </summary>
         static Booter()
         {
 
@@ -72,12 +128,13 @@ namespace Wockets.Kernel
             wcontroller._Mode = MemoryMode.BluetoothToShared;
 
             Logger.InitLogger(rootStorageDirectory + "kernellog\\");
-            Logger.Debug2("Time,Time,PowerPercent,Voltage,Current,Temperature\n");
-
-            //Used for logging the battery
-            //wcontroller.InitializeBatteryThread();
+            Logger.Debug2("Time,Time,PowerPercent,Voltage,Current,Temperature\n");            
             
         }
+
+        /// <summary>
+        /// Kernel booter that initiates the command thread
+        /// </summary>
         public static void Boot()
         {
             try
@@ -108,6 +165,11 @@ namespace Wockets.Kernel
         }
 
 
+
+        /// <summary>
+        /// Handler for decoder callbacks when wockets response packets are received
+        /// </summary>
+        /// <param name="e">Wockets response pakcet</param>
         private static void DecoderCallback(object e)
         {
             Response response = (Response)e;
@@ -194,6 +256,9 @@ namespace Wockets.Kernel
             }
         }
 
+        /// <summary>
+        /// Handler for processing application messages
+        /// </summary>
         public static void ApplicationHandler()
         {
             int tid = Thread.CurrentThread.ManagedThreadId;
@@ -315,13 +380,10 @@ namespace Wockets.Kernel
                                     }
                                     Send(KernelResponse.CONNECTED, applicationGuid);
                                 }
-                              //  else
-                                //    Send(ApplicationResponse.CONNECT_FAILURE, applicationGuid);
 
                                 Broadcast(KernelResponse.CONNECTED);                                
                             }
-                           // else
-                             //   Send(ApplicationResponse.CONNECT_FAILURE, applicationGuid);
+                           
                         }
                         catch (Exception e)
                         {
@@ -596,7 +658,6 @@ namespace Wockets.Kernel
                     }
                     #endregion SET_WOCKET_CALIBRATION
 
-
                     #region GET_WOCKET_SAMPLING_RATE
                     else if (msg == KernelCommand.GET_WOCKET_SAMPLING_RATE.ToString())
                     {
@@ -654,7 +715,6 @@ namespace Wockets.Kernel
                     }
                     #endregion SET_WOCKET_SAMPLING_RATE
 
-
                     #region GET_WOCKET_POWERDOWN_TIMEOUT
                     else if (msg == KernelCommand.GET_WOCKET_POWERDOWN_TIMEOUT.ToString())
                     {
@@ -711,7 +771,6 @@ namespace Wockets.Kernel
                         }
                     }
                     #endregion SET_WOCKET_POWERDOWN_TIMEOUT
-
 
                     #region GET_TRANSMISSION_MODE
                     else if (msg == KernelCommand.GET_TRANSMISSION_MODE.ToString())
@@ -776,8 +835,6 @@ namespace Wockets.Kernel
                     }
                     #endregion SET_TRANSMISSION_MODE
 
-
-
                     #region GET_MEMORY_MODE
                     else if (msg == KernelCommand.GET_MEMORY_MODE.ToString())
                     {
@@ -819,8 +876,10 @@ namespace Wockets.Kernel
                 namedEvent.Reset();
             }
         }
-
-        /** Processes any application registrations with the kernel **/
+        
+        /// <summary>
+        /// Handler to process pre-registration messages from applications
+        /// </summary>
         private static void CommandHandler()
         {       
             NamedEvents namedEvent = new NamedEvents();
@@ -836,7 +895,9 @@ namespace Wockets.Kernel
                     string param = (string)rk.GetValue("Param");//, processID.ToString(), RegistryValueKind.DWord);        
                     rk.Close();
 
-                    if (msg == KernelCommand.TERMINATE.ToString())
+                    if (msg == KernelCommand.PING.ToString())
+                        Broadcast(KernelResponse.PING_RESPONSE);                                            
+                    else if (msg == KernelCommand.TERMINATE.ToString())
                     {
 
 
@@ -850,22 +911,25 @@ namespace Wockets.Kernel
                     }
                     else if (msg == KernelCommand.REGISTER.ToString())
                     {
-                        rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + param + "}");                        
-                        rk.SetValue("Message", "", RegistryValueKind.String);
-                        rk.SetValue("Param", "", RegistryValueKind.String);
-                        rk.Close();
+                        if (!applicationThreads.ContainsKey(param))
+                        {
+                            rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + param + "}");
+                            rk.SetValue("Message", "", RegistryValueKind.String);
+                            rk.SetValue("Param", "", RegistryValueKind.String);
+                            rk.Close();
 
-                        //spawn the processing thread
-                        Thread applicationThread = new Thread(new ThreadStart(ApplicationHandler));        
-                        applicationPaths.Add(applicationThread.ManagedThreadId, param);
-                        applicationThreads.Add(param,applicationThread);
-                        applicationThread.Start();
-                        _NumRegistrations++;
+                            //spawn the processing thread
+                            Thread applicationThread = new Thread(new ThreadStart(ApplicationHandler));
+                            applicationPaths.Add(applicationThread.ManagedThreadId, param);
+                            applicationThreads.Add(param, applicationThread);
+                            applicationThread.Start();
+                            _NumRegistrations++;
 
-                        rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_REGISTERED_APPLICATIONS_PATH);                                                                  
-                        rk.SetValue("Count", _NumRegistrations, RegistryValueKind.DWord);
-                        rk.Close();
-                        Broadcast(KernelResponse.REGISTERED);
+                            rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_REGISTERED_APPLICATIONS_PATH);
+                            rk.SetValue("Count", _NumRegistrations, RegistryValueKind.DWord);
+                            rk.Close();
+                            Broadcast(KernelResponse.REGISTERED);
+                        }
                     }
                     else if (msg == KernelCommand.UNREGISTER.ToString())
                     {
@@ -873,16 +937,19 @@ namespace Wockets.Kernel
 
                         //Registry.LocalMachine.DeleteSubKeyTree(Core.REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + param + "}");
 
-                        //kill the processing thread
-                        applicationPaths.Remove(((Thread)applicationThreads[param]).ManagedThreadId);
-                        ((Thread)applicationThreads[param]).Abort();
-                        applicationThreads.Remove(param);
-                        _NumRegistrations--;
+                        if (applicationThreads.ContainsKey(param))
+                        {
+                            //kill the processing thread
+                            applicationPaths.Remove(((Thread)applicationThreads[param]).ManagedThreadId);
+                            ((Thread)applicationThreads[param]).Abort();
+                            applicationThreads.Remove(param);
+                            _NumRegistrations--;
 
-                        rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_REGISTERED_APPLICATIONS_PATH);                        
-                        rk.SetValue("Count", _NumRegistrations, RegistryValueKind.DWord);
-                        rk.Close();
-                        Broadcast(KernelResponse.UNREGISTERED);
+                            rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_REGISTERED_APPLICATIONS_PATH);
+                            rk.SetValue("Count", _NumRegistrations, RegistryValueKind.DWord);
+                            rk.Close();
+                            Broadcast(KernelResponse.UNREGISTERED);
+                        }
                     }
                                     
                 }
@@ -892,7 +959,15 @@ namespace Wockets.Kernel
             }
 
         }
+
+        /// <summary>
+        /// Guid of application requesting wockets to be discovered
+        /// </summary>
         private static string discoveryGuid="";
+
+        /// <summary>
+        /// Initiates wockets discovery and updates the registry
+        /// </summary>
         private static void Discover()
         {
             lock (discoveryLock)
@@ -915,11 +990,7 @@ namespace Wockets.Kernel
                     //if the device is a wocket
                     if (((devices[i].DeviceName.IndexOf("WKT") >= 0) || (devices[i].DeviceName.IndexOf("Wocket") >= 0) || (devices[i].DeviceName.IndexOf("FireFly") >= 0)) && (wocketCount < 100))
                     {
-                        string hex = "";
-                        //byte[] address = devices[i].DeviceAddress.ToByteArray();
-                        //for (int j = 0; j < address.Length; j++)
-                          //  hex += address[j].ToString("X2");
-
+                        string hex = "";               
                         hex=devices[i].DeviceAddress.ToString();
                         registryLock.WaitOne();
                         RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_DISCOVERED_SENSORS_PATH + "\\" + wocketCount.ToString("00"));
@@ -927,8 +998,6 @@ namespace Wockets.Kernel
                         rk.SetValue("MacAddress", hex, RegistryValueKind.String);
                         rk.Close();
                         registryLock.Release();
-
-
                         wocketCount++;
                     }
                 }
@@ -941,7 +1010,11 @@ namespace Wockets.Kernel
             }
         }
 
-        //send a response to a specific application
+        /// <summary>
+        /// Sends a kernel response to a specific application
+        /// </summary>
+        /// <param name="response">Kernel response</param>
+        /// <param name="senderGuid">Guid of the sender application</param>
         public static void Send(KernelResponse response, string senderGuid)
         {
             registryLock.WaitOne();
@@ -954,14 +1027,20 @@ namespace Wockets.Kernel
             namedEvent.Send(senderGuid);
         }
 
-        //Broadcast the response to everyone
+        /// <summary>
+        /// Broadcast a kernel response to a specific application
+        /// </summary>
+        /// <param name="response">Kernel response</param>
         public static void Broadcast(KernelResponse response)
         {
             NamedEvents namedEvent = new NamedEvents();
             namedEvent.Send(Core.BROADCAST_EVENT_PREFIX + response.ToString());
         }
 
-        /* Initializes the kernel */
+        
+        /// <summary>
+        /// Initializes kernel's registry for the first time
+        /// </summary>
         private static void Initialize()
         {
 
