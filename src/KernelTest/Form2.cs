@@ -39,7 +39,7 @@ namespace KernelTest
 
             //Initialize a configuration and controller structures to retrieve wockets data
             Core.InitializeConfiguration();
-            Core.InitializeController();
+     
             mac = ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0])._Address;
             this.label1.Text = "Wocket " + mac + ":";
 
@@ -58,6 +58,19 @@ namespace KernelTest
 
         }
 
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            this.timer1.Enabled = false;
+            plotter = null;
+            Core.UnsubscribeEvent(KernelResponse.BATTERY_LEVEL_UPDATED);
+            Core.UnsubscribeEvent(KernelResponse.BATTERY_PERCENT_UPDATED);
+            Core.UnsubscribeEvent(KernelResponse.PC_COUNT_UPDATED);
+            Core.UnsubscribeEvent(KernelResponse.SENSITIVITY_UPDATED);
+            Core.UnsubscribeEvent(KernelResponse.CALIBRATION_UPDATED);
+            Core.UnsubscribeEvent(KernelResponse.SAMPLING_RATE_UPDATED);
+            Core.UnsubscribeEvent(KernelResponse.TRANSMISSION_MODE_UPDATED);
+            Core.UnsubscribeEvent(KernelResponse.ACTIVITY_COUNT_UPDATED);
+        }
 
 
         private void EventListener(KernelResponse rsp)

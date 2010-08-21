@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using System.Threading;
-
 using Wockets;
 using Wockets.Receivers;
 using Wockets.Decoders;
@@ -16,14 +15,11 @@ using Wockets.Data.Accelerometers;
 using Wockets.Data.Annotation;
 using Wockets.Data.Features;
 using Wockets.Data.Types;
-
-
 using WocketsWeka;
 using weka.classifiers;
 using weka;
 using weka.core;
 using weka.classifiers.trees;
-
 #if (PocketPC)
 using Wockets.Utils.IPC.MMF;
 #endif
@@ -31,9 +27,7 @@ using Wockets.Utils.IPC.MMF;
 namespace Wockets
 {
     /// <summary>
-    /// The wockets controller is the starting point to talk to the wockets. It instantiates a number of threads to do the following:
-    /// 1- read data 2- save data 3- extract features and classify data into activities 4- transparently managing, tracking and updating
-    /// the status of connections to wockets 
+    /// The wockets controller manages data connections, writes raw data and classifies data
     /// </summary>
     public sealed class WocketsController : XMLSerializable
     {                
@@ -77,16 +71,12 @@ namespace Wockets
 
         public int extractedVectors = 0;
         private int structureFileExamples = 0;
-
-
         private AutoResetEvent waitToPollEvent;
         private AutoResetEvent pollingEvent;
         private bool polling = true;
-
         private AutoResetEvent savingEvent;
         private AutoResetEvent waitToSaveEvent;
         private bool saving = true;
-
         private AutoResetEvent classifyingEvent;
         private bool classifying = false;        
         private AutoResetEvent trainingEvent;
@@ -96,11 +86,8 @@ namespace Wockets
         private Instances instances;        
         private Classifier classifier;
         private string storageDirectory;
-        private Session annotatedSession;
-        
+        private Session annotatedSession;        
         public double StartTime = 0;
-
-
         /// <summary>
         /// Stores the current record that is being annotated
         /// </summary>

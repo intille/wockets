@@ -45,6 +45,7 @@
             this.label1 = new System.Windows.Forms.Label();
             this.status = new System.Windows.Forms.Label();
             this.listBox1 = new System.Windows.Forms.ListBox();
+            this.menuItem3 = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // mainMenu1
@@ -63,6 +64,7 @@
             // 
             this.menukernel.MenuItems.Add(this.menukernelstart);
             this.menukernel.MenuItems.Add(this.menukernelstop);
+            this.menukernel.MenuItems.Add(this.menuItem3);
             this.menukernel.Text = "Kernel";
             // 
             // menukernelstart
@@ -140,6 +142,7 @@
             this.status.Location = new System.Drawing.Point(15, 231);
             this.status.Name = "status";
             this.status.Size = new System.Drawing.Size(198, 72);
+            this.status.Text = "Wockets - Version 2.0.0.0";
             // 
             // listBox1
             // 
@@ -149,6 +152,11 @@
             this.listBox1.Size = new System.Drawing.Size(234, 173);
             this.listBox1.TabIndex = 4;
             this.listBox1.SelectedIndexChanged += new System.EventHandler(this.listBox1_SelectedIndexChanged);
+            // 
+            // menuItem3
+            // 
+            this.menuItem3.Text = "Ping";
+            this.menuItem3.Click += new System.EventHandler(this.menuItem3_Click);
             // 
             // Form1
             // 
@@ -183,6 +191,7 @@
         private System.Windows.Forms.MenuItem menuWocketDiscover;
         private System.Windows.Forms.MenuItem menuWocketConnect;
         private System.Windows.Forms.MenuItem menuWocketDisconnect;
+        private System.Windows.Forms.MenuItem menuItem3;
     }
 }
 

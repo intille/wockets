@@ -13,23 +13,9 @@ namespace Wockets.Data.Accelerometers
         public WocketsAccelerationData(byte sensorID): base(NUM_RAW_BYTES,sensorID)
         {           
         }
-
         public WocketsAccelerationData()
             : base(NUM_RAW_BYTES, 0)
         {
-        }
-
-        public bool _PeggyBacked
-        {
-            get
-            {
-                return this.peggyBacked;
-            }
-
-            set
-            {
-                this.peggyBacked = value;
-            }
         }
     }
 }
