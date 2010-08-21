@@ -1,0 +1,41 @@
+<html>
+<head>
+<title>File Upload Hash Test Page</title>
+</head>
+
+<h2>File Upload hash</h2>
+upload_md5sum.php checks the following parameters:<br>
+<ul>
+	<li>perChunkSums - 0 do not compute md5sums for the chunks 1 - compute md5sums for chunkSize blocks of data</li>
+	<li>chunkSize - size in bytes of the md5sum chunks</li>
+	<li>algo - specify the hash algorithm to use, see the list <a href="http://www.php.net/manual/en/function.hash-algos.php">here</a></li>
+	<li>displayExecuteTime - display the time the PHP script took to execute if this parameter is set (regardless of value)</li>
+</ul>
+
+<form enctype="multipart/form-data" action="../dataupload/upload_md5sum.php" method="POST">
+	<label>uuid     		</label> <input type="text" size="30" maxlength="40" name="uuid" 		 value="8EE6A1BE82A811DFA86300123F205EC2"> <br/>
+	<label>perChunkSums		</label> <input type="text" size="30" maxlength="40" name="perChunkSums" value="1"> <br/>
+	<label>ChunkSize 		</label> <input type="text" size="30" maxlength="40" name="chunkSize" 	 value="1048576"> <br/>
+	<label>Hash Algorithm 	</label> <input type="text" size="30" maxlength="40" name="algo" 		 value="md5"> <br/>
+	<label>Debug php time 	</label> <input type="radio" name="displayExecuteTime" value="true"><br>
+	<p class="submit"><input type="submit" value="Submit" /> </p>
+</form>
+
+
+<style type="text/css">
+label
+{
+width: 9em;
+float: left;
+text-align: right;
+margin-right: 0.5em;
+display: block
+}
+
+.submit input
+{
+margin-left: 9.5em;
+} 
+</style>
+
+</html>
