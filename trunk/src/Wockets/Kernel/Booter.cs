@@ -30,12 +30,7 @@ namespace Wockets.Kernel
         /// Specifies if the wockets are running
         /// </summary>
         public static bool _WocketsRunning = false;
-
-        /// <summary>
-        /// Locks the kernel during booting to ensure that only 1 instance is ever running
-        /// </summary>
-        private static object booterLock = new object();
-
+     
         /// <summary>
         /// Locks the processing of a command from an application to avoid processing multiple commands simultaneously
         /// </summary>
@@ -140,28 +135,99 @@ namespace Wockets.Kernel
         /// </summary>
         public static void Boot()
         {
+            kernelLock.WaitOne();
             try
             {
-                lock (booterLock)
+                if (!_Running)
                 {
-                    if (!_Running)
+                    Registry.LocalMachine.DeleteSubKeyTree(Core.REGISTRY_REGISTERED_APPLICATIONS_PATH);
+                    RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_WOCKETS_PATH + "\\Kernel");
+                    rk.SetValue("Handle", 00000, RegistryValueKind.DWord);
+                    rk.SetValue("OnBoot", 1, RegistryValueKind.DWord);
+                    rk.SetValue("Status", 1, RegistryValueKind.DWord);
+                    rk.SetValue("Storage", "", RegistryValueKind.String);
+                    rk.Close();
+                    rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_WOCKETS_PATH + "\\Kernel\\Commands");
+                    rk.SetValue("GET_BT", 0, RegistryValueKind.DWord);
+                    rk.SetValue("GET_PC", 1, RegistryValueKind.DWord);
+                    rk.SetValue("GET_SM", 2, RegistryValueKind.DWord);
+                    rk.SetValue("SET_SM", 3, RegistryValueKind.DWord);
+                    rk.SetValue("GET_SEN", 6, RegistryValueKind.DWord);
+                    rk.SetValue("SET_SEN", 7, RegistryValueKind.DWord);
+                    rk.SetValue("GET_CAL", 8, RegistryValueKind.DWord);
+                    rk.SetValue("SET_CAL", 9, RegistryValueKind.DWord);
+                    rk.SetValue("GET_TP", 10, RegistryValueKind.DWord);
+                    rk.SetValue("SET_TP", 11, RegistryValueKind.DWord);
+                    rk.SetValue("GET_SR", 12, RegistryValueKind.DWord);
+                    rk.SetValue("SET_SR", 13, RegistryValueKind.DWord);
+                    rk.SetValue("GET_DSC", 14, RegistryValueKind.DWord);
+                    rk.SetValue("SET_DSC", 15, RegistryValueKind.DWord);
+                    rk.SetValue("GET_TM", 16, RegistryValueKind.DWord);
+                    rk.SetValue("SET_TM", 17, RegistryValueKind.DWord);
+                    rk.SetValue("GET_ALT", 18, RegistryValueKind.DWord);
+                    rk.SetValue("SET_ALT", 19, RegistryValueKind.DWord);
+                    rk.SetValue("GET_PDT", 20, RegistryValueKind.DWord);
+                    rk.SetValue("SET_PDT", 21, RegistryValueKind.DWord);
+                    rk.SetValue("RST_WK", 22, RegistryValueKind.DWord);
+                    rk.SetValue("GET_CFT", 23, RegistryValueKind.DWord);
+                    rk.SetValue("SET_CFT", 24, RegistryValueKind.DWord);
+                    rk.SetValue("GET_BR", 25, RegistryValueKind.DWord);
+                    rk.SetValue("SET_BR", 26, RegistryValueKind.DWord);
+                    rk.Flush();
+                    rk.Close();
+                    rk = Registry.LocalMachine.CreateSubKey(Core.COMMAND_CHANNEL);
+                    rk.SetValue("Message", "", RegistryValueKind.String);
+                    rk.SetValue("Param", "", RegistryValueKind.String);
+                    rk.Flush();
+                    rk.Close();
+                    rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH);
+                    rk.Flush();
+                    rk.Close();
+                    for (int i = 0; (i < 5); i++)
                     {
-                        Initialize();
-                        commandThread = new Thread(new ThreadStart(CommandHandler));
-                        commandThread.Start();
-                        _Running = true;
-//                        Broadcast(KernelResponse.STARTED);
-                        commandThread.Join();
-
+                        rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + i.ToString("0"));
+                        rk.SetValue("MacAddress", "");
+                        rk.SetValue("Status", 0, RegistryValueKind.DWord);
+                        rk.Close();
                     }
+
+                    rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_DISCOVERED_SENSORS_PATH);
+                    rk.Flush();
+                    rk.Close();
+                    rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_REGISTERED_APPLICATIONS_PATH);
+                    rk.SetValue("Count", 0, RegistryValueKind.DWord);
+                    rk.Flush();
+                    rk.Close();
+                                      
+                   _Running = true;
+                    
+
                 }
+
             }
             catch
             {
-                RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_WOCKETS_PATH + "\\Kernel");
-                rk.SetValue("Status", 0, RegistryValueKind.DWord);
-                rk.Close();
-                Logger.Close();
+                try
+                {
+                    RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_WOCKETS_PATH + "\\Kernel");
+                    rk.SetValue("Status", 0, RegistryValueKind.DWord);
+                    rk.Close();
+                    Logger.Close();
+                }
+                catch
+                {
+                }
+                
+            }
+            kernelLock.Release();
+            if (_Running)
+            {
+                commandThread = new Thread(new ThreadStart(CommandHandler));
+                commandThread.Start();
+                commandThread.Join();
+            }
+            else
+            {
                 System.Diagnostics.Process.GetCurrentProcess().Close();
                 System.Diagnostics.Process.GetCurrentProcess().Kill();
             }
@@ -178,96 +244,95 @@ namespace Wockets.Kernel
             Response response = (Response)e;
             switch (response._Type)
             {
-                case ResponseTypes.BL_RSP: //write to the registry
+                case ResponseTypes.BL_RSP:
                     try
                     {
                         foreach (string guid in applicationPaths.Values)
                             Send(KernelResponse.BATTERY_LEVEL_UPDATED, guid);
-//                        Broadcast(KernelResponse.BATTERY_LEVEL_UPDATED);
                     }
-                    catch
-                    {                        
+                    catch (Exception ex)
+                    {
+                        Logger.Error("Booter.cs:DecoderCallback:BL_RSP:" + ex.ToString());
                     }
                     break;
 
-                case ResponseTypes.BP_RSP: //write to the registry
+                case ResponseTypes.BP_RSP:
                     try
                     {
                         foreach (string guid in applicationPaths.Values)
-                            Send(KernelResponse.BATTERY_LEVEL_UPDATED, guid);
-//                        Broadcast(KernelResponse.BATTERY_PERCENT_UPDATED);
+                            Send(KernelResponse.BATTERY_PERCENT_UPDATED, guid);
                     }
-                    catch
-                    {                        
+                    catch (Exception ex)
+                    {
+                        Logger.Error("Booter.cs:DecoderCallback:BP_RSP:" + ex.ToString());
                     }
                     break;
 
-                case ResponseTypes.PC_RSP: //write to the registry
+                case ResponseTypes.PC_RSP:
                     try
                     {
                         foreach (string guid in applicationPaths.Values)
-                            Send(KernelResponse.BATTERY_LEVEL_UPDATED, guid);
-                        //Broadcast(KernelResponse.PC_COUNT_UPDATED);
+                            Send(KernelResponse.PC_COUNT_UPDATED, guid);
                     }
-                    catch
-                    {                        
+                    catch (Exception ex)
+                    {
+                        Logger.Error("Booter.cs:DecoderCallback:PC_RSP:" + ex.ToString());
                     }
                     break;
-                case ResponseTypes.SENS_RSP: //write to the registry
+                case ResponseTypes.SENS_RSP:
                     try
                     {
                         foreach (string guid in applicationPaths.Values)
-                            Send(KernelResponse.BATTERY_LEVEL_UPDATED, guid);
-                        //Broadcast(KernelResponse.SENSITIVITY_UPDATED);
+                            Send(KernelResponse.SENSITIVITY_UPDATED, guid);
                     }
-                    catch
-                    {                        
+                    catch (Exception ex)
+                    {
+                        Logger.Error("Booter.cs:DecoderCallback:SENS_RSP:" + ex.ToString());
                     }
                     break;
-                case ResponseTypes.CAL_RSP: //write to the registry
+                case ResponseTypes.CAL_RSP:
                     try
                     {
                         foreach (string guid in applicationPaths.Values)
-                            Send(KernelResponse.BATTERY_LEVEL_UPDATED, guid);
-                        //Broadcast(KernelResponse.CALIBRATION_UPDATED);
+                            Send(KernelResponse.CALIBRATION_UPDATED, guid);
                     }
-                    catch
-                    {                        
-                    }
-                    break;
-
-                case ResponseTypes.SR_RSP: //write to the registry
-                    try
+                    catch (Exception ex)
                     {
-                        foreach (string guid in applicationPaths.Values)
-                            Send(KernelResponse.BATTERY_LEVEL_UPDATED, guid);
-                        //Broadcast(KernelResponse.SAMPLING_RATE_UPDATED);
-                    }
-                    catch
-                    {                        
-                    }
-                    break;
-                case ResponseTypes.TM_RSP: //write to the registry
-                    try
-                    {
-                        foreach (string guid in applicationPaths.Values)
-                            Send(KernelResponse.BATTERY_LEVEL_UPDATED, guid);
-                        //Broadcast(KernelResponse.TRANSMISSION_MODE_UPDATED);
-                    }
-                    catch
-                    {                     
+                        Logger.Error("Booter.cs:DecoderCallback:CAL_RSP:" + ex.ToString());
                     }
                     break;
 
-                case ResponseTypes.AC_RSP: //write to the registry
+                case ResponseTypes.SR_RSP:
+                    try
+                    {
+                        foreach (string guid in applicationPaths.Values)
+                            Send(KernelResponse.SAMPLING_RATE_UPDATED, guid);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Error("Booter.cs:DecoderCallback:SR_RSP:" + ex.ToString());
+                    }
+                    break;
+                case ResponseTypes.TM_RSP:
+                    try
+                    {
+                        foreach (string guid in applicationPaths.Values)
+                            Send(KernelResponse.TRANSMISSION_MODE_UPDATED, guid);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Error("Booter.cs:DecoderCallback:TM_RSP:" + ex.ToString());
+                    }
+                    break;
+                case ResponseTypes.AC_RSP:
                     try
                     {
                         foreach (string guid in applicationPaths.Values)
                             Send(KernelResponse.BATTERY_LEVEL_UPDATED, guid);
-                        //Broadcast(KernelResponse.ACTIVITY_COUNT_UPDATED);
                     }
-                    catch
-                    {                        
+                    catch (Exception ex)
+                    {
+                        Logger.Error("Booter.cs:DecoderCallback:AC_RSP:" + ex.ToString());
                     }
                     break;
                 default:
@@ -304,8 +369,7 @@ namespace Wockets.Kernel
                 #region DISCOVER
                 if (msg == KernelCommand.DISCOVER.ToString())
                 {
-                    Thread discovery = new Thread(new ThreadStart(Discover));
-                    discoveryGuid = param;
+                    Thread discovery = new Thread(new ThreadStart(Discover));                 
                     discovery.Start();
                 }
                 #endregion DISCOVER
@@ -371,10 +435,10 @@ namespace Wockets.Kernel
                                 ((Wocket)CurrentWockets._Controller._Sensors[i])._Receiver = CurrentWockets._Controller._Receivers[i];
 
                             if (CurrentWockets._Controller._Sensors.Count > 0)
-                            {                                
+                            {
                                 rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_KERNEL_PATH, true);
                                 rk.SetValue("Storage", storageDirectory);
-                                rk.Close();                                
+                                rk.Close();
 
                                 TextWriter tw = new StreamWriter(storageDirectory + "\\SensorData.xml");
                                 tw.WriteLine(CurrentWockets._Controller.ToXML());
@@ -395,18 +459,18 @@ namespace Wockets.Kernel
                                     d.Subscribe(ResponseTypes.TM_RSP, new Decoder.ResponseHandler(DecoderCallback));
                                     d.Subscribe(ResponseTypes.AC_RSP, new Decoder.ResponseHandler(DecoderCallback));
                                 }
-                                // If not connected send the connect event
-                                Send(KernelResponse.CONNECTED, applicationGuid);
-                            }
-                            else // if already connected send the connected event
-                                Send(KernelResponse.CONNECTED, applicationGuid);
 
+                            }
+
+                            foreach (string guid in applicationPaths.Values)
+                                Send(KernelResponse.CONNECTED, guid);
                         }
 
                     }
                     catch (Exception e)
                     {
-                        Send(KernelResponse.CONNECT_FAILED, applicationGuid);
+                        foreach (string guid in applicationPaths.Values)
+                            Send(KernelResponse.CONNECT_FAILED, guid);
                         Logger.Error("Booter.cs:ApplicationHandler: CONNECT:" + e.ToString());
                     }
                 }
@@ -421,18 +485,17 @@ namespace Wockets.Kernel
                         {
                             CurrentWockets._Controller.Dispose();
                             _WocketsRunning = false;
-                            Send(KernelResponse.DISCONNECTED, applicationGuid);
                         }
-                        else
-                            Send(KernelResponse.DISCONNECTED, applicationGuid);
+                        foreach (string guid in applicationPaths.Values)
+                            Send(KernelResponse.DISCONNECTED, guid);
 
                     }
                     catch (Exception e)
                     {
-                        Send(KernelResponse.DISCONNECT_FAILED, applicationGuid);
+                        foreach (string guid in applicationPaths.Values)
+                            Send(KernelResponse.DISCONNECT_FAILED, guid);                        
                         Logger.Error("Booter.cs:ApplicationHandler: DISCONNECT:" + e.ToString());
                     }
-
                 }
                 #endregion DISCONNECT
 
@@ -458,14 +521,19 @@ namespace Wockets.Kernel
                                 }
                                 rk.Close();
                             }
-                            Send(KernelResponse.SENSORS_UPDATED, applicationGuid);
+                            foreach (string guid in applicationPaths.Values)
+                                Send(KernelResponse.SENSORS_UPDATED, guid);
                         }
                         else
-                            Send(KernelResponse.SENSORS_UPDATED_FAILED, applicationGuid);
+                        {
+                            foreach (string guid in applicationPaths.Values)
+                                Send(KernelResponse.SENSORS_UPDATED_FAILED, guid);
+                        }
                     }
                     catch (Exception e)
                     {
-                        Send(KernelResponse.SENSORS_UPDATED_FAILED, applicationGuid);
+                        foreach (string guid in applicationPaths.Values)
+                            Send(KernelResponse.SENSORS_UPDATED_FAILED, guid);
                         Logger.Error("Booter.cs:ApplicationHandler: SET_WOCKETS:" + e.ToString());
                     }
                 }
@@ -890,7 +958,6 @@ namespace Wockets.Kernel
                 #endregion SET_MEMORY_MODE
 
                 kernelLock.Release();
-
                 namedEvent.Reset();
             }
         }
@@ -907,88 +974,91 @@ namespace Wockets.Kernel
                 //ensures prior synchronization
                 namedEvent.Receive(Channels.COMMAND.ToString());
                 kernelLock.WaitOne();
-                //lock (registryLock)
-                //{
-                RegistryKey rk = Registry.LocalMachine.OpenSubKey(Core.COMMAND_CHANNEL, true);
-                string msg = (string)rk.GetValue("Message");//, KernelNamedEvents.REGISTER.ToString(), RegistryValueKind.DWord);
-                string param = (string)rk.GetValue("Param");//, processID.ToString(), RegistryValueKind.DWord);        
-                rk.Close();
-
-                if (msg == KernelCommand.PING.ToString())
+                try
                 {
-                    Send(KernelResponse.PING_RESPONSE, param);
-                 //   Broadcast(KernelResponse.PING_RESPONSE);
-                }
-                else if (msg == KernelCommand.TERMINATE.ToString())
-                {
-
-
-                    rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_WOCKETS_PATH + "\\Kernel");
-                    rk.SetValue("Status", 0, RegistryValueKind.DWord);
+                    RegistryKey rk = Registry.LocalMachine.OpenSubKey(Core.COMMAND_CHANNEL, true);
+                    string msg = (string)rk.GetValue("Message");
+                    string param = (string)rk.GetValue("Param");
                     rk.Close();
-                    Logger.Close();
-                    Send(KernelResponse.STOPPED, param);
-                    //Broadcast(KernelResponse.STOPPED);
-                    System.Diagnostics.Process.GetCurrentProcess().Close();
-                    System.Diagnostics.Process.GetCurrentProcess().Kill();
-                }
-                else if (msg == KernelCommand.REGISTER.ToString())
-                {
-                    if (!applicationThreads.ContainsKey(param))
+
+                    #region PING Kernel
+                    if (msg == KernelCommand.PING.ToString())
+                        Send(KernelResponse.PING_RESPONSE, param);
+                    #endregion PING Kernel
+
+                    #region Terminate Kernel
+                    else if (msg == KernelCommand.TERMINATE.ToString())
                     {
-                        //spawn the processing thread
-                        Thread applicationThread = new Thread(new ThreadStart(ApplicationHandler));
-                        applicationPaths.Add(applicationThread.ManagedThreadId, param);
-                        applicationThreads.Add(param, applicationThread);
-                        applicationThread.Start();
-                        _NumRegistrations++;
 
-                        rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_REGISTERED_APPLICATIONS_PATH);
-                        rk.SetValue("Count", _NumRegistrations, RegistryValueKind.DWord);
+
+                        rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_WOCKETS_PATH + "\\Kernel");
+                        rk.SetValue("Status", 0, RegistryValueKind.DWord);
                         rk.Close();
-                        Send(KernelResponse.REGISTERED, param);
-                        //Broadcast(KernelResponse.REGISTERED);
+                        Logger.Close();
+                        Send(KernelResponse.STOPPED, param);
+                        foreach (string guid in applicationPaths.Values)
+                            Send(KernelResponse.STOPPED, guid);
+                        System.Diagnostics.Process.GetCurrentProcess().Close();
+                        System.Diagnostics.Process.GetCurrentProcess().Kill();
                     }
-                }
-                else if (msg == KernelCommand.UNREGISTER.ToString())
-                {
+                    #endregion Terminate Kernel
 
-
-                    //Registry.LocalMachine.DeleteSubKeyTree(Core.REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + param + "}");
-
-                    if (applicationThreads.ContainsKey(param))
+                    #region Register Kernel
+                    else if (msg == KernelCommand.REGISTER.ToString())
                     {
-                        //kill the processing thread
-                        applicationPaths.Remove(((Thread)applicationThreads[param]).ManagedThreadId);
-                        ((Thread)applicationThreads[param]).Abort();
-                        applicationThreads.Remove(param);
-                        _NumRegistrations--;
+                        if (!applicationThreads.ContainsKey(param))
+                        {
+                            //spawn the processing thread
+                            Thread applicationThread = new Thread(new ThreadStart(ApplicationHandler));
+                            applicationPaths.Add(applicationThread.ManagedThreadId, param);
+                            applicationThreads.Add(param, applicationThread);
+                            applicationThread.Start();
+                            _NumRegistrations++;
 
-                        rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_REGISTERED_APPLICATIONS_PATH);
-                        rk.SetValue("Count", _NumRegistrations, RegistryValueKind.DWord);
-                        rk.Close();
-                        //Broadcast(KernelResponse.UNREGISTERED);
-                        Send(KernelResponse.UNREGISTERED, param);
+                            rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_REGISTERED_APPLICATIONS_PATH);
+                            rk.SetValue("Count", _NumRegistrations, RegistryValueKind.DWord);
+                            rk.Close();
+                            Send(KernelResponse.REGISTERED, param);
+                        }
                     }
+                    #endregion Register Kernel
+
+                    #region Unregister Kernel
+                    else if (msg == KernelCommand.UNREGISTER.ToString())
+                    {
+                        if (applicationThreads.ContainsKey(param))
+                        {
+                            //kill the processing thread
+                            applicationPaths.Remove(((Thread)applicationThreads[param]).ManagedThreadId);
+                            ((Thread)applicationThreads[param]).Abort();
+                            applicationThreads.Remove(param);
+                            _NumRegistrations--;
+
+                            rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_REGISTERED_APPLICATIONS_PATH);
+                            rk.SetValue("Count", _NumRegistrations, RegistryValueKind.DWord);
+                            rk.Close();
+                            Send(KernelResponse.UNREGISTERED, param);
+                        }
+                    }
+                    #endregion Unregister Kernel
                 }
-                //}
+                catch (Exception e)
+                {
+                    Logger.Error("Booter.cs:CommandHandler:" + e.ToString());
+                }
+
                 kernelLock.Release();
                 namedEvent.Reset();
             }
 
         }
 
-        /// <summary>
-        /// Guid of application requesting wockets to be discovered
-        /// </summary>
-        private static string discoveryGuid="";
-
+       
         /// <summary>
         /// Initiates wockets discovery and updates the registry
         /// </summary>
         private static void Discover()
-        {
-            kernelLock.WaitOne();
+        {            
             try
             {
                 Registry.LocalMachine.DeleteSubKeyTree(Core.REGISTRY_DISCOVERED_SENSORS_PATH);
@@ -1011,16 +1081,14 @@ namespace Wockets.Kernel
                         wocketCount++;
                     }
                 }
-                //Send to the appropriate application a response
-                //Send(KernelResponse.DISCOVERED, discoveryGuid);
+                //Send to the appropriate application a response                
                 foreach (string guid in applicationPaths.Values)
                     Send(KernelResponse.DISCOVERED, guid);
             }
             catch (Exception e)
             {
                 Logger.Error("Booter.cs: "+ e.ToString());
-            }
-            kernelLock.Release();
+            }            
         }
 
         /// <summary>
@@ -1059,84 +1127,6 @@ namespace Wockets.Kernel
         /// <summary>
         /// Initializes kernel's registry for the first time
         /// </summary>
-        private static void Initialize()
-        {
-
-            //If the kernel crashed or an application crashed while locking a semaphore then restarting the kernel should ensures
-            //that the lock is released            
-            //registryLock.Release();
-
-            //Always attempt to delete registered applications
-            //at the beginning
-            //this will fail only if the registry tree is being accessed at that time (i.e. not writable)            
-            kernelLock.WaitOne();
-
-            try
-            {
-                Registry.LocalMachine.DeleteSubKeyTree(Core.REGISTRY_REGISTERED_APPLICATIONS_PATH);
-                RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_WOCKETS_PATH + "\\Kernel");
-                rk.SetValue("Handle", 00000, RegistryValueKind.DWord);
-                rk.SetValue("OnBoot", 1, RegistryValueKind.DWord);
-                rk.SetValue("Status", 1, RegistryValueKind.DWord);
-                rk.SetValue("Storage", "", RegistryValueKind.String);
-                rk.Close();
-                rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_WOCKETS_PATH + "\\Kernel\\Commands");
-                rk.SetValue("GET_BT", 0, RegistryValueKind.DWord);
-                rk.SetValue("GET_PC", 1, RegistryValueKind.DWord);
-                rk.SetValue("GET_SM", 2, RegistryValueKind.DWord);
-                rk.SetValue("SET_SM", 3, RegistryValueKind.DWord);
-                rk.SetValue("GET_SEN", 6, RegistryValueKind.DWord);
-                rk.SetValue("SET_SEN", 7, RegistryValueKind.DWord);
-                rk.SetValue("GET_CAL", 8, RegistryValueKind.DWord);
-                rk.SetValue("SET_CAL", 9, RegistryValueKind.DWord);
-                rk.SetValue("GET_TP", 10, RegistryValueKind.DWord);
-                rk.SetValue("SET_TP", 11, RegistryValueKind.DWord);
-                rk.SetValue("GET_SR", 12, RegistryValueKind.DWord);
-                rk.SetValue("SET_SR", 13, RegistryValueKind.DWord);
-                rk.SetValue("GET_DSC", 14, RegistryValueKind.DWord);
-                rk.SetValue("SET_DSC", 15, RegistryValueKind.DWord);
-                rk.SetValue("GET_TM", 16, RegistryValueKind.DWord);
-                rk.SetValue("SET_TM", 17, RegistryValueKind.DWord);
-                rk.SetValue("GET_ALT", 18, RegistryValueKind.DWord);
-                rk.SetValue("SET_ALT", 19, RegistryValueKind.DWord);
-                rk.SetValue("GET_PDT", 20, RegistryValueKind.DWord);
-                rk.SetValue("SET_PDT", 21, RegistryValueKind.DWord);
-                rk.SetValue("RST_WK", 22, RegistryValueKind.DWord);
-                rk.SetValue("GET_CFT", 23, RegistryValueKind.DWord);
-                rk.SetValue("SET_CFT", 24, RegistryValueKind.DWord);
-                rk.SetValue("GET_BR", 25, RegistryValueKind.DWord);
-                rk.SetValue("SET_BR", 26, RegistryValueKind.DWord);
-                rk.Flush();
-                rk.Close();
-                rk = Registry.LocalMachine.CreateSubKey(Core.COMMAND_CHANNEL);
-                rk.SetValue("Message", "", RegistryValueKind.String);
-                rk.SetValue("Param", "", RegistryValueKind.String);
-                rk.Flush();
-                rk.Close();
-                rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH);
-                rk.Flush();
-                rk.Close();
-                for (int i = 0; (i < 5); i++)
-                {
-                    rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + i.ToString("0"));
-                    rk.SetValue("MacAddress", "");
-                    rk.SetValue("Status", 0, RegistryValueKind.DWord);
-                    rk.Close();
-                }
-
-                rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_DISCOVERED_SENSORS_PATH);
-                rk.Flush();
-                rk.Close();
-                rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_REGISTERED_APPLICATIONS_PATH);
-                rk.SetValue("Count", 0, RegistryValueKind.DWord);
-                rk.Flush();
-                rk.Close();
-            }
-            catch (Exception e)
-            {
-                Logger.Error("Booter.cs:Initialize: " + e.ToString());
-            }
-            kernelLock.Release();
-        }
+        
     }
 }

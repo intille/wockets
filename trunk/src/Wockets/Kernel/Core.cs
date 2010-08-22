@@ -154,9 +154,7 @@ namespace Wockets.Kernel
             RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + Core._IcomingChannel + "}");
             rk.SetValue("Message", "", RegistryValueKind.String);
             rk.SetValue("Param", "", RegistryValueKind.String);
-            rk.Close();
-
-            Core.Ping();
+            rk.Close();            
 
 /*            Thread t = new Thread(EventListener);
             threads.Add(t.ManagedThreadId, t);
@@ -386,7 +384,7 @@ namespace Wockets.Kernel
                     default:
                         break;
                 }
-
+                namedEvent.Reset();
                 FireEvent(myevent);
             }
         }
