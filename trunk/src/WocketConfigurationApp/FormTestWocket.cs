@@ -46,7 +46,7 @@ namespace WocketConfigurationApp
         private ushort[] xyzN = new ushort[3] { 0, 0, 0 };
         private double[] xyzSTD = new double[3] { 0.0, 0.0, 0.0 };
 
-        public static string NEEDED_FILES_PATH = "C:\\Data\\Project\\Google Code\\GoogleCode version 3\\bin\\NeededFiles\\";
+        public static string NEEDED_FILES_PATH = "..\\..\\bin\\NeededFiles\\";
         public static string CALIBRATIONS_DIRECTORY = NEEDED_FILES_PATH + "images\\calibrations\\";
         Image[] calibrationImages;
         int calibration_step = -1;
@@ -2742,7 +2742,9 @@ namespace WocketConfigurationApp
     private double[] RMEANS = new double[3]{0.0, 0.0, 0.0};
     private double[] RSTD   = new double[3] { 0.0, 0.0, 0.0 };
 
-    private double lastUnixTime = 0.0;   
+    private long samplingRate = 0;
+    private DateTime calTime;
+    
     private int MaxSamples = 20000;
     
     private int DecodedPackets = 0;
@@ -2820,6 +2822,12 @@ namespace WocketConfigurationApp
 
         try
         {
+            if (calibration_step == 0)
+            {
+                calTime = DateTime.Now;
+                samplingRate = wc._Decoders[0].TotalSamples;
+            }
+
             is_reading = true;
 
            
@@ -2835,18 +2843,19 @@ namespace WocketConfigurationApp
                 //wait and update the head, when the tail has reached the head 
                 if (myTail == myHead)
                 {  System.Threading.Thread.Sleep(1000);
-                   myHead = wc._Decoders[0]._Head; 
+                   myHead = wc._Decoders[0]._Head;
+                   continue;
                 }
                 
                  
                 //get data
                 data = ((Wockets.Data.Accelerometers.AccelerationData)wc._Decoders[0]._Data[myTail]);
+                
 
                 
                 //check that the unix time stam
                 if (data.UnixTimeStamp > 0.0)
                 {
-
                     //add data values to counters
                     accMeans[0] = accMeans[0] + data._X;
                     accMeans[1] = accMeans[1] + data._Y;
@@ -2857,15 +2866,8 @@ namespace WocketConfigurationApp
                     cbuffer[DecodedPackets, 1] = data._Y;
                     cbuffer[DecodedPackets, 2] = data._Z;
                     cbuffer[DecodedPackets, 3] = data.UnixTimeStamp;
-
                     //update the number of decoded packets
                     DecodedPackets++;
-
-
-
-                }
-                else
-                { //make sure that the time stamp is not zero
                 }
 
 
@@ -2894,13 +2896,9 @@ namespace WocketConfigurationApp
                 {   //compute the standard deviation
                     for (int k = 0; k < 3; k++)
                     {
-                        for (int j = 0; j < DecodedPackets; j++)
-                        {
-                            RSTD[k] = RSTD[k] + Math.Pow(cbuffer[j, k] - RMEANS[k], 2.0);
-                        }
-                        
-                        RSTD[k] = Math.Sqrt(RSTD[k] / DecodedPackets);
-                        
+                        for (int j = 0; j < DecodedPackets; j++)                        
+                            RSTD[k] = RSTD[k] + Math.Pow(cbuffer[j, k] - RMEANS[k], 2.0);                                                
+                        RSTD[k] = Math.Sqrt(RSTD[k] / DecodedPackets);                        
                     }
                 }
             }
@@ -2908,6 +2906,9 @@ namespace WocketConfigurationApp
             
             //Finish Test & Update Delegate
             calibration_step = calibration_step + 1;
+
+            if (calibration_step == 16)      
+                samplingRate = (long) Math.Round(((wc._Decoders[0].TotalSamples-samplingRate) / ((TimeSpan)DateTime.Now.Subtract(calTime)).TotalSeconds));            
 
 
         }//ends try
