@@ -74,9 +74,14 @@ namespace WocketConfigurationApp
            
             this.dataGridView1.Rows.Clear();
             this.macaddresses.Clear();
+            bluetoothlist.Clear();
             int wocketCount = 0;
-            
-            BluetoothRadio.PrimaryRadio.Mode = RadioMode.Connectable;
+
+
+            if (BluetoothRadio.PrimaryRadio.Mode != RadioMode.Connectable)
+            {
+                BluetoothRadio.PrimaryRadio.Mode = RadioMode.Connectable;
+            }
             BluetoothClient btc = new BluetoothClient();
 
             label_status.Text = "Searching for wockets...";
