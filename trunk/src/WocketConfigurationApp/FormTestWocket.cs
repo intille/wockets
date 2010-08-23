@@ -2785,214 +2785,10 @@ namespace WocketConfigurationApp
 
 
 
-
-    #region commented
-
-    /*
-    private void ReadingLoop()
-    {
-        
-        //Initialize time stamps 
-        //DateTime data_initial_time;
-        //TimeSpan data_elapsed_time;
-        double curUnixTime = 0.0;
-        DecodedPackets = 0;
-         
-
-        //Initialize the means
-        double[] accMeans = new double[3] { 0.0, 0.0, 0.0 };
-
-        RMEANS[0] = 0.0;
-        RMEANS[1] = 0.0;
-        RMEANS[2] = 0.0;
-
-        RSTD[0] = 0.0;
-        RSTD[1] = 0.0;
-        RSTD[2] = 0.0;
-
-        clean_data_buffer();
-
-        //Initialize buffer pointers
-        //The wockets controller doesn't keep track of the head
-        int myHead = wc._Decoders[0]._Head; 
-        int myTail = myHead;
-        Wockets.Data.Accelerometers.AccelerationData data;
-
-
-
-
-        #region commented
-        ////Initialize the acceleration data 
-        //Wockets.Data.Accelerometers.AccelerationData data = ((Wockets.Data.Accelerometers.AccelerationData)wc._Decoders[0]._Data[myHead]);
-
-        //cbuffer[DecodedPackets,0] = data._X;
-        //cbuffer[DecodedPackets,1] = data._Y;
-        //cbuffer[DecodedPackets,2] = data._Z;
-
-        ////update the tail
-        //myTail++;
-        #endregion commented
-
-
-
-        try
-        {
-            is_reading = true;
-
-           //sampling rate initial time
-           //data_initial_time = DateTime.Now;
-
-            
-            #region Get Data Samples
-
-            while ( (myTail != myHead) && 
-                    //(data.UnixTimeStamp > 0) &&
-                    (DecodedPackets < MaxSamples -1) && 
-                    (is_reading))
-            {
-
-                #region commented
-                //wait for data in the beginning
-                //if (myTail == myHead)
-                //{  System.Threading.Thread.Sleep(1000); }
-                //System.Threading.Thread.Sleep(10);
-
-                #endregion 
-
-
-                //get data
-                data = ((Wockets.Data.Accelerometers.AccelerationData)wc._Decoders[0]._Data[myTail]);
-
-                
-
-                if( data.UnixTimeStamp > 0.0)
-                {
-                    //check if the ACC data is valid
-                    curUnixTime = data.UnixTimeStamp;
-
-                    #region commented
-                    //sampling rate
-                    //if (final_time <= curUnixTime)
-                    //{
-                    //    final_time = curUnixTime + 1000;
-
-                    //    Math.DivRem(sr_counter, Max_SR_Samples-1, out sr_counter);
-                    //    SR[sr_counter] = _sr;
-                    //    sr_counter++;
-                    //    _sr = 0;
-                    //}
-
-                    
-                    //if (curUnixTime < lastUnixTime)
-                    //{
-                    //    MessageBox.Show("Data overwritten without decoding");
-                    //    break;
-                    //}
-                    #endregion 
-
-                    //update data & time stamps 
-                    lastUnixTime = curUnixTime;
-
-                    //add data values to counters
-                    accMeans[0] = accMeans[0] + data._X;
-                    accMeans[1] = accMeans[1] + data._Y;
-                    accMeans[2] = accMeans[2] + data._Z;
-
-                    //add data to buffer
-                    cbuffer[DecodedPackets, 0] = data._X;
-                    cbuffer[DecodedPackets, 1] = data._Y;
-                    cbuffer[DecodedPackets, 2] = data._Z;
-                    cbuffer[DecodedPackets, 3] = data.UnixTimeStamp;
-
-                    //update the number of decoded packets
-                    DecodedPackets++;
-                   
-
-                    //get new data value
-                    data = ((Wockets.Data.Accelerometers.AccelerationData)wc._Decoders[0]._Data[myTail]);
-
-                }
-
-
-                //update the tail
-                if (myTail >= wc._Decoders[0]._Data.Length - 1)
-                    myTail = 0;
-                else
-                    myTail++;
-
-            }
-
-            DecodedPackets++;
-
-
-            #region commented
-            //sampling rate final time
-            //data_elapsed_time = DateTime.Now.Subtract(data_initial_time);
-            //SR = (int)Math.Floor(MaxSamples / data_elapsed_time.TotalSeconds);
-            #endregion 
-
-            double unix_elapsed_time = cbuffer[DecodedPackets-1,3] - cbuffer[0,3];
-            SR = (int)Math.Abs(Math.Floor(MaxSamples / unix_elapsed_time));
-
-
-            //compute the final mean result
-            if (DecodedPackets > 1)
-            {
-                for (int i = 0; i < 3; i++)
-                {
-                    //compute the mean
-                    RMEANS[i] = accMeans[i] / DecodedPackets;
-
-                    if (CALIBRATE_STD)
-                    {   //compute the standard deviation
-                        for (int j = 0; j < DecodedPackets; j++)
-                        {
-                            RSTD[i] = RSTD[i] + Math.Pow( cbuffer[j,i] - RMEANS[i], 2.0);
-                        }
-
-                        RSTD[i] = Math.Sqrt(RSTD[0] / DecodedPackets);
-                    }
-                }
-            }
-
-
-            //Finish Test & Update Delegate
-            calibration_step = calibration_step + 1;
-
-        }
-        catch
-        {
-            DecodedPackets = -1;
-        }
-             
-
-        #endregion 
-
-
-       
-       
-       //Indicate that the reading loop ended
-        is_reading = false;
-        is_test_finished = true;
-        
-
-    }//function ends
-
-    */
-    #endregion commented
-
-
     
     private void ReadingLoop()
     {
 
-
-        #region commented
-        // Initialize time stamps 
-        // DateTime data_initial_time;
-        // TimeSpan data_elapsed_time;
-        // double curUnixTime = 0.0;
-        #endregion commented
 
         MaxSamples = 1000;
 
@@ -3022,40 +2818,16 @@ namespace WocketConfigurationApp
         Wockets.Data.Accelerometers.AccelerationData data;
 
 
-
-
-        #region commented
-        ////Initialize the acceleration data 
-        //Wockets.Data.Accelerometers.AccelerationData data = ((Wockets.Data.Accelerometers.AccelerationData)wc._Decoders[0]._Data[myHead]);
-
-        //cbuffer[DecodedPackets,0] = data._X;
-        //cbuffer[DecodedPackets,1] = data._Y;
-        //cbuffer[DecodedPackets,2] = data._Z;
-
-        ////update the tail
-        //myTail++;
-        #endregion commented
-
-
-
         try
         {
             is_reading = true;
 
-            #region commented
-            //sampling rate initial time
-            //data_initial_time = DateTime.Now;
-            #endregion commented
-
-
+           
 
             #region Get Data Samples
 
             //-- Loop until the desired number of samples ---
-            while ( //(myTail != myHead) && 
-                    //(data.UnixTimeStamp > 0) &&
-                    //(DecodedPackets < MaxSamples-1) && 
-                    (DecodedPackets < MaxSamples) && 
+            while ( (DecodedPackets < MaxSamples) && 
                     (is_reading))
             {
 
@@ -3074,34 +2846,6 @@ namespace WocketConfigurationApp
                 //check that the unix time stam
                 if (data.UnixTimeStamp > 0.0)
                 {
-                    #region commented
-                    //check if the ACC data is valid
-                    //curUnixTime = data.UnixTimeStamp;
-
-                    #region commented
-                    //sampling rate
-                    //if (final_time <= curUnixTime)
-                    //{
-                    //    final_time = curUnixTime + 1000;
-
-                    //    Math.DivRem(sr_counter, Max_SR_Samples-1, out sr_counter);
-                    //    SR[sr_counter] = _sr;
-                    //    sr_counter++;
-                    //    _sr = 0;
-                    //}
-
-
-                    //if (curUnixTime < lastUnixTime)
-                    //{
-                    //    MessageBox.Show("Data overwritten without decoding");
-                    //    break;
-                    //}
-                    #endregion
-
-                    //update data & time stamps 
-                    //lastUnixTime = curUnixTime;
-                    #endregion commented
-
 
                     //add data values to counters
                     accMeans[0] = accMeans[0] + data._X;
@@ -3121,7 +2865,8 @@ namespace WocketConfigurationApp
 
                 }
                 else
-                { }
+                { //make sure that the time stamp is not zero
+                }
 
 
                 //update the tail
@@ -3132,17 +2877,6 @@ namespace WocketConfigurationApp
 
             }//ends while
 
-
-            #region commented
-            #region commented
-            //sampling rate final time
-            //data_elapsed_time = DateTime.Now.Subtract(data_initial_time);
-            //SR = (int)Math.Floor(MaxSamples / data_elapsed_time.TotalSeconds);
-            #endregion 
-
-           // double unix_elapsed_time = cbuffer[DecodedPackets-1,3] - cbuffer[0,3];
-            // SR = (int)Math.Abs(Math.Floor(MaxSamples / unix_elapsed_time));
-            #endregion commented
 
 
             //compute the final mean result
