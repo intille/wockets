@@ -206,11 +206,11 @@ int main()
 			power_adc_enable();
 			_atmega_adc_turn_on();
 #ifdef _VERSION ==3
-			x=_atmega_a2dConvert10bit(ADC2);
+			x=_atmega_a2dConvert10bit(ADC0);
 		
 			y=_atmega_a2dConvert10bit(ADC1);
 
-			z=_atmega_a2dConvert10bit(ADC0);
+			z=_atmega_a2dConvert10bit(ADC2);
 	
 	//if (_wTM!=_TM_Continuous)
 	//		{
@@ -250,7 +250,8 @@ int main()
 			 m_SET_X(data[dataIndex],x,dataSubindex);
 			 m_SET_Y(data[dataIndex],y,dataSubindex);
 			 m_SET_Z(data[dataIndex],z,dataSubindex);
-
+//			m_SET_Y(data[dataIndex],dataIndex,dataSubindex);
+//			m_SET_Z(data[dataIndex],dataSubindex,dataSubindex);
 			 dataSubindex++;
 			 if (dataSubindex>=4)
 			 	dataSubindex=0;
@@ -293,6 +294,7 @@ int main()
 					_send_tm();
 					justconnected=2;
 				}
+				//y=dataIndex; z=dataSubindex;
 				_send_pdu(x,y,z);
 
 				
@@ -339,6 +341,7 @@ int main()
 							m_GET_Z(z,data[i].byte3,data[i].byte4,0);
 							//_transmit_packet(_encode_packet(x,y,z));
 							//_send_uncompressed_pdu(x, y, z);
+							
 							_send_pdu(x,y,z);
 
 							m_GET_X(x,data[i].byte4,data[i].byte5,1);
@@ -346,6 +349,7 @@ int main()
 							m_GET_Z(z,data[i].byte7,data[i].byte8,1);
 							//_transmit_packet(_encode_packet(x,y,z));
 							//_send_uncompressed_pdu(x, y, z);
+							
 							_send_pdu(x,y,z);
 
 							m_GET_X(x,data[i].byte8,data[i].byte9,2);
@@ -353,6 +357,7 @@ int main()
 							m_GET_Z(z,data[i].byte11,data[i].byte12,2);
 							//_transmit_packet(_encode_packet(x,y,z));
 							//_send_uncompressed_pdu(x, y, z);
+							
 							_send_pdu(x,y,z);
 
 							m_GET_X(x,data[i].byte12,data[i].byte13,3);
@@ -360,12 +365,33 @@ int main()
 							m_GET_Z(z,data[i].byte14,data[i].byte15,3);
 							//_transmit_packet(_encode_packet(x,y,z));
 							//_send_uncompressed_pdu(x, y, z);
+							
 							_send_pdu(x,y,z);
 
 							_receive_data();
 							//if (_wTM==_TM_Continuous)
 								//break;
 						}
+
+						
+						//copy end item into start
+						data[0].byte1=data[batch_counter].byte1;
+						data[0].byte2=data[batch_counter].byte2;
+						data[0].byte3=data[batch_counter].byte3;
+						data[0].byte4=data[batch_counter].byte4;
+						data[0].byte5=data[batch_counter].byte5;
+						data[0].byte6=data[batch_counter].byte6;
+						data[0].byte7=data[batch_counter].byte7;
+						data[0].byte8=data[batch_counter].byte8;
+						data[0].byte9=data[batch_counter].byte9;
+						data[0].byte10=data[batch_counter].byte10;
+						data[0].byte11=data[batch_counter].byte11;
+						data[0].byte12=data[batch_counter].byte12;
+						data[0].byte13=data[batch_counter].byte13;
+						data[0].byte14=data[batch_counter].byte14;
+						data[0].byte15=data[batch_counter].byte15;
+
+
 					}else{
 
 						int current=dataIndex+1;
@@ -379,6 +405,7 @@ int main()
 							m_GET_Z(z,data[current].byte3,data[current].byte4,0);
 							//_transmit_packet(_encode_packet(x,y,z));
 							//_send_uncompressed_pdu(x, y, z);
+							
 							_send_pdu(x,y,z);
 
 							m_GET_X(x,data[current].byte4,data[current].byte5,1);
@@ -386,6 +413,7 @@ int main()
 							m_GET_Z(z,data[current].byte7,data[current].byte8,1);
 							//_transmit_packet(_encode_packet(x,y,z));
 							//_send_uncompressed_pdu(x, y, z);
+							
 							_send_pdu(x,y,z);
 
 							m_GET_X(x,data[current].byte8,data[current].byte9,2);
@@ -393,6 +421,7 @@ int main()
 							m_GET_Z(z,data[current].byte11,data[current].byte12,2);
 							//_transmit_packet(_encode_packet(x,y,z));
 							//_send_uncompressed_pdu(x, y, z);
+							
 							_send_pdu(x,y,z);
 
 							m_GET_X(x,data[current].byte12,data[current].byte13,3);
@@ -400,6 +429,7 @@ int main()
 							m_GET_Z(z,data[current].byte14,data[current].byte15,3);
 							//_transmit_packet(_encode_packet(x,y,z));
 							//_send_uncompressed_pdu(x, y, z);
+							
 							_send_pdu(x,y,z);
 
 							current++;
@@ -446,13 +476,8 @@ int main()
 			_atmega_adc_turn_off();
 			power_adc_disable();
 
-			if (dataSubindex==0)
-			{
-				dataIndex++;
-
-
-			}
-
+			if (dataSubindex==0)			
+				dataIndex++;			
 			if (dataIndex==750)
 				dataIndex=0;
 			sampleFlag=0;
