@@ -23,7 +23,6 @@ namespace KernelTest
         Hashtable events = new Hashtable();
         Hashtable threads = new Hashtable();
         Hashtable discovered = new Hashtable();
-        string maclabel = "";
         public Form1()
         {
             InitializeComponent();
@@ -38,6 +37,7 @@ namespace KernelTest
             Core.SubscribeEvent(KernelResponse.DISCONNECTED, EventListener);
             Core.SubscribeEvent(KernelResponse.SENSORS_UPDATED, EventListener);
             Core.SubscribeEvent(KernelResponse.PING_RESPONSE, EventListener);
+            Core.Ping();
         }
 
         delegate void UpdateFormCallback(KernelResponse response);

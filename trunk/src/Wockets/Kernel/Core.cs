@@ -465,8 +465,27 @@ namespace Wockets.Kernel
         /// <returns>True if the kernel successfully terminated, otherwise false</returns>
         public static bool Terminate()
         {
-            storagePath = "";
-            Core.Send(KernelCommand.TERMINATE);
+            storagePath = "";     
+            
+          
+            kernelLock.WaitOne();
+            try
+            {
+                NamedEvents namedEvent = new NamedEvents();
+                RegistryKey rk = Registry.LocalMachine.OpenSubKey(COMMAND_CHANNEL, true);
+                rk.SetValue("Message", KernelCommand.TERMINATE.ToString(), RegistryValueKind.String);
+                rk.SetValue("Param", Core._IcomingChannel.ToString(), RegistryValueKind.String);
+                rk.Flush();
+                rk.Close();
+                namedEvent.Send(Channels.COMMAND.ToString());
+            }
+            catch (Exception e)
+            {
+                Logger.Error("Core.cs:Terminate:" + e.ToString());
+            }
+            kernelLock.Release();
+       
+
             Thread.Sleep(2000);
             //If termination failed try killing the process
             if (Core._KernalStarted)
@@ -486,9 +505,9 @@ namespace Wockets.Kernel
                         }
 
                         // registry is corrupt fix it
-                        RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_WOCKETS_PATH + "\\Kernel");
-                        rk.SetValue("Status", 0, RegistryValueKind.DWord);
-                        rk.Close();      
+                        RegistryKey rk1 = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_WOCKETS_PATH + "\\Kernel");
+                        rk1.SetValue("Status", 0, RegistryValueKind.DWord);
+                        rk1.Close();      
                     }
                 }
                 catch
@@ -499,25 +518,6 @@ namespace Wockets.Kernel
             }
             return true;
         }
-
-
-        /// <summary>
-        /// Sends kernel commands before an application registers (e.g. register) on the shared command channel
-        /// </summary>
-        /// <param name="command"></param>
-        public static void Send(KernelCommand command)
-        {
-            NamedEvents namedEvent = new NamedEvents();
-            kernelLock.WaitOne();
-            RegistryKey rk = Registry.LocalMachine.OpenSubKey(COMMAND_CHANNEL, true);
-            rk.SetValue("Message", command.ToString(), RegistryValueKind.String);
-            rk.SetValue("Param", Core.COMMAND_CHANNEL.ToString(), RegistryValueKind.String);
-            rk.Flush();
-            rk.Close();
-            kernelLock.Release();
-            namedEvent.Send(Channels.COMMAND.ToString());
-        }
-
         
         /// <summary>
         /// Sends a request to the kernel to select a list of wockets
@@ -649,7 +649,10 @@ namespace Wockets.Kernel
             return false;           
         }
 
-
+        /// <summary>
+        /// Sends a request to the kernel to ping it
+        /// </summary>
+        /// <returns>True if the request is sent, otherwise false</returns>
         public static bool Ping()
         {
             NamedEvents namedEvent = new NamedEvents();

@@ -34,6 +34,7 @@
             this.menukernel = new System.Windows.Forms.MenuItem();
             this.menukernelstart = new System.Windows.Forms.MenuItem();
             this.menukernelstop = new System.Windows.Forms.MenuItem();
+            this.menuItem3 = new System.Windows.Forms.MenuItem();
             this.menuApp = new System.Windows.Forms.MenuItem();
             this.menuAppRegister = new System.Windows.Forms.MenuItem();
             this.menuAppUnregister = new System.Windows.Forms.MenuItem();
@@ -45,7 +46,6 @@
             this.label1 = new System.Windows.Forms.Label();
             this.status = new System.Windows.Forms.Label();
             this.listBox1 = new System.Windows.Forms.ListBox();
-            this.menuItem3 = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // mainMenu1
@@ -77,6 +77,11 @@
             this.menukernelstop.Enabled = false;
             this.menukernelstop.Text = "Stop";
             this.menukernelstop.Click += new System.EventHandler(this.menuItem9_Click);
+            // 
+            // menuItem3
+            // 
+            this.menuItem3.Text = "Ping";
+            this.menuItem3.Click += new System.EventHandler(this.menuItem3_Click);
             // 
             // menuApp
             // 
@@ -152,11 +157,6 @@
             this.listBox1.Size = new System.Drawing.Size(234, 173);
             this.listBox1.TabIndex = 4;
             this.listBox1.SelectedIndexChanged += new System.EventHandler(this.listBox1_SelectedIndexChanged);
-            // 
-            // menuItem3
-            // 
-            this.menuItem3.Text = "Ping";
-            this.menuItem3.Click += new System.EventHandler(this.menuItem3_Click);
             // 
             // Form1
             // 

@@ -998,6 +998,7 @@ namespace Wockets.Kernel
                         Send(KernelResponse.STOPPED, param);
                         foreach (string guid in applicationPaths.Values)
                             Send(KernelResponse.STOPPED, guid);
+                        Thread.Sleep(2000);
                         System.Diagnostics.Process.GetCurrentProcess().Close();
                         System.Diagnostics.Process.GetCurrentProcess().Kill();
                     }
