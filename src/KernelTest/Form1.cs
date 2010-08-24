@@ -104,6 +104,7 @@ namespace KernelTest
                             this.menuWocketDisconnect.Enabled = false;
                             this.menuWocketDiscover.Enabled = false;
                             this.menuItem2.Enabled = true;
+                            this.listBox1.Enabled = false;
                             break;
                         case KernelResponse.REGISTERED:
                             this.status.Text = "Kernel ... registered";
