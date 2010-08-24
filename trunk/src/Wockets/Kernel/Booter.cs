@@ -135,6 +135,32 @@ namespace Wockets.Kernel
         /// </summary>
         public static void Boot()
         {
+            int kernelCount = 0;
+            try
+            {
+                ProcessInfo[] processes = ProcessCE.GetProcesses();
+                if (processes != null)
+                {
+                    for (int i = 0; (i < processes.Length); i++)
+                    {
+                        if (processes[i].FullPath.IndexOf("Kernel.exe") >= 0)                        
+                            kernelCount++;
+                                                    
+                    }
+
+                    if (kernelCount > 1)
+                    {
+                        // registry is corrupt fix it
+                        RegistryKey rk1 = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_WOCKETS_PATH + "\\Kernel");
+                        rk1.SetValue("Status", 0, RegistryValueKind.DWord);
+                        rk1.Close();
+                        System.Diagnostics.Process.GetCurrentProcess().Kill();
+                    }
+                }
+            }
+            catch
+            {
+            }
             kernelLock.WaitOne();
             try
             {
