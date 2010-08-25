@@ -47,7 +47,6 @@ namespace WocketConfigurationApp
             this.label_connect_status = new System.Windows.Forms.Label();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.panel1 = new System.Windows.Forms.Panel();
-            this.panelPlotter = new System.Windows.Forms.Panel();
             this.info_cmd_value_distance_test = new System.Windows.Forms.TextBox();
             this.info_cmd_label_distance_test = new System.Windows.Forms.Label();
             this.info_cmd_value_BatteryTest = new System.Windows.Forms.TextBox();
@@ -304,7 +303,6 @@ namespace WocketConfigurationApp
             // panel1
             // 
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.panel1.Controls.Add(this.panelPlotter);
             this.panel1.Controls.Add(this.info_cmd_value_distance_test);
             this.panel1.Controls.Add(this.info_cmd_label_distance_test);
             this.panel1.Controls.Add(this.info_cmd_value_BatteryTest);
@@ -317,16 +315,6 @@ namespace WocketConfigurationApp
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(480, 442);
             this.panel1.TabIndex = 42;
-            // 
-            // panelPlotter
-            // 
-            this.panelPlotter.BackColor = System.Drawing.Color.DimGray;
-            this.panelPlotter.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.panelPlotter.Location = new System.Drawing.Point(25, 164);
-            this.panelPlotter.Name = "panelPlotter";
-            this.panelPlotter.Size = new System.Drawing.Size(439, 259);
-            this.panelPlotter.TabIndex = 78;
-            
             // 
             // info_cmd_value_distance_test
             // 
@@ -406,7 +394,7 @@ namespace WocketConfigurationApp
             this.cal_panel_cal_values_std.Controls.Add(this.label21);
             this.cal_panel_cal_values_std.Controls.Add(this.cal_panel_ystd);
             this.cal_panel_cal_values_std.Controls.Add(this.label24);
-            this.cal_panel_cal_values_std.Location = new System.Drawing.Point(14, 27);
+            this.cal_panel_cal_values_std.Location = new System.Drawing.Point(14, 54);
             this.cal_panel_cal_values_std.Name = "cal_panel_cal_values_std";
             this.cal_panel_cal_values_std.Size = new System.Drawing.Size(384, 25);
             this.cal_panel_cal_values_std.TabIndex = 78;
@@ -575,7 +563,7 @@ namespace WocketConfigurationApp
             this.cal_panel_cal_values_negative.Controls.Add(this.cal_panel_yn1g);
             this.cal_panel_cal_values_negative.Controls.Add(this.label20);
             this.cal_panel_cal_values_negative.Controls.Add(this.label22);
-            this.cal_panel_cal_values_negative.Location = new System.Drawing.Point(14, 53);
+            this.cal_panel_cal_values_negative.Location = new System.Drawing.Point(14, 27);
             this.cal_panel_cal_values_negative.Name = "cal_panel_cal_values_negative";
             this.cal_panel_cal_values_negative.Size = new System.Drawing.Size(384, 25);
             this.cal_panel_cal_values_negative.TabIndex = 49;
@@ -1181,7 +1169,7 @@ namespace WocketConfigurationApp
             // timerPlotter
             // 
             this.timerPlotter.Interval = 50;
-           
+            this.timerPlotter.Tick += new System.EventHandler(this.timerPlotter_Tick);
             // 
             // FormTestWocket
             // 
@@ -1334,6 +1322,5 @@ namespace WocketConfigurationApp
         private System.Windows.Forms.Panel cal_panel_cal_values_std;
         private System.Windows.Forms.Panel cal_panel_cal_values_negative;
         private System.Windows.Forms.Timer timerPlotter;
-        private System.Windows.Forms.Panel panelPlotter;
     }
 }

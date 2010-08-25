@@ -488,20 +488,22 @@ namespace WocketConfigurationApp
                 return;
             }
 
-
-            this.label_status.Text = "Loading Wocket...";
             this.button_test.Enabled = false;
-            Application.DoEvents();
-
-
+            
             DataGridViewRow selected_row = this.dataGridView1.SelectedRows[0];
             int selected_device_index = selected_row.Index;
 
-            WktTestForm = new FormTestWocket((BluetoothDeviceInfo)bluetoothlist[selected_device_index]);
+            this.label_status.Text = "Loading Wocket: " + 
+                                     ((BluetoothDeviceInfo)bluetoothlist[selected_device_index]).DeviceAddress.ToString().Substring(7);
+            
+            Application.DoEvents();
+
+            BluetoothDeviceInfo bt = (BluetoothDeviceInfo)bluetoothlist[selected_device_index];
+            WktTestForm = new FormTestWocket(bt.DeviceAddress.ToString(), bt.DeviceName);
             WktTestForm.Show();
 
 
-            this.label_status.Text = "Wocket Loaded...";
+            this.label_status.Text = "...";
             this.button_test.Enabled = true;
 
 
