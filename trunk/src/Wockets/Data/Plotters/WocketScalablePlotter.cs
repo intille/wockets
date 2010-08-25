@@ -11,15 +11,24 @@ using Wockets.Utils.IPC.MMF;
 
 namespace Wockets.Data.Plotters
 {
+
+       
+
     public enum PlottingMode
     {
         Normal,
         Delayed
     }
 
+
+
     public class WocketsScalablePlotter
     {
 
+
+#region Declare Variables
+
+        //private parameters
         public const int SIGNALS_PER_AXIS = 3;
         private Size plotAreaSize;
         private int[] axisOffset;
@@ -39,6 +48,48 @@ namespace Wockets.Data.Plotters
         int[] pointsToPlot;
         int skippedPoints = 0;
         private PlottingMode mode;
+
+
+        //public parameters
+        private SolidBrush aBrush = new SolidBrush(Color.White);
+        private SolidBrush blueBrush = new SolidBrush(Color.LightBlue);
+        private bool requiresFullRedraw = true;
+
+        private SolidBrush PlotBackgroundBrush = new SolidBrush(Color.White);
+        private double OnScreenDrawPercent = 1.00;
+
+
+#endregion 
+
+        #region Set/Get Plot Settings 
+        
+        
+        public void SetBackgroundBrush(SolidBrush bgcolor)
+        {
+             PlotBackgroundBrush= bgcolor;
+        }
+
+        public SolidBrush GetBackgroundBrush(SolidBrush bgcolor)
+        {
+            return PlotBackgroundBrush;
+        }
+
+
+        public void SetOnScreenDrawPercent(double value)
+        {
+            OnScreenDrawPercent = value;
+        }
+
+        public double GetOnScreenDrawPercent()
+        {
+            return OnScreenDrawPercent;
+        }
+
+
+        #endregion 
+
+
+
 
 #if(PocketPC)
 
@@ -224,8 +275,12 @@ namespace Wockets.Data.Plotters
 
         }
 #else
+
+
+
         public WocketsScalablePlotter(System.Windows.Forms.Panel aPanel, WocketsController wocketsController)
         {
+            
 
             this.wocketsController = wocketsController;
             if (this.wocketsController._Sensors.Count > 3)
@@ -234,7 +289,7 @@ namespace Wockets.Data.Plotters
                 skippedPoints = 2;
             
             this.aPanel = aPanel;
-            this.plotAreaSize = new Size(this.aPanel.Width, ((int)(this.aPanel.Height * 0.60)));
+            this.plotAreaSize = new Size(this.aPanel.Width, ((int)(this.aPanel.Height * OnScreenDrawPercent)));
             graphSize = (int)Math.Floor((plotAreaSize.Height / ((double)this.wocketsController._Sensors.Count)));
   
             scaleFactors = new double[this.wocketsController._Sensors.Count];
@@ -284,6 +339,8 @@ namespace Wockets.Data.Plotters
             p[2] = new Pen(System.Drawing.Color.Blue);
            
         }
+
+
 
         public void Draw(Graphics g)
         {
@@ -344,7 +401,7 @@ namespace Wockets.Data.Plotters
 
                             if (this.currentColumns[i] >= this.plotAreaSize.Width - 1)
                             {
-                                g.FillRectangle(blueBrush, 0, 0, this.plotAreaSize.Width + 10, this.plotAreaSize.Height);
+                                g.FillRectangle(PlotBackgroundBrush, 0, 0, this.plotAreaSize.Width + 10, this.plotAreaSize.Height);
                                 requiresFullRedraw = true;
                                 this.currentColumns[i] = 0;
                             }
@@ -433,11 +490,7 @@ namespace Wockets.Data.Plotters
 
 
 #endif
-        private SolidBrush aBrush = new SolidBrush(Color.White);
-        private SolidBrush blueBrush = new SolidBrush(Color.LightBlue);
-
-        private bool requiresFullRedraw = true;
-
+        
 
         public PlottingMode _Mode
         {
