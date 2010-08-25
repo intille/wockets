@@ -15,6 +15,10 @@ namespace Wockets.Utils.HttpUploader
     /// </summary>
     public class HttpPostDataManager
     {
+
+
+        #region Variables
+
         private static List<PostDataToSend> postQueue = new List<PostDataToSend>();
 
         // retry connection count
@@ -25,6 +29,49 @@ namespace Wockets.Utils.HttpUploader
         private const int postResendRetryTimes = 3;
         private static StreamWriter logWriter;
         private static Thread postMonitorThread;
+
+
+        #endregion 
+
+
+
+      
+
+        static HttpPostDataManager()
+        {
+            //postMonitorThread = new Thread(new ThreadStart(postMonitor));
+            //postMonitorThread.Start();
+        }
+
+
+
+
+        #region add the file to the list
+        /// <summary>
+        /// The HTTP Send function is blocking. 
+        /// </summary>
+        /// <param name="uri">uri for data connection</param>
+        /// <param name="clientNum">client number of the phone</param>
+        /// <param name="msgContent">message content to send</param>
+        public static void SendData(String uri, String subjectId, String project, String dbTable, String unixTime, String logLevel, String logContent)
+        {
+            postQueue.Add(new PostDataToSend(uri, subjectId, project, dbTable, unixTime, logLevel, logContent));
+        }
+
+
+        #endregion 
+
+
+
+        //enable the logger
+        public static void enableLogger(StreamWriter logWriter)
+        {
+            HttpPostDataManager.logWriter = logWriter;
+
+            if (logWriter != null)
+                HttpPostDataManager.enableLogging = true;
+        }
+
 
         /// <summary>
         /// Check if an ip was acquired from DHCP. Won't work with Static ip assignment.
@@ -57,29 +104,6 @@ namespace Wockets.Utils.HttpUploader
             }
         }
 
-
-
-
-        /// <summary>
-        /// The HTTP Send function is blocking. 
-        /// </summary>
-        /// <param name="uri">uri for data connection</param>
-        /// <param name="clientNum">client number of the phone</param>
-        /// <param name="msgContent">message content to send</param>
-        /*
-        public static void SendData(String uri, String clientNum, String msgContent)
-        {
-            MessageToSend newMessage = new MessageToSend(uri, clientNum, msgContent);
-            Thread sendDataThread = new Thread(newMessage.startConnection);
-            sendDataThread.Start();
-        }
-        */
-
-        static HttpPostDataManager()
-        {
-            postMonitorThread = new Thread(new ThreadStart(postMonitor));
-            postMonitorThread.Start();
-        }
 
         // http post data monitor
         public static void postMonitor()
@@ -126,18 +150,21 @@ namespace Wockets.Utils.HttpUploader
             }
         }
 
-        public static void enableLogger(StreamWriter logWriter)
-        {
-            HttpPostDataManager.logWriter = logWriter;
 
-            if (logWriter != null)
-                HttpPostDataManager.enableLogging = true;
-        }
+
+
+        #region POST FILE
 
         private static bool constructPostAndSend(String uri, String subjectId, String project, String dbTable, String unixTime, String logLevel, String logContent)
         {
-            parameterWithSpaces = "project=" + project + "&id=" + subjectId + "&db_table=" + dbTable + "&log_level=" + logLevel + "&log_content=" + logContent + "&unix_time=" + unixTime;
+            string original_parameterWithSpaces = "project=" + project + "&id=" + subjectId + "&db_table=" + dbTable + "&log_level=" + logLevel + "&log_content=" + logContent + "&unix_time=" + unixTime;
+            //parameterWithoutSpaces = parameterWithSpaces.Replace(" ", "%20");
+            
+            //File name and relative path
+            parameterWithoutSpaces = "relative_path=" + logLevel + "&filename=" + logContent;
             parameterWithoutSpaces = parameterWithSpaces.Replace(" ", "%20");
+            
+            //POST
             serverResponse = HttpPost(uri, parameterWithoutSpaces, 600000);// 10 minute time out.
 
             if (serverResponse != null)
@@ -174,16 +201,10 @@ namespace Wockets.Utils.HttpUploader
             return false;
         }
 
-        /// <summary>
-        /// The HTTP Send function is blocking. 
-        /// </summary>
-        /// <param name="uri">uri for data connection</param>
-        /// <param name="clientNum">client number of the phone</param>
-        /// <param name="msgContent">message content to send</param>
-        public static void SendData(String uri, String subjectId, String project, String dbTable, String unixTime, String logLevel, String logContent)
-        {
-            postQueue.Add(new PostDataToSend(uri, subjectId, project, dbTable, unixTime, logLevel, logContent));
-        }
+
+
+
+
 
         // HTTP Post method from http://en.csharp-online.net/HTTP_Post
         // parameters: name1=value1&name2=value2	
@@ -253,16 +274,47 @@ namespace Wockets.Utils.HttpUploader
             return null;
         }
 
-        
+
+        #endregion 
+
+
+
+        #region commented send function because it is blocking
+        /// <summary>
+        /// The HTTP Send function is blocking. 
+        /// </summary>
+        /// <param name="uri">uri for data connection</param>
+        /// <param name="clientNum">client number of the phone</param>
+        /// <param name="msgContent">message content to send</param>
+        /*
+        public static void SendData(String uri, String clientNum, String msgContent)
+        {
+            MessageToSend newMessage = new MessageToSend(uri, clientNum, msgContent);
+            Thread sendDataThread = new Thread(newMessage.startConnection);
+            sendDataThread.Start();
+        }
+        */
+        #endregion 
+
+
+
+
     }
 
 
+
+
+
+       #region internal class PostData to Send
+ 
     internal class PostDataToSend
     {
         internal String uri, subjectId, project, dbTable, unixTime, logLevel, logContent;
         public int failedCount = 0;
+        //internal String file_path, file_name;
 
         public PostDataToSend(String uri, String subjectId, String project, String dbTable, String unixTime, String logLevel, String logContent)
+       // public PostDataToSend(String uri, String fpath, String fname)
         {
             this.uri = uri;
             this.subjectId = subjectId;
@@ -271,11 +323,23 @@ namespace Wockets.Utils.HttpUploader
             this.unixTime = unixTime;
             this.logLevel = logLevel;
             this.logContent = logContent;
-        }
 
+            
+            //this.file_path = fpath;
+            //this.file_name = Path.GetFileName(filePath);
+
+        }
     }
 
+#endregion
 
+
+
+
+
+
+
+       #region commented
 
     /*
     internal class MessageToSend
@@ -393,5 +457,8 @@ namespace Wockets.Utils.HttpUploader
 
     }
      */
+
+    #endregion 
+
 
 }

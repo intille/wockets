@@ -30,17 +30,26 @@
         private void InitializeComponent()
         {
             this.mainMenu1 = new System.Windows.Forms.MainMenu();
+            this.menuItem1 = new System.Windows.Forms.MenuItem();
+            this.menuItem2 = new System.Windows.Forms.MenuItem();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.timer1 = new System.Windows.Forms.Timer();
             this.label1 = new System.Windows.Forms.Label();
-            this.menuItem1 = new System.Windows.Forms.MenuItem();
-            this.menuItem2 = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // mainMenu1
             // 
             this.mainMenu1.MenuItems.Add(this.menuItem1);
             this.mainMenu1.MenuItems.Add(this.menuItem2);
+            // 
+            // menuItem1
+            // 
+            this.menuItem1.Text = "";
+            // 
+            // menuItem2
+            // 
+            this.menuItem2.Text = "Close";
+            this.menuItem2.Click += new System.EventHandler(this.menuItem2_Click);
             // 
             // textBox1
             // 
@@ -53,9 +62,8 @@
             // 
             // timer1
             // 
-            this.timer1.Enabled = true;
             this.timer1.Interval = 5000;
-            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            
             // 
             // label1
             // 
@@ -63,16 +71,6 @@
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(198, 57);
             this.label1.Text = "This propgram is periodically uploading files in the wockets_data folder.";
-            // 
-            // menuItem1
-            // 
-            this.menuItem1.Text = "Reupload Files";
-            this.menuItem1.Click += new System.EventHandler(this.menuItem1_Click);
-            // 
-            // menuItem2
-            // 
-            this.menuItem2.Text = "Start Uploading";
-            this.menuItem2.Click += new System.EventHandler(this.menuItem2_Click);
             // 
             // Form1
             // 
@@ -85,6 +83,7 @@
             this.Menu = this.mainMenu1;
             this.Name = "Form1";
             this.Text = "Form1";
+            this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
 
         }
