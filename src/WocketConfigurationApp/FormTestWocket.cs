@@ -32,9 +32,6 @@ namespace WocketConfigurationApp
 
         #region Declare Variables
 
-        //---- Bluetooth & Wockets ----
-        //BluetoothDeviceInfo wocket;
-        
         private String wocket_address = "";
         private String wocket_name = "";
 
@@ -44,10 +41,13 @@ namespace WocketConfigurationApp
 
         //---- Commands ---------------
         private string current_command = "";
+        private bool IsTestRunning = false;
+        private bool IsTestStepFinished = true;
+
 
         //----- calibration panel variables  ------------
-        private ushort[] xyzP = new ushort[3] { 0, 0, 0 };
-        private ushort[] xyzN = new ushort[3] { 0, 0, 0 };
+        private double[] xyzP = new double[3] { 0.0, 0.0, 0.0 };
+        private double[] xyzN = new double[3] { 0.0, 0.0, 0.0 };
         private double[] xyzSTD = new double[3] { 0.0, 0.0, 0.0 };
 
         public static string NEEDED_FILES_PATH = "C:\\Data\\Project\\Google Code\\GoogleCode version 3\\bin\\NeededFiles\\";
@@ -60,8 +60,7 @@ namespace WocketConfigurationApp
         public static string BATTERY_DIRECTORY = NEEDED_FILES_PATH + "images\\battery\\";
         private Image[] bat_calibrationImages;
        // private int bat_calibration_step = -1;
-        bool is_test_finished = true;
-
+        
         private DateTime StartTime;
         private DateTime CurTime;
         private DateTime TotalTime;
@@ -89,7 +88,9 @@ namespace WocketConfigurationApp
         private TimeSpan ElapsedTime = TimeSpan.Zero;
         private TimeSpan MaxTestTime; 
         private int SR = 0;
-       
+        private long  PackageCount = 0;
+        private double PercentageLoss = 0.0;
+
 
         #endregion
 
@@ -105,27 +106,18 @@ namespace WocketConfigurationApp
             //Copy parameters to loacal variables
             this.wocket_address = address;
 
-            //this.Text = "Wocket (" + wocket.DeviceAddress.ToString() + ")";
             this.Text = "Wocket (" + address + ")";
 
             //Load the parameters saved on the bluetoothinfo device
-            //this.info_cmd_value_name.Text = wocket.DeviceName;
-            //this.info_cmd_value_mac.Text = wocket.DeviceAddress.ToString();
-
             this.info_cmd_value_name.Text = name;
             this.info_cmd_value_mac.Text = address;
 
             this.panel_status_texbox.Text = "";
 
-            //disable battery timer
-            this.test_timer.Enabled = false;
-            this.test_timer.Stop();
-
-            //disable plotter timer
-            timerPlotter.Enabled = false;
+            //disable test running flag
+             IsTestRunning = false;
 
             
-
             //load status panels
             this.panel_status.Visible = true;
 
@@ -147,6 +139,7 @@ namespace WocketConfigurationApp
            //clean calibration values
             clean_calibration_values("calibration", true);
             clean_calibration_values("battery_calibration", true);
+            clean_calibration_values("sampling_rate", true);
 
 
             
@@ -206,9 +199,10 @@ namespace WocketConfigurationApp
             //commands
             LoadWocketsParameters();
 
+            Thread.Sleep(1000);
+
             //Panel for Plotter
-            plotToolStripMenuItem.Checked = false;
-            plotData();
+            startPlottingData();
 
         }
 
@@ -274,7 +268,7 @@ namespace WocketConfigurationApp
             wc._Decoders.Add(new WocketsDecoder());
             wc._Sensors.Add(new Wocket());
 
-            ((RFCOMMReceiver)wc._Receivers[0])._Address = wocket_address; //this.wocket.DeviceAddress.ToString();
+            ((RFCOMMReceiver)wc._Receivers[0])._Address = wocket_address; 
             wc._Receivers[0]._ID = 0;
             wc._Decoders[0]._ID = 0;
             wc._Sensors[0]._Receiver = wc._Receivers[0];
@@ -324,7 +318,7 @@ namespace WocketConfigurationApp
 
 
 
-        #region Timers: Recconect & Battery
+        #region Timer: Recconect & Test
 
         private void timer1_Tick(object sender, EventArgs e)
         {
@@ -341,25 +335,25 @@ namespace WocketConfigurationApp
 
                 //if necessary, update progress bar here
 
-                #endregion 
+                #endregion
             }
             else
             {
                 #region Disconnected & Reconnecting
 
-                    if (CurrentWockets._Controller._Receivers[0]._Status == ReceiverStatus.Disconnected)
-                    {
-                        this.label_connect_status.Text = "Disconnected";
-                    }
-                    else if (CurrentWockets._Controller._Receivers[0]._Status == ReceiverStatus.Reconnecting)
-                    {
-                        this.label_connect_status.Text = "Reconnecting";
-                    }
+                if (CurrentWockets._Controller._Receivers[0]._Status == ReceiverStatus.Disconnected)
+                {
+                    this.label_connect_status.Text = "Disconnected";
+                }
+                else if (CurrentWockets._Controller._Receivers[0]._Status == ReceiverStatus.Reconnecting)
+                {
+                    this.label_connect_status.Text = "Reconnecting";
+                }
 
 
-                    #region Interrupt the test
-                    
-                    /*
+                #region Interrupt the test
+
+                /*
                     if (current_command.CompareTo("battery_calibration") == 0)
                     {   //Interrupt the test
                         bat_calibration_step = 1;
@@ -380,44 +374,45 @@ namespace WocketConfigurationApp
                     cal_panel_button_ok.Enabled = false;
                     */
 
-                    #endregion Interrup the test
+                #endregion Interrup the test
 
                 #endregion
             }
 
 
-            //temporal for testing
-            #region Update the progress indicators
-            
-            if ((current_command.Trim().CompareTo("") != 0) &&
-                 (!is_test_finished))
+
+            if (IsTestRunning)
             {
-                //update battery progress bar
-                int val = 0;
-                Math.DivRem(cal_panel_progressBar.Value + 10, 100, out val);
-                cal_panel_progressBar.Value = val;
 
-                //Update Elapsed time
-                ElapsedTime = ((DateTime)DateTime.Now).Subtract(StartTime);
-                ElapsedTime = ElapsedTime.Subtract(OffTime);
+                // ----  move this part within wocket connected check  ----
+                #region Update the progress bar
 
-                cal_panel_bat_label_elapTime.Text = ElapsedTime.ToString().Split('.')[0];
-            }
-
-            #endregion
-
-        }
-
-        private void test_timer_Tick(object sender, EventArgs e)
-        {
-            
-            //this line is commented temporaly for testing
-            //if (label_connect_status.Text.Contains("Connected:"))
-            //{
-                if ((current_command.CompareTo("batery_calibration") == 0) &&
-                         (!is_test_finished))
+                if ((current_command.Trim().CompareTo("") != 0) &&
+                     (!IsTestStepFinished))
                 {
-                        #region Send battery level command
+                    //update battery progress bar
+                    int val = 0;
+                    Math.DivRem(cal_panel_progressBar.Value + 10, 100, out val);
+                    cal_panel_progressBar.Value = val;
+
+                    //Update Elapsed time
+                    ElapsedTime = ((DateTime)DateTime.Now).Subtract(StartTime);
+                    ElapsedTime = ElapsedTime.Subtract(OffTime);
+
+                    cal_panel_bat_label_elapTime.Text = ElapsedTime.ToString().Split('.')[0];
+                }
+
+                #endregion
+
+
+
+                #region if a test is running,  test status
+
+
+                if ((current_command.CompareTo("batery_calibration") == 0) &&
+                         (!IsTestStepFinished))
+                {
+                    #region Send battery level command
 
                     CurTime = DateTime.Now;
                     TimeSpan TimeDiff = CurTime.Subtract(TotalTime);
@@ -430,24 +425,31 @@ namespace WocketConfigurationApp
                         // send the command
                         GET_BT cmd = new GET_BT();
                         ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
-             
+
                     }
 
                     #endregion
                 }
-               else if ( ( (current_command.CompareTo("calibration") == 0)   ||
+                else if (((current_command.CompareTo("calibration") == 0) ||
                            (current_command.CompareTo("distance_test") == 0) ||
-                           (current_command.CompareTo("sampling_rate") == 0) ) 
-                          && (is_test_finished) && (!is_reading) )
+                           (current_command.CompareTo("sampling_rate") == 0))
+                          && (IsTestStepFinished) && (!is_reading))
                 {
                     StopReading();
                     cal_panel_button_ok.Enabled = true;
                     process_calibration();
                 }
 
-            //}
+
+                #endregion
+
+
+            }
+
+
         }
 
+       
         #endregion
 
 
@@ -508,7 +510,7 @@ namespace WocketConfigurationApp
         { 
 
             if( (current_command.CompareTo("battery_calibration") == 0) 
-                && (!is_test_finished) )
+                && (!IsTestStepFinished) )
             {
                 CurBTLevel = ((BL_RSP)bt_response)._BatteryLevel;
 
@@ -568,7 +570,7 @@ namespace WocketConfigurationApp
                     cal_panel_bat_10.Text = CurBTLevel.ToString();
                
                     //Finish the test
-                    is_test_finished = true;
+                    IsTestStepFinished = true;
                     calibration_step = 3;
                     process_calibration();
 
@@ -582,89 +584,52 @@ namespace WocketConfigurationApp
                 }
 
             }
-            
+
 
         }
 
-        private void process_sr_response()
-        {
-            if ((current_command.CompareTo("sampling_rate") == 0)
-                && (!is_test_finished))
-            {
-                
-                if (log_file != null)
-                {
-                    //Log the data 
-                    DateTime timenow = DateTime.Now;
-                    log_file.WriteLine( timenow.ToShortDateString() + " " + 
-                                        String.Format("{0:HH:mm:ss.fff}", timenow) + "," + 
-                                       "sampling_rate" );
-                }
 
-                //Stop the test reached the maximum elapsed time 
-                TimeSpan diff = ElapsedTime.Subtract(MaxTestTime);
+        #region commented
+        //private void process_sr_response()
+        //{
+        //    if ((current_command.CompareTo("sampling_rate") == 0)
+        //        && (!IsTestStepFinished))
+        //    {
+                
+        //        if (log_file != null)
+        //        {
+        //            //Log the data 
+        //            DateTime timenow = DateTime.Now;
+        //            log_file.WriteLine( timenow.ToShortDateString() + " " + 
+        //                                String.Format("{0:HH:mm:ss.fff}", timenow) + "," + 
+        //                               "sampling_rate" );
+        //        }
+
+        //        //Stop the test reached the maximum elapsed time 
+        //        TimeSpan diff = ElapsedTime.Subtract(MaxTestTime);
                     
 
-                if ( diff.TotalSeconds >= 0.0 )
-                {   
+        //        if ( diff.TotalSeconds >= 0.0 )
+        //        {   
                    
-                    //Finish the test
-                    is_test_finished = true;
-                    calibration_step = 1;
-                    process_calibration();
-                }
-            }
+        //            //Finish the test
+        //            IsTestStepFinished = true;
+        //            calibration_step = 1;
+        //            process_calibration();
+        //        }
+        //    }
 
-        }
-
+        //}
+        #endregion commented
 
 
         #endregion
 
 
 
-
-        #region MenuStrip
-
-        private void commandToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (CurrentWockets._Controller._Sensors[0]._Mode == SensorModes.Data)
-            {
-                /*((RFCOMMReceiver)wc._Receivers[0])._TimeoutEnabled = false;
-                CurrentWockets._Controller._Decoders[0]._Mode = DecoderModes.Command;
-                Command c = new EnterCommandMode();
-                ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(c._Bytes);*/
-            }
-        }
-
-        private void dataToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (CurrentWockets._Controller._Sensors[0]._Mode == SensorModes.Command)
-            {
-                /*CurrentWockets._Controller._Decoders[0]._Mode = DecoderModes.Data;
-                Command c = new ExitCommandMode();
-                ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(c._Bytes);*/
-            }
-
-        }
-
-        #endregion 
-
-
-
-
         #region Plot Raw Signal
-       
-        
-        private void plotToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            plotData();
-        }
 
- 
 
-        #region Plotting Panel
-        
         private WocketsScalablePlotter rawdataPlotter;
         private Bitmap backBuffer = null;
         private Panel wPlottingPanel = null;
@@ -672,48 +637,49 @@ namespace WocketConfigurationApp
 
 
 
-        private void plotData()
+        private void timerPlotter_Tick(object sender, EventArgs e)
+        {
+            GraphAccelerometerValues();
+        }
+       
+
+        private void startPlottingData()
         {
 
-
           if (CurrentWockets._Controller != null)
-            {
-                if (!plotToolStripMenuItem.Checked)
+          {
+
+                if ( rawdataPlotter == null && this.wPlottingPanel == null )
                 {
-                    if ((rawdataPlotter == null) || (!wPlottingPanel.Visible))
-                       {
-                            //Create the panel
-                            this.wPlottingPanel = new Panel();
-                            this.wPlottingPanel.BackColor = Color.White;
-                            this.wPlottingPanel.Size = new Size(440, 260);
-                            this.wPlottingPanel.Location = new Point(20, 165);
-                            this.wPlottingPanel.BorderStyle = BorderStyle.Fixed3D;
-                            this.wPlottingPanel.Visible = true;
-                            this.wPlottingPanel.Paint += new PaintEventHandler(plotterPanel_Paint);
-                            
-                            this.panel1.Controls.Add(wPlottingPanel);
-                            
-                            //Create the plotter
-                            rawdataPlotter = new WocketsScalablePlotter(this.wPlottingPanel, CurrentWockets._Controller);
+                    //Create the panel
+                    this.wPlottingPanel = new Panel();
+                    this.wPlottingPanel.BackColor = Color.White;
+                    this.wPlottingPanel.Size = new Size(440, 260);
+                    this.wPlottingPanel.Location = new Point(20, 165);
+                    this.wPlottingPanel.BorderStyle = BorderStyle.Fixed3D;
+                    this.wPlottingPanel.Visible = true;
+                    this.wPlottingPanel.Paint += new PaintEventHandler(plotterPanel_Paint);
 
-                            //Enable timer
-                            timerPlotter.Enabled = true;
+                    //add panel to the parent container
+                    this.panel1.Controls.Add(wPlottingPanel);
 
-                            if (!wPlottingPanel.Visible)
-                                wPlottingPanel.Visible = true;
-                        }
-                    
+                    //Create the plotter
+                    rawdataPlotter = new WocketsScalablePlotter(this.wPlottingPanel, CurrentWockets._Controller);
 
+                    //Enable timer
+                    timerPlotter.Enabled = true;
+
+                    if (!wPlottingPanel.Visible)
+                        wPlottingPanel.Visible = true;
                 }
                 else
                 {
 
-                    if (rawdataPlotter != null)
+                    if (!wPlottingPanel.Visible)
                     {
-                        wPlottingPanel.Visible = false;
-                        timerPlotter.Enabled = false;
+                        wPlottingPanel.Visible = true;
+                        timerPlotter.Enabled = true;
                     }
-
 
                 }
             }
@@ -721,41 +687,25 @@ namespace WocketConfigurationApp
         }
 
 
-      
+        private void stopPlotData()
+        {
+            
+            if (CurrentWockets._Controller != null)
+            {
+                if (wPlottingPanel.Visible)
+                {
+                    wPlottingPanel.Visible = false;
+                    timerPlotter.Enabled = false;
+                }
+            }
+        }
 
 
-       private void timerPlotter_Tick(object sender, EventArgs e)
-       {
-           GraphAccelerometerValues(); 
-       }
-       
-
-
-       
-       /// <param name="pevent"></param>
-       //protected override void OnPaintBackground(PaintEventArgs pevent)
-       //{
-       //}
-
-       void plotterPanel_Paint(object sender, System.Windows.Forms.PaintEventArgs e)
+       private void plotterPanel_Paint(object sender, System.Windows.Forms.PaintEventArgs e)
        {
            if ((this.wPlottingPanel.Visible) && (backBuffer != null))
                e.Graphics.DrawImage(backBuffer, 0, 0);
        }
-
-
-       #region commented
-       //void panelPlotter_resize(object sender, system.eventargs e)
-       //{
-       //    this.timerPlotter.Enabled = false;
-       //    this.panelPlotter.Width = this.width;
-       //    this.panelPlotter.Height = this.height;
-       //    aplotter = new wocketsscalableplotter(this.panelPlotter, CurrentWockets._Controller);
-       //    isresized = true;
-       //    this.timerPlotter.Enabled = true;
-       //}
-       #endregion commented
-
 
        private void GraphAccelerometerValues()
        {
@@ -772,15 +722,29 @@ namespace WocketConfigurationApp
 
        }
 
-        
-        #endregion 
+
+       #region commented
 
 
+       /// <param name="pevent"></param>
+       //protected override void OnPaintBackground(PaintEventArgs pevent)
+       //{
+       //}
+
+
+       //void panelPlotter_resize(object sender, system.eventargs e)
+       //{
+       //    this.timerPlotter.Enabled = false;
+       //    this.panelPlotter.Width = this.width;
+       //    this.panelPlotter.Height = this.height;
+       //    aplotter = new wocketsscalableplotter(this.panelPlotter, CurrentWockets._Controller);
+       //    isresized = true;
+       //    this.timerPlotter.Enabled = true;
+       //}
+       #endregion commented 
 
 
         #endregion
-
-
 
 
 
@@ -957,8 +921,6 @@ namespace WocketConfigurationApp
 
 
 
-
-
         #region Key EVENTS
 
         private void info_cmd_value_calibration_KeyDown(object sender, KeyEventArgs e)
@@ -1007,8 +969,6 @@ namespace WocketConfigurationApp
            }
        }
     
-
-
        private void Load_button_Click(object sender, EventArgs e)
        {
            button_load.Enabled = false;
@@ -1055,8 +1015,6 @@ namespace WocketConfigurationApp
        }
 
 
-
-
        private void button_start_test_Click(object sender, EventArgs e)
        {
 
@@ -1073,8 +1031,10 @@ namespace WocketConfigurationApp
 
 
                    #region Calibration
-                   MaxSamples = 1000;
+                   MaxSamples = 500;
                    sampling_data_sleep_time_ms = 500;
+                   is_sampling_rate_enabled = false;
+
 
                    //setup the calibration panel parameters
                    cal_panel_title.Text = info_cmd_label_WKTCalibration.Text;
@@ -1086,13 +1046,24 @@ namespace WocketConfigurationApp
                    
                    cal_panel_button_ok.Text = "Start";
 
+                   //battery calibration panel
                    cal_panel_values_BTpercent.Visible = false;
+
+                   //elapsed test time panel
+                   panel_time_updates.Visible = false;
 
                    //calibration panel
                    cal_panel_cal_values.Visible = false;
                    cal_panel_cal_values_positive.Visible = true;
+
                    cal_panel_cal_values_negative.Visible = true;
+                   cal_panel_cal_values_negative.Location = new Point(14, 27);
+
                    cal_panel_cal_values_std.Visible = true;
+                   cal_panel_cal_values_std.Location = new Point(14, 54);
+
+                  cal_panel_sr_values.Visible = false;
+                  cal_panel_sr_values.SendToBack();
 
 
                    //progress bar
@@ -1104,7 +1075,7 @@ namespace WocketConfigurationApp
                    button_finish.Enabled = false;
 
                  
-                   //calibration panel
+                   //overall calibration panel
                    panel_calibration.Visible = true;
                    
                    //picture box
@@ -1123,7 +1094,7 @@ namespace WocketConfigurationApp
 
 
                    //clean panel parameters
-                   panel_status_texbox.Text = "";
+                   //panel_status_texbox.Text = "";
                    panel_status.Visible = false;
                    cal_panel_bat_label_elapTime.Text = "";
                    cal_panel_bat_label_startTime.Text = "";
@@ -1132,8 +1103,7 @@ namespace WocketConfigurationApp
                    calibration_step = 0;
                    cal_panel_button_ok.Enabled = true;
                    info_cmd_value_WKTCalibration.Text = "Calibrating ...";
-                   clean_calibration_values("calibration",true);
-                  
+                   clean_calibration_values("calibration",false);
 
                    #endregion Calibration
 
@@ -1145,8 +1115,10 @@ namespace WocketConfigurationApp
 
                    #region Distance Test
 
-                   MaxSamples = 1000;
+                   MaxSamples = 500;
                    sampling_data_sleep_time_ms = 500;
+                   is_sampling_rate_enabled = true;
+
 
                    //setup the calibration panel parameters
                    cal_panel_title.Text = info_cmd_label_distance_test.Text;
@@ -1161,7 +1133,6 @@ namespace WocketConfigurationApp
 
                    //Sampling Rate Log File
                    log_filename = OUTPUT_DIRECTORY +
-                                  //wocket.DeviceAddress.ToString().Substring(7) + "_" +
                                   wocket_address.Substring(7) + "_" +
                                   "DT_Log.txt";
                    log_file = new StreamWriter(log_filename);
@@ -1179,7 +1150,7 @@ namespace WocketConfigurationApp
 
 
                    //clean panel parameters
-                   panel_status_texbox.Text = "";
+                   //panel_status_texbox.Text = "";
                    panel_status.Visible = false;
                    cal_panel_bat_label_elapTime.Text = "";
                    cal_panel_bat_label_startTime.Text = "";
@@ -1187,11 +1158,21 @@ namespace WocketConfigurationApp
                    //Hide battery Panel
                    cal_panel_values_BTpercent.Visible = false;
 
+                   //elapsed test time panel
+                   panel_time_updates.Visible = false;
+
+
                    //set calibration panel
                    cal_panel_cal_values.Visible = false;
                    cal_panel_cal_values_positive.Visible = true;
+
                    cal_panel_cal_values_negative.Visible = false;
+
                    cal_panel_cal_values_std.Visible = true;
+                   cal_panel_cal_values_std.Location = new Point(14, 27);
+
+                   cal_panel_sr_values.Visible = true;
+                   cal_panel_sr_values.Location = new Point(14, 54);
 
 
                    //Hide select folder fields
@@ -1212,17 +1193,22 @@ namespace WocketConfigurationApp
                    calibration_step = 0;
                    cal_panel_button_ok.Enabled = true;
                    info_cmd_value_distance_test.Text = "Testing...";
-                   clean_calibration_values("calibration", true);
+
+                   //clean fields
+                   clean_calibration_values("distance_test", false);
+                   
 
                    #endregion Distance Test
 
                }
                else if (current_command.CompareTo("sampling_rate") == 0)
                {
+
                    #region Sampling Rate Test
                    //Compute the number of samples that we need to capture
-                    MaxSamples = 5 * 60 * 40;
+                    MaxSamples = 2 * 60 * 40;
                     sampling_data_sleep_time_ms = 500;
+                    is_sampling_rate_enabled = true;
 
                    //setup the calibration panel parameters
                    cal_panel_title.Text = info_cmd_label_SamplingRate.Text;
@@ -1235,7 +1221,6 @@ namespace WocketConfigurationApp
 
                    //Sampling Rate Log Filei
                    log_filename = OUTPUT_DIRECTORY +
-                                 // wocket.DeviceAddress.ToString().Substring(7) + "_" +
                                  wocket_address.Substring(7) + "_" +
                                   "SR_Log.txt";
                    log_file = new StreamWriter(log_filename);
@@ -1250,7 +1235,7 @@ namespace WocketConfigurationApp
                    pictureBox_calibration.Visible = true;
 
                    //clean panel parameters
-                   panel_status_texbox.Text = "";
+                   //panel_status_texbox.Text = "";
                    panel_status.Visible = false;
                    cal_panel_bat_label_elapTime.Text = "";
                    cal_panel_bat_label_startTime.Text = "";
@@ -1262,8 +1247,14 @@ namespace WocketConfigurationApp
                    //set calibration panel
                    cal_panel_cal_values.Visible = false;
                    cal_panel_cal_values_positive.Visible = true;
+
                    cal_panel_cal_values_negative.Visible = false;
+                   
                    cal_panel_cal_values_std.Visible = true;
+                   cal_panel_cal_values_std.Location = new Point(14, 27);
+
+                   cal_panel_sr_values.Visible = true;
+                   cal_panel_sr_values.Location = new Point(14, 54);
 
                    //Hide select folder fields
                    //cal_panel_cmd_label.Text = "Path";
@@ -1289,7 +1280,7 @@ namespace WocketConfigurationApp
                    calibration_step = 0;
                    cal_panel_button_ok.Enabled = true;
                    info_cmd_value_SamplingRate.Text = "Testing Sampling Rate...";
-                   clean_calibration_values("calibration", true);
+                   clean_calibration_values("sampling_rate", false);
 
 
                    #endregion Sampling Rate Test
@@ -1303,7 +1294,9 @@ namespace WocketConfigurationApp
                    
                    #region Battery Calibration
 
-                   MaxSamples = 1000;
+                   MaxSamples = 500;
+                   is_sampling_rate_enabled = false;
+
 
                    //setup the calibration panel parameters
                    cal_panel_title.Text = info_cmd_label_BatteryTest.Text;
@@ -1316,7 +1309,6 @@ namespace WocketConfigurationApp
 
                    //Battery Log File
                    log_filename = OUTPUT_DIRECTORY +
-                                  //wocket.DeviceAddress.ToString().Substring(7) + "_" +
                                   wocket_address.Substring(7) + "_" +
                                   "BAT_Log.txt";  
                    log_file = new StreamWriter(log_filename);
@@ -1328,7 +1320,7 @@ namespace WocketConfigurationApp
                    
 
                    //clean panel parameters
-                   panel_status_texbox.Text = "";
+                   //panel_status_texbox.Text = "";
                    panel_status.Visible = false;
                    cal_panel_bat_label_elapTime.Text = "";
                    cal_panel_bat_label_startTime.Text = "";
@@ -1358,8 +1350,9 @@ namespace WocketConfigurationApp
                    calibration_step = 0;
                    cal_panel_button_ok.Enabled = true;
                    info_cmd_value_BatteryTest.Text = "Calibrating Battery";
-                   clean_calibration_values("battery_calibration", true);
                    pictureBox_calibration.Image = null;
+
+                   clean_calibration_values("battery_calibration", false);
 
                    #endregion BAT Calibration
                }
@@ -1408,9 +1401,6 @@ namespace WocketConfigurationApp
   
 
        #endregion
-
-
-
 
 
 
@@ -1571,7 +1561,11 @@ namespace WocketConfigurationApp
             
             //values for panel
             cal_panel_cal_values.Visible = true;
-           
+
+            //elapsed test time panel
+            if ( !panel_time_updates.Visible ) 
+                panel_time_updates.Visible = true;
+
 
             //progress bar
             cal_panel_progressBar.Value = 0;
@@ -1582,7 +1576,7 @@ namespace WocketConfigurationApp
 
 
             // start calibration & initialize time counters
-            is_test_finished = false;
+            IsTestStepFinished = false;
             OffTime = TimeSpan.Zero;
             StartTime = DateTime.Now;
             cal_panel_bat_label_startTime.Text = String.Format("{0:HH:mm:ss}", StartTime);
@@ -1591,12 +1585,10 @@ namespace WocketConfigurationApp
             //Flag that determines if the axis standard deviations need to be computed
             if (compute_std)
                 CALIBRATE_STD = true;
-              
+            clean_calibration_values("only_std", false);
 
-            //Enable timer
-            test_timer.Enabled = true;
-            test_timer.Start();
-
+            //Start Test
+            IsTestRunning = true;
 
             //Start the reading thread for calibration
             StartReading();
@@ -1611,13 +1603,11 @@ namespace WocketConfigurationApp
 
                    
             //--- stop test  ----
-            is_test_finished = true;
+            IsTestStepFinished = true;
 
 
-            //-- disable timer  ---
-            test_timer.Stop();
-            test_timer.Enabled = false;
-
+            //-- stop test ----
+            IsTestRunning = false;
 
             //--- Get the computed variables  ----
             if (compute_calibration_stats(axis_name, out calibration_result) == 0)
@@ -1635,13 +1625,13 @@ namespace WocketConfigurationApp
 
                
                 //setup the ui for the next test
+                // if it is not necessary to indicate the wockets position anymore, save the cal values
                 if (!skip_position_step)
                 {
                     cal_panel_button_ok.Enabled = true;
-                    cal_panel_button_ok.Text = "Continue";
-                    //cal_panel_label_status.Text = "The " + axis_name + " axis calibration has finished.\r\n";
+                    cal_panel_button_ok.Text = "Save";
                     cal_panel_label_status.Text = "The calibration process has finished.\r\n" +
-                                                  "Click CONTINUE to save the data.";
+                                                  "Click SAVE to save the data and exit the test.";
 
 
                     //update progres bar 
@@ -1714,7 +1704,10 @@ namespace WocketConfigurationApp
 
             //values for panel calibration
             cal_panel_cal_values.Visible = true;
-            
+
+            //elapsed test time panel
+            if (!panel_time_updates.Visible)
+                panel_time_updates.Visible = true;
             
             //progress bar
             cal_panel_progressBar.Value = 0;
@@ -1722,7 +1715,7 @@ namespace WocketConfigurationApp
 
             
             // start calibration & initialize time counters
-            is_test_finished = false;
+            IsTestStepFinished = false;
             OffTime = TimeSpan.Zero;
             StartTime = DateTime.Now;
             cal_panel_bat_label_startTime.Text = String.Format("{0:HH:mm:ss}", StartTime);
@@ -1732,10 +1725,10 @@ namespace WocketConfigurationApp
             CALIBRATE_STD = true;
 
 
-            //Enable timer
-            test_timer.Enabled = true;
-            test_timer.Start();
-
+            //Enable test
+            //test_timer.Enabled = true;
+            //test_timer.Start();
+            IsTestRunning = true;
 
             //Start the reading thread for calibration
             StartReading();
@@ -1748,13 +1741,11 @@ namespace WocketConfigurationApp
             string calibration_result = "";
 
             //--- stop test  ----
-            is_test_finished = true;
+            IsTestStepFinished = true;
 
 
-            //-- disable timer  ---
-            test_timer.Stop();
-            test_timer.Enabled = false;
-
+            //-- disable test  ---
+            IsTestRunning = false;
 
             //--- Get the computed variables  ----
             if (compute_calibration_stats("all", out calibration_result) == 0)
@@ -1780,6 +1771,11 @@ namespace WocketConfigurationApp
                                         String.Format("{0:0.00}", xyzSTD[0]) + "," +
                                         String.Format("{0:0.00}", xyzSTD[1]) + "," +
                                         String.Format("{0:0.00}", xyzSTD[2]) ;
+                }
+
+                if (is_sampling_rate_enabled)
+                {
+                    cal_panel_sr.Text = samplingRate.ToString();
                 }
 
 
@@ -1809,9 +1805,9 @@ namespace WocketConfigurationApp
                 }
                 else
                 {
-                    cal_panel_button_ok.Text = "Save";
+                    cal_panel_button_ok.Text = "Finish";
                     cal_panel_label_status.Text = cal_panel_label_status.Text +
-                                                 "Click SAVE to save the data.";
+                                                 "Click FINISH to save the data.";
                 }
 
                 //update progres bar 
@@ -1844,11 +1840,10 @@ namespace WocketConfigurationApp
 
         
         //---- Sampling Rate Test -----
-        private void start_SamplingRate_test(int test_time_in_minutes)
+        private void start_SamplingRate_test()
         {
             
             cal_panel_button_ok.Enabled = false;
-            //cal_panel_button_ok.Text = "PAUSE";
             cal_panel_label_status.Text = "Running Sampling Rate Test...\r\n" +
                                           "Keep the wocket in the SAME POSITION.\r\n" +
                                           "Click CANCEL if you want to exit.";
@@ -1859,32 +1854,35 @@ namespace WocketConfigurationApp
             cal_panel_cal_values_negative.Visible = false;
             cal_panel_cal_values_std.Visible = true;
 
+            cal_panel_sr_values.Visible = true;
+            samplingRate = 0;
+            cal_panel_sr.Text = "";
+
+
+            //elapsed test time panel
+            if (!panel_time_updates.Visible)
+                panel_time_updates.Visible = true;
+
+
             //progress bar
             cal_panel_progressBar.Value = 0;
             cal_panel_progressBar.Visible = true;
 
 
             //Start calibration & initialize time counters
-            is_test_finished = false;
+            IsTestStepFinished = false;
 
             OffTime = TimeSpan.Zero;
             StartTime = DateTime.Now;
             cal_panel_bat_label_startTime.Text = String.Format("{0:HH:mm:ss}", StartTime);
 
-            //Test Time (in minutes)
-            MaxTestTime = new TimeSpan(0, test_time_in_minutes, 0);  
-
-
-            
 
             //Flag that determines if the axis standard deviations need to be computed
             CALIBRATE_STD = true;
 
 
-            //Enable timer
-            test_timer.Enabled = true;
-            test_timer.Start();
-
+            //Enable test
+            IsTestRunning = true;
 
             //Start the reading thread for calibration
             StartReading();
@@ -1897,12 +1895,10 @@ namespace WocketConfigurationApp
             string test_result = "";
 
             //--- stop test  ----
-            is_test_finished = true;
+            IsTestStepFinished = true;
 
-            //-- disable timer  ---
-            test_timer.Stop();
-            test_timer.Enabled = false;
-
+            //-- disable test ---
+            IsTestRunning = false;
 
             //--- Get the computed variables  ----
             if (compute_calibration_stats("all", out test_result) == 0)
@@ -1935,9 +1931,10 @@ namespace WocketConfigurationApp
                 //save to log file
                 if (log_file != null)
                 {
-                    log_file.WriteLine( "sampling_rate" + "," +
-                                        StartTime.ToString() + "," +
+                    log_file.WriteLine( "sampling_rate"        + "," + 
+                                        StartTime.ToString()   + "," +
                                         ElapsedTime.ToString() + "," +
+                                        "sr," + samplingRate.ToString()+ "," +
                                         test_result);
                 }
 
@@ -1947,8 +1944,10 @@ namespace WocketConfigurationApp
                 cal_panel_label_status.Text = "";
 
                 cal_panel_button_ok.Text = "Save";
-                cal_panel_label_status.Text = "Click SAVE to write the data.";
-                
+                cal_panel_label_status.Text = "Click SAVE to save the data and exit the test.";
+
+                SR = (int)samplingRate;
+                cal_panel_sr.Text = samplingRate.ToString();
 
                 //update progres bar 
                 cal_panel_progressBar.Value = 100;
@@ -1975,7 +1974,6 @@ namespace WocketConfigurationApp
             return test_result;
 
         }
-
 
 
         #endregion
@@ -2020,7 +2018,8 @@ namespace WocketConfigurationApp
 
             if (step_number == 0)
             {
-
+                
+                clean_calibration_values("calibration", true);
                 start_axis_calibration("X +G", true);
 
             }
@@ -2101,44 +2100,48 @@ namespace WocketConfigurationApp
                 cal_panel_z1g.Text = stop_axis_calibration("Z +G", false, "", 0);
 
             }
+
+            #region commented
+            //else if (step_number == 17)
+            //{
+
+            //    #region Show Save File Button
+
+            //    //cal_panel_button_ok.Enabled = true;
+            //    cal_panel_button_ok.Text = "SAVE";
+
+
+            //    #region Browse for a specific file (commented)
+            //    //cal_panel_label_status.Text = "Click the Browse button to select the file output folder.\r\n" +
+            //    //                              "Otherwise, the SensorData file will be saved on the desktop.";
+
+            //    ////show select folder button
+            //    //cal_panel_entry_path.Enabled = true;
+            //    //cal_panel_entry_path.Visible = true;
+
+            //    //cal_panel_cmd_label.Visible = true;
+
+            //    //cal_panel_button_browse.Enabled = true;
+            //    //cal_panel_button_browse.Visible = true;
+            //    #endregion
+
+
+            //    //progress bar
+            //    cal_panel_progressBar.Visible = false;
+            //    cal_panel_progressBar.Value = 0;
+
+            //    //picture box
+            //    //pictureBox_calibration.Visible = false;
+
+            //    #endregion
+
+            //    //step_number = 18;
+            //    calibration_step = 18;
+
+            //}
+            #endregion 
+
             else if (step_number == 17)
-            {
-
-                #region Show Save File Button
-
-                //cal_panel_button_ok.Enabled = true;
-                cal_panel_button_ok.Text = "SAVE";
-
-
-                #region Browse for a specific file (commented)
-                //cal_panel_label_status.Text = "Click the Browse button to select the file output folder.\r\n" +
-                //                              "Otherwise, the SensorData file will be saved on the desktop.";
-
-                ////show select folder button
-                //cal_panel_entry_path.Enabled = true;
-                //cal_panel_entry_path.Visible = true;
-
-                //cal_panel_cmd_label.Visible = true;
-
-                //cal_panel_button_browse.Enabled = true;
-                //cal_panel_button_browse.Visible = true;
-                #endregion
-
-
-                //progress bar
-                cal_panel_progressBar.Visible = false;
-                cal_panel_progressBar.Value = 0;
-
-                //picture box
-                pictureBox_calibration.Visible = false;
-
-                #endregion
-
-                //step_number = 18;
-                calibration_step = 18;
-
-            }
-            else if (step_number == 18)
             {
 
                 #region SAVE values
@@ -2151,15 +2154,15 @@ namespace WocketConfigurationApp
                                String.Format("{0:HH:mm:ss}", timenow);
 
                 //Save values to the test results string
-                TestResults[0] = stime + ",calibration,x+," + xyzP[0].ToString();
-                TestResults[1] = stime + ",calibration,x-," + xyzN[0].ToString();
-                TestResults[2] = stime + ",calibration,xstd," + xyzSTD[0].ToString();
-                TestResults[3] = stime + ",calibration,y+," + xyzP[1].ToString();
-                TestResults[4] = stime + ",calibration,y-," + xyzN[1].ToString();
-                TestResults[5] = stime + ",calibration,ystd," + xyzSTD[1].ToString();
-                TestResults[6] = stime + ",calibration,z+," + xyzP[2].ToString();
-                TestResults[7] = stime + ",calibration,z-," + xyzN[2].ToString();
-                TestResults[8] = stime + ",calibration,zstd," + xyzSTD[2].ToString();
+                TestResults[0] = stime + ",calibration,x+," + String.Format("{0:0.00}", xyzP[0]); ;
+                TestResults[1] = stime + ",calibration,x-," + String.Format("{0:0.00}", xyzN[0]);
+                TestResults[2] = stime + ",calibration,xstd," + String.Format("{0:0.00}", xyzSTD[0]);
+                TestResults[3] = stime + ",calibration,y+," + String.Format("{0:0.00}", xyzP[1]);
+                TestResults[4] = stime + ",calibration,y-," + String.Format("{0:0.00}", xyzN[1]);
+                TestResults[5] = stime + ",calibration,ystd," + String.Format("{0:0.00}", xyzSTD[1]);
+                TestResults[6] = stime + ",calibration,z+," + String.Format("{0:0.00}", xyzP[2] );
+                TestResults[7] = stime + ",calibration,z-," + String.Format("{0:0.00}", xyzN[2] );
+                TestResults[8] = stime + ",calibration,zstd," + String.Format("{0:0.00}", xyzSTD[2]);
 
 
                 //---- Finish the calibration process ------
@@ -2196,6 +2199,8 @@ namespace WocketConfigurationApp
 
             if (step_number == 0)
             {
+                clean_calibration_values("distance_test", true);
+
                 cal_panel_button_ok.Enabled = true;
                 cal_panel_button_ok.Text = "START";
                 cal_panel_label_status.Text = "Place the wocket " + "1 METER" + " away from computer.\r\n" +
@@ -2255,8 +2260,8 @@ namespace WocketConfigurationApp
             //Initialize Sampling Rate test
             if (step_number == 0)
             {
-
-                start_SamplingRate_test(5);
+                clean_calibration_values("sampling_rate", true);
+                start_SamplingRate_test();
 
             } //Pause/Stop test
             else if (step_number == 1)
@@ -2282,6 +2287,14 @@ namespace WocketConfigurationApp
             //Initialize Battery Calibration test
             if (step_number == 0)
             {
+
+                clean_calibration_values("battery_calibration", true);
+                
+                //elapsed test time panel
+                if (!panel_time_updates.Visible)
+                    panel_time_updates.Visible = true;
+
+
                 #region Start Calibration
 
                 cal_panel_button_ok.Enabled = false;
@@ -2292,14 +2305,14 @@ namespace WocketConfigurationApp
                 Application.DoEvents();
 
                 // start battery calibration & initialize time counters
-                is_test_finished = false;
+                IsTestStepFinished = false;
                 OffTime = TimeSpan.Zero;
                 StartTime = DateTime.Now;
                 cal_panel_bat_label_startTime.Text = String.Format("{0:HH:mm:ss}", StartTime);
 
-                //Enable Timer
-                test_timer.Enabled = true;
-                test_timer.Start();
+                //Enable Test
+                IsTestRunning = true;
+
 
                 //Pass to the next step
                 //step_number = 1;
@@ -2322,7 +2335,7 @@ namespace WocketConfigurationApp
                 Application.DoEvents();
 
                 //stop battery calibration
-                is_test_finished = true;
+                IsTestStepFinished = true;
                 StopOffTime = DateTime.Now;
 
                 //Restart the CAL test
@@ -2345,7 +2358,7 @@ namespace WocketConfigurationApp
                 Application.DoEvents();
 
                 // start battery calibration
-                is_test_finished = false;
+                IsTestStepFinished = false;
                 //OffTime = TimeSpan.Zero;
                 //StartTime = DateTime.Now;
                 //cal_panel_bat_label_startTime.Text = String.Format("{0:HH:mm:ss}", StartTime);
@@ -2373,7 +2386,7 @@ namespace WocketConfigurationApp
                 Application.DoEvents();
 
                 //stop battery calibration
-                is_test_finished = true;
+                IsTestStepFinished = true;
 
                 //Pass to the next step
                 //step_number = 4;
@@ -2390,7 +2403,7 @@ namespace WocketConfigurationApp
                 #region Save Battery Calibration Values
 
                 //stop battery calibration
-                is_test_finished = true;
+                IsTestStepFinished = true;
                 DateTime timenow = DateTime.Now;
 
 
@@ -2443,9 +2456,9 @@ namespace WocketConfigurationApp
         {
             
             //Disable timer
-            test_timer.Enabled = false;
-            test_timer.Stop();
-                
+            IsTestRunning = false;  
+  
+
             StartBTLevel = 0;
             OffTime = TimeSpan.Zero;
 
@@ -2463,14 +2476,12 @@ namespace WocketConfigurationApp
             
 
             //Restore status panel
-           panel_status.Visible = true;
+            panel_status.Visible = true;
 
             //clean calibration panel
             cal_panel_title.Text = "";
             cal_panel_cmd_label.Text = "";
             cal_panel_entry_path.Text = "";
-
-            clean_calibration_values("",false);
 
             cal_panel_values_BTpercent.Visible = false;
             cal_panel_cal_values.Visible = false;
@@ -2484,12 +2495,9 @@ namespace WocketConfigurationApp
             button_to_xml.Enabled = true;
 
             //reset variables
-            is_test_finished = true;
-
-            //Close Data Plotter
-            plotToolStripMenuItem.Checked = true;
-            plotData();
-
+            IsTestStepFinished = true;
+            calibration_step = -1;
+            
             Application.DoEvents();
 
             //Stop Reading The Thread
@@ -2540,6 +2548,8 @@ namespace WocketConfigurationApp
     private int DecodedPackets = 0;
     private bool is_reading = false;
     private int sampling_data_sleep_time_ms = 500;
+
+    private bool is_sampling_rate_enabled = true;
 
     //private double[,] cbuffer;
     private bool CALIBRATE_STD = false;
@@ -2594,10 +2604,6 @@ namespace WocketConfigurationApp
 
 
 
-        // Initialize the buffer 
-        // where the decoded data will be temp. storaged
-        //clean_data_buffer(out cbuffer);
-
         // Initialize counter
         DecodedPackets = 0;
 
@@ -2611,7 +2617,7 @@ namespace WocketConfigurationApp
 
         try
         {
-            if (calibration_step == 0)
+            if (is_sampling_rate_enabled ) //calibration step == 0
             {
                 calTime = DateTime.Now;
                 samplingRate = wc._Decoders[0].TotalSamples;
@@ -2697,7 +2703,7 @@ namespace WocketConfigurationApp
             //Finish Test & Update Delegate
             calibration_step = calibration_step + 1;
 
-            if (calibration_step == 16)
+            if (is_sampling_rate_enabled) //calibration_step == 16
                 samplingRate = (long)Math.Round(((wc._Decoders[0].TotalSamples - samplingRate) / ((TimeSpan)DateTime.Now.Subtract(calTime)).TotalSeconds));
 
 
@@ -2713,12 +2719,14 @@ namespace WocketConfigurationApp
 
        //Indicate that the reading loop ended
         is_reading = false;
-        is_test_finished = true;
+        IsTestStepFinished = true;
         
 
     }//function ends
 
     
+
+
     private int compute_calibration_stats(string axis_id, out string st_result)
     {
         int success = -1;
@@ -2736,7 +2744,7 @@ namespace WocketConfigurationApp
             switch (axis_id)
             {
                 case "X +G":
-                    xyzP[0] = Convert.ToUInt16(RMEANS[0]);
+                    xyzP[0] = RMEANS[0];
                     st_result = String.Format("{0:0.00} ", xyzP[0]);
                     break;
                 case "X -G":
@@ -2788,54 +2796,12 @@ namespace WocketConfigurationApp
 
     }
 
-    //private void clean_data_buffer(out double[,] cbuffer)
-    //{
-    //    if (cbuffer.Length > 0 )
-    //    {
-    //        for (int i=0; i < MaxSamples; i++)
-    //        {    for (int j = 0; j < 4; j++)
-    //                cbuffer[i, j] = 0.0;
-    //        }
-    //    }
-    //}
-
+  
 
     private void clean_calibration_values(string cmd_name, bool clean_array)
     {
 
-        if (cmd_name.CompareTo("calibration") == 0)
-        {
-            //update the calibration fields
-            cal_panel_x1g.Text = "";
-            cal_panel_xn1g.Text = "";
-            cal_panel_xstd.Text = "";
-
-            cal_panel_y1g.Text = "";
-            cal_panel_yn1g.Text = "";
-            cal_panel_ystd.Text = "";
-
-            cal_panel_z1g.Text = "";
-            cal_panel_zn1g.Text = "";
-            cal_panel_zstd.Text = "";
-
-            //clean cal values arrays 
-            if (clean_array)
-            {
-                xyzP[0] = 0;
-                xyzP[1] = 0;
-                xyzP[2] = 0;
-
-                xyzN[0] = 0;
-                xyzN[1] = 0;
-                xyzN[2] = 0;
-
-                xyzSTD[0] = 0.0;
-                xyzSTD[1] = 0.0;
-                xyzSTD[2] = 0.0;
-            }
-
-        }
-        else if (cmd_name.CompareTo("battery_calibration") == 0)
+        if (cmd_name.CompareTo("battery_calibration") == 0)
         {
             // clean bat cal values on panel
             cal_panel_bat_100.Text = "";
@@ -2856,6 +2822,64 @@ namespace WocketConfigurationApp
             }
 
         }
+        else
+        {
+
+            if (cmd_name.CompareTo("only_std") == 0)
+            {
+                cal_panel_xstd.Text = "";
+                cal_panel_ystd.Text = "";
+                cal_panel_zstd.Text = "";
+            }
+            else
+            {
+                //update the calibration fields
+                cal_panel_x1g.Text = "";
+                cal_panel_xn1g.Text = "";
+                cal_panel_xstd.Text = "";
+
+                cal_panel_y1g.Text = "";
+                cal_panel_yn1g.Text = "";
+                cal_panel_ystd.Text = "";
+
+                cal_panel_z1g.Text = "";
+                cal_panel_zn1g.Text = "";
+                cal_panel_zstd.Text = "";
+
+                cal_panel_sr.Text = "";
+                cal_panel_pc.Text = "";
+                cal_panel_loss.Text = "";
+
+
+                //clean cal values arrays 
+                if (clean_array)
+                {
+                    if (cmd_name.CompareTo("calibration") == 0)
+                    {
+
+                        xyzP[0] = 0.0;
+                        xyzP[1] = 0.0;
+                        xyzP[2] = 0.0;
+
+                        xyzN[0] = 0.0;
+                        xyzN[1] = 0.0;
+                        xyzN[2] = 0.0;
+
+                        xyzSTD[0] = 0.0;
+                        xyzSTD[1] = 0.0;
+                        xyzSTD[2] = 0.0;
+                    }
+                    else if (cmd_name.CompareTo("sampling_rate") == 0)
+                    {
+                        SR = 0;
+                        PackageCount = 0;
+                        PercentageLoss = 0.0;
+                    }
+                }
+            }
+        }
+       
+
 
     }
 
@@ -2887,13 +2911,13 @@ namespace WocketConfigurationApp
             Accelerometer acc_sensor = (Accelerometer)wc_cal._Sensors[0];
 
             //load the fields
-            acc_sensor._Calibration._X1G = xyzP[0];
-            acc_sensor._Calibration._Y1G = xyzP[1];
-            acc_sensor._Calibration._Z1G = xyzP[2];
+            acc_sensor._Calibration._X1G = (ushort) xyzP[0];
+            acc_sensor._Calibration._Y1G = (ushort)xyzP[1];
+            acc_sensor._Calibration._Z1G = (ushort)xyzP[2];
 
-            acc_sensor._Calibration._XN1G = xyzN[0];
-            acc_sensor._Calibration._YN1G = xyzN[1];
-            acc_sensor._Calibration._ZN1G = xyzN[2];
+            acc_sensor._Calibration._XN1G = (ushort)xyzN[0];
+            acc_sensor._Calibration._YN1G = (ushort)xyzN[1];
+            acc_sensor._Calibration._ZN1G = (ushort)xyzN[2];
 
             acc_sensor._XStd = xyzSTD[0];
             acc_sensor._YStd = xyzSTD[1];
@@ -3007,7 +3031,7 @@ namespace WocketConfigurationApp
             TestResults[21] = stime + ",noise,zstd," + xyzSTD[2].ToString();
 
             //update the test status
-            info_cmd_value_distance_test.Text = "Last Test: " + String.Format("{0:MM/dd/yy  HH:mm:ss}", timenow);
+            info_cmd_value_distance_test.Text = "Last Tested: " + String.Format("{0:MM/dd/yy  HH:mm:ss}", timenow);
 
             panel_status_texbox.Text = panel_status_texbox.Text + "\r\n" +
                                        String.Format("{0:MM/dd/yy  HH:mm:ss}", timenow) + ": Distance Test Finished.";
@@ -3020,7 +3044,7 @@ namespace WocketConfigurationApp
             TestResults[21] = stime + ",noise,zstd," + xyzSTD[2].ToString();
 
             //update the test status
-            info_cmd_value_SamplingRate.Text = "Last Test: " + String.Format("{0:MM/dd/yy  HH:mm:ss}", timenow);
+            info_cmd_value_SamplingRate.Text = "Last Tested: " + String.Format("{0:MM/dd/yy  HH:mm:ss}", timenow);
 
             panel_status_texbox.Text = panel_status_texbox.Text + "\r\n" +
                                        String.Format("{0:MM/dd/yy  HH:mm:ss}", timenow) + ": Sampling Rate Test Finished.";
@@ -3047,7 +3071,6 @@ namespace WocketConfigurationApp
         {
             //Create test results file
             string filename = OUTPUT_DIRECTORY +
-                               //wocket.DeviceAddress.ToString().Substring(7) + "_" +
                                wocket_address.Substring(7) + "_" +
                                "Test_" + String.Format("{0:MMddyy-HHmmss}", DateTime.Now) + ".txt";
 
@@ -3083,7 +3106,7 @@ namespace WocketConfigurationApp
         {
             //Stablish File Path
             string path = cal_panel_entry_path.Text;
-            string filename = "SensorData_" + //wocket.DeviceAddress.ToString().Substring(7)
+            string filename = "SensorData_" + 
                               wocket_address.Substring(7) + ".xml";
 
             if (path.Trim().CompareTo("") == 0)
@@ -3108,13 +3131,13 @@ namespace WocketConfigurationApp
             Accelerometer acc_sensor = (Accelerometer)wc_cal._Sensors[0];
 
             //set the ACC calibration values
-            acc_sensor._Calibration._X1G = xyzP[0];
-            acc_sensor._Calibration._Y1G = xyzP[1];
-            acc_sensor._Calibration._Z1G = xyzP[2];
+            acc_sensor._Calibration._X1G = (ushort)xyzP[0];
+            acc_sensor._Calibration._Y1G = (ushort)xyzP[1];
+            acc_sensor._Calibration._Z1G = (ushort)xyzP[2];
 
-            acc_sensor._Calibration._XN1G = xyzN[0];
-            acc_sensor._Calibration._YN1G = xyzN[1];
-            acc_sensor._Calibration._ZN1G = xyzN[2];
+            acc_sensor._Calibration._XN1G = (ushort)xyzN[0];
+            acc_sensor._Calibration._YN1G = (ushort)xyzN[1];
+            acc_sensor._Calibration._ZN1G = (ushort)xyzN[2];
 
             acc_sensor._XStd = xyzSTD[0];
             acc_sensor._YStd = xyzSTD[1];
@@ -3176,9 +3199,12 @@ namespace WocketConfigurationApp
 
 
     #endregion
- 
 
-    
+   
+   
+   
+
+   
    
       
 
