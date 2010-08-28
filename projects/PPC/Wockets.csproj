@@ -1,8 +1,8 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{5D98635F-251B-464F-9132-AF594E8D482B}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -37,6 +37,7 @@
     <WarningLevel>4</WarningLevel>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DocumentationFile>..\..\bin\PPC\Wockets.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -307,9 +308,6 @@
     </Compile>
     <Compile Include="..\..\src\Wockets\Utils\IPC\Semaphore.cs">
       <Link>Utils\IPC\Semaphore.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Wockets\Kernel\Types\ApplicationResponse.cs">
-      <Link>Kernel\Types\ApplicationResponse.cs</Link>
     </Compile>
     <Compile Include="..\..\src\Wockets\Kernel\Booter.cs">
       <Link>Kernel\Booter.cs</Link>
@@ -588,14 +586,23 @@
     <Compile Include="..\..\src\Wockets\Utils\HttpUploader\HttpPostDataManager.cs">
       <Link>Utils\HttpUploader\HttpPostDataManager.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Utils\sms\SentMessage2.cs" >
-    <Link>Utils\sms\SentMessage2.cs</Link>
+    <Compile Include="..\..\src\Wockets\Utils\sms\SentMessage2.cs">
+      <Link>Utils\sms\SentMessage2.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Utils\sms\SMSManager2.cs" >
-    <Link>Utils\sms\SMSManager2.cs</Link>
+    <Compile Include="..\..\src\Wockets\Utils\sms\SMSManager2.cs">
+      <Link>Utils\sms\SMSManager2.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Utils\sms\Util2.cs" >
-    <Link>Utils\sms\Util2.cs</Link>
+    <Compile Include="..\..\src\Wockets\Utils\sms\Util2.cs">
+      <Link>Utils\sms\Util2.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_TCT.cs" >
+      <Link>Data\Commands\GET_TCT.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\SET_TCT.cs" >
+      <Link>Data\Commands\SET_TCT.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\TCT_RSP.cs" >
+      <Link>Data\Responses\TCT_RSP.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
