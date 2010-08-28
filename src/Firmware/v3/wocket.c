@@ -6,6 +6,7 @@
 
 //A buffer to store commands from the phone
 unsigned char aBuffer[MAX_COMMAND_SIZE];
+unsigned char rBuffer[MAX_COMMAND_SIZE];
 
 //counts how many bytes received for a command
 unsigned char command_counter=0;
@@ -32,6 +33,9 @@ uint8_t EEMEM _NV_STATUS_BYTE;
 uint8_t EEMEM _NV_SAMPLING_RATE;
 uint8_t EEMEM _NV_TM;
 uint8_t EEMEM _NV_SENS;
+uint8_t EEMEM _NV_TCT;
+uint8_t EEMEM _NV_TCTREPS;
+uint8_t EEMEM _NV_TCTLAST;
 
 #define _DEFAULTBTCAL100 725
 #define _DEFAULTBTCAL80 680
@@ -82,6 +86,7 @@ unsigned char _SAMPLING_RATE=90;
 unsigned char _wTCNT2_reps=1;
 unsigned char _wTCNT2=0;
 unsigned char _wTCNT2_last=0;
+
 unsigned char _wTM=_TM_Continuous;
 unsigned char _wSENS=_4_G;
 
@@ -180,6 +185,10 @@ void _wocket_initialize(void)
 			_wTM=eeprom_read_byte(&_NV_TM);
 			_wSENS=eeprom_read_byte(&_NV_SENS);
 
+			_wTCNT2=eeprom_read_byte(&_NV_TCT);
+			_wTCNT2_reps=eeprom_read_byte(&_NV_TCTREPS);
+			_wTCNT2_last=eeprom_read_byte(&_NV_TCTLAST);
+
 			_wBTCAL100=eeprom_read_word(&_NV_BTCAL100);
 			_wBTCAL80=eeprom_read_word(&_NV_BTCAL80);
 			_wBTCAL60=eeprom_read_word(&_NV_BTCAL60);
@@ -220,6 +229,12 @@ void _wocket_initialize(void)
 		if (battery>300)
 		{
 			eeprom_write_byte(&_NV_SAMPLING_RATE,_SAMPLING_RATE);
+			// Calculate the timer variables used to sample at the right frequency
+			_wocket_initialize_timer2_interrupt();
+			eeprom_write_byte(&_NV_TCT,_wTCNT2);
+			eeprom_write_byte(&_NV_TCTREPS,_wTCNT2_reps);
+			eeprom_write_byte(&_NV_TCTLAST,_wTCNT2_last);
+
 			eeprom_write_byte(&_NV_TM,_wTM);
 			eeprom_write_byte(&_NV_STATUS_BYTE,0x00);
 			eeprom_write_byte(&_NV_SENS,_wSENS);
@@ -312,10 +327,6 @@ void _wocket_initialize(void)
 	_DEFAULT_SHUTDOWN= (unsigned long)_wPDT*(unsigned long)_SAMPLING_RATE* (unsigned long)60;
 	_wShutdownTimer=_DEFAULT_SHUTDOWN;
 
-
-
-	// Calculate the timer variables used to sample at the right frequency
-	_wocket_initialize_timer2_interrupt();
 	
 	
      /* Enable Timer 2 */
@@ -522,7 +533,7 @@ void _receive_data(void)
 	// Attempt to receive a byte only if no command is being received or a partial comman has been received
 	if ( ((command_counter==0)||(command_counter<command_length))  && (_bluetooth_receive_uart0_byte(&aByte)) )
     {
-		aBuffer[command_counter++]=aByte;
+		rBuffer[command_counter++]=aByte;
 		
 		if ((aByte>>5)==COMMAND_PREFIX)
     	{
@@ -546,6 +557,7 @@ void _receive_data(void)
 				case (unsigned char)GET_BTCAL:
 				case (unsigned char) GET_HV:
 				case (unsigned char) GET_FV:				
+				case (unsigned char) GET_TCT:
                 	command_length=1;
                     break;
                 case (unsigned char)SET_SEN:
@@ -554,6 +566,9 @@ void _receive_data(void)
                 case (unsigned char)SET_PDT:
                 case (unsigned char)SET_TM:                
                      command_length=2;
+                     break;
+				case (unsigned char)SET_TCT:                
+                     command_length=5;
                      break;
                 case (unsigned char)SET_CAL:
 				case (unsigned char) SET_BTCAL:
@@ -579,6 +594,15 @@ void _receive_data(void)
     {                                       
             switch (opcode)
             {
+			        case (unsigned char) SET_TCT:  
+				   		_wTCNT2=m_SET_TCT(rBuffer[1],rBuffer[2]);
+						_wTCNT2_reps=m_SET_TCTREPS(rBuffer[2],rBuffer[3]);
+						_wTCNT2_last=m_SET_TCTLAST(rBuffer[3],rBuffer[4]);
+						eeprom_write_byte(&_NV_TCT,_wTCNT2);
+						eeprom_write_byte(&_NV_TCTREPS,_wTCNT2_reps);
+						eeprom_write_byte(&_NV_TCTLAST,_wTCNT2_last);
+						processed_counter=command_counter;
+						break;
                     case (unsigned char)PAUSE:                                                      
                             paused=1;
                             processed_counter=command_counter;                                                      
@@ -601,15 +625,15 @@ void _receive_data(void)
                             word=_atmega_a2dConvert10bit(ADC4);
 #endif				  
 
-                            aBuffer[0]=m_BL_RSP_BYTE0;
-                            aBuffer[1]=m_BL_RSP_BYTE1(word);
-                            aBuffer[2]=m_BL_RSP_BYTE2(word);
+                            rBuffer[0]=m_BL_RSP_BYTE0;
+                            rBuffer[1]=m_BL_RSP_BYTE1(word);
+                            rBuffer[2]=m_BL_RSP_BYTE2(word);
                             processed_counter=command_counter;
                             response_length=3;		                                                                          
                             break;		
                 case (unsigned char) GET_SEN:           			  
-                            aBuffer[0]=m_SENS_RSP_BYTE0;
-                            aBuffer[1]=m_SENS_RSP_BYTE1(_wSENS);                       
+                            rBuffer[0]=m_SENS_RSP_BYTE0;
+                            rBuffer[1]=m_SENS_RSP_BYTE1(_wSENS);                       
                             processed_counter=command_counter;
                             response_length=2;		                                                                          
                             break;	
@@ -635,53 +659,56 @@ void _receive_data(void)
 							else
 								word=0;
 
-                            aBuffer[0]=m_BP_RSP_BYTE0;
-                            aBuffer[1]=m_BP_RSP_BYTE1(word);      ;
+                            rBuffer[0]=m_BP_RSP_BYTE0;
+                            rBuffer[1]=m_BP_RSP_BYTE1(word);      ;
                             processed_counter=command_counter;
                             response_length=2;		                                                                          
                             break;
  				   case (unsigned char) GET_PDT:  
-				   		aBuffer[0]=m_PDT_RSP_BYTE0;
-                        aBuffer[1]=m_PDT_RSP_BYTE1(_wPDT);
+				   		rBuffer[0]=m_PDT_RSP_BYTE0;
+                        rBuffer[1]=m_PDT_RSP_BYTE1(_wPDT);
 						processed_counter=command_counter;
 						response_length=2;
 						break;			
                    case (unsigned char) SET_PDT:  
-				   		_wPDT=m_SET_PDT(aBuffer[1]);
+				   		_wPDT=m_SET_PDT(rBuffer[1]);
 						eeprom_write_byte(&_NV_PDT,_wPDT);
 						processed_counter=command_counter;
 						break;																				
                    case (unsigned char) GET_SR:  
-				   		aBuffer[0]=m_SR_RSP_BYTE0;
-                        aBuffer[1]=m_SR_RSP_BYTE1(_SAMPLING_RATE);
+				   		rBuffer[0]=m_SR_RSP_BYTE0;
+                        rBuffer[1]=m_SR_RSP_BYTE1(_SAMPLING_RATE);
 						processed_counter=command_counter;
 						response_length=2;
 						break;
                 case (unsigned char) GET_PC:  
-				   		aBuffer[0]=m_PC_RSP_BYTE0;
-                        aBuffer[1]=m_PC_RSP_BYTE1(_wPC);
-						aBuffer[2]=m_PC_RSP_BYTE2(_wPC);
-                        aBuffer[3]=m_PC_RSP_BYTE3(_wPC);
-						aBuffer[4]=m_PC_RSP_BYTE4(_wPC);
-                        aBuffer[5]=m_PC_RSP_BYTE5(_wPC);
+				   		rBuffer[0]=m_PC_RSP_BYTE0;
+                        rBuffer[1]=m_PC_RSP_BYTE1(_wPC);
+						rBuffer[2]=m_PC_RSP_BYTE2(_wPC);
+                        rBuffer[3]=m_PC_RSP_BYTE3(_wPC);
+						rBuffer[4]=m_PC_RSP_BYTE4(_wPC);
+                        rBuffer[5]=m_PC_RSP_BYTE5(_wPC);
 						processed_counter=command_counter;
 						response_length=6;
 						break;
                    case (unsigned char) SET_SR:  
-				   		_SAMPLING_RATE=m_SET_SR(aBuffer[1]);
+				   		_SAMPLING_RATE=m_SET_SR(rBuffer[1]);
 						_wocket_initialize_timer2_interrupt();
 						eeprom_write_byte(&_NV_SAMPLING_RATE,_SAMPLING_RATE);
+						eeprom_write_byte(&_NV_TCT,_wTCNT2);
+						eeprom_write_byte(&_NV_TCTREPS,_wTCNT2_reps);
+						eeprom_write_byte(&_NV_TCTLAST,_wTCNT2_last);
 						processed_counter=command_counter;
 						break;
 
      			 case (unsigned char) GET_TM:  
-				   		aBuffer[0]=m_TM_RSP_BYTE0;
-                        aBuffer[1]=m_TM_RSP_BYTE1(_wTM);
+				   		rBuffer[0]=m_TM_RSP_BYTE0;
+                        rBuffer[1]=m_TM_RSP_BYTE1(_wTM);
 						processed_counter=command_counter;
 						response_length=2;
 						break;
                    case (unsigned char) SET_TM:  
-				   		_wTM=m_SET_TM(aBuffer[1]);
+				   		_wTM=m_SET_TM(rBuffer[1]);
 						eeprom_write_byte(&_NV_TM,_wTM);
 	//					_yellowled_turn_on();
 						_atmega_reset();
@@ -699,17 +726,17 @@ void _receive_data(void)
                                             break;
                                     else
                                     {   
-										_wX1G_CAL=m_SET_CAL_x1g(aBuffer[1],aBuffer[2]);
+										_wX1G_CAL=m_SET_CAL_x1g(rBuffer[1],rBuffer[2]);
 										eeprom_write_word(&_NV_X1G_CAL,_wX1G_CAL);
-										_wXN1G_CAL=m_SET_CAL_xn1g(aBuffer[2],aBuffer[3]);
+										_wXN1G_CAL=m_SET_CAL_xn1g(rBuffer[2],rBuffer[3]);
 										eeprom_write_word(&_NV_XN1G_CAL,_wXN1G_CAL);
-										_wY1G_CAL=m_SET_CAL_y1g(aBuffer[3],aBuffer[4],aBuffer[5]);
+										_wY1G_CAL=m_SET_CAL_y1g(rBuffer[3],rBuffer[4],rBuffer[5]);
 										eeprom_write_word(&_NV_Y1G_CAL,_wY1G_CAL);
-										_wYN1G_CAL= m_SET_CAL_yn1g(aBuffer[5],aBuffer[6]);
+										_wYN1G_CAL= m_SET_CAL_yn1g(rBuffer[5],rBuffer[6]);
 										eeprom_write_word(&_NV_YN1G_CAL,_wYN1G_CAL);
-										_wZ1G_CAL= m_SET_CAL_z1g(aBuffer[6],aBuffer[7],aBuffer[8]);
+										_wZ1G_CAL= m_SET_CAL_z1g(rBuffer[6],rBuffer[7],rBuffer[8]);
 										eeprom_write_word(&_NV_Z1G_CAL,_wZ1G_CAL);
-										_wZN1G_CAL=m_SET_CAL_zn1g(aBuffer[8],aBuffer[8]);
+										_wZN1G_CAL=m_SET_CAL_zn1g(rBuffer[8],rBuffer[8]);
 										eeprom_write_word(&_NV_ZN1G_CAL,_wZN1G_CAL);
 										processed_counter=command_counter;
 
@@ -720,41 +747,41 @@ void _receive_data(void)
                             break;
                     case (unsigned char) GET_CAL:    
 							                                                              
-							aBuffer[0]= m_CAL_RSP_BYTE0;
-                            aBuffer[1]= m_CAL_RSP_BYTE1_x1g(_wX1G_CAL);                                                                   
-                            aBuffer[2]= m_CAL_RSP_BYTE2_x1g(_wX1G_CAL);
-							aBuffer[2]|= m_CAL_RSP_BYTE2_xn1g(_wXN1G_CAL);
-                            aBuffer[3] = m_CAL_RSP_BYTE3_xn1g(_wXN1G_CAL);
-							aBuffer[3]|= m_CAL_RSP_BYTE3_y1g(_wY1G_CAL);
-                            aBuffer[4] = m_CAL_RSP_BYTE4_y1g(_wY1G_CAL);
-                            aBuffer[5] = m_CAL_RSP_BYTE5_y1g(_wY1G_CAL);
-                            aBuffer[5]|= m_CAL_RSP_BYTE5_yn1g(_wYN1G_CAL);
-                            aBuffer[6] = m_CAL_RSP_BYTE6_yn1g(_wYN1G_CAL);
-							aBuffer[6] |= m_CAL_RSP_BYTE6_z1g(_wZ1G_CAL);
-                            aBuffer[7] =  m_CAL_RSP_BYTE7_z1g(_wZ1G_CAL);
-                            aBuffer[8] =  m_CAL_RSP_BYTE8_z1g(_wZ1G_CAL);
-							aBuffer[8] |= m_CAL_RSP_BYTE8_zn1g(_wZN1G_CAL);
-                            aBuffer[9] =  m_CAL_RSP_BYTE9_zn1g(_wZN1G_CAL);
+							rBuffer[0]= m_CAL_RSP_BYTE0;
+                            rBuffer[1]= m_CAL_RSP_BYTE1_x1g(_wX1G_CAL);                                                                   
+                            rBuffer[2]= m_CAL_RSP_BYTE2_x1g(_wX1G_CAL);
+							rBuffer[2]|= m_CAL_RSP_BYTE2_xn1g(_wXN1G_CAL);
+                            rBuffer[3] = m_CAL_RSP_BYTE3_xn1g(_wXN1G_CAL);
+							rBuffer[3]|= m_CAL_RSP_BYTE3_y1g(_wY1G_CAL);
+                            rBuffer[4] = m_CAL_RSP_BYTE4_y1g(_wY1G_CAL);
+                            rBuffer[5] = m_CAL_RSP_BYTE5_y1g(_wY1G_CAL);
+                            rBuffer[5]|= m_CAL_RSP_BYTE5_yn1g(_wYN1G_CAL);
+                            rBuffer[6] = m_CAL_RSP_BYTE6_yn1g(_wYN1G_CAL);
+							rBuffer[6] |= m_CAL_RSP_BYTE6_z1g(_wZ1G_CAL);
+                            rBuffer[7] =  m_CAL_RSP_BYTE7_z1g(_wZ1G_CAL);
+                            rBuffer[8] =  m_CAL_RSP_BYTE8_z1g(_wZ1G_CAL);
+							rBuffer[8] |= m_CAL_RSP_BYTE8_zn1g(_wZN1G_CAL);
+                            rBuffer[9] =  m_CAL_RSP_BYTE9_zn1g(_wZN1G_CAL);
 							processed_counter=command_counter;
                             response_length=10;                                                                               
                             break;    
                     case (unsigned char) GET_BTCAL:    
 							                                                              
-							aBuffer[0]= m_BTCAL_RSP_BYTE0;
-                            aBuffer[1]= m_BTCAL_RSP_BYTE1_100(_wBTCAL100);                                                                   
-                            aBuffer[2]= m_BTCAL_RSP_BYTE2_100(_wBTCAL100);
-							aBuffer[2]|= m_BTCAL_RSP_BYTE2_80(_wBTCAL80);
-                            aBuffer[3] = m_BTCAL_RSP_BYTE3_80(_wBTCAL80);
-							aBuffer[3]|= m_BTCAL_RSP_BYTE3_60(_wBTCAL60);
-                            aBuffer[4] = m_BTCAL_RSP_BYTE4_60(_wBTCAL60);
-                            aBuffer[5] = m_BTCAL_RSP_BYTE5_60(_wBTCAL60);
-                            aBuffer[5]|= m_BTCAL_RSP_BYTE5_40(_wBTCAL40);
-                            aBuffer[6] = m_BTCAL_RSP_BYTE6_40(_wBTCAL40);
-							aBuffer[6] |= m_BTCAL_RSP_BYTE6_20(_wBTCAL20);
-                            aBuffer[7] =  m_BTCAL_RSP_BYTE7_20(_wBTCAL20);
-                            aBuffer[8] =  m_BTCAL_RSP_BYTE8_20(_wBTCAL20);
-							aBuffer[8] |= m_BTCAL_RSP_BYTE8_10(_wBTCAL10);
-                            aBuffer[9] =  m_BTCAL_RSP_BYTE9_10(_wBTCAL10);
+							rBuffer[0]= m_BTCAL_RSP_BYTE0;
+                            rBuffer[1]= m_BTCAL_RSP_BYTE1_100(_wBTCAL100);                                                                   
+                            rBuffer[2]= m_BTCAL_RSP_BYTE2_100(_wBTCAL100);
+							rBuffer[2]|= m_BTCAL_RSP_BYTE2_80(_wBTCAL80);
+                            rBuffer[3] = m_BTCAL_RSP_BYTE3_80(_wBTCAL80);
+							rBuffer[3]|= m_BTCAL_RSP_BYTE3_60(_wBTCAL60);
+                            rBuffer[4] = m_BTCAL_RSP_BYTE4_60(_wBTCAL60);
+                            rBuffer[5] = m_BTCAL_RSP_BYTE5_60(_wBTCAL60);
+                            rBuffer[5]|= m_BTCAL_RSP_BYTE5_40(_wBTCAL40);
+                            rBuffer[6] = m_BTCAL_RSP_BYTE6_40(_wBTCAL40);
+							rBuffer[6] |= m_BTCAL_RSP_BYTE6_20(_wBTCAL20);
+                            rBuffer[7] =  m_BTCAL_RSP_BYTE7_20(_wBTCAL20);
+                            rBuffer[8] =  m_BTCAL_RSP_BYTE8_20(_wBTCAL20);
+							rBuffer[8] |= m_BTCAL_RSP_BYTE8_10(_wBTCAL10);
+                            rBuffer[9] =  m_BTCAL_RSP_BYTE9_10(_wBTCAL10);
 							processed_counter=command_counter;
                             response_length=10;                                                                               
                             break;  
@@ -770,17 +797,17 @@ void _receive_data(void)
                                             break;
                                     else
                                     {   
-										_wBTCAL100=m_SET_BTCAL_100(aBuffer[1],aBuffer[2]);
+										_wBTCAL100=m_SET_BTCAL_100(rBuffer[1],rBuffer[2]);
 										eeprom_write_word(&_NV_BTCAL100,_wBTCAL100);
-										_wBTCAL80=m_SET_BTCAL_80(aBuffer[2],aBuffer[3]);
+										_wBTCAL80=m_SET_BTCAL_80(rBuffer[2],rBuffer[3]);
 										eeprom_write_word(&_NV_BTCAL80,_wBTCAL80);
-										_wBTCAL60=m_SET_BTCAL_60(aBuffer[3],aBuffer[4],aBuffer[5]);
+										_wBTCAL60=m_SET_BTCAL_60(rBuffer[3],rBuffer[4],rBuffer[5]);
 										eeprom_write_word(&_NV_BTCAL60,_wBTCAL60);
-										_wBTCAL40= m_SET_BTCAL_40(aBuffer[5],aBuffer[6]);
+										_wBTCAL40= m_SET_BTCAL_40(rBuffer[5],rBuffer[6]);
 										eeprom_write_word(&_NV_BTCAL40,_wBTCAL40);
-										_wBTCAL20= m_SET_BTCAL_20(aBuffer[6],aBuffer[7],aBuffer[8]);
+										_wBTCAL20= m_SET_BTCAL_20(rBuffer[6],rBuffer[7],rBuffer[8]);
 										eeprom_write_word(&_NV_BTCAL20,_wBTCAL20);
-										_wBTCAL10=m_SET_BTCAL_10(aBuffer[8],aBuffer[8]);
+										_wBTCAL10=m_SET_BTCAL_10(rBuffer[8],rBuffer[8]);
 										eeprom_write_word(&_NV_BTCAL10,_wBTCAL10);
 										processed_counter=command_counter;
 
@@ -790,17 +817,27 @@ void _receive_data(void)
                             //enable global interrupts
                             break;	
 	   				case (unsigned char) GET_HV:  
-				   		aBuffer[0]=m_HV_RSP_BYTE0;
-                        aBuffer[1]=m_HV_RSP_BYTE1(_VERSION);
+				   		rBuffer[0]=m_HV_RSP_BYTE0;
+                        rBuffer[1]=m_HV_RSP_BYTE1(_VERSION);
 						processed_counter=command_counter;		
 						response_length=2;
 						break;				
 					case (unsigned char) GET_FV:  
-				   		aBuffer[0]=m_FV_RSP_BYTE0;
-                        aBuffer[1]=m_FV_RSP_BYTE1(_FVERSION);
+				   		rBuffer[0]=m_FV_RSP_BYTE0;
+                        rBuffer[1]=m_FV_RSP_BYTE1(_FVERSION);
 						processed_counter=command_counter;
 						response_length=2;
-						break;															 							                              
+						break;	
+					case (unsigned char) GET_TCT:  
+				      	rBuffer[0]=m_TCT_RSP_BYTE0;
+    					rBuffer[1]=m_TCT_RSP_BYTE1(_wTCNT2);
+    					rBuffer[2]=m_TCT_RSP_BYTE2(_wTCNT2,_wTCNT2_reps);
+						rBuffer[3]=m_TCT_RSP_BYTE3(_wTCNT2_reps,_wTCNT2_last);
+						rBuffer[4]=m_TCT_RSP_BYTE4(_wTCNT2_last);
+						processed_counter=command_counter;				
+						response_length=5;
+						break;	
+																					 							                              
                     default:        
                             break;
 
@@ -810,7 +847,7 @@ void _receive_data(void)
 			{                                        
                             
                     for (int i=0;(i<response_length);i++)                                                                                       
-                     	_bluetooth_transmit_uart0_byte(aBuffer[i]);                                                                                                                                                   
+                     	_bluetooth_transmit_uart0_byte(rBuffer[i]);                                                                                                                                                   
                     command_length=0;
                     command_counter=0;
                     command_timer=0;

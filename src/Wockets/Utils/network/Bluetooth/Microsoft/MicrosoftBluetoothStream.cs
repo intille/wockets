@@ -7,6 +7,7 @@ using Wockets.Data.Configuration;
 using Wockets.Exceptions;
 using System.Net.Sockets;
 using System.Threading;
+using System.Runtime.InteropServices;
 
 
 #if (!PocketPC)
@@ -67,7 +68,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
         /// </summary>
         private static object socketLock = new object();
 
-       
+       //private static int pport=5005;
 
         /// <summary>
         /// The constructor sets up a Bluetooth stream object with refrences to the send and receive buffers
@@ -93,6 +94,8 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
 
                 // Create a connection channel specifying the Bluetooth-Serial end-points 
                 _RemoteEP = new BluetoothEndPoint((BluetoothAddress)btaddress, BluetoothService.SerialPort);
+                
+                
 #endif
 
             }
@@ -116,12 +119,34 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
            Dispose();
         }
 
+        [StructLayout(LayoutKind.Sequential)]
+        public class WSAData
+        {
+            public Int16 wVersion;
+            public Int16 wHighVersion;
+            public String szDescription;
+            public String szSystemStatus;
+            public Int16 iMaxSockets;
+            public Int16 iMaxUdpDg;
+            public IntPtr lpVendorInfo;
+        }
+        [DllImport("ws2_32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        static extern Int32 WSACleanup();
+
+        [DllImport("ws2_32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        static extern Int32 WSAStartup(Int16 wVersionRequested, ref WSAData wsaData);
+
+        public const int SUCCESS = 0;
+        public const int HIGH_VERSION = 2;
+        public const int LOW_VERSION = 2;
+        public const short WORD_VERSION = 36;
+
         /// <summary>
         /// Dispose and deallocates any resources with the Bluetooth stream
         /// </summary>
         public void Dispose()
         {
-            lock (this)
+           lock (this)
             {
                 if (disposed)
                     return;
@@ -129,10 +154,21 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
             }
 
             try
-            {               
+            {
+            
+                //socket.Ttl = 5;                
+                //socket.Shutdown(SocketShutdown.Both);
+                //Thread.Sleep(5000);
+                //socket.Close();
+         
+                //Thread.Sleep(5000);
+                //socket = null;
+               // BluetoothRadio.PrimaryRadio.Mode = RadioMode.PowerOff;
+                
                 IDisposable idStream = nstream;
 #if (!PocketPC)
                 nstream.Close();
+                
 #endif
                 if (idStream != null)
                 {
@@ -140,7 +176,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                     idStream.Dispose();
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
             }
 
@@ -157,6 +193,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
         /// <returns>A BluetoothStream object on success, otherwise a null</returns>
         public static BluetoothStream Open(CircularBuffer buffer,CircularBuffer sbuffer, byte[] address, string pin)
         {
+            
             //Initialize the Bluetooth stack
             if (!NetworkStacks._BluetoothStack.Initialize())
                 return null;
@@ -169,14 +206,16 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                    
                 // Critical section: Allow one connection at a time
                 lock (mylock)
-                {                    
+                {                  
                     btStream.socket = new Socket(BluetoothStream._AddressFamily, SocketType.Stream, BluetoothStream._ProtocolType);
+                    //btStream.socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout,10000);
                     btStream.socket.Blocking = true;
                     btStream._ConnectionTime = WocketsTimer.GetUnixTime(DateTime.Now);
                     btStream.socket.Connect(btStream._RemoteEP);       
                     btStream._CurrentConnectionUnixTime = WocketsTimer.GetUnixTime(DateTime.Now);
                     btStream._ConnectionTime = btStream._CurrentConnectionUnixTime - btStream._ConnectionTime;
-                    btStream.nstream = new NetworkStream(btStream.socket, true);                   
+                    btStream.nstream = new NetworkStream(btStream.socket, true);
+                    
                 }
 
 
@@ -290,6 +329,11 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                             timeoutIterationsCounter++;
                             if (timeoutIterationsCounter > iterationsToTimeout)
                             {
+#if (!PocketPC)
+                                socket.Receive(singleReadBuffer);
+                                socket.Disconnect(false);
+                                Dispose();
+#endif
                                 CurrentWockets._LastError = ErrorCodes.CONNECTION_TIMEOUT;
                                 CurrentWockets._LastErrorMessage = "Connection " + this._HexAddress + " timed out.";                                
                                 Logger.Error("MicrosoftBluetoothStream: Process: <" + ErrorCodes.CONNECTION_TIMEOUT + ">: Connection " + this._HexAddress + " timed out.");
@@ -305,8 +349,10 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                 }
                 catch (Exception e)
                 {
-
-
+#if (!PocketPC)
+                    Dispose();
+#endif
+                   
                     CurrentWockets._LastError =ErrorCodes.CONNECTION_FAILED;
                     CurrentWockets._LastErrorMessage = "Connection " + this._HexAddress + " failed.";
                     Logger.Error("MicrosoftBluetoothStream: Process: <" + ErrorCodes.CONNECTION_FAILED + ">: Connection " + this._HexAddress + " failed. "+e.Message+". "+e.StackTrace +".");

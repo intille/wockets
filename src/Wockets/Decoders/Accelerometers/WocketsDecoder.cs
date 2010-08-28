@@ -174,6 +174,9 @@ namespace Wockets.Decoders.Accelerometers
                                     case ResponseTypes.AC_RSP:                                    
                                         bytesToRead = 4;
                                         break;
+                                    case ResponseTypes.TCT_RSP:
+                                        bytesToRead = 5;
+                                        break;
                                     case ResponseTypes.PC_RSP:
                                         bytesToRead = 6;
                                         break;
@@ -466,6 +469,19 @@ namespace Wockets.Decoders.Accelerometers
                                     Core.WRITE_ACTIVITY_COUNT(ac);
 #endif
                                     FireEvent(ac);
+                                    break;
+
+                                case ResponseTypes.TCT_RSP:
+                                    TCT_RSP tct = new TCT_RSP(this._ID);
+                                    for (int i = 0; (i < bytesToRead); i++)
+                                        tct.RawBytes[i] = this.packet[i];
+                                    tct._TCT = (((this.packet[1] & 0x7f) << 1) | ((this.packet[2] >> 6) & 0x01));
+                                    tct._REPS = (((this.packet[2] & 0x3f) << 2) | ((this.packet[3] >> 5) & 0x03));
+                                    tct._LAST = (((this.packet[3] & 0x1f) << 3) | ((this.packet[4] >> 4) & 0x07));
+#if (PocketPC)
+                                    Core.WRITE_TCT(tct);
+#endif
+                                    FireEvent(tct);
                                     break;
                                 default:
                                     break;

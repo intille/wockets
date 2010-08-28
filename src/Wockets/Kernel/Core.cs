@@ -381,6 +381,9 @@ namespace Wockets.Kernel
                     case (KernelResponse)KernelResponse.ACTIVITY_COUNT_UPDATED:
                         Core.READ_ACTIVITY_COUNT();              
                         break;
+                    case (KernelResponse)KernelResponse.TCT_UPDATED:
+                        Core.READ_TCT();
+                        break;
                     default:
                         break;
                 }
@@ -1401,6 +1404,122 @@ namespace Wockets.Kernel
             catch (Exception e)
             {
                 Logger.Error("Core.cs:READ_ACTIVITY_COUNT:" + e.ToString());
+            }
+            kernelLock.Release();
+            return success;
+        }
+
+
+
+        public static bool GET_WOCKET_TCT(string mac)
+        {
+            bool success = false;
+            kernelLock.WaitOne();
+            try
+            {
+                if ((_Registered) && (_Connected))
+                {
+                    string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + _IcomingChannel + "}";
+                    NamedEvents namedEvent = new NamedEvents();
+                    RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
+                    rk.SetValue("Message", KernelCommand.GET_TCT.ToString(), RegistryValueKind.String);
+                    rk.SetValue("Param", mac.ToString(), RegistryValueKind.String);
+                    rk.Flush();
+                    rk.Close();
+                    namedEvent.Send(Core._OutgoingChannel);
+                    success = true;
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Error("Core.cs:GET_TCT:" + e.ToString());
+            }
+            kernelLock.Release();
+            return success;
+        }
+
+
+        public static bool SET_TCT(string mac, int tct,int reps,int last)
+        {
+            bool success = false;
+            kernelLock.WaitOne();
+
+            try
+            {
+                if ((_Registered) && (_Connected))
+                {
+                    string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + _IcomingChannel + "}";
+                    NamedEvents namedEvent = new NamedEvents();
+                    RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
+                    rk.SetValue("Message", KernelCommand.SET_TCT.ToString(), RegistryValueKind.String);
+                    rk.SetValue("Param", mac.ToString() + ":" + tct.ToString() + ":" + reps.ToString() + ":" + last.ToString(), RegistryValueKind.String);
+                    rk.Flush();
+                    rk.Close();
+                    namedEvent.Send(Core._OutgoingChannel);
+                    success = true;
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Error("Core.cs:SET_TCT:" + e.ToString());
+            }
+            kernelLock.Release();
+            return success;
+        }
+        public static void WRITE_TCT(TCT_RSP tct)
+        {
+            kernelLock.WaitOne();
+            try
+            {
+
+                RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + tct._SensorID.ToString("0"));
+                rk.SetValue("TCT", tct._TCT, RegistryValueKind.String);
+                rk.SetValue("TCT_REPS", tct._REPS, RegistryValueKind.String);
+                rk.SetValue("TCT_LAST", tct._LAST, RegistryValueKind.String);
+                rk.Close();
+
+            }
+            catch (Exception e)
+            {
+                Logger.Error("Core.cs:WRITE_TCT:" + e.ToString());
+            }
+
+            kernelLock.Release();
+        }
+
+
+
+        public static bool READ_TCT()
+        {
+            bool success = false;
+            kernelLock.WaitOne();
+            try
+            {
+                RegistryKey rk = null;
+                for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
+                {
+                    try
+                    {
+                        rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + i.ToString("0"));
+                        int status = (int)rk.GetValue("Status");
+                        if (status == 1)
+                        {
+                            ((Accelerometer)CurrentWockets._Controller._Sensors[i])._TCT = Convert.ToInt32((string)rk.GetValue("TCT"));
+                            ((Accelerometer)CurrentWockets._Controller._Sensors[i])._TCTREPS = Convert.ToInt32((string)rk.GetValue("TCT_REPS"));
+                            ((Accelerometer)CurrentWockets._Controller._Sensors[i])._TCTLAST = Convert.ToInt32((string)rk.GetValue("TCT_LAST"));
+                        }
+                        rk.Close();
+                    }
+                    catch
+                    {
+                    }
+                }
+
+                success = true;
+            }
+            catch (Exception e)
+            {
+                Logger.Error("Core.cs:READ_TCT:" + e.ToString());
             }
             kernelLock.Release();
             return success;

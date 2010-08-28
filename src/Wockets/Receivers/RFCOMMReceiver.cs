@@ -233,6 +233,7 @@ namespace Wockets.Receivers
             
             try
             {
+               // Thread.Sleep(10000);
                 this._Buffer = new CircularBuffer(this._Buffer._Bytes.Length);
                 this.head = 0;
                 this._SBuffer = new CircularBuffer(SEND_BUFFER_SIZE);

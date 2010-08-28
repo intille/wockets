@@ -29,6 +29,8 @@ namespace Wockets.Data
         GET_BTCAL=20,
         SET_BTCAL=21,
         GET_HV=22,
-        GET_FV=23
+        GET_FV=23,
+        GET_TCT=24,
+        SET_TCT=25
     }
 }
