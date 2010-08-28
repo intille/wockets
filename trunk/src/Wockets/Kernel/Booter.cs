@@ -231,7 +231,7 @@ namespace Wockets.Kernel
                 }
 
             }
-            catch
+            catch (Exception e)
             {
                 try
                 {
@@ -354,11 +354,23 @@ namespace Wockets.Kernel
                     try
                     {
                         foreach (string guid in applicationPaths.Values)
-                            Send(KernelResponse.BATTERY_LEVEL_UPDATED, guid);
+                            Send(KernelResponse.ACTIVITY_COUNT_UPDATED, guid);
                     }
                     catch (Exception ex)
                     {
                         Logger.Error("Booter.cs:DecoderCallback:AC_RSP:" + ex.ToString());
+                    }
+                    break;
+
+                case ResponseTypes.TCT_RSP:
+                    try
+                    {
+                        foreach (string guid in applicationPaths.Values)
+                            Send(KernelResponse.TCT_UPDATED, guid);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Error("Booter.cs:DecoderCallback:TCT_RSP:" + ex.ToString());
                     }
                     break;
                 default:
@@ -484,6 +496,7 @@ namespace Wockets.Kernel
                                     d.Subscribe(ResponseTypes.SR_RSP, new Decoder.ResponseHandler(DecoderCallback));
                                     d.Subscribe(ResponseTypes.TM_RSP, new Decoder.ResponseHandler(DecoderCallback));
                                     d.Subscribe(ResponseTypes.AC_RSP, new Decoder.ResponseHandler(DecoderCallback));
+                                    d.Subscribe(ResponseTypes.TCT_RSP, new Decoder.ResponseHandler(DecoderCallback));
                                 }
 
                             }
@@ -982,6 +995,65 @@ namespace Wockets.Kernel
                     }
                 }
                 #endregion SET_MEMORY_MODE
+
+
+                #region GET_WOCKET_TCT
+                else if (msg == KernelCommand.GET_TCT.ToString())
+                {
+                    if (_WocketsRunning)
+                    {
+                        try
+                        {
+                            Command command = new GET_TCT();
+                            for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+                            {
+                                if (param == "all")
+                                    ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == param)
+                                {
+                                    ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                    break;
+                                }
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Logger.Error("Booter.cs:ApplicationHandler: GET_TCT:" + e.ToString());
+                        }
+                    }
+                }
+
+                #endregion GET_TCT
+
+                #region SET_TCT
+                else if (msg == KernelCommand.SET_TCT.ToString())
+                {
+                    if (_WocketsRunning)
+                    {
+
+                        try
+                        {
+                            string[] tokens = param.Split(new char[] { ':' });
+                            Command command = new SET_TCT(Convert.ToInt32(tokens[1]), Convert.ToInt32(tokens[2]), Convert.ToInt32(tokens[3]));
+                            for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+                            {
+                                if (tokens[0] == "all")
+                                    ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == tokens[0])
+                                {
+                                    ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                    break;
+                                }
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Logger.Error("Booter.cs:ApplicationHandler: SET_TCT:" + e.ToString());
+                        }
+                    }
+                }
+                #endregion SET_TCT
+
 
                 kernelLock.Release();
                 namedEvent.Reset();

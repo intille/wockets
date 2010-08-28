@@ -110,6 +110,7 @@ namespace Wockets.Kernel.Types
 
         CONNECT_FAILED=19,
         DISCONNECT_FAILED=20,
-        SENSORS_UPDATED_FAILED=21
+        SENSORS_UPDATED_FAILED=21,
+        TCT_UPDATED=22
     }
 }

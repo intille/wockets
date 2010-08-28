@@ -130,6 +130,8 @@ typedef struct{
 #define SET_BTCAL		0b10101
 #define GET_HV			0b10110
 #define GET_FV			0b10111
+#define GET_TCT			0b11000
+#define SET_TCT			0b11001
 
 /* Macros for Wockets Commands */
 
@@ -173,6 +175,11 @@ typedef struct{
 #define m_SET_SR(aByte2) (aByte2 & 0x7f)
 
 
+/* SET_TCT Macros */
+#define m_SET_TCT(aByte1,aByte2) ( ((unsigned char)(aByte1 & 0x7f)<<1)| (unsigned char)((aByte2>>6)&0x01) )
+#define m_SET_TCTREPS(aByte2,aByte3) ( (unsigned char)((aByte2 & 0x3f)<<2)| (unsigned char)((aByte3>>5)&0x03) )
+#define m_SET_TCTLAST(aByte3,aByte4) ( (unsigned char)((aByte3 & 0x1f)<<3)| (unsigned char)((aByte4>>4)&0x07) )
+
 /* Reserved Wockets Response Opcodes */
 
 #define BL_RSP 		0b00000
@@ -188,7 +195,9 @@ typedef struct{
 #define HV_RSP	 	0b01010
 #define FV_RSP	 	0b01011
 #define BC_RSP		0b01100
-#define AC_RSP 		0B01101
+#define AC_RSP 		0b01101
+#define TCT_RSP		0b01110
+
 
 /* Macros for Wockets Responses */
 
@@ -303,6 +312,14 @@ typedef struct{
 #define m_AC_RSP_BYTE3(count)	((count & 0x03)<<5)
 
 
+/* TCT_RSP Macros */
+#define m_TCT_RSP_BYTE0				RESPONSE_HEADER(TCT_RSP)
+#define m_TCT_RSP_BYTE1(tct)		((tct>>1) &0x7f)
+#define m_TCT_RSP_BYTE2(tct,reps)	(((tct&0x01)<<6) | (reps>>2))
+#define m_TCT_RSP_BYTE3(reps,last)	(((reps&0x03)<<5) | (last>>3))
+#define m_TCT_RSP_BYTE4(last)		((last & 0x07)<<4)
+
+
 #define m_SUCCESS_RESPONSE_BYTE1			RESPONSE_HEADER(SUCCESS_RESPONSE)
 
 
@@ -319,12 +336,19 @@ extern uint8_t EEMEM _NV_INITIALIZED;
 extern uint8_t EEMEM _NV_STATUS_BYTE;
 extern uint8_t EEMEM _NV_SAMPLING_RATE;
 extern uint8_t EEMEM _NV_DEBUG;
+
+extern uint8_t EEMEM _NV_TCT;
+extern uint8_t EEMEM _NV_TCTREPS;
+extern uint8_t EEMEM _NV_TCTLAST;
+
 extern unsigned char _INITIALIZED;
 extern unsigned char _STATUS_BYTE;
 extern unsigned char _SAMPLING_RATE;
+
 extern unsigned char _wTCNT2_reps;
 extern unsigned char _wTCNT2;
 extern unsigned char _wTCNT2_last;
+
 extern unsigned char _wTM;
 extern unsigned long _wPC;
 extern unsigned long _wShutdownTimer;

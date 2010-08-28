@@ -123,6 +123,10 @@ namespace Wockets.Kernel.Types
         /// <summary>
         /// Pings the kernel
         /// </summary>
-        PING
+        PING,
+        
+        GET_TCT,
+
+        SET_TCT
     }
 }

@@ -55,6 +55,7 @@ namespace KernelTest
             Core.SubscribeEvent(KernelResponse.SAMPLING_RATE_UPDATED, EventListener);
             Core.SubscribeEvent(KernelResponse.TRANSMISSION_MODE_UPDATED, EventListener);
             Core.SubscribeEvent(KernelResponse.ACTIVITY_COUNT_UPDATED, EventListener);
+            Core.SubscribeEvent(KernelResponse.TCT_UPDATED, EventListener);
 
         }
 
@@ -69,7 +70,8 @@ namespace KernelTest
             Core.UnsubscribeEvent(KernelResponse.CALIBRATION_UPDATED);
             Core.UnsubscribeEvent(KernelResponse.SAMPLING_RATE_UPDATED);
             Core.UnsubscribeEvent(KernelResponse.TRANSMISSION_MODE_UPDATED);
-            Core.UnsubscribeEvent(KernelResponse.ACTIVITY_COUNT_UPDATED);   
+            Core.UnsubscribeEvent(KernelResponse.ACTIVITY_COUNT_UPDATED);
+            Core.UnsubscribeEvent(KernelResponse.TCT_UPDATED); 
         }
 
 
@@ -172,6 +174,15 @@ namespace KernelTest
                             for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
                                 kernelresponse += ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address + " - " +
                                     ((Wocket)CurrentWockets._Controller._Sensors[i])._ActivityCount.ToString() + "\r\n";
+                            this.label3.Text = "Received: " + kernelresponse;
+                            break;
+                        case (KernelResponse)KernelResponse.TCT_UPDATED:
+                            kernelresponse = "";
+                            for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
+                                kernelresponse += ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address + " - " +
+                                    ((Wocket)CurrentWockets._Controller._Sensors[i])._TCT.ToString() + " - " +
+                                    ((Wocket)CurrentWockets._Controller._Sensors[i])._TCTREPS.ToString() + " - " +
+                                    ((Wocket)CurrentWockets._Controller._Sensors[i])._TCTLAST.ToString() + "\r\n";
                             this.label3.Text = "Received: " + kernelresponse;
                             break;
                         default:
@@ -456,6 +467,35 @@ namespace KernelTest
             this.menuItem26.Checked = false;
             this.menuItem27.Checked = false;
             Core.SET_TRANSMISSION_MODE(mac, TransmissionMode.Continuous);
+        }
+
+        private void menuItem28_Click_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void menuItem29_Click(object sender, EventArgs e)
+        {
+            Core.GET_WOCKET_TCT(mac);
+            this.label2.Text = "Sent: GET_TCT";
+        }
+
+        private void menuItem30_Click(object sender, EventArgs e)
+        {
+            Core.SET_TCT(mac,50,1,80);
+            this.label2.Text = "Sent: SET_TCT 50 1 80";
+        }
+
+        private void menuItem31_Click(object sender, EventArgs e)
+        {
+            Core.SET_TCT(mac, 133, 0, 0);
+            this.label2.Text = "Sent: SET_TCT 133 0 0";
+        }
+
+        private void menuItem32_Click(object sender, EventArgs e)
+        {
+            Core.SET_TCT(mac, 0, 2, 50);
+            this.label2.Text = "Sent: SET_TCT 0 2 50";
         }
     }
 }

@@ -56,12 +56,16 @@
             this.menuItem25 = new System.Windows.Forms.MenuItem();
             this.menuItem26 = new System.Windows.Forms.MenuItem();
             this.menuItem27 = new System.Windows.Forms.MenuItem();
+            this.menuItem28 = new System.Windows.Forms.MenuItem();
             this.menuItem2 = new System.Windows.Forms.MenuItem();
             this.panel1 = new System.Windows.Forms.Panel();
             this.label1 = new System.Windows.Forms.Label();
             this.timer1 = new System.Windows.Forms.Timer();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
+            this.menuItem29 = new System.Windows.Forms.MenuItem();
+            this.menuItem30 = new System.Windows.Forms.MenuItem();
+            this.menuItem31 = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // mainMenu1
@@ -78,6 +82,7 @@
             this.menuItem1.MenuItems.Add(this.menuItem7);
             this.menuItem1.MenuItems.Add(this.menuItem8);
             this.menuItem1.MenuItems.Add(this.menuItem21);
+            this.menuItem1.MenuItems.Add(this.menuItem28);
             this.menuItem1.Text = "Commands";
             // 
             // menuItem3
@@ -218,6 +223,14 @@
             // 
             this.menuItem27.Text = "Efficient 120";
             // 
+            // menuItem28
+            // 
+            this.menuItem28.MenuItems.Add(this.menuItem29);
+            this.menuItem28.MenuItems.Add(this.menuItem30);
+            this.menuItem28.MenuItems.Add(this.menuItem31);
+            this.menuItem28.Text = "TCT";
+            this.menuItem28.Click += new System.EventHandler(this.menuItem28_Click_1);
+            // 
             // menuItem2
             // 
             this.menuItem2.Text = "Disconnect";
@@ -257,6 +270,21 @@
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(223, 48);
             this.label3.Text = "Received:";
+            // 
+            // menuItem29
+            // 
+            this.menuItem29.Text = "Update";
+            this.menuItem29.Click += new System.EventHandler(this.menuItem29_Click);
+            // 
+            // menuItem30
+            // 
+            this.menuItem30.Text = "TCT50 REP1LAST80";
+            this.menuItem30.Click += new System.EventHandler(this.menuItem30_Click);
+            // 
+            // menuItem31
+            // 
+            this.menuItem31.Text = "TCT133";
+            this.menuItem31.Click += new System.EventHandler(this.menuItem31_Click);
             // 
             // Form2
             // 
@@ -311,5 +339,9 @@
         private System.Windows.Forms.MenuItem menuItem25;
         private System.Windows.Forms.MenuItem menuItem26;
         private System.Windows.Forms.MenuItem menuItem27;
+        private System.Windows.Forms.MenuItem menuItem28;
+        private System.Windows.Forms.MenuItem menuItem29;
+        private System.Windows.Forms.MenuItem menuItem30;
+        private System.Windows.Forms.MenuItem menuItem31;
     }
 }

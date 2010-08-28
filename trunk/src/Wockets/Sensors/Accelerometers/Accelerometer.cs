@@ -123,6 +123,12 @@ namespace Wockets.Sensors.Accelerometers
 
         public int _ActivityCount = 0;
 
+        public int _TCT = 0;
+
+        public int _TCTREPS = 0;
+
+        public int _TCTLAST = 0;
+
         #region IO storage variables
         
         /// <summary>
