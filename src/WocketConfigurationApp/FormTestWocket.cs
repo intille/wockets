@@ -62,16 +62,21 @@ namespace WocketConfigurationApp
         
         private DateTime StartTime;
         private DateTime CurTime;
-        private DateTime TotalTime;
+
+        private DateTime MeasurementLastTime;
+        TimeSpan MeasurementElapsedTime = TimeSpan.Zero;
+        
         private TimeSpan OffTime;
         private DateTime StopOffTime;
 
+        private TimeSpan ElapsedTime = TimeSpan.Zero;
+        private int SR = 0;
 
         //100%, 80%, 60%, 40%, 20%, 10%
         private double[] target_bat_cal_values = new double[6] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
         private double[] bat_cal_values = new double[6] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 
-        private int CAL_UPDATE_SECS = 10000;
+        private int CAL_UPDATE_SECS = 1000 * 60 * 1; // Sample battery every 3 mins
         
         private int StartBTLevel = 0;
         private int CurBTLevel = 0;
@@ -91,8 +96,6 @@ namespace WocketConfigurationApp
 
 
         //------ Sampling Rate Test ------------
-        private TimeSpan ElapsedTime = TimeSpan.Zero;
-        private int SR = 0;
         //private long  PackageCount = 0;
         //private double PercentageLoss = 0.0;
 
@@ -129,6 +132,11 @@ namespace WocketConfigurationApp
             //load calibration panel
             this.panel_calibration.Visible = false;
 
+            //hide battery calibration log text box
+            this.cal_panel_battery_log_textBox.Visible = false;
+            this.cal_panel_battery_log_textBox.Text = "";
+
+
             //calibration images
             this.calibrationImages = new Image[7];
 
@@ -158,13 +166,6 @@ namespace WocketConfigurationApp
             clean_calibration_values("battery_calibration", true);
             clean_calibration_values("sampling_rate", true);
 
-
-            
-          
-
-
-           
-            
             ////Initialize Test Results
             TestResults[0] = "calibration,No Calibrated";
             TestResults[1] = "distance_test,No Tested";
@@ -259,39 +260,39 @@ namespace WocketConfigurationApp
         {
             Command cmd;
 
-            //-----  Read the commands when the form is loaded  ------------------------
-            cmd = new GET_FV();
-            ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
+            ////-----  Read the commands when the form is loaded  ------------------------
+            //cmd = new GET_FV();
+            //((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
 
-            cmd = new GET_HV();
-            ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
+            //cmd = new GET_HV();
+            //((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
 
-            cmd = new GET_PC();
-            ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
+            //cmd = new GET_PC();
+            //((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
 
-            cmd = new GET_BT();
-            ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
+            //cmd = new GET_BT();
+            //((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
 
-            cmd = new GET_BP();
-            ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
+            //cmd = new GET_BP();
+            //((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
 
-            cmd = new GET_BTCAL();
-            ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
+            //cmd = new GET_BTCAL();
+            //((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
 
-            cmd = new GET_CAL();
-            ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
+            //cmd = new GET_CAL();
+            //((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
 
-            cmd = new GET_SEN();
-            ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
+            //cmd = new GET_SEN();
+            //((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
 
-            cmd = new GET_TM();
-            ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
+            //cmd = new GET_TM();
+            //((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
 
-            cmd = new GET_SR();
-            ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
+            //cmd = new GET_SR();
+            //((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
 
-            cmd = new GET_PDT();
-            ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
+            //cmd = new GET_PDT();
+            //((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
 
   
             //-----------------------------------------------------------------------
@@ -367,6 +368,9 @@ namespace WocketConfigurationApp
 
 
         #region Timer: Recconect & Test
+
+
+       
 
         private void timer1_Tick(object sender, EventArgs e)
         {
@@ -454,31 +458,33 @@ namespace WocketConfigurationApp
 
 
 
-                #region if a test is running,  test status
+                #region if a test is running
 
 
-                if ((current_command.CompareTo("battery_calibration") == 0) &&
-                         (!IsTestStepFinished))
-                {
-                    #region Send battery level command
+                //if ((current_command.CompareTo("battery_calibration") == 0) &&
+                //         (!IsTestStepFinished))
+                //{
+                //    #region Send battery level command
 
-                    CurTime = DateTime.Now;
-                    TimeSpan TimeDiff = CurTime.Subtract(TotalTime);
+                //    //CurTime = DateTime.Now;
+                //    //MeasurementElapsedTime = CurTime.Subtract(MeasurementLastTime);
 
-                    if (TimeDiff.TotalMilliseconds >= CAL_UPDATE_SECS)
-                    {
-                        //update the time variables
-                        TotalTime = CurTime;
+                //    //if (MeasurementElapsedTime.TotalMilliseconds >= CAL_UPDATE_SECS)
+                //    //{
+                //    //    //update the time variables
+                //    //    MeasurementLastTime = CurTime;
 
-                        // send the command
-                        GET_BT cmd = new GET_BT();
-                        ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
+                //    //    // send the command
+                //    //    GET_BT cmd = new GET_BT();
+                //    //    ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
+                //    //}
 
-                    }
+                //    #endregion
+                //}
+                //else 
+                
 
-                    #endregion
-                }
-                else if (((current_command.CompareTo("calibration") == 0) ||
+                if (((current_command.CompareTo("calibration") == 0) ||
                            (current_command.CompareTo("distance_test") == 0) ||
                            (current_command.CompareTo("sampling_rate") == 0))
                           && (IsTestStepFinished) && (!is_reading))
@@ -528,9 +534,8 @@ namespace WocketConfigurationApp
                         break;
                     //battery level
                     case ResponseTypes.BL_RSP:
-                        //info_cmd_value_battery_level.Text = ((BL_RSP)response)._BatteryLevel.ToString();
                         process_bat_level_response(response);
-                        break;
+                    break;
                     //Sampling Rate
                     case ResponseTypes.SR_RSP:
                         //info_cmd_value_SRQuality.Text = ((SR_RSP)response)._Version.ToString();
@@ -553,92 +558,152 @@ namespace WocketConfigurationApp
             }
         }
 
-        private void process_bat_level_response(Response bt_response)
-        { 
 
-            if( (current_command.CompareTo("battery_calibration") == 0) 
-                && (!IsTestStepFinished) )
-            {
+        private int bat_label_index = 0;
+        private void process_bat_level_response(Response bt_response)
+       { 
                 CurBTLevel = ((BL_RSP)bt_response)._BatteryLevel;
 
-                //Get BatLevel at 100%
-                if( CurBTLevel > StartBTLevel ) 
-                {
-                    StartBTLevel = CurBTLevel;
-                    cal_panel_bat_100.Text = CurBTLevel.ToString();
+                #region Write battery level to screen (commented)
 
-                    //Determine the % for the target battery values
-                    bat_cal_values[0] = CurBTLevel; //%100
-                    target_bat_cal_values[0] = CurBTLevel; //%100
-                    target_bat_cal_values[1] = Math.Floor((double)CurBTLevel * 0.80); //%80
-                    target_bat_cal_values[2] = Math.Floor((double)CurBTLevel * 0.60); //%60
-                    target_bat_cal_values[3] = Math.Floor((double)CurBTLevel * 0.40); //%40
-                    target_bat_cal_values[4] = Math.Floor((double)CurBTLevel * 0.20); //%20
-                    target_bat_cal_values[5] = Math.Floor((double)CurBTLevel * 0.10); //%10
+                ////Get BatLevel at 100%
+                //if( CurBTLevel > StartBTLevel ) 
+                //{
+                //    StartBTLevel = CurBTLevel;
+                //    cal_panel_bat_100.Text = CurBTLevel.ToString();
 
-                    //pictureBox_calibration.Image = bat_calibrationImages[0];
-                    pictureBox_calibration.BackColor = Color.Green;
-                }
-                //Get BatLevel at 80%
-                else if (CurBTLevel < target_bat_cal_values[1] )
-                {
-                    bat_cal_values[1] = CurBTLevel;
-                    cal_panel_bat_80.Text = CurBTLevel.ToString();
+                //    //Determine the % for the target battery values
+                //    bat_cal_values[0] = CurBTLevel; //%100
+                //    target_bat_cal_values[0] = CurBTLevel; //%100
+                //    target_bat_cal_values[1] = Math.Floor((double)CurBTLevel * 0.80); //%80
+                //    target_bat_cal_values[2] = Math.Floor((double)CurBTLevel * 0.60); //%60
+                //    target_bat_cal_values[3] = Math.Floor((double)CurBTLevel * 0.40); //%40
+                //    target_bat_cal_values[4] = Math.Floor((double)CurBTLevel * 0.20); //%20
+                //    target_bat_cal_values[5] = Math.Floor((double)CurBTLevel * 0.10); //%10
 
-                    //pictureBox_calibration.Image = bat_calibrationImages[1];
-                    pictureBox_calibration.BackColor = Color.YellowGreen;
-                }
-                //Get BatLevel at 60%
-                else if (CurBTLevel < target_bat_cal_values[2])
-                {
-                    bat_cal_values[2] = CurBTLevel;
-                    cal_panel_bat_60.Text = CurBTLevel.ToString();
+                //    //pictureBox_calibration.Image = bat_calibrationImages[0];
+                //    pictureBox_calibration.BackColor = Color.Green;
+                //}
+                ////Get BatLevel at 80%
+                //else if (CurBTLevel < target_bat_cal_values[1] )
+                //{
+                //    bat_cal_values[1] = CurBTLevel;
+                //    cal_panel_bat_80.Text = CurBTLevel.ToString();
 
-                    //pictureBox_calibration.Image = bat_calibrationImages[2];
-                    pictureBox_calibration.BackColor = Color.Yellow;
-                }
-                //Get BatLevel at 40%
-                else if (CurBTLevel < target_bat_cal_values[3])
-                {
-                    bat_cal_values[3] = CurBTLevel;
-                    cal_panel_bat_40.Text = CurBTLevel.ToString();
+                //    //pictureBox_calibration.Image = bat_calibrationImages[1];
+                //    pictureBox_calibration.BackColor = Color.YellowGreen;
+                //}
+                ////Get BatLevel at 60%
+                //else if (CurBTLevel < target_bat_cal_values[2])
+                //{
+                //    bat_cal_values[2] = CurBTLevel;
+                //    cal_panel_bat_60.Text = CurBTLevel.ToString();
 
-                    //pictureBox_calibration.Image = bat_calibrationImages[3];
-                    pictureBox_calibration.BackColor = Color.Gold;
-                }
-                //Get BatLevel at 20%
-                else if (CurBTLevel < target_bat_cal_values[4])
-                {
-                    bat_cal_values[4] = CurBTLevel;
-                    cal_panel_bat_20.Text = CurBTLevel.ToString();
+                //    //pictureBox_calibration.Image = bat_calibrationImages[2];
+                //    pictureBox_calibration.BackColor = Color.Yellow;
+                //}
+                ////Get BatLevel at 40%
+                //else if (CurBTLevel < target_bat_cal_values[3])
+                //{
+                //    bat_cal_values[3] = CurBTLevel;
+                //    cal_panel_bat_40.Text = CurBTLevel.ToString();
 
-                    //pictureBox_calibration.Image = bat_calibrationImages[4];
-                    pictureBox_calibration.BackColor = Color.Orange;
-                }
-                //Get BatLevel at 10%
-                else if (CurBTLevel < target_bat_cal_values[5])
-                {
-                    bat_cal_values[5] = CurBTLevel;
-                    cal_panel_bat_10.Text = CurBTLevel.ToString();
+                //    //pictureBox_calibration.Image = bat_calibrationImages[3];
+                //    pictureBox_calibration.BackColor = Color.Gold;
+                //}
+                ////Get BatLevel at 20%
+                //else if (CurBTLevel < target_bat_cal_values[4])
+                //{
+                //    bat_cal_values[4] = CurBTLevel;
+                //    cal_panel_bat_20.Text = CurBTLevel.ToString();
+
+                //    //pictureBox_calibration.Image = bat_calibrationImages[4];
+                //    pictureBox_calibration.BackColor = Color.Orange;
+                //}
+                ////Get BatLevel at 10%
+                //else if (CurBTLevel < target_bat_cal_values[5])
+                //{
+                //    bat_cal_values[5] = CurBTLevel;
+                //    cal_panel_bat_10.Text = CurBTLevel.ToString();
                
-                    //Finish the test
-                    IsTestStepFinished = true;
-                    calibration_step = 3;
-                    process_calibration();
+                //    //Finish the test
+                //    IsTestStepFinished = true;
+                //    calibration_step = 3;
+                //    process_calibration();
 
-                    //pictureBox_calibration.Image = bat_calibrationImages[5];
-                    pictureBox_calibration.BackColor = Color.Red;
-                }
+                //    //pictureBox_calibration.Image = bat_calibrationImages[5];
+                //    pictureBox_calibration.BackColor = Color.Red;
+                //}
 
-                if (log_file != null)
+                #endregion 
+
+
+                #region Map Batt Levels to Interface
+
+                //if (bat_label_index == 0)
+                //{
+                //    cal_panel_bat_100.Text = CurBTLevel.ToString();
+                //    pictureBox_calibration.BackColor = Color.YellowGreen;
+                //    bat_label_index++;
+                //}
+                //else if (bat_label_index == 1)
+                //{
+                //    cal_panel_bat_80.Text = CurBTLevel.ToString();
+                //    pictureBox_calibration.BackColor = Color.Orange;
+                //    bat_label_index++;
+                //}
+                //else if (bat_label_index == 2)
+                //{
+                //    cal_panel_bat_60.Text = CurBTLevel.ToString();
+                //    pictureBox_calibration.BackColor = Color.YellowGreen;
+                //    bat_label_index++;
+                //}
+                //else if (bat_label_index == 3)
+                //{
+                //    cal_panel_bat_40.Text = CurBTLevel.ToString();
+                //    pictureBox_calibration.BackColor = Color.Orange;
+                //    bat_label_index++;
+                //}
+                //else if (bat_label_index == 4)
+                //{
+                //    cal_panel_bat_20.Text = CurBTLevel.ToString();
+                //    pictureBox_calibration.BackColor = Color.YellowGreen;
+                //    bat_label_index++;
+                //}
+                //else 
+                //{
+                //    cal_panel_bat_10.Text = CurBTLevel.ToString();
+                //    pictureBox_calibration.BackColor = Color.Orange;
+                //    bat_label_index = 0;
+                //}
+
+                #endregion
+
+                DateTime timenow = DateTime.Now;
+                string result = String.Format("{0:MM/dd/yy}", timenow) + " " + 
+                                                String.Format("{0:HH:mm:ss}", timenow)   + "," + 
+                                                CurBTLevel.ToString() ;
+
+
+                if (current_command.CompareTo("battery_calibration") == 0)
                 {
-                    DateTime timenow = DateTime.Now;
-                    log_file_battery.WriteLine( timenow.ToShortDateString()+" "+ String.Format("{0:HH:mm:ss.ff}", timenow) + "," + CurBTLevel.ToString());
+                    cal_panel_battery_log_textBox.Text = cal_panel_battery_log_textBox.Text + "\r\n" +
+                                                         result;
+
+                    //Write the battery level to file
+                    if (log_file_battery != null)
+                    {
+                        log_file_battery.WriteLine(result);
+                    }
                 }
+                else
+                {
 
-            }
-
-
+                    panel_status_texbox.Text = panel_status_texbox.Text + "\r\n" +
+                                               result + "\r\n";
+                }
+                
+                                                        
         }
 
 
@@ -2123,14 +2188,37 @@ namespace WocketConfigurationApp
 
                     cal_panel_button_ok.Text = "Start";
 
+
+
                     //Battery Log File
                     log_filename_battery = OUTPUT_DIRECTORY +
                                    wocket_address.Substring(7) + "_" +
                                    "bat_log.txt";
 
                     if (!File.Exists(log_filename_battery))
-                       log_file_battery = new StreamWriter(log_filename_battery,true);
+                        log_file_battery = new StreamWriter(log_filename_battery);
+                    else
+                    {
+                        if (log_file_battery == null)
+                        {
+                           log_file_battery = new StreamWriter(log_filename_battery, true);
+                        }
+                    }
 
+                    // Initialize Battery Current Time
+                    MeasurementLastTime = DateTime.Now;
+
+                    //Hide picture box
+                    //pictureBox_calibration.Size = new Size(135, 240);
+                    pictureBox_calibration.Visible = false;
+                    pictureBox_calibration.SendToBack();
+
+                    //Show Battery log text box
+                    cal_panel_battery_log_textBox.BringToFront();
+                    cal_panel_battery_log_textBox.Visible = true;
+                    
+                    //Hide the calibration percent labels
+                    
 
                     //progress bar
                     cal_panel_progressBar.Visible = true;
@@ -2138,7 +2226,6 @@ namespace WocketConfigurationApp
 
 
                     //clean panel parameters
-                    //panel_status_texbox.Text = "";
                     panel_status.Visible = false;
                     cal_panel_bat_label_elapTime.Text = "";
                     cal_panel_bat_label_startTime.Text = "";
@@ -2152,17 +2239,15 @@ namespace WocketConfigurationApp
                     cal_panel_entry_path.Enabled = false;
                     cal_panel_entry_path.Visible = false;
                     cal_panel_cmd_label.Visible = false;
-                    cal_panel_button_browse.Enabled = true;
                     cal_panel_button_browse.Visible = false;
-
+                    cal_panel_button_browse.Enabled = false;
 
                     //calibration panel
                     panel_calibration.Visible = true;
                     //is_sensordata_valid = false;
 
-                    //picture box
-                    //pictureBox_calibration.Size = new Size(135, 240);
-                    pictureBox_calibration.Visible = true;
+                    
+                    
 
                     //start battery calibration steps
                     calibration_step = 0;
@@ -2506,8 +2591,7 @@ namespace WocketConfigurationApp
                 cal_panel_button_ok.Enabled = false;
                 cal_panel_button_ok.Text = "PAUSE";
                 cal_panel_label_status.Text = "Calibrating Battery Values...";
-                cal_panel_values_BTpercent.Visible = true;
-                cal_panel_values_BTpercent.Visible = true;
+                //cal_panel_values_BTpercent.Visible = true;
                 Application.DoEvents();
 
                 // start battery calibration & initialize time counters
@@ -2567,7 +2651,7 @@ namespace WocketConfigurationApp
                 cal_panel_button_ok.Enabled = false;
                 cal_panel_button_ok.Text = "PAUSE";
                 cal_panel_label_status.Text = "Calibrating Battery Values...";
-                cal_panel_values_BTpercent.Visible = true;
+                //cal_panel_values_BTpercent.Visible = true;
                 Application.DoEvents();
 
                 // start battery calibration
@@ -2704,7 +2788,11 @@ namespace WocketConfigurationApp
             cal_panel_cal_values.Visible = false;
 
             panel_calibration.Visible = false;
-            
+
+
+            cal_panel_battery_log_textBox.Visible = false;
+
+
             //buttons
             button_load.Enabled = true;
             button_finish.Enabled = true;

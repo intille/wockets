@@ -124,6 +124,7 @@ namespace WocketConfigurationApp
             this.button_load = new System.Windows.Forms.Button();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.timerPlotter = new System.Windows.Forms.Timer(this.components);
+            this.cal_panel_battery_log_textBox = new System.Windows.Forms.TextBox();
             this.panel1.SuspendLayout();
             this.cal_panel_cal_values_std.SuspendLayout();
             this.cal_panel_cal_values.SuspendLayout();
@@ -911,6 +912,7 @@ namespace WocketConfigurationApp
             this.panel_calibration.Controls.Add(this.cal_panel_button_ok);
             this.panel_calibration.Controls.Add(this.cal_panel_cal_values);
             this.panel_calibration.Controls.Add(this.cal_panel_values_BTpercent);
+            this.panel_calibration.Controls.Add(this.cal_panel_battery_log_textBox);
             this.panel_calibration.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.panel_calibration.Location = new System.Drawing.Point(496, 33);
             this.panel_calibration.Name = "panel_calibration";
@@ -1189,6 +1191,18 @@ namespace WocketConfigurationApp
             this.timerPlotter.Interval = 50;
             this.timerPlotter.Tick += new System.EventHandler(this.timerPlotter_Tick);
             // 
+            // cal_panel_battery_log_textBox
+            // 
+            this.cal_panel_battery_log_textBox.BackColor = System.Drawing.Color.DimGray;
+            this.cal_panel_battery_log_textBox.ForeColor = System.Drawing.Color.White;
+            this.cal_panel_battery_log_textBox.Location = new System.Drawing.Point(58, 27);
+            this.cal_panel_battery_log_textBox.Multiline = true;
+            this.cal_panel_battery_log_textBox.Name = "cal_panel_battery_log_textBox";
+            this.cal_panel_battery_log_textBox.ReadOnly = true;
+            this.cal_panel_battery_log_textBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.cal_panel_battery_log_textBox.Size = new System.Drawing.Size(349, 250);
+            this.cal_panel_battery_log_textBox.TabIndex = 81;
+            // 
             // FormTestWocket
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1338,5 +1352,6 @@ namespace WocketConfigurationApp
         private System.Windows.Forms.Label label28;
         private System.Windows.Forms.Label cal_panel_loss;
         private System.Windows.Forms.Label label29;
+        private System.Windows.Forms.TextBox cal_panel_battery_log_textBox;
     }
 }
