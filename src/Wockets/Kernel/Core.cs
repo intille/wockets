@@ -1410,7 +1410,11 @@ namespace Wockets.Kernel
         }
 
 
-
+        /// <summary>
+        /// Sends a request to the kernel to get the values for the interrupt timer counters for  a sepcific wocket
+        /// </summary>
+        /// <param name="mac">MAC address for the wocket</param>
+        /// <returns>TRUE if the request is sent successfully otherwise false</returns>
         public static bool GET_WOCKET_TCT(string mac)
         {
             bool success = false;
@@ -1438,7 +1442,14 @@ namespace Wockets.Kernel
             return success;
         }
 
-
+        /// <summary>
+        /// Sends a request to set the interrupt timer counters
+        /// </summary>
+        /// <param name="mac">MAC address of the wocket</param>
+        /// <param name="tct">value for the timer counter for (reps-1) iterations</param>
+        /// <param name="reps">number of reps to wait on that counter before sampling</param>
+        /// <param name="last">value of the timer counter for the last iteration</param>
+        /// <returns></returns>
         public static bool SET_TCT(string mac, int tct,int reps,int last)
         {
             bool success = false;
@@ -1466,6 +1477,11 @@ namespace Wockets.Kernel
             kernelLock.Release();
             return success;
         }
+
+        /// <summary>
+        /// Writes the values of the interrupt timer to the registry
+        /// </summary>
+        /// <param name="tct">Stores the values for the interrupt timer</param>
         public static void WRITE_TCT(TCT_RSP tct)
         {
             kernelLock.WaitOne();
@@ -1488,7 +1504,10 @@ namespace Wockets.Kernel
         }
 
 
-
+        /// <summary>
+        /// Reads the values of the interrupt timer from the registry
+        /// </summary>
+        /// <returns>True if read successfully otherwise false</returns>
         public static bool READ_TCT()
         {
             bool success = false;
