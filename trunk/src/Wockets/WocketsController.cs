@@ -242,7 +242,7 @@ namespace Wockets
             aPollingThread.Priority = ThreadPriority.Highest;            
             aPollingThread.Start();
 
-            if (((this._Mode== MemoryMode.BluetoothToShared) ||(this._Mode== MemoryMode.SharedToLocal)) && (!_Bursty))
+            if (((this._Mode == MemoryMode.BluetoothToShared) || (this._Mode == MemoryMode.SharedToLocal) || (this._Mode == MemoryMode.BluetoothToLocal)) && (!_Bursty))
             {
                 _Saving = true;
                 aSavingThread = new Thread(new ThreadStart(Save));

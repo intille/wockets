@@ -67,27 +67,12 @@ namespace Wockets.Utils.HttpUploader
   #endregion
 
 
-            #region Event Handler
-
-            //public bool _IsFileUploadSessionRunning(object sender,MyEventArgs e)
-            //{
-            //    return fileUploadSessionRunning;
-            //}
-            
-            #endregion
-
-
-
-
         #region  Start File Uploader Monitoring Thread
 
         public FileUploader(string url)
         {
 
             this.uri = url;
-
-            //create delegate
-            //FileUploaderResponseHandler myHandler = new FileUploaderResponseHandler(_IsFileUploadSessionRunning);
 
             //Initialize the file upload monitor
             fileUploadMonitorThread = new Thread(new ThreadStart(fileUploadMonitor));
@@ -573,8 +558,6 @@ namespace Wockets.Utils.HttpUploader
 
         #endregion 
 
-
-
         #region MD5 
 
         public static String GetMD5HashFromFile(String fileName)
@@ -695,7 +678,7 @@ namespace Wockets.Utils.HttpUploader
 
                 #region commented
 
-                /*
+                
                 #region Web Request
 
                 // Create the web request
@@ -754,57 +737,6 @@ namespace Wockets.Utils.HttpUploader
                 
 
                 #region commented
-
-                //String header = "Content-Disposition: form-data; name=\"project\"\r\n\r\n";
-                //header += projectName + "\r\n--" + boundary + "\r\n";
-
-                //// subject id
-                //header += "Content-Disposition: form-data; name=\"subject_id\"\r\n\r\n";
-                //header += subjectId + "\r\n--" + boundary + "\r\n";
-
-                //// data type
-                //header += "Content-Disposition: form-data; name=\"data_type\"\r\n\r\n";
-                //header += dataType +"\r\n--" + boundary + "\r\n";
-
-                //// date string
-                //header += "Content-Disposition: form-data; name=\"date_string\"\r\n\r\n";
-                //header += dateString + "\r\n--" + boundary + "\r\n";
-
-                //// app id
-                //header += "Content-Disposition: form-data; name=\"app_id\"\r\n\r\n";
-                //header += subDirectoryPath + "\r\n--" + boundary + "\r\n";
-
-                //// unix time
-                //header += "Content-Disposition: form-data; name=\"unix_time\"\r\n\r\n";
-                //header += unixTime + "\r\n--" + boundary + "\r\n";
-
-                //// notes
-                //header += "Content-Disposition: form-data; name=\"notes\"\r\n\r\n";
-                //header += notes + "\r\n--" + boundary + "\r\n";
-
-                //header += "Content-Disposition: form-data; name=\"sendfile\"; filename=\"" + Path.GetFileName(filePath) + "\"\r\nContent-Type: application/octet-stream\r\n\r\n";
-
-
-
-                ////convert the header to a byte array
-                //byte[] headerbytes = System.Text.Encoding.UTF8.GetBytes(header);
-
-                //// Add all of the header and file bytes up.
-                //httpWebRequest.ContentLength = new FileInfo(filePath).Length + headerbytes.Length;  
-
-                //// Get the output stream
-                //Stream requestStream = httpWebRequest.GetRequestStream();
-
-
-                //#region commented
-                //// Write out the starting boundry
-                ////requestStream.Write(boundarybytes, 0, boundarybytes.Length);
-                //#region commented
-
-
-                //// Write the header including the filename.
-                //requestStream.Write(headerbytes, 0, headerbytes.Length);
-
 
                 #endregion 
 
@@ -889,12 +821,12 @@ namespace Wockets.Utils.HttpUploader
 
                 #endregion
 
-                */
+                
 
                 #endregion 
 
 
-                return "success";
+                
 
 
             }
