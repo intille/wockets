@@ -15,7 +15,7 @@
   $tNG_email_user = "";
   $tNG_email_port = "25";
   $tNG_email_password = "";
-  $tNG_email_defaultFrom = "noreply@mit.edu";
+  $tNG_email_defaultFrom = "wockets@dhcp-18-85-23-131.media.mit.edu";
   $tNG_login_config["connection"] = "Wockets";
   $tNG_login_config["table"] = "ACCOUNTS";
   $tNG_login_config["pk_field"] = "user_id";

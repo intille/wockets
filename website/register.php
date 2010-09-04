@@ -1,6 +1,6 @@
 <?php if ($_POST['username']){
   require_once('recaptchalib.php');
-  $privatekey = "6Le38bsSAAAAAI9t3hzCeY9Gdij8cPk3hrfsDoVz";
+  $privatekey = "6Ldzx7wSAAAAAIXj9XX5QoxK0zKvfuIQyFrtuaPP";
   $resp = recaptcha_check_answer ($privatekey,
                                 $_SERVER["REMOTE_ADDR"],
                                 $_POST["recaptcha_challenge_field"],
@@ -104,7 +104,7 @@ $userRegistration->addColumn("first_name", "STRING_TYPE", "POST", "first_name");
 $userRegistration->addColumn("password", "STRING_TYPE", "POST", "password");
 $userRegistration->addColumn("last_name", "STRING_TYPE", "POST", "last_name");
 $userRegistration->addColumn("email", "STRING_TYPE", "POST", "email");
-$userRegistration->addColumn("registration_datetime", "DATE_TYPE", "POST", "registration_datetime");
+$userRegistration->addColumn("registration_datetime", "STRING_TYPE", "POST", "registration_datetime");
 $userRegistration->setPrimaryKey("user_id", "NUMERIC_TYPE");
 
 // Execute all the registered transactions
@@ -173,7 +173,7 @@ $totalRows_rsACCOUNTS = mysql_num_rows($rsACCOUNTS);
 	<tr><td>
 	<?php
 	 require_once('recaptchalib.php');
-  	 $publickey = "6Le38bsSAAAAAAyTc5sFaKVQN6bxAVi8farxBm1U"; // you got this from the signup page
+  	 $publickey = "6Ldzx7wSAAAAAMX1fDdCa69BrxDeM9kZwvyUTHyB"; // you got this from the signup page
   	 echo recaptcha_get_html($publickey);
 	?>
 	</td></tr>
