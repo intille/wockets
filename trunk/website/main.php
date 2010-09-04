@@ -44,7 +44,9 @@
   </div>
 </p>
 <p>&nbsp;</p>
-<p>&nbsp;</p>
+<p>Wockets &lt;mac&gt;&lt;color&gt;</p>
+<p>Wockets_Assignment when and when sent and notes </p>
+<p>Phone Assignment... when and when sent and notes </p>
 <p>Please embed the summary view for all users </p>
 </body>
 </html>

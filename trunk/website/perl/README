@@ -1,0 +1,58 @@
+tree.pl 2.0.6, 2003-01-22
+Copyright (C) 1998-2003 Daniel Naber
+Homepage: http://www.danielnaber.de/tree/
+
+tree.pl walks through a directory and builds a HTML list of all
+files. The files' <title> tags are taken as the linked text, and 
+if there is no <title> tag, the filename is used.
+
+How to use this software
+
+    1. On Unix, check if the path to perl in the very first line 
+       of tree.pl is correct.
+    2. Go to the configuration section in tree.pl and modify the values if 
+       necessary.
+       Note that the most important values are at the top, so if something
+       fails the error is probably there.
+    3. On Unix, set execute permission: chmod u+rx tree.pl
+    4. -Call the script from command line: ./tree.pl <directory> >sitemap.html
+       -Or copy tree.pl and tree-template.html to your cgi-bin
+        directory and set execute permissions for the web server
+        (chmod u+rx tree.pl or, if that fails, chmod a+rx tree.pl).
+        Set $conf::cgi = 1 in the configuration section.
+        Set $conf::basedir_cgi to the directory that you want to list.
+        Call it in your browser: http://domain.com/cgi-bin/tree.pl
+        If it fails with "Internal Server Error", please see the server's 
+        error log for a detailed error message.
+    5. Optionally edit tree-template.html to modify the look of the 
+       generated file.
+
+Changes (important ones):
+
+    2003-01-22: released version 2.0.6:
+        -SECURITY: fix CGI mode. 2.0.5 opens a security hole if configured
+         with $conf::cgi = 1
+        -don't stop if there's a permission problem (thanks to Roberto Mazzoni)
+    2002-12-21: released version 2.0.5:
+        -bug fix: escape file name in regular expression
+        -list all file types by default
+        -require one argument (the directory that should be listed)
+        -new option: max_title_length
+    2002-11-23: released version 2.0.4:
+        -don't default to "/" as base url
+        -bug fix for recognizing recently modified files (thanks to Yifang Dai)
+        -speed up: don't try to load binary files (thanks to Narbey Derbekyan)
+    2002-03-28: released version 2.0.2:
+        -fixed problem on Windows if default file did not exist
+    2001-10-27: released version 2.0.1:
+        -don't ignore default file in the top directory
+        -better escaping of characters in title, thanks to Philip Kromer
+    2001-08-22: released version 2.0:
+        -complete rewrite
+        -output is now valid XHTML
+    1997-09-07: first version
+
+TODO/Bugs/Problems:
+
+    -doesn't care about meta tags for robots
+    -will produce invalid XHTML if the files' title tags contain illegal characters
