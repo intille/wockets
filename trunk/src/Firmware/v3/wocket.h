@@ -1,3 +1,5 @@
+#define AC_BUFFER_SIZE 960
+
 typedef struct{
 	unsigned char byte1;
 	unsigned char byte2;
@@ -132,6 +134,8 @@ typedef struct{
 #define GET_FV			0b10111
 #define GET_TCT			0b11000
 #define SET_TCT			0b11001
+#define SET_VTM			0b11010
+#define ACK				0b11011
 
 /* Macros for Wockets Commands */
 
@@ -180,6 +184,10 @@ typedef struct{
 #define m_SET_TCTREPS(aByte2,aByte3) ( (unsigned char)((aByte2 & 0x3f)<<2)| (unsigned char)((aByte3>>5)&0x03) )
 #define m_SET_TCTLAST(aByte3,aByte4) ( (unsigned char)((aByte3 & 0x1f)<<3)| (unsigned char)((aByte4>>4)&0x07) )
 
+
+/* SET_TM Macros */
+#define m_ACK(aByte2,aByte3,aByte4) 	( (((unsigned short)(aByte2& 0x7f))<<9) | (((unsigned short)(aByte3& 0x7f))<<2) | (((unsigned short)(aByte4>>5))&0x03))
+
 /* Reserved Wockets Response Opcodes */
 
 #define BL_RSP 		0b00000
@@ -197,6 +205,9 @@ typedef struct{
 #define BC_RSP		0b01100
 #define AC_RSP 		0b01101
 #define TCT_RSP		0b01110
+#define ACC_RSP		0b01111 //activity count count
+#define OFT_RSP		0b10000 //offset AC count
+
 
 
 /* Macros for Wockets Responses */
@@ -307,9 +318,11 @@ typedef struct{
 
 /* AC_RSP Macros */
 #define m_AC_RSP_BYTE0			RESPONSE_HEADER(AC_RSP)
-#define m_AC_RSP_BYTE1(count)	((count>>9) &0x7f)
-#define m_AC_RSP_BYTE2(count)	((count>>2) & 0x7f)
-#define m_AC_RSP_BYTE3(count)	((count & 0x03)<<5)
+#define m_AC_RSP_BYTE1(seq_num)	((seq_num>>9) &0x7f)
+#define m_AC_RSP_BYTE2(seq_num)	((seq_num>>2) & 0x7f)
+#define m_AC_RSP_BYTE3(seq_num,count)	( ((seq_num & 0x03)<<5) | ((count>>11) & 0x1f) )
+#define m_AC_RSP_BYTE4(count)	((count>>4) &0x7f)
+#define m_AC_RSP_BYTE5(count)	((count & 0x0f)<<2)
 
 
 /* TCT_RSP Macros */
@@ -318,6 +331,17 @@ typedef struct{
 #define m_TCT_RSP_BYTE2(tct,reps)	(((tct&0x01)<<6) | (reps>>2))
 #define m_TCT_RSP_BYTE3(reps,last)	(((reps&0x03)<<5) | (last>>3))
 #define m_TCT_RSP_BYTE4(last)		((last & 0x07)<<4)
+
+
+/* ACC_RSP Macros */
+#define m_ACC_RSP_BYTE0			RESPONSE_HEADER(ACC_RSP)
+#define m_ACC_RSP_BYTE1(count)	((count>>7) &0x7f)
+#define m_ACC_RSP_BYTE2(count)	(count & 0x7f)
+
+/* OFT_RSP Macros */
+#define m_OFT_RSP_BYTE0			RESPONSE_HEADER(OFT_RSP)
+#define m_OFT_RSP_BYTE1(offset)	((offset>>7) &0x7f)
+#define m_OFT_RSP_BYTE2(offset)	(offset & 0x7f)
 
 
 #define m_SUCCESS_RESPONSE_BYTE1			RESPONSE_HEADER(SUCCESS_RESPONSE)
@@ -355,6 +379,15 @@ extern unsigned long _wShutdownTimer;
 extern unsigned long _DEFAULT_SHUTDOWN;
 extern unsigned char _wPDT;
 
+extern unsigned short cseq;
+extern unsigned short sseq;
+extern unsigned short kseq;
+extern unsigned short dseq;
+extern unsigned short ci;
+extern unsigned short si;
+extern unsigned short AC_NUMS;
+extern unsigned short summary_count;
+
 typedef struct{
 	unsigned char byte1; //sync bit, 2 bits packet type, 3 bits sensitivity, 2 bits MSB X
 	unsigned char byte2;	//0 bit, 7 X
@@ -391,6 +424,8 @@ extern unsigned char dataSubindex;
 extern unsigned short *xsp;
 extern unsigned short *ysp;
 extern unsigned short *zsp;
+
+extern unsigned short acount[AC_BUFFER_SIZE];
 
 #define m_SET_X(pdata,x,index) switch(index){\
 									case 0: pdata.byte1=(x>>2);pdata.byte2=((x<<6)&0xc0);break;\
@@ -441,16 +476,21 @@ void _wocket_set_flag(unsigned char flag);
 void _send_data(void);
 void _receive_data(void);
 void _send_batch_count(unsigned short count);
-void _send_summary_count(unsigned short count);
+void _send_ac_count(unsigned short count);
+//void _send_summary_count(unsigned short count);
+void _send_acs();
+void _send_ac_offset(unsigned short offset);
 void _send_data_bufferred(void);
+void _send_tm();
+void _send_sr();
 
 unsigned char _wocket_get_baudrate(void);
 void _wocket_set_baudrate(unsigned char baudrate);
 wockets_uncompressed_packet _encode_packet(unsigned short x, unsigned short y, unsigned short z);
 void _transmit_packet(wockets_uncompressed_packet packet);
 
-//void _send_uncompressed_pdu(unsigned short x, unsigned short y, unsigned short z);
-//void _send_compressed_pdu(unsigned char x, unsigned char y, unsigned char z);
+void _send_uncompressed_pdu(unsigned short x, unsigned short y, unsigned short z);
+void _send_compressed_pdu(unsigned char x, unsigned char y, unsigned char z);
 
 
 //unsigned int min_shutdown_timer;

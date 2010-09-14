@@ -44,11 +44,18 @@ data_unit data7[50];*/
 //unsigned short zs[3000];
 
 data_unit data[750];
-unsigned short acount[960]; //16 hours
+unsigned short acount[AC_BUFFER_SIZE]; //16 hours
+unsigned short AC_NUMS=0;
 unsigned short summaryindex=0;
 unsigned short summary_count=2400;
 
-//data_unit pose[360];
+unsigned short cseq=0;
+unsigned short sseq=0;
+unsigned short kseq=0;
+unsigned short dseq=0;
+unsigned short ci=0;
+unsigned short si=0;
+
 
 unsigned short x;
 unsigned short y;
@@ -89,6 +96,8 @@ double vmag;
 unsigned short vmags;
 unsigned short val;
 unsigned char justconnected=0;
+
+unsigned short blink_counter;
 
 double Filter(unsigned short data,int axis)
 {
@@ -189,6 +198,7 @@ int main()
 	_wocket_initialize();
 		
 
+	AC_NUMS=_SAMPLING_RATE *60;
 	power_adc_disable();
   	power_spi_disable();
   	power_timer0_disable();
@@ -212,34 +222,42 @@ int main()
 
 			z=_atmega_a2dConvert10bit(ADC2);
 	
-	//if (_wTM!=_TM_Continuous)
-	//		{
 
+
+			/**** Activity Count ****/
 			val=Filter(x,0);			
 			vmag=val;
 			val= Filter(y,1);			
 			vmag+=val;
 			val = Filter(z,2);			
 			vmag+=val;
-			vmags=vmag+acount[summaryindex];
-			
+			vmags=vmag+acount[ci];			
 			if (vmags>65535.0)
-				acount[summaryindex]=65535;
+				acount[ci]=65535;
 			else
-				acount[summaryindex]=(unsigned short)vmags;//+=(unsigned short)vmag;
+				acount[ci]=(unsigned short)vmags;
 			
 
 			if (summary_count==0)
 			{
-				++summaryindex;
-				if (summaryindex==960)
-					summaryindex=0;
-				acount[summaryindex]=0;
-				summary_count=2400;
+				++ci;
+				if (ci==AC_BUFFER_SIZE)
+					ci=0;
+				cseq++;
+
+				if (ci==si)
+				{
+					si++;
+					if (si==AC_BUFFER_SIZE)
+						si=0;
+					sseq++;
+				}
+				acount[ci]=0;
+				summary_count=AC_NUMS;
 			}else
 				summary_count--;
-	//	}
-		
+	
+			/*********************************/
 #else
 			x=_atmega_a2dConvert10bit(ADC3);
 			y=_atmega_a2dConvert10bit(ADC2);
@@ -286,27 +304,24 @@ int main()
 						break;
 				}
 											
-				//_transmit_packet(_encode_packet( x, y, z));	
-				//_send_uncompressed_pdu(x, y, z);
-				//_send_pdu(x,y,z);
+		
 				if (justconnected==1)
 				{
 					_send_tm();
 					justconnected=2;
-				}
-				//y=dataIndex; z=dataSubindex;
+				}		
 				_send_pdu(x,y,z);
 
 				
 					//Send summary activity count
-					for (int i=0;(i<summaryindex);i++){
+				/*	for (int i=0;(i<summaryindex);i++){
 						_send_summary_count(acount[i]);
 						acount[i]=0;
 					}
-					if (summaryindex<960){
+					if (summaryindex<AC_BUFFER_SIZE){
 						acount[0]=acount[summaryindex];
 						summaryindex=0;
-					}
+					}*/
 
 			}
 			else 
@@ -319,17 +334,18 @@ int main()
 					_send_sr();					
 					_send_tm();
 					_send_batch_count(batch_counter*4);
-
-
+					
+									
+					_send_acs();
 					//Send summary activity count
-					for (int i=0;(i<summaryindex);i++){
+					/*for (int i=0;(i<summaryindex);i++){
 						_send_summary_count(acount[i]);
 						acount[i]=0;
 					}
-					if (summaryindex<960){
+					if (summaryindex<AC_BUFFER_SIZE){
 						acount[0]=acount[summaryindex];
 						summaryindex=0;
-					}
+					}*/
 
 					
 					if (batch_counter<750) // Go from 0 up to batch_counter
@@ -338,16 +354,14 @@ int main()
 						{
 							m_GET_X(x,data[i].byte1,data[i].byte2,0);
 							m_GET_Y(y,data[i].byte2,data[i].byte3,0);
-							m_GET_Z(z,data[i].byte3,data[i].byte4,0);
-							//_transmit_packet(_encode_packet(x,y,z));
+							m_GET_Z(z,data[i].byte3,data[i].byte4,0);							
 							//_send_uncompressed_pdu(x, y, z);
 							
 							_send_pdu(x,y,z);
 
 							m_GET_X(x,data[i].byte4,data[i].byte5,1);
 							m_GET_Y(y,data[i].byte6,data[i].byte7,1);
-							m_GET_Z(z,data[i].byte7,data[i].byte8,1);
-							//_transmit_packet(_encode_packet(x,y,z));
+							m_GET_Z(z,data[i].byte7,data[i].byte8,1);							
 							//_send_uncompressed_pdu(x, y, z);
 							
 							_send_pdu(x,y,z);
@@ -355,22 +369,18 @@ int main()
 							m_GET_X(x,data[i].byte8,data[i].byte9,2);
 							m_GET_Y(y,data[i].byte9,data[i].byte10,2);
 							m_GET_Z(z,data[i].byte11,data[i].byte12,2);
-							//_transmit_packet(_encode_packet(x,y,z));
 							//_send_uncompressed_pdu(x, y, z);
 							
 							_send_pdu(x,y,z);
 
 							m_GET_X(x,data[i].byte12,data[i].byte13,3);
 							m_GET_Y(y,data[i].byte13,data[i].byte14,3);
-							m_GET_Z(z,data[i].byte14,data[i].byte15,3);
-							//_transmit_packet(_encode_packet(x,y,z));
+							m_GET_Z(z,data[i].byte14,data[i].byte15,3);							
 							//_send_uncompressed_pdu(x, y, z);
 							
 							_send_pdu(x,y,z);
 
 							_receive_data();
-							//if (_wTM==_TM_Continuous)
-								//break;
 						}
 
 						
@@ -402,16 +412,14 @@ int main()
 						{
 							m_GET_X(x,data[current].byte1,data[current].byte2,0);
 							m_GET_Y(y,data[current].byte2,data[current].byte3,0);
-							m_GET_Z(z,data[current].byte3,data[current].byte4,0);
-							//_transmit_packet(_encode_packet(x,y,z));
+							m_GET_Z(z,data[current].byte3,data[current].byte4,0);							
 							//_send_uncompressed_pdu(x, y, z);
 							
 							_send_pdu(x,y,z);
 
 							m_GET_X(x,data[current].byte4,data[current].byte5,1);
 							m_GET_Y(y,data[current].byte6,data[current].byte7,1);
-							m_GET_Z(z,data[current].byte7,data[current].byte8,1);
-							//_transmit_packet(_encode_packet(x,y,z));
+							m_GET_Z(z,data[current].byte7,data[current].byte8,1);							
 							//_send_uncompressed_pdu(x, y, z);
 							
 							_send_pdu(x,y,z);
@@ -419,15 +427,13 @@ int main()
 							m_GET_X(x,data[current].byte8,data[current].byte9,2);
 							m_GET_Y(y,data[current].byte9,data[current].byte10,2);
 							m_GET_Z(z,data[current].byte11,data[current].byte12,2);
-							//_transmit_packet(_encode_packet(x,y,z));
 							//_send_uncompressed_pdu(x, y, z);
 							
 							_send_pdu(x,y,z);
 
 							m_GET_X(x,data[current].byte12,data[current].byte13,3);
 							m_GET_Y(y,data[current].byte13,data[current].byte14,3);
-							m_GET_Z(z,data[current].byte14,data[current].byte15,3);
-							//_transmit_packet(_encode_packet(x,y,z));
+							m_GET_Z(z,data[current].byte14,data[current].byte15,3);							
 							//_send_uncompressed_pdu(x, y, z);
 							
 							_send_pdu(x,y,z);
@@ -467,7 +473,14 @@ int main()
 
 					}						
 					connected=0;
-					_bluetooth_turn_off();		
+
+					//Don't turn off the radio if a request to switch mode has been received
+					if (_wTM==_TM_Continuous)
+						_bluetooth_turn_on();	
+					else
+						_bluetooth_turn_off();		
+					
+					
 					seconds_disconnected=0;
 					_greenled_turn_off();
 				
@@ -506,6 +519,16 @@ int main()
 ISR(TIMER2_OVF_vect)
 {
 
+/*	blink_counter++;
+
+	if (blink_counter==(_SAMPLING_RATE*2))
+		_greenled_turn_on();
+	else if (blink_counter==(_SAMPLING_RATE*3))
+	{
+		_greenled_turn_off();
+		blink_counter=0;
+	}
+*/
 	/* If the wocket is docked in shut it down */
 
 /*	if (_is_docked())
@@ -547,7 +570,6 @@ ISR(TIMER2_OVF_vect)
 		return;
 	}
 
-
 	
 	/* Sample data and transmt it if necessary */
 	sampleFlag=1;
@@ -560,11 +582,11 @@ ISR(TIMER2_OVF_vect)
 		{
 			justconnected=0;
 			compress=0; //false
-			if (_wPDT!=0){
-				_wShutdownTimer--;
-				if (_wShutdownTimer==0)
-					_atmega_finalize();
-			}
+			//if (_wPDT!=0){
+			//	_wShutdownTimer--;
+				//if (_wShutdownTimer==0)
+				//	_atmega_finalize();
+			//}
 			return;		
 		}else if (justconnected==0)
 			justconnected=1;
@@ -577,12 +599,15 @@ ISR(TIMER2_OVF_vect)
 	}
 	else if (_wTM==_TM_Burst_60)
 	{
+
 		if (_wPDT!=0)
 			_wShutdownTimer--;
 
 		 _wPC++;
 
-		if (!_bluetooth_is_connected()){
+
+		if (!_bluetooth_is_connected())
+		{
 			
 			compress=0; 
 
@@ -590,44 +615,23 @@ ISR(TIMER2_OVF_vect)
 				seconds_disconnected++;
 			else if (seconds_disconnected==1800)
 			{
-				_bluetooth_turn_on();
-				//_atmega_reset();
+				_bluetooth_turn_on();		
 				seconds_disconnected=1801;			
+				_delay_ms(10);
 			}
-			return;	
 
+			return;	
 		}
+	
+	
+
 		//reset shutdown timer if connected
 		if ((_wPDT!=0) && (_wShutdownTimer!=_DEFAULT_SHUTDOWN))
 			_wShutdownTimer=_DEFAULT_SHUTDOWN;
 
 
-		/*seconds_passed2=0;
-		while (seconds_passed2<20)
-		{
-			_delay_ms(5);
-			seconds_passed2++;
-			_receive_data();
-			if (_wTM==_TM_Continuous)
-				break;
-		}						
-*/
-
 		connected=1;
 		_receive_data();		
-		/*_send_batch_count(2400);
-		_send_data_bufferred();
-
-		seconds_passed=0;
-		while (seconds_passed<400)
-		{
-			_delay_ms(5);
-			seconds_passed++;
-
-		}
-						
-		_bluetooth_turn_off();		
-		seconds_disconnected=0;*/
 	}
 
 
