@@ -604,29 +604,38 @@
     <Compile Include="..\..\src\Wockets\Data\Responses\TCT_RSP.cs">
       <Link>Data\Responses\TCT_RSP.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\CurrentPhone.cs" >
+    <Compile Include="..\..\src\Wockets\CurrentPhone.cs">
       <Link>CurrentPhone.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\CurrentSubject.cs" >
+    <Compile Include="..\..\src\Wockets\CurrentSubject.cs">
       <Link>CurrentSubject.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Utils\Hash.cs" >
+    <Compile Include="..\..\src\Wockets\Utils\Hash.cs">
       <Link>Utils\Hash.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Utils\Http\FileUploader.cs" >
+    <Compile Include="..\..\src\Wockets\Utils\Http\FileUploader.cs">
       <Link>Utils\Http\FileUploader.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Utils\Tapi\ByteCopy.cs" >
+    <Compile Include="..\..\src\Wockets\Utils\Tapi\ByteCopy.cs">
       <Link>Utils\Tapi\ByteCopy.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Utils\Tapi\CellTSP.cs" >
+    <Compile Include="..\..\src\Wockets\Utils\Tapi\CellTSP.cs">
       <Link>Utils\Tapi\CellTSP.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Utils\Tapi\Tapi.cs" >
+    <Compile Include="..\..\src\Wockets\Utils\Tapi\Tapi.cs">
       <Link>Utils\Tapi\Tapi.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Utils\Tapi\TapiEnums.cs" >
+    <Compile Include="..\..\src\Wockets\Utils\Tapi\TapiEnums.cs">
       <Link>Utils\Tapi\TapiEnums.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\SET_VTM.cs" >
+      <Link>Data\Commands\SET_VTM.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\ACC_RSP.cs" >
+      <Link>Data\Responses\ACC_RSP.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\OFT_RSP.cs" >
+      <Link>Data\Responses\OFT_RSP.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
