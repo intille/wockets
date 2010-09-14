@@ -280,7 +280,8 @@ void _atmega_disable_timer2(void)
 
 
 void _atmega_reset(void)
-{               
+{   
+		_atmega_disable_timer2();            
         cli(); //irq's off
         wdt_enable(WDTO_15MS); //wd on,15ms
         while(1); //loop 

@@ -219,11 +219,11 @@ void _wocket_initialize(void)
 	{
 
 		// Set the sampling rate to 90Hz
-		//_SAMPLING_RATE=40;
-		//_wTM=_TM_Burst_60;
+		_SAMPLING_RATE=40;
+		_wTM=_TM_Burst_60;
 
-		_SAMPLING_RATE=90;
-		_wTM=_TM_Continuous;
+		//_SAMPLING_RATE=90;
+		//_wTM=_TM_Continuous;
 	
 		// Write the sampling rate to the EEPROM
 		if (battery>300)
@@ -427,17 +427,71 @@ void _send_batch_count(unsigned short count)
  
 }
 
-void _send_summary_count(unsigned short count)
+void _send_ac_count(unsigned short count)
+{
+ 
+    aBuffer[0]=m_ACC_RSP_BYTE0;
+    aBuffer[1]=m_ACC_RSP_BYTE1(count);
+    aBuffer[2]=m_ACC_RSP_BYTE2(count);
+	for (int i=0;(i<3);i++)                                                                                       
+       	_bluetooth_transmit_uart0_byte(aBuffer[i]); 
+ 
+}
+
+
+void _send_ac_offset(unsigned short offset)
+{
+ 
+    aBuffer[0]=m_OFT_RSP_BYTE0;
+    aBuffer[1]=m_OFT_RSP_BYTE1(offset);
+    aBuffer[2]=m_OFT_RSP_BYTE2(offset);
+	for (int i=0;(i<3);i++)                                                                                       
+       	_bluetooth_transmit_uart0_byte(aBuffer[i]); 
+ 
+}
+
+void _send_acs()
+{
+	unsigned short count=0;
+	unsigned short seq_num=sseq;
+	unsigned short num_acs=0;
+
+	if (ci>si)
+		num_acs=ci-si;
+	else
+		num_acs=ci+(AC_BUFFER_SIZE-si);
+
+	_send_ac_count(num_acs);
+	_send_ac_offset(AC_NUMS-summary_count); //send offset of the last activity count
+	for (int i=si;(i<ci);)
+	{		
+		count=acount[i];
+		aBuffer[0]=m_AC_RSP_BYTE0;
+    	aBuffer[1]=m_AC_RSP_BYTE1(seq_num);
+    	aBuffer[2]=m_AC_RSP_BYTE2(seq_num);
+		aBuffer[3]=m_AC_RSP_BYTE3(seq_num,count);
+		aBuffer[4]=m_AC_RSP_BYTE4(count);
+		aBuffer[5]=m_AC_RSP_BYTE5(count);
+		for (int j=0;(j<6);j++)                                                                                       
+       		_bluetooth_transmit_uart0_byte(aBuffer[j]); 
+		i++;
+		if (i==AC_BUFFER_SIZE)
+			i=0;
+		seq_num++;
+	}
+}
+
+/*void _send_summary_count(unsigned short count)
 {
   	
     aBuffer[0]=m_AC_RSP_BYTE0;
     aBuffer[1]=m_AC_RSP_BYTE1(count);
     aBuffer[2]=m_AC_RSP_BYTE2(count);
 	aBuffer[3]=m_AC_RSP_BYTE3(count);
-	for (int i=0;(i<4);i++)                                                                                       
+	for (int i=0;(i<6);i++)                                                                                       
        	_bluetooth_transmit_uart0_byte(aBuffer[i]); 
  
-}
+}*/
 
 void _send_sr()
 {
@@ -458,6 +512,9 @@ void _send_tm()
        	_bluetooth_transmit_uart0_byte(aBuffer[i]); 
  
 }
+
+
+
 
 void _send_data_bufferred(void)
 {
@@ -555,9 +612,9 @@ void _receive_data(void)
 				case (unsigned char)RESUME:
 				case (unsigned char)GET_TM:
 				case (unsigned char)GET_BTCAL:
-				case (unsigned char) GET_HV:
-				case (unsigned char) GET_FV:				
-				case (unsigned char) GET_TCT:
+				case (unsigned char)GET_HV:
+				case (unsigned char)GET_FV:				
+				case (unsigned char)GET_TCT:
                 	command_length=1;
                     break;
                 case (unsigned char)SET_SEN:
@@ -565,13 +622,17 @@ void _receive_data(void)
                 case (unsigned char)SET_ALT:
                 case (unsigned char)SET_PDT:
                 case (unsigned char)SET_TM:                
+				case (unsigned char)SET_VTM:  
                      command_length=2;
+                     break;
+     			case (unsigned char)ACK:
+                     command_length=4;
                      break;
 				case (unsigned char)SET_TCT:                
                      command_length=5;
                      break;
                 case (unsigned char)SET_CAL:
-				case (unsigned char) SET_BTCAL:
+				case (unsigned char)SET_BTCAL:
                       command_length=10;                                                              
                       break;                                                          
     		}
@@ -710,8 +771,10 @@ void _receive_data(void)
                    case (unsigned char) SET_TM:  
 				   		_wTM=m_SET_TM(rBuffer[1]);
 						eeprom_write_byte(&_NV_TM,_wTM);
-	//					_yellowled_turn_on();
-						_atmega_reset();
+						processed_counter=command_counter;
+						break;
+                   case (unsigned char) SET_VTM:  
+				   		_wTM=m_SET_TM(rBuffer[1]);						
 						processed_counter=command_counter;
 						break;
                     case (unsigned char) SET_CAL:                                                                    
@@ -836,6 +899,28 @@ void _receive_data(void)
 						rBuffer[4]=m_TCT_RSP_BYTE4(_wTCNT2_last);
 						processed_counter=command_counter;				
 						response_length=5;
+						break;	
+
+					case (unsigned char) ACK: 
+						kseq=m_ACK(rBuffer[1],rBuffer[2],rBuffer[3]);
+
+						// on receiving an ack for seq num K
+						// only update start pointers if k is
+						// still in the AC array and did not overflow
+						// If the array overflows, start sequences are updated
+						// automatically elsewhere during insertion of the AC causing the overflow
+						// just a precaution if old ACK K are sent (e.g. user gets out of range for long periods)					
+						if ((kseq-sseq)<AC_BUFFER_SIZE) 
+						// no overflow for sure
+						{
+							dseq=cseq-kseq;							
+							if (ci>=dseq) // check for wrap around in the current index
+								si=ci-dseq;
+							else
+								si=AC_BUFFER_SIZE-(dseq-ci);
+							sseq=kseq;							
+						} 
+						processed_counter=command_counter;				
 						break;	
 																					 							                              
                     default:        
