@@ -183,6 +183,9 @@ namespace Wockets.Data.Plotters
                     int tail = this.decoderTails[i];
                     int currentHead = tail;
 
+                    //Check if the decoder got reinitialized
+                    if ((CurrentWockets._Controller._Decoders[i].TotalSamples == 0) && (this.decoderTails[i]!=0))
+                        this.decoderTails[i] = 0;                    
 
                     currentHead = CurrentWockets._Controller._Sensors[i]._Decoder._Head;
 

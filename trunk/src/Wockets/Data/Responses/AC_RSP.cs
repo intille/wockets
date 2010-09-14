@@ -9,6 +9,8 @@ namespace Wockets.Data.Responses
     {
 
         public int _Count;
+        public int _SeqNum;
+        public double _TimeStamp;
 
         public AC_RSP(int id)
             : base(4, ResponseTypes.AC_RSP, (byte)id)

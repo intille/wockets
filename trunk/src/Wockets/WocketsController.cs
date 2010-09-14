@@ -15,11 +15,14 @@ using Wockets.Data.Accelerometers;
 using Wockets.Data.Annotation;
 using Wockets.Data.Features;
 using Wockets.Data.Types;
+using Wockets.Decoders.Accelerometers;
 using WocketsWeka;
 using weka.classifiers;
 using weka;
 using weka.core;
 using weka.classifiers.trees;
+using Wockets.Utils.IPC;
+using System.Runtime.InteropServices;
 #if (PocketPC)
 using Wockets.Utils.IPC.MMF;
 #endif
@@ -95,7 +98,7 @@ namespace Wockets
         public Annotation currentRecord;
 
            
-        public bool _Bursty = false;
+        
 
         public MemoryMode _Mode = MemoryMode.BluetoothToLocal;
         public TransmissionMode _TMode = TransmissionMode.Continuous;
@@ -193,7 +196,22 @@ namespace Wockets
             this._Sensors = new SensorList();
                      
         }
-  
+
+
+        public void Deinitialize()
+        {
+            if (aPollingThread!=null)
+                aPollingThread.Abort();
+
+            if (aSavingThread!=null)
+                aSavingThread.Abort();
+
+            for (int i = 0; (i < this._Receivers.Count); i++)
+            {
+                this._Receivers[i].Dispose();
+                this._Decoders[i].Dispose();
+            }
+        }
         public void Initialize()
         {
 
@@ -218,14 +236,13 @@ namespace Wockets
                 {
                     try
                     {
+                        if (this._Receivers[i]._Type == ReceiverTypes.RFCOMM)
+                            ((RFCOMMReceiver)this._Receivers[i])._TMode = this._TMode;   
                         if (this._Sensors[i]._Loaded)
                         {
                             this._Receivers[i].Initialize();
                             this._Decoders[i].Initialize();
-                        }
-
-                        if (this._Receivers[i]._Type == ReceiverTypes.RFCOMM)
-                            ((RFCOMMReceiver)this._Receivers[i])._Bursty = this._Bursty;                  
+                        }               
                     }
                     catch (Exception e)
                     {
@@ -242,21 +259,338 @@ namespace Wockets
             aPollingThread.Priority = ThreadPriority.Highest;            
             aPollingThread.Start();
 
-            if (((this._Mode == MemoryMode.BluetoothToShared) || (this._Mode == MemoryMode.SharedToLocal) || (this._Mode == MemoryMode.BluetoothToLocal)) && (!_Bursty))
+            if (((this._Mode == MemoryMode.BluetoothToShared) || (this._Mode == MemoryMode.SharedToLocal) || (this._Mode == MemoryMode.BluetoothToLocal)) && (this._TMode== TransmissionMode.Continuous))
             {
                 _Saving = true;
                 aSavingThread = new Thread(new ThreadStart(Save));
                 aSavingThread.Priority = ThreadPriority.Highest;
                 aSavingThread.Start();
             }
+
+            if (this._TMode == TransmissionMode.Bursty60)
+            {
+                reminderDateTime = DateTime.Now.AddSeconds(60);
+                //default is local memory
+                interfaceActivityThread = new Thread(new ThreadStart(InterfaceActivityTracker));
+                interfaceActivityThread.Priority = ThreadPriority.Highest;
+                dataCollectionThread = new Thread(new ThreadStart(DataCollection));
+                terminationThread = new Thread(new ThreadStart(TerminateWockets));
+                terminationThread.Start();
+                interfaceActivityThread.Start();
+                dataCollectionThread.Start();
+
+
+                activitySignal = OpenEvent(EVENT_ALL_ACCESS, false, ActiveName);
+                if (activitySignal == IntPtr.Zero)
+                {
+                    // Can't open the events -- this device probably doesn't define them
+                    return;
+                }
+                activityListenerThread = new Thread(activityListener);
+                activityListenerThread.Start();
+            }
                         
         }
+        public class CE_NOTIFICATION_TRIGGER
+        {
+
+            public UInt32 Size = 0;
+            public UInt32 Type = 1;
+            public UInt32 Event = 11;
+            [MarshalAs(UnmanagedType.LPWStr)]
+            public string pAppName;
+            [MarshalAs(UnmanagedType.LPWStr)]
+            public string pArgs;
+            public SYSTEMTIME StartTime;
+            public SYSTEMTIME EndTime;
+        }
+
+        public class CE_USER_NOTIFICATION
+        {
+            public UInt32 ActionFlags;
+            [MarshalAs(UnmanagedType.LPWStr)]
+            public string pDialogTitle;
+            [MarshalAs(UnmanagedType.LPWStr)]
+            public string DialogText;
+            [MarshalAs(UnmanagedType.LPWStr)]
+            public string Sound;
+            public UInt32 MaxSound;
+            public UInt32 Reserved;
+        }
+        [DllImport("coredll.dll", EntryPoint = "CeClearUserNotification", SetLastError = true)]
+        private static extern bool CeClearUserNotification(int hNotification);
+
+        [DllImport("coredll.dll", EntryPoint = "CeSetUserNotificationEx", SetLastError = true)]
+        private static extern int CeSetUserNotificationEx(int hNotification, byte[] lpTrigger, byte[] lpUserNotification);
+
+        [DllImport("coredll.dll")]
+        private static extern IntPtr CeSetUserNotificationEx(IntPtr notification, CE_NOTIFICATION_TRIGGER notificationTrigger, CE_USER_NOTIFICATION userNotification);
+        [DllImport("CoreDll.dll")]
+        public static extern void SystemIdleTimerReset();
+
+        [DllImport("coredll.dll", SetLastError = true)]
+        static extern int SetSystemPowerState(string psState, int StateFlags, int Options);
 
 
-   
+        const int POWER_STATE_ON = 0x00010000;
+        const int POWER_STATE_OFF = 0x00020000;
+        const int POWER_STATE_IDLE = 0x00100000;
+        const int POWER_STATE_SUSPEND = 0x00200000;
+        const int POWER_FORCE = 4096;
+        const int POWER_STATE_RESET = 0x00800000;
+
+
+        int reminderID = 0;
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct SYSTEMTIME
+        {
+            [MarshalAs(UnmanagedType.U2)]
+            public short Year;
+            [MarshalAs(UnmanagedType.U2)]
+            public short Month;
+            [MarshalAs(UnmanagedType.U2)]
+            public short DayOfWeek;
+            [MarshalAs(UnmanagedType.U2)]
+            public short Day;
+            [MarshalAs(UnmanagedType.U2)]
+            public short Hour;
+            [MarshalAs(UnmanagedType.U2)]
+            public short Minute;
+            [MarshalAs(UnmanagedType.U2)]
+            public short Second;
+            [MarshalAs(UnmanagedType.U2)]
+            public short Milliseconds;
+
+            public SYSTEMTIME(DateTime dt)
+            {
+                Year = (short)dt.Year;
+                Month = (short)dt.Month;
+                DayOfWeek = (short)dt.DayOfWeek;
+                Day = (short)dt.Day;
+                Hour = (short)dt.Hour;
+                Minute = (short)dt.Minute;
+                Second = (short)dt.Second;
+                Milliseconds = (short)dt.Millisecond;
+            }
+        }
+
+        bool[] countSeconds = null;
+        bool connecting = false;
+        void InterfaceActivityTracker()
+        {
+
+            int k = 0;
+            int[] dataSavedSeconds = new int[this._Sensors.Count];
+
+            for (int i = 0; (i < this._Sensors.Count); i++)
+            {
+                dataSavedSeconds[i] = 0;
+
+            }
+            while (true)
+            {
+                if (connecting)
+                {
+                    SystemIdleTimerReset();
+                    if ((this != null) && (this._Sensors.Count > 0))
+                    {
+                        //Check 2 things, num of connection failures
+                        // check if data received is > 0
+                        // if num connections >2, ready to pause
+                        // if data received is >0, ready to pause within 2 seconds.
+
+                        bool receivedSomeData = true;
+                        bool receivedFullData = true;
+                        for (int i = 0; (i < this._Sensors.Count); i++)
+                        {
+                            //halt, if either 1 successful connection was made
+                            // or any data was received
+                            // or 3 or more reconnections were made
+                            if ((((RFCOMMReceiver)this._Receivers[i])._SuccessfulConnections <= 1) &&
+                                (this._Sensors[i]._ReceivedPackets == 0) &&
+                                (((RFCOMMReceiver)this._Receivers[i])._Reconnections <= 3))
+                            {
+                                receivedSomeData = false;
+                                break;
+                            }
+                            else
+                                receivedFullData &= (this._Sensors[i]._ReceivedPackets == ((WocketsDecoder)this._Decoders[i])._ExpectedBatchCount);
+                        }
+
+                        if (receivedSomeData)
+                        {
+                            // if didnt get full data, sleep for 2 seconds
+                            if (!receivedFullData)
+                                Thread.Sleep(3000);
+
+                            //save whatever we have so far then sleep
+                            connecting = false;
+                            SYSTEM_POWER_STATUS_EX2 bpower = Battery.GetSystemPowerStatus();
+                            DateTime now = DateTime.Now;
+                            double unixtime = WocketsTimer.GetUnixTime(now);
+                            string currentTime = now.ToString("yyyy-MM-dd HH:mm:ss");
+                            string log_line = ++k + "," + currentTime + "," + bpower.BatteryLifePercent + "," + bpower.BatteryVoltage + "," + bpower.BatteryCurrent + "," + bpower.BatteryTemperature;
+
+
+                            for (int i = 0; (i < this._Sensors.Count); i++)
+                            {
+                                /* string smslog = i + "," + currentTime + "," + WocketsTimer.GetUnixTime() + ",-5,wtm,WocketsController," + ((WocketsDecoder)wc._Decoders[i])._ExpectedBatchCount + ":" + wc._Sensors[i]._ReceivedPackets + ":" + bpower.BatteryLifePercent;
+                                 try
+                                 {
+                                     SMSManager.SMSErrorMessage errorMsg = smsMgr.sendControlledSMS(gatewayNumber, projectCode, programCode, "txt", smslog, false);
+                                     if (errorMsg != SMSManager.SMSErrorMessage.None)
+                                     {
+                                     }
+                                 }
+                                 catch (Exception e)
+                                 {
+                                 }*/
+
+                                log_line += "," + this._Sensors[i]._ReceivedPackets + "," + ((WocketsDecoder)this._Decoders[i])._ExpectedBatchCount + "," + ((RFCOMMReceiver)this._Receivers[i])._SuccessfulConnections + "," + ((RFCOMMReceiver)this._Receivers[i])._Reconnections + "," + ((RFCOMMReceiver)this._Receivers[i])._ConnectionTime;
+                                dataSavedSeconds[i] = 0;
+                                countSeconds[i] = false;
+                                ((WocketsDecoder)this._Decoders[i])._ExpectedBatchCount = 0;
+
+                                TextWriter tw2 = new StreamWriter("testsummary" + i + ".csv", true);
+                                for (int j = 0; (j < ((WocketsDecoder)this._Decoders[i])._ActivityCountIndex); j++)
+                                    tw2.WriteLine(k + "," + currentTime + "," + ((WocketsDecoder)this._Decoders[i])._ActivityCounts[j]);
+                                ((WocketsDecoder)this._Decoders[i])._ActivityCountIndex = 0;
+                                tw2.Close();
+                            }
+
+
+                            /*string activitylog = "1," + currentTime + "," + unixtime + ",-5,aat,SystemAnnotater," + ((long)WocketsTimer.GetUnixTime(now.AddSeconds(-60.0))).ToString() + ":" + ((long)unixtime).ToString() + ":" + "Active";
+                            try
+                            {
+                                SMSManager.SMSErrorMessage errorMsg = smsMgr.sendControlledSMS(gatewayNumber, projectCode, programCode, "txt", activitylog, false);
+                                if (errorMsg != SMSManager.SMSErrorMessage.None)
+                                {
+                                }
+                            }
+                            catch
+                            {
+                            }*/
+                            this._Polling = false;
+
+                            //shutting down BT here causes a strange delay on wakeup.
+                            while (true)
+                            {
+                                try
+                                {
+                                    if (Wockets.Utils.network.NetworkStacks._BluetoothStack.Dispose())
+                                        break;
+                                }
+                                catch
+                                {
+                                }
+                                SystemIdleTimerReset();
+                                Thread.Sleep(1000);
+                            }
+
+                            TextWriter tw = new StreamWriter("test.csv", true);
+                            tw.WriteLine(log_line);
+                            tw.Close();
+
+
+
+
+                            SystemIdleTimerReset();
+                            for (int i = 0; (i < this._Sensors.Count); i++)
+                                this._Sensors[i].Save();
+
+
+
+                            Thread.Sleep(1000);
+                            if (DateTime.Now.Subtract(lastActivity).TotalSeconds > 30)
+                                SetSystemPowerState(null, POWER_STATE_SUSPEND, POWER_FORCE);
+
+                        }
+
+                    }
+                }
+
+                Thread.Sleep(1000);
+            }
+        }
+
         
- 
-        
+        void DataCollection()
+        {
+            NamedEvents namedEvent = new NamedEvents();
+            NamedEvents waitDisconnectEvent = new NamedEvents();
+
+            while (true)
+            {
+
+                //on receive a disconnect, insert an event and wakeup after 1 minute
+                string appName = "\\\\.\\Notifications\\NamedEvents\\WocketsEvent" + reminderID;
+                string args = "";
+
+                CE_NOTIFICATION_TRIGGER notificationTrigger = new CE_NOTIFICATION_TRIGGER();
+                notificationTrigger.Type = 2;
+                notificationTrigger.pAppName = appName;
+                notificationTrigger.pArgs = args;
+                notificationTrigger.StartTime = new SYSTEMTIME(reminderDateTime);
+                notificationTrigger.EndTime = new SYSTEMTIME();
+                notificationTrigger.Size = (UInt32)Marshal.SizeOf(notificationTrigger); // This line needs the compile switch /unsafe
+                IntPtr notificationHandle = CeSetUserNotificationEx(IntPtr.Zero, notificationTrigger, null);
+                reminderDateTime = reminderDateTime.AddSeconds(60);
+
+                namedEvent.Receive("WocketsEvent" + reminderID++);
+                SystemIdleTimerReset();
+                try
+                {
+                    Wockets.Utils.network.NetworkStacks._BluetoothStack.Initialize();
+                }
+                catch
+                {
+                }
+                Thread.Sleep(3000);
+                for (int i = 0; (i < this._Sensors.Count); i++)
+                    countSeconds[i] = true;
+                connecting = true;
+                this._Polling = true;
+
+
+
+                namedEvent.Reset();
+                CeClearUserNotification((int)notificationHandle);
+            }
+        }
+        private  void activityListener()
+        {
+            while (true)
+            {
+                // waiting for activity signal, will block the thread, works globally.
+                WaitForSingleObject(activitySignal, int.MaxValue);
+                lastActivity = DateTime.Now;
+                Thread.Sleep(5000);
+            }
+        }
+
+        private void TerminateWockets()
+        {
+            NamedEvents namedEvent = new NamedEvents();
+            namedEvent.Receive("TerminateWockets");
+            System.Diagnostics.Process.GetCurrentProcess().Kill();
+        }
+
+        private DateTime lastActivity = DateTime.Now;
+        DateTime reminderDateTime;
+        Thread interfaceActivityThread;
+        Thread dataCollectionThread;
+        Thread terminationThread;
+
+        private int EVENT_ALL_ACCESS = 0x1F0003;
+        private  String ActiveName = "PowerManager/UserActivity_Active";
+        private IntPtr activitySignal;
+        private Thread activityListenerThread;
+        [DllImport("coredll.dll")]
+        private static extern IntPtr OpenEvent(int desiredAccess, bool inheritHandle, string name);
+
+        [DllImport("coredll.dll")]
+        private static extern int WaitForSingleObject(IntPtr handle, int milliseconds);
 
            
 
@@ -628,7 +962,7 @@ namespace Wockets
                             currentReceiver = sensor._Receiver;
                             try
                             {
-                                if (_Bursty)
+                                if (this._TMode== TransmissionMode.Bursty60)
                                 {
 
                                     int expectedPackets = ((Wockets.Decoders.Accelerometers.WocketsDecoder)sensor._Decoder)._ExpectedBatchCount;
@@ -726,7 +1060,7 @@ namespace Wockets
 
                     //reset bluetooth stack once if all wockets are disconnected
 
-                    if ((!_Bursty) && (!bluetoothIsReset) && (allWocketsDisconnected))
+                    if ((this._TMode== TransmissionMode.Continuous) && (!bluetoothIsReset) && (allWocketsDisconnected))
                     {
                         try
                         {

@@ -199,6 +199,8 @@ namespace Wockets.Decoders
                     this.sdata.Close();
                 if (this.shead != null)
                     this.shead.Close();
+                this._Head = 0;
+                this.TotalSamples = 0;
             }
 #endif
             return true;
