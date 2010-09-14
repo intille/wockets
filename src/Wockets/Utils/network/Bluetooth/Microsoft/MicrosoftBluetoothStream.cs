@@ -262,13 +262,13 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
 
                 try
                 {
-                    if (CurrentWockets._Continuous)
+                    /*if (CurrentWockets._Continuous)
                     {
                         Wockets.Data.Commands.SET_TM tm = new Wockets.Data.Commands.SET_TM(Wockets.Data.Types.TransmissionMode.Continuous);
                         socket.Send(tm._Bytes);
                         CurrentWockets._Continuous = false;
                         Thread.Sleep(1000);
-                    }
+                    }*/
 
                     // Transmit data if needed 1 byte at a time, for a maximum of 10 bytes in each iteration
                     // then receive to avoid substantial delays

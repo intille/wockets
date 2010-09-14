@@ -84,6 +84,8 @@ namespace Wockets.Utils.network.Bluetooth
         /// </summary>
         protected CircularBuffer sbuffer;
 
+     
+
         /// <summary>
         /// A reference to a data processing thread
         /// </summary>
@@ -120,32 +122,7 @@ namespace Wockets.Utils.network.Bluetooth
         public BluetoothStream(CircularBuffer buffer,CircularBuffer sbuffer,byte[] address,string pin)
         {       
             this.address = new byte[MAC_SIZE];
-            /*
-#if (PocketPC)                       
-            if (IsLittleEndian() == 1)
-#else
-            if (BitConverter.IsLittleEndian)
-#endif
-            {
 
-
-                            //reverse address depending on the architecture
-                for (int i = 0; i < address.Length; i++)
-                    this.address[this.address.Length - 1 - i] = address[i];
-
-
-          
-
-            }
-            else
-            {
-
-                            for (int i = 0; i < address.Length; i++)
-                    this.address[i] = address[i];
-
-
-            }
-             */
 #if (PocketPC)
 
                 if (BitConverter.IsLittleEndian)
@@ -153,15 +130,9 @@ namespace Wockets.Utils.network.Bluetooth
                     //reverse address depending on the architecture
                     for (int i = 0; i < address.Length; i++)
                         this.address[this.address.Length - 1 - i] = address[i]; 
-
-  
-
-                    
-       
                 }
                 else
                 {
-
                     for (int i = 0; i < address.Length; i++)
                         this.address[i] = address[i];  
                 }

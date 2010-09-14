@@ -32,9 +32,11 @@ namespace Wockets.Decoders.Accelerometers
         private ResponseTypes responseType;
         private double lastTimestamp;
         public int _ExpectedBatchCount = 0;
-        public int[] _ActivityCounts = new int[960];
+        public AC_RSP[] _ActivityCounts = new AC_RSP[960];
         public int _ActivityCountIndex = 0;
+        public int _LastActivityCountIndex = -1;
         public int _ExpectedSamplingRate = 0;
+        public int _ActivityCountOffset = 0;
         public double _ReferenceTime = 0;
 
         private double batchCurrentTime = 0;
@@ -126,6 +128,12 @@ namespace Wockets.Decoders.Accelerometers
             else
                 throw new Exception("Failed to decode data");
         }
+
+        private double ac_delta = 0;
+        private int ac_index = 0;
+        private double ac_unixtime = 0;
+        private double acc_count = 0;
+
         public override int Decode(int sourceSensor, CircularBuffer data,int start,int end)
         {
 
@@ -169,14 +177,14 @@ namespace Wockets.Decoders.Accelerometers
                                         break;
                                     case ResponseTypes.BL_RSP:
                                     case ResponseTypes.BC_RSP:
+                                    case ResponseTypes.ACC_RSP:
+                                    case ResponseTypes.OFT_RSP:
                                         bytesToRead = 3;                 
-                                        break;
-                                    case ResponseTypes.AC_RSP:                                    
-                                        bytesToRead = 4;
                                         break;
                                     case ResponseTypes.TCT_RSP:
                                         bytesToRead = 5;
                                         break;
+                                    case ResponseTypes.AC_RSP:
                                     case ResponseTypes.PC_RSP:
                                         bytesToRead = 6;
                                         break;
@@ -463,8 +471,43 @@ namespace Wockets.Decoders.Accelerometers
                                     AC_RSP ac = new AC_RSP(this._ID);
                                     for (int i = 0; (i < bytesToRead); i++)
                                         ac.RawBytes[i] = this.packet[i];
-                                    ac._Count = ((this.packet[1] & 0x7f) << 9) | ((this.packet[2] & 0x7f)<<2) | ((this.packet[3]>>5)&0x03);
-                                    this._ActivityCounts[this._ActivityCountIndex++] = ac._Count;
+
+                                    ac._SeqNum = ((this.packet[1] & 0x7f) << 9) | ((this.packet[2] & 0x7f) << 2) | ((this.packet[3] >> 5) & 0x03);
+                                    ac._Count = ((this.packet[3] & 0x1f) << 11) | ((this.packet[4] & 0x7f)<<4) | ((this.packet[5]>>2)&0x0f);
+                                    //First time base it on the sampling rate
+                                    if (this._LastActivityCountIndex==-1)
+                                    {
+                                        ac_unixtime=((RFCOMMReceiver)CurrentWockets._Controller._Receivers[this._ID])._CurrentConnectionUnixTime - ((this._ActivityCountOffset * 1000.0)/this._ExpectedSamplingRate) - (acc_count* 60000.0);
+                                        ac_delta=60000.0;
+                                    }
+                                    else if (ac_delta == 0) //First sample after ACC
+                                    {
+                                        if (ac._SeqNum == (this._ActivityCounts[this._LastActivityCountIndex]._SeqNum + 1))// if the sequence number follows well
+                                        {
+
+                                            ac_delta = (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[this._ID])._CurrentConnectionUnixTime - this._ActivityCounts[this._LastActivityCountIndex]._TimeStamp) / acc_count;
+                                            ac_unixtime = ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[this._ID])._CurrentConnectionUnixTime - ((this._ActivityCountOffset * 1000.0) / this._ExpectedSamplingRate) - (acc_count * ac_delta);
+                                        }
+                                        else //seq numbers do not follow
+                                        {
+                                            ac_unixtime = ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[this._ID])._CurrentConnectionUnixTime - ((this._ActivityCountOffset * 1000.0) / this._ExpectedSamplingRate) - (acc_count * 60000.0);
+                                            ac_delta = 60000.0;
+                                        }
+                                    }
+
+                                    //Has to stay here to protect against situations when a batch is sent
+                                    //with some ACs that were received and others that were not
+                                    ac._TimeStamp = ac_unixtime+ (++ac_index * ac_delta);
+
+                                    //Only insert new sequence numbers
+                                    if (ac._SeqNum != (this._ActivityCounts[this._LastActivityCountIndex]._SeqNum + 1))
+                                    {                 
+                                        this._LastActivityCountIndex = this._ActivityCountIndex;
+                                        this._ActivityCounts[this._ActivityCountIndex++] = ac;
+                                        if (this._ActivityCountIndex == 960)
+                                            this._ActivityCountIndex = 0;
+                                    }
+
 #if (PocketPC)
                                     Core.WRITE_ACTIVITY_COUNT(ac);
 #endif
@@ -482,6 +525,26 @@ namespace Wockets.Decoders.Accelerometers
                                     Core.WRITE_TCT(tct);
 #endif
                                     FireEvent(tct);
+                                    break;
+
+                                case ResponseTypes.ACC_RSP:
+                                    ACC_RSP acc = new ACC_RSP(this._ID);
+                                    for (int i = 0; (i < bytesToRead); i++)
+                                        acc.RawBytes[i] = this.packet[i];
+                                    acc._Count = ((this.packet[1] & 0x7f) << 7) | (this.packet[2] & 0x7f);
+                                    ac_unixtime = 0;
+                                    ac_delta = 0;
+                                    ac_index = 0;
+                                    acc_count=acc._Count;
+                                    FireEvent(acc);
+                                    break;
+                                case ResponseTypes.OFT_RSP:
+                                    OFT_RSP offset = new OFT_RSP(this._ID);
+                                    for (int i = 0; (i < bytesToRead); i++)
+                                        offset.RawBytes[i] = this.packet[i];
+                                    offset._Offset = ((this.packet[1] & 0x7f) << 7) | (this.packet[2] & 0x7f);
+                                    this._ActivityCountOffset = offset._Offset;
+                                    FireEvent(offset);
                                     break;
                                 default:
                                     break;

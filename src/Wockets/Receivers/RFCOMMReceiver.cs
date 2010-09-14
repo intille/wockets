@@ -18,6 +18,8 @@ using Wockets.Utils.network;
 using Wockets.Utils.network.Bluetooth;
 using Wockets.Utils.network.Bluetooth.Microsoft;
 using Wockets.Utils.network.Bluetooth.Widcomm;
+using Wockets.Data.Types;
+using Wockets.Data.Commands;
 
 
 namespace Wockets.Receivers
@@ -51,7 +53,9 @@ namespace Wockets.Receivers
         private int sniffTime = 0;
         private bool sniffMode;
         public CircularBuffer _SBuffer;
-        public bool _Bursty = false;
+        
+        //Default
+        public TransmissionMode _TMode = TransmissionMode.Continuous;
         public bool _TimeoutEnabled = true;
         public double _ConnectionTime = 0;
         public double _CurrentConnectionUnixTime = 0;
@@ -201,8 +205,8 @@ namespace Wockets.Receivers
             Random random = new Random();
             int backoff = random.Next(1000);
             _Reconnections = 0;
-            if (!_Bursty)
-                Thread.Sleep(10000);       
+            if (this._TMode== TransmissionMode.Continuous)
+              Thread.Sleep(10000);       
 
             
             while ((this.bluetoothStream == null) || (this.bluetoothStream._Status != BluetoothStatus.Connected))
@@ -232,19 +236,20 @@ namespace Wockets.Receivers
         {
             
             try
-            {
-               // Thread.Sleep(10000);
+            {               
                 this._Buffer = new CircularBuffer(this._Buffer._Bytes.Length);
                 this.head = 0;
                 this._SBuffer = new CircularBuffer(SEND_BUFFER_SIZE);
 
+                //Always set the transmission mode on connection
+                Write(new SET_VTM(this._TMode)._Bytes);
                 if (CurrentWockets._Configuration._SoftwareMode == Wockets.Data.Configuration.SoftwareConfiguration.DEBUG)
                     Logger.Debug("RFCOMMReceiver: Initialize: Attempting reconnection for receiver " + this._Address);
                 this.bluetoothStream = NetworkStacks._BluetoothStack.Connect(this._Buffer,this._SBuffer , this.address_bytes, this.pin);              
                 if (this.bluetoothStream == null)
                     return false;
 
-                if (this._Bursty)
+                if (this._TMode== TransmissionMode.Bursty60)
                     this.bluetoothStream._Timeout = 2;
                 this.bluetoothStream._TimeoutEnabled = this._TimeoutEnabled;
                 this._ConnectionTime = this.bluetoothStream._ConnectionTime;

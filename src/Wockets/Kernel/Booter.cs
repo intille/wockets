@@ -341,7 +341,7 @@ namespace Wockets.Kernel
                     break;
                 case ResponseTypes.TM_RSP:
                     try
-                    {
+                    {         
                         foreach (string guid in applicationPaths.Values)
                             Send(KernelResponse.TRANSMISSION_MODE_UPDATED, guid);
                     }
@@ -937,19 +937,86 @@ namespace Wockets.Kernel
                             TransmissionMode mode = (TransmissionMode)Enum.Parse(typeof(TransmissionMode),
                                 tokens[1], true);
 
-                            if (mode == TransmissionMode.Continuous)
-                                CurrentWockets._Continuous = true;
-                            Command command = new SET_TM(mode);
+
+                            //If the mode changed only
+                            //if (CurrentWockets._Controller._TMode != mode)
+                            // {
+
+
+                            // to switch from bursty mode, update the receiver mode and on next connection
+                            // the mode will be set up
                             for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
                             {
                                 if (tokens[0] == "all")
-                                    ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                    ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._TMode = mode;
                                 else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == tokens[0])
                                 {
-                                    ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                    ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._TMode = mode;
                                     break;
                                 }
                             }
+
+                            if (CurrentWockets._Controller._TMode == TransmissionMode.Continuous)
+                            {
+                                Command command = new SET_VTM(mode);
+                                for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+                                {
+                                    if (tokens[0] == "all")
+                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                    else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == tokens[0])
+                                    {
+                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                        break;
+                                    }
+                                }
+                            }
+
+
+                            Thread.Sleep(3000);
+
+                            CurrentWockets._Controller.Deinitialize();
+                            System.IO.DirectoryInfo di = new System.IO.DirectoryInfo("\\");
+                            System.IO.FileSystemInfo[] fsi = di.GetFileSystemInfos();
+                            string firstCard = "";
+                            //iterate through them
+                            for (int x = 0; x < fsi.Length; x++)
+                            {
+                                //check to see if this is a temporary storage card (e.g. SD card)
+                                if ((fsi[x].Attributes & System.IO.FileAttributes.Temporary) == System.IO.FileAttributes.Temporary)
+                                {
+                                    firstCard = fsi[x].FullName;
+                                    try
+                                    {
+                                        Directory.CreateDirectory(firstCard + "\\writable");
+                                        Directory.Delete(firstCard + "\\writable");
+                                    }
+                                    catch (Exception)
+                                    {
+                                        firstCard = "";
+                                        continue;
+                                    }
+                                    //if so, return the path
+
+                                    break;
+                                }
+                            }
+                            DateTime now = DateTime.Now;
+                            string storageDirectory = firstCard + "\\Wockets\\Session-" + now.Month.ToString("00") + "-" + now.Day.ToString("00") + "-" + now.Year.ToString("0000") + "-" + now.Hour.ToString("00") + "-" + now.Minute.ToString("00") + "-" + now.Second.ToString("00");
+
+
+                            for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
+                            {
+                                CurrentWockets._Controller._Sensors[i]._Loaded = true;
+                                CurrentWockets._Controller._Sensors[i]._Flush = true;
+                                CurrentWockets._Controller._Sensors[i]._RootStorageDirectory = storageDirectory + "\\data\\raw\\PLFormat\\";
+                            }
+
+
+                            CurrentWockets._Controller._TMode = mode;
+                            CurrentWockets._Controller.Initialize();
+
+                            
+
                         }
                         catch (Exception e)
                         {

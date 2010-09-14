@@ -20,6 +20,8 @@ namespace Wockets.Data.Responses
         FV_RSP=11,
         BC_RSP=12,
         AC_RSP=13,
-        TCT_RSP=14
+        TCT_RSP=14,
+        ACC_RSP=15,
+        OFT_RSP=16
     }
 }

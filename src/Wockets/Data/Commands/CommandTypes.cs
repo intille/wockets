@@ -31,6 +31,8 @@ namespace Wockets.Data
         GET_HV=22,
         GET_FV=23,
         GET_TCT=24,
-        SET_TCT=25
+        SET_TCT=25,
+        SET_VTM = 26,
+        ACK=27
     }
 }
