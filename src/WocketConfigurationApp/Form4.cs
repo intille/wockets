@@ -67,75 +67,85 @@ namespace WocketConfigurationApp
         private void button_search_Click(object sender, EventArgs e)
         {
 
-            this.label_status.Text = "Please wait... searching for wockets";
-            this.Refresh();
-            this.button_search.Enabled = false;
-
-           
-            this.dataGridView1.Rows.Clear();
-            this.macaddresses.Clear();
-            bluetoothlist.Clear();
-            int wocketCount = 0;
-
-
-            if (BluetoothRadio.PrimaryRadio.Mode != RadioMode.Connectable)
+            try
             {
-                BluetoothRadio.PrimaryRadio.Mode = RadioMode.Connectable;
-            }
-            BluetoothClient btc = new BluetoothClient();
+                this.label_status.Text = "Please wait... searching for wockets";
+                this.Refresh();
+                this.button_search.Enabled = false;
 
-            label_status.Text = "Searching for wockets...";
-            Application.DoEvents();
 
-            devices = btc.DiscoverDevices(60, true, true, true);
+                this.dataGridView1.Rows.Clear();
+                this.macaddresses.Clear();
+                bluetoothlist.Clear();
+                int wocketCount = 0;
 
-            
-            for (int i = 0; (i < devices.Length); i++)
-            {
-                //if the device is a wocket
-                if (((devices[i].DeviceName.IndexOf("Wocket") >= 0) 
-                    || (devices[i].DeviceName.IndexOf("WKT") >= 0) 
-                    || (devices[i].DeviceName.IndexOf("FireFly") >= 0)
-                    || (devices[i].DeviceName.IndexOf("00:06:66") >= 0) 
-                    && (wocketCount < 100)))
+
+                if (BluetoothRadio.PrimaryRadio.Mode != RadioMode.Connectable)
                 {
-                    string hex = "";
-                    hex = devices[i].DeviceAddress.ToString();
+                    BluetoothRadio.PrimaryRadio.Mode = RadioMode.Connectable;
+                }
+                BluetoothClient btc = new BluetoothClient();
 
-                    System.Threading.Thread.Sleep(1000);
-                  
-                    if (this.macaddresses.IndexOf(hex) < 0)
+                label_status.Text = "Searching for wockets...";
+                Application.DoEvents();
+
+                devices = btc.DiscoverDevices(60, true, true, true);
+
+
+                for (int i = 0; (i < devices.Length); i++)
+                {
+                    //if the device is a wocket
+                    if (((devices[i].DeviceName.IndexOf("Wocket") >= 0)
+                        || (devices[i].DeviceName.IndexOf("WKT") >= 0)
+                        || (devices[i].DeviceName.IndexOf("FireFly") >= 0)
+                        || (devices[i].DeviceName.IndexOf("00:06:66") >= 0)
+                        && (wocketCount < 100)))
                     {
-                        int row = this.dataGridView1.Rows.Add();
-                        
-                        this.dataGridView1.Rows[row].Cells[0].Value = devices[i].DeviceName;
-                        this.dataGridView1.Rows[row].Cells[1].Value = hex;
-                        this.dataGridView1.Rows[row].Cells[2].Value = "Not tested";
-                        this.dataGridView1.Rows[row].Cells[3].Value = "Not tested";
-                            
-                        macaddresses.Add(hex);
-                        bluetoothlist.Add(devices[i]);
+                        string hex = "";
+                        hex = devices[i].DeviceAddress.ToString();
 
                         System.Threading.Thread.Sleep(1000);
 
+                        if (this.macaddresses.IndexOf(hex) < 0)
+                        {
+                            int row = this.dataGridView1.Rows.Add();
+
+                            this.dataGridView1.Rows[row].Cells[0].Value = devices[i].DeviceName;
+                            this.dataGridView1.Rows[row].Cells[1].Value = hex;
+                            this.dataGridView1.Rows[row].Cells[2].Value = "Not tested";
+                            this.dataGridView1.Rows[row].Cells[3].Value = "Not tested";
+
+                            macaddresses.Add(hex);
+                            bluetoothlist.Add(devices[i]);
+
+                            System.Threading.Thread.Sleep(1000);
+
+                        }
+
+                        wocketCount++;
                     }
-                   
-                    wocketCount++;
                 }
+
+
+                btc.Dispose();
+                btc.Close();
+
+
+                if (this.dataGridView1.Rows.Count > 0)
+                {
+                    this.button_test.Enabled = true;
+                    this.button_settings.Enabled = true;
+                }
+
+
+                label_status.Text = "Waiting for wocket...";
+
             }
-
-
-            btc.Dispose();
-            btc.Close();
-
-           
-            if (this.dataGridView1.Rows.Count > 0)
+            catch
             {
-                this.button_test.Enabled = true;
-                this.button_settings.Enabled = true;
+                label_status.Text = "BT module not responding.";
             }
 
-            label_status.Text = "Waiting for wocket...";
             this.button_search.Enabled = true;
         }
 

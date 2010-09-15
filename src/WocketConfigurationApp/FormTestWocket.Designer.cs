@@ -39,7 +39,7 @@ namespace WocketConfigurationApp
             this.label_status = new System.Windows.Forms.Label();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.label_connect_status = new System.Windows.Forms.Label();
-            this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.timerSampling = new System.Windows.Forms.Timer(this.components);
             this.panel1 = new System.Windows.Forms.Panel();
             this.info_cmd_value_distance_test = new System.Windows.Forms.TextBox();
             this.info_cmd_label_distance_test = new System.Windows.Forms.Label();
@@ -70,12 +70,12 @@ namespace WocketConfigurationApp
             this.label20 = new System.Windows.Forms.Label();
             this.label22 = new System.Windows.Forms.Label();
             this.cal_panel_sr_values = new System.Windows.Forms.Panel();
-            this.cal_panel_loss = new System.Windows.Forms.Label();
-            this.label29 = new System.Windows.Forms.Label();
-            this.cal_panel_pc = new System.Windows.Forms.Label();
-            this.label28 = new System.Windows.Forms.Label();
+            this.cal_panel_trials = new System.Windows.Forms.Label();
+            this.cal_panel_tct = new System.Windows.Forms.Label();
             this.cal_panel_sr = new System.Windows.Forms.Label();
             this.label32 = new System.Windows.Forms.Label();
+            this.label28 = new System.Windows.Forms.Label();
+            this.label29 = new System.Windows.Forms.Label();
             this.cal_panel_values_BTpercent = new System.Windows.Forms.Panel();
             this.label16 = new System.Windows.Forms.Label();
             this.label15 = new System.Windows.Forms.Label();
@@ -97,6 +97,7 @@ namespace WocketConfigurationApp
             this.panel_status_texbox = new System.Windows.Forms.TextBox();
             this.set_panel_title = new System.Windows.Forms.TextBox();
             this.panel_calibration = new System.Windows.Forms.Panel();
+            this.cal_panel_button_back = new System.Windows.Forms.Button();
             this.panel_time_updates = new System.Windows.Forms.Panel();
             this.cal_panel_progressBar = new System.Windows.Forms.ProgressBar();
             this.pictureBox_calibration = new System.Windows.Forms.PictureBox();
@@ -107,6 +108,7 @@ namespace WocketConfigurationApp
             this.cal_panel_cmd_label = new System.Windows.Forms.Label();
             this.cal_panel_title = new System.Windows.Forms.TextBox();
             this.cal_panel_button_ok = new System.Windows.Forms.Button();
+            this.cal_panel_battery_log_textBox = new System.Windows.Forms.TextBox();
             this.label10 = new System.Windows.Forms.Label();
             this.label11 = new System.Windows.Forms.Label();
             this.label12 = new System.Windows.Forms.Label();
@@ -124,7 +126,6 @@ namespace WocketConfigurationApp
             this.button_load = new System.Windows.Forms.Button();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.timerPlotter = new System.Windows.Forms.Timer(this.components);
-            this.cal_panel_battery_log_textBox = new System.Windows.Forms.TextBox();
             this.panel1.SuspendLayout();
             this.cal_panel_cal_values_std.SuspendLayout();
             this.cal_panel_cal_values.SuspendLayout();
@@ -244,11 +245,11 @@ namespace WocketConfigurationApp
             this.label_connect_status.TabIndex = 41;
             this.label_connect_status.Text = "Connecting ...";
             // 
-            // timer1
+            // timerSampling
             // 
-            this.timer1.Enabled = true;
-            this.timer1.Interval = 1000;
-            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            this.timerSampling.Enabled = true;
+            this.timerSampling.Interval = 1000;
+            this.timerSampling.Tick += new System.EventHandler(this.timerSampling_Tick);
             // 
             // panel1
             // 
@@ -587,65 +588,41 @@ namespace WocketConfigurationApp
             // 
             // cal_panel_sr_values
             // 
-            this.cal_panel_sr_values.Controls.Add(this.cal_panel_loss);
-            this.cal_panel_sr_values.Controls.Add(this.label29);
-            this.cal_panel_sr_values.Controls.Add(this.cal_panel_pc);
-            this.cal_panel_sr_values.Controls.Add(this.label28);
+            this.cal_panel_sr_values.Controls.Add(this.cal_panel_trials);
+            this.cal_panel_sr_values.Controls.Add(this.cal_panel_tct);
             this.cal_panel_sr_values.Controls.Add(this.cal_panel_sr);
             this.cal_panel_sr_values.Controls.Add(this.label32);
+            this.cal_panel_sr_values.Controls.Add(this.label28);
+            this.cal_panel_sr_values.Controls.Add(this.label29);
             this.cal_panel_sr_values.Location = new System.Drawing.Point(14, 53);
             this.cal_panel_sr_values.Name = "cal_panel_sr_values";
             this.cal_panel_sr_values.Size = new System.Drawing.Size(398, 25);
             this.cal_panel_sr_values.TabIndex = 80;
             this.cal_panel_sr_values.Visible = false;
             // 
-            // cal_panel_loss
+            // cal_panel_trials
             // 
-            this.cal_panel_loss.AutoSize = true;
-            this.cal_panel_loss.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cal_panel_loss.ForeColor = System.Drawing.Color.WhiteSmoke;
-            this.cal_panel_loss.Location = new System.Drawing.Point(322, 5);
-            this.cal_panel_loss.Name = "cal_panel_loss";
-            this.cal_panel_loss.Size = new System.Drawing.Size(15, 15);
-            this.cal_panel_loss.TabIndex = 26;
-            this.cal_panel_loss.Text = "=";
-            this.cal_panel_loss.Visible = false;
+            this.cal_panel_trials.AutoSize = true;
+            this.cal_panel_trials.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cal_panel_trials.ForeColor = System.Drawing.Color.WhiteSmoke;
+            this.cal_panel_trials.Location = new System.Drawing.Point(322, 5);
+            this.cal_panel_trials.Name = "cal_panel_trials";
+            this.cal_panel_trials.Size = new System.Drawing.Size(15, 15);
+            this.cal_panel_trials.TabIndex = 26;
+            this.cal_panel_trials.Text = "=";
+            this.cal_panel_trials.Visible = false;
             // 
-            // label29
+            // cal_panel_tct
             // 
-            this.label29.AutoSize = true;
-            this.label29.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label29.ForeColor = System.Drawing.Color.Orange;
-            this.label29.Location = new System.Drawing.Point(265, 5);
-            this.label29.Name = "label29";
-            this.label29.Size = new System.Drawing.Size(59, 15);
-            this.label29.TabIndex = 27;
-            this.label29.Text = "LOSS  =";
-            this.label29.Visible = false;
-            // 
-            // cal_panel_pc
-            // 
-            this.cal_panel_pc.AutoSize = true;
-            this.cal_panel_pc.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cal_panel_pc.ForeColor = System.Drawing.Color.WhiteSmoke;
-            this.cal_panel_pc.Location = new System.Drawing.Point(178, 5);
-            this.cal_panel_pc.Name = "cal_panel_pc";
-            this.cal_panel_pc.Size = new System.Drawing.Size(15, 15);
-            this.cal_panel_pc.TabIndex = 24;
-            this.cal_panel_pc.Text = "=";
-            this.cal_panel_pc.Visible = false;
-            // 
-            // label28
-            // 
-            this.label28.AutoSize = true;
-            this.label28.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label28.ForeColor = System.Drawing.Color.Orange;
-            this.label28.Location = new System.Drawing.Point(125, 5);
-            this.label28.Name = "label28";
-            this.label28.Size = new System.Drawing.Size(49, 15);
-            this.label28.TabIndex = 25;
-            this.label28.Text = "PC    =";
-            this.label28.Visible = false;
+            this.cal_panel_tct.AutoSize = true;
+            this.cal_panel_tct.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cal_panel_tct.ForeColor = System.Drawing.Color.WhiteSmoke;
+            this.cal_panel_tct.Location = new System.Drawing.Point(178, 5);
+            this.cal_panel_tct.Name = "cal_panel_tct";
+            this.cal_panel_tct.Size = new System.Drawing.Size(15, 15);
+            this.cal_panel_tct.TabIndex = 24;
+            this.cal_panel_tct.Text = "=";
+            this.cal_panel_tct.Visible = false;
             // 
             // cal_panel_sr
             // 
@@ -668,6 +645,30 @@ namespace WocketConfigurationApp
             this.label32.Size = new System.Drawing.Size(50, 15);
             this.label32.TabIndex = 23;
             this.label32.Text = "SR    =";
+            // 
+            // label28
+            // 
+            this.label28.AutoSize = true;
+            this.label28.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label28.ForeColor = System.Drawing.Color.Orange;
+            this.label28.Location = new System.Drawing.Point(125, 5);
+            this.label28.Name = "label28";
+            this.label28.Size = new System.Drawing.Size(52, 15);
+            this.label28.TabIndex = 25;
+            this.label28.Text = "TCT   =";
+            this.label28.Visible = false;
+            // 
+            // label29
+            // 
+            this.label29.AutoSize = true;
+            this.label29.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label29.ForeColor = System.Drawing.Color.Orange;
+            this.label29.Location = new System.Drawing.Point(265, 5);
+            this.label29.Name = "label29";
+            this.label29.Size = new System.Drawing.Size(58, 15);
+            this.label29.TabIndex = 27;
+            this.label29.Text = "TRIALS:";
+            this.label29.Visible = false;
             // 
             // cal_panel_values_BTpercent
             // 
@@ -900,6 +901,7 @@ namespace WocketConfigurationApp
             // panel_calibration
             // 
             this.panel_calibration.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.panel_calibration.Controls.Add(this.cal_panel_button_back);
             this.panel_calibration.Controls.Add(this.panel_time_updates);
             this.panel_calibration.Controls.Add(this.cal_panel_progressBar);
             this.panel_calibration.Controls.Add(this.pictureBox_calibration);
@@ -918,6 +920,17 @@ namespace WocketConfigurationApp
             this.panel_calibration.Name = "panel_calibration";
             this.panel_calibration.Size = new System.Drawing.Size(468, 573);
             this.panel_calibration.TabIndex = 20;
+            // 
+            // cal_panel_button_back
+            // 
+            this.cal_panel_button_back.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cal_panel_button_back.Location = new System.Drawing.Point(187, 367);
+            this.cal_panel_button_back.Name = "cal_panel_button_back";
+            this.cal_panel_button_back.Size = new System.Drawing.Size(77, 35);
+            this.cal_panel_button_back.TabIndex = 82;
+            this.cal_panel_button_back.Text = "Back";
+            this.cal_panel_button_back.UseVisualStyleBackColor = true;
+            this.cal_panel_button_back.Click += new System.EventHandler(this.button_back_Click);
             // 
             // panel_time_updates
             // 
@@ -967,9 +980,9 @@ namespace WocketConfigurationApp
             // cal_panel_button_cancel
             // 
             this.cal_panel_button_cancel.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cal_panel_button_cancel.Location = new System.Drawing.Point(292, 367);
+            this.cal_panel_button_cancel.Location = new System.Drawing.Point(355, 367);
             this.cal_panel_button_cancel.Name = "cal_panel_button_cancel";
-            this.cal_panel_button_cancel.Size = new System.Drawing.Size(142, 35);
+            this.cal_panel_button_cancel.Size = new System.Drawing.Size(77, 35);
             this.cal_panel_button_cancel.TabIndex = 49;
             this.cal_panel_button_cancel.Text = "Cancel";
             this.cal_panel_button_cancel.UseVisualStyleBackColor = true;
@@ -1014,13 +1027,25 @@ namespace WocketConfigurationApp
             // cal_panel_button_ok
             // 
             this.cal_panel_button_ok.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cal_panel_button_ok.Location = new System.Drawing.Point(18, 367);
+            this.cal_panel_button_ok.Location = new System.Drawing.Point(19, 367);
             this.cal_panel_button_ok.Name = "cal_panel_button_ok";
-            this.cal_panel_button_ok.Size = new System.Drawing.Size(142, 35);
+            this.cal_panel_button_ok.Size = new System.Drawing.Size(77, 35);
             this.cal_panel_button_ok.TabIndex = 48;
             this.cal_panel_button_ok.Text = "Start";
             this.cal_panel_button_ok.UseVisualStyleBackColor = true;
             this.cal_panel_button_ok.Click += new System.EventHandler(this.cal_panel_button_ok_Click);
+            // 
+            // cal_panel_battery_log_textBox
+            // 
+            this.cal_panel_battery_log_textBox.BackColor = System.Drawing.Color.DimGray;
+            this.cal_panel_battery_log_textBox.ForeColor = System.Drawing.Color.White;
+            this.cal_panel_battery_log_textBox.Location = new System.Drawing.Point(58, 27);
+            this.cal_panel_battery_log_textBox.Multiline = true;
+            this.cal_panel_battery_log_textBox.Name = "cal_panel_battery_log_textBox";
+            this.cal_panel_battery_log_textBox.ReadOnly = true;
+            this.cal_panel_battery_log_textBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.cal_panel_battery_log_textBox.Size = new System.Drawing.Size(349, 250);
+            this.cal_panel_battery_log_textBox.TabIndex = 81;
             // 
             // label10
             // 
@@ -1191,18 +1216,6 @@ namespace WocketConfigurationApp
             this.timerPlotter.Interval = 50;
             this.timerPlotter.Tick += new System.EventHandler(this.timerPlotter_Tick);
             // 
-            // cal_panel_battery_log_textBox
-            // 
-            this.cal_panel_battery_log_textBox.BackColor = System.Drawing.Color.DimGray;
-            this.cal_panel_battery_log_textBox.ForeColor = System.Drawing.Color.White;
-            this.cal_panel_battery_log_textBox.Location = new System.Drawing.Point(58, 27);
-            this.cal_panel_battery_log_textBox.Multiline = true;
-            this.cal_panel_battery_log_textBox.Name = "cal_panel_battery_log_textBox";
-            this.cal_panel_battery_log_textBox.ReadOnly = true;
-            this.cal_panel_battery_log_textBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.cal_panel_battery_log_textBox.Size = new System.Drawing.Size(349, 250);
-            this.cal_panel_battery_log_textBox.TabIndex = 81;
-            // 
             // FormTestWocket
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1264,7 +1277,7 @@ namespace WocketConfigurationApp
         private System.Windows.Forms.Label label_status;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.Label label_connect_status;
-        private System.Windows.Forms.Timer timer1;
+        private System.Windows.Forms.Timer timerSampling;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Panel panel_status;
         private System.Windows.Forms.Label label18;
@@ -1348,10 +1361,11 @@ namespace WocketConfigurationApp
         private System.Windows.Forms.Panel cal_panel_sr_values;
         private System.Windows.Forms.Label cal_panel_sr;
         private System.Windows.Forms.Label label32;
-        private System.Windows.Forms.Label cal_panel_pc;
+        private System.Windows.Forms.Label cal_panel_tct;
         private System.Windows.Forms.Label label28;
-        private System.Windows.Forms.Label cal_panel_loss;
+        private System.Windows.Forms.Label cal_panel_trials;
         private System.Windows.Forms.Label label29;
         private System.Windows.Forms.TextBox cal_panel_battery_log_textBox;
+        private System.Windows.Forms.Button cal_panel_button_back;
     }
 }
