@@ -110,7 +110,7 @@ namespace WocketConfigurationApp
             InitializeWocket();
 
             //commands
-            LoadWocketsParameters();
+            //LoadWocketsParameters();
 
             
 
@@ -128,8 +128,8 @@ namespace WocketConfigurationApp
             cmd = new GET_HV();
             ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
 
-            cmd = new GET_PC();
-            ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
+            //cmd = new GET_PC();
+            //((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
 
             cmd = new GET_BT();
             ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
@@ -686,7 +686,7 @@ namespace WocketConfigurationApp
 
 
 
-        #region Munu Items Events
+        #region Menu Items Events
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -822,7 +822,7 @@ namespace WocketConfigurationApp
                 info_panel_clean_text_fields();
                 Application.DoEvents();
 
-                LoadWocketsParameters();
+                //LoadWocketsParameters();
             }
             else
             {
@@ -844,8 +844,8 @@ namespace WocketConfigurationApp
                     case "packet_count":
                         info_cmd_value_pkt_count.Text = "";
                         Application.DoEvents();
-                        cmd = new GET_PC();
-                        ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
+                        //cmd = new GET_PC();
+                        //((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0]).Write(cmd._Bytes);
                         break;
                     case "battery_level":
                         info_cmd_value_battery_level.Text = "";
