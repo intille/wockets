@@ -57,15 +57,15 @@
             this.menuItem26 = new System.Windows.Forms.MenuItem();
             this.menuItem27 = new System.Windows.Forms.MenuItem();
             this.menuItem28 = new System.Windows.Forms.MenuItem();
+            this.menuItem29 = new System.Windows.Forms.MenuItem();
+            this.menuItem30 = new System.Windows.Forms.MenuItem();
+            this.menuItem31 = new System.Windows.Forms.MenuItem();
             this.menuItem2 = new System.Windows.Forms.MenuItem();
             this.panel1 = new System.Windows.Forms.Panel();
             this.label1 = new System.Windows.Forms.Label();
             this.timer1 = new System.Windows.Forms.Timer();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
-            this.menuItem29 = new System.Windows.Forms.MenuItem();
-            this.menuItem30 = new System.Windows.Forms.MenuItem();
-            this.menuItem31 = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // mainMenu1
@@ -118,11 +118,13 @@
             // 
             // menuItem15
             // 
+            this.menuItem15.Enabled = false;
             this.menuItem15.Text = "1.5 G";
             this.menuItem15.Click += new System.EventHandler(this.menuItem15_Click);
             // 
             // menuItem16
             // 
+            this.menuItem16.Enabled = false;
             this.menuItem16.Text = "2 G";
             this.menuItem16.Click += new System.EventHandler(this.menuItem16_Click);
             // 
@@ -133,6 +135,7 @@
             // 
             // menuItem18
             // 
+            this.menuItem18.Enabled = false;
             this.menuItem18.Text = "8 G";
             this.menuItem18.Click += new System.EventHandler(this.menuItem18_Click);
             // 
@@ -162,11 +165,13 @@
             // 
             // menuItem9
             // 
+            this.menuItem9.Enabled = false;
             this.menuItem9.Text = "20";
             this.menuItem9.Click += new System.EventHandler(this.menuItem9_Click);
             // 
             // menuItem10
             // 
+            this.menuItem10.Enabled = false;
             this.menuItem10.Text = "30";
             this.menuItem10.Click += new System.EventHandler(this.menuItem10_Click);
             // 
@@ -177,6 +182,7 @@
             // 
             // menuItem12
             // 
+            this.menuItem12.Enabled = false;
             this.menuItem12.Text = "80";
             this.menuItem12.Click += new System.EventHandler(this.menuItem12_Click);
             // 
@@ -207,6 +213,7 @@
             // 
             // menuItem23
             // 
+            this.menuItem23.Enabled = false;
             this.menuItem23.Text = "Efficient 30";
             this.menuItem23.Click += new System.EventHandler(this.menuItem23_Click);
             // 
@@ -217,10 +224,12 @@
             // 
             // menuItem26
             // 
+            this.menuItem26.Enabled = false;
             this.menuItem26.Text = "Efficient 90";
             // 
             // menuItem27
             // 
+            this.menuItem27.Enabled = false;
             this.menuItem27.Text = "Efficient 120";
             // 
             // menuItem28
@@ -230,6 +239,21 @@
             this.menuItem28.MenuItems.Add(this.menuItem31);
             this.menuItem28.Text = "TCT";
             this.menuItem28.Click += new System.EventHandler(this.menuItem28_Click_1);
+            // 
+            // menuItem29
+            // 
+            this.menuItem29.Text = "Update";
+            this.menuItem29.Click += new System.EventHandler(this.menuItem29_Click);
+            // 
+            // menuItem30
+            // 
+            this.menuItem30.Text = "TCT50 REP1LAST80";
+            this.menuItem30.Click += new System.EventHandler(this.menuItem30_Click);
+            // 
+            // menuItem31
+            // 
+            this.menuItem31.Text = "TCT133";
+            this.menuItem31.Click += new System.EventHandler(this.menuItem31_Click);
             // 
             // menuItem2
             // 
@@ -270,21 +294,6 @@
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(223, 48);
             this.label3.Text = "Received:";
-            // 
-            // menuItem29
-            // 
-            this.menuItem29.Text = "Update";
-            this.menuItem29.Click += new System.EventHandler(this.menuItem29_Click);
-            // 
-            // menuItem30
-            // 
-            this.menuItem30.Text = "TCT50 REP1LAST80";
-            this.menuItem30.Click += new System.EventHandler(this.menuItem30_Click);
-            // 
-            // menuItem31
-            // 
-            this.menuItem31.Text = "TCT133";
-            this.menuItem31.Click += new System.EventHandler(this.menuItem31_Click);
             // 
             // Form2
             // 

@@ -36,12 +36,8 @@ namespace Wockets.Receivers
         private const bool USE_PARITY = false;
         private const bool USE_STOP_BIT = true;
         private const int BAUD_RATE = 57600;
-        private const int BUFFER_SIZE = 8192;//8000;
+        private const int BUFFER_SIZE = 16834;
         private const int SEND_BUFFER_SIZE = 256;
-        private const int PORT_NUMBER = 9;
-        private const int MAXIMUM_SAMPLING_RATE = 70;
-
-        //RFCOMM Specific Objects
 
         //private BluetoothStream bluetoothStream;       
 

@@ -220,10 +220,10 @@ void _wocket_initialize(void)
 
 		// Set the sampling rate to 90Hz
 		_SAMPLING_RATE=40;
-		_wTM=_TM_Burst_60;
+		//_wTM=_TM_Burst_60;
 
 		//_SAMPLING_RATE=90;
-		//_wTM=_TM_Continuous;
+		_wTM=_TM_Continuous;
 	
 		// Write the sampling rate to the EEPROM
 		if (battery>300)
@@ -463,7 +463,7 @@ void _send_acs()
 
 	_send_ac_count(num_acs);
 	_send_ac_offset(AC_NUMS-summary_count); //send offset of the last activity count
-	for (int i=si;(i<ci);)
+	for (int i=si;(i!=ci);)
 	{		
 		count=acount[i];
 		aBuffer[0]=m_AC_RSP_BYTE0;

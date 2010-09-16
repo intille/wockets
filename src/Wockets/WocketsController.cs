@@ -211,6 +211,14 @@ namespace Wockets
                 this._Receivers[i].Dispose();
                 this._Decoders[i].Dispose();
             }
+
+            try
+            {
+                Wockets.Utils.network.NetworkStacks._BluetoothStack.Dispose();                    
+            }
+            catch
+            {
+            }
         }
         public void Initialize()
         {
@@ -240,7 +248,10 @@ namespace Wockets
                             ((RFCOMMReceiver)this._Receivers[i])._TMode = this._TMode;   
                         if (this._Sensors[i]._Loaded)
                         {
-                            this._Receivers[i].Initialize();
+                            //Only initialize receiver if continuous
+                            if (this._TMode== TransmissionMode.Continuous)
+                                this._Receivers[i].Initialize();
+
                             this._Decoders[i].Initialize();
                         }               
                     }
@@ -250,36 +261,99 @@ namespace Wockets
 
                 }
             }
-
-            polling = true;
+            
             classifying = true;
             
             //Priorities are very critical to avoid buffer overflow                      
+            if (this._TMode == TransmissionMode.Continuous)
+                this.polling = true;
+            else
+                this.polling = false;
+            
             aPollingThread = new Thread(new ThreadStart(Poll));
             aPollingThread.Priority = ThreadPriority.Highest;            
             aPollingThread.Start();
 
-            if (((this._Mode == MemoryMode.BluetoothToShared) || (this._Mode == MemoryMode.SharedToLocal) || (this._Mode == MemoryMode.BluetoothToLocal)) && (this._TMode== TransmissionMode.Continuous))
+
+            // Save only if the wocket controller is the kernel: Bluetooth to shared or
+            // if it is in an application address space BluetoothToLocal
+            if (this._TMode == TransmissionMode.Continuous)
             {
-                _Saving = true;
-                aSavingThread = new Thread(new ThreadStart(Save));
-                aSavingThread.Priority = ThreadPriority.Highest;
-                aSavingThread.Start();
+                if ((this._Mode == MemoryMode.BluetoothToShared) || (this._Mode == MemoryMode.BluetoothToLocal))
+                {
+                    _Saving = true;
+                    aSavingThread = new Thread(new ThreadStart(Save));
+                    aSavingThread.Priority = ThreadPriority.Highest;
+                    aSavingThread.Start();
+                }
+#if (PockePC)
+                try
+                {
+                    if (interfaceActivityThread != null)
+                        interfaceActivityThread.Abort();
+                }
+                catch
+                {
+                }
+
+                try
+                {
+                    if (dataCollectionThread != null)
+                        dataCollectionThread.Abort();
+                }
+                catch
+                {
+                }
+
+                try
+                {
+                    if (activityListenerThread != null)
+                        activityListenerThread.Abort();
+                }
+                catch
+                {
+                }
+#endif
             }
 
-            if (this._TMode == TransmissionMode.Bursty60)
+                //If bursty spawn interface tracking thread//data writing
+                //termination thread
+                //wakeup thread
+            else if (this._TMode == TransmissionMode.Bursty60)
             {
+
+                try
+                {
+                    if (aSavingThread != null)
+                        aSavingThread.Abort();
+                }
+                catch
+                {
+                }
+
+#if (PocketPC)
+                countSeconds = new bool[this._Sensors.Count];
+                LastACIndex = new int[this._Sensors.Count];
+                LastSeqNum = new int[this._Sensors.Count];
+                for (int i = 0; (i < this._Sensors.Count); i++)
+                {
+                    this._Sensors[i]._Loaded = true;
+                    this._Sensors[i]._Flush = true;
+                    this._Sensors[i]._RootStorageDirectory = storageDirectory + "\\data\\raw\\PLFormat\\";
+                    countSeconds[i] = false;
+                    LastACIndex[i] = -1;
+                    LastSeqNum[i] = -1;
+                }
+
                 reminderDateTime = DateTime.Now.AddSeconds(60);
                 //default is local memory
                 interfaceActivityThread = new Thread(new ThreadStart(InterfaceActivityTracker));
                 interfaceActivityThread.Priority = ThreadPriority.Highest;
                 dataCollectionThread = new Thread(new ThreadStart(DataCollection));
-                terminationThread = new Thread(new ThreadStart(TerminateWockets));
-                terminationThread.Start();
+                //terminationThread = new Thread(new ThreadStart(TerminateWockets));
+                //terminationThread.Start();
                 interfaceActivityThread.Start();
                 dataCollectionThread.Start();
-
-
                 activitySignal = OpenEvent(EVENT_ALL_ACCESS, false, ActiveName);
                 if (activitySignal == IntPtr.Zero)
                 {
@@ -288,6 +362,7 @@ namespace Wockets
                 }
                 activityListenerThread = new Thread(activityListener);
                 activityListenerThread.Start();
+#endif
             }
                         
         }
@@ -375,8 +450,11 @@ namespace Wockets
             }
         }
 
+#if (PocketPC)
         bool[] countSeconds = null;
         bool connecting = false;
+        int[] LastACIndex;
+        int[] LastSeqNum;
         void InterfaceActivityTracker()
         {
 
@@ -400,25 +478,21 @@ namespace Wockets
                         // if num connections >2, ready to pause
                         // if data received is >0, ready to pause within 2 seconds.
 
-                        bool receivedSomeData = true;
+                        bool receiveFailed = true;
                         bool receivedFullData = true;
                         for (int i = 0; (i < this._Sensors.Count); i++)
                         {
+                            receivedFullData &= (this._Sensors[i]._ReceivedPackets == ((WocketsDecoder)this._Decoders[i])._ExpectedBatchCount);
+                            
                             //halt, if either 1 successful connection was made
                             // or any data was received
                             // or 3 or more reconnections were made
-                            if ((((RFCOMMReceiver)this._Receivers[i])._SuccessfulConnections <= 1) &&
-                                (this._Sensors[i]._ReceivedPackets == 0) &&
-                                (((RFCOMMReceiver)this._Receivers[i])._Reconnections <= 3))
-                            {
-                                receivedSomeData = false;
-                                break;
-                            }
-                            else
-                                receivedFullData &= (this._Sensors[i]._ReceivedPackets == ((WocketsDecoder)this._Decoders[i])._ExpectedBatchCount);
+                            if ((((RFCOMMReceiver)this._Receivers[i])._SuccessfulConnections ==0) &&           
+                                (((RFCOMMReceiver)this._Receivers[i])._Reconnections < 3))                            
+                                receiveFailed = false;                                                  
                         }
 
-                        if (receivedSomeData)
+                        if ((receivedFullData) || (receiveFailed))
                         {
                             // if didnt get full data, sleep for 2 seconds
                             if (!receivedFullData)
@@ -435,42 +509,37 @@ namespace Wockets
 
                             for (int i = 0; (i < this._Sensors.Count); i++)
                             {
-                                /* string smslog = i + "," + currentTime + "," + WocketsTimer.GetUnixTime() + ",-5,wtm,WocketsController," + ((WocketsDecoder)wc._Decoders[i])._ExpectedBatchCount + ":" + wc._Sensors[i]._ReceivedPackets + ":" + bpower.BatteryLifePercent;
-                                 try
-                                 {
-                                     SMSManager.SMSErrorMessage errorMsg = smsMgr.sendControlledSMS(gatewayNumber, projectCode, programCode, "txt", smslog, false);
-                                     if (errorMsg != SMSManager.SMSErrorMessage.None)
-                                     {
-                                     }
-                                 }
-                                 catch (Exception e)
-                                 {
-                                 }*/
+
 
                                 log_line += "," + this._Sensors[i]._ReceivedPackets + "," + ((WocketsDecoder)this._Decoders[i])._ExpectedBatchCount + "," + ((RFCOMMReceiver)this._Receivers[i])._SuccessfulConnections + "," + ((RFCOMMReceiver)this._Receivers[i])._Reconnections + "," + ((RFCOMMReceiver)this._Receivers[i])._ConnectionTime;
                                 dataSavedSeconds[i] = 0;
                                 countSeconds[i] = false;
                                 ((WocketsDecoder)this._Decoders[i])._ExpectedBatchCount = 0;
+          
+                                if (!Directory.Exists(this._storageDirectory + "\\data\\summary\\"))
+                                    Directory.CreateDirectory(this._storageDirectory + "\\data\\summary\\");
 
-                                TextWriter tw2 = new StreamWriter("testsummary" + i + ".csv", true);
-                                for (int j = 0; (j < ((WocketsDecoder)this._Decoders[i])._ActivityCountIndex); j++)
-                                    tw2.WriteLine(k + "," + currentTime + "," + ((WocketsDecoder)this._Decoders[i])._ActivityCounts[j]);
-                                ((WocketsDecoder)this._Decoders[i])._ActivityCountIndex = 0;
+                                TextWriter tw2 = new StreamWriter(this._storageDirectory + "\\data\\summary\\Sensor-" + this._Sensors[i] ._Location+"-"+ i + ".csv", true);
+                                int nextACIndex = LastACIndex[i] + 1;
+                                if (nextACIndex == 960)
+                                    nextACIndex = 0;
+                                for (int j = nextACIndex; (j != ((WocketsDecoder)this._Decoders[i])._ActivityCountIndex); )
+                                {
+                                    DateTime ac_dt = new DateTime();
+                                    WocketsTimer.GetDateTime((long)((WocketsDecoder)this._Decoders[i])._ActivityCounts[j]._TimeStamp, out ac_dt);
+                                    string ac_currentTime = ac_dt.ToString("yyyy-MM-dd HH:mm:ss");
+                                    tw2.WriteLine(((WocketsDecoder)this._Decoders[i])._ActivityCounts[j]._SeqNum + "," + ac_currentTime + "," + ((WocketsDecoder)this._Decoders[i])._ActivityCounts[j]._TimeStamp + "," + ((WocketsDecoder)this._Decoders[i])._ActivityCounts[j]._Count);
+                                    LastSeqNum[i] = ((WocketsDecoder)this._Decoders[i])._ActivityCounts[j]._SeqNum;
+                                    LastACIndex[i] = j;
+
+                                    j++;
+                                    if (j == 960)
+                                        j = 0;
+                                }
+
                                 tw2.Close();
                             }
 
-
-                            /*string activitylog = "1," + currentTime + "," + unixtime + ",-5,aat,SystemAnnotater," + ((long)WocketsTimer.GetUnixTime(now.AddSeconds(-60.0))).ToString() + ":" + ((long)unixtime).ToString() + ":" + "Active";
-                            try
-                            {
-                                SMSManager.SMSErrorMessage errorMsg = smsMgr.sendControlledSMS(gatewayNumber, projectCode, programCode, "txt", activitylog, false);
-                                if (errorMsg != SMSManager.SMSErrorMessage.None)
-                                {
-                                }
-                            }
-                            catch
-                            {
-                            }*/
                             this._Polling = false;
 
                             //shutting down BT here causes a strange delay on wakeup.
@@ -502,8 +571,8 @@ namespace Wockets
 
 
                             Thread.Sleep(1000);
-                            if (DateTime.Now.Subtract(lastActivity).TotalSeconds > 30)
-                                SetSystemPowerState(null, POWER_STATE_SUSPEND, POWER_FORCE);
+                            //if (DateTime.Now.Subtract(lastActivity).TotalSeconds > 30)
+                              //  SetSystemPowerState(null, POWER_STATE_SUSPEND, POWER_FORCE);
 
                         }
 
@@ -537,7 +606,8 @@ namespace Wockets
                 IntPtr notificationHandle = CeSetUserNotificationEx(IntPtr.Zero, notificationTrigger, null);
                 reminderDateTime = reminderDateTime.AddSeconds(60);
 
-                namedEvent.Receive("WocketsEvent" + reminderID++);
+                namedEvent.Receive("WocketsEvent" + reminderID++);           
+                       
                 SystemIdleTimerReset();
                 try
                 {
@@ -548,7 +618,12 @@ namespace Wockets
                 }
                 Thread.Sleep(3000);
                 for (int i = 0; (i < this._Sensors.Count); i++)
+                {
                     countSeconds[i] = true;
+                    ((WocketsDecoder)this._Decoders[i])._ExpectedBatchCount = -1;
+                    this._Sensors[i]._ReceivedPackets = 0;
+                    ((RFCOMMReceiver)this._Receivers[i])._Reconnections = 0;
+                }
                 connecting = true;
                 this._Polling = true;
 
@@ -569,18 +644,18 @@ namespace Wockets
             }
         }
 
-        private void TerminateWockets()
+        /*private void TerminateWockets()
         {
             NamedEvents namedEvent = new NamedEvents();
             namedEvent.Receive("TerminateWockets");
             System.Diagnostics.Process.GetCurrentProcess().Kill();
-        }
+        }*/
 
         private DateTime lastActivity = DateTime.Now;
         DateTime reminderDateTime;
         Thread interfaceActivityThread;
         Thread dataCollectionThread;
-        Thread terminationThread;
+        //Thread terminationThread;
 
         private int EVENT_ALL_ACCESS = 0x1F0003;
         private  String ActiveName = "PowerManager/UserActivity_Active";
@@ -592,7 +667,7 @@ namespace Wockets
         [DllImport("coredll.dll")]
         private static extern int WaitForSingleObject(IntPtr handle, int milliseconds);
 
-           
+#endif           
 
         public void Dispose()
         {

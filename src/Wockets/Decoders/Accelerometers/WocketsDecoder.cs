@@ -31,7 +31,7 @@ namespace Wockets.Decoders.Accelerometers
         private SensorDataType packetType;
         private ResponseTypes responseType;
         private double lastTimestamp;
-        public int _ExpectedBatchCount = 0;
+        public int _ExpectedBatchCount = -1;
         public AC_RSP[] _ActivityCounts = new AC_RSP[960];
         public int _ActivityCountIndex = 0;
         public int _LastActivityCountIndex = -1;
@@ -306,17 +306,9 @@ namespace Wockets.Decoders.Accelerometers
                         }
 #endif
 
-                            // this.head++;
-
-
 
                             numDecodedPackets++;
-
-                            this.packetPosition = 0;
-                            this.headerSeen = false;
-
-
-                            lastTimestamp = ts;
+                            
                         }
                         else if (packetType == SensorDataType.RESPONSE_PDU)
                         {
@@ -500,7 +492,8 @@ namespace Wockets.Decoders.Accelerometers
                                     ac._TimeStamp = ac_unixtime+ (++ac_index * ac_delta);
 
                                     //Only insert new sequence numbers
-                                    if (ac._SeqNum != (this._ActivityCounts[this._LastActivityCountIndex]._SeqNum + 1))
+                                    // if this is the first AC or it is not equal to the previous sequence number
+                                    if ((this._LastActivityCountIndex==-1) || (ac._SeqNum > this._ActivityCounts[this._LastActivityCountIndex]._SeqNum))
                                     {                 
                                         this._LastActivityCountIndex = this._ActivityCountIndex;
                                         this._ActivityCounts[this._ActivityCountIndex++] = ac;
@@ -511,7 +504,7 @@ namespace Wockets.Decoders.Accelerometers
 #if (PocketPC)
                                     Core.WRITE_ACTIVITY_COUNT(ac);
 #endif
-                                    FireEvent(ac);
+                                    //FireEvent(ac);
                                     break;
 
                                 case ResponseTypes.TCT_RSP:
@@ -536,7 +529,7 @@ namespace Wockets.Decoders.Accelerometers
                                     ac_delta = 0;
                                     ac_index = 0;
                                     acc_count=acc._Count;
-                                    FireEvent(acc);
+                                    //FireEvent(acc);
                                     break;
                                 case ResponseTypes.OFT_RSP:
                                     OFT_RSP offset = new OFT_RSP(this._ID);
@@ -544,7 +537,7 @@ namespace Wockets.Decoders.Accelerometers
                                         offset.RawBytes[i] = this.packet[i];
                                     offset._Offset = ((this.packet[1] & 0x7f) << 7) | (this.packet[2] & 0x7f);
                                     this._ActivityCountOffset = offset._Offset;
-                                    FireEvent(offset);
+                                    //FireEvent(offset);
                                     break;
                                 default:
                                     break;
@@ -553,10 +546,12 @@ namespace Wockets.Decoders.Accelerometers
                      
 
                         }
-                                   
+
+                        this.packetPosition = 0;
+                        this.headerSeen = false;
+        
                     }
 
-                //}
             }
             return numDecodedPackets;
         }

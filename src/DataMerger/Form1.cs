@@ -3657,7 +3657,7 @@ namespace DataMerger
             {
                 wocketsTR1 = new TextReader[wcontroller._Sensors.Count];
                 for (int k = 0; (k < wcontroller._Sensors.Count); k++)
-                    wocketsTR1[k] = new StreamReader(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "Wocket_" + wcontroller._Sensors[k]._ID.ToString("00") + "_RawCorrectedData_" + wcontroller._Sensors[k]._Location.Replace(' ', '-') + ".csv");
+                    wocketsTR1[k] = new StreamReader(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "Wocket_" + wcontroller._Sensors[k]._ID.ToString("00") + "_RawData_" + wcontroller._Sensors[k]._Location.Replace(' ', '-') + ".csv");
             }
             while (((TimeSpan)endDateTime.Subtract(currentDateTime)).TotalSeconds >= 0)
             {

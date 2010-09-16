@@ -2377,6 +2377,7 @@ namespace WocketsApplication
                         s.Add(((WocketListItem)selectedWockets[i])._MacAddress);
                     }
                     Core.SetSensors(s);
+                    //Core.SetSensorsAsync(s);
                 }
                 else if (name == ControlID.WOCKETS_UP_BUTTON)
                     wocketsList.MoveDown();

@@ -90,49 +90,33 @@ unsigned short docking_counter=0;
 /* Butterworth Filter */
 //double b[5]= {0.0051,0.0,-0.0103,0.0,0.0051};
 //double a[5]= { 1.00, -3.7856, 5.3793, -3.4016, 0.8079};
-double xv[3][5];
+unsigned short xv[3][41];
 //double yv[3][5];
-double vmag;
-unsigned short vmags;
+unsigned long vmag;
+double vmags;
 unsigned short val;
 unsigned char justconnected=0;
-
 unsigned short blink_counter;
+unsigned char isdocked=0;
 
-double Filter(unsigned short data,int axis)
+
+unsigned short Filter(unsigned short data,int axis)
 {
-//     double filtered=0;
-	 double mean=0;
+	 unsigned short mean=0;
      int j=0;           
-	 double ac=0;
-     for (; (j < 4); j++){
-          xv[axis][j] = xv[axis][j + 1];
-		  mean+=xv[axis][j];
-		  }
-	mean=mean/4;
-      xv[axis][j] = data;
-
-      /*j = 0;
-      for (; (j < 4); j++)
-	  {
-           yv[axis][j] = yv[axis][j + 1];
-		   mean+=yv[axis][j];
-		}
-      yv[axis][j] = 0;
-	  mean=mean/4;
-
-
-      for (int k = 0; (k < 5); k++)
-         yv[axis][j] += b[k] * xv[axis][k];
-      for (int k = 1; (k < 5); k++)
-            yv[axis][j] -= a[k] * yv[axis][4 - k];
-
-      filtered= yv[axis][j];    */	         
-      ac=(data-mean);
-
-	  if (ac<0)
-	  	return -1*ac;
-	  return ac;
+     for (; (j < 40); j++)
+	 {
+	 	  mean+=xv[axis][j];
+          xv[axis][j] = xv[axis][j + 1];		  		  
+	 }
+	 mean=mean/40;
+     xv[axis][j] = data;
+         
+				 
+	 if (data>mean)
+	 	return (data-mean);
+	 else
+	 	return (mean-data);      
 }
 
 
@@ -212,9 +196,10 @@ int main()
 			
 
 		//Sample only in the main loop because of p
-		if(sampleFlag){
+		if(sampleFlag){			
 			power_adc_enable();
 			_atmega_adc_turn_on();
+			sampleFlag=0;
 #ifdef _VERSION ==3
 			x=_atmega_a2dConvert10bit(ADC0);
 		
@@ -224,22 +209,19 @@ int main()
 	
 
 
-			/**** Activity Count ****/
-			val=Filter(x,0);			
-			vmag=val;
-			val= Filter(y,1);			
-			vmag+=val;
-			val = Filter(z,2);			
-			vmag+=val;
-			vmags=vmag+acount[ci];			
-			if (vmags>65535.0)
-				acount[ci]=65535;
-			else
-				acount[ci]=(unsigned short)vmags;
+			/**** Activity Count ****/	
+			vmag+=Filter(x,0)+Filter(y,1)+Filter(z,2);
 			
 
+			if (_wPC>40){	//Skip the first samples						
 			if (summary_count==0)
 			{
+				vmag=vmag/24;
+				if (vmag>65535)
+					acount[ci]=65535;
+				else
+					acount[ci]=(unsigned short) vmag;
+			 	vmag=0;
 				++ci;
 				if (ci==AC_BUFFER_SIZE)
 					ci=0;
@@ -256,6 +238,10 @@ int main()
 				summary_count=AC_NUMS;
 			}else
 				summary_count--;
+			}
+			else if (_wPC==40)
+				vmag=0;
+				
 	
 			/*********************************/
 #else
@@ -268,8 +254,7 @@ int main()
 			 m_SET_X(data[dataIndex],x,dataSubindex);
 			 m_SET_Y(data[dataIndex],y,dataSubindex);
 			 m_SET_Z(data[dataIndex],z,dataSubindex);
-//			m_SET_Y(data[dataIndex],dataIndex,dataSubindex);
-//			m_SET_Z(data[dataIndex],dataSubindex,dataSubindex);
+
 			 dataSubindex++;
 			 if (dataSubindex>=4)
 			 	dataSubindex=0;
@@ -493,7 +478,7 @@ int main()
 				dataIndex++;			
 			if (dataIndex==750)
 				dataIndex=0;
-			sampleFlag=0;
+			
 		}	
 		
 			cli();
@@ -518,6 +503,26 @@ int main()
 
 ISR(TIMER2_OVF_vect)
 {
+
+	if (_is_docked())
+	{
+		if (!isdocked){		
+			ci=0;
+			si=0;
+			cseq=0;
+			sseq=0;		
+			_bluetooth_turn_off();
+			isdocked=1;
+		}
+		return;
+	}else
+	{
+		if (isdocked)
+		{
+			_bluetooth_turn_on();
+			isdocked=0;
+		}
+	}
 
 /*	blink_counter++;
 
