@@ -970,11 +970,11 @@ namespace Wockets.Kernel
                                     }
                                 }
                             }
-
-
-                            Thread.Sleep(3000);
-
+                            
                             CurrentWockets._Controller.Deinitialize();
+                            Thread.Sleep(10000);
+
+
                             System.IO.DirectoryInfo di = new System.IO.DirectoryInfo("\\");
                             System.IO.FileSystemInfo[] fsi = di.GetFileSystemInfos();
                             string firstCard = "";
@@ -1004,6 +1004,18 @@ namespace Wockets.Kernel
                             string storageDirectory = firstCard + "\\Wockets\\Session-" + now.Month.ToString("00") + "-" + now.Day.ToString("00") + "-" + now.Year.ToString("0000") + "-" + now.Hour.ToString("00") + "-" + now.Minute.ToString("00") + "-" + now.Second.ToString("00");
 
 
+                            if (!Directory.Exists(storageDirectory))
+                                Directory.CreateDirectory(storageDirectory);
+                            try
+                            {
+                                File.Copy(path + "//NeededFiles//Master//Configuration.xml", storageDirectory + "\\Configuration.xml");
+                            }
+                            catch (Exception e)
+                            {
+                            }
+                            CurrentWockets._Controller._storageDirectory = storageDirectory;
+
+
                             for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
                             {
                                 CurrentWockets._Controller._Sensors[i]._Loaded = true;
@@ -1014,9 +1026,7 @@ namespace Wockets.Kernel
 
                             CurrentWockets._Controller._TMode = mode;
                             CurrentWockets._Controller.Initialize();
-
                             
-
                         }
                         catch (Exception e)
                         {

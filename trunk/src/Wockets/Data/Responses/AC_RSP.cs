@@ -13,7 +13,7 @@ namespace Wockets.Data.Responses
         public double _TimeStamp;
 
         public AC_RSP(int id)
-            : base(4, ResponseTypes.AC_RSP, (byte)id)
+            : base(6, ResponseTypes.AC_RSP, (byte)id)
         {
         }
     }

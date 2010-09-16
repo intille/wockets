@@ -75,7 +75,7 @@ namespace KernelTest
                             this.menuWocketConnect.Enabled = false;
                             this.menuWocketDisconnect.Enabled = false;
                             this.menuWocketDiscover.Enabled = false;
-                            this.menuItem2.Enabled = false;
+                            
                             break;
                         case KernelResponse.STARTED:
                             this.status.Text = "Kernel ... started";
@@ -89,7 +89,7 @@ namespace KernelTest
                             this.menuWocketConnect.Enabled = false;
                             this.menuWocketDisconnect.Enabled = false;
                             this.menuWocketDiscover.Enabled = false;
-                            this.menuItem2.Enabled = false;
+                            
                             break;
                         case KernelResponse.STOPPED:
                             this.status.Text = "Kernel ... stopped";
@@ -103,7 +103,7 @@ namespace KernelTest
                             this.menuWocketConnect.Enabled = false;
                             this.menuWocketDisconnect.Enabled = false;
                             this.menuWocketDiscover.Enabled = false;
-                            this.menuItem2.Enabled = true;
+                            
                             this.listBox1.Enabled = false;
                             break;
                         case KernelResponse.REGISTERED:
@@ -219,6 +219,8 @@ namespace KernelTest
         {
             if (MessageBox.Show("Are you sure you want to exit?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
             {
+                Core.Terminate();
+
                 if (!Core._KernalStarted)
                 {
                     Application.Exit();
@@ -233,6 +235,7 @@ namespace KernelTest
             ArrayList s = new ArrayList();
             s.Add((string)this.listBox1.Items[this.listBox1.SelectedIndex]);            
             Core.SetSensors(s);
+          //  Core.SetSensorsAsync(s);
         }
 
 
