@@ -447,14 +447,23 @@
     <Compile Include="..\..\src\Wockets\Data\Commands\SET_TM.cs">
       <Link>Data\Commands\SET_TM.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\GET_TCT.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Commands\GET_TCT.cs">
       <Link>Data\Commands\GET_TCT.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\SET_TCT.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Commands\SET_TCT.cs">
       <Link>Data\Commands\SET_TCT.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Responses\TCT_RSP.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Responses\TCT_RSP.cs">
       <Link>Data\Responses\TCT_RSP.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Commands\SET_VTM.cs" >
+      <Link>Data\Commands\SET_VTM.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\ACC_RSP.cs" >
+      <Link>Data\Responses\ACC_RSP.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Data\Responses\OFT_RSP.cs" >
+      <Link>Data\Responses\OFT_RSP.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
