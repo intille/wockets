@@ -64,11 +64,11 @@ namespace Wockets.Decoders.Accelerometers
         public override bool Initialize()
         {
             base.Initialize();
-            if ((CurrentWockets._Controller._Mode == MemoryMode.BluetoothToLocal) || (CurrentWockets._Controller._Mode == MemoryMode.SharedToLocal))
-            {
+           // if ((CurrentWockets._Controller._Mode == MemoryMode.BluetoothToLocal) || (CurrentWockets._Controller._Mode == MemoryMode.SharedToLocal))
+           // {
                 for (int i = 0; (i < this._Data.Length); i++)
                     this._Data[i] = new WocketsAccelerationData();
-            }
+            //}
             return true;
         }
 
@@ -251,8 +251,8 @@ namespace Wockets.Decoders.Accelerometers
                             this.TotalSamples++;                    
 
                             //if (CurrentWockets._Configuration._MemoryMode == Wockets.Data.Configuration.MemoryConfiguration.NON_SHARED)
-                            if (CurrentWockets._Controller._Mode== MemoryMode.BluetoothToLocal)
-                            {
+                           // if (CurrentWockets._Controller._Mode== MemoryMode.BluetoothToLocal)
+                            //{
                                 int bufferHead = this.head;
                                 WocketsAccelerationData datum = ((WocketsAccelerationData)this._Data[bufferHead]);
                                 datum.Reset();                                
@@ -272,15 +272,41 @@ namespace Wockets.Decoders.Accelerometers
                                 datum._Y = y;
                                 datum._Z = z;
 
-
+#if (PocketPC)
+                                if ((CurrentWockets._Controller._TMode== TransmissionMode.Continuous) && (CurrentWockets._Controller._Mode == MemoryMode.BluetoothToShared))//if (CurrentWockets._Configuration._MemoryMode == Wockets.Data.Configuration.MemoryConfiguration.SHARED)
+                                {
+                                    this.sdata.Write(BitConverter.GetBytes(ts), 0, sizeof(double));
+                                    //this.head+=sizeof(double);
+                                    this.sdata.Write(BitConverter.GetBytes(x), 0, sizeof(short));
+                                    //this.head+=sizeof(short);
+                                    this.sdata.Write(BitConverter.GetBytes(y), 0, sizeof(short));
+                                    //this.head+=sizeof(short);
+                                    this.sdata.Write(BitConverter.GetBytes(z), 0, sizeof(short));
+                                }
+#endif
                                 if (bufferHead >= (BUFFER_SIZE - 1))
+                                {
                                     bufferHead = 0;
+#if (PocketPC)
+                                    if (CurrentWockets._Controller._TMode == TransmissionMode.Continuous)
+                                     this.sdata.Seek(0, System.IO.SeekOrigin.Begin);
+#endif
+                                }
                                 else
                                     bufferHead++;
                                 this.head = bufferHead;
-                            }
 #if (PocketPC)
-                            else if (CurrentWockets._Controller._Mode == MemoryMode.BluetoothToShared)//if (CurrentWockets._Configuration._MemoryMode == Wockets.Data.Configuration.MemoryConfiguration.SHARED)
+                                if (CurrentWockets._Controller._TMode == TransmissionMode.Continuous)
+                                {
+                                    this.shead.Seek(0, System.IO.SeekOrigin.Begin);
+                                    this.shead.Write(BitConverter.GetBytes(this.head), 0, sizeof(int));
+
+                                }
+#endif
+                           /// }
+#if (PocketPC)
+                            /*else 
+                            if (CurrentWockets._Controller._Mode == MemoryMode.BluetoothToShared)//if (CurrentWockets._Configuration._MemoryMode == Wockets.Data.Configuration.MemoryConfiguration.SHARED)
                         {
                             this.sdata.Write(BitConverter.GetBytes(ts), 0, sizeof(double));
                             //this.head+=sizeof(double);
@@ -303,7 +329,7 @@ namespace Wockets.Decoders.Accelerometers
 
                             this.shead.Seek(0, System.IO.SeekOrigin.Begin);
                             this.shead.Write(BitConverter.GetBytes(this.head), 0, sizeof(int));
-                        }
+                        }*/
 #endif
 
 

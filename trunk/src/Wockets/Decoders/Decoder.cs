@@ -173,10 +173,11 @@ namespace Wockets.Decoders
         public abstract int Decode(int sensorID, CircularBuffer data, int start,int end);
         public virtual bool Initialize()
         {
-            if ( (CurrentWockets._Controller._Mode== MemoryMode.BluetoothToLocal) || (CurrentWockets._Controller._Mode== MemoryMode.SharedToLocal))
+            //if ( (CurrentWockets._Controller._Mode== MemoryMode.BluetoothToLocal) || (CurrentWockets._Controller._Mode== MemoryMode.SharedToLocal))
                 this._Data = new SensorData[this._BufferSize];  
 #if (PocketPC)
-            else if (CurrentWockets._Controller._Mode == MemoryMode.BluetoothToShared)
+           // else 
+            if (CurrentWockets._Controller._Mode == MemoryMode.BluetoothToShared)
             {
                 this.sdata = new MemoryMappedFileStream("\\Temp\\wocket" + this._ID + ".dat", "wocket" + this._ID, (_DUSize * (uint)this._BufferSize), MemoryProtection.PageReadWrite);
                 this.shead = new MemoryMappedFileStream("\\Temp\\whead" + this._ID + ".dat", "whead" + this._ID, sizeof(int), MemoryProtection.PageReadWrite);

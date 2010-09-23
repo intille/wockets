@@ -156,7 +156,8 @@ namespace Wockets.Kernel
             RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + Core._IcomingChannel + "}");
             rk.SetValue("Message", "", RegistryValueKind.String);
             rk.SetValue("Param", "", RegistryValueKind.String);
-            rk.Close();            
+            rk.Close();
+            Core.KERNEL_PATH=System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase)+"\\";
         }
 
         /// <summary>
@@ -354,6 +355,7 @@ namespace Wockets.Kernel
 
        }
 
+       private static System.Diagnostics.Process _KernelProcess=null;
         /// <summary>
         /// Spawns the kernel process if it is not started
         /// </summary>
@@ -362,14 +364,23 @@ namespace Wockets.Kernel
         {          
             if (!Core._KernalStarted)
             {
-                System.Diagnostics.Process po = new System.Diagnostics.Process();
-                ProcessStartInfo startInfo = new ProcessStartInfo();
-                //startInfo.
-                startInfo.WorkingDirectory = KERNEL_PATH;
-                startInfo.FileName = KERNEL_PATH + "\\" + KERNEL_EXECUTABLE;
-                startInfo.UseShellExecute = false;
-                po.StartInfo = startInfo;
-                return po.Start();               
+                try
+                {
+                    //System.Diagnostics.Process po = new System.Diagnostics.Process();
+                    ProcessStartInfo startInfo = new ProcessStartInfo();
+                    //startInfo.
+                    startInfo.WorkingDirectory = KERNEL_PATH;
+                    startInfo.FileName = KERNEL_PATH + KERNEL_EXECUTABLE;
+                    //startInfo.FileName = startInfo.FileName;
+                    startInfo.UseShellExecute = false;
+                     //System.Diagnostics.Process.Start(
+                    //po.StartInfo = startInfo;
+                    return ((_KernelProcess=System.Diagnostics.Process.Start(startInfo.FileName, ""))!=null);
+                }
+                catch (Exception e)
+                {
+                    return false;
+                }
             }
             return false;
         }
@@ -383,22 +394,22 @@ namespace Wockets.Kernel
             storagePath = "";     
             
           
-            kernelLock.WaitOne();
+           // kernelLock.WaitOne();
             try
             {
                 NamedEvents namedEvent = new NamedEvents();
-                RegistryKey rk = Registry.LocalMachine.OpenSubKey(COMMAND_CHANNEL, true);
+                /*RegistryKey rk = Registry.LocalMachine.OpenSubKey(COMMAND_CHANNEL, true);
                 rk.SetValue("Message", KernelCommand.TERMINATE.ToString(), RegistryValueKind.String);
                 rk.SetValue("Param", Core._IcomingChannel.ToString(), RegistryValueKind.String);
                 rk.Flush();
-                rk.Close();
-                namedEvent.Send(Channels.COMMAND.ToString());
+                rk.Close();*/
+                namedEvent.Send("TerminateKernel");
             }
             catch (Exception e)
             {
                 Logger.Error("Core.cs:Terminate:" + e.ToString());
             }
-            kernelLock.Release();
+            //kernelLock.Release();
        
 
             Thread.Sleep(2000);
@@ -422,13 +433,14 @@ namespace Wockets.Kernel
                         // registry is corrupt fix it
                         RegistryKey rk1 = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_WOCKETS_PATH + "\\Kernel");
                         rk1.SetValue("Status", 0, RegistryValueKind.DWord);
-                        rk1.Close();      
+                        rk1.Close();
                     }
                 }
                 catch
                 {
                     if (Core._KernalStarted)
                         return false;
+
                 }
             }
             return true;
@@ -576,15 +588,22 @@ namespace Wockets.Kernel
         {
             ThreadPool.QueueUserWorkItem(func =>
             {
+
                 NamedEvents namedEvent = new NamedEvents();
                 kernelLock.WaitOne();
-                RegistryKey rk = Registry.LocalMachine.OpenSubKey(COMMAND_CHANNEL, true);
-                rk.SetValue("Message", KernelCommand.PING.ToString(), RegistryValueKind.String);
-                rk.SetValue("Param", _IcomingChannel.ToString(), RegistryValueKind.String);
-                rk.Flush();
-                rk.Close();
-                kernelLock.Release();
-                namedEvent.Send(Channels.COMMAND.ToString());
+                try
+                {
+                    RegistryKey rk = Registry.LocalMachine.OpenSubKey(COMMAND_CHANNEL, true);
+                    rk.SetValue("Message", KernelCommand.PING.ToString(), RegistryValueKind.String);
+                    rk.SetValue("Param", _IcomingChannel.ToString(), RegistryValueKind.String);
+                    rk.Flush();
+                    rk.Close();
+                    namedEvent.Send(Channels.COMMAND.ToString());
+                }
+                catch 
+                { 
+                }
+                kernelLock.Release();                
             });
 
         }

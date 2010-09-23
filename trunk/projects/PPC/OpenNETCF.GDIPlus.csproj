@@ -1,4 +1,4 @@
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -13,7 +13,7 @@
     <PlatformFamilyName>PocketPC</PlatformFamilyName>
     <PlatformID>4118C335-430C-497f-BE48-11C3316B135E</PlatformID>
     <OSVersion>5.1</OSVersion>
-    <DeployDirSuffix>OpenNETCF.GDIPlus</DeployDirSuffix>
+    <DeployDirSuffix>Wockets</DeployDirSuffix>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <NativePlatformName>Windows Mobile 5.0 Pocket PC SDK</NativePlatformName>
     <FormFactorID>
@@ -55,112 +55,112 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\src\OpenNETCF.GDIPlus\BitmapPlus.cs" >
+    <Compile Include="..\..\src\OpenNETCF.GDIPlus\BitmapPlus.cs">
       <Link>BitmapPlus.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\OpenNETCF.GDIPlus\Brushes.cs" >
+    <Compile Include="..\..\src\OpenNETCF.GDIPlus\Brushes.cs">
       <Link>Brushes.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\OpenNETCF.GDIPlus\BrushPlus.cs" >
+    <Compile Include="..\..\src\OpenNETCF.GDIPlus\BrushPlus.cs">
       <Link>BrushPlus.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\OpenNETCF.GDIPlus\CustomLineCap.cs" >
+    <Compile Include="..\..\src\OpenNETCF.GDIPlus\CustomLineCap.cs">
       <Link>CustomLineCap.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\OpenNETCF.GDIPlus\DataTypes.cs" >
+    <Compile Include="..\..\src\OpenNETCF.GDIPlus\DataTypes.cs">
       <Link>DataTypes.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\OpenNETCF.GDIPlus\Enums.cs" >
+    <Compile Include="..\..\src\OpenNETCF.GDIPlus\Enums.cs">
       <Link>Enums.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\OpenNETCF.GDIPlus\FileStream.cs" >
+    <Compile Include="..\..\src\OpenNETCF.GDIPlus\FileStream.cs">
       <Link>FileStream.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\OpenNETCF.GDIPlus\FILETIME.cs" >
+    <Compile Include="..\..\src\OpenNETCF.GDIPlus\FILETIME.cs">
       <Link>FILETIME.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\OpenNETCF.GDIPlus\FontFamilyPlus.cs" >
+    <Compile Include="..\..\src\OpenNETCF.GDIPlus\FontFamilyPlus.cs">
       <Link>FontFamilyPlus.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\OpenNETCF.GDIPlus\FontPlus.cs" >
+    <Compile Include="..\..\src\OpenNETCF.GDIPlus\FontPlus.cs">
       <Link>FontPlus.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\OpenNETCF.GDIPlus\GraphicsPath.cs" >
+    <Compile Include="..\..\src\OpenNETCF.GDIPlus\GraphicsPath.cs">
       <Link>GraphicsPath.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\OpenNETCF.GDIPlus\GraphicsPlus.cs" >
+    <Compile Include="..\..\src\OpenNETCF.GDIPlus\GraphicsPlus.cs">
       <Link>GraphicsPlus.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\OpenNETCF.GDIPlus\Image.cs" >
+    <Compile Include="..\..\src\OpenNETCF.GDIPlus\Image.cs">
       <Link>Image.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\OpenNETCF.GDIPlus\ImageAttributesPlus.cs" >
+    <Compile Include="..\..\src\OpenNETCF.GDIPlus\ImageAttributesPlus.cs">
       <Link>ImageAttributesPlus.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\OpenNETCF.GDIPlus\IStream.cs" >
+    <Compile Include="..\..\src\OpenNETCF.GDIPlus\IStream.cs">
       <Link>IStream.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\OpenNETCF.GDIPlus\Matrix.cs" >
+    <Compile Include="..\..\src\OpenNETCF.GDIPlus\Matrix.cs">
       <Link>Matrix.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\OpenNETCF.GDIPlus\NativeMethods\Bitmaps.cs" >
+    <Compile Include="..\..\src\OpenNETCF.GDIPlus\NativeMethods\Bitmaps.cs">
       <Link>NativeMethods\Bitmaps.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\OpenNETCF.GDIPlus\NativeMethods\Brushes.cs" >
+    <Compile Include="..\..\src\OpenNETCF.GDIPlus\NativeMethods\Brushes.cs">
       <Link>NativeMethods\Brushes.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\OpenNETCF.GDIPlus\NativeMethods\Common.cs" >
+    <Compile Include="..\..\src\OpenNETCF.GDIPlus\NativeMethods\Common.cs">
       <Link>NativeMethods\Common.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\OpenNETCF.GDIPlus\NativeMethods\Drawing.cs" >
+    <Compile Include="..\..\src\OpenNETCF.GDIPlus\NativeMethods\Drawing.cs">
       <Link>NativeMethods\Drawing.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\OpenNETCF.GDIPlus\NativeMethods\Fonts.cs" >
+    <Compile Include="..\..\src\OpenNETCF.GDIPlus\NativeMethods\Fonts.cs">
       <Link>NativeMethods\Fonts.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\OpenNETCF.GDIPlus\NativeMethods\Graphics.cs" >
+    <Compile Include="..\..\src\OpenNETCF.GDIPlus\NativeMethods\Graphics.cs">
       <Link>NativeMethods\Graphics.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\OpenNETCF.GDIPlus\NativeMethods\ImageAttributes.cs" >
+    <Compile Include="..\..\src\OpenNETCF.GDIPlus\NativeMethods\ImageAttributes.cs">
       <Link>NativeMethods\ImageAttributes.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\OpenNETCF.GDIPlus\NativeMethods\Images.cs" >
+    <Compile Include="..\..\src\OpenNETCF.GDIPlus\NativeMethods\Images.cs">
       <Link>NativeMethods\Images.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\OpenNETCF.GDIPlus\NativeMethods\Matrices.cs" >
+    <Compile Include="..\..\src\OpenNETCF.GDIPlus\NativeMethods\Matrices.cs">
       <Link>NativeMethods\Matrices.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\OpenNETCF.GDIPlus\NativeMethods\Others.cs" >
+    <Compile Include="..\..\src\OpenNETCF.GDIPlus\NativeMethods\Others.cs">
       <Link>NativeMethods\Others.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\OpenNETCF.GDIPlus\NativeMethods\Paths.cs" >
+    <Compile Include="..\..\src\OpenNETCF.GDIPlus\NativeMethods\Paths.cs">
       <Link>NativeMethods\Paths.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\OpenNETCF.GDIPlus\NativeMethods\Pens.cs" >
+    <Compile Include="..\..\src\OpenNETCF.GDIPlus\NativeMethods\Pens.cs">
       <Link>NativeMethods\Pens.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\OpenNETCF.GDIPlus\NativeMethods\Regions.cs" >
+    <Compile Include="..\..\src\OpenNETCF.GDIPlus\NativeMethods\Regions.cs">
       <Link>NativeMethods\Regions.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\OpenNETCF.GDIPlus\PenPlus.cs" >
+    <Compile Include="..\..\src\OpenNETCF.GDIPlus\PenPlus.cs">
       <Link>PenPlus.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\OpenNETCF.GDIPlus\Properties\AssemblyInfo.cs" >
+    <Compile Include="..\..\src\OpenNETCF.GDIPlus\Properties\AssemblyInfo.cs">
       <Link>Properties\AssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\OpenNETCF.GDIPlus\RegionPlus.cs" >
+    <Compile Include="..\..\src\OpenNETCF.GDIPlus\RegionPlus.cs">
       <Link>RegionPlus.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\OpenNETCF.GDIPlus\SimpleTypes.cs" >
+    <Compile Include="..\..\src\OpenNETCF.GDIPlus\SimpleTypes.cs">
       <Link>SimpleTypes.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\OpenNETCF.GDIPlus\STATSTG.cs" >
+    <Compile Include="..\..\src\OpenNETCF.GDIPlus\STATSTG.cs">
       <Link>STATSTG.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\OpenNETCF.GDIPlus\StringFormatPlus.cs" >
+    <Compile Include="..\..\src\OpenNETCF.GDIPlus\StringFormatPlus.cs">
       <Link>StringFormatPlus.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\OpenNETCF.GDIPlus\Stubs.cs" >
+    <Compile Include="..\..\src\OpenNETCF.GDIPlus\Stubs.cs">
       <Link>Stubs.cs</Link>
     </Compile>
   </ItemGroup>

@@ -455,6 +455,7 @@ int main()
 					{
 						_delay_ms(5);
 						seconds_passed++;
+						_receive_data();
 
 					}						
 					connected=0;
@@ -633,7 +634,6 @@ ISR(TIMER2_OVF_vect)
 		//reset shutdown timer if connected
 		if ((_wPDT!=0) && (_wShutdownTimer!=_DEFAULT_SHUTDOWN))
 			_wShutdownTimer=_DEFAULT_SHUTDOWN;
-
 
 		connected=1;
 		_receive_data();		

@@ -88,7 +88,7 @@ namespace Wockets
         private TextWriter structureTW = null;
         private Instances instances;        
         private Classifier classifier;
-        private string storageDirectory;
+        public string _StorageDirectory;
         private Session annotatedSession;        
         public double StartTime = 0;
         /// <summary>
@@ -210,6 +210,7 @@ namespace Wockets
             {
                 this._Receivers[i].Dispose();
                 this._Decoders[i].Dispose();
+                this._Sensors[i].Dispose();
             }
 
             try
@@ -286,7 +287,7 @@ namespace Wockets
                     aSavingThread.Priority = ThreadPriority.Highest;
                     aSavingThread.Start();
                 }
-#if (PockePC)
+#if (PocketPC)
                 try
                 {
                     if (interfaceActivityThread != null)
@@ -339,7 +340,7 @@ namespace Wockets
                 {
                     this._Sensors[i]._Loaded = true;
                     this._Sensors[i]._Flush = true;
-                    this._Sensors[i]._RootStorageDirectory = storageDirectory + "\\data\\raw\\PLFormat\\";
+                    this._Sensors[i]._RootStorageDirectory = this._StorageDirectory + "\\data\\raw\\PLFormat\\";
                     countSeconds[i] = false;
                     LastACIndex[i] = -1;
                     LastSeqNum[i] = -1;
@@ -494,6 +495,17 @@ namespace Wockets
 
                         if ((receivedFullData) || (receiveFailed))
                         {
+
+                            for (int kk = 0; (kk < 10); kk++)
+                            {
+                                for (int i = 0; (i < this._Sensors.Count); i++)
+                                    if (LastSeqNum[i]>=0)
+                                        ((RFCOMMReceiver)this._Receivers[i]).Write(new ACK(LastSeqNum[i])._Bytes);
+                                Thread.Sleep(20);
+                            }
+   
+
+
                             // if didnt get full data, sleep for 2 seconds
                             if (!receivedFullData)
                                 Thread.Sleep(3000);
@@ -515,11 +527,11 @@ namespace Wockets
                                 dataSavedSeconds[i] = 0;
                                 countSeconds[i] = false;
                                 ((WocketsDecoder)this._Decoders[i])._ExpectedBatchCount = 0;
-          
-                                if (!Directory.Exists(this._storageDirectory + "\\data\\summary\\"))
-                                    Directory.CreateDirectory(this._storageDirectory + "\\data\\summary\\");
 
-                                TextWriter tw2 = new StreamWriter(this._storageDirectory + "\\data\\summary\\Sensor-" + this._Sensors[i] ._Location+"-"+ i + ".csv", true);
+                                if (!Directory.Exists(this._StorageDirectory + "\\data\\summary\\"))
+                                    Directory.CreateDirectory(this._StorageDirectory+ "\\data\\summary\\");
+
+                                TextWriter tw2 = new StreamWriter(this._StorageDirectory+ "\\data\\summary\\Sensor-" + this._Sensors[i]._Location + "-" + i + ".csv", true);
                                 int nextACIndex = LastACIndex[i] + 1;
                                 if (nextACIndex == 960)
                                     nextACIndex = 0;
@@ -537,7 +549,7 @@ namespace Wockets
                                         j = 0;
                                 }
 
-                                tw2.Close();
+                                tw2.Close();                                
                             }
 
                             this._Polling = false;
@@ -571,8 +583,8 @@ namespace Wockets
 
 
                             Thread.Sleep(1000);
-                            //if (DateTime.Now.Subtract(lastActivity).TotalSeconds > 30)
-                              //  SetSystemPowerState(null, POWER_STATE_SUSPEND, POWER_FORCE);
+                            if (DateTime.Now.Subtract(lastActivity).TotalSeconds > 30)
+                                SetSystemPowerState(null, POWER_STATE_SUSPEND, POWER_FORCE);
 
                         }
 
@@ -764,17 +776,7 @@ namespace Wockets
             }
         }
 
-        public string _storageDirectory
-        {
-            get
-            {
-                return this.storageDirectory;
-            }
-            set
-            {
-                this.storageDirectory = value;
-            }
-        }
+
 
         public Instances _instances
         {

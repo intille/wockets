@@ -1,4 +1,4 @@
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -628,15 +628,17 @@
     <Compile Include="..\..\src\Wockets\Utils\Tapi\TapiEnums.cs">
       <Link>Utils\Tapi\TapiEnums.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\SET_VTM.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Commands\SET_VTM.cs">
       <Link>Data\Commands\SET_VTM.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Responses\ACC_RSP.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Responses\ACC_RSP.cs">
       <Link>Data\Responses\ACC_RSP.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Responses\OFT_RSP.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Responses\OFT_RSP.cs">
       <Link>Data\Responses\OFT_RSP.cs</Link>
     </Compile>
+    <Compile Include="Data\Commands\ACK.cs" />
+    <Compile Include="Utils\Storage.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="WocketsWeka.csproj">

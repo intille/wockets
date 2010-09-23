@@ -20,9 +20,6 @@ namespace KernelTest
 {
     public partial class Form1 : Form
     {
-        Hashtable events = new Hashtable();
-        Hashtable threads = new Hashtable();
-        Hashtable discovered = new Hashtable();
         public Form1()
         {
             InitializeComponent();
