@@ -262,12 +262,14 @@ namespace Wockets.Sensors.Accelerometers
             if (bw != null)
             {
                 bw.Flush();
-                bw.CloseFile();
+                bw.CloseFile();               
             }
 
             if (br != null)            
                 br.CloseFile();
-            
+            presentHour = -1;
+            presentMinute = -1;
+            presentSecond = -1;
         }
 
 
@@ -284,7 +286,7 @@ namespace Wockets.Sensors.Accelerometers
                 #region Determine the head of the data buffer
                 int currentHead = -1;
                 //if (CurrentWockets._Configuration._MemoryMode == MemoryConfiguration.SHARED)
-                if (CurrentWockets._Controller._Mode== MemoryMode.BluetoothToShared)
+               /* if (CurrentWockets._Controller._Mode== MemoryMode.BluetoothToShared)
                 {
                     if (sdata == null)
                     {
@@ -305,7 +307,7 @@ namespace Wockets.Sensors.Accelerometers
                     currentHead = BitConverter.ToInt32(head, 0);
                     shead.Seek(0, System.IO.SeekOrigin.Begin);
                 }
-                else
+                else*/
                     currentHead = this._Decoder._Head;
                 #endregion Determine the head of the data buffer
 
@@ -344,7 +346,7 @@ namespace Wockets.Sensors.Accelerometers
                 {
                     #region Populate the acceleration data that need to be written
                     //if (CurrentWockets._Configuration._MemoryMode == MemoryConfiguration.SHARED)
-                    if (CurrentWockets._Controller._Mode== MemoryMode.BluetoothToShared)
+                   /* if (CurrentWockets._Controller._Mode== MemoryMode.BluetoothToShared)
                     {
                         sdata.Read(timestamp, 0, sizeof(double));
                         data.UnixTimeStamp = BitConverter.ToDouble(timestamp, 0);
@@ -361,7 +363,7 @@ namespace Wockets.Sensors.Accelerometers
                         data.RawBytes[3] = (byte)(((data._Y & 0x0f) << 3) | ((data._Z & 0x380) >> 7));
                         data.RawBytes[4] = (byte)(data._Z & 0x7f);
                     }
-                    else
+                    else*/
                         data = ((AccelerationData)this._Decoder._Data[tail]);
                     #endregion Populate the acceleration data that need to be written
 
@@ -415,8 +417,8 @@ namespace Wockets.Sensors.Accelerometers
                     {
                         tail = 0;
                         //if (CurrentWockets._Configuration._MemoryMode == MemoryConfiguration.SHARED)
-                        if (CurrentWockets._Controller._Mode== MemoryMode.BluetoothToShared)
-                            sdata.Seek(0, System.IO.SeekOrigin.Begin);
+                       // if (CurrentWockets._Controller._Mode== MemoryMode.BluetoothToShared)
+                         //   sdata.Seek(0, System.IO.SeekOrigin.Begin);
                     }
                     else
                         tail++;

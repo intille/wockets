@@ -300,7 +300,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                             counter++;
                             if (counter == 10)
                                 break;
-                        }
+                        }                        
                     }
 
        

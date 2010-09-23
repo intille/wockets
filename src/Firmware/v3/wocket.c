@@ -219,10 +219,10 @@ void _wocket_initialize(void)
 	{
 
 		// Set the sampling rate to 90Hz
-		_SAMPLING_RATE=40;
+		//_SAMPLING_RATE=40;
 		//_wTM=_TM_Burst_60;
 
-		//_SAMPLING_RATE=90;
+		_SAMPLING_RATE=40;
 		_wTM=_TM_Continuous;
 	
 		// Write the sampling rate to the EEPROM
@@ -625,7 +625,7 @@ void _receive_data(void)
 				case (unsigned char)SET_VTM:  
                      command_length=2;
                      break;
-     			case (unsigned char)ACK:
+     			case (unsigned char)ACK:		
                      command_length=4;
                      break;
 				case (unsigned char)SET_TCT:                
@@ -655,6 +655,34 @@ void _receive_data(void)
     {                                       
             switch (opcode)
             {
+
+				case (unsigned char) ACK:
+						
+							/*	_yellowled_turn_on();
+								for (int xyz=0;(xyz<80);xyz++)
+									_delay_ms(10);
+								_yellowled_turn_off();*/
+						kseq=m_ACK(rBuffer[1],rBuffer[2],rBuffer[3]);
+
+						// on receiving an ack for seq num K
+						// only update start pointers if k is
+						// still in the AC array and did not overflow
+						// If the array overflows, start sequences are updated
+						// automatically elsewhere during insertion of the AC causing the overflow
+						// just a precaution if old ACK K are sent (e.g. user gets out of range for long periods)					
+						if ((kseq-sseq)<AC_BUFFER_SIZE) 
+						// no overflow for sure
+						{
+							dseq=cseq-kseq;							
+							if (ci>=dseq) // check for wrap around in the current index
+								si=ci-dseq;
+							else
+								si=AC_BUFFER_SIZE-(dseq-ci);
+							sseq=kseq;							
+						} 
+						processed_counter=command_counter;				
+						break;	
+
 			        case (unsigned char) SET_TCT:  
 				   		_wTCNT2=m_SET_TCT(rBuffer[1],rBuffer[2]);
 						_wTCNT2_reps=m_SET_TCTREPS(rBuffer[2],rBuffer[3]);
@@ -901,27 +929,7 @@ void _receive_data(void)
 						response_length=5;
 						break;	
 
-					case (unsigned char) ACK: 
-						kseq=m_ACK(rBuffer[1],rBuffer[2],rBuffer[3]);
-
-						// on receiving an ack for seq num K
-						// only update start pointers if k is
-						// still in the AC array and did not overflow
-						// If the array overflows, start sequences are updated
-						// automatically elsewhere during insertion of the AC causing the overflow
-						// just a precaution if old ACK K are sent (e.g. user gets out of range for long periods)					
-						if ((kseq-sseq)<AC_BUFFER_SIZE) 
-						// no overflow for sure
-						{
-							dseq=cseq-kseq;							
-							if (ci>=dseq) // check for wrap around in the current index
-								si=ci-dseq;
-							else
-								si=AC_BUFFER_SIZE-(dseq-ci);
-							sseq=kseq;							
-						} 
-						processed_counter=command_counter;				
-						break;	
+				
 																					 							                              
                     default:        
                             break;

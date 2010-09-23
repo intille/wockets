@@ -57,7 +57,9 @@ namespace Wockets.Receivers
         public double _CurrentConnectionUnixTime = 0;
         public int _Reconnections = 0;
         public int _SuccessfulConnections = 0;
-     
+
+
+        public ArrayList _OnConnectionCommands = new ArrayList();
 
         public override int CompareTo(object receiver)
         {
@@ -238,7 +240,13 @@ namespace Wockets.Receivers
                 this._SBuffer = new CircularBuffer(SEND_BUFFER_SIZE);
 
                 //Always set the transmission mode on connection
+             
+                for (int i = 0; (i < this._OnConnectionCommands.Count); i++)
+                    Write(((Command)this._OnConnectionCommands[i])._Bytes);
+                this._OnConnectionCommands.Clear();
+
                 Write(new SET_VTM(this._TMode)._Bytes);
+
                 if (CurrentWockets._Configuration._SoftwareMode == Wockets.Data.Configuration.SoftwareConfiguration.DEBUG)
                     Logger.Debug("RFCOMMReceiver: Initialize: Attempting reconnection for receiver " + this._Address);
                 this.bluetoothStream = NetworkStacks._BluetoothStack.Connect(this._Buffer,this._SBuffer , this.address_bytes, this.pin);              
