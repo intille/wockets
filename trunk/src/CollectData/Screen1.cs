@@ -9,10 +9,11 @@ using System.Windows.Forms;
 using Wockets.Kernel;
 using System.Collections;
 using Wockets.Receivers;
+using Wockets;
 
 namespace CollectData
 {
-    public partial class Screen1 : Form
+    public partial class Screen1 :  Panel
     {
         public Screen1()
         {
@@ -26,26 +27,25 @@ namespace CollectData
         private void button1_Click(object sender, EventArgs e)
         {
             this.panel2.Visible = false;
-            this.menuItem2.Enabled = this.panel1.Visible = !(this.panel1.Visible);
+            this.menuItem2.Enabled = this.panel1.Visible = this.button3.Enabled = !(this.panel1.Visible);
         }
 
         private void pictureBox1_Click(object sender, EventArgs e)
         {
             this.panel2.Visible = false;
-            this.menuItem2.Enabled = this.panel1.Visible = !(this.panel1.Visible);
+            this.menuItem2.Enabled = this.panel1.Visible = this.button3.Enabled = !(this.panel1.Visible);
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
             this.panel1.Visible = false;
-            this.menuItem2.Enabled=this.panel2.Visible = !(this.panel2.Visible);
-            
+            this.menuItem2.Enabled=this.panel2.Visible =  this.button3.Enabled = !(this.panel2.Visible);          
         }
 
         private void pictureBox2_Click(object sender, EventArgs e)
         {
             this.panel1.Visible = false;
-            this.menuItem2.Enabled = this.panel2.Visible = !(this.panel2.Visible);
+            this.menuItem2.Enabled = this.panel2.Visible = this.button3.Enabled = !(this.panel2.Visible);
         }
 
         private void menuItem1_Click(object sender, EventArgs e)
@@ -63,20 +63,25 @@ namespace CollectData
         }
 
 
-        private void menuItem2_Click(object sender, EventArgs e)
+        private void button3_Click(object sender, EventArgs e)
         {
-            Wockets.WocketsController wc = new Wockets.WocketsController("", "", "");
+
+            this.button1.Enabled=this.button2.Enabled=this.pictureBox1.Enabled=this.pictureBox2.Enabled=this.button3.Enabled = false;            
+           CurrentWockets._Controller = new Wockets.WocketsController("", "", "");
             if (this.panel1.Visible)
-                wc.FromXML(Core.KERNEL_PATH+"\\SensorData1.xml");
+                CurrentWockets._Controller.FromXML(Core.KERNEL_PATH + "\\SensorData1.xml");
             else
-                wc.FromXML(Core.KERNEL_PATH+"\\SensorData2.xml");
+                CurrentWockets._Controller.FromXML(Core.KERNEL_PATH + "\\SensorData2.xml");
             ArrayList sensors = new ArrayList();
-            for (int i = 0; (i < wc._Receivers.Count); i++)
-                sensors.Add(((RFCOMMReceiver)wc._Receivers[i])._Address);
-           
+            for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+                sensors.Add(((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address);           
             Screens.screen2 = new Screen2(sensors);
-            Screens.screen2.Show();
-            this.Close();
+            Screens.screen2.Location = new System.Drawing.Point(3, 3);
+            Screens.screen2.Name = "screen2";
+            Screens.screen2.Size = new System.Drawing.Size(474, 690);
+            Screens.screen.Controls.Add(Screens.screen2);
+            Screens.screen2.Visible = true;
+            this.Visible = false;
         }
     }
 }

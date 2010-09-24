@@ -6,6 +6,7 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+using System.Runtime.InteropServices;
 
 namespace CollectData
 {
@@ -14,10 +15,10 @@ namespace CollectData
         public ParentScreen()
         {
             InitializeComponent();
-            this.Size = new Size(0, 0);
-            this.Visible = false;            
             Screens.screen1 = new Screen1();
             Screens.screen1.Show();
+
         }
+
     }
 }

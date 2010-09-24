@@ -840,6 +840,176 @@ namespace Wockets.Kernel
            });
         }
 
+
+        /// <summary>
+        /// Writes a packet count to the registry
+        /// </summary>
+        /// <param name="pc">Packet count response PDU</param>
+        /// 
+        public static void READ_RECEIVED_COUNT()
+        {
+            ThreadPool.QueueUserWorkItem(func =>
+            {
+
+                kernelLock.WaitOne();
+                try
+                {
+                    RegistryKey rk = null;
+
+                    for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
+                    {
+                        try
+                        {
+                            rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + i.ToString("0"));
+                            int status = (int)rk.GetValue("Status");
+                            if (status == 1)
+                                CurrentWockets._Controller._Sensors[i]._ReceivedPackets = Convert.ToInt32(rk.GetValue("RECEIVED_COUNT"));
+                            rk.Close();
+                        }
+                        catch
+                        {
+                        }
+                    }
+
+                }
+                catch (Exception e)
+                {
+                    Logger.Error("Core.cs:READ_BATTERY_PERCENT:" + e.ToString());
+
+                }
+                kernelLock.Release();
+            });
+        }
+        public static void WRITE_RECEIVED_COUNT(int sensorID, int received)
+        {
+            ThreadPool.QueueUserWorkItem(func =>
+            {
+                kernelLock.WaitOne();
+                try
+                {
+
+                    RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + sensorID.ToString("0"));
+                    rk.SetValue("RECEIVED_COUNT", received, RegistryValueKind.String);
+                    rk.Close();
+                }
+                catch (Exception e)
+                {
+                    Logger.Error("Core.cs:WRITE_RECEIVED_COUNT:" + e.ToString());
+                }
+                kernelLock.Release();
+            });
+        }
+
+
+
+        public static void READ_FULL_RECEIVED_COUNT()
+        {
+            ThreadPool.QueueUserWorkItem(func =>
+            {
+
+                kernelLock.WaitOne();
+                try
+                {
+                    RegistryKey rk = null;
+
+                    for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
+                    {
+                        try
+                        {
+                            rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + i.ToString("0"));
+                            int status = (int)rk.GetValue("Status");
+                            if (status == 1)
+                                CurrentWockets._Controller._Sensors[i]._Full = Convert.ToInt32(rk.GetValue("FULL_RECEIVED_COUNT"));
+                            rk.Close();
+                        }
+                        catch
+                        {
+                        }
+                    }
+
+                }
+                catch (Exception e)
+                {
+                    Logger.Error("Core.cs:READ_BATTERY_PERCENT:" + e.ToString());
+
+                }
+                kernelLock.Release();
+            });
+        }
+        public static void WRITE_FULL_RECEIVED_COUNT(int sensorID, int full)
+        {
+            ThreadPool.QueueUserWorkItem(func =>
+            {
+                kernelLock.WaitOne();
+                try
+                {
+
+                    RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + sensorID.ToString("0"));
+                    rk.SetValue("FULL_RECEIVED_COUNT", full, RegistryValueKind.String);
+                    rk.Close();
+                }
+                catch (Exception e)
+                {
+                    Logger.Error("Core.cs:WRITE_RECEIVED_COUNT:" + e.ToString());
+                }
+                kernelLock.Release();
+            });
+        }
+
+
+        public static void READ_PARTIAL_RECEIVED_COUNT()
+        {
+            ThreadPool.QueueUserWorkItem(func =>
+            {
+
+                kernelLock.WaitOne();
+                try
+                {
+                    RegistryKey rk = null;
+
+                    for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
+                    {
+                        try
+                        {
+                            rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + i.ToString("0"));
+                            int status = (int)rk.GetValue("Status");
+                            if (status == 1)
+                                CurrentWockets._Controller._Sensors[i]._Partial = Convert.ToInt32(rk.GetValue("PARTIAL_RECEIVED_COUNT"));
+                            rk.Close();
+                        }
+                        catch
+                        {
+                        }
+                    }
+
+                }
+                catch (Exception e)
+                {
+                    Logger.Error("Core.cs:READ_BATTERY_PERCENT:" + e.ToString());
+
+                }
+                kernelLock.Release();
+            });
+        }
+        public static void WRITE_PARTIAL_RECEIVED_COUNT(int sensorID, int partial)
+        {
+            ThreadPool.QueueUserWorkItem(func =>
+            {
+                kernelLock.WaitOne();
+                try
+                {
+
+                    RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + sensorID.ToString("0"));
+                    rk.SetValue("PARTIAL_RECEIVED_COUNT", partial, RegistryValueKind.String);
+                    rk.Close();
+                }
+                catch (Exception e)
+                {
+                    Logger.Error("Core.cs:WRITE_RECEIVED_COUNT:" + e.ToString());
+                }
+                kernelLock.Release();
+            });
+        }
         /// <summary>
         /// Writes a packet count to the registry
         /// </summary>
@@ -853,7 +1023,7 @@ namespace Wockets.Kernel
                 {
 
                     RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + pc._SensorID.ToString("0"));
-                    rk.SetValue("PDU_COUNT", pc._Count, RegistryValueKind.String);
+                    rk.SetValue("PDU_COUNT", pc._Count, RegistryValueKind.String);                    
                     rk.Close();
                 }
                 catch (Exception e)

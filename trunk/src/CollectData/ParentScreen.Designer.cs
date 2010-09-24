@@ -38,10 +38,10 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.AutoScroll = true;
             this.ClientSize = new System.Drawing.Size(0, 0);
-            this.Location = new System.Drawing.Point(0, 52);
+            this.Location = new System.Drawing.Point(-100, -100);
             this.Menu = this.mainMenu1;
             this.Name = "ParentScreen";
-            this.Text = "ParentScreen";
+            this.Text = "ParentScreen";            
             this.ResumeLayout(false);
 
         }
