@@ -37,6 +37,7 @@
             this.button2 = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.timer1 = new System.Windows.Forms.Timer();
+            this.button3 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // mainMenu1
@@ -83,28 +84,36 @@
             // 
             // label1
             // 
-            this.label1.Font = new System.Drawing.Font("Tahoma", 14F, System.Drawing.FontStyle.Regular);
-            this.label1.Location = new System.Drawing.Point(14, 24);
+            this.label1.Font = new System.Drawing.Font("Tahoma", 18F, System.Drawing.FontStyle.Regular);
+            this.label1.Location = new System.Drawing.Point(14, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(408, 90);
+            this.label1.Size = new System.Drawing.Size(447, 114);
             this.label1.Text = "Select the location of the sensors:";
             // 
             // timer1
             // 
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
+            // button3
+            // 
+            this.button3.Font = new System.Drawing.Font("Tahoma", 16F, System.Drawing.FontStyle.Bold);
+            this.button3.Location = new System.Drawing.Point(73, 554);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(388, 115);
+            this.button3.TabIndex = 4;
+            this.button3.Text = "Collect Data >>";
+            this.button3.Click += new System.EventHandler(this.button3_Click);
+            // 
             // Screen3
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(192F, 192F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.AutoScroll = true;
             this.ClientSize = new System.Drawing.Size(480, 696);
+            this.Controls.Add(this.button3);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.panel1);
             this.Location = new System.Drawing.Point(0, 52);
-            this.Menu = this.mainMenu1;
             this.Name = "Screen3";
             this.Text = "Screen3";
             this.ResumeLayout(false);
@@ -120,5 +129,6 @@
         private System.Windows.Forms.MenuItem menuItem2;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Timer timer1;
+        private System.Windows.Forms.Button button3;
     }
 }

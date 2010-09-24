@@ -144,6 +144,8 @@ namespace CircularProgress.SpinningProgress
                 }
                 if (m_IncrementFrequency > 0)
                     this.m_AutoRotateTimer.Enabled = true;
+                else
+                    this.m_AutoRotateTimer.Enabled = false;
             } 
         }
         static IntPtr token;

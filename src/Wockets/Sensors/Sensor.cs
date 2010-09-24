@@ -131,6 +131,10 @@ namespace Wockets.Sensors
         /// </summary>
         public int _ReceivedPackets = 0;
 
+        public int _Full = 0;
+
+        public int _Partial = 0;
+
         /// <summary>
         /// Specifies if the sensor is enabled or not
         /// </summary>

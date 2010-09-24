@@ -10,10 +10,10 @@ using Wockets.Kernel;
 using Wockets.Data.Plotters;
 using Wockets.Kernel.Types;
 using Wockets.Data.Types;
-
+using System.Threading;
 namespace CollectData
 {
-    public partial class Screen3 : Form
+    public partial class Screen3 : Panel
     {
 
         WocketsScalablePlotter plotter;
@@ -21,11 +21,17 @@ namespace CollectData
 
         public Screen3()
         {
+            Screens.screen.Controls.Remove(Screens.screen1);
+            Screens.screen.Controls.Remove(Screens.screen2);
+            Screens.screen1 = null;
+            Screens.screen2 = null;
             InitializeComponent();
 
             //Initialize Plotter
             plotter = new WocketsScalablePlotter(this.panel1);
             this.timer1.Enabled = true;
+            Screens.Location1 = this.button1.Text;
+            Screens.Location2 = this.button2.Text;
         }
 
 
@@ -49,6 +55,7 @@ namespace CollectData
                 this.button1.Text = "Ankle";
             else
                 this.button1.Text = "Wrist";
+            Screens.Location1 = this.button1.Text;
 
         }
 
@@ -57,7 +64,8 @@ namespace CollectData
             if (this.button2.Text == "Wrist")
                 this.button2.Text = "Ankle";
             else
-                this.button1.Text = "Wrist";
+                this.button2.Text = "Wrist";
+            Screens.Location2 = this.button2.Text;
         }
 
         void panel1_Paint(object sender, System.Windows.Forms.PaintEventArgs e)
@@ -89,10 +97,24 @@ namespace CollectData
 
         private void menuItem2_Click(object sender, EventArgs e)
         {
+  
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
             Core.SET_TRANSMISSION_MODE("all", TransmissionMode.Bursty60);
-            this.menuItem2.Enabled = false;
+            this.button3.Enabled = false;
             this.timer1.Enabled = false;
-            this.panel1.Visible=false;
+            this.panel1.Visible = false;
+
+            Screens.screen4 = new Screen4();
+            Screens.screen4.Location = new System.Drawing.Point(3, 3);
+            Screens.screen4.Name = "screen4";
+            Screens.screen4.Size = new System.Drawing.Size(474, 690);
+            Screens.screen.Controls.Add(Screens.screen4);
+            Screens.screen4.Visible = true;
+            this.Visible = false;
+            Thread.Sleep(5000);            
         }
     }
 }

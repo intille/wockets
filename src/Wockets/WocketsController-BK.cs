@@ -26,7 +26,7 @@ using System.Runtime.InteropServices;
 #if (PocketPC)
 using Wockets.Utils.IPC.MMF;
 #endif
-using Wockets.Kernel;
+
 namespace Wockets
 {
     /// <summary>
@@ -456,28 +456,18 @@ namespace Wockets
         bool connecting = false;
         int[] LastACIndex;
         int[] LastSeqNum;
+      
         void InterfaceActivityTracker()
         {
 
             int k = 0;
             int[] dataSavedSeconds = new int[this._Sensors.Count];
             int[] secondsCounter = new int[this._Sensors.Count];
-            int[] full = new int[this._Sensors.Count];
-            int[] partial = new int[this._Sensors.Count];
-
-            if (!Directory.Exists(this._StorageDirectory + "\\log\\"))
-                Directory.CreateDirectory(this._StorageDirectory + "\\log\\");
-            if (!Directory.Exists(this._StorageDirectory + "\\data\\summary\\"))
-                Directory.CreateDirectory(this._StorageDirectory + "\\data\\summary\\");
-
 
             for (int i = 0; (i < this._Sensors.Count); i++)
             {
                 dataSavedSeconds[i] = 0;
                 secondsCounter[i] = 0;
-                full[i]=0;
-                partial[i]=0;
-
             }
             while (true)
             {
@@ -497,17 +487,17 @@ namespace Wockets
                         for (int i = 0; (i < this._Sensors.Count); i++)
                         {
                             receivedFullData &= (this._Sensors[i]._ReceivedPackets == ((WocketsDecoder)this._Decoders[i])._ExpectedBatchCount);
-
+                            
                             //halt, if either 1 successful connection was made
                             // or any data was received
                             // or 3 or more reconnections were made
                             if ((((RFCOMMReceiver)this._Receivers[i])._Reconnections < 3))
                                 receiveFailed = false;
-
+                            
                             if (((RFCOMMReceiver)this._Receivers[i])._SuccessfulConnections >= 1)
                                 secondsCounter[i] = secondsCounter[i] + 1;
 
-                            notimeoutData &= (secondsCounter[i] > 5);
+                            notimeoutData &= (secondsCounter[i]>5);
                         }
 
                         if ((receivedFullData) || (receiveFailed) || (notimeoutData))
@@ -539,20 +529,15 @@ namespace Wockets
                             for (int i = 0; (i < this._Sensors.Count); i++)
                             {
 
-                                Core.WRITE_RECEIVED_COUNT(i, this._Sensors[i]._ReceivedPackets);
-                                if (this._Sensors[i]._ReceivedPackets == ((WocketsDecoder)this._Decoders[i])._ExpectedBatchCount)
-                                    full[i] = full[i] + 1;
-                                else
-                                    partial[i] = partial[i] + 1;
-                                Core.WRITE_FULL_RECEIVED_COUNT(i,full[i]);
-                                Core.WRITE_PARTIAL_RECEIVED_COUNT(i, partial[i]);
+
                                 log_line += "," + this._Sensors[i]._ReceivedPackets + "," + ((WocketsDecoder)this._Decoders[i])._ExpectedBatchCount + "," + ((RFCOMMReceiver)this._Receivers[i])._SuccessfulConnections + "," + ((RFCOMMReceiver)this._Receivers[i])._Reconnections + "," + ((RFCOMMReceiver)this._Receivers[i])._ConnectionTime;
                                 dataSavedSeconds[i] = 0;
                                 countSeconds[i] = false;
                                 secondsCounter[i] = 0;
-                                ((WocketsDecoder)this._Decoders[i])._ExpectedBatchCount = 0;
+                                ((WocketsDecoder)this._Decoders[i])._ExpectedBatchCount = -1;
 
-              
+                                if (!Directory.Exists(this._StorageDirectory + "\\data\\summary\\"))
+                                    Directory.CreateDirectory(this._StorageDirectory+ "\\data\\summary\\");
 
                                 TextWriter tw2 = new StreamWriter(this._StorageDirectory+ "\\data\\summary\\Sensor-" + this._Sensors[i]._Location + "-" + i + ".csv", true);
                                 int nextACIndex = LastACIndex[i] + 1;
@@ -577,6 +562,9 @@ namespace Wockets
 
                             this._Polling = false;
 
+
+                            //for (int i = 0; (i < this._Decoders.Count); i++)
+                              //  this._Decoders[i].FireEvents();
                             //shutting down BT here causes a strange delay on wakeup.
                             while (true)
                             {
@@ -592,12 +580,18 @@ namespace Wockets
                                 Thread.Sleep(1000);
                             }
 
-                            TextWriter tw = new StreamWriter(this._StorageDirectory + "\\log\\stats.csv", true);
-                            tw.WriteLine(log_line);
-                            tw.Close();
 
-
-
+                            try
+                            {
+                                if (!Directory.Exists(this._StorageDirectory + "\\log\\"))
+                                    Directory.CreateDirectory(this._StorageDirectory + "\\log\\");
+                                TextWriter tw = new StreamWriter(this._StorageDirectory + "\\log\\statistics.csv", true);
+                                tw.WriteLine(log_line);
+                                tw.Close();
+                            }
+                            catch
+                            {
+                            }
 
                             SystemIdleTimerReset();
                             for (int i = 0; (i < this._Sensors.Count); i++)
@@ -606,8 +600,8 @@ namespace Wockets
 
 
                             Thread.Sleep(1000);
-                            if (DateTime.Now.Subtract(lastActivity).TotalSeconds > 30)
-                              SetSystemPowerState(null, POWER_STATE_SUSPEND, POWER_FORCE);
+                            //if (DateTime.Now.Subtract(lastActivity).TotalSeconds > 30)
+                              //SetSystemPowerState(null, POWER_STATE_SUSPEND, POWER_FORCE);
 
                         }
 

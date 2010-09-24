@@ -36,16 +36,7 @@
             this.label2 = new System.Windows.Forms.Label();
             this.menuItem2 = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
-            // 
-            // mainMenu1
-            // 
-            this.mainMenu1.MenuItems.Add(this.menuItem1);
-            this.mainMenu1.MenuItems.Add(this.menuItem2);
-            // 
-            // menuItem1
-            // 
-            this.menuItem1.Text = "Quit";
-            this.menuItem1.Click += new System.EventHandler(this.menuItem1_Click);
+
             // 
             // spinningProgress1
             // 
@@ -57,6 +48,7 @@
             this.spinningProgress1.TabIndex = 0;
             this.spinningProgress1.TransistionSegment = 0;
             this.spinningProgress1.TransistionSegmentColour = System.Drawing.Color.FromArgb(((int)(((byte)(129)))), ((int)(((byte)(242)))), ((int)(((byte)(121)))));
+            
             // 
             // label1
             // 
@@ -78,15 +70,12 @@
             // 
             // Screen2
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(192F, 192F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.AutoScroll = true;
             this.ClientSize = new System.Drawing.Size(480, 696);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.spinningProgress1);
             this.Location = new System.Drawing.Point(0, 52);
-            this.Menu = this.mainMenu1;
             this.Name = "Screen2";
             this.Text = "Screen2";
             this.ResumeLayout(false);
