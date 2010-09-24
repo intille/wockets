@@ -126,6 +126,7 @@ namespace WocketConfigurationApp
             this.button_load = new System.Windows.Forms.Button();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.timerPlotter = new System.Windows.Forms.Timer(this.components);
+            this.button_save_to_wocket = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             this.cal_panel_cal_values_std.SuspendLayout();
             this.cal_panel_cal_values.SuspendLayout();
@@ -968,7 +969,7 @@ namespace WocketConfigurationApp
             this.cal_panel_button_browse.TabIndex = 44;
             this.cal_panel_button_browse.Text = "Browse";
             this.cal_panel_button_browse.UseVisualStyleBackColor = true;
-            this.cal_panel_button_browse.Click += new System.EventHandler(this.cal_panel_button_browse_Click);
+            this.cal_panel_button_browse.Click += new System.EventHandler(this.cal_panel_button_browseFile_Click);
             // 
             // cal_panel_entry_path
             // 
@@ -1138,7 +1139,7 @@ namespace WocketConfigurationApp
             // button_start_test
             // 
             this.button_start_test.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button_start_test.Location = new System.Drawing.Point(432, 615);
+            this.button_start_test.Location = new System.Drawing.Point(289, 615);
             this.button_start_test.Name = "button_start_test";
             this.button_start_test.Size = new System.Drawing.Size(110, 71);
             this.button_start_test.TabIndex = 45;
@@ -1216,12 +1217,24 @@ namespace WocketConfigurationApp
             this.timerPlotter.Interval = 50;
             this.timerPlotter.Tick += new System.EventHandler(this.timerPlotter_Tick);
             // 
+            // button_save_to_wocket
+            // 
+            this.button_save_to_wocket.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button_save_to_wocket.Location = new System.Drawing.Point(589, 615);
+            this.button_save_to_wocket.Name = "button_save_to_wocket";
+            this.button_save_to_wocket.Size = new System.Drawing.Size(110, 71);
+            this.button_save_to_wocket.TabIndex = 48;
+            this.button_save_to_wocket.Text = "Save to Wocket";
+            this.button_save_to_wocket.UseVisualStyleBackColor = true;
+            this.button_save_to_wocket.Click += new System.EventHandler(this.button_save_to_wocket_Click);
+            // 
             // FormTestWocket
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.DimGray;
             this.ClientSize = new System.Drawing.Size(976, 695);
+            this.Controls.Add(this.button_save_to_wocket);
             this.Controls.Add(this.button_load);
             this.Controls.Add(this.button_finish);
             this.Controls.Add(this.panel3);
@@ -1236,7 +1249,7 @@ namespace WocketConfigurationApp
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Wocket Configuration Settings";
             this.Load += new System.EventHandler(this.Form2_Load);
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form7_FormClosing);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form_FormClosing);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             this.cal_panel_cal_values_std.ResumeLayout(false);
@@ -1367,5 +1380,6 @@ namespace WocketConfigurationApp
         private System.Windows.Forms.Label label29;
         private System.Windows.Forms.TextBox cal_panel_battery_log_textBox;
         private System.Windows.Forms.Button cal_panel_button_back;
+        private System.Windows.Forms.Button button_save_to_wocket;
     }
 }
