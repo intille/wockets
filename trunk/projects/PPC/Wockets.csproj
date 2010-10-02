@@ -1,4 +1,4 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -637,8 +637,18 @@
     <Compile Include="..\..\src\Wockets\Data\Responses\OFT_RSP.cs">
       <Link>Data\Responses\OFT_RSP.cs</Link>
     </Compile>
-    <Compile Include="Data\Commands\ACK.cs" />
-    <Compile Include="Utils\Storage.cs" />
+    <Compile Include="..\..\src\Wockets\Data\Commands\ACK.cs" >
+      <Link>Data\Commands\ACK.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\CRC8.cs" >
+      <Link>Utils\CRC8.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\Memory.cs" >
+      <Link>Utils\Memory.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\Storage.cs" >
+      <Link>Utils\Storage.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="WocketsWeka.csproj">
