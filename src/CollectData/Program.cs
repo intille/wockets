@@ -15,8 +15,8 @@ namespace CollectData
         [MTAThread]
         static void Main()
         {
-           // Application.Run(new Screen());
-            Application.Run(new Form1());
+            Application.Run(new Screen());
+           // Application.Run(new Form1());
         }
     }
 }
