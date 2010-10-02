@@ -33,36 +33,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_1B00A3972DC1D47C8A032C7728B55B0C"
-        "OwnerKey" = "8:_DFD0A2DD9E68420888ABCC17AB43E5EF"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_1B00A3972DC1D47C8A032C7728B55B0C"
-        "OwnerKey" = "8:_CCCF234C77174EC49130BB4AD39C0B4F"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_1B00A3972DC1D47C8A032C7728B55B0C"
-        "OwnerKey" = "8:_C2385F9BF98C4E8EA5BE4C99902B1882"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_1B00A3972DC1D47C8A032C7728B55B0C"
-        "OwnerKey" = "8:_9684725F82234F07AB6709C3A60600DE"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_1B00A3972DC1D47C8A032C7728B55B0C"
-        "OwnerKey" = "8:_17B24499954841A79895C0B911C98AE4"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_1B833B939C194D5DB50B1AFBE0ABE2E6"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -1092,7 +1062,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:Wockets, Version=1.0.3848.21438, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:Wockets, Version=1.0.3922.23000, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
                     "_BCD3F189F0B02D607CE6D1F7A459F4A2"
@@ -1452,14 +1422,14 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:WocketsInstaller"
-        "ProductCode" = "8:{986710E1-249F-4510-A0A5-4A3783F7D667}"
-        "PackageCode" = "8:{FCEACE31-16D5-4AF4-9AC4-0504E6EAD4D3}"
+        "ProductCode" = "8:{9399F8CA-E0AA-4610-8F68-C3D62917601A}"
+        "PackageCode" = "8:{25B140DB-824D-4834-AFF0-D57EA5E8E080}"
         "UpgradeCode" = "8:{C469586D-4266-4E79-8F41-3937F5A8F09F}"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:1.45.0"
+        "ProductVersion" = "8:1.51.0"
         "Manufacturer" = "8:MIT"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
