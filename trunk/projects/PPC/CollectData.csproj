@@ -79,7 +79,7 @@
     <EmbeddedResource Include="..\..\src\CollectData\Screen.resx">
       <DependentUpon>Screen.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Screen4.resx">
+    <EmbeddedResource Include="..\..\src\CollectData\Screen4.resx">
       <DependentUpon>Screen4.cs</DependentUpon>
     </EmbeddedResource>
     <Compile Include="..\..\src\CollectData\Properties\Resources.Designer.cs">
@@ -105,7 +105,7 @@
       <DependentUpon>Screen3.cs</DependentUpon>
     </Compile>
     <Compile Include="..\..\src\CollectData\Screens.cs" />
-    <Compile Include="Form1.cs">
+    <Compile Include="..\..\src\CollectData\Form1.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="..\..\src\CollectData\Form1.Designer.cs">
