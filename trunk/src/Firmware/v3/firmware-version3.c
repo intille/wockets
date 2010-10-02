@@ -241,7 +241,7 @@ int main()
 			}
 			else if (_wPC==40)
 				vmag=0;
-				
+
 	
 			/*********************************/
 #else
@@ -316,11 +316,12 @@ int main()
 				if (connected){
 					_greenled_turn_on();
 					
+
+						for (int ixz=0;(ixz<100);ixz++)                                                                                       
+       						_bluetooth_transmit_uart0_byte(0xff); 
 					_send_sr();					
 					_send_tm();
-					_send_batch_count(batch_counter*4);
-					
-									
+					_send_batch_count(batch_counter*4);														
 					_send_acs();
 					//Send summary activity count
 					/*for (int i=0;(i<summaryindex);i++){
@@ -525,16 +526,17 @@ ISR(TIMER2_OVF_vect)
 		}
 	}
 
-/*	blink_counter++;
-
-	if (blink_counter==(_SAMPLING_RATE*2))
+	if (connected==0){
+	blink_counter++;
+	if (blink_counter==(_SAMPLING_RATE*5))
 		_greenled_turn_on();
-	else if (blink_counter==(_SAMPLING_RATE*3))
+	else if (blink_counter==((_SAMPLING_RATE*5)+10))
 	{
 		_greenled_turn_off();
 		blink_counter=0;
 	}
-*/
+
+	}
 	/* If the wocket is docked in shut it down */
 
 /*	if (_is_docked())
@@ -628,7 +630,8 @@ ISR(TIMER2_OVF_vect)
 
 			return;	
 		}
-	
+
+		_atmega_initialize_uart0(ATMEGA_BAUD_38400, TX_RX_UART_MODE);
 	
 
 		//reset shutdown timer if connected

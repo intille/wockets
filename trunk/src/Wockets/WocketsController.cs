@@ -25,8 +25,9 @@ using Wockets.Utils.IPC;
 using System.Runtime.InteropServices;
 #if (PocketPC)
 using Wockets.Utils.IPC.MMF;
-#endif
 using Wockets.Kernel;
+#endif
+
 namespace Wockets
 {
     /// <summary>
@@ -504,10 +505,10 @@ namespace Wockets
                             if ((((RFCOMMReceiver)this._Receivers[i])._Reconnections < 3))
                                 receiveFailed = false;
 
-                            if (((RFCOMMReceiver)this._Receivers[i])._SuccessfulConnections >= 1)
-                                secondsCounter[i] = secondsCounter[i] + 1;
+                            //if (((RFCOMMReceiver)this._Receivers[i])._SuccessfulConnections >= 1)
+                            secondsCounter[i] = secondsCounter[i] + 1;
 
-                            notimeoutData &= (secondsCounter[i] > 5);
+                            notimeoutData &= (secondsCounter[i] > 20);
                         }
 
                         if ((receivedFullData) || (receiveFailed) || (notimeoutData))
@@ -516,8 +517,13 @@ namespace Wockets
                             for (int kk = 0; (kk < 10); kk++)
                             {
                                 for (int i = 0; (i < this._Sensors.Count); i++)
-                                    if (LastSeqNum[i]>=0)
+                                    if (LastSeqNum[i] >= 0)
+                                    {
+                                        System.IO.TextWriter tww = new StreamWriter("hELLO.txt",true);
                                         ((RFCOMMReceiver)this._Receivers[i]).Write(new ACK(LastSeqNum[i])._Bytes);
+                                        tww.WriteLine(LastSeqNum[i]);
+                                        tww.Close();
+                                    }
                                 Thread.Sleep(20);
                             }
    
@@ -550,7 +556,7 @@ namespace Wockets
                                 dataSavedSeconds[i] = 0;
                                 countSeconds[i] = false;
                                 secondsCounter[i] = 0;
-                                ((WocketsDecoder)this._Decoders[i])._ExpectedBatchCount = 0;
+                                ((WocketsDecoder)this._Decoders[i])._ExpectedBatchCount = -1;
 
               
 
@@ -563,7 +569,7 @@ namespace Wockets
                                     DateTime ac_dt = new DateTime();
                                     WocketsTimer.GetDateTime((long)((WocketsDecoder)this._Decoders[i])._ActivityCounts[j]._TimeStamp, out ac_dt);
                                     string ac_currentTime = ac_dt.ToString("yyyy-MM-dd HH:mm:ss");
-                                    tw2.WriteLine(((WocketsDecoder)this._Decoders[i])._ActivityCounts[j]._SeqNum + "," + ac_currentTime + "," + ((WocketsDecoder)this._Decoders[i])._ActivityCounts[j]._TimeStamp + "," + ((WocketsDecoder)this._Decoders[i])._ActivityCounts[j]._Count);
+                                    tw2.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")+","+j+","+((WocketsDecoder)this._Decoders[i])._ActivityCounts[j]._SeqNum + "," + ac_currentTime + "," + ((WocketsDecoder)this._Decoders[i])._ActivityCounts[j]._TimeStamp + "," + ((WocketsDecoder)this._Decoders[i])._ActivityCounts[j]._Count);
                                     LastSeqNum[i] = ((WocketsDecoder)this._Decoders[i])._ActivityCounts[j]._SeqNum;
                                     LastACIndex[i] = j;
 

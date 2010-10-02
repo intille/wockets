@@ -1096,7 +1096,7 @@ namespace DataMerger
         public static int gpsRecords = 0;
 
 
-
+        public static string summaryStart = null;
         public static string actigraphStart = null;
         public static string oxyconStart = null;
         public static string sensewearStart = null;
@@ -1110,6 +1110,12 @@ namespace DataMerger
         static TextWriter[] actigraphCSV;
         static Hashtable[] actigraphData;
         static string[] actigraphType;
+
+        //Summary 
+        static TextWriter[] summaryCSV;
+        static Hashtable[] summaryData;
+        static int[] rawSummaryData;
+        static TextWriter[] rawSummaryCSV;
 
         public static void toCSV(string aDataDirectory, string masterDirectory, int maxControllers, string[] filter)
         {
@@ -1313,6 +1319,7 @@ namespace DataMerger
             string csv_line6 = "UnixTimeStamp,TimeStamp,VectorMagnitude";
             string hr_csv_header = "UnixTimeStamp,TimeStamp,HR";
             string actigraph_csv_header = "UnixTimeStamp,TimeStamp,Actigraph";
+            string summary_csv_header = "UnixTimeStamp,TimeStamp,ActivityCount";
             string actigraph_csv_header_gt1m = "UnixTimeStamp,TimeStamp,ActigraphX,ActigraphY";
             string actigraph_csv_header_gtx = "UnixTimeStamp,TimeStamp,ActigraphX,ActigraphY,ActigraphZ";
             string sensewear_csv_header = "UnixTimeStamp,TimeStamp,SensewearSR,Sensewear_AVTranAcc,Senserwear_AVLongAcc,Sensewear_AVForAcc";
@@ -1376,8 +1383,58 @@ namespace DataMerger
             CurrentWockets._Configuration = configuration;
 
 
+            #region Read Summary data
+            string[] file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY+"\\data\\summary", "Sensor*.csv");
+  
+
+            summaryCSV = new TextWriter[file.Length];
+            rawSummaryCSV = new TextWriter[file.Length];
+            summaryData = new Hashtable[file.Length];
+            rawSummaryData = new int[file.Length];
+
+
+            try
+            {
+                for (int i = 0; (i < file.Length); i++)
+                {
+                    summaryData[i] = new Hashtable();
+                    rawSummaryData[i] = 0;
+                }
+                for (int i = 0; (i < file.Length); i++)
+                {
+                    if (CSVProgress == "")
+                        CSVProgress = "Processing Summary Data " + (i + 1);
+                    TextReader summaryReader = null;
+                    string summary_line = "";
+                    double summaryUnixTime = 0;
+                    DateTime summaryTime = new DateTime();
+
+                    summaryReader = new StreamReader(file[i]);
+                    summary_line = summaryReader.ReadLine();//read first line
+
+                    do
+                    {
+                        tokens = summary_line.Split(',');
+                        if (tokens.Length == 6)
+                        {
+                            summaryUnixTime = Convert.ToDouble(tokens[4]);//UnixTime.GetUnixTime(actigraphTime);
+                            UnixTime.GetDateTime((long)(summaryUnixTime), out summaryTime);
+                            string summaryKey = summaryTime.Year + "-" + summaryTime.Month + "-" + summaryTime.Day + "-" + summaryTime.Hour + "-" + summaryTime.Minute + "-" + summaryTime.Second;
+                            string summaryLine =tokens[5];
+                            if (summaryStart == null)
+                                summaryStart = summaryTime.Year + "/" + summaryTime.Month + "/" + summaryTime.Day + " " + summaryTime.Hour + ":" + summaryTime.Minute + ":" + summaryTime.Second;
+                            summaryData[i].Add(summaryKey, summaryLine);
+                        }
+                    } while ((summary_line = summaryReader.ReadLine()) != null);
+                }
+            }
+            catch
+            {
+            }
+            #endregion Read Summary data
+
             #region Read RTI data
-            string[] file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*-rti*.csv");
+            file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*-rti*.csv");
 
             
 
@@ -2754,6 +2811,13 @@ namespace DataMerger
                 hrCSV = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\HeartRate_MITes.csv");
                 for (int i = 0; (i < actigraphCSV.Length); i++)
                     actigraphCSV[i] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Actigraph" + (i + 1) + ".csv");
+
+                for (int i = 0; (i < summaryCSV.Length); i++)
+                {
+                    summaryCSV[i] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Wocket_" + i.ToString("00") + "_Summary.csv");
+                    rawSummaryCSV[i] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Wocket_" + i.ToString("00") + "_RawSummary.csv");
+                }
+
                 if ( (sensewearFound) || (sensewearVanderbiltFound))
                     sensewearCSV = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Sensewear.csv");
 
@@ -3415,6 +3479,12 @@ namespace DataMerger
                 }
             }
 
+
+            for (int i = 0; (i < summaryData.Length); i++)
+            {
+                master_csv_header += ",WocketSummary" + i.ToString("00")+ ",RawWocketSummary" + i.ToString("00");
+                summaryCSV[i].WriteLine(summary_csv_header);
+            }
             if (sensewearFound)
                 master_csv_header += ",SensewearSR,Sensewear_AVTranAcc,Senserwear_AVLongAcc,Sensewear_AVForAcc";
             else if (sensewearVanderbiltFound)
@@ -3639,9 +3709,15 @@ namespace DataMerger
             #region Initialize CSV lines
                 string master_csv_line = "";
                 string hr_csv_line = "";
-                string[] actigraph_csv_line = new string[actigraphData.Length];
+                
+                string[] actigraph_csv_line = new string[actigraphData.Length];                
                 for (int i = 0; (i < actigraphData.Length); i++)
                     actigraph_csv_line[i] = "";
+                
+                string[] summary_csv_line = new string[summaryData.Length];
+                for (int i = 0; (i < summaryData.Length); i++)
+                    summary_csv_line[i] = "";
+
                 string sensewear_csv_line = "";
                 string zephyr_csv_line = "";
                 string oxycon_csv_line = "";
@@ -3672,6 +3748,8 @@ namespace DataMerger
                 hr_csv_line = timestamp;
                 for (int i = 0; (i < actigraphData.Length); i++)
                     actigraph_csv_line[i] = timestamp;
+                for (int i = 0; (i < summaryData.Length); i++)
+                    summary_csv_line[i] = timestamp;
                 sensewear_csv_line = timestamp;
                 zephyr_csv_line = timestamp;
                 oxycon_csv_line = timestamp;
@@ -3807,7 +3885,7 @@ namespace DataMerger
 
                         int headPtr = head[channel] - 1;
                         if (headPtr < 0)
-                            headPtr = 499;
+                            headPtr = 39;
 
 
                         if (channel > 0)
@@ -3820,7 +3898,7 @@ namespace DataMerger
                             //compute running means
                             // && ((timeData[channel, headPtr] - currentUnixTime) <=MEAN_SIZE)
 
-                            while ((timeData[channel, headPtr] > 0) && (headPtr != head[channel]) && (numMeanPts <= 499))
+                            while ((timeData[channel, headPtr] > 0) && (headPtr != head[channel]) && (numMeanPts <= 39))
                             {
                                 runningMeanX += rawData[channel, 0, headPtr];
                                 runningMeanY += rawData[channel, 1, headPtr];
@@ -3828,7 +3906,7 @@ namespace DataMerger
                                 numMeanPts++;
                                 headPtr--;
                                 if (headPtr < 0)
-                                    headPtr = 499;
+                                    headPtr = 39;
                             }
 
                             runningMeanX = runningMeanX / numMeanPts;
@@ -3843,7 +3921,7 @@ namespace DataMerger
 
                             headPtr = head[channel] - 1;
                             if (headPtr < 0)
-                                headPtr = 499;
+                                headPtr = 39;
                             //compute values per second
 
                             while ((timeData[channel, headPtr] > 0) && (headPtr != head[channel]))
@@ -3874,7 +3952,7 @@ namespace DataMerger
                                         //headPtr = head[channel];
                                         int prevHead = headPtr - 1;
                                         if (prevHead < 0)
-                                            prevHead = 499;
+                                            prevHead = 39;
 
 
                                         //trapezoid
@@ -3914,7 +3992,7 @@ namespace DataMerger
 
                                 headPtr--;
                                 if (headPtr < 0)
-                                    headPtr = 499;
+                                    headPtr = 39;
                             }
                         }
 
@@ -4259,13 +4337,13 @@ namespace DataMerger
                             master_csv_line += ((double)wAUC[sensor_id, 1]).ToString("00.00") + ",";
                             master_csv_line += ((double)wAUC[sensor_id, 2]).ToString("00.00") + ",";
                             master_csv_line += ((double)(wAUC[sensor_id, 0] + wAUC[sensor_id, 1] + wAUC[sensor_id, 2])).ToString("00.00") + ",";
-
+                            
                             master_csv_line += ((double)wRMX[sensor_id]).ToString("00.00") + ",";
                             master_csv_line += ((double)wRMY[sensor_id]).ToString("00.00") + ",";
                             master_csv_line += ((double)wRMZ[sensor_id]).ToString("00.00") + ",";
                             master_csv_line += ((double)wRMSize[sensor_id]).ToString("00.00") + ",";
                             master_csv_line += ((double)(wVMAG[sensor_id] / (double)wacCounters[sensor_id])).ToString("00.00");
-
+                            rawSummaryData[i] += (int)((double)(wAUC[sensor_id, 0] + wAUC[sensor_id, 1] + wAUC[sensor_id, 2]));
 
                         }
                         else
@@ -4345,6 +4423,27 @@ namespace DataMerger
                     }
                 }
                 #endregion Write CSV lines for Actigraphs
+
+
+                #region Write CSV lines for Wockets Summary
+                for (int i = 0; (i < summaryData.Length); i++)
+                {
+                    if (summaryData[i].ContainsKey(key) == false)
+                    {
+                        summaryCSV[i].WriteLine(summary_csv_line[i] + ",");
+                        rawSummaryCSV[i].WriteLine(summary_csv_line[i] + ",");
+                        master_csv_line = master_csv_line + ",,";
+                    }
+                    else
+                    {
+                        string myline = summary_csv_line[i] + "," + summaryData[i][key];
+                        summaryCSV[i].WriteLine(summary_csv_line[i] + "," + summaryData[i][key] );
+                        rawSummaryCSV[i].WriteLine(summary_csv_line[i] + "," + rawSummaryData[i]);
+                        master_csv_line = master_csv_line + "," + summaryData[i][key] + "," + rawSummaryData[i];
+                        rawSummaryData[i] = 0;
+                    }
+                }
+                #endregion Write CSV lines for Wockets Summary
 
                 #region Write CSV line for Sensewear
                 if ((sensewearFound) && (sensewearCSV != null))
@@ -4586,6 +4685,12 @@ namespace DataMerger
             masterCSV.Close();
             for (int i = 0; (i < actigraphCSV.Length); i++)
                 actigraphCSV[i].Close();
+
+            for (int i = 0; (i < summaryCSV.Length); i++)
+            {
+                summaryCSV[i].Close();
+                rawSummaryCSV[i].Close();
+            }
             if (sensewearCSV != null)
                 sensewearCSV.Close();
             if (zephyrCSV != null)
