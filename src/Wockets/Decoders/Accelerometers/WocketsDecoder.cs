@@ -555,6 +555,8 @@ namespace Wockets.Decoders.Accelerometers
                                     ac_delta = 0;
                                     ac_index = 0;
                                     acc_count=acc._Count;
+                                    if (acc_count > 100)
+                                        ac_index = 0;
                                     //FireEvent(acc);
                                     break;
                                 case ResponseTypes.OFT_RSP:

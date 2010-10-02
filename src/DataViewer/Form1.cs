@@ -405,7 +405,7 @@ namespace NESPDataViewer
         }
 
 
-        private void AddAccelerationCurve(string name, string title, PointPairList pplX, PointPairList pplY, PointPairList pplZ, PointPairList pplActivityCount, PointPairList pplSamplingRate, PointPairList pplAUC, PointPairList pplVMag)
+        private void AddAccelerationCurve(string name, string title, PointPairList pplX, PointPairList pplY, PointPairList pplZ, PointPairList pplActivityCount, PointPairList pplWKTActivityCount,PointPairList pplRawWKTActivityCount, PointPairList pplSamplingRate, PointPairList pplAUC, PointPairList pplVMag)
         {
             GraphPane pane = AddPane(name,"Acceleration - " + title);           
 
@@ -443,6 +443,19 @@ namespace NESPDataViewer
             pointsCurveAUC.Symbol.Fill = new Fill(Color.Red);
             _alLinesWithSymbols.Add(pointsCurveAUC);
             pointsCurveAUC.Line.IsVisible = false;
+
+            LineItem pointsCurveWKTAC = pane.AddCurve("WKT AC", pplWKTActivityCount, Color.Red, SymbolType.Circle);
+            pointsCurveWKTAC.Symbol.Size = 1F;
+            pointsCurveWKTAC.Symbol.Fill = new Fill(Color.Red);
+            _alLinesWithSymbols.Add(pointsCurveWKTAC);
+            pointsCurveWKTAC.Line.IsVisible =true;
+
+
+            LineItem pointsCurveRawWKTAC = pane.AddCurve("Raw WKT AC", pplRawWKTActivityCount, Color.DarkGray, SymbolType.Circle);
+            pointsCurveRawWKTAC.Symbol.Size = 1F;
+            pointsCurveRawWKTAC.Symbol.Fill = new Fill(Color.DarkGray);
+            _alLinesWithSymbols.Add(pointsCurveRawWKTAC);
+            pointsCurveRawWKTAC.Line.IsVisible = true;
 
               LineItem pointsCurveVMAG = pane.AddCurve("Vector Magnitude", pplVMag, Color.LimeGreen, SymbolType.Circle);
             pointsCurveVMAG.Symbol.Size = 1F;
@@ -600,44 +613,66 @@ namespace NESPDataViewer
             #endregion
 
 
+            #region WKT ACTIVITY COUNTS
+            string[] wktcounts = new string[0];
+            matches = Directory.GetFiles(Path.GetDirectoryName(filepath), String.Format(type + "_{0}_Summary*", channel));
+            if (matches.Length == 1)
+                wktcounts = FileReadWrite.ReadLinesFromFile(matches[0]);
+            PointPairList listWKTActivityCounts = new PointPairList();
+            for (int i = 1; i < wktcounts.Length; i++)
+            {
+                try
+                {
+                    string[] split = wktcounts[i].Split(',');
+                    if ((split.Length > 2) && (split[1].Length > 0) && (split[2].Length > 0))
+                    {
+                        DateTime dt = DateTime.Parse(split[1]);
+                        double x = (double)new XDate(dt);
+                        double value = Convert.ToDouble(split[2])*24.0;
+                        string label = String.Format("WKT Activity Count {0} at {1}", value, dt.ToLongTimeString());
+                        if (_isUsingLabels) listWKTActivityCounts.Add(x, value, label);
+                        else listWKTActivityCounts.Add(x, value);
+                    }
+                }
+                catch { }
+            }
+            #endregion
+
+
+
+            #region WKT Raw ACTIVITY COUNTS
+            string[] rawwktcounts = new string[0];
+            matches = Directory.GetFiles(Path.GetDirectoryName(filepath), String.Format(type + "_{0}_RawSummary*", channel));
+            if (matches.Length == 1)
+                rawwktcounts = FileReadWrite.ReadLinesFromFile(matches[0]);
+            PointPairList listRawWKTActivityCounts = new PointPairList();
+            for (int i = 1; i < rawwktcounts.Length; i++)
+            {
+                try
+                {
+                    string[] split = rawwktcounts[i].Split(',');
+                    if ((split.Length > 2) && (split[1].Length > 0) && (split[2].Length > 0))
+                    {
+                        DateTime dt = DateTime.Parse(split[1]);
+                        double x = (double)new XDate(dt);
+                        double value = Convert.ToDouble(split[2]);// *10.0;
+                        string label = String.Format("Raw WKT Activity Count {0} at {1}", value, dt.ToLongTimeString());
+                        if (_isUsingLabels) listRawWKTActivityCounts.Add(x, value, label);
+                        else listRawWKTActivityCounts.Add(x, value);
+                    }
+                }
+                catch { }
+            }
+            #endregion
+
             if (mac.Length == 0)
             {
-                AddAccelerationCurve(type + " " + channel, location, listX, listY, listZ, listActivityCounts, listSampleRates, listAUCs, listVMAGs);
+                AddAccelerationCurve(type + " " + channel, location, listX, listY, listZ, listActivityCounts, listWKTActivityCounts,listRawWKTActivityCounts, listSampleRates, listAUCs, listVMAGs);
                 paneOrders.Add(type + " " + channel, paneOrder);
             }
             else
             {
-                AddAccelerationCurve(mac, location, listX, listY, listZ, listActivityCounts, listSampleRates, listAUCs, listVMAGs);
-                /* if (mac != "Internal")
-                {
-                    //mac = mac.Substring(mac.Length - 2, 2);
-                    //mac = "Wocket " + mac;
-                    //string loc = wc._Sensors[Convert.ToInt32(channel)]._Location;
-                   string loc = "";
-                    switch (location)
-                    {
-                        case "Dominant-Hip":
-                            loc = "DHP";
-                            break;
-                        case "Dominant-Ankle":
-                            loc = "DAK";
-                            break;
-                        case "Dominant-Upper-Arm":
-                            loc = "DUA";
-                            break;
-                        case "Dominant-Wrist":
-                            loc = "DW";
-                            break;
-                        case "Dominant-Thigh":
-                            loc = "DT";
-                            break;
-                        default:
-                            loc = "lOC";
-                            break;
-                    }
-                    
-                    //mac = "WKT-" + loc + "-" + mac;
-                }*/
+                AddAccelerationCurve(mac, location, listX, listY, listZ, listActivityCounts, listWKTActivityCounts,listRawWKTActivityCounts, listSampleRates, listAUCs, listVMAGs);
                 paneOrders.Add(mac, paneOrder);
             }
 
@@ -648,6 +683,9 @@ namespace NESPDataViewer
         #endregion
 
 
+        #region Wockets Summary
+     
+        #endregion Wockets Summary
 
 
         #region Columbia Graph
@@ -1079,6 +1117,7 @@ namespace NESPDataViewer
         }
         #endregion Actigraph
 
+        
         #region Zephyr
         private void CreateZephyrGraph(GraphPane gp, string filePath)
         {
@@ -2323,6 +2362,8 @@ namespace NESPDataViewer
             }
 
             #endregion Actigraphs
+
+
 
             #region Sensewear
             string sensewearFile = Path.Combine(path + "\\merged\\", "Sensewear.csv");
