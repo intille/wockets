@@ -543,7 +543,7 @@ namespace Wockets.Decoders.Accelerometers
 #if (PocketPC)
                                     Core.WRITE_TCT(tct);
 #endif
-                                    //FireEvent(tct);
+                                    FireEvent(tct);
                                     break;
 
                                 case ResponseTypes.ACC_RSP:
