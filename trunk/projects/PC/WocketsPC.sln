@@ -34,6 +34,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WocketsTestApp", "WocketsTe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WocketsProgrammer", "WocketsProgrammer.csproj", "{14487665-253E-4ABC-A87F-7ED2FDAD4B48}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "WocketsSetup", "..\WocketsSetup\WocketsSetup.vdproj", "{FBF809F2-0B07-4B77-A1B5-15B660A64828}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -208,6 +210,13 @@ Global
 		{14487665-253E-4ABC-A87F-7ED2FDAD4B48}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{14487665-253E-4ABC-A87F-7ED2FDAD4B48}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{14487665-253E-4ABC-A87F-7ED2FDAD4B48}.Release|Win32.ActiveCfg = Release|Any CPU
+		{FBF809F2-0B07-4B77-A1B5-15B660A64828}.Debug|Any CPU.ActiveCfg = Debug
+		{FBF809F2-0B07-4B77-A1B5-15B660A64828}.Debug|Mixed Platforms.ActiveCfg = Debug
+		{FBF809F2-0B07-4B77-A1B5-15B660A64828}.Debug|Mixed Platforms.Build.0 = Debug
+		{FBF809F2-0B07-4B77-A1B5-15B660A64828}.Debug|Win32.ActiveCfg = Debug
+		{FBF809F2-0B07-4B77-A1B5-15B660A64828}.Release|Any CPU.ActiveCfg = Release
+		{FBF809F2-0B07-4B77-A1B5-15B660A64828}.Release|Mixed Platforms.ActiveCfg = Release
+		{FBF809F2-0B07-4B77-A1B5-15B660A64828}.Release|Win32.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
