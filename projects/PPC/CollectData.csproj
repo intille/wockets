@@ -73,14 +73,18 @@
     <EmbeddedResource Include="..\..\src\CollectData\Screen3.resx">
       <DependentUpon>Screen3.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="..\..\src\CollectData\Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <EmbeddedResource Include="..\..\src\CollectData\Screen5.resx">
+      <DependentUpon>Screen5.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="..\..\src\CollectData\Screen.resx">
       <DependentUpon>Screen.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="..\..\src\CollectData\Screen4.resx">
       <DependentUpon>Screen4.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BatteryImages.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>BatteryImages.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <Compile Include="..\..\src\CollectData\Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -105,11 +109,11 @@
       <DependentUpon>Screen3.cs</DependentUpon>
     </Compile>
     <Compile Include="..\..\src\CollectData\Screens.cs" />
-    <Compile Include="..\..\src\CollectData\Form1.cs">
-      <SubType>Form</SubType>
+    <Compile Include="..\..\src\CollectData\Screen5.cs">
+      <SubType>Component</SubType>
     </Compile>
-    <Compile Include="..\..\src\CollectData\Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="..\..\src\CollectData\Screen5.Designer.cs">
+      <DependentUpon>Screen5.cs</DependentUpon>
     </Compile>
     <Compile Include="..\..\src\CollectData\Screen.cs">
       <SubType>Form</SubType>
@@ -124,6 +128,28 @@
       <DependentUpon>Screen4.cs</DependentUpon>
     </Compile>
     <Compile Include="..\..\src\CollectData\Settings.cs" />
+    <Compile Include="BatteryImages.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>BatteryImages.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Screen6.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Screen6.Designer.cs">
+      <DependentUpon>Screen6.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ProgressBar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ProgressBar.Designer.cs">
+      <DependentUpon>ProgressBar.cs</DependentUpon>
+    </Compile>
+    <Compile Include="StatusImages.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>StatusImages.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Wockets.csproj">
@@ -135,13 +161,47 @@
       <Name>SpinningProgress</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\1.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\2.GIF" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\3.GIF" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\4.GIF" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\5.GIF" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\6.GIF" />
+    <EmbeddedResource Include="StatusImages.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>StatusImages.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\minimize.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\ni0013-64.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Screen6.resx">
+      <DependentUpon>Screen6.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\ni0022-64.gif" />
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
       <FlavorProperties GUID="{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}">
         <HostingProcess disable="1" />
       </FlavorProperties>
-      <UserProperties BuildVersion_BuildVersioningStyle="None.Increment.YearStamp.MonthAndDayStamp" BuildVersion_StartDate="2010/9/21" BuildVersion_UpdateAssemblyVersion="True" />
+      <UserProperties BuildVersion_UpdateAssemblyVersion="True" BuildVersion_StartDate="2010/9/21" BuildVersion_BuildVersioningStyle="None.Increment.YearStamp.MonthAndDayStamp" />
     </VisualStudio>
   </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

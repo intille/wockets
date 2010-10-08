@@ -1,4 +1,4 @@
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -637,18 +637,19 @@
     <Compile Include="..\..\src\Wockets\Data\Responses\OFT_RSP.cs">
       <Link>Data\Responses\OFT_RSP.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Data\Commands\ACK.cs" >
+    <Compile Include="..\..\src\Wockets\Data\Commands\ACK.cs">
       <Link>Data\Commands\ACK.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Utils\CRC8.cs" >
+    <Compile Include="..\..\src\Wockets\Utils\CRC8.cs">
       <Link>Utils\CRC8.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Utils\Memory.cs" >
+    <Compile Include="..\..\src\Wockets\Utils\Memory.cs">
       <Link>Utils\Memory.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Utils\Storage.cs" >
+    <Compile Include="..\..\src\Wockets\Utils\Storage.cs">
       <Link>Utils\Storage.cs</Link>
     </Compile>
+    <Compile Include="Utils\CRC16.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="WocketsWeka.csproj">
@@ -663,6 +664,7 @@
       <FlavorProperties GUID="{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}">
         <HostingProcess disable="1" />
       </FlavorProperties>
+      <UserProperties BuildVersion_BuildVersioningStyle="None.Increment.YearStamp.MonthAndDayStamp" />
     </VisualStudio>
   </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
