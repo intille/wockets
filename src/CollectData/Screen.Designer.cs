@@ -30,44 +30,65 @@
         private void InitializeComponent()
         {
             this.mainMenu1 = new System.Windows.Forms.MainMenu();
-            this.screen1 = new CollectData.Screen1();
             this.menuItem1 = new System.Windows.Forms.MenuItem();
+            this.screen51 = new CollectData.Screen5();
+            this.screen61 = new CollectData.Screen6();
+            this.screen11 = new CollectData.Screen1();
             this.SuspendLayout();
             // 
             // mainMenu1
             // 
             this.mainMenu1.MenuItems.Add(this.menuItem1);
             // 
-            // screen1
-            // 
-            this.screen1.Location = new System.Drawing.Point(3, 3);
-            this.screen1.Name = "screen1";
-            this.screen1.Size = new System.Drawing.Size(474, 690);
-            // 
             // menuItem1
             // 
             this.menuItem1.Text = "Quit";
             this.menuItem1.Click += new System.EventHandler(this.menuItem1_Click);
             // 
+            // screen51
+            // 
+            this.screen51.Enabled = false;
+            this.screen51.Location = new System.Drawing.Point(0, 0);
+            this.screen51.Name = "screen51";
+            this.screen51.Size = new System.Drawing.Size(475, 692);
+            this.screen51.Visible = false;
+            // 
+            // screen61
+            // 
+            this.screen61.Enabled = false;
+            this.screen61.Location = new System.Drawing.Point(481, 0);
+            this.screen61.Name = "screen61";
+            this.screen61.Size = new System.Drawing.Size(477, 692);
+            this.screen61.Visible = false;
+            // 
+            // screen11
+            // 
+            this.screen11.Location = new System.Drawing.Point(3, 3);
+            this.screen11.Name = "screen11";
+            this.screen11.Size = new System.Drawing.Size(469, 686);
+            // 
             // Screen
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(192F, 192F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.AutoScroll = true;
             this.ClientSize = new System.Drawing.Size(480, 696);
-            this.Controls.Add(this.screen1);
+            this.Controls.Add(this.screen51);
+            this.Controls.Add(this.screen61);
+            this.Controls.Add(this.screen11);
             this.Location = new System.Drawing.Point(0, 52);
             this.Menu = this.mainMenu1;
             this.Name = "Screen";
-            this.Text = "Screen";
+            this.Text = "Wockets";
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private Screen1 screen1;
         private System.Windows.Forms.MenuItem menuItem1;
+        private Screen5 screen51;
+        private Screen6 screen61;
+        private Screen1 screen11;
 
 
     }

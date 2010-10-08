@@ -11,47 +11,75 @@ using System.IO;
 using System.Threading;
 using System.Collections.Generic;
 using Wockets.Utils;
+using System.Threading;
+using System.Runtime.InteropServices;
+using Wockets.Kernel;
 
 namespace DataUploader
 {
     class Program
     {
+        private static Thread stayUpThread;
+        private static Thread postThread;
+
+        [DllImport("CoreDll.dll")]
+        public static extern void SystemIdleTimerReset();
+        private static void StayUp()
+        {
+            while (true)
+            {
+                if (DateTime.Now.Subtract(startTime).TotalSeconds > 120)
+                {
+                    startTime = DateTime.Now.AddDays(2);
+                    if (FileUploader.webrequest!=null)
+                        FileUploader.webrequest.Abort();                    
+                }
+                SystemIdleTimerReset();
+                Thread.Sleep(1000);
+            }
+        }
+
+        static DateTime startTime;
         static void Main(string[] args)
         {
+            DateTime startTime=DateTime.Now;
+            Core.WRITE_LAST_UPLOAD_TIME(startTime);
+            stayUpThread = new Thread(new ThreadStart(StayUp));
+            stayUpThread.Start();
 
             CurrentPhone._Number="";
             CurrentSubject._ID = 1;
-            FileUploader.Load();
-            Dictionary<string,DateTime> files = FileUploader.Scan(DateTime.Now.Subtract(new TimeSpan(1000,0,0,0)));            
+            Dictionary<string, DateTime> files = FileUploader.Scan(DateTime.Now.Subtract(new TimeSpan(2, 0, 0, 0)), DateTime.Now.Subtract(new TimeSpan(0, 0, 0, 0)));            
             //Sort files by creation time 
             var sortedFiles = from k in FileUploader._NotUploaded.Keys
                               orderby FileUploader._NotUploaded[k] ascending
                         select k;
 
 
-           
-            FileUploader._Uri = "http://18.85.54.236/FileUpload.php";
-
-
+            Core.WRITE_LAST_UPLOAD_NEWFILES(files.Count);
+            FileUploader._Uri = "http://wockets.media.mit.edu/FileUpload.php";
+            int success = 0;
+            int failure = 0;
             foreach (string filename in sortedFiles)
             {
-                DateTime creationTime = FileUploader._NotUploaded[filename];                
-                int start = filename.IndexOf("\\Wockets\\") + 9;
-                int length = filename.LastIndexOf("\\") - start;
-                string relative_path = "";
-                if (length > 0)
-                    relative_path = filename.Substring(start, length);
-                NameValueCollection postData = new NameValueCollection();
-                relative_path = relative_path.Replace("\\", "/");
-                relative_path = "Subject" + CurrentSubject._ID.ToString("000") + "/" + relative_path;
-                postData.Add("relative_path", relative_path.Replace("\\", "/"));
-                postData.Add("imei", CurrentPhone._IMEI);
-                postData.Add("sender_date", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-                postData.Add("KT_Insert1", "Insert");
-
+                DateTime creationTime = FileUploader._NotUploaded[filename];
                 try
                 {
+                    
+                    int start = filename.IndexOf("\\Wockets\\") + 9;
+                    int length = filename.LastIndexOf("\\") - start;
+                    string relative_path = "";
+                    if (length > 0)
+                        relative_path = filename.Substring(start, length);
+                    NameValueCollection postData = new NameValueCollection();
+                    relative_path = relative_path.Replace("\\", "/");
+                    relative_path = "IMEI-" + CurrentPhone._IMEI + "/" + relative_path;
+                    postData.Add("relative_path", relative_path.Replace("\\", "/"));
+                    postData.Add("imei", CurrentPhone._IMEI);
+                    postData.Add("sender_date", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                    postData.Add("KT_Insert1", "Insert");
 
+                    startTime = DateTime.Now;
                     WebResponse response = FileUploader.Post(new Uri(FileUploader._Uri), postData, filename,
                            "application/octet-stream", "filename", null);
                     StreamReader reader = new StreamReader(response.GetResponseStream());
@@ -74,26 +102,38 @@ namespace DataUploader
 
                     if (md5 == localmd5)
                     {
-                        FileUploader._Success.Add(filename, creationTime);
-                        //FileUploader._Uploaded.Add(filename, creationTime);
-                        
+                        success++;
+                        if (!FileUploader._Success.ContainsKey(filename))
+                            FileUploader._Success.Add(filename, creationTime);
+                        Core.WRITE_LAST_UPLOAD_SUCCESSFILES(success);
                     }
-                    else
+                    else if (!FileUploader._Failure.ContainsKey(filename))
+                    {
+                        failure++;
                         FileUploader._Failure.Add(filename, creationTime);
-                        //FileUploader._NotUploaded.Add(filename, creationTime);
+                        Core.WRITE_LAST_UPLOAD_FAILEDFILES(failure);
+                    }
 
                     Thread.Sleep(5000);
 
                 }
                 catch (Exception e)
                 {
+                    failure++;
+                    if (!FileUploader._Failure.ContainsKey(filename))
+                        FileUploader._Failure.Add(filename, creationTime);
+                    Core.WRITE_LAST_UPLOAD_FAILEDFILES(failure);
                 }
-                //Check if the md5 is good, file uploaded correctly
 
+                FileUploader.Save();          
             }
-
-            //Exit
-            FileUploader.Save();
+            Core.WRITE_LAST_UPLOAD_DURATION(DateTime.Now.Subtract(startTime));
+            FileUploader.Save();          
+           
+    
+            
+            stayUpThread.Abort();
+            System.Diagnostics.Process.GetCurrentProcess().Kill();
         }
     }
 }

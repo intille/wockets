@@ -36,7 +36,10 @@
             this.label2 = new System.Windows.Forms.Label();
             this.menuItem2 = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
-
+            // 
+            // menuItem1
+            // 
+            this.menuItem1.Text = "";
             // 
             // spinningProgress1
             // 
@@ -48,7 +51,6 @@
             this.spinningProgress1.TabIndex = 0;
             this.spinningProgress1.TransistionSegment = 0;
             this.spinningProgress1.TransistionSegmentColour = System.Drawing.Color.FromArgb(((int)(((byte)(129)))), ((int)(((byte)(242)))), ((int)(((byte)(121)))));
-            
             // 
             // label1
             // 
@@ -66,18 +68,18 @@
             this.label2.Size = new System.Drawing.Size(171, 101);
             this.label2.Text = "Starting wockets";
             this.label2.TextAlign = System.Drawing.ContentAlignment.TopCenter;
-
+            // 
+            // menuItem2
+            // 
+            this.menuItem2.Text = "";
             // 
             // Screen2
             // 
-            this.AutoScroll = true;
-            this.ClientSize = new System.Drawing.Size(480, 696);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.spinningProgress1);
             this.Location = new System.Drawing.Point(0, 52);
-            this.Name = "Screen2";
-            this.Text = "Screen2";
+            this.Size = new System.Drawing.Size(480, 696);
             this.ResumeLayout(false);
 
         }

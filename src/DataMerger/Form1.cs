@@ -22,6 +22,7 @@ namespace DataMerger
     public partial class Form1 : Form
     {
         ProgressForm progressForm;
+        
 
         public Form1()
         {
@@ -1152,8 +1153,10 @@ namespace DataMerger
 
 
             //Size of the moving average
-            int MEAN_SIZE = 5000;
-
+            int RM_DURATION = 1000;
+            int SAMPLING_RATE = 40;
+            int RM_SIZE = (RM_DURATION / 1000) * SAMPLING_RATE;
+            
 
             //CSV files that store data                    
             TextWriter[] activityCountCSVs = null; //old activity count files
@@ -1383,58 +1386,8 @@ namespace DataMerger
             CurrentWockets._Configuration = configuration;
 
 
-            #region Read Summary data
-            string[] file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY+"\\data\\summary", "Sensor*.csv");
-  
-
-            summaryCSV = new TextWriter[file.Length];
-            rawSummaryCSV = new TextWriter[file.Length];
-            summaryData = new Hashtable[file.Length];
-            rawSummaryData = new int[file.Length];
-
-
-            try
-            {
-                for (int i = 0; (i < file.Length); i++)
-                {
-                    summaryData[i] = new Hashtable();
-                    rawSummaryData[i] = 0;
-                }
-                for (int i = 0; (i < file.Length); i++)
-                {
-                    if (CSVProgress == "")
-                        CSVProgress = "Processing Summary Data " + (i + 1);
-                    TextReader summaryReader = null;
-                    string summary_line = "";
-                    double summaryUnixTime = 0;
-                    DateTime summaryTime = new DateTime();
-
-                    summaryReader = new StreamReader(file[i]);
-                    summary_line = summaryReader.ReadLine();//read first line
-
-                    do
-                    {
-                        tokens = summary_line.Split(',');
-                        if (tokens.Length == 6)
-                        {
-                            summaryUnixTime = Convert.ToDouble(tokens[4]);//UnixTime.GetUnixTime(actigraphTime);
-                            UnixTime.GetDateTime((long)(summaryUnixTime), out summaryTime);
-                            string summaryKey = summaryTime.Year + "-" + summaryTime.Month + "-" + summaryTime.Day + "-" + summaryTime.Hour + "-" + summaryTime.Minute + "-" + summaryTime.Second;
-                            string summaryLine =tokens[5];
-                            if (summaryStart == null)
-                                summaryStart = summaryTime.Year + "/" + summaryTime.Month + "/" + summaryTime.Day + " " + summaryTime.Hour + ":" + summaryTime.Minute + ":" + summaryTime.Second;
-                            summaryData[i].Add(summaryKey, summaryLine);
-                        }
-                    } while ((summary_line = summaryReader.ReadLine()) != null);
-                }
-            }
-            catch
-            {
-            }
-            #endregion Read Summary data
-
             #region Read RTI data
-            file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*-rti*.csv");
+            string[] file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*-rti*.csv");
 
             
 
@@ -2812,11 +2765,6 @@ namespace DataMerger
                 for (int i = 0; (i < actigraphCSV.Length); i++)
                     actigraphCSV[i] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Actigraph" + (i + 1) + ".csv");
 
-                for (int i = 0; (i < summaryCSV.Length); i++)
-                {
-                    summaryCSV[i] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Wocket_" + i.ToString("00") + "_Summary.csv");
-                    rawSummaryCSV[i] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Wocket_" + i.ToString("00") + "_RawSummary.csv");
-                }
 
                 if ( (sensewearFound) || (sensewearVanderbiltFound))
                     sensewearCSV = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Sensewear.csv");
@@ -3054,12 +3002,12 @@ namespace DataMerger
 
 
                 //Initialize arrays based on number of sensors
-                rawData = new int[sannotation.MaximumSensorID + 1, 3, 500];
+                rawData = new int[sannotation.MaximumSensorID + 1, 3, RM_SIZE];
                 for (int i = 0; (i < sannotation.MaximumSensorID + 1); i++)
                     for (int j=0;(j<3);j++)
-                        for (int k=0;(k<500);k++)
+                        for (int k=0;(k<RM_SIZE);k++)
                             rawData[i,j,k]=-1;
-                timeData = new long[sannotation.MaximumSensorID + 1, 500];
+                timeData = new long[sannotation.MaximumSensorID + 1, RM_SIZE];
                 AUC = new int[sannotation.MaximumSensorID + 1, 3];
                 VMAG = new double[sannotation.MaximumSensorID + 1];
                 head = new int[sannotation.MaximumSensorID + 1];
@@ -3426,12 +3374,12 @@ namespace DataMerger
 
 
                 //Initialize arrays based on number of sensors
-                wrawData = new int[wcontroller._Sensors.Count, 3, 500];
+                wrawData = new int[wcontroller._Sensors.Count, 3, RM_SIZE];
                 for (int i = 0; (i < wcontroller._Sensors.Count); i++)
                     for (int j = 0; (j < 3); j++)
-                        for (int k = 0; (k < 500); k++)
+                        for (int k = 0; (k < RM_SIZE); k++)
                             wrawData[i,j,k]=-1;
-                wtimeData = new long[wcontroller._Sensors.Count, 500];
+                wtimeData = new long[wcontroller._Sensors.Count, RM_SIZE];
                 wAUC = new int[wcontroller._Sensors.Count, 3];
                 wVMAG = new double[wcontroller._Sensors.Count];
                 whead = new int[wcontroller._Sensors.Count];
@@ -3457,6 +3405,93 @@ namespace DataMerger
             #endregion Setup Wockets Data
 
 
+
+            #region Read Summary data
+
+            //string[] file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY+"\\data\\summary", "Sensor*.csv");
+            string[] subdirectories = Directory.GetDirectories(aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY + "\\data\\summary");
+            ArrayList[] files = new ArrayList[CurrentWockets._Controller._Sensors.Count];
+            for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
+                files[i] = new ArrayList();
+            foreach (string subdirectory in subdirectories)
+            {
+                for (int i = 0; i < 30; i++)
+                {
+                    if (Directory.Exists(subdirectory + "\\" + i))
+                    {
+                        for (int k = 0; (k < CurrentWockets._Controller._Sensors.Count); k++)
+                        {
+                            string[] matchingFiles = Directory.GetFiles(subdirectory + "\\" + i, "Sensor-*" + k + ".csv");
+                            for (int j = 0; (j < matchingFiles.Length); j++)
+                                files[k].Add(matchingFiles[j]);
+                        }
+                    }
+                }
+            }
+
+            summaryCSV = new TextWriter[CurrentWockets._Controller._Sensors.Count];
+            rawSummaryCSV = new TextWriter[CurrentWockets._Controller._Sensors.Count];
+            summaryData = new Hashtable[CurrentWockets._Controller._Sensors.Count];
+            rawSummaryData = new int[CurrentWockets._Controller._Sensors.Count];
+
+            try
+            {
+
+                for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
+                {
+                    summaryCSV[i] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Wocket_" + i.ToString("00") + "_Summary.csv");
+                    rawSummaryCSV[i] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Wocket_" + i.ToString("00") + "_RawSummary.csv");
+                    summaryData[i] = new Hashtable();
+                    rawSummaryData[i] = 0;
+                }
+                for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
+                {
+                    if (CSVProgress == "")
+                        CSVProgress = "Processing Summary Data " + (i + 1);
+
+                    foreach (string filename in files[i])
+                    {
+                        TextReader summaryReader = null;
+                        string summary_line = "";
+                        double summaryUnixTime = 0;
+                        DateTime summaryTime = new DateTime();
+
+                        summaryReader = new StreamReader(filename);
+                        summary_line = summaryReader.ReadLine();//read first line
+
+                        do
+                        {
+                            try
+                            {
+                                if (summary_line == null)
+                                    break;
+                                tokens = summary_line.Split(',');
+                                if (tokens.Length == 6)
+                                {
+                                    summaryUnixTime = Convert.ToDouble(tokens[4]);//UnixTime.GetUnixTime(actigraphTime);
+                                    UnixTime.GetDateTime((long)(summaryUnixTime), out summaryTime);
+                                    string summaryKey = summaryTime.Year + "-" + summaryTime.Month + "-" + summaryTime.Day + "-" + summaryTime.Hour + "-" + summaryTime.Minute + "-" + summaryTime.Second;
+                                    string summaryLine = tokens[5];
+                                    if (summaryStart == null)
+                                        summaryStart = summaryTime.Year + "/" + summaryTime.Month + "/" + summaryTime.Day + " " + summaryTime.Hour + ":" + summaryTime.Minute + ":" + summaryTime.Second;
+
+
+                                    //
+                                    summaryData[i].Add(summaryKey, summaryLine);
+
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                            }
+                        } while ((summary_line = summaryReader.ReadLine()) != null);
+                    }
+                }
+            }
+            catch  (Exception e)
+            {
+            }
+            #endregion Read Summary data
 
 
 
@@ -3563,7 +3598,7 @@ namespace DataMerger
                 if (Directory.Exists(rawDirectory) == false)
                     return;
 
-                string[] subdirectories = Directory.GetDirectories(rawDirectory);
+                subdirectories = Directory.GetDirectories(rawDirectory);
                 foreach (string subdirectory in subdirectories)
                 {
                     string[] datetokens = subdirectory.Split('\\');
@@ -3612,7 +3647,7 @@ namespace DataMerger
                 if (Directory.Exists(rawDirectory) == false)
                     return;
 
-                string[] subdirectories = Directory.GetDirectories(rawDirectory);
+                subdirectories = Directory.GetDirectories(rawDirectory);
                 foreach (string subdirectory in subdirectories)
                 {
                     string[] datetokens = subdirectory.Split('\\');
@@ -3824,7 +3859,7 @@ namespace DataMerger
                     #region Load MITes data if needed
 
                     //always have at least 5 seconds worth of data for the MITes
-                    while (((unixtimestamp - currentUnixTime) <= MEAN_SIZE) && (aMITesLoggerReader.GetSensorData(10)))
+                    while (((unixtimestamp - currentUnixTime) <= RM_DURATION) && (aMITesLoggerReader.GetSensorData(10)))
                     {
                         channel = aMITesDecoder.GetSomeMITesData()[0].channel;
 
@@ -3840,7 +3875,7 @@ namespace DataMerger
                                 
                                 mitesTime = unixtimestamp;
                                 timeData[channel, head[channel]] = (long)mitesTime;
-                                head[channel] = (head[channel] + 1) % 500;
+                                head[channel] = (head[channel] + 1) % RM_SIZE;
 
                             }
                         }
@@ -3866,7 +3901,7 @@ namespace DataMerger
                             //UnixTime.GetDateTime((long)mitesTime,out d2);
 
                             timeData[channel, head[channel]] = (long)mitesTime;
-                            head[channel] = (head[channel] + 1) % 500;
+                            head[channel] = (head[channel] + 1) % RM_SIZE;
 
                             
                         }
@@ -4090,7 +4125,7 @@ namespace DataMerger
                                 }
                                 headPtr--;
                                 if (headPtr < 0)
-                                    headPtr = 499;
+                                    headPtr = RM_SIZE-1;
                             }
                             if (hrCount > 0)
                             {
@@ -4145,38 +4180,17 @@ namespace DataMerger
                     for (int i = 0; (i < wcontroller._Sensors.Count); i++)
                     {
 
-                        //always have at least 5 seconds worth of data for the MITes
-                        //while (((wunixtimestamp[i] - currentUnixTime) <= MEAN_SIZE) && (wcontroller._Sensors[i].Load()))
                         string s = "";
-                        while (((wunixtimestamp[i] - currentUnixTime) <= MEAN_SIZE) && ((s=wocketsTR1[i].ReadLine())!=null))
+                        while (((wunixtimestamp[i] - currentUnixTime) <= RM_DURATION) && ((s=wocketsTR1[i].ReadLine())!=null))
                         {
                             string[] wocketsTokens = s.Split(',');
                             wrawData[wcontroller._Sensors[i]._ID, 0, whead[wcontroller._Sensors[i]._ID]] = Convert.ToInt32(wocketsTokens[1]);
                             wrawData[wcontroller._Sensors[i]._ID, 1, whead[wcontroller._Sensors[i]._ID]] = Convert.ToInt32(wocketsTokens[2]);
                             wrawData[wcontroller._Sensors[i]._ID, 2, whead[wcontroller._Sensors[i]._ID]] = Convert.ToInt32(wocketsTokens[3]);
                             wtimeData[wcontroller._Sensors[i]._ID, whead[wcontroller._Sensors[i]._ID]] = (long)Convert.ToDouble(wocketsTokens[0]);
-                            wunixtimestamp[i] = Convert.ToDouble(wocketsTokens[0]);
+                            wunixtimestamp[i] = Convert.ToDouble(wocketsTokens[0]);                                           
+                            whead[wcontroller._Sensors[i]._ID] = (whead[wcontroller._Sensors[i]._ID] + 1) % RM_SIZE;
                
-                            /*
-                            if (wcontroller._Sensors[i]._Decoder._Head == 0)
-                                lastDecodedIndex[i] = wcontroller._Sensors[i]._Decoder._Data.Length - 1;
-                            else
-                                lastDecodedIndex[i] = wcontroller._Sensors[i]._Decoder._Head - 1;
-
-                            Wockets.Data.Accelerometers.AccelerationData data = (Wockets.Data.Accelerometers.AccelerationData)wcontroller._Sensors[i]._Decoder._Data[lastDecodedIndex[i]];
-                           
-
-                            wrawData[wcontroller._Sensors[i]._ID, 0, whead[wcontroller._Sensors[i]._ID]] = data.X;
-                            wrawData[wcontroller._Sensors[i]._ID, 1, whead[wcontroller._Sensors[i]._ID]] = data.Y;
-                            wrawData[wcontroller._Sensors[i]._ID, 2, whead[wcontroller._Sensors[i]._ID]] = data.Z;
-                            wtimeData[wcontroller._Sensors[i]._ID, whead[wcontroller._Sensors[i]._ID]] = (long)data.UnixTimeStamp;
-                            wunixtimestamp[i] = data.UnixTimeStamp;
-                             */
-                            whead[wcontroller._Sensors[i]._ID] = (whead[wcontroller._Sensors[i]._ID] + 1) % 500;
-
-                            //if (data.UnixTimeStamp == 1255223724999)
-                              //  Console.Write("");
-
                         }
 
                     }
@@ -4194,25 +4208,21 @@ namespace DataMerger
 
                         int wheadPtr = whead[wcontroller._Sensors[i]._ID] - 1;
                         if (wheadPtr < 0)
-                            wheadPtr = 499;
+                            wheadPtr = RM_SIZE-1;
 
                         //compute running means
 
 
-                        while ((wtimeData[wcontroller._Sensors[i]._ID, wheadPtr] > 0) && (wheadPtr != whead[wcontroller._Sensors[i]._ID]) && (wnumMeanPts <= 499))
+                        while ((wtimeData[wcontroller._Sensors[i]._ID, wheadPtr] > 0) && (wheadPtr != whead[wcontroller._Sensors[i]._ID]) && (wnumMeanPts <= (RM_SIZE-1)))
                         {
                             wrunningMeanX += wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr];
                             wrunningMeanY += wrawData[wcontroller._Sensors[i]._ID, 1, wheadPtr];
                             wrunningMeanZ += wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr];
-                            wnumMeanPts++;
-                           
-
+                            wnumMeanPts++;                           
                             wheadPtr--;
 
-
-
                             if (wheadPtr < 0)
-                                wheadPtr = 499;
+                                wheadPtr = (RM_SIZE-1);
                         }
 
                         wrunningMeanX = wrunningMeanX / wnumMeanPts;
@@ -4226,7 +4236,7 @@ namespace DataMerger
 
                         wheadPtr = whead[wcontroller._Sensors[i]._ID] - 1;
                         if (wheadPtr < 0)
-                            wheadPtr = 499;
+                            wheadPtr = (RM_SIZE-1);
                         //compute values per second
 
 
@@ -4235,12 +4245,10 @@ namespace DataMerger
                         while ((wtimeData[wcontroller._Sensors[i]._ID, wheadPtr] > 0) && (wheadPtr != whead[wcontroller._Sensors[i]._ID]))
                         {
                             double ttt=wtimeData[wcontroller._Sensors[i]._ID, wheadPtr] ;
-                            //if (ttt == 1255223724999)
-                              //  Console.Write("");
+
                             if (((wtimeData[wcontroller._Sensors[i]._ID, wheadPtr] - currentUnixTime) >= 0) && ((wtimeData[wcontroller._Sensors[i]._ID, wheadPtr] - currentUnixTime) <= 1000))
                             {
-                                //if (wcontroller._Sensors[i]._ID == 3)
-                                  //  Console.Write("");
+
                                 if ((wprevX[wcontroller._Sensors[i]._ID] > -1) && (wprevY[wcontroller._Sensors[i]._ID] > -1) && (wprevZ[wcontroller._Sensors[i]._ID] > -1) && (wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr] > -1) && (wrawData[wcontroller._Sensors[i]._ID, 1, wheadPtr] > -1) && (wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr] > -1))
                                 {
                                     waverageX[wcontroller._Sensors[i]._ID] = waverageX[wcontroller._Sensors[i]._ID] + Math.Abs(wprevX[wcontroller._Sensors[i]._ID] - wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr]);
@@ -4250,8 +4258,6 @@ namespace DataMerger
                                     waverageZ[wcontroller._Sensors[i]._ID] = waverageZ[wcontroller._Sensors[i]._ID] + Math.Abs(wprevZ[wcontroller._Sensors[i]._ID] - wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr]);
                                     waverageRawZ[wcontroller._Sensors[i]._ID] = waverageRawZ[wcontroller._Sensors[i]._ID] + wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr];
                                     wacCounters[wcontroller._Sensors[i]._ID] = wacCounters[wcontroller._Sensors[i]._ID] + 1;
-//                                    if (ttt == 1255223724999)
-//                                        Console.Write("");
                                 }
 
                                 wprevX[wcontroller._Sensors[i]._ID] = wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr];
@@ -4259,38 +4265,58 @@ namespace DataMerger
                                 wprevZ[wcontroller._Sensors[i]._ID] = wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr];
 
 
-                                //current data item
-                                //headPtr = head[wcontroller._Sensors[i]._ID];
                                 int wprevHead = wheadPtr - 1;
                                 if (wprevHead < 0)
-                                    wprevHead = 499;
+                                    wprevHead = (RM_SIZE-1);
 
-
-                                //trapezoid
-                                //double a2=rawData[wcontroller._Sensors[i]._ID, 0, headPtr];
-                                //double a1=rawData[wcontroller._Sensors[i]._ID, 0, prevHead];
-                                //a2 = a2 - runningMeanX;
-                                //a1 = a1 - runningMeanX;
 
                                 double wt2 = wtimeData[wcontroller._Sensors[i]._ID, wheadPtr];
                                 double wt1 = wtimeData[wcontroller._Sensors[i]._ID, wprevHead];
                                 if ((wt2 > 0) & (wt1 > 0))
                                 {
 
+                                    
                                     wAUC[wcontroller._Sensors[i]._ID, 0] = wAUC[wcontroller._Sensors[i]._ID, 0] + (int)Math.Abs((wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr] - wrunningMeanX));
                                     wAUC[wcontroller._Sensors[i]._ID, 1] = wAUC[wcontroller._Sensors[i]._ID, 1] + (int)Math.Abs((wrawData[wcontroller._Sensors[i]._ID, 1, wheadPtr] - wrunningMeanY));
                                     wAUC[wcontroller._Sensors[i]._ID, 2] = wAUC[wcontroller._Sensors[i]._ID, 2] + (int)Math.Abs((wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr] - wrunningMeanZ));
                                     wVMAG[wcontroller._Sensors[i]._ID] = wVMAG[wcontroller._Sensors[i]._ID] + Math.Sqrt(Math.Pow((double)(wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr] - wrunningMeanX), 2.0) + Math.Pow((double)(wrawData[wcontroller._Sensors[i]._ID, 1, wheadPtr] - wrunningMeanY), 2.0) + Math.Pow((double)(wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr] - wrunningMeanZ), 2.0));
                                 }
 
-
-
                             }
 
                             wheadPtr--;
                             if (wheadPtr < 0)
-                                wheadPtr = 499;
+                                wheadPtr = (RM_SIZE-1);
                         }
+
+                        wrunningMeanX = 0;
+                        wrunningMeanY = 0;
+                        wrunningMeanZ = 0;
+
+                        for (int k = 0; (k < RM_SIZE); k++)
+                        {
+                            wrunningMeanX += wrawData[wcontroller._Sensors[i]._ID, 0, k];
+                            wrunningMeanY += wrawData[wcontroller._Sensors[i]._ID, 1, k];
+                            wrunningMeanZ += wrawData[wcontroller._Sensors[i]._ID, 2, k];
+                        }
+
+                        wrunningMeanX = wrunningMeanX / RM_SIZE;
+                        wrunningMeanY = wrunningMeanY / RM_SIZE;
+                        wrunningMeanZ = wrunningMeanZ / RM_SIZE;
+
+                        wAUC[wcontroller._Sensors[i]._ID, 0] = 0;
+                        wAUC[wcontroller._Sensors[i]._ID, 1] = 0;
+                        wAUC[wcontroller._Sensors[i]._ID, 2] = 0;
+                        wVMAG[wcontroller._Sensors[i]._ID] = 0;
+                        for (int k = 0; (k < RM_SIZE); k++)
+                        {
+                            wAUC[wcontroller._Sensors[i]._ID, 0] = wAUC[wcontroller._Sensors[i]._ID, 0] + (int)Math.Abs((wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr] - wrunningMeanX));
+                            wAUC[wcontroller._Sensors[i]._ID, 1] = wAUC[wcontroller._Sensors[i]._ID, 1] + (int)Math.Abs((wrawData[wcontroller._Sensors[i]._ID, 1, wheadPtr] - wrunningMeanY));
+                            wAUC[wcontroller._Sensors[i]._ID, 2] = wAUC[wcontroller._Sensors[i]._ID, 2] + (int)Math.Abs((wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr] - wrunningMeanZ));
+                            wVMAG[wcontroller._Sensors[i]._ID] = wVMAG[wcontroller._Sensors[i]._ID] + Math.Sqrt(Math.Pow((double)(wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr] - wrunningMeanX), 2.0) + Math.Pow((double)(wrawData[wcontroller._Sensors[i]._ID, 1, wheadPtr] - wrunningMeanY), 2.0) + Math.Pow((double)(wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr] - wrunningMeanZ), 2.0));
+                        }
+
+
 
                         #region Append Wockets Statistics
 

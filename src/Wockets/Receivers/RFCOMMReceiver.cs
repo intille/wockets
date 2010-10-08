@@ -161,8 +161,8 @@ namespace Wockets.Receivers
                     this.status = ReceiverStatus.Reconnecting;
                     reconnectionThread = new Thread(new ThreadStart(this.Reconnect));
                     reconnectionThread.Start();
-                    if (CurrentWockets._Configuration._SoftwareMode == SoftwareConfiguration.DEBUG)
-                        Logger.Debug("RFCOMMReceiver: Update: Spawning a reconnection thread for "+ this._Address);
+                    //if (CurrentWockets._Configuration._SoftwareMode == SoftwareConfiguration.DEBUG)
+                      //  Logger.Debug("RFCOMMReceiver: Update: Spawning a reconnection thread for "+ this._Address);
                 }
 
                 if ((this.status != ReceiverStatus.Connected) && (this.bluetoothStream != null) && (this.bluetoothStream._Status == BluetoothStatus.Connected))
@@ -173,8 +173,8 @@ namespace Wockets.Receivers
                         reconnectionThread.Abort();
                         reconnectionThread = null;            
                     }
-                   if (CurrentWockets._Configuration._SoftwareMode == SoftwareConfiguration.DEBUG)                           
-                       Logger.Debug("RFCOMMReceiver: Update: Reconnection successful for "+ this._Address);
+                   //if (CurrentWockets._Configuration._SoftwareMode == SoftwareConfiguration.DEBUG)                           
+                     //  Logger.Debug("RFCOMMReceiver: Update: Reconnection successful for "+ this._Address);
                     this.status = ReceiverStatus.Connected;
                     if (this.disconnectionTime!=0)                    
                         this.disconTime += (int)((WocketsTimer.GetUnixTime() - this.disconnectionTime) / 1000);
@@ -247,8 +247,8 @@ namespace Wockets.Receivers
 
                 Write(new SET_VTM(this._TMode)._Bytes);
 
-                if (CurrentWockets._Configuration._SoftwareMode == Wockets.Data.Configuration.SoftwareConfiguration.DEBUG)
-                    Logger.Debug("RFCOMMReceiver: Initialize: Attempting reconnection for receiver " + this._Address);
+                //if (CurrentWockets._Configuration._SoftwareMode == Wockets.Data.Configuration.SoftwareConfiguration.DEBUG)
+                  //  Logger.Debug("RFCOMMReceiver: Initialize: Attempting reconnection for receiver " + this._Address);
                 this.bluetoothStream = NetworkStacks._BluetoothStack.Connect(this._Buffer,this._SBuffer , this.address_bytes, this.pin);              
                 if (this.bluetoothStream == null)
                     return false;

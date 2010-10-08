@@ -1010,6 +1010,100 @@ namespace Wockets.Kernel
                 kernelLock.Release();
             });
         }
+
+
+
+
+        public static void READ_EMPTY_RECEIVED_COUNT()
+        {
+            ThreadPool.QueueUserWorkItem(func =>
+            {
+
+                kernelLock.WaitOne();
+                try
+                {
+                    RegistryKey rk = null;
+
+                    for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
+                    {
+                        try
+                        {
+                            rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + i.ToString("0"));
+                            int status = (int)rk.GetValue("Status");
+                            if (status == 1)
+                                CurrentWockets._Controller._Sensors[i]._Empty = Convert.ToInt32(rk.GetValue("EMPTY_RECEIVED_COUNT"));
+                            rk.Close();
+                        }
+                        catch
+                        {
+                        }
+                    }
+
+                }
+                catch (Exception e)
+                {
+                    Logger.Error("Core.cs:READ_BATTERY_PERCENT:" + e.ToString());
+
+                }
+                kernelLock.Release();
+            });
+        }
+        public static void WRITE_EMPTY_RECEIVED_COUNT(int sensorID, int partial)
+        {
+            ThreadPool.QueueUserWorkItem(func =>
+            {
+                kernelLock.WaitOne();
+                try
+                {
+
+                    RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + sensorID.ToString("0"));
+                    rk.SetValue("EMPTY_RECEIVED_COUNT", partial, RegistryValueKind.String);
+                    rk.Close();
+                }
+                catch (Exception e)
+                {
+                    Logger.Error("Core.cs:WRITE_RECEIVED_COUNT:" + e.ToString());
+                }
+                kernelLock.Release();
+            });
+        }
+
+
+        public static void READ_MAC()
+        {
+            ThreadPool.QueueUserWorkItem(func =>
+            {
+
+                kernelLock.WaitOne();
+                try
+                {
+                    RegistryKey rk = null;
+
+                    for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
+                    {
+                        try
+                        {
+                            rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + i.ToString("0"));
+                            int status = (int)rk.GetValue("Status");
+                            if (status == 1)
+                                CurrentWockets._Controller._Sensors[i]._Address = (string)rk.GetValue("MacAddress");
+                            rk.Close();
+                        }
+                        catch
+                        {
+                        }
+                    }
+
+                }
+                catch (Exception e)
+                {
+                    Logger.Error("Core.cs:READ_BATTERY_PERCENT:" + e.ToString());
+
+                }
+                kernelLock.Release();
+            });
+        }
+
         /// <summary>
         /// Writes a packet count to the registry
         /// </summary>
@@ -1910,6 +2004,304 @@ namespace Wockets.Kernel
                 catch (Exception e)
                 {
                     Logger.Error("Core.cs:SET_MEMORY_MODE:" + e.ToString());
+                }
+
+                kernelLock.Release();
+            });
+        }
+
+
+
+
+
+
+
+
+        //CORE REGISTRY COMMANDS FOR UPLOAD TRACKING
+
+
+        /// <summary>
+        /// Writes last upload time
+        /// </summary>
+        /// <param name=""></param>
+        public static void WRITE_LAST_UPLOAD_TIME(DateTime uploadtime)
+        {
+            ThreadPool.QueueUserWorkItem(func =>
+            {
+                kernelLock.WaitOne();
+                try
+                {
+
+                    RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_KERNEL_PATH);
+                    rk.SetValue("upload_time", uploadtime.ToString("yyyy-MM-dd HH:mm tt"), RegistryValueKind.String);
+                    rk.Close();
+                }
+                catch (Exception e)
+                {
+                    Logger.Error("Core.cs:WRITE_LAST_UPLOAD_TIME: " + e.ToString());
+                }
+                kernelLock.Release();
+            });
+        }
+
+        /// <summary>
+        /// Reads last upload time
+        /// </summary>
+        public static void READ_LAST_UPLOAD_TIME()
+        {
+            ThreadPool.QueueUserWorkItem(func =>
+            {
+                kernelLock.WaitOne();
+                try
+                {
+                    RegistryKey rk = null;
+
+                    try
+                    {
+                        rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_KERNEL_PATH);
+                        CurrentWockets._UploadLastTime = DateTime.ParseExact((string)rk.GetValue("upload_time"), "yyyy-MM-dd HH:mm tt", null);
+                        rk.Close();
+                    }
+                    catch
+                    {
+                    }
+
+                }
+                catch (Exception e)
+                {
+                    Logger.Error("Core.cs: READ_LAST_UPLOAD_TIME: " + e.ToString());
+                }
+
+                kernelLock.Release();
+            });
+        }
+
+
+        /// <summary>
+        /// Writes last upload duration
+        /// </summary>
+        /// <param name=""></param>
+        public static void WRITE_LAST_UPLOAD_DURATION(TimeSpan duration)
+        {
+            ThreadPool.QueueUserWorkItem(func =>
+            {
+                kernelLock.WaitOne();
+                try
+                {                  
+                    RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_KERNEL_PATH);
+                    rk.SetValue("upload_duration", duration.Hours.ToString("00")+":"+duration.Minutes.ToString("00")+":"+duration.Seconds.ToString("00"), RegistryValueKind.String);
+                    rk.Close();
+                }
+                catch (Exception e)
+                {
+                    Logger.Error("Core.cs:WRITE_LAST_UPLOAD_TIME: " + e.ToString());
+                }
+                kernelLock.Release();
+            });
+        }
+
+        /// <summary>
+        /// Reads last upload duration
+        /// </summary>
+        public static void READ_LAST_UPLOAD_DURATION()
+        {
+            ThreadPool.QueueUserWorkItem(func =>
+            {
+                kernelLock.WaitOne();
+                try
+                {
+                    RegistryKey rk = null;
+
+                    try
+                    {
+                        rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_KERNEL_PATH);
+                        CurrentWockets._UploadDuration = (string)rk.GetValue("upload_duration");
+                        rk.Close();
+                    }
+                    catch
+                    {
+                    }
+
+                }
+                catch (Exception e)
+                {
+                    Logger.Error("Core.cs: READ_LAST_UPLOAD_DURATION: " + e.ToString());
+                }
+
+                kernelLock.Release();
+            });
+        }
+
+
+
+
+        /// <summary>
+        /// Writes last # of new files to be uploaded
+        /// </summary>
+        /// <param name=""></param>
+        public static void WRITE_LAST_UPLOAD_NEWFILES(int numFiles)
+        {
+            ThreadPool.QueueUserWorkItem(func =>
+            {
+                kernelLock.WaitOne();
+                try
+                {
+                    RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_KERNEL_PATH);
+                    rk.SetValue("newfiles", numFiles, RegistryValueKind.DWord);
+                    rk.Close();
+                }
+                catch (Exception e)
+                {
+                    Logger.Error("Core.cs:WRITE_LAST_UPLOAD_NEWFILES: " + e.ToString());
+                }
+                kernelLock.Release();
+            });
+        }
+
+        /// <summary>
+        /// Reads last upload duration
+        /// </summary>
+        public static void READ_LAST_UPLOAD_NEWFILES()
+        {
+            ThreadPool.QueueUserWorkItem(func =>
+            {
+                kernelLock.WaitOne();
+                try
+                {
+                    RegistryKey rk = null;
+                    try
+                    {
+                        rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_KERNEL_PATH);
+                        CurrentWockets._UploadNewFiles = (int)rk.GetValue("newfiles");
+                        rk.Close();
+                    }
+                    catch
+                    {
+                    }
+                }
+                catch (Exception e)
+                {
+                    Logger.Error("Core.cs: READ_LAST_UPLOAD_NEWFILES: " + e.ToString());
+                }
+
+                kernelLock.Release();
+            });
+        }
+
+
+
+
+
+
+
+
+
+        /// <summary>
+        /// Writes last # of successful files uploaded
+        /// </summary>
+        /// <param name=""></param>
+        public static void WRITE_LAST_UPLOAD_SUCCESSFILES(int numFiles)
+        {
+            ThreadPool.QueueUserWorkItem(func =>
+            {
+                kernelLock.WaitOne();
+                try
+                {
+                    RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_KERNEL_PATH);
+                    rk.SetValue("successfiles", numFiles, RegistryValueKind.DWord);
+                    rk.Close();
+                }
+                catch (Exception e)
+                {
+                    Logger.Error("Core.cs:WRITE_LAST_UPLOAD_SUCCESSFILES: " + e.ToString());
+                }
+                kernelLock.Release();
+            });
+        }
+
+        /// <summary>
+        /// Reads last # of successful files uploaded
+        /// </summary>
+        public static void READ_LAST_UPLOAD_SUCCESSFILES()
+        {
+            ThreadPool.QueueUserWorkItem(func =>
+            {
+                kernelLock.WaitOne();
+                try
+                {
+                    RegistryKey rk = null;
+
+                    try
+                    {
+                        rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_KERNEL_PATH);
+                        CurrentWockets._UploadSuccessFiles = (int)rk.GetValue("successfiles");
+                        rk.Close();
+                    }
+                    catch
+                    {
+                    }
+
+                }
+                catch (Exception e)
+                {
+                    Logger.Error("Core.cs: READ_LAST_UPLOAD_SUCCESSFILES: " + e.ToString());
+                }
+
+                kernelLock.Release();
+            });
+        }
+
+
+
+        /// <summary>
+        /// Writes last # of failed files uploaded
+        /// </summary>
+        /// <param name=""></param>
+        public static void WRITE_LAST_UPLOAD_FAILEDFILES(int numFiles)
+        {
+            ThreadPool.QueueUserWorkItem(func =>
+            {
+                kernelLock.WaitOne();
+                try
+                {
+                    RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_KERNEL_PATH);
+                    rk.SetValue("failedfiles", numFiles, RegistryValueKind.DWord);
+                    rk.Close();
+                }
+                catch (Exception e)
+                {
+                    Logger.Error("Core.cs:WRITE_LAST_UPLOAD_FAILEDFILES: " + e.ToString());
+                }
+                kernelLock.Release();
+            });
+        }
+
+        /// <summary>
+        /// Reads last # of failed files uploaded
+        /// </summary>
+        public static void READ_LAST_UPLOAD_FAILEDFILES()
+        {
+            ThreadPool.QueueUserWorkItem(func =>
+            {
+                kernelLock.WaitOne();
+                try
+                {
+                    RegistryKey rk = null;
+
+                    try
+                    {
+                        rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_KERNEL_PATH);
+                        CurrentWockets._UploadFailedFiles = (int)rk.GetValue("failedfiles");
+                        rk.Close();
+                    }
+                    catch
+                    {
+                    }
+
+                }
+                catch (Exception e)
+                {
+                    Logger.Error("Core.cs: READ_LAST_UPLOAD_FAILEDFILES: " + e.ToString());
                 }
 
                 kernelLock.Release();

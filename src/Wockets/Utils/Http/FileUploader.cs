@@ -14,11 +14,12 @@ namespace Wockets.Utils.Http
     {
         public static string _Uri = "";
         public static string _Path = "";
+        public static string _HourlyPath = "";
+        public static string _HistoryPath = "";
         public static Dictionary<string, DateTime> _NotUploaded = new Dictionary<string, DateTime>();
         public static Dictionary<string, DateTime> _Success = new Dictionary<string, DateTime>();
         public static Dictionary<string, DateTime> _Failure = new Dictionary<string, DateTime>();
-        private static Dictionary<string, DateTime> _DirectoryScanned = new Dictionary<string, DateTime>();
-
+     
         static FileUploader()
         {
             //Determine the default path to upload from the local file system
@@ -38,15 +39,35 @@ namespace Wockets.Utils.Http
                 }
             }
             _Path = firstCard + "\\Wockets\\";
+            _HistoryPath = _Path + "kernellog\\uploadhistory\\";
+            
+            try
+            {
+                if (!Directory.Exists(_HistoryPath))
+                    Directory.CreateDirectory(_HistoryPath);
+            }
+            catch
+            {
+            }
+            try
+            {
+                DateTime now = DateTime.Now;
+                _HourlyPath = _Path + "kernellog\\" + now.ToString("yyyy-MM-dd") + "\\" + now.Hour+"\\";
+                if (!Directory.Exists(_HourlyPath))
+                    Directory.CreateDirectory(_HourlyPath);
+            }
+            catch
+            {
+            }
         }
 
         public static void Load()
         {
             try
             {
-                if (File.Exists("files.notuploaded.wockets"))
+                if (File.Exists(_HistoryPath + "files.notuploaded.wockets"))
                 {
-                    TextReader tr = new StreamReader("files.notuploaded.wockets");
+                    TextReader tr = new StreamReader(_HistoryPath + "files.notuploaded.wockets");
                     string line = "";
                     while ((line = tr.ReadLine()) != null)
                     {
@@ -62,37 +83,21 @@ namespace Wockets.Utils.Http
             {
             }
 
-            /*try
-            {
-                if (File.Exists("files.uploaded.wockets"))
-                {
-                    TextReader tr = new StreamReader("files.uploaded.wockets");
-                    string line = "";
-                    while ((line = tr.ReadLine()) != null)
-                    {
-                        string[] tokens = line.Split(new char[] { ',' });
-                        _Uploaded.Add(tokens[0], DateTime.ParseExact(tokens[1], "yyyy-MM-dd HH:mm tt", null));
-                    }
-                    tr.Close();
-                }
-            }
-            catch (Exception e)
-            {
-            }*/
 
             try
             {
-                if (File.Exists("directory.scanned.wockets"))
+                if (File.Exists(_HistoryPath + "files.uploaded.wockets"))
                 {
-                    TextReader tr = new StreamReader("directory.scanned.wockets");
+                    TextReader tr = new StreamReader(_HistoryPath + "files.uploaded.wockets");
                     string line = "";
                     while ((line = tr.ReadLine()) != null)
                     {
                         string[] tokens = line.Split(new char[] { ',' });
-                        _DirectoryScanned.Add(tokens[0], DateTime.ParseExact(tokens[1], "yyyy-MM-dd HH:mm tt", null));
+                        _Success.Add(tokens[0], DateTime.ParseExact(tokens[1], "yyyy-MM-dd HH:mm tt", null));
                     }
                     tr.Close();
                 }
+
             }
             catch (Exception e)
             {
@@ -106,7 +111,74 @@ namespace Wockets.Utils.Http
             //Save not uploaded files
             try
             {
-                TextWriter tw = new StreamWriter("files.notuploaded.wockets");
+                TextWriter tw = new StreamWriter(_HistoryPath + "files.notuploaded.wockets");
+                foreach (string filename in _Failure.Keys)
+                    tw.WriteLine(filename + "," + File.GetCreationTime(filename).ToString("yyyy-MM-dd HH:mm tt"));
+                tw.Close();
+            }
+            catch (Exception e)
+            {
+            }
+
+
+            //Save uploaded files
+            try
+            {
+                TextWriter tw = new StreamWriter(_HistoryPath + "files.uploaded.wockets");
+                foreach (string filename in _Success.Keys)
+                {
+                    DateTime creationTime=File.GetCreationTime(filename);
+                    if (DateTime.Now.Subtract(creationTime).Days<=2)
+                        tw.WriteLine(filename + "," + creationTime.ToString("yyyy-MM-dd HH:mm tt"));
+                }
+                tw.Close();
+            }
+            catch (Exception e)
+            {
+            }
+
+            //Write files that were successfully uploaded
+            try
+            {
+                TextWriter tw = new StreamWriter(_HourlyPath + "success.upload.wockets-" + DateTime.Now.ToString("yyyy-MM-dd-HH-mm-tt"));
+                foreach (string filename in _Success.Keys)
+                    tw.WriteLine(filename + "," + File.GetCreationTime(filename).ToString("yyyy-MM-dd HH:mm tt"));
+                tw.Close();
+            }
+            catch (Exception e)
+            {
+            }
+
+
+            //Write files that were unsuccessfully uploaded
+            try
+            {
+                TextWriter tw = new StreamWriter(_HourlyPath + "failed.upload.wockets-" + DateTime.Now.ToString("yyyy-MM-dd-HH-mm-tt"));
+                foreach (string filename in _Failure.Keys)
+                    tw.WriteLine(filename + "," + File.GetCreationTime(filename).ToString("yyyy-MM-dd HH:mm tt"));
+                tw.Close();
+            }
+            catch (Exception e)
+            {
+            }
+        }
+
+        public static Dictionary<string, DateTime> Scan(DateTime from, DateTime until)
+        {
+            //load successful and not uploaded files
+            Load();
+
+            Dictionary<string, DateTime> _scanned= Scan(_Path,from,until);
+            foreach (string filename in _scanned.Keys)
+            {
+                if ( (!_NotUploaded.ContainsKey(filename)) && (!_Success.ContainsKey(filename)))
+                    _NotUploaded.Add(filename, File.GetCreationTime(filename));
+            }
+         
+            //Write the files to be uploaded
+            try
+            {
+                TextWriter tw = new StreamWriter(_HourlyPath+ "files.toupload.wockets");
                 foreach (string filename in _NotUploaded.Keys)
                     tw.WriteLine(filename + "," + File.GetCreationTime(filename).ToString("yyyy-MM-dd HH:mm tt"));
                 tw.Close();
@@ -114,52 +186,25 @@ namespace Wockets.Utils.Http
             catch (Exception e)
             {
             }
-
-            //Save uploaded files
-           /* try
-            {
-                TextWriter tw = new StreamWriter("files.uploaded.wockets");
-                foreach (string filename in _Uploaded.Keys)
-                    tw.WriteLine(filename + "," + File.GetCreationTime(filename).ToString("yyyy-MM-dd HH:mm tt"));
-                tw.Close();
-            }
-            catch (Exception e)
-            {
-            }
-            */
-
-            //Save scanned directories
-            try
-            {
-                TextWriter tw = new StreamWriter("directory.scanned.wockets");
-                foreach (string directory in _DirectoryScanned.Keys)
-                    tw.WriteLine(directory + "," + Directory.GetCreationTime(directory).ToString("yyyy-MM-dd HH:mm tt"));
-                tw.Close();
-            }
-            catch (Exception e)
-            {
-            }
-        }
-
-        public static Dictionary<string, DateTime> Scan(DateTime from)
-        {
-            _NotUploaded = Scan(_Path,from);
             return _NotUploaded;
         }
-        public static Dictionary<string, DateTime> Scan(string path,DateTime from)
+        public static Dictionary<string, DateTime> Scan(string path,DateTime from, DateTime until)
         {
             string[] scannedfiles = Directory.GetFiles(path);
             Dictionary<string, DateTime> files = new Dictionary<string, DateTime>();
 
             //Directory was scanned before
-            if (_DirectoryScanned.ContainsKey(path))
-                return files;
+            if ((path+"\\")==_HistoryPath)
+               return files;
 
             for (int i = 0; (i < scannedfiles.Length); i++)
             {
                 DateTime creationTime = File.GetCreationTime(scannedfiles[i]);
-                if (((creationTime.Day != DateTime.Now.Day) || (creationTime.Hour != DateTime.Now.Hour) || (creationTime.Month != DateTime.Now.Month) ||
-                    (creationTime.Year != DateTime.Now.Year)) && (DateTime.Compare(creationTime,from)>=0))
+                FileInfo f = new FileInfo(scannedfiles[i]);
+
+                if ( (f.Length>0) && (((creationTime.Day != DateTime.Now.Day) || (creationTime.Hour != DateTime.Now.Hour) || (creationTime.Month != DateTime.Now.Month) ||
+                    (creationTime.Year != DateTime.Now.Year)) && (DateTime.Compare(creationTime,from)>=0) && 
+                    (DateTime.Now.Subtract(creationTime).Hours>=2)))
                     files.Add(scannedfiles[i], creationTime);
             }
             if (Directory.Exists(path))
@@ -168,19 +213,20 @@ namespace Wockets.Utils.Http
                 for (int j = 0; (j < scanneddirectories.Length); j++)
                 {
                     DateTime dCreationTime=Directory.GetCreationTime(scanneddirectories[j]);
-                    if (DateTime.Compare(dCreationTime, from) >= 0)
+                    if ((DateTime.Compare(dCreationTime, from) >= 0) && (DateTime.Compare(until,dCreationTime) >= 0))
                     {
-                        Dictionary<string, DateTime> scanneddirectory = Scan(scanneddirectories[j]);
+                        Dictionary<string, DateTime> scanneddirectory = Scan(scanneddirectories[j],from,until);
                         foreach (string filename in scanneddirectory.Keys)
                         {
                             DateTime creationTime = File.GetCreationTime(filename);
-                            if ( ((creationTime.Day != DateTime.Now.Day) || (creationTime.Hour != DateTime.Now.Hour) || (creationTime.Month != DateTime.Now.Month) ||
-                                (creationTime.Year != DateTime.Now.Year)))
+                            FileInfo f = new FileInfo(filename);
+                            if ((f.Length>0) && ((((creationTime.Day != DateTime.Now.Day) || (creationTime.Hour != DateTime.Now.Hour) || (creationTime.Month != DateTime.Now.Month) ||
+                                (creationTime.Year != DateTime.Now.Year)))  && (DateTime.Now.Subtract(creationTime).Hours>=2)))
                                 files.Add(filename, creationTime);
                         }
                         //if a top level directory... store it in the scanned list
-                        if ((path == _Path) && (!_DirectoryScanned.ContainsKey(scanneddirectories[j])))
-                            _DirectoryScanned.Add(scanneddirectories[j], Directory.GetCreationTime(scanneddirectories[j]));                        
+                        //if ((path == _Path) && (!_DirectoryScanned.ContainsKey(scanneddirectories[j])))
+                          //  _DirectoryScanned.Add(scanneddirectories[j], Directory.GetCreationTime(scanneddirectories[j]));                        
                     }
                 }
             }
@@ -197,9 +243,9 @@ namespace Wockets.Utils.Http
             Dictionary<string,DateTime> files = new Dictionary<string,DateTime>();
             for (int i = 0; (i < scannedfiles.Length); i++)
             {
-                DateTime creationTime = File.GetCreationTime(scannedfiles[i]);
-                if (((creationTime.Day != DateTime.Now.Day) || (creationTime.Hour != DateTime.Now.Hour) || (creationTime.Month != DateTime.Now.Month) ||
-                    (creationTime.Year != DateTime.Now.Year)))
+                DateTime creationTime = File.GetCreationTime(scannedfiles[i]);               
+                if ((DateTime.Now.Subtract(creationTime).Hours>=2) && (((creationTime.Day != DateTime.Now.Day) || (creationTime.Hour != DateTime.Now.Hour) || (creationTime.Month != DateTime.Now.Month) ||
+                    (creationTime.Year != DateTime.Now.Year))))
                     files.Add(scannedfiles[i], creationTime);
             }
 
@@ -212,8 +258,8 @@ namespace Wockets.Utils.Http
                     foreach (string filename in scanneddirectory.Keys)
                     {
                         DateTime creationTime = File.GetCreationTime(filename);
-                        if ( ((creationTime.Day != DateTime.Now.Day) || (creationTime.Hour != DateTime.Now.Hour) || (creationTime.Month != DateTime.Now.Month) ||
-                            (creationTime.Year != DateTime.Now.Year)))
+                        if  ((DateTime.Now.Subtract(creationTime).Hours>=2) && (((creationTime.Day != DateTime.Now.Day) || (creationTime.Hour != DateTime.Now.Hour) || (creationTime.Month != DateTime.Now.Month) ||
+                            (creationTime.Year != DateTime.Now.Year))))
                             files.Add(filename, creationTime);
                     }
                 }
@@ -241,10 +287,11 @@ namespace Wockets.Utils.Http
         /// http://tools.ietf.org/html/rfc2388
         /// http://www.w3.org/TR/html401/interact/forms.html#h-17.13.4.2
         /// 
+        public static HttpWebRequest webrequest;
         public static WebResponse Post(Uri requestUri, NameValueCollection postData, Stream fileData, string fileName,
                                            string fileContentType, string fileFieldName, NameValueCollection headers)
         {
-            HttpWebRequest webrequest = (HttpWebRequest)WebRequest.Create(requestUri);
+            webrequest = (HttpWebRequest)WebRequest.Create(requestUri);
 
 
             string ctype;
@@ -310,7 +357,11 @@ namespace Wockets.Utils.Http
             long contentLength = header.Length + (fileData != null ? fileData.Length : 0) + footer.Length;
 
             webrequest.ContentLength = contentLength;
-
+            webrequest.Timeout = 30000;
+            webrequest.KeepAlive = true;
+            //webrequest.ReadWriteTimeout = 90000;
+            
+            //webrequest.
             using (Stream requestStream = webrequest.GetRequestStream())
             {
                 requestStream.Write(header, 0, header.Length);
@@ -330,9 +381,11 @@ namespace Wockets.Utils.Http
                 // write footer
                 requestStream.Write(footer, 0, footer.Length);
                 requestStream.Close();
-
-                return webrequest.GetResponse();
+                return webrequest.GetResponse();               
             }
+
+            webrequest.Abort();            
+            return null;
         }
 
         /// <summary>

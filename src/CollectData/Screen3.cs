@@ -107,12 +107,19 @@ namespace CollectData
             this.timer1.Enabled = false;
             this.panel1.Visible = false;
 
-            Screens.screen4 = new Screen4();
+           /* Screens.screen4 = new Screen4();
             Screens.screen4.Location = new System.Drawing.Point(3, 3);
             Screens.screen4.Name = "screen4";
             Screens.screen4.Size = new System.Drawing.Size(474, 690);
             Screens.screen.Controls.Add(Screens.screen4);
-            Screens.screen4.Visible = true;
+            Screens.screen4.Visible = true;*/
+            Screens.screen5 = new Screen5();
+            Screens.screen5.Location = new System.Drawing.Point(3, 3);
+            Screens.screen5.Name = "screen5";
+            Screens.screen5.Size = new System.Drawing.Size(474, 690);
+            Screens.screen.Controls.Add(Screens.screen5);
+            Screens.screen5.Visible = true;
+            Screens.screen5.Enabled = true;
             this.Visible = false;
             Thread.Sleep(5000);            
         }

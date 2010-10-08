@@ -104,7 +104,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                 CurrentWockets._LastError = ErrorCodes.REMOTE_ENDPOINT_CREATION_FAILED;
                 CurrentWockets._LastErrorMessage = "Failed to setup connection endpoint for " + this._HexAddress + ". " + e.ToString();
                 if (CurrentWockets._Configuration._SoftwareMode == SoftwareConfiguration.DEBUG)
-                    Logger.Debug("MicrosoftBluetoothStream: Constructor: <" + ErrorCodes.REMOTE_ENDPOINT_CREATION_FAILED + ">: Failed to setup connection endpoint for " + this._HexAddress + ". " + e.ToString());
+                    Logger.Error("MicrosoftBluetoothStream: Constructor: <" + ErrorCodes.REMOTE_ENDPOINT_CREATION_FAILED + ">: Failed to setup connection endpoint for " + this._HexAddress + ". " + e.ToString());
                 throw new Exception("MicrosoftBluetoothStream: Constructor: <" + ErrorCodes.REMOTE_ENDPOINT_CREATION_FAILED + ">: Failed to setup connection endpoint for " + this._HexAddress + ". " + e.ToString());
             }
         }
@@ -223,8 +223,8 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                 btStream.processingThread = new Thread(new ThreadStart(btStream.Process));
                 btStream.processingThread.Priority = ThreadPriority.AboveNormal;
                 btStream.processingThread.Start();                
-                if (CurrentWockets._Configuration._SoftwareMode == SoftwareConfiguration.DEBUG)
-                    Logger.Debug("MicrosoftBluetoothStream: Open: Successful connection to" + btStream._HexAddress + ".");
+                //if (CurrentWockets._Configuration._SoftwareMode == SoftwareConfiguration.DEBUG)
+                  //  Logger.Debug("MicrosoftBluetoothStream: Open: Successful connection to" + btStream._HexAddress + ".");
                 return btStream;
             }
             catch (Exception e)
