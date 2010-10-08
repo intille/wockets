@@ -11,6 +11,7 @@ namespace CollectData
         public static bool _Running = false;
         public static int _PhoneBattry = 73;
         public static DateTime _SessionStart = DateTime.Now;
+        public static string _StorageDirectory = "";
         public static int _InternalStorage = 200;
         public static int _SDStorage = 1000;
         public static int _NewFiles = 200;

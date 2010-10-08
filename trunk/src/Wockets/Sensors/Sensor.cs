@@ -135,6 +135,9 @@ namespace Wockets.Sensors
 
         public int _Partial = 0;
 
+        public int _Empty = 0;
+
+        public string _Address = "";
         /// <summary>
         /// Specifies if the sensor is enabled or not
         /// </summary>

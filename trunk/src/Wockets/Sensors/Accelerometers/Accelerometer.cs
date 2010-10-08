@@ -312,13 +312,15 @@ namespace Wockets.Sensors.Accelerometers
                 #endregion Determine the head of the data buffer
 
                 #region Check if a new binary file need to be created
-                if (presentHour != DateTime.Now.Hour) //((bw==null)||(presentHour != DateTime.Now.Hour)|| (presentMinute != DateTime.Now.Minute) || (presentSecond!= DateTime.Now.Second))
+                    
+                DateTime now = DateTime.Now;
+                if (presentHour != now.Hour) //((bw==null)||(presentHour != DateTime.Now.Hour)|| (presentMinute != DateTime.Now.Minute) || (presentSecond!= DateTime.Now.Second))
                 {
                     if (bw != null)
-                        bw.CloseFile();
-                    presentHour = DateTime.Now.Hour;
-                    presentMinute = DateTime.Now.Minute;
-                    presentSecond = DateTime.Now.Second;
+                        bw.CloseFile();        
+                    presentHour = now.Hour;
+                    presentMinute = now.Minute;
+                    presentSecond = now.Second;
                     // Need to create a new directory and switch the file name
                     dayPath = DirectoryStructure.DayDirectoryToUse(this._RootStorageDirectory);
 

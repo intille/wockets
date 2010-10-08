@@ -463,8 +463,8 @@ void _send_acs()
 		num_acs=ci+(AC_BUFFER_SIZE-si);
 
 
-	if (num_acs>200)
-		_yellowled_turn_on();
+	//if (num_acs>2000)
+	//	_yellowled_turn_on();
 	_send_ac_count(num_acs);
 	_send_ac_offset(AC_NUMS-summary_count); //send offset of the last activity count
 	for (int i=si;(i!=ci);)
@@ -630,7 +630,7 @@ void _receive_data(void)
                      command_length=2;
                      break;
      			case (unsigned char)ACK:		
-                     command_length=5;
+                     command_length=7;
                      break;
 				case (unsigned char)SET_TCT:                
                      command_length=5;
@@ -667,7 +667,12 @@ void _receive_data(void)
 									_delay_ms(10);
 								_yellowled_turn_off();*/
 						kseq=m_ACK(rBuffer[1],rBuffer[2],rBuffer[3]);
-						crc=ComputeCRC8(0,rBuffer,4);
+						crc=CRC16(rBuffer,4);//ComputeCRC8(0,rBuffer,4);
+						rcrc=(rBuffer[6]>>5);
+						rcrc=rcrc|(rBuffer[5]<<2);
+						rcrc=rcrc|(rBuffer[4]<<9);
+						
+
 						/*if ((crc==0) || ((crc)!=rBuffer[4]))
 						{
 								_yellowled_turn_on();
@@ -686,7 +691,7 @@ void _receive_data(void)
 						// If the array overflows, start sequences are updated
 						// automatically elsewhere during insertion of the AC causing the overflow
 						// just a precaution if old ACK K are sent (e.g. user gets out of range for long periods)					
-						if ( ((crc>>1)==rBuffer[4]) && (kseq<=cseq) && ((kseq-sseq)<AC_BUFFER_SIZE) && ((kseq-sseq)>0) )
+						if ( (crc==rcrc) && (kseq<=cseq) && ((kseq-sseq)<AC_BUFFER_SIZE) && ((kseq-sseq)>0) )
 						// no overflow for sure
 						{
 							dseq=cseq-kseq;							
@@ -696,6 +701,8 @@ void _receive_data(void)
 								si=AC_BUFFER_SIZE-(dseq-ci);
 							sseq=kseq;							
 						} 
+						//else
+						//	_yellowled_turn_on();
 
 						
 						processed_counter=command_counter;				

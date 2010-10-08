@@ -102,8 +102,8 @@ namespace Wockets.Utils.Tapi
                 throw new TapiException(ret);
 
             // Start listen for events
-            thTapi = new Thread(new ThreadStart(TapiThreadProc));
-            thTapi.Start();
+            //thTapi = new Thread(new ThreadStart(TapiThreadProc));
+            //thTapi.Start();
 
             //TODO: build device list
 

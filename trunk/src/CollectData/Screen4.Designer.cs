@@ -236,8 +236,6 @@
             // 
             // Screen4
             // 
-            this.AutoScroll = true;
-            this.ClientSize = new System.Drawing.Size(480, 696);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.label12);
             this.Controls.Add(this.label13);
@@ -263,8 +261,7 @@
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Location = new System.Drawing.Point(0, 52);
-            this.Name = "Screen4";
-            this.Text = "Screen4";
+            this.Size = new System.Drawing.Size(480, 696);
             this.ResumeLayout(false);
 
         }

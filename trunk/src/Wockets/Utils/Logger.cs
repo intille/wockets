@@ -9,32 +9,19 @@ namespace Wockets.Utils
     {
         private static String errorPath;
         private static String warnPath;
-        private static String debugPath;
-        private static String debug2Path;
-        private static StreamWriter e;
-        private static StreamWriter w;
-        private static StreamWriter d;
-        private static StreamWriter d2;
+        private static String debugPath;     
         private static object wLock = new Object();
         private static object dLock = new Object();
         private static object eLock = new Object();
         private static object d2Lock = new Object();
-        private static bool initialized = false;
+        private static string _FilePath = "";
 
         public static void InitLogger(String filePath)
         {
             try
             {
+                _FilePath = filePath;
                 Directory.CreateDirectory(filePath);
-                errorPath = filePath + "error.txt";
-                warnPath = filePath + "warn.txt";
-                debugPath = filePath + "debug.csv";
-                debug2Path = filePath + "debug2.csv";
-                e = new StreamWriter(new FileStream(errorPath, FileMode.Create));
-                w = new StreamWriter(new FileStream(warnPath, FileMode.Create));
-                d = new StreamWriter(new FileStream(debugPath, FileMode.Create));
-                d2 = new StreamWriter(new FileStream(debug2Path, FileMode.Create));
-                initialized = true;
             }
             catch
             {
@@ -45,49 +32,35 @@ namespace Wockets.Utils
         {
             try
             {
-                if (!initialized)
-                    InitLogger(".\\");
                 lock (wLock)
                 {
-                    w.WriteLine("WARNING: " + WocketsTimer.GetUnixTime() + "," + DateTime.Now + "," + msg);
-                    w.Flush();
+                    DateTime now = DateTime.Now;
+                    string hourlyPath = now.ToString("yyyy-MM-dd") + "\\" + now.Hour;
+                    if (!Directory.Exists(_FilePath + "\\" + hourlyPath))
+                        Directory.CreateDirectory(_FilePath + "\\" + hourlyPath);
+                    TextWriter tw = new StreamWriter(_FilePath + "\\" + hourlyPath + "\\warn.csv",true);
+                    tw.WriteLine(WocketsTimer.GetUnixTime() + "," + DateTime.Now + "," + msg);
+                    tw.Flush();
+                    tw.Close();
                 }
             }
             catch
             {
             }
         }
-
-
-        public static void Debug2(String msg)
-        {
-            try
-            {
-                if (!initialized)
-                    InitLogger(".\\");
-                lock (d2Lock)
-                {
-                    d2.WriteLine(WocketsTimer.GetUnixTime() + "," + DateTime.Now + "," + msg);
-                    d2.Flush();
-                }
-            }
-            catch
-            {
-            }
-        }
-
-
+      
         public static void Debug(String msg)
         {
             try
             {
-                if (!initialized)
-                    InitLogger(".\\");
-                lock (dLock)
-                {
-                    d.WriteLine(WocketsTimer.GetUnixTime() + "," + DateTime.Now + "," + msg);
-                    d.Flush();
-                }
+                DateTime now = DateTime.Now;
+                string hourlyPath = now.ToString("yyyy-MM-dd") + "\\" + now.Hour;
+                if (!Directory.Exists(_FilePath + "\\" + hourlyPath))
+                    Directory.CreateDirectory(_FilePath + "\\" + hourlyPath);
+                TextWriter tw = new StreamWriter(_FilePath + "\\" + hourlyPath + "\\debug.csv",true);
+                tw.WriteLine(WocketsTimer.GetUnixTime() + "," + DateTime.Now + "," + msg);
+                tw.Flush();
+                tw.Close();
             }
             catch
             {
@@ -98,31 +71,38 @@ namespace Wockets.Utils
         {
             try
             {
-                if (!initialized)
-                    InitLogger(".\\");
-                lock (eLock)
-                {
-                    e.WriteLine(WocketsTimer.GetUnixTime() + "," + DateTime.Now + "," + msg);
-                    e.Flush();
-                }
+                DateTime now = DateTime.Now;
+                string hourlyPath = now.ToString("yyyy-MM-dd") + "\\" + now.Hour;
+                if (!Directory.Exists(_FilePath + "\\" + hourlyPath))
+                    Directory.CreateDirectory(_FilePath + "\\" + hourlyPath);
+                TextWriter tw = new StreamWriter(_FilePath + "\\" + hourlyPath + "\\error.csv",true);
+                tw.WriteLine(WocketsTimer.GetUnixTime() + "," + DateTime.Now + "," + msg);
+                tw.Flush();
+                tw.Close();
             }
             catch
             {
             }
         }
 
-        public static void Close()
+
+        public static void Log(String msg)
         {
             try
             {
-                w.Close();
-                d.Close();
-                e.Close();
-                d2.Close();
+                DateTime now = DateTime.Now;
+                string hourlyPath = now.ToString("yyyy-MM-dd") + "\\" + now.Hour;
+                if (!Directory.Exists(_FilePath + "\\" + hourlyPath))
+                    Directory.CreateDirectory(_FilePath + "\\" + hourlyPath);
+                TextWriter tw = new StreamWriter(_FilePath + "\\" + hourlyPath + "\\log.csv", true);
+                tw.WriteLine(WocketsTimer.GetUnixTime() + "," + DateTime.Now + "," + msg);
+                tw.Flush();
+                tw.Close();
             }
             catch
             {
             }
         }
+
     }
 }

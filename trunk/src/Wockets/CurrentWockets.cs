@@ -50,5 +50,12 @@ namespace Wockets
 
         public static string _LastErrorMessage = "";
 
+        public static DateTime _UploadLastTime=new DateTime(1961,1,1);
+        public static string _UploadDuration;
+        public static int _UploadNewFiles = 0;
+        public static int _UploadSuccessFiles = 0;
+        public static int _UploadFailedFiles = 0;
+
+
     }
 }

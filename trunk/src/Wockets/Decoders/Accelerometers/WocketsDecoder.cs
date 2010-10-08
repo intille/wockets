@@ -217,6 +217,15 @@ namespace Wockets.Decoders.Accelerometers
                             short y = 0;
                             short z = 0;
 
+                            //for each batch reinitialize the activity count sum and offset
+                            if (this._ActivityCountOffset < 0)
+                            {
+                                acc_count = -1;
+                                this._ActivityCountOffset = -1;
+                            }
+
+
+
                             if (packetType == SensorDataType.UNCOMPRESSED_DATA_PDU)
                             {
                                 x = (short)((((short)(this.packet[0] & 0x03)) << 8) | (((short)(this.packet[1] & 0x7f)) << 1) | (((short)(this.packet[2] & 0x40)) >> 6));
@@ -519,17 +528,23 @@ namespace Wockets.Decoders.Accelerometers
 
                                     //Only insert new sequence numbers
                                     // if this is the first AC or it is not equal to the previous sequence number
-                                    if ((this._LastActivityCountIndex==-1) || (ac._SeqNum > this._ActivityCounts[this._LastActivityCountIndex]._SeqNum))
-                                    {                 
-                                        this._LastActivityCountIndex = this._ActivityCountIndex;
-                                        this._ActivityCounts[this._ActivityCountIndex++] = ac;
-                                        if (this._ActivityCountIndex == 960)
-                                            this._ActivityCountIndex = 0;
+                                    if ((this._ActivityCountOffset >= 0) && (acc_count >= 0))
+                                    {
+                                        if ((this._LastActivityCountIndex == -1) || (ac._SeqNum == (this._ActivityCounts[this._LastActivityCountIndex]._SeqNum + 1)) || ((ac._SeqNum - this._ActivityCounts[this._LastActivityCountIndex]._SeqNum + 1) > 960))
+                                        {
+                                            this._LastActivityCountIndex = this._ActivityCountIndex;
+                                            this._ActivityCounts[this._ActivityCountIndex++] = ac;
+                                            if (this._ActivityCountIndex == 960)
+                                                this._ActivityCountIndex = 0;
+
+                                           
+#if (PocketPC)
+                                            Core.WRITE_ACTIVITY_COUNT(ac);
+#endif
+                                        }
                                     }
 
-#if (PocketPC)
-                                    Core.WRITE_ACTIVITY_COUNT(ac);
-#endif
+                                    //Logger.Warn("ACC," + ac._SeqNum + "," + ac._Count);
                                     //FireEvent(ac);
                                     break;
 
@@ -543,7 +558,7 @@ namespace Wockets.Decoders.Accelerometers
 #if (PocketPC)
                                     Core.WRITE_TCT(tct);
 #endif
-                                    FireEvent(tct);
+                                    //FireEvent(tct);
                                     break;
 
                                 case ResponseTypes.ACC_RSP:
@@ -557,6 +572,7 @@ namespace Wockets.Decoders.Accelerometers
                                     acc_count=acc._Count;
                                     if (acc_count > 100)
                                         ac_index = 0;
+                                    Logger.Warn("ACC," + acc_count);
                                     //FireEvent(acc);
                                     break;
                                 case ResponseTypes.OFT_RSP:

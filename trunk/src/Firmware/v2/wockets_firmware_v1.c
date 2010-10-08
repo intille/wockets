@@ -392,18 +392,18 @@ ISR(TIMER2_OVF_vect){
 				}
 					
 				if (paused==0){
-					alive_timer++;					
-					if (alive_timer>=2730) //if no acks for approx 30 seconds, reset radio
-					{
+				//	alive_timer++;					
+				//	if (alive_timer>=2730) //if no acks for approx 30 seconds, reset radio
+				//	{
 					
 						//NEVER RESET						
 						//_atmega324p_reset();
-						_bluetooth_turn_off();
-						for (int zz=0;(zz<100);zz++)
-							_delay_ms(5);
-						_bluetooth_turn_on();
-						alive_timer=0;					
-					}
+						//_bluetooth_turn_off();
+						//for (int zz=0;(zz<100);zz++)
+						//	_delay_ms(5);
+					//	_bluetooth_turn_on();
+					//	alive_timer=0;					
+				//	}
 					 					
 					adc_result[ADC1]=_atmega324p_a2dConvert10bit(ADC1);
 					adc_result[ADC2]=_atmega324p_a2dConvert10bit(ADC2);

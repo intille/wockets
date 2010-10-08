@@ -106,16 +106,13 @@
             // 
             // Screen3
             // 
-            this.AutoScroll = true;
-            this.ClientSize = new System.Drawing.Size(480, 696);
             this.Controls.Add(this.button3);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.panel1);
             this.Location = new System.Drawing.Point(0, 52);
-            this.Name = "Screen3";
-            this.Text = "Screen3";
+            this.Size = new System.Drawing.Size(480, 696);
             this.ResumeLayout(false);
 
         }

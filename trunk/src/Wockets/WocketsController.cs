@@ -465,6 +465,7 @@ namespace Wockets
             int[] secondsCounter = new int[this._Sensors.Count];
             int[] full = new int[this._Sensors.Count];
             int[] partial = new int[this._Sensors.Count];
+            int[] empty = new int[this._Sensors.Count];
 
             if (!Directory.Exists(this._StorageDirectory + "\\log\\"))
                 Directory.CreateDirectory(this._StorageDirectory + "\\log\\");
@@ -519,10 +520,10 @@ namespace Wockets
                                 for (int i = 0; (i < this._Sensors.Count); i++)
                                     if (LastSeqNum[i] >= 0)
                                     {
-                                        System.IO.TextWriter tww = new StreamWriter("hELLO.txt",true);
+                                        //System.IO.TextWriter tww = new StreamWriter("hELLO.txt",true);
                                         ((RFCOMMReceiver)this._Receivers[i]).Write(new ACK(LastSeqNum[i])._Bytes);
-                                        tww.WriteLine(LastSeqNum[i]);
-                                        tww.Close();
+                                        //tww.WriteLine(LastSeqNum[i]);
+                                        //tww.Close();
                                     }
                                 Thread.Sleep(20);
                             }
@@ -540,27 +541,35 @@ namespace Wockets
                             double unixtime = WocketsTimer.GetUnixTime(now);
                             string currentTime = now.ToString("yyyy-MM-dd HH:mm:ss");
                             string log_line = ++k + "," + currentTime + "," + bpower.BatteryLifePercent + "," + bpower.BatteryVoltage + "," + bpower.BatteryCurrent + "," + bpower.BatteryTemperature;
-
-
+                            string hourlyPath = now.ToString("yyyy-MM-dd") + "\\" + now.Hour;
+                            
+                            
                             for (int i = 0; (i < this._Sensors.Count); i++)
                             {
 
                                 Core.WRITE_RECEIVED_COUNT(i, this._Sensors[i]._ReceivedPackets);
                                 if (this._Sensors[i]._ReceivedPackets == ((WocketsDecoder)this._Decoders[i])._ExpectedBatchCount)
                                     full[i] = full[i] + 1;
+                                else if (this._Sensors[i]._ReceivedPackets ==0)
+                                    empty[i] = empty[i] + 1;
                                 else
                                     partial[i] = partial[i] + 1;
+                                
                                 Core.WRITE_FULL_RECEIVED_COUNT(i,full[i]);
                                 Core.WRITE_PARTIAL_RECEIVED_COUNT(i, partial[i]);
+                                Core.WRITE_EMPTY_RECEIVED_COUNT(i, empty[i]);
+
                                 log_line += "," + this._Sensors[i]._ReceivedPackets + "," + ((WocketsDecoder)this._Decoders[i])._ExpectedBatchCount + "," + ((RFCOMMReceiver)this._Receivers[i])._SuccessfulConnections + "," + ((RFCOMMReceiver)this._Receivers[i])._Reconnections + "," + ((RFCOMMReceiver)this._Receivers[i])._ConnectionTime;
                                 dataSavedSeconds[i] = 0;
                                 countSeconds[i] = false;
                                 secondsCounter[i] = 0;
                                 ((WocketsDecoder)this._Decoders[i])._ExpectedBatchCount = -1;
 
-              
 
-                                TextWriter tw2 = new StreamWriter(this._StorageDirectory+ "\\data\\summary\\Sensor-" + this._Sensors[i]._Location + "-" + i + ".csv", true);
+                                if (!Directory.Exists(this._StorageDirectory + "\\data\\summary\\" + hourlyPath))                                
+                                    Directory.CreateDirectory(this._StorageDirectory + "\\data\\summary\\" + hourlyPath);                                
+
+                                TextWriter tw2 = new StreamWriter(this._StorageDirectory+ "\\data\\summary\\"+hourlyPath+"\\Sensor-" + this._Sensors[i]._Location + "-" + i + ".csv", true);
                                 int nextACIndex = LastACIndex[i] + 1;
                                 if (nextACIndex == 960)
                                     nextACIndex = 0;
@@ -598,18 +607,25 @@ namespace Wockets
                                 Thread.Sleep(1000);
                             }
 
-                            TextWriter tw = new StreamWriter(this._StorageDirectory + "\\log\\stats.csv", true);
-                            tw.WriteLine(log_line);
-                            tw.Close();
+                            //TextWriter tw = new StreamWriter(this._StorageDirectory + "\\data\\log\\" + hourlyPath + "\\stats.csv", true);
+                            Logger.Log(log_line);
+                            //tw.Close();
 
 
 
 
                             SystemIdleTimerReset();
                             for (int i = 0; (i < this._Sensors.Count); i++)
-                                this._Sensors[i].Save();
-
-
+                            {
+                                try
+                                {
+                                    this._Sensors[i].Save();
+                                }
+                                catch(Exception e)
+                                {
+                                    Logger.Error("Sensor " + i + ": failed to save:" + e.Message);
+                                }
+                            }
 
                             Thread.Sleep(1000);
                             if (DateTime.Now.Subtract(lastActivity).TotalSeconds > 30)
@@ -1038,7 +1054,10 @@ namespace Wockets
                 GET_BT GET_BT_CMD = new GET_BT();
                 ALIVE ALIVE_CMD = new ALIVE();
                 int pollCounter = 0;
-                Logger.Warn("Version " + CurrentWockets._Version + " " + CurrentWockets._Date);
+
+                System.Reflection.Assembly a = System.Reflection.Assembly.GetExecutingAssembly();
+                System.Reflection.AssemblyName an = a.GetName();
+                Logger.Warn("Version " + an.Version.ToString() +" Date:"+ DateTime.Now.ToString("f"));
                 this.StartTime = WocketsTimer.GetUnixTime();
 
                 while (true)
@@ -1147,7 +1166,7 @@ namespace Wockets
 
                                     if (pollCounter > 2000)
                                     {
-                                        Logger.Warn("Receiver " + sensor._Receiver._ID + " decoded:" + sensor._ReceivedPackets + ",saved:" + sensor._SavedPackets + ", tail=" + tail + ",head=" + head);
+                                        //Logger.Warn("Receiver " + sensor._Receiver._ID + " decoded:" + sensor._ReceivedPackets + ",saved:" + sensor._SavedPackets + ", tail=" + tail + ",head=" + head);
                                         pollCounter = 0;
                                     }
 
@@ -1170,8 +1189,8 @@ namespace Wockets
                     {
                         try
                         {
-                            if (CurrentWockets._Configuration._SoftwareMode == Wockets.Data.Configuration.SoftwareConfiguration.DEBUG)
-                                Logger.Debug("All Wockets Disconnected. BT Reset.");
+                            //if (CurrentWockets._Configuration._SoftwareMode == Wockets.Data.Configuration.SoftwareConfiguration.DEBUG)
+                              //  Logger.Debug("All Wockets Disconnected. BT Reset.");
                             NetworkStacks._BluetoothStack.Dispose();
                             NetworkStacks._BluetoothStack.Initialize();
                             bluetoothIsReset = true;

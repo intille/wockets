@@ -129,7 +129,7 @@ namespace Wockets.Kernel
             wcontroller._Mode = MemoryMode.BluetoothToShared;
 
             Logger.InitLogger(rootStorageDirectory + "kernellog\\");
-            Logger.Debug2("Time,Time,PowerPercent,Voltage,Current,Temperature\n");            
+            //Logger.Debug2("Time,Time,PowerPercent,Voltage,Current,Temperature\n");            
             
         }
 
@@ -252,8 +252,7 @@ namespace Wockets.Kernel
                     {
                         RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_WOCKETS_PATH + "\\Kernel");
                         rk.SetValue("Status", 0, RegistryValueKind.DWord);
-                        rk.Close();
-                        Logger.Close();
+                        rk.Close();       
                     }
                     catch
                     {
