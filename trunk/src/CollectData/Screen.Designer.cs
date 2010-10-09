@@ -42,6 +42,7 @@
             // 
             // menuItem1
             // 
+            this.menuItem1.Enabled = false;
             this.menuItem1.Text = "Quit";
             this.menuItem1.Click += new System.EventHandler(this.menuItem1_Click);
             // 

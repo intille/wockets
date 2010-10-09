@@ -544,6 +544,7 @@ namespace Wockets.Decoders.Accelerometers
                                         }
                                     }
 
+                                    Logger.Warn("ACC,"+acc_count+","+this._ActivityCounts[this._LastActivityCountIndex]._SeqNum+"," + ac._SeqNum + "," + ac._Count);
                                     //Logger.Warn("ACC," + ac._SeqNum + "," + ac._Count);
                                     //FireEvent(ac);
                                     break;
@@ -572,7 +573,7 @@ namespace Wockets.Decoders.Accelerometers
                                     acc_count=acc._Count;
                                     if (acc_count > 100)
                                         ac_index = 0;
-                                    Logger.Warn("ACC," + acc_count);
+                                    //Logger.Warn("ACC," + acc_count);
                                     //FireEvent(acc);
                                     break;
                                 case ResponseTypes.OFT_RSP:

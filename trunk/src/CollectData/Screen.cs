@@ -37,9 +37,12 @@ namespace CollectData
             this.screen51.Start();
 
         }
-        
 
 
+        public void EnableMenu()
+        {
+            this.menuItem1.Enabled = true;
+        }
         public void GoPanel51()
         {
             this.screen51.BringToFront();
@@ -81,6 +84,7 @@ namespace CollectData
             if (MessageBox.Show("Are you sure you want to exit?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
             {
                 this.screen51.Stop();
+                Core.Unregister();
                 Core.Terminate();
 
                 if (!Core._KernalStarted)
