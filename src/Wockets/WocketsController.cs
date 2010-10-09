@@ -524,6 +524,7 @@ namespace Wockets
                                         ((RFCOMMReceiver)this._Receivers[i]).Write(new ACK(LastSeqNum[i])._Bytes);
                                         //tww.WriteLine(LastSeqNum[i]);
                                         //tww.Close();
+                                        Logger.Warn("Ack," + LastSeqNum[i]);
                                     }
                                 Thread.Sleep(20);
                             }

@@ -70,6 +70,7 @@
             this.button1.Size = new System.Drawing.Size(219, 129);
             this.button1.TabIndex = 1;
             this.button1.Text = "Wrist";
+            this.button1.Enabled = false;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // button2
@@ -80,6 +81,7 @@
             this.button2.Size = new System.Drawing.Size(219, 129);
             this.button2.TabIndex = 2;
             this.button2.Text = "Ankle";
+            this.button2.Enabled = false;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // label1

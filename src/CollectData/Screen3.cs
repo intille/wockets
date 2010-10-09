@@ -121,6 +121,7 @@ namespace CollectData
             Screens.screen5.Visible = true;
             Screens.screen5.Enabled = true;
             this.Visible = false;
+            Screens.screen.EnableMenu();
             Thread.Sleep(5000);            
         }
     }

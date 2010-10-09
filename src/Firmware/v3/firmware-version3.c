@@ -60,12 +60,7 @@ unsigned short si=0;
 unsigned short x;
 unsigned short y;
 unsigned short z;
-unsigned short xh[4];
-unsigned short yh[4];
-unsigned short zh[4];
-unsigned short dx[3];
-unsigned short dy[3];
-unsigned short dz[3];
+
 
 unsigned short prevx;
 unsigned short prevy;
@@ -175,19 +170,6 @@ int main()
 {
 
 
-	for (int i=0;(i<4);i++)
-	{
-		xh[i]=12000;
-		yh[i]=12000;
-		zh[i]=12000;
-	}
-
-	for (int i=0;(i<3);i++)
-	{
-		dx[i]=12000;
-		dy[i]=12000;
-		dz[i]=12000;
-	}
 
 	if (_is_docked()){
 		for(int j=0;(j<10);j++)
@@ -225,17 +207,7 @@ int main()
 #ifdef _VERSION ==3
 
 
-			//x=_atmega_a2dConvert10bit(ADC0);
-		
-			//y=_atmega_a2dConvert10bit(ADC1);
 
-			//z=_atmega_a2dConvert10bit(ADC2);
-			for (int i=0;(i<3);i++)
-			{
-				xh[i]=xh[i+1];
-				yh[i]=yh[i+1];
-				zh[i]=zh[i+1];
-			}
 
 			x=_atmega_a2dConvert10bit(ADC0);
 		
@@ -243,60 +215,6 @@ int main()
 
 			z=_atmega_a2dConvert10bit(ADC2);
 
-			/*					
-			if ((xh[2]<50) || (xh[2]>950))
-			{
-			
-				dx[0]=((xh[1]>xh[0])?xh[1]-xh[0]:xh[0]-xh[1]);
-				dx[1]=((xh[2]>xh[1])?xh[2]-xh[1]:xh[1]-xh[2]);
-				dx[2]=((xh[3]>xh[2])?xh[3]-xh[2]:xh[2]-xh[3]);
-
-				if ( (dx[0]<50) && (dx[1]>300) && (dx[2]>300))	{			
-							if (_wPC>2400)
-			_yellowled_turn_on();	
-					xh[2]=1015;//(xh[3]+xh[1])/2;				
-					}
-			}
-
-
-
-			if ((yh[2]<50) || (yh[2]>950))
-			{
-			
-				dx[0]=((yh[1]>yh[0])?yh[1]-yh[0]:yh[0]-yh[1]);
-				dx[1]=((yh[2]>yh[1])?yh[2]-yh[1]:yh[1]-yh[2]);
-				dx[2]=((yh[3]>yh[2])?yh[3]-yh[2]:yh[2]-yh[3]);
-
-				if ( (dx[0]<50) && (dx[1]>300) && (dx[2]>300)){				
-											if (_wPC>2400)
-			_yellowled_turn_on();	
-					yh[2]=1015;//(yh[3]+yh[1])/2;			
-					}	
-			}
-
-
-			
-			if ((zh[2]<50) || (zh[2]>950))
-			{
-		
-				dx[0]=((zh[1]>zh[0])?zh[1]-zh[0]:zh[0]-zh[1]);
-				dx[1]=((zh[2]>zh[1])?zh[2]-zh[1]:zh[1]-zh[2]);
-				dx[2]=((zh[3]>zh[2])?zh[3]-zh[2]:zh[2]-zh[3]);
-
-				if ( (dx[0]<50) && (dx[1]>300) && (dx[2]>300))	{			
-											if (_wPC>2400)
-			_yellowled_turn_on();	
-					zh[2]=1015;//(zh[3]+zh[1])/2;				
-				}
-			}
-*/
-	
-			
-
-	
-			/*	x=xh[2];
-				y=yh[2];
-				z=zh[2];*/
 				vmag+=Filter(x,0)+Filter(y,1)+Filter(z,2);
 			
 
@@ -409,11 +327,11 @@ int main()
 					if (_wTM==_TM_Continuous)
 						continue;
 						
-						for (int ixz=0;(ixz<100);ixz++)                                                                                       
+					for (int ixz=0;(ixz<100);ixz++)                                                                                       
        						_bluetooth_transmit_uart0_byte(0xff); 
 					_send_sr();					
 					_send_tm();
-					_send_batch_count((batch_counter-1)*4);														
+					_send_batch_count((batch_counter-1)*4);																	
 					_send_acs();
 					//Send summary activity count
 					/*for (int i=0;(i<summaryindex);i++){
@@ -462,7 +380,7 @@ int main()
 						}
 
 						
-						if ((batch_counter-1)>0){
+						if (batch_counter>0){
 						//copy end item into start
 						data[0].byte1=data[batch_counter].byte1;
 						data[0].byte2=data[batch_counter].byte2;
@@ -544,7 +462,8 @@ int main()
 					}
 
 
-						
+			
+
 					batch_counter=0;
 					dataIndex=0;
 					seconds_passed=0;
@@ -555,7 +474,7 @@ int main()
 						_receive_data();
 
 					}						
-					connected=0;
+					//connected=0;
 
 					//Don't turn off the radio if a request to switch mode has been received
 					if (_wTM==_TM_Continuous)
@@ -572,10 +491,11 @@ int main()
 			_atmega_adc_turn_off();
 			power_adc_disable();
 
-			if (dataSubindex==0)			
+			if ((dataSubindex==0) && (!connected))
 				dataIndex++;			
 			if (dataIndex==750)
 				dataIndex=0;
+			connected=0;
 			
 		}	
 		

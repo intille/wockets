@@ -168,6 +168,18 @@ namespace Wockets.Kernel
                         rk1.Close();
                        // System.Diagnostics.Process.GetCurrentProcess().Kill();
                     }
+
+
+                    /*for (int i = 0; (i < processes.Length); i++)
+                    {
+                        if (processes[i].FullPath.IndexOf("Kernel.exe") >= 0)
+                        {
+                            kernelCount++;
+                            if ((int)processes[i].Pid != Process.GetCurrentProcessID())
+                                 processes[i].Kill();
+                        }
+
+                    }*/
                 }
             }
             catch
@@ -486,7 +498,7 @@ namespace Wockets.Kernel
                                         CurrentWockets._Controller._Sensors[i]._RootStorageDirectory = CurrentWockets._Controller._StorageDirectory + "\\data\\raw\\PLFormat\\";
                                 }
 
-                                CurrentWockets._Controller._Receivers.SortByAddress();
+                                //CurrentWockets._Controller._Receivers.SortByAddress();
                                 for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
                                     ((Wocket)CurrentWockets._Controller._Sensors[i])._Receiver = CurrentWockets._Controller._Receivers[i];
 
@@ -1149,6 +1161,8 @@ namespace Wockets.Kernel
                 }
                 catch
                 {
+                    System.Diagnostics.Process.GetCurrentProcess().Close();
+                    System.Diagnostics.Process.GetCurrentProcess().Kill();
                 }
            
         }

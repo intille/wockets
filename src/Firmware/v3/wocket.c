@@ -456,15 +456,17 @@ void _send_acs()
 	unsigned short count=0;
 	unsigned short seq_num=sseq;
 	unsigned short num_acs=0;
+	unsigned char counter=0;
+
 
 	if (ci>si)
 		num_acs=ci-si;
 	else
 		num_acs=ci+(AC_BUFFER_SIZE-si);
 
+	if (num_acs>5)
+		num_acs=5;
 
-	//if (num_acs>2000)
-	//	_yellowled_turn_on();
 	_send_ac_count(num_acs);
 	_send_ac_offset(AC_NUMS-summary_count); //send offset of the last activity count
 	for (int i=si;(i!=ci);)
@@ -482,6 +484,10 @@ void _send_acs()
 		if (i==AC_BUFFER_SIZE)
 			i=0;
 		seq_num++;
+
+		counter++;
+		if (counter==5)
+			return;
 	}
 }
 
@@ -662,10 +668,6 @@ void _receive_data(void)
 
 				case (unsigned char) ACK:
 						
-							/*	_yellowled_turn_on();
-								for (int xyz=0;(xyz<80);xyz++)
-									_delay_ms(10);
-								_yellowled_turn_off();*/
 						kseq=m_ACK(rBuffer[1],rBuffer[2],rBuffer[3]);
 						crc=CRC16(rBuffer,4);//ComputeCRC8(0,rBuffer,4);
 						rcrc=(rBuffer[6]>>5);
@@ -700,6 +702,12 @@ void _receive_data(void)
 							else
 								si=AC_BUFFER_SIZE-(dseq-ci);
 							sseq=kseq;							
+
+							_yellowled_turn_on();
+								for (int xyz=0;(xyz<80);xyz++)
+									_delay_ms(10);
+								_yellowled_turn_off();
+
 						} 
 						//else
 						//	_yellowled_turn_on();
