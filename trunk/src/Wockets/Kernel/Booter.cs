@@ -138,7 +138,7 @@ namespace Wockets.Kernel
         /// </summary>
         public static void Boot()
         {
-            int kernelCount = 0;
+/*            int kernelCount = 0;
             try
             {
                 ProcessInfo[] processes = ProcessCE.GetProcesses();
@@ -170,22 +170,12 @@ namespace Wockets.Kernel
                     }
 
 
-                    /*for (int i = 0; (i < processes.Length); i++)
-                    {
-                        if (processes[i].FullPath.IndexOf("Kernel.exe") >= 0)
-                        {
-                            kernelCount++;
-                            if ((int)processes[i].Pid != Process.GetCurrentProcessID())
-                                 processes[i].Kill();
-                        }
-
-                    }*/
                 }
             }
             catch
             {
             }
-
+            */
             lock (terminationLock)
             {
                 kernelLock.WaitOne();

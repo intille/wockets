@@ -387,6 +387,10 @@ extern unsigned short ci;
 extern unsigned short si;
 extern unsigned short AC_NUMS;
 extern unsigned short summary_count;
+extern unsigned char gotack;
+extern unsigned char command_counter;
+extern unsigned tester;
+extern unsigned long _wLastPC;
 
 typedef struct{
 	unsigned char byte1; //sync bit, 2 bits packet type, 3 bits sensitivity, 2 bits MSB X

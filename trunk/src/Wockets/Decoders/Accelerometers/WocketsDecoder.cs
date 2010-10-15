@@ -130,7 +130,7 @@ namespace Wockets.Decoders.Accelerometers
         }
 
         private double ac_delta = 0;
-        private int ac_index = 0;
+        public int _ACIndex = 0;
         private double ac_unixtime = 0;
         private double acc_count = 0;
 
@@ -524,8 +524,16 @@ namespace Wockets.Decoders.Accelerometers
 
                                     //Has to stay here to protect against situations when a batch is sent
                                     //with some ACs that were received and others that were not
-                                    ac._TimeStamp = ac_unixtime+ (++ac_index * ac_delta);
-
+                                    ac._TimeStamp = ac_unixtime + (++_ACIndex * ac_delta);
+#if (PocketPC)
+                                    if (_ACIndex == 10)
+                                    {
+                                     for (int kk = 0; (kk < 10); kk++)
+                                         //if (CurrentWockets._Controller.LastSeqNum[this._ID]>0)
+                                            //((RFCOMMReceiver)CurrentWockets._Controller._Receivers[this._ID]).Write(new Wockets.Data.Commands.ACK(CurrentWockets._Controller.LastSeqNum[this._ID])._Bytes);
+                                            ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[this._ID]).Write(new Wockets.Data.Commands.ACK()._Bytes);
+                                    }
+#endif
                                     //Only insert new sequence numbers
                                     // if this is the first AC or it is not equal to the previous sequence number
                                     if ((this._ActivityCountOffset >= 0) && (acc_count >= 0))
@@ -569,10 +577,10 @@ namespace Wockets.Decoders.Accelerometers
                                     acc._Count = ((this.packet[1] & 0x7f) << 7) | (this.packet[2] & 0x7f);
                                     ac_unixtime = 0;
                                     ac_delta = 0;
-                                    ac_index = 0;
+                                    _ACIndex = 0;
                                     acc_count=acc._Count;
-                                    if (acc_count > 100)
-                                        ac_index = 0;
+                                    //if (acc_count > 100)
+                                      //  _ACIndex = 0;
                                     //Logger.Warn("ACC," + acc_count);
                                     //FireEvent(acc);
                                     break;

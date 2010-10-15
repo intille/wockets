@@ -455,8 +455,8 @@ namespace Wockets
 #if (PocketPC)
         bool[] countSeconds = null;
         bool connecting = false;
-        int[] LastACIndex;
-        int[] LastSeqNum;
+        public int[] LastACIndex;
+        public int[] LastSeqNum;
         void InterfaceActivityTracker()
         {
 
@@ -515,19 +515,29 @@ namespace Wockets
                         if ((receivedFullData) || (receiveFailed) || (notimeoutData))
                         {
 
-                            for (int kk = 0; (kk < 10); kk++)
+                           // for (int kk = 0; (kk < 10); kk++)
+                            //{
+                            for (int i = 0; (i < this._Sensors.Count); i++)
                             {
-                                for (int i = 0; (i < this._Sensors.Count); i++)
-                                    if (LastSeqNum[i] >= 0)
-                                    {
-                                        //System.IO.TextWriter tww = new StreamWriter("hELLO.txt",true);
-                                        ((RFCOMMReceiver)this._Receivers[i]).Write(new ACK(LastSeqNum[i])._Bytes);
-                                        //tww.WriteLine(LastSeqNum[i]);
-                                        //tww.Close();
-                                        Logger.Warn("Ack," + LastSeqNum[i]);
-                                    }
-                                Thread.Sleep(20);
+                                /* if (LastSeqNum[i] >= 0)
+                                 {
+                                     //System.IO.TextWriter tww = new StreamWriter("hELLO.txt",true);
+                                     ((RFCOMMReceiver)this._Receivers[i]).Write(new ACK(LastSeqNum[i])._Bytes);
+                                     //tww.WriteLine(LastSeqNum[i]);
+                                     //tww.Close();
+                                     Logger.Warn("Ack," + LastSeqNum[i]);
+                                 }*/
+                                //Core.WRITE_RECEIVED_ACs(i,((WocketsDecoder)this._Decoders[i])._ACIndex);
+                                if (((WocketsDecoder)this._Decoders[i])._ACIndex == 10)
+                                {
+                                   // for (int kk = 0; (kk < 10); kk++)
+                                        //((RFCOMMReceiver)this._Receivers[i]).Write(new ACK()._Bytes);
+                                 //       ((RFCOMMReceiver)this._Receivers[i]).Write(new ACK(LastSeqNum[i])._Bytes);
+                                }
+
                             }
+                              //  Thread.Sleep(20);
+                            //}
    
 
 
@@ -574,6 +584,7 @@ namespace Wockets
                                 int nextACIndex = LastACIndex[i] + 1;
                                 if (nextACIndex == 960)
                                     nextACIndex = 0;
+                                int countsaved = 0;
                                 for (int j = nextACIndex; (j != ((WocketsDecoder)this._Decoders[i])._ActivityCountIndex); )
                                 {
                                     DateTime ac_dt = new DateTime();
@@ -582,12 +593,12 @@ namespace Wockets
                                     tw2.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")+","+j+","+((WocketsDecoder)this._Decoders[i])._ActivityCounts[j]._SeqNum + "," + ac_currentTime + "," + ((WocketsDecoder)this._Decoders[i])._ActivityCounts[j]._TimeStamp + "," + ((WocketsDecoder)this._Decoders[i])._ActivityCounts[j]._Count);
                                     LastSeqNum[i] = ((WocketsDecoder)this._Decoders[i])._ActivityCounts[j]._SeqNum;
                                     LastACIndex[i] = j;
-
+                                    countsaved++;
                                     j++;
                                     if (j == 960)
                                         j = 0;
-                                }
-
+                                }                              
+                                Core.WRITE_SAVED_ACs(i, countsaved);
                                 tw2.Close();                                
                             }
 

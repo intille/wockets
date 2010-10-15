@@ -55,6 +55,7 @@ unsigned short kseq=0;
 unsigned short dseq=0;
 unsigned short ci=0;
 unsigned short si=0;
+unsigned char gotack=0;
 
 
 unsigned short x;
@@ -323,6 +324,8 @@ int main()
 				if (connected){
 					_greenled_turn_on();
 						
+					gotack=1;
+					tester=0;
 
 					if (_wTM==_TM_Continuous)
 						continue;
@@ -464,6 +467,7 @@ int main()
 
 			
 
+					
 					batch_counter=0;
 					dataIndex=0;
 					seconds_passed=0;
@@ -482,7 +486,7 @@ int main()
 					else
 						_bluetooth_turn_off();		
 					
-					
+					command_counter=0;
 					seconds_disconnected=0;
 					_greenled_turn_off();
 				
@@ -495,7 +499,7 @@ int main()
 				dataIndex++;			
 			if (dataIndex==750)
 				dataIndex=0;
-			connected=0;
+			connected=0;			
 			
 		}	
 		
@@ -647,15 +651,19 @@ ISR(TIMER2_OVF_vect)
 			return;	
 		}
 
-		_atmega_initialize_uart0(ATMEGA_BAUD_38400, TX_RX_UART_MODE);
+		//_atmega_initialize_uart0(ATMEGA_BAUD_38400, TX_RX_UART_MODE);
+//		_atmega_initialize_uart1(ATMEGA_BAUD_38400, TX_RX_UART_MODE);
 	
 
 		//reset shutdown timer if connected
 		if ((_wPDT!=0) && (_wShutdownTimer!=_DEFAULT_SHUTDOWN))
 			_wShutdownTimer=_DEFAULT_SHUTDOWN;
 
-		connected=1;
+
+
 		_receive_data();		
+		connected=1;
+		
 	}
 
 

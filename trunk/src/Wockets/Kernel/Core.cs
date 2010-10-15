@@ -902,6 +902,132 @@ namespace Wockets.Kernel
 
 
 
+
+        public static void READ_RECEIVED_ACs()
+        {
+            ThreadPool.QueueUserWorkItem(func =>
+            {
+
+                kernelLock.WaitOne();
+                try
+                {
+                    RegistryKey rk = null;
+
+                    for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
+                    {
+                        try
+                        {
+                            rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + i.ToString("0"));
+                            int status = (int)rk.GetValue("Status");
+                            if (status == 1)
+                            {
+                                CurrentWockets._Controller._Sensors[i]._ReceivedACs = Convert.ToInt32(rk.GetValue("RECEIVED_ACs"));
+                                CurrentWockets._Controller._Sensors[i]._TotalReceivedACs = Convert.ToInt32(rk.GetValue("RECEIVED_TACs"));
+                            }
+                            rk.Close();
+                        }
+                        catch
+                        {
+                        }
+                    }
+
+                }
+                catch (Exception e)
+                {
+                    Logger.Error("Core.cs:READ_BATTERY_PERCENT:" + e.ToString());
+
+                }
+                kernelLock.Release();
+            });
+        }
+        public static void WRITE_RECEIVED_ACs(int sensorID, int received)
+        {
+            ThreadPool.QueueUserWorkItem(func =>
+            {
+                kernelLock.WaitOne();
+                try
+                {
+
+                    RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + sensorID.ToString("0"));
+                    rk.SetValue("RECEIVED_ACs", received, RegistryValueKind.String);
+                    ((Wocket)CurrentWockets._Controller._Sensors[sensorID])._ReceivedACs = received;
+                    ((Wocket)CurrentWockets._Controller._Sensors[sensorID])._TotalReceivedACs += received;
+                    rk.SetValue("RECEIVED_TACs", ((Wocket)CurrentWockets._Controller._Sensors[sensorID])._TotalReceivedACs, RegistryValueKind.String);
+                    rk.Close();
+                }
+                catch (Exception e)
+                {
+                    Logger.Error("Core.cs:WRITE_RECEIVED_COUNT:" + e.ToString());
+                }
+                kernelLock.Release();
+            });
+        }
+
+
+
+
+
+
+        public static void READ_SAVED_ACs()
+        {
+            ThreadPool.QueueUserWorkItem(func =>
+            {
+
+                kernelLock.WaitOne();
+                try
+                {
+                    RegistryKey rk = null;
+
+                    for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
+                    {
+                        try
+                        {
+                            rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + i.ToString("0"));
+                            int status = (int)rk.GetValue("Status");
+                            if (status == 1)
+                            {
+                                CurrentWockets._Controller._Sensors[i]._SavedACs = Convert.ToInt32(rk.GetValue("SAVED_ACs"));
+                                CurrentWockets._Controller._Sensors[i]._TotalSavedACs = Convert.ToInt32(rk.GetValue("SAVED_TACs"));
+                            }
+                            rk.Close();
+                        }
+                        catch
+                        {
+                        }
+                    }
+
+                }
+                catch (Exception e)
+                {
+                    Logger.Error("Core.cs:READ_BATTERY_PERCENT:" + e.ToString());
+
+                }
+                kernelLock.Release();
+            });
+        }
+        public static void WRITE_SAVED_ACs(int sensorID, int saved)
+        {
+            ThreadPool.QueueUserWorkItem(func =>
+            {
+                kernelLock.WaitOne();
+                try
+                {
+
+                    RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + sensorID.ToString("0"));
+                    rk.SetValue("SAVED_ACs", saved, RegistryValueKind.String);
+                    ((Wocket)CurrentWockets._Controller._Sensors[sensorID])._SavedACs = saved;
+                    ((Wocket)CurrentWockets._Controller._Sensors[sensorID])._TotalSavedACs += saved;
+                    rk.SetValue("SAVED_TACs", ((Wocket)CurrentWockets._Controller._Sensors[sensorID])._TotalSavedACs, RegistryValueKind.String);
+                    rk.Close();
+                }
+                catch (Exception e)
+                {
+                    Logger.Error("Core.cs:WRITE_RECEIVED_COUNT:" + e.ToString());
+                }
+                kernelLock.Release();
+            });
+        }
+
         public static void READ_FULL_RECEIVED_COUNT()
         {
             ThreadPool.QueueUserWorkItem(func =>
