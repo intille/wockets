@@ -131,6 +131,12 @@ namespace Wockets.Sensors
         /// </summary>
         public int _ReceivedPackets = 0;
 
+        public int _ReceivedACs = 0;
+        public int _TotalReceivedACs = 0;
+
+        public int _SavedACs = 0;
+        public int _TotalSavedACs = 0;
+
         public int _Full = 0;
 
         public int _Partial = 0;

@@ -159,7 +159,7 @@ void _atmega_initialize_uart0(unsigned int baud, unsigned char mode)
         		UCSR0B = (1<<TXEN0)|(1<<RXEN0);
 		}
         /* Set frame format: 8data, 2stop bit */
-        UCSR0C = (3<<UCSZ00);  //change 1 to 0 and &
+        UCSR0C = (3<<UCSZ00);//| (3<<UCSZ01) ;  //change 1 to 0 and &
 }
 
 /** 
@@ -456,6 +456,7 @@ void _atmega_initialize(unsigned char timer_prescalar)
 	_yellowled_turn_off();
 	*/
 	_atmega_initialize_uart0(ATMEGA_BAUD_38400, TX_RX_UART_MODE);
+
 
 	/* Set ADC for conversion */    
     //Set ADC reference to AVCC

@@ -32,6 +32,8 @@ namespace CollectData
                 Core.WRITE_FULL_RECEIVED_COUNT(i, 0);
                 Core.WRITE_PARTIAL_RECEIVED_COUNT(i, 0);
                 Core.WRITE_EMPTY_RECEIVED_COUNT(i, 0);
+                Core.WRITE_RECEIVED_ACs(i, 0);
+                Core.WRITE_SAVED_ACs(i, 0);             
             }
 
             this.screen51.Start();

@@ -27,6 +27,7 @@ unsigned short y=0;
 unsigned short z=0;
 
 
+unsigned tester=0;
 #define _WOCKET_INITIALIZED 0x25
 
 uint8_t EEMEM _NV_INITIALIZED;
@@ -92,6 +93,7 @@ unsigned char _wTM=_TM_Continuous;
 unsigned char _wSENS=_4_G;
 
 unsigned long _wPC=0;
+unsigned long _wLastPC=0;
 
 uint8_t EEMEM _NV_PDT;
 #define _DEFAULT_PDT 127
@@ -464,8 +466,8 @@ void _send_acs()
 	else
 		num_acs=ci+(AC_BUFFER_SIZE-si);
 
-	if (num_acs>5)
-		num_acs=5;
+	//if (num_acs>10)
+	//	num_acs=10;
 
 	_send_ac_count(num_acs);
 	_send_ac_offset(AC_NUMS-summary_count); //send offset of the last activity count
@@ -486,7 +488,7 @@ void _send_acs()
 		seq_num++;
 
 		counter++;
-		if (counter==5)
+		if (counter==10)
 			return;
 	}
 }
@@ -593,6 +595,8 @@ void _send_data(void)
 		
 	}
 }
+
+
 void _receive_data(void)
 {
 	unsigned char aByte;
@@ -636,7 +640,8 @@ void _receive_data(void)
                      command_length=2;
                      break;
      			case (unsigned char)ACK:		
-                     command_length=7;
+                     //command_length=7;
+					 command_length=1;
                      break;
 				case (unsigned char)SET_TCT:                
                      command_length=5;
@@ -668,36 +673,16 @@ void _receive_data(void)
 
 				case (unsigned char) ACK:
 						
+						/*
 						kseq=m_ACK(rBuffer[1],rBuffer[2],rBuffer[3]);
-						crc=CRC16(rBuffer,4);//ComputeCRC8(0,rBuffer,4);
+						crc=CRC16(rBuffer,4);
 						rcrc=(rBuffer[6]>>5);
 						rcrc=rcrc|(rBuffer[5]<<2);
-						rcrc=rcrc|(rBuffer[4]<<9);
-						
-
-						/*if ((crc==0) || ((crc)!=rBuffer[4]))
-						{
-								_yellowled_turn_on();
-								for (int xyz=0;(xyz<80);xyz++)
-									_delay_ms(10);
-								_yellowled_turn_off();
-						}*/
-						
-
-
-					//if (kseq>960)
-					//	_yellowled_turn_on();
-						// on receiving an ack for seq num K
-						// only update start pointers if k is
-						// still in the AC array and did not overflow
-						// If the array overflows, start sequences are updated
-						// automatically elsewhere during insertion of the AC causing the overflow
-						// just a precaution if old ACK K are sent (e.g. user gets out of range for long periods)					
-						if ( (crc==rcrc) && (kseq<=cseq) && ((kseq-sseq)<AC_BUFFER_SIZE) && ((kseq-sseq)>0) )
-						// no overflow for sure
+						rcrc=rcrc|(rBuffer[4]<<9);						
+						if ( (crc==rcrc) && (kseq<=cseq) && ((kseq-sseq)<AC_BUFFER_SIZE) && ((kseq-sseq)>0) )						
 						{
 							dseq=cseq-kseq;							
-							if (ci>=dseq) // check for wrap around in the current index
+							if (ci>=dseq) 
 								si=ci-dseq;
 							else
 								si=AC_BUFFER_SIZE-(dseq-ci);
@@ -707,11 +692,36 @@ void _receive_data(void)
 								for (int xyz=0;(xyz<80);xyz++)
 									_delay_ms(10);
 								_yellowled_turn_off();
+						}*/
 
-						} 
-						//else
-						//	_yellowled_turn_on();
 
+						//if (gotack==1){
+
+							if ((_wPC-_wLastPC)>1000){
+								_wLastPC=_wPC;						
+								kseq=sseq+10;
+								if ( (kseq<=cseq) && ((kseq-sseq)<AC_BUFFER_SIZE) && ((kseq-sseq)>0) )						
+								{
+									dseq=cseq-kseq;							
+									if (ci>=dseq) 
+										si=ci-dseq;
+									else
+										si=AC_BUFFER_SIZE-(dseq-ci);
+									sseq=kseq;							
+
+									_yellowled_turn_on();
+									for (int xyz=0;(xyz<80);xyz++)
+										_delay_ms(10);
+									_yellowled_turn_off();
+								//gotack=0;
+								tester++;
+
+									if (tester>1)
+										_yellowled_turn_on();
+								}
+							}
+
+						//}
 						
 						processed_counter=command_counter;				
 						break;	

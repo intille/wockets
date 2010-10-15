@@ -64,6 +64,8 @@ namespace CollectData
                 }
                 else
                 {
+
+                    
                     Core.READ_ACTIVITY_COUNT();
                     this.label11.Text = "Val: " + ((Wocket)CurrentWockets._Controller._Sensors[0])._ActivityCount;
                     this.label12.Text = "Val: " + ((Wocket)CurrentWockets._Controller._Sensors[1])._ActivityCount;
