@@ -1,4 +1,4 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -649,7 +649,9 @@
     <Compile Include="..\..\src\Wockets\Utils\Storage.cs">
       <Link>Utils\Storage.cs</Link>
     </Compile>
-    <Compile Include="Utils\CRC16.cs" />
+    <Compile Include="..\..\src\Wockets\Utils\CRC16.cs" >
+      <Link>Utils\CRC16.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="WocketsWeka.csproj">
