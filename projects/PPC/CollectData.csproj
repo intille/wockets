@@ -82,7 +82,7 @@
     <EmbeddedResource Include="..\..\src\CollectData\Screen4.resx">
       <DependentUpon>Screen4.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="BatteryImages.resx">
+    <EmbeddedResource Include="..\..\src\CollectData\BatteryImages.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>BatteryImages.Designer.cs</LastGenOutput>
     </EmbeddedResource>
@@ -128,24 +128,24 @@
       <DependentUpon>Screen4.cs</DependentUpon>
     </Compile>
     <Compile Include="..\..\src\CollectData\Settings.cs" />
-    <Compile Include="BatteryImages.Designer.cs">
+    <Compile Include="..\..\src\CollectData\BatteryImages.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>BatteryImages.resx</DependentUpon>
     </Compile>
-    <Compile Include="Screen6.cs">
+    <Compile Include="..\..\src\CollectData\Screen6.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Screen6.Designer.cs">
+    <Compile Include="..\..\src\CollectData\Screen6.Designer.cs">
       <DependentUpon>Screen6.cs</DependentUpon>
     </Compile>
-    <Compile Include="ProgressBar.cs">
+    <Compile Include="..\..\src\CollectData\ProgressBar.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="ProgressBar.Designer.cs">
+    <Compile Include="..\..\src\CollectData\ProgressBar.Designer.cs">
       <DependentUpon>ProgressBar.cs</DependentUpon>
     </Compile>
-    <Compile Include="StatusImages.Designer.cs">
+    <Compile Include="..\..\src\CollectData\StatusImages.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>StatusImages.resx</DependentUpon>
@@ -162,38 +162,38 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\1.gif" />
+    <EmbeddedResource Include="..\..\bin\NeededFiles\images\1.gif" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\2.GIF" />
+    <EmbeddedResource Include="..\..\bin\NeededFiles\images\2.GIF" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\3.GIF" />
+    <EmbeddedResource Include="..\..\bin\NeededFiles\images\3.GIF" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\4.GIF" />
+    <EmbeddedResource Include="..\..\bin\NeededFiles\images\4.GIF" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\5.GIF" />
+    <EmbeddedResource Include="..\..\bin\NeededFiles\images\5.GIF" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\6.GIF" />
-    <EmbeddedResource Include="StatusImages.resx">
+    <EmbeddedResource Include="..\..\bin\NeededFiles\images\6.GIF" />
+    <EmbeddedResource Include="..\..\src\CollectData\StatusImages.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>StatusImages.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Resources\minimize.gif" />
+    <Content Include="..\..\bin\NeededFiles\images\minimize.gif" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\ni0013-64.gif" />
+    <EmbeddedResource Include="..\..\bin\NeededFiles\images\ni0013-64.gif" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Screen6.resx">
+    <EmbeddedResource Include="..\..\src\CollectData\Screen6.resx">
       <DependentUpon>Screen6.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Resources\ni0022-64.gif" />
+    <EmbeddedResource Include="..\..\bin\NeededFiles\images\ni0022-64.gif" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />
   <ProjectExtensions>
