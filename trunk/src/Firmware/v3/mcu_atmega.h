@@ -233,6 +233,7 @@ unsigned char _bluetooth_is_connected(void);
 unsigned char _bluetooth_is_discoverable(void);
 void _bluetooth_transmit_uart0_byte(unsigned char data);
 unsigned char _bluetooth_receive_uart0_byte(unsigned char *data);
+void _receive_uart0_flush();
 
 /* Accelerometer Specific Functions */
 unsigned char _accelerometer_set_sensitivity(unsigned char sensitivity);

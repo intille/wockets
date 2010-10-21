@@ -862,6 +862,13 @@ unsigned char _bluetooth_is_discoverable(void){
 }
 
 
+
+void _receive_uart0_flush( void )
+{
+	unsigned char dummy;
+	while ( UCSR0A & (1<<RXC0) ) dummy = UDR0;
+}
+
 unsigned char _bluetooth_receive_uart0_byte(unsigned char *data)
   {
   	int count=0;

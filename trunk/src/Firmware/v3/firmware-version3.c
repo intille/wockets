@@ -547,14 +547,14 @@ ISR(TIMER2_OVF_vect)
 	}
 
 	if (connected==0){
-	blink_counter++;
-	if (blink_counter==(_SAMPLING_RATE*5))
-		_greenled_turn_on();
-	else if (blink_counter==((_SAMPLING_RATE*5)+10))
-	{
-		_greenled_turn_off();
-		blink_counter=0;
-	}
+		blink_counter++;
+		if (blink_counter==(_SAMPLING_RATE*5))
+			_greenled_turn_on();
+		else if (blink_counter==((_SAMPLING_RATE*5)+10))
+		{
+			_greenled_turn_off();
+			blink_counter=0;
+		}
 
 	}
 	/* If the wocket is docked in shut it down */
@@ -643,6 +643,8 @@ ISR(TIMER2_OVF_vect)
 				seconds_disconnected++;
 			else if (seconds_disconnected==1800)
 			{
+				//before turning on the bluetooth make sure you flush the receive buffer
+				_receive_uart0_flush();
 				_bluetooth_turn_on();		
 				seconds_disconnected=1801;			
 				_delay_ms(10);

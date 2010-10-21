@@ -515,31 +515,6 @@ namespace Wockets
                         if ((receivedFullData) || (receiveFailed) || (notimeoutData))
                         {
 
-                           // for (int kk = 0; (kk < 10); kk++)
-                            //{
-                            for (int i = 0; (i < this._Sensors.Count); i++)
-                            {
-                                /* if (LastSeqNum[i] >= 0)
-                                 {
-                                     //System.IO.TextWriter tww = new StreamWriter("hELLO.txt",true);
-                                     ((RFCOMMReceiver)this._Receivers[i]).Write(new ACK(LastSeqNum[i])._Bytes);
-                                     //tww.WriteLine(LastSeqNum[i]);
-                                     //tww.Close();
-                                     Logger.Warn("Ack," + LastSeqNum[i]);
-                                 }*/
-                                //Core.WRITE_RECEIVED_ACs(i,((WocketsDecoder)this._Decoders[i])._ACIndex);
-                                if (((WocketsDecoder)this._Decoders[i])._ACIndex == 10)
-                                {
-                                   // for (int kk = 0; (kk < 10); kk++)
-                                        //((RFCOMMReceiver)this._Receivers[i]).Write(new ACK()._Bytes);
-                                 //       ((RFCOMMReceiver)this._Receivers[i]).Write(new ACK(LastSeqNum[i])._Bytes);
-                                }
-
-                            }
-                              //  Thread.Sleep(20);
-                            //}
-   
-
 
                             // if didnt get full data, sleep for 2 seconds
                             if (!receivedFullData)
@@ -558,7 +533,6 @@ namespace Wockets
                             for (int i = 0; (i < this._Sensors.Count); i++)
                             {
 
-                                Core.WRITE_RECEIVED_COUNT(i, this._Sensors[i]._ReceivedPackets);
                                 if (this._Sensors[i]._ReceivedPackets == ((WocketsDecoder)this._Decoders[i])._ExpectedBatchCount)
                                     full[i] = full[i] + 1;
                                 else if (this._Sensors[i]._ReceivedPackets ==0)
@@ -569,6 +543,9 @@ namespace Wockets
                                 Core.WRITE_FULL_RECEIVED_COUNT(i,full[i]);
                                 Core.WRITE_PARTIAL_RECEIVED_COUNT(i, partial[i]);
                                 Core.WRITE_EMPTY_RECEIVED_COUNT(i, empty[i]);
+
+                                Core.WRITE_RECEIVED_ACs(i, ((WocketsDecoder)this._Decoders[i])._ACIndex);
+                                Core.WRITE_RECEIVED_COUNT(i, this._Sensors[i]._ReceivedPackets);
 
                                 log_line += "," + this._Sensors[i]._ReceivedPackets + "," + ((WocketsDecoder)this._Decoders[i])._ExpectedBatchCount + "," + ((RFCOMMReceiver)this._Receivers[i])._SuccessfulConnections + "," + ((RFCOMMReceiver)this._Receivers[i])._Reconnections + "," + ((RFCOMMReceiver)this._Receivers[i])._ConnectionTime;
                                 dataSavedSeconds[i] = 0;
