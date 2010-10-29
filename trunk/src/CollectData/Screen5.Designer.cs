@@ -300,7 +300,7 @@
             this.button1.Size = new System.Drawing.Size(130, 40);
             this.button1.TabIndex = 29;
             this.button1.Text = "Upload";
-            this.button1.Enabled = false;
+            this.button1.Enabled = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // progressBar1

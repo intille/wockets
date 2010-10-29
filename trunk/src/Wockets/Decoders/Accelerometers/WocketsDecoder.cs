@@ -133,6 +133,7 @@ namespace Wockets.Decoders.Accelerometers
         public int _ACIndex = 0;
         private double ac_unixtime = 0;
         private double acc_count = 0;
+        private double ac_refseq = 0;
 
         public override int Decode(int sourceSensor, CircularBuffer data,int start,int end)
         {
@@ -459,6 +460,7 @@ namespace Wockets.Decoders.Accelerometers
                                     for (int i = 0; (i < bytesToRead); i++)
                                         fv.RawBytes[i] = this.packet[i];
                                     fv._Version = (this.packet[1] & 0x7f);
+                                    Logger.Debug(this._ID + "," + fv._Version); 
                                     //FireEvent(fv);
                                     break;
                                 case ResponseTypes.BC_RSP:
@@ -501,34 +503,44 @@ namespace Wockets.Decoders.Accelerometers
 
                                     ac._SeqNum = ((this.packet[1] & 0x7f) << 9) | ((this.packet[2] & 0x7f) << 2) | ((this.packet[3] >> 5) & 0x03);
                                     ac._Count = ((this.packet[3] & 0x1f) << 11) | ((this.packet[4] & 0x7f)<<4) | ((this.packet[5]>>2)&0x0f);
-                                    //First time base it on the sampling rate
-                                    if (this._LastActivityCountIndex==-1)
+                                    
+                                    if ((this._LastActivityCountIndex==-1) //First time base it on the sampling rate
+                                        || (acc_count<this._ActivityCounts[this._LastActivityCountIndex]._SeqNum))  //accidental reset
+                      
                                     {
                                         ac_unixtime=((RFCOMMReceiver)CurrentWockets._Controller._Receivers[this._ID])._CurrentConnectionUnixTime - ((this._ActivityCountOffset * 1000.0)/this._ExpectedSamplingRate) - (acc_count* 60000.0);
                                         ac_delta=60000.0;
+                                        ac_refseq=0;
                                     }
-                                    else if (ac_delta == 0) //First sample after ACC
+                                    else if (ac_delta == 0) //First sample after ACC, handles overflow as well
                                     {
-                                        if (ac._SeqNum == (this._ActivityCounts[this._LastActivityCountIndex]._SeqNum + 1))// if the sequence number follows well
-                                        {
+                                          ac_unixtime = this._ActivityCounts[this._LastActivityCountIndex]._TimeStamp;
+                                          ac_refseq = this._ActivityCounts[this._LastActivityCountIndex]._SeqNum;
+                                          ac_delta = (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[this._ID])._CurrentConnectionUnixTime - ((this._ActivityCountOffset * 1000.0) / this._ExpectedSamplingRate) - this._ActivityCounts[this._LastActivityCountIndex]._TimeStamp) / (acc_count - ac_refseq);
+                           
 
-                                            ac_delta = (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[this._ID])._CurrentConnectionUnixTime - this._ActivityCounts[this._LastActivityCountIndex]._TimeStamp) / acc_count;
-                                            ac_unixtime = ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[this._ID])._CurrentConnectionUnixTime - ((this._ActivityCountOffset * 1000.0) / this._ExpectedSamplingRate) - (acc_count * ac_delta);
-                                        }
-                                        else //seq numbers do not follow
-                                        {
-                                            ac_unixtime = ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[this._ID])._CurrentConnectionUnixTime - ((this._ActivityCountOffset * 1000.0) / this._ExpectedSamplingRate) - (acc_count * 60000.0);
-                                            ac_delta = 60000.0;
-                                        }
+//                                        if (ac._SeqNum == (this._ActivityCounts[this._LastActivityCountIndex]._SeqNum + 1))// if the sequence number follows well
+//                                        {
+
+//                                            ac_delta = (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[this._ID])._CurrentConnectionUnixTime - this._ActivityCounts[this._LastActivityCountIndex]._TimeStamp) / acc_count;
+  //                                          ac_unixtime = ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[this._ID])._CurrentConnectionUnixTime - ((this._ActivityCountOffset * 1000.0) / this._ExpectedSamplingRate) - (acc_count * ac_delta);
+ //                                       }
+ //                                       else //seq numbers do not follow
+ //                                       {
+ //                                           ac_unixtime = ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[this._ID])._CurrentConnectionUnixTime - ((this._ActivityCountOffset * 1000.0) / this._ExpectedSamplingRate) - (acc_count * 60000.0);
+ //                                           ac_delta = 60000.0;
+ //                                       }
                                     }
 
                                     //Has to stay here to protect against situations when a batch is sent
                                     //with some ACs that were received and others that were not
-                                    ac._TimeStamp = ac_unixtime + (++_ACIndex * ac_delta);
+                                    //ac._TimeStamp = ac_unixtime + (++_ACIndex * ac_delta);
+                                    ++_ACIndex;
+                                    ac._TimeStamp = ac_unixtime + ((ac._SeqNum-ac_refseq) * ac_delta);
 #if (PocketPC)
                                     if (_ACIndex == 10)
                                     {
-                                     for (int kk = 0; (kk < 10); kk++)
+                                     //for (int kk = 0; (kk < 1); kk++)
                                          //if (CurrentWockets._Controller.LastSeqNum[this._ID]>0)
                                             //((RFCOMMReceiver)CurrentWockets._Controller._Receivers[this._ID]).Write(new Wockets.Data.Commands.ACK(CurrentWockets._Controller.LastSeqNum[this._ID])._Bytes);
                                             ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[this._ID]).Write(new Wockets.Data.Commands.ACK()._Bytes);

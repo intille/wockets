@@ -101,6 +101,8 @@ unsigned short val;
 unsigned char justconnected=0;
 unsigned short blink_counter;
 unsigned char isdocked=0;
+unsigned int dockcounter=0;
+unsigned int pseq=0;
 
 
 unsigned short Filter(unsigned short data,int axis)
@@ -332,7 +334,9 @@ int main()
 						
 					for (int ixz=0;(ixz<100);ixz++)                                                                                       
        						_bluetooth_transmit_uart0_byte(0xff); 
-					_send_sr();					
+
+					_send_fv();
+					_send_sr();					 
 					_send_tm();
 					_send_batch_count((batch_counter-1)*4);																	
 					_send_acs();
@@ -525,24 +529,35 @@ int main()
 
 ISR(TIMER2_OVF_vect)
 {
+	if (cseq<pseq)
+	{
+		_yellowled_turn_on();
+		while(1)
+		;
+	}
+	pseq=cseq;	
 
 	if (_is_docked())
 	{
-		if (!isdocked){		
+		dockcounter++;		
+		if ((!isdocked)&& (dockcounter>2400)){	
+		
+				
 			ci=0;
 			si=0;
-			cseq=0;
+			cseq=0; 
 			sseq=0;		
 			_bluetooth_turn_off();
-			isdocked=1;
+			isdocked=1;			
 		}
 		return;
 	}else
 	{
+		dockcounter=0;
 		if (isdocked)
 		{
 			_bluetooth_turn_on();
-			isdocked=0;
+			isdocked=0;			
 		}
 	}
 

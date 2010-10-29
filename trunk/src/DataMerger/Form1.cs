@@ -360,7 +360,7 @@ namespace DataMerger
                 try
                 {
                     toQualityHTML(this.textBox1.Text, "..\\NeededFiles\\Master\\", 3, filter);
-                }catch
+                }catch (Exception ee)
                 {
                 }
             }
@@ -420,10 +420,10 @@ namespace DataMerger
 
         public static void toQualityHTML(string aDataDirectory, string masterDirectory, int maxControllers, string[] filter)
         {
+            
             int ACCELEROMETER_STATISTICS_LENGTH=16;
             int WOCKETS_SR = 92;
-            int MITES_SR = 45;           
-
+            int MITES_SR = 45;
 
 
             if (CSVProgress == "")
@@ -700,7 +700,7 @@ namespace DataMerger
 
             #region Wockets Loss Calculation
             int totalSeconds = (int)((endTime - startTime) / 1000.0);
-            int expectedWocketsSamples = WOCKETS_SR * totalSeconds;
+           
             int expectedMITesSamples = MITES_SR * totalSeconds;
             int[] wocketsSecondsLost = new int[wc._Sensors.Count];
             int[] mitesSecondsLost = new int[mitesCount];
@@ -708,9 +708,10 @@ namespace DataMerger
             int[] mitesPercentLost = new int[mitesCount];
             for (int i = 0; (i < wc._Sensors.Count); i++)
             {
+                int expectedWocketsSamples = wc._Sensors[i]._SamplingRate * totalSeconds;
                 if (wocketsSR[i] < expectedWocketsSamples)
                 {
-                    wocketsSecondsLost[i] = (int) Math.Ceiling((double)(expectedWocketsSamples - wocketsSR[i]) / WOCKETS_SR);
+                    wocketsSecondsLost[i] = (int)Math.Ceiling((double)(expectedWocketsSamples - wocketsSR[i]) / wc._Sensors[i]._SamplingRate);
                     wocketsPercentLost[i] = (int)(((double)wocketsSecondsLost[i] / (double)totalSeconds) * 100.0);
                 }
 
@@ -724,20 +725,25 @@ namespace DataMerger
             #region Wockets per Activity Loss Calculation
             for (int i = 0; (i < timeLostPostureSensorCounter.Length); i++)
             {
-                expectedWocketsSamples = WOCKETS_SR * timeLostPostureSensorCounter[i];
+
+
                 for (int j = 0; (j < wc._Sensors.Count); j++)
                 {
+                    int expectedWocketsSamples = wc._Sensors[j]._SamplingRate * timeLostPostureSensorCounter[i];
                     if (timeLostPostureSensorDistribution[j][i] < expectedWocketsSamples)
                     {
-                        timeLostPostureSensorDistribution[j][i] = (int) Math.Floor((expectedWocketsSamples - timeLostPostureSensorDistribution[j][i]) / (double)WOCKETS_SR);
-                        percentLostPostureSensorDistribution[j][i] = (int) Math.Floor((((double)timeLostPostureSensorDistribution[j][i] / (double)timeLostPostureSensorCounter[i]) * 100.0));
+                        timeLostPostureSensorDistribution[j][i] = (int)Math.Floor((expectedWocketsSamples - timeLostPostureSensorDistribution[j][i]) / (double)wc._Sensors[j]._SamplingRate);
+                        percentLostPostureSensorDistribution[j][i] = (int)Math.Floor((((double)timeLostPostureSensorDistribution[j][i] / (double)timeLostPostureSensorCounter[i]) * 100.0));
                     }
                     else
                     {
                         timeLostPostureSensorDistribution[j][i] = 0;
                         percentLostPostureSensorDistribution[j][i] = 0;
                     }
+
                 }
+
+
             }
            
             #endregion Wockets per Activity Loss Calculation
@@ -927,7 +933,7 @@ namespace DataMerger
             numRows =numPostures;
             rows = new string[numRows];
             header = "<TR>\n<td><div align=\"center\"><strong>Activity</strong></div></td><td><div align=\"center\"><strong>Posture</strong></div></td><td><strong>Total Seconds Annotated</strong></td>\n";
-            for (int j = 0; (j < wc._Sensors.Count-1); j++)
+            for (int j = 0; (j < wc._Sensors.Count); j++)
                 header += "<TD><div align=\"center\"><strong>" + wc._Sensors[j]._Location + "</br>(Seconds Lost|% Lost)</strong></div></TD>\n";
             header += "</TR>\n";
             summary += header;
@@ -964,8 +970,8 @@ namespace DataMerger
                     {
                         string row = "<TR>\n";
                         row += "<TD><div align=\"center\"><strong>" + session.OverlappingActivityLists[0][j]._Name + "</strong></div></TD><TD><div align=\"center\"><strong>" + session.OverlappingActivityLists[0][j]._Name + "</strong></div></TD>\n";
-                        row += "<TD><div></TD>\n";
-                        for (int r = 0; (r < wc._Sensors.Count - 1); r++)
+                        row += "<TD><div>" + (int)annotatedPostures[session.OverlappingActivityLists[0][j]._Name] + "</TD>\n";
+                        for (int r = 0; (r < wc._Sensors.Count); r++)
                             if (percentLostPostureSensorDistribution[r][m] > 20)
                                 row += "<TD bgcolor=\"#FF0000\"><div align=\"center\">" + timeLostPostureSensorDistribution[r][m].ToString() + " | " + percentLostPostureSensorDistribution[r][m].ToString() + "%" + "</div></TD>\n";
                             else
@@ -3325,7 +3331,7 @@ namespace DataMerger
                             }
 
 
-                            while (lastSecond != unixtime)
+                            while ((lastSecond != unixtime) && (unixtime!=0))
                             {
                                 loadedIndex++;
                                 if (loadedIndex == LoadedSeconds)
@@ -3409,87 +3415,91 @@ namespace DataMerger
             #region Read Summary data
 
             //string[] file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY+"\\data\\summary", "Sensor*.csv");
-            string[] subdirectories = Directory.GetDirectories(aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY + "\\data\\summary");
-            ArrayList[] files = new ArrayList[CurrentWockets._Controller._Sensors.Count];
-            for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
-                files[i] = new ArrayList();
-            foreach (string subdirectory in subdirectories)
+            string[] subdirectories = null; 
+            if (Directory.Exists(aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY + "\\data\\summary"))
             {
-                for (int i = 0; i < 30; i++)
+                subdirectories = Directory.GetDirectories(aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY + "\\data\\summary");
+                ArrayList[] files = new ArrayList[CurrentWockets._Controller._Sensors.Count];
+                for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
+                    files[i] = new ArrayList();
+                foreach (string subdirectory in subdirectories)
                 {
-                    if (Directory.Exists(subdirectory + "\\" + i))
+                    for (int i = 0; i < 30; i++)
                     {
-                        for (int k = 0; (k < CurrentWockets._Controller._Sensors.Count); k++)
+                        if (Directory.Exists(subdirectory + "\\" + i))
                         {
-                            string[] matchingFiles = Directory.GetFiles(subdirectory + "\\" + i, "Sensor-*" + k + ".csv");
-                            for (int j = 0; (j < matchingFiles.Length); j++)
-                                files[k].Add(matchingFiles[j]);
+                            for (int k = 0; (k < CurrentWockets._Controller._Sensors.Count); k++)
+                            {
+                                string[] matchingFiles = Directory.GetFiles(subdirectory + "\\" + i, "Sensor-*" + k + ".csv");
+                                for (int j = 0; (j < matchingFiles.Length); j++)
+                                    files[k].Add(matchingFiles[j]);
+                            }
                         }
                     }
                 }
-            }
 
-            summaryCSV = new TextWriter[CurrentWockets._Controller._Sensors.Count];
-            rawSummaryCSV = new TextWriter[CurrentWockets._Controller._Sensors.Count];
-            summaryData = new Hashtable[CurrentWockets._Controller._Sensors.Count];
-            rawSummaryData = new int[CurrentWockets._Controller._Sensors.Count];
+                summaryCSV = new TextWriter[CurrentWockets._Controller._Sensors.Count];
+                rawSummaryCSV = new TextWriter[CurrentWockets._Controller._Sensors.Count];
+                summaryData = new Hashtable[CurrentWockets._Controller._Sensors.Count];
+                rawSummaryData = new int[CurrentWockets._Controller._Sensors.Count];
 
-            try
-            {
-
-                for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
+                try
                 {
-                    summaryCSV[i] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Wocket_" + i.ToString("00") + "_Summary.csv");
-                    rawSummaryCSV[i] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Wocket_" + i.ToString("00") + "_RawSummary.csv");
-                    summaryData[i] = new Hashtable();
-                    rawSummaryData[i] = 0;
-                }
-                for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
-                {
-                    if (CSVProgress == "")
-                        CSVProgress = "Processing Summary Data " + (i + 1);
 
-                    foreach (string filename in files[i])
+                    for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
                     {
-                        TextReader summaryReader = null;
-                        string summary_line = "";
-                        double summaryUnixTime = 0;
-                        DateTime summaryTime = new DateTime();
+                        summaryCSV[i] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Wocket_" + i.ToString("00") + "_Summary.csv");
+                        rawSummaryCSV[i] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Wocket_" + i.ToString("00") + "_RawSummary.csv");
+                        summaryData[i] = new Hashtable();
+                        rawSummaryData[i] = 0;
+                    }
+                    for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
+                    {
+                        if (CSVProgress == "")
+                            CSVProgress = "Processing Summary Data " + (i + 1);
 
-                        summaryReader = new StreamReader(filename);
-                        summary_line = summaryReader.ReadLine();//read first line
-
-                        do
+                        foreach (string filename in files[i])
                         {
-                            try
+                            TextReader summaryReader = null;
+                            string summary_line = "";
+                            double summaryUnixTime = 0;
+                            DateTime summaryTime = new DateTime();
+
+                            summaryReader = new StreamReader(filename);
+                            summary_line = summaryReader.ReadLine();//read first line
+
+                            do
                             {
-                                if (summary_line == null)
-                                    break;
-                                tokens = summary_line.Split(',');
-                                if (tokens.Length == 6)
+                                try
                                 {
-                                    summaryUnixTime = Convert.ToDouble(tokens[4]);//UnixTime.GetUnixTime(actigraphTime);
-                                    UnixTime.GetDateTime((long)(summaryUnixTime), out summaryTime);
-                                    string summaryKey = summaryTime.Year + "-" + summaryTime.Month + "-" + summaryTime.Day + "-" + summaryTime.Hour + "-" + summaryTime.Minute + "-" + summaryTime.Second;
-                                    string summaryLine = tokens[5];
-                                    if (summaryStart == null)
-                                        summaryStart = summaryTime.Year + "/" + summaryTime.Month + "/" + summaryTime.Day + " " + summaryTime.Hour + ":" + summaryTime.Minute + ":" + summaryTime.Second;
+                                    if (summary_line == null)
+                                        break;
+                                    tokens = summary_line.Split(',');
+                                    if (tokens.Length == 6)
+                                    {
+                                        summaryUnixTime = Convert.ToDouble(tokens[4]);//UnixTime.GetUnixTime(actigraphTime);
+                                        UnixTime.GetDateTime((long)(summaryUnixTime), out summaryTime);
+                                        string summaryKey = summaryTime.Year + "-" + summaryTime.Month + "-" + summaryTime.Day + "-" + summaryTime.Hour + "-" + summaryTime.Minute + "-" + summaryTime.Second;
+                                        string summaryLine = tokens[5];
+                                        if (summaryStart == null)
+                                            summaryStart = summaryTime.Year + "/" + summaryTime.Month + "/" + summaryTime.Day + " " + summaryTime.Hour + ":" + summaryTime.Minute + ":" + summaryTime.Second;
 
 
-                                    //
-                                    summaryData[i].Add(summaryKey, summaryLine);
+                                        //
+                                        summaryData[i].Add(summaryKey, summaryLine);
 
+                                    }
                                 }
-                            }
-                            catch (Exception e)
-                            {
-                            }
-                        } while ((summary_line = summaryReader.ReadLine()) != null);
+                                catch (Exception e)
+                                {
+                                }
+                            } while ((summary_line = summaryReader.ReadLine()) != null);
+                        }
                     }
                 }
-            }
-            catch  (Exception e)
-            {
+                catch (Exception e)
+                {
+                }
             }
             #endregion Read Summary data
 
@@ -3515,10 +3525,13 @@ namespace DataMerger
             }
 
 
-            for (int i = 0; (i < summaryData.Length); i++)
+            if (summaryData != null)
             {
-                master_csv_header += ",WocketSummary" + i.ToString("00")+ ",RawWocketSummary" + i.ToString("00");
-                summaryCSV[i].WriteLine(summary_csv_header);
+                for (int i = 0; (i < summaryData.Length); i++)
+                {
+                    master_csv_header += ",WocketSummary" + i.ToString("00") + ",RawWocketSummary" + i.ToString("00");
+                    summaryCSV[i].WriteLine(summary_csv_header);
+                }
             }
             if (sensewearFound)
                 master_csv_header += ",SensewearSR,Sensewear_AVTranAcc,Senserwear_AVLongAcc,Sensewear_AVForAcc";
@@ -3748,10 +3761,14 @@ namespace DataMerger
                 string[] actigraph_csv_line = new string[actigraphData.Length];                
                 for (int i = 0; (i < actigraphData.Length); i++)
                     actigraph_csv_line[i] = "";
-                
-                string[] summary_csv_line = new string[summaryData.Length];
-                for (int i = 0; (i < summaryData.Length); i++)
-                    summary_csv_line[i] = "";
+
+                string[] summary_csv_line = null; 
+                if (summaryData != null)
+                {
+                    summary_csv_line = new string[summaryData.Length];
+                    for (int i = 0; (i < summaryData.Length); i++)
+                        summary_csv_line[i] = "";
+                }
 
                 string sensewear_csv_line = "";
                 string zephyr_csv_line = "";
@@ -3768,7 +3785,7 @@ namespace DataMerger
             {
                 wocketsTR1 = new TextReader[wcontroller._Sensors.Count];
                 for (int k = 0; (k < wcontroller._Sensors.Count); k++)
-                    wocketsTR1[k] = new StreamReader(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "Wocket_" + wcontroller._Sensors[k]._ID.ToString("00") + "_RawData_" + wcontroller._Sensors[k]._Location.Replace(' ', '-') + ".csv");
+                    wocketsTR1[k] = new StreamReader(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "Wocket_" + wcontroller._Sensors[k]._ID.ToString("00") + "_RawCorrectedData_" + wcontroller._Sensors[k]._Location.Replace(' ', '-') + ".csv");
             }
             while (((TimeSpan)endDateTime.Subtract(currentDateTime)).TotalSeconds >= 0)
             {
@@ -3783,8 +3800,12 @@ namespace DataMerger
                 hr_csv_line = timestamp;
                 for (int i = 0; (i < actigraphData.Length); i++)
                     actigraph_csv_line[i] = timestamp;
-                for (int i = 0; (i < summaryData.Length); i++)
-                    summary_csv_line[i] = timestamp;
+
+                if (summaryData != null)
+                {
+                    for (int i = 0; (i < summaryData.Length); i++)
+                        summary_csv_line[i] = timestamp;
+                }
                 sensewear_csv_line = timestamp;
                 zephyr_csv_line = timestamp;
                 oxycon_csv_line = timestamp;
@@ -4369,7 +4390,10 @@ namespace DataMerger
                             master_csv_line += ((double)wRMZ[sensor_id]).ToString("00.00") + ",";
                             master_csv_line += ((double)wRMSize[sensor_id]).ToString("00.00") + ",";
                             master_csv_line += ((double)(wVMAG[sensor_id] / (double)wacCounters[sensor_id])).ToString("00.00");
-                            rawSummaryData[i] += (int)((double)(wAUC[sensor_id, 0] + wAUC[sensor_id, 1] + wAUC[sensor_id, 2]));
+                         
+                            
+                            if (rawSummaryData!=null)
+                                rawSummaryData[i] += (int)((double)(wAUC[sensor_id, 0] + wAUC[sensor_id, 1] + wAUC[sensor_id, 2]));
 
                         }
                         else
@@ -4452,21 +4476,24 @@ namespace DataMerger
 
 
                 #region Write CSV lines for Wockets Summary
-                for (int i = 0; (i < summaryData.Length); i++)
+                if (summaryData != null)
                 {
-                    if (summaryData[i].ContainsKey(key) == false)
+                    for (int i = 0; (i < summaryData.Length); i++)
                     {
-                        summaryCSV[i].WriteLine(summary_csv_line[i] + ",");
-                        rawSummaryCSV[i].WriteLine(summary_csv_line[i] + ",");
-                        master_csv_line = master_csv_line + ",,";
-                    }
-                    else
-                    {
-                        string myline = summary_csv_line[i] + "," + summaryData[i][key];
-                        summaryCSV[i].WriteLine(summary_csv_line[i] + "," + summaryData[i][key] );
-                        rawSummaryCSV[i].WriteLine(summary_csv_line[i] + "," + rawSummaryData[i]);
-                        master_csv_line = master_csv_line + "," + summaryData[i][key] + "," + rawSummaryData[i];
-                        rawSummaryData[i] = 0;
+                        if (summaryData[i].ContainsKey(key) == false)
+                        {
+                            summaryCSV[i].WriteLine(summary_csv_line[i] + ",");
+                            rawSummaryCSV[i].WriteLine(summary_csv_line[i] + ",");
+                            master_csv_line = master_csv_line + ",,";
+                        }
+                        else
+                        {
+                            string myline = summary_csv_line[i] + "," + summaryData[i][key];
+                            summaryCSV[i].WriteLine(summary_csv_line[i] + "," + summaryData[i][key]);
+                            rawSummaryCSV[i].WriteLine(summary_csv_line[i] + "," + rawSummaryData[i]);
+                            master_csv_line = master_csv_line + "," + summaryData[i][key] + "," + rawSummaryData[i];
+                            rawSummaryData[i] = 0;
+                        }
                     }
                 }
                 #endregion Write CSV lines for Wockets Summary
@@ -4712,10 +4739,13 @@ namespace DataMerger
             for (int i = 0; (i < actigraphCSV.Length); i++)
                 actigraphCSV[i].Close();
 
-            for (int i = 0; (i < summaryCSV.Length); i++)
+            if (summaryCSV != null)
             {
-                summaryCSV[i].Close();
-                rawSummaryCSV[i].Close();
+                for (int i = 0; (i < summaryCSV.Length); i++)
+                {
+                    summaryCSV[i].Close();
+                    rawSummaryCSV[i].Close();
+                }
             }
             if (sensewearCSV != null)
                 sensewearCSV.Close();

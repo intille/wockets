@@ -235,6 +235,32 @@ namespace CollectData
                         this.label18.Text = CurrentWockets._UploadSuccessFiles + " successful";
                         this.label20.Text = CurrentWockets._UploadFailedFiles + " failed";
                         counter = 0;
+
+                        try
+                        {
+                            ProcessInfo[] processes = ProcessCE.GetProcesses();
+                            if (processes != null)
+                            {
+                                bool found = false;
+                                for (int i = 0; (i < processes.Length); i++)
+                                {
+                                    if (processes[i].FullPath.IndexOf("DataUploader.exe") >= 0)
+                                        found = true;                                  
+                                }
+                                this.button1.Enabled = !found;
+                            }
+                        }
+                        catch { }
+                        if ((!this.button1.Enabled)&& (_UploaderProcess!=null) && (_UploaderProcess.HasExited))
+                            this.button1.Enabled = true;
+
+                                           
+                        try
+                        {
+                            SYSTEM_POWER_STATUS_EX2 bpower = Battery.GetSystemPowerStatus();
+                            this.label6.Text = bpower.BatteryLifePercent + "%";
+                        }
+                        catch { }
                     }
 
                     this.Invalidate();
@@ -322,6 +348,7 @@ namespace CollectData
                     startInfo.FileName = Core.KERNEL_PATH + "DataUploader.exe";
                     startInfo.UseShellExecute = false;                    
                     _UploaderProcess = System.Diagnostics.Process.Start(startInfo.FileName, "");
+                    this.button1.Enabled = false;
                 }
                 catch 
                 {
