@@ -949,10 +949,19 @@ namespace Wockets.Kernel
                 {
 
                     RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + sensorID.ToString("0"));
-                    rk.SetValue("RECEIVED_ACs", received, RegistryValueKind.String);
-                    ((Wocket)CurrentWockets._Controller._Sensors[sensorID])._ReceivedACs = received;
-                    ((Wocket)CurrentWockets._Controller._Sensors[sensorID])._TotalReceivedACs += received;
-                    rk.SetValue("RECEIVED_TACs", ((Wocket)CurrentWockets._Controller._Sensors[sensorID])._TotalReceivedACs, RegistryValueKind.String);
+                  
+                    if (received == -1)
+                    {
+                        rk.SetValue("RECEIVED_ACs", 0, RegistryValueKind.String);
+                        rk.SetValue("RECEIVED_TACs", 0, RegistryValueKind.String);
+                    }
+                    else
+                    {
+                        ((Wocket)CurrentWockets._Controller._Sensors[sensorID])._ReceivedACs = received;
+                        ((Wocket)CurrentWockets._Controller._Sensors[sensorID])._TotalReceivedACs += received;
+                        rk.SetValue("RECEIVED_ACs", ((Wocket)CurrentWockets._Controller._Sensors[sensorID])._ReceivedACs, RegistryValueKind.String);
+                        rk.SetValue("RECEIVED_TACs", ((Wocket)CurrentWockets._Controller._Sensors[sensorID])._TotalReceivedACs, RegistryValueKind.String);
+                    }                   
                     rk.Close();
                 }
                 catch (Exception e)
@@ -1014,10 +1023,21 @@ namespace Wockets.Kernel
                 {
 
                     RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + sensorID.ToString("0"));
-                    rk.SetValue("SAVED_ACs", saved, RegistryValueKind.String);
-                    ((Wocket)CurrentWockets._Controller._Sensors[sensorID])._SavedACs = saved;
-                    ((Wocket)CurrentWockets._Controller._Sensors[sensorID])._TotalSavedACs += saved;
-                    rk.SetValue("SAVED_TACs", ((Wocket)CurrentWockets._Controller._Sensors[sensorID])._TotalSavedACs, RegistryValueKind.String);
+
+                    if (saved == -1)
+                    {
+                        rk.SetValue("SAVED_ACs", 0, RegistryValueKind.String);
+                        rk.SetValue("SAVED_TACs",0, RegistryValueKind.String);
+
+                    }
+                    else
+                    {
+                        ((Wocket)CurrentWockets._Controller._Sensors[sensorID])._SavedACs = saved;
+                        ((Wocket)CurrentWockets._Controller._Sensors[sensorID])._TotalSavedACs += saved;
+                        rk.SetValue("SAVED_ACs", ((Wocket)CurrentWockets._Controller._Sensors[sensorID])._SavedACs, RegistryValueKind.String);
+                        rk.SetValue("SAVED_TACs", ((Wocket)CurrentWockets._Controller._Sensors[sensorID])._TotalSavedACs, RegistryValueKind.String);
+
+                    }
                     rk.Close();
                 }
                 catch (Exception e)

@@ -487,6 +487,7 @@ void _send_ac_offset(unsigned short offset);
 void _send_data_bufferred(void);
 void _send_tm();
 void _send_sr();
+void _send_fv();
 
 unsigned char _wocket_get_baudrate(void);
 void _wocket_set_baudrate(unsigned char baudrate);

@@ -2258,6 +2258,9 @@ namespace NESPDataViewer
                                 case "Dominant Thigh":
                                     loc = "DT";
                                     break;
+                                case "Torso":
+                                    loc = "TR";
+                                    break;
                                 default:
                                     loc = "lOC";
                                     break;

@@ -453,23 +453,32 @@ void _send_ac_offset(unsigned short offset)
  
 }
 
+void _send_fv()
+{
+
+    aBuffer[0]=m_FV_RSP_BYTE0;
+    aBuffer[1]= m_FV_RSP_BYTE1(_VERSION);    
+	for (int i=0;(i<2);i++)                                                                                       
+       	_bluetooth_transmit_uart0_byte(aBuffer[i]); 
+}
 void _send_acs()
 {
 	unsigned short count=0;
 	unsigned short seq_num=sseq;
-	unsigned short num_acs=0;
+	//unsigned short num_acs=0;
 	unsigned char counter=0;
 
 
-	if (ci>si)
-		num_acs=ci-si;
-	else
-		num_acs=ci+(AC_BUFFER_SIZE-si);
+//	if (ci>si)
+//		num_acs=ci-si;
+//	else
+//		num_acs=ci+(AC_BUFFER_SIZE-si);
 
 	//if (num_acs>10)
 	//	num_acs=10;
 
-	_send_ac_count(num_acs);
+//	_send_ac_count(num_acs);
+	_send_ac_count(cseq);
 	_send_ac_offset(AC_NUMS-summary_count); //send offset of the last activity count
 	for (int i=si;(i!=ci);)
 	{		

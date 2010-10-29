@@ -477,8 +477,18 @@ namespace Wockets
             {
                 dataSavedSeconds[i] = 0;
                 secondsCounter[i] = 0;
-                full[i]=0;
-                partial[i]=0;
+                full[i] = 0;
+                partial[i] = 0;
+
+                this._Sensors[i]._ReceivedACs = 0;
+                this._Sensors[i]._TotalReceivedACs = 0;
+                this._Sensors[i]._SavedACs = 0;
+                this._Sensors[i]._TotalSavedACs = 0;
+                Core.WRITE_FULL_RECEIVED_COUNT(i, 0);
+                Core.WRITE_PARTIAL_RECEIVED_COUNT(i, 0);
+                Core.WRITE_EMPTY_RECEIVED_COUNT(i, 0);
+                Core.WRITE_RECEIVED_ACs(i, -1);
+                Core.WRITE_SAVED_ACs(i, -1);
 
             }
             while (true)
