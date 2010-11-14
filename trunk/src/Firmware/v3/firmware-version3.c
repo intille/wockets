@@ -529,13 +529,14 @@ int main()
 
 ISR(TIMER2_OVF_vect)
 {
-	if (cseq<pseq)
+	/*if (cseq<pseq)
 	{
 		_yellowled_turn_on();
 		while(1)
 		;
 	}
 	pseq=cseq;	
+	*/
 
 	if (_is_docked())
 	{

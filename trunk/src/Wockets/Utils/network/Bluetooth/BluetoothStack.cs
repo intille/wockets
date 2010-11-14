@@ -15,7 +15,7 @@ namespace Wockets.Utils.network.Bluetooth
 
         /// <summary>
         /// Defines the type of the Bluetooth stack
-        /// </summary>
+        /// </summary
         private static BluetoothStackTypes type;
 
         /// <summary>

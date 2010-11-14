@@ -225,7 +225,7 @@ void _wocket_initialize(void)
 		//_SAMPLING_RATE=40;
 		//_wTM=_TM_Burst_60;
 
-		_SAMPLING_RATE=40;
+		_SAMPLING_RATE=90;
 		_wTM=_TM_Continuous;
 	
 		// Write the sampling rate to the EEPROM

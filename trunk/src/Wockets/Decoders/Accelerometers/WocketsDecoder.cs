@@ -313,34 +313,7 @@ namespace Wockets.Decoders.Accelerometers
 
                                 }
 #endif
-                           /// }
-#if (PocketPC)
-                            /*else 
-                            if (CurrentWockets._Controller._Mode == MemoryMode.BluetoothToShared)//if (CurrentWockets._Configuration._MemoryMode == Wockets.Data.Configuration.MemoryConfiguration.SHARED)
-                        {
-                            this.sdata.Write(BitConverter.GetBytes(ts), 0, sizeof(double));
-                            //this.head+=sizeof(double);
-                            this.sdata.Write(BitConverter.GetBytes(x), 0, sizeof(short));
-                            //this.head+=sizeof(short);
-                            this.sdata.Write(BitConverter.GetBytes(y), 0, sizeof(short));
-                            //this.head+=sizeof(short);
-                            this.sdata.Write(BitConverter.GetBytes(z), 0, sizeof(short));
-                            //this.head+=sizeof(short);
 
-
-                            if (this.head >= (BUFFER_SIZE - 1))
-                            {
-                                //bufferHead = 0;
-                                this.head = 0;
-                                this.sdata.Seek(0, System.IO.SeekOrigin.Begin);
-                            }
-                            else
-                                this.head++;
-
-                            this.shead.Seek(0, System.IO.SeekOrigin.Begin);
-                            this.shead.Write(BitConverter.GetBytes(this.head), 0, sizeof(int));
-                        }*/
-#endif
 
 
                             numDecodedPackets++;
@@ -359,7 +332,7 @@ namespace Wockets.Decoders.Accelerometers
 #if (PocketPC)
                                     Core.WRITE_BATTERY_LEVEL(br);
 #endif
-                                    //FireEvent(br);
+                                    FireEvent(br);
                                     break;                                
                                 case ResponseTypes.CAL_RSP:
                                     CAL_RSP cal = new CAL_RSP(this._ID);
@@ -374,7 +347,7 @@ namespace Wockets.Decoders.Accelerometers
 #if (PocketPC)
                                     Core.WRITE_CALIBRATION(cal);
 #endif
-                                   // FireEvent(cal);
+                                   FireEvent(cal);
                                     break;
                                 case ResponseTypes.BTCAL_RSP:
                                     BTCAL_RSP btcal = new BTCAL_RSP(this._ID);
@@ -386,7 +359,7 @@ namespace Wockets.Decoders.Accelerometers
                                     btcal._CAL40 = ((this.packet[5] & 0x1f) << 5) | ((this.packet[6] & 0x7c) >> 2);
                                     btcal._CAL20 = ((this.packet[6] & 0x03) << 8) | ((this.packet[7] & 0x7f) << 1) | ((this.packet[8] & 0x40) >> 6);
                                     btcal._CAL10 = ((this.packet[8] & 0x3f) << 4) | ((this.packet[9] & 0x78) >> 3);
-                                   // FireEvent(btcal);
+                                    FireEvent(btcal);
                                     break;
                                 case ResponseTypes.SR_RSP:
                                     SR_RSP sr = new SR_RSP(this._ID);
@@ -397,7 +370,7 @@ namespace Wockets.Decoders.Accelerometers
 #if (PocketPC)
                                     Core.WRITE_SAMPLING_RATE(sr);
 #endif
-                                    //FireEvent(sr);
+                                    FireEvent(sr);
                                     break;
                                 case ResponseTypes.BP_RSP:
                                     BP_RSP bp = new BP_RSP(this._ID);
@@ -417,7 +390,7 @@ namespace Wockets.Decoders.Accelerometers
 #if (PocketPC)
                                     Core.WRITE_TRANSMISSION_MODE(tm);
 #endif
-                                    //FireEvent(tm);
+                                    FireEvent(tm);
                                     break;
 
                                 case ResponseTypes.SENS_RSP:
@@ -428,7 +401,7 @@ namespace Wockets.Decoders.Accelerometers
 #if (PocketPC)
                                     Core.WRITE_SENSITIVITY(sen);
 #endif
-                                    //FireEvent(sen);
+                                    FireEvent(sen);
                                     break;
                                 case ResponseTypes.PC_RSP:
                                     PC_RSP pc = new PC_RSP(this._ID);
@@ -438,14 +411,14 @@ namespace Wockets.Decoders.Accelerometers
 #if (PocketPC)
                                     Core.WRITE_PDU_COUNT(pc);                                            
 #endif
-                                    //FireEvent(pc);
+                                    FireEvent(pc);
                                     break;
                                 case ResponseTypes.PDT_RSP:
                                     PDT_RSP pdt = new PDT_RSP(this._ID);
                                     for (int i = 0; (i < bytesToRead); i++)
                                         pdt.RawBytes[i] = this.packet[i];
                                     pdt._Timeout = (this.packet[1] & 0x7f); 
-                                    //FireEvent(pdt);
+                                    FireEvent(pdt);
                                     break;
 
                                 case ResponseTypes.HV_RSP:
@@ -453,7 +426,7 @@ namespace Wockets.Decoders.Accelerometers
                                     for (int i = 0; (i < bytesToRead); i++)
                                         hv.RawBytes[i] = this.packet[i];
                                     hv._Version = (this.packet[1] & 0x7f);
-                                    //FireEvent(hv);
+                                    FireEvent(hv);
                                     break;
                                 case ResponseTypes.FV_RSP:
                                     FV_RSP fv = new FV_RSP(this._ID);
@@ -461,7 +434,7 @@ namespace Wockets.Decoders.Accelerometers
                                         fv.RawBytes[i] = this.packet[i];
                                     fv._Version = (this.packet[1] & 0x7f);
                                     Logger.Debug(this._ID + "," + fv._Version); 
-                                    //FireEvent(fv);
+                                    FireEvent(fv);
                                     break;
                                 case ResponseTypes.BC_RSP:
                                     BC_RSP bc = new BC_RSP(this._ID);
@@ -493,7 +466,7 @@ namespace Wockets.Decoders.Accelerometers
                                         batchCurrentTime = lastDecodedSampleTime+batchDeltaTime;
                                     }
                                     lastDecodedSampleTime = ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[this._ID])._CurrentConnectionUnixTime;
-                                   // FireEvent(bc);
+                                    FireEvent(bc);
                                     break;
 
                                 case ResponseTypes.AC_RSP:
@@ -503,7 +476,12 @@ namespace Wockets.Decoders.Accelerometers
 
                                     ac._SeqNum = ((this.packet[1] & 0x7f) << 9) | ((this.packet[2] & 0x7f) << 2) | ((this.packet[3] >> 5) & 0x03);
                                     ac._Count = ((this.packet[3] & 0x1f) << 11) | ((this.packet[4] & 0x7f)<<4) | ((this.packet[5]>>2)&0x0f);
-                                    
+
+
+                                    //to recover from resets
+                                    if ((this._LastActivityCountIndex!=-1) && (((this._ActivityCounts[this._LastActivityCountIndex]._SeqNum)- ac._SeqNum)>20))
+                                        this._LastActivityCountIndex = -1;
+
                                     if ((this._LastActivityCountIndex==-1) //First time base it on the sampling rate
                                         || (acc_count<this._ActivityCounts[this._LastActivityCountIndex]._SeqNum))  //accidental reset
                       
@@ -516,20 +494,7 @@ namespace Wockets.Decoders.Accelerometers
                                     {
                                           ac_unixtime = this._ActivityCounts[this._LastActivityCountIndex]._TimeStamp;
                                           ac_refseq = this._ActivityCounts[this._LastActivityCountIndex]._SeqNum;
-                                          ac_delta = (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[this._ID])._CurrentConnectionUnixTime - ((this._ActivityCountOffset * 1000.0) / this._ExpectedSamplingRate) - this._ActivityCounts[this._LastActivityCountIndex]._TimeStamp) / (acc_count - ac_refseq);
-                           
-
-//                                        if (ac._SeqNum == (this._ActivityCounts[this._LastActivityCountIndex]._SeqNum + 1))// if the sequence number follows well
-//                                        {
-
-//                                            ac_delta = (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[this._ID])._CurrentConnectionUnixTime - this._ActivityCounts[this._LastActivityCountIndex]._TimeStamp) / acc_count;
-  //                                          ac_unixtime = ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[this._ID])._CurrentConnectionUnixTime - ((this._ActivityCountOffset * 1000.0) / this._ExpectedSamplingRate) - (acc_count * ac_delta);
- //                                       }
- //                                       else //seq numbers do not follow
- //                                       {
- //                                           ac_unixtime = ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[this._ID])._CurrentConnectionUnixTime - ((this._ActivityCountOffset * 1000.0) / this._ExpectedSamplingRate) - (acc_count * 60000.0);
- //                                           ac_delta = 60000.0;
- //                                       }
+                                          ac_delta = (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[this._ID])._CurrentConnectionUnixTime - ((this._ActivityCountOffset * 1000.0) / this._ExpectedSamplingRate) - this._ActivityCounts[this._LastActivityCountIndex]._TimeStamp) / (acc_count - ac_refseq);                          
                                     }
 
                                     //Has to stay here to protect against situations when a batch is sent
@@ -539,24 +504,18 @@ namespace Wockets.Decoders.Accelerometers
                                     ac._TimeStamp = ac_unixtime + ((ac._SeqNum-ac_refseq) * ac_delta);
 #if (PocketPC)
                                     if (_ACIndex == 10)
-                                    {
-                                     //for (int kk = 0; (kk < 1); kk++)
-                                         //if (CurrentWockets._Controller.LastSeqNum[this._ID]>0)
-                                            //((RFCOMMReceiver)CurrentWockets._Controller._Receivers[this._ID]).Write(new Wockets.Data.Commands.ACK(CurrentWockets._Controller.LastSeqNum[this._ID])._Bytes);
-                                            ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[this._ID]).Write(new Wockets.Data.Commands.ACK()._Bytes);
-                                    }
+                                            ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[this._ID]).Write(new Wockets.Data.Commands.ACK()._Bytes);                                    
 #endif
                                     //Only insert new sequence numbers
                                     // if this is the first AC or it is not equal to the previous sequence number
                                     if ((this._ActivityCountOffset >= 0) && (acc_count >= 0))
-                                    {
+                                    {                                       
                                         if ((this._LastActivityCountIndex == -1) || (ac._SeqNum == (this._ActivityCounts[this._LastActivityCountIndex]._SeqNum + 1)) || ((ac._SeqNum - this._ActivityCounts[this._LastActivityCountIndex]._SeqNum + 1) > 960))
                                         {
                                             this._LastActivityCountIndex = this._ActivityCountIndex;
                                             this._ActivityCounts[this._ActivityCountIndex++] = ac;
                                             if (this._ActivityCountIndex == 960)
                                                 this._ActivityCountIndex = 0;
-
                                            
 #if (PocketPC)
                                             Core.WRITE_ACTIVITY_COUNT(ac);
@@ -565,8 +524,7 @@ namespace Wockets.Decoders.Accelerometers
                                     }
 
                                     Logger.Warn("ACC,"+acc_count+","+this._ActivityCounts[this._LastActivityCountIndex]._SeqNum+"," + ac._SeqNum + "," + ac._Count);
-                                    //Logger.Warn("ACC," + ac._SeqNum + "," + ac._Count);
-                                    //FireEvent(ac);
+                                    FireEvent(ac);
                                     break;
 
                                 case ResponseTypes.TCT_RSP:
@@ -579,7 +537,7 @@ namespace Wockets.Decoders.Accelerometers
 #if (PocketPC)
                                     Core.WRITE_TCT(tct);
 #endif
-                                    //FireEvent(tct);
+                                    FireEvent(tct);
                                     break;
 
                                 case ResponseTypes.ACC_RSP:
@@ -591,10 +549,7 @@ namespace Wockets.Decoders.Accelerometers
                                     ac_delta = 0;
                                     _ACIndex = 0;
                                     acc_count=acc._Count;
-                                    //if (acc_count > 100)
-                                      //  _ACIndex = 0;
-                                    //Logger.Warn("ACC," + acc_count);
-                                    //FireEvent(acc);
+                                    FireEvent(acc);
                                     break;
                                 case ResponseTypes.OFT_RSP:
                                     OFT_RSP offset = new OFT_RSP(this._ID);
@@ -602,7 +557,7 @@ namespace Wockets.Decoders.Accelerometers
                                         offset.RawBytes[i] = this.packet[i];
                                     offset._Offset = ((this.packet[1] & 0x7f) << 7) | (this.packet[2] & 0x7f);
                                     this._ActivityCountOffset = offset._Offset;
-                                    //FireEvent(offset);
+                                    FireEvent(offset);
                                     break;
                                 default:
                                     break;

@@ -71,7 +71,7 @@ namespace Wockets.Data.Features
             num_features += this.raw_rows_size; // number of energies
             num_features += ((this.raw_rows_size * this.raw_rows_size) - this.raw_rows_size) / 2; //correlation coefficients off-di
             num_features += this.raw_rows_size; //RM
-            num_features += this.raw_rows_size; //SN
+            //num_features += this.raw_rows_size; //SN
             num_features += this.num_wockets;
 
             //Allocate the feature vector and labels vector
@@ -210,8 +210,8 @@ namespace Wockets.Data.Features
             int energyIndex = fftIndex + (2 * FFT_MAX_FREQUENCIES * this.raw_rows_size);
             int correlationIndex = energyIndex + this.raw_rows_size; //add number of variances         
             int rmIndex = correlationIndex + ((this.raw_rows_size * this.raw_rows_size) - this.raw_rows_size) / 2;
-            int snIndex = rmIndex + this.raw_rows_size;
-            int svIndex = snIndex + this.raw_rows_size;
+            //int snIndex = rmIndex + this.raw_rows_size;
+            int svIndex = rmIndex + this.raw_rows_size;
            
 
             for (i = 0; (i < this._Values.Length); i++)
@@ -301,7 +301,7 @@ namespace Wockets.Data.Features
                     }
 
                 }
-                this._Values[snIndex++] = variance/variancen;
+                //this._Values[snIndex++] = variance/variancen;
                 this._Values[varianceIndex++] = variance / (this.raw_columns_size - 1);
 
                 //calculate the range
@@ -373,7 +373,7 @@ namespace Wockets.Data.Features
             string ENERGY_ATTRIBUTES = "";
             string CORRELATION_ATTRIBUTES = "";
             string RM_ATTRIBUTES = "";
-            string SN_ATTRIBUTES = "";
+            //string SN_ATTRIBUTES = "";
             string SV_ATTRIBUTES = "";
 
             int distanceIndex = 0;//number of means on every row + 1 for total mean, 0 based index
@@ -383,9 +383,9 @@ namespace Wockets.Data.Features
             int energyIndex = fftIndex + (2 * FFT_MAX_FREQUENCIES * this.raw_rows_size);
             int correlationIndex = energyIndex + this.raw_rows_size; //add number of variances   
             int rmIndex = correlationIndex + ((this.raw_rows_size * this.raw_rows_size) - this.raw_rows_size) / 2;
-            int snIndex = rmIndex + this.raw_rows_size;
-            int svIndex = snIndex + this.raw_rows_size;
-            
+            //int snIndex = rmIndex + this.raw_rows_size;
+            //int svIndex = snIndex + this.raw_rows_size;
+            int svIndex = rmIndex + this.raw_rows_size;
 
             for (int i = 0; (i < this.raw_rows_size); i++)
             {
@@ -410,8 +410,8 @@ namespace Wockets.Data.Features
                 RM_ATTRIBUTES += "@ATTRIBUTE RM_" + i + " NUMERIC\n";
                 this._Names[rmIndex++] = "RM_" + i;
 
-                SN_ATTRIBUTES += "@ATTRIBUTE SN_" + i + " NUMERIC\n";
-                this._Names[snIndex++] = "SN_" + i;
+                //SN_ATTRIBUTES += "@ATTRIBUTE SN_" + i + " NUMERIC\n";
+               // this._Names[snIndex++] = "SN_" + i;
 
                 for (int k = 0; (k < (FFT_MAX_FREQUENCIES * 2)); k++)
                 {
@@ -447,7 +447,7 @@ namespace Wockets.Data.Features
             }
 
             return DISTANCE_ATTRIBUTES + TOTAL_ATTRIBUTE + VARIANCE_ATTRIBUTES + RANGE_ATTRIBUTES +
-               FFT_ATTRIBUTES + ENERGY_ATTRIBUTES + CORRELATION_ATTRIBUTES + RM_ATTRIBUTES +SN_ATTRIBUTES + SV_ATTRIBUTES;
+               FFT_ATTRIBUTES + ENERGY_ATTRIBUTES + CORRELATION_ATTRIBUTES + RM_ATTRIBUTES + SV_ATTRIBUTES; //+SN_ATTRIBUTES 
         }
 
         public string toString()

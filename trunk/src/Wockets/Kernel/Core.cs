@@ -319,11 +319,10 @@ namespace Wockets.Kernel
                     {
                         if (storagePath == "")
                         {
-                            kernelLock.WaitOne();
+  
                             RegistryKey rk = Registry.LocalMachine.OpenSubKey(REGISTRY_KERNEL_PATH);
                             storagePath = (string)rk.GetValue("Storage");
                             rk.Close();
-                            kernelLock.Release();
                         }
 
                     }
