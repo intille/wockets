@@ -285,30 +285,7 @@ namespace Wockets.Sensors.Accelerometers
 
                 #region Determine the head of the data buffer
                 int currentHead = -1;
-                //if (CurrentWockets._Configuration._MemoryMode == MemoryConfiguration.SHARED)
-               /* if (CurrentWockets._Controller._Mode== MemoryMode.BluetoothToShared)
-                {
-                    if (sdata == null)
-                    {
-                        this.sdataSize = (int)Decoder._DUSize * Wockets.Decoders.Accelerometers.WocketsDecoder.BUFFER_SIZE;
-                        sdata = new MemoryMappedFileStream("\\Temp\\wocket" + this._ID + ".dat", "wocket" + this._ID, (uint)this.sdataSize, MemoryProtection.PageReadWrite);
-                        shead = new MemoryMappedFileStream("\\Temp\\whead" + this._ID + ".dat", "whead" + this._ID, sizeof(int), MemoryProtection.PageReadWrite);
-
-                        sdata.MapViewToProcessMemory(0, this.sdataSize);
-                        shead.MapViewToProcessMemory(0, sizeof(int));
-                        shead.Read(head, 0, 4);
-                        int lastHead = BitConverter.ToInt32(head, 0);
-                        tail = lastHead;
-                        shead.Seek(0, System.IO.SeekOrigin.Begin);
-                        sdata.Seek((lastHead * (sizeof(double) + 3 * sizeof(short))), System.IO.SeekOrigin.Begin);
-                    }
-
-                    shead.Read(head, 0, 4);
-                    currentHead = BitConverter.ToInt32(head, 0);
-                    shead.Seek(0, System.IO.SeekOrigin.Begin);
-                }
-                else*/
-                    currentHead = this._Decoder._Head;
+                currentHead = this._Decoder._Head;
                 #endregion Determine the head of the data buffer
 
                 #region Check if a new binary file need to be created
@@ -332,8 +309,7 @@ namespace Wockets.Sensors.Accelerometers
                     currentDataFile = currentDataFile + FILE_TYPE_PREFIX + "." +
                                    DirectoryStructure.GetDate() + "." + this._ID + "." + FILE_EXT;
 
-                    bw = new ByteWriter(currentDataFile, true);
-                    //bw.OpenFile();
+                    bw = new ByteWriter(currentDataFile, true);                    
                     bw.OpenFile(32768);
 
                     // Ensure that the first data point in the new file will start
@@ -346,42 +322,22 @@ namespace Wockets.Sensors.Accelerometers
                 // Write data as long as the tail is not equal to the head
                 while (tail != currentHead)
                 {
-                    #region Populate the acceleration data that need to be written
-                    //if (CurrentWockets._Configuration._MemoryMode == MemoryConfiguration.SHARED)
-                   /* if (CurrentWockets._Controller._Mode== MemoryMode.BluetoothToShared)
-                    {
-                        sdata.Read(timestamp, 0, sizeof(double));
-                        data.UnixTimeStamp = BitConverter.ToDouble(timestamp, 0);
-                        sdata.Read(acc, 0, sizeof(short));
-                        data._X = BitConverter.ToInt16(acc, 0);
-                        sdata.Read(acc, 0, sizeof(short));
-                        data._Y = BitConverter.ToInt16(acc, 0);
-                        sdata.Read(acc, 0, sizeof(short));
-                        data._Z = BitConverter.ToInt16(acc, 0);
-
-                        data.RawBytes[0] = (byte)(0x80 | ((data._X & 0x300) >> 8));
-                        data.RawBytes[1] = (byte) ((data._X & 0xff)>>1);
-                        data.RawBytes[2] = (byte)(((data._X & 0x01) <<6) | ((data._Y &0x3f0)>>4));
-                        data.RawBytes[3] = (byte)(((data._Y & 0x0f) << 3) | ((data._Z & 0x380) >> 7));
-                        data.RawBytes[4] = (byte)(data._Z & 0x7f);
-                    }
-                    else*/
-                        data = ((AccelerationData)this._Decoder._Data[tail]);
+                    #region Populate the acceleration data that need to be written   
+                    data = ((AccelerationData)this._Decoder._Data[tail]);
                     #endregion Populate the acceleration data that need to be written
 
                     #region Check for timestamp errors
                     aUnixTime = data.UnixTimeStamp;
                     if (aUnixTime < lastUnixTime)
-                    {      
-                        Logger.Error("Accelerometer: Save: Data overwritten without saving Accelerometer.cs Save " + this._ID + " " + aUnixTime + " " + lastUnixTime);
-                        break;
+                    {
+                        lastUnixTime = aUnixTime;
+                        Logger.Error("Accelerometer: Save: Data overwritten without saving Accelerometer.cs Save " + this._ID + " " + aUnixTime + " " + lastUnixTime);                        
                     }
                     #endregion Check for timestamp errors
 
                     #region Write Data
                     if (bw != null)
-                    {
-                        
+                    {                        
                         #region Write Timestamp
                         diffMS = (int)(aUnixTime - lastUnixTime);
                         if (isForceTimestampSave || (diffMS > 254) || (timeSaveCount == TIMESTAMP_AFTER_SAMPLES))
@@ -403,9 +359,7 @@ namespace Wockets.Sensors.Accelerometers
                         #region Write Raw Data
                         for (int j = 0; j < data._Length; j++)
                             bw.WriteByte(data.RawBytes[j]);
-                        #endregion Write Raw Data
-                 
-                         
+                        #endregion Write Raw Data                                          
                     }
                     #endregion Write Data
 
@@ -415,13 +369,8 @@ namespace Wockets.Sensors.Accelerometers
                     #region Update Pointers, statistics and time stamps
                     lastUnixTime = aUnixTime;
                     this.tailUnixTimestamp = aUnixTime;    
-                    if (tail >= this._Decoder._BufferSize- 1)
-                    {
-                        tail = 0;
-                        //if (CurrentWockets._Configuration._MemoryMode == MemoryConfiguration.SHARED)
-                       // if (CurrentWockets._Controller._Mode== MemoryMode.BluetoothToShared)
-                         //   sdata.Seek(0, System.IO.SeekOrigin.Begin);
-                    }
+                    if (tail >= this._Decoder._BufferSize- 1)                    
+                        tail = 0;                    
                     else
                         tail++;
                     this._SavedPackets++;
@@ -429,14 +378,8 @@ namespace Wockets.Sensors.Accelerometers
 
                 }
 
-                if ((bw != null) && (this._Flush))
-                {
-                    bw.Flush();
-                    //bw.CloseFile();
-                    //bw = null;
-                    //bw = new ByteWriter(currentDataFile, false);
-                    //bw.OpenFile(false);
-                }           
+                if ((bw != null) && (this._Flush))                
+                    bw.Flush();               
             }
 #endif
         }

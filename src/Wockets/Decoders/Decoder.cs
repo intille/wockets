@@ -7,6 +7,7 @@ using Wockets.Utils;
 #if (PocketPC)
 using Wockets.Utils.IPC.MMF;
 #endif
+using System.Threading;
 
 namespace Wockets.Decoders
 {
@@ -140,11 +141,14 @@ namespace Wockets.Decoders
         }
         #endregion Access Properties
 
-        protected void FireEvent(Response e)
-        {
-            if (this.subscribed[(int)e._Type])
-                this.delegates[(int)e._Type](e);
-        }
+          protected void FireEvent(Response e)
+          {
+              ThreadPool.QueueUserWorkItem(func =>
+              {
+                  if (this.subscribed[(int)e._Type])
+                      this.delegates[(int)e._Type](e);
+              });
+          }
 
         public void Subscribe(ResponseTypes type, ResponseHandler handler)
         {

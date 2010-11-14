@@ -249,8 +249,9 @@ namespace WocketsApplication
                 structureTW.Close();
                 structureTW = null;
             }
-            fv.Cleanup();
-            //FullFeatureExtractor.Cleanup();
+            if (fv!=null)
+              fv.Cleanup();
+            
 
             //Save any existing arff files
             if ((this._SaveFeatures) && (arffFileName != ""))
@@ -279,81 +280,112 @@ namespace WocketsApplication
         }
 
 
-        private AnnotationProtocolList models;
-        private void KernelListener()
+
+
+        delegate void UpdateFormCallback(KernelResponse response);
+        /// <summary>
+        /// Handles kernel response events
+        /// </summary>
+        /// <param name="rsp"></param>
+        private void EventListener(KernelResponse rsp)
         {
-            NamedEvents namedEvent = new NamedEvents();
-            while (true)
+            try
             {
-                //ensures prior synchronization
-                namedEvent.Receive(Core._IcomingChannel);
-
-
-                RegistryKey rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_REGISTERED_APPLICATIONS_PATH +
-                                                                         "\\{" + Core._IcomingChannel + "}");
-                string response = (string)rk.GetValue("Message");
-                rk.Close();
-
-              if (response == KernelResponse.DISCOVERED.ToString())                
-                    UpdatewWocketsList();                
-                else if (response == KernelResponse.CONNECTED.ToString())
+                // InvokeRequired required compares the thread ID of the
+                // calling thread to the thread ID of the creating thread.
+                // If these threads are different, it returns true.
+                if (this.InvokeRequired || this.InvokeRequired)
                 {
-                   Core._Connected= true;
-                   CurrentWockets._Configuration = new WocketsConfiguration();//new DTConfiguration();
-                   CurrentWockets._Configuration.FromXML(Core._StoragePath + "\\Configuration.xml");
-                   CurrentWockets._Configuration._MemoryMode = MemoryConfiguration.SHARED;
-                   CurrentWockets._Controller = new WocketsController("", "", "");
-                   CurrentWockets._Controller._Mode = Wockets.MemoryMode.SharedToLocal;
-                   CurrentWockets._Controller.FromXML(Core._StoragePath + "\\SensorData.xml");
-                   CurrentWockets._Controller.Initialize();
-                   //plotterTimer.Enabled = true;
-                   UpdatePlotter();
-                   this.currentStatus = "Connected";
-                   UpdateStatus();
-
-                    //if the activity protocol is already selected, copy it and load it after connecting
-                   if (this.selectedActivityProtocol != -1)
-                   {
-                       if (File.Exists(Constants.PATH + "ActivityProtocols\\" + this.aProtocols[this.selectedActivityProtocol]._FileName))
-                       {
-                           File.Copy(Constants.PATH + "ActivityProtocols\\" + this.aProtocols[this.selectedActivityProtocol]._FileName,
-                                  Core._StoragePath + "\\ActivityLabelsRealtime.xml");
-                           this.annotatedSession = new Session();
-                           annotatedSession.FromXML(Core._StoragePath + "\\ActivityLabelsRealtime.xml");
-
-                           if (this._SaveFeatures)
-                               InitializeML();
-                       }
-                   }
-                  soundThread = new Thread(new ThreadStart(SoundThread));
-                  soundThread.Start();
-            
+                    UpdateFormCallback d = new UpdateFormCallback(EventListener);
+                    this.Invoke(d, new object[] { rsp });
                 }
-                else if (response == KernelResponse.DISCONNECTED.ToString())
+                else
                 {
-                    Core._Connected = false;
-                    this.selectedActivityProtocol = -1;
-                    this.currentStatus = "Ready to connect";
-                    UpdateStatus();
 
-                    //if you disconnect stop and cleanup the ML and save any existing arff file
-                    CleanupML();
-
-                    if (soundThread != null)
+                    switch (rsp)
                     {
-                        soundThread.Abort();
-                        soundThread = null;
+                        case KernelResponse.STARTED:
+                        case KernelResponse.PING_RESPONSE:                           
+                            this.statusLabel.Text = "Registering";     
+                            Core.Register();
+                            break;
+                        case KernelResponse.REGISTERED:
+                            this.statusLabel.Text = "Registered";
+                            break;
+                        case KernelResponse.SENSORS_UPDATED:
+                            this.statusLabel.Text = "Sensors selected";
+                            break;
+                        case KernelResponse.DISCOVERED:
+                            this.statusLabel.Text = "Discovered";
+                            UpdatewWocketsList(); 
+                            break; 
+                        case KernelResponse.CONNECTED:
+                            this.statusLabel.Text = "Connected";            
+                            //UpdatePlotter();
+                            //this.currentStatus = "Connected";
+                            //UpdateStatus();
+
+                            if (plotter != null)
+                            {
+                                plotterTimer.Enabled = false;
+                                plotter.Dispose();
+                            }
+                            plotterPanel.Size = new Size(Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height);
+                            plotter = new WocketsScalablePlotter(plotterPanel);
+                            plotterPanel.Visible = true;
+                            plotterTimer.Enabled = true;
+                    
+
+                            //if the activity protocol is already selected, copy it and load it after connecting
+                            if (this.selectedActivityProtocol != -1)
+                            {
+                                if (File.Exists(Constants.PATH + "ActivityProtocols\\" + this.aProtocols[this.selectedActivityProtocol]._FileName))
+                                {
+                                    File.Copy(Constants.PATH + "ActivityProtocols\\" + this.aProtocols[this.selectedActivityProtocol]._FileName,
+                                           Core._StoragePath + "\\ActivityLabelsRealtime.xml");
+                                    this.annotatedSession = new Session();
+                                    annotatedSession.FromXML(Core._StoragePath + "\\ActivityLabelsRealtime.xml");
+
+                                    if (this._SaveFeatures)
+                                        InitializeML();
+                                }
+                            }
+                            soundThread = new Thread(new ThreadStart(SoundThread));
+                            soundThread.Start();            
+                            break;
+
+                        case KernelResponse.DISCONNECTED:
+                            Core._Connected = false;
+                            this.selectedActivityProtocol = -1;
+                            this.statusLabel.Text = "Disconnected";
+                            //this.currentStatus = "Ready to connect";
+                            //UpdateStatus();
+
+                            //if you disconnect stop and cleanup the ML and save any existing arff file
+                            CleanupML();
+
+                            if (soundThread != null)
+                            {
+                                soundThread.Abort();
+                                soundThread = null;
+                            }
+                            break;
+                        default:
+                            break;
                     }
-             
-                 
+
+                    this.Refresh();
+
                 }
-            
-                namedEvent.Reset();
+            }
+            catch
+            {
             }
         }
 
+        private AnnotationProtocolList models;
 
-        delegate void UpdateStatusCallback();
+        /*delegate void UpdateStatusCallback();
         public void UpdateStatus()
         {
 
@@ -376,9 +408,9 @@ namespace WocketsApplication
                 
             }
 
-        }
+        }*/
 
-        delegate void UpdatePlotterCallback();
+        /*delegate void UpdatePlotterCallback();
         public void UpdatePlotter()
         {
 
@@ -410,7 +442,7 @@ namespace WocketsApplication
                 }
             }
 
-        }
+        }*/
 
         public Form1()
         {                    
@@ -435,7 +467,6 @@ namespace WocketsApplication
             //all commands should be sent after initializing interface
 
             wocketsList._Status = "Refresh wockets...";
-            //this.slidingThread = new Thread(new ThreadStart(timeAnimation_Tick));
             _alphaManager = new AlphaContainer(this);
              this.Refresh();    
         }
@@ -505,11 +536,6 @@ namespace WocketsApplication
         WocketSlidingList wocketsList = null;
         private Panel bluetoothPanel;
         private Label bluetoothName;
-        /*private Label bluetoothMac;
-        private Label bluetoothPIN;
-        private ComboBox bluetoothTP;
-        private ComboBox bluetoothSM;
-        private WocketListItem currentWi;*/
         ArrayList selectedWockets = new ArrayList();
         WocketsScalablePlotter plotter=null;
         private Panel plotterPanel;
@@ -522,7 +548,7 @@ namespace WocketsApplication
         private Button startAnnnotationButton;
         private Label annotationLabel;
         private AlphaLabel statusLabel;
-        private string currentStatus = "";
+        //private string currentStatus = "";
 
 
         private System.Windows.Forms.ListView modelsList;
@@ -606,12 +632,7 @@ namespace WocketsApplication
             this.panels[ControlID.SETTINGS_PANEL]._BackgroundFile = Constants.PATH + "Backgrounds\\DottedBlack.png";
             this.panels[ControlID.ACTIVITY_PANEL]._Background = (Bitmap)this.panels[ControlID.HOME_PANEL]._Background.Clone();
             this.panels[ControlID.ACTIVITY_PANEL]._BackgroundFile = Constants.PATH + "Backgrounds\\DottedBlack.png";
-            //this.panels[ControlID.WOCKETS_PANEL]._Background = new Bitmap(Constants.PATH + "Backgrounds\\DottedBlack.png");
-            //this.panels[ControlID.WOCKETS_PANEL]._BackgroundFile = Constants.PATH + "Backgrounds\\DottedBlack.png";
-           // this.panels[ControlID.WOCKETS_CONFIGURATION_PANEL]._Background = new Bitmap(Constants.PATH + "Backgrounds\\DottedBlack.png");
-            //this.panels[ControlID.WOCKETS_CONFIGURATION_PANEL]._BackgroundFile = Constants.PATH + "Backgrounds\\DottedBlack.png";
-            //this.panels[ControlID.PLOTTER_PANEL]._Background = new Bitmap(Constants.PATH + "Backgrounds\\DottedBlack.png");
-            //this.panels[ControlID.PLOTTER_PANEL]._BackgroundFile = Constants.PATH + "Backgrounds\\DottedBlack.png";
+
             this.panels[ControlID.MODELS_PANEL].BackColor = Color.FromArgb(250, 237, 221);
             this.panels[ControlID.MODELS_PANEL]._ClearCanvas = true;
             this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL].BackColor = Color.FromArgb(250, 237, 221);
@@ -866,21 +887,10 @@ namespace WocketsApplication
             //Line 1
             AddButton(ControlID.HOME_PANEL, ControlID.LINE_CHART_BUTTON, "Buttons\\LineChartPressed.png", "Buttons\\LineChartUnpressed.png", 0, 50, 128, "Plot", ButtonType.Fixed);
             AddButton(ControlID.HOME_PANEL, ControlID.ACTIVITY_BUTTON, "Buttons\\ActivityPressed-128.png", "Buttons\\ActivityUnpressed-128.png", 160, 50, 128, "Activity", ButtonType.Fixed);
-            //AddButton(ControlID.HOME_PANEL, ControlID.BATTERY_BUTTON, "Buttons\\BatteryPressed.png", "Buttons\\BatteryUnpressed.png", 310, 50, 128,  "Power", ButtonType.Fixed);
-            
-            //Line 2
-            //AddButton(ControlID.HOME_PANEL, ControlID.GO_GREEN_BUTTON, "Buttons\\GoGreenPressed-128.png", "Buttons\\GoGreenUnpressed-128.png", 0, 210, 128, "Go Green", ButtonType.Fixed);
+
+            //Line 2            
             AddButton(ControlID.HOME_PANEL, ControlID.CONNECT_BUTTON, "Buttons\\DisconnectUnpressed-128.png", "Buttons\\ConnectUnpressed-128.png", 310, 50, 128, "Connect", ButtonType.Alternating);
             AddButton(ControlID.HOME_PANEL, ControlID.KERNEL_BUTTON, "Buttons\\StopKernelUnpressed-128.png", "Buttons\\StartKernelUnpressed-128.png", 0, 210, 128, "Start Kernel", ButtonType.Alternating);
-
-
-           
-            //AddButton(ControlID.HOME_PANEL, ControlID.DISCONNECT_BUTTON, "Buttons\\DisconnectPressed-128.png", "Buttons\\DisconnectUnpressed-128.png", 160, 210, 128,  "Disconnect", ButtonType.Fixed);
-
-            
-            
-            //AddButton(ControlID.HOME_PANEL, ControlID.RECORD_BUTTON, "Buttons\\RecordPressed-128.png", "Buttons\\RecordUnpressed-128.png", 160, 370, 128, "Record", ButtonType.Fixed);
-            //AddButton(ControlID.HOME_PANEL, ControlID.STOP_KERNEL_BUTTON, "Buttons\\StopKernelPressed-128.png", "Buttons\\StopKernelUnpressed-128.png", 0, 310, 128, "Stop", "Stop", ButtonType.Fixed);
 
 
             //Add top status bar information
@@ -892,25 +902,6 @@ namespace WocketsApplication
             statusLabel.Visible = true;
             statusLabel.Location = new Point(1, 1);
             this.panels[ControlID.HOME_PANEL].Controls.Add(statusLabel);
-           // gauge.Visible = true;
-           // gauge.Location = new Point(200, 200);
-            //this.panels[ControlID.HOME_PANEL].Controls.Add(gauge);
-
-            //gg.Size = new Size(400, 400);
-            //this.panels[ControlID.HOME_PANEL].Controls.Add(gg);
-            
-            //AddButton(ControlID.HOME_PANEL, ControlID.ANNOTATE_BUTTON, "Buttons\\AnnotatePressed.png", "Buttons\\AnnotateUnpressed.png", 0, 160, 128);
-            //AddButton(ControlID.HOME_PANEL, ControlID.STATISTICS_BUTTON, "Buttons\\StatisticsPressed.png", "Buttons\\StatisticsUnpressed.png", 310, 0, 128);
-            //AddButton(ControlID.HOME_PANEL, ControlID.QUALITY_BUTTON, "Buttons\\SignalQualityPressed.png", "Buttons\\SignalQualityUnpressed.png", 0, 160, 128);
-            
-            //AddButton(ControlID.HOME_PANEL, ControlID.HEALTH_BUTTON, "Buttons\\HeartPressed.png", "Buttons\\HeartUnpressed.png", 310, 160, 128);
-
-
-
-
-            //Annotation Bottom  Buttons
-           // AddButton(ControlID.ANNOTATION_PROTCOLS_PANEL, ControlID.ANNOTATION_BACK_BUTTON, "Buttons\\BackPressed.png", "Buttons\\BackUnpressed.png", 310, this.Height - 130, 128, null, ButtonType.Fixed);
-            //AddButton(ControlID.ANNOTATION_BUTTON_PANEL, ControlID.ANNOTATION_BUTTON_BACK_BUTTON, "Buttons\\BackPressed.png", "Buttons\\BackUnpressed.png", 310, this.Height - 130, 128, null, ButtonType.Fixed);
 
             //Settings Bottom  Buttons
             AddButton(ControlID.SETTINGS_PANEL, ControlID.BACK_BUTTON, "Buttons\\BackPressed.png", "Buttons\\BackUnpressed.png", 310, this.Height - 130, 128, null, ButtonType.Fixed);
@@ -919,46 +910,13 @@ namespace WocketsApplication
             AddButton(ControlID.SETTINGS_PANEL, ControlID.BLUETOOTH_BUTTON, "Buttons\\BluetoothPressed.png", "Buttons\\BluetoothUnpressed.png", 0, 50, 128,  "Wockets", ButtonType.Fixed);
             AddButton(ControlID.SETTINGS_PANEL, ControlID.SOUND_BUTTON, "Buttons\\SoundPressed.png", "Buttons\\SoundUnpressed.png", 160, 50, 128, "Sound",  ButtonType.Fixed);
 
-           /* saveLabel = new AlphaLabel();
-            saveLabel.Size = new Size(600, 50);
-            saveLabel.Text = "Data Settings";
-            saveLabel.ForeColor = Color.FromArgb(250, 237, 221);
-            saveLabel.Font = new Font(FontFamily.GenericSerif, 16.0f, FontStyle.Bold | FontStyle.Underline);
-            saveLabel.Visible = true;
-            saveLabel.Location = new Point(10, 300);
-            this.panels[ControlID.SETTINGS_PANEL].Controls.Add(saveLabel);           
-            saveData = new CheckBox();
-            saveData.Size = new Size(600, 50);
-            saveData.Text = "Save Data";
-            saveData.BackColor = Color.Black;
-            saveData.ForeColor = Color.FromArgb(250, 237, 221);
-            saveData.Font = new Font(FontFamily.GenericSerif, 16.0f, FontStyle.Bold | FontStyle.Underline);
-            saveData.Visible = true;
-            saveData.Location = new Point(10, 380);
-            saveData.CheckStateChanged += new EventHandler(saveData_CheckStateChanged);
-            this.panels[ControlID.SETTINGS_PANEL].Controls.Add(saveData);
-
-            saveFeatures = new CheckBox();
-            saveFeatures.Size = new Size(600, 50);
-            saveFeatures.Text = "Save Features";
-            saveFeatures.BackColor = Color.Black;
-            saveFeatures.ForeColor = Color.FromArgb(250, 237, 221);
-            saveFeatures.Font = new Font(FontFamily.GenericSerif, 16.0f, FontStyle.Bold);
-            saveFeatures.Visible = true;
-            saveFeatures.Location = new Point(10, 480);
-            saveFeatures.CheckStateChanged += new EventHandler(saveFeatures_CheckStateChanged);
-            this.panels[ControlID.SETTINGS_PANEL].Controls.Add(saveFeatures);
-            */
-
-            
-
             //Wockets Screen
 
             AddButton(ControlID.WOCKETS_PANEL, ControlID.WOCKETS_BACK_BUTTON, "Buttons\\Back48Pressed.png", "Buttons\\Back48Unpressed.png", 400, this.Height - 48, 48, null, ButtonType.Fixed);
             AddButton(ControlID.WOCKETS_PANEL, ControlID.WOCKETS_UP_BUTTON, "Buttons\\Up48Pressed.png", "Buttons\\Up48Unpressed.png", 250, this.Height - 48, 48,  null, ButtonType.Fixed);
             AddButton(ControlID.WOCKETS_PANEL, ControlID.WOCKETS_DOWN_BUTTON, "Buttons\\Down48Pressed.png", "Buttons\\Down48Unpressed.png", 180, this.Height - 48, 48, null, ButtonType.Fixed);
             AddButton(ControlID.WOCKETS_PANEL, ControlID.WOCKETS_RELOAD_BUTTON, "Buttons\\BluetoothReloadPressed-48.png", "Buttons\\BluetoothReloadUnpressed-48.png", 20, this.Height - 48, 48, null,  ButtonType.Fixed);
-            //AddButton(ControlID.WOCKETS_PANEL, ControlID.WOCKETS_SAVE_BUTTON, "Buttons\\SavePressed-64.png", "Buttons\\SaveUnpressed-64.png", 100, this.Height - 64, 64);
+            
 
             wocketsList = new WocketSlidingList();                                         
             wocketsList.Size = new Size(Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height);            
@@ -969,12 +927,12 @@ namespace WocketsApplication
 
             //Wockets Configuration Panel
 
-            AddButton(ControlID.WOCKETS_CONFIGURATION_PANEL, ControlID.WOCKETS_CONFIGURATIONS_BLUETOOTH_BUTTON, "Buttons\\BluetoothUnpressed-64.png", "Buttons\\BluetoothPressed-64.png", 0, this.Height - 64, 64, null, ButtonType.Fixed);
-            AddButton(ControlID.WOCKETS_CONFIGURATION_PANEL, ControlID.WOCKETS_CONFIGURATIONS_COMMAND_BUTTON, "Buttons\\CommandPressed-64.png", "Buttons\\CommandUnpressed-64.png", 80, this.Height - 64, 64, null, ButtonType.Fixed);
-            AddButton(ControlID.WOCKETS_CONFIGURATION_PANEL, ControlID.WOCKETS_CONFIGURATIONS_TIMERS_BUTTON, "Buttons\\TimerPressed-64.png", "Buttons\\TimerUnpressed-64.png", 160, this.Height - 64, 64, null, ButtonType.Fixed);
-            AddButton(ControlID.WOCKETS_CONFIGURATION_PANEL, ControlID.WOCKETS_CONFIGURATIONS_STATUS_BUTTON, "Buttons\\StatusPressed-64.png", "Buttons\\StatusUnpressed-64.png", 240, this.Height - 64, 64, null, ButtonType.Fixed);
-            AddButton(ControlID.WOCKETS_CONFIGURATION_PANEL, ControlID.WOCKETS_CONFIGURATIONS_INFORMATION_BUTTON, "Buttons\\InformationPressed-64.png", "Buttons\\InformationUnpressed-64.png", 320, this.Height - 64, 64, null, ButtonType.Fixed);
-            AddButton(ControlID.WOCKETS_CONFIGURATION_PANEL, ControlID.WOCKETS_CONFIGURATIONS_BACK_BUTTON, "Buttons\\Back64Pressed.png", "Buttons\\Back64Unpressed.png", 400, this.Height - 64, 64, null,  ButtonType.Fixed);
+//            AddButton(ControlID.WOCKETS_CONFIGURATION_PANEL, ControlID.WOCKETS_CONFIGURATIONS_BLUETOOTH_BUTTON, "Buttons\\BluetoothUnpressed-64.png", "Buttons\\BluetoothPressed-64.png", 0, this.Height - 64, 64, null, ButtonType.Fixed);
+ //           AddButton(ControlID.WOCKETS_CONFIGURATION_PANEL, ControlID.WOCKETS_CONFIGURATIONS_COMMAND_BUTTON, "Buttons\\CommandPressed-64.png", "Buttons\\CommandUnpressed-64.png", 80, this.Height - 64, 64, null, ButtonType.Fixed);
+   //         AddButton(ControlID.WOCKETS_CONFIGURATION_PANEL, ControlID.WOCKETS_CONFIGURATIONS_TIMERS_BUTTON, "Buttons\\TimerPressed-64.png", "Buttons\\TimerUnpressed-64.png", 160, this.Height - 64, 64, null, ButtonType.Fixed);
+     //       AddButton(ControlID.WOCKETS_CONFIGURATION_PANEL, ControlID.WOCKETS_CONFIGURATIONS_STATUS_BUTTON, "Buttons\\StatusPressed-64.png", "Buttons\\StatusUnpressed-64.png", 240, this.Height - 64, 64, null, ButtonType.Fixed);
+       //     AddButton(ControlID.WOCKETS_CONFIGURATION_PANEL, ControlID.WOCKETS_CONFIGURATIONS_INFORMATION_BUTTON, "Buttons\\InformationPressed-64.png", "Buttons\\InformationUnpressed-64.png", 320, this.Height - 64, 64, null, ButtonType.Fixed);
+         //   AddButton(ControlID.WOCKETS_CONFIGURATION_PANEL, ControlID.WOCKETS_CONFIGURATIONS_BACK_BUTTON, "Buttons\\Back64Pressed.png", "Buttons\\Back64Unpressed.png", 400, this.Height - 64, 64, null,  ButtonType.Fixed);
             bluetoothPanel = new Panel();
             bluetoothPanel.Size = new Size(Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height);
             bluetoothPanel.Visible = true;
@@ -1000,14 +958,6 @@ namespace WocketsApplication
             this.panels[ControlID.PLOTTER_PANEL].Controls.Add(plotterPanel);            
 
 
-            
-            //this.panels[ControlID.WOCKETS_CONFIGURATION_PANEL].Controls.Add(
-            //add bluetooth panel
-            //add timers panel
-            //add status panel
-
-
-
             for (int i = 0; (i < ControlID.NUMBER_PANELS); i++)
             {
                 //cache panels with drawn backgrounds
@@ -1019,8 +969,7 @@ namespace WocketsApplication
                 }
                 this.panels[i].Initialize();
             }
-            
-            //this.panels[currentPanel]._Backbuffer = this._backBuffers[currentPanel];                        
+                                 
             this.panels[currentPanel].Location = new Point(0, 0);
             this.panels[currentPanel].Update();
             this.panels[currentPanel].Visible = true;
@@ -1193,7 +1142,7 @@ namespace WocketsApplication
                     long numNewSamples = CurrentWockets._Controller._Decoders[i].TotalSamples - lastTotalSamples[i];
                     if (numNewSamples == 0)
                         readyFV = false;
-                    else if (numNewSamples < fv._Length)
+                    else if (numNewSamples < (fv._Length/2))
                     {
                         if (no_fv_iterations[i] > 7) // a disconnection occurred, so reset the window you are looking at
                         {
@@ -2255,6 +2204,36 @@ namespace WocketsApplication
         }
         public delegate void ClickHandler(object sender, EventArgs e);
         private double clickTime = 0;
+        private Thread startupThread;
+
+        private void LoadWockets()
+        {
+
+            if (!Core._KernalStarted)
+            {
+                if (!Core.Start())
+                    MessageBox.Show("Failed to start kernel");
+                else
+                    Thread.Sleep(5000);
+            }
+            else
+            {
+                //Make sure no kernels are running
+                if (Core.Terminate())
+                {
+                    if (!Core.Start())
+                        MessageBox.Show("Failed to start kernel");
+                    else
+                        Thread.Sleep(5000);
+                }
+                else
+                    MessageBox.Show("Failed to shutdown kernel");
+
+            }
+
+            Thread.Sleep(5000);
+            Core.Ping();
+        }
         private void clickHandler(object sender, EventArgs e)
         {
             AlphaPictureBox p = (AlphaPictureBox)sender;
@@ -2389,13 +2368,9 @@ namespace WocketsApplication
                     wocketsList.Controls.Clear();     
                     wocketsList._Status = "Searching for Wockets...";
                     wocketsList.Refresh();
-                   // if (Core._KernelGuid != null)
-                     //   Core.Send(KernelCommand.DISCOVER, Core._KernelGuid);
                     Core.Discover();
                 }
-               /* else if (name == ControlID.WOCKETS_SAVE_BUTTON)
-                {
-                }*/
+  
             }
             else if (currentPanel == ControlID.WOCKETS_CONFIGURATION_PANEL)
             {
@@ -2424,7 +2399,6 @@ namespace WocketsApplication
                         statusLabel.Text = "Kernel Starting...";
                         this.panels[currentPanel]._UnpressedButtonControls[ControlID.KERNEL_BUTTON].Enabled = false;
                         this.panels[currentPanel]._PressedButtonControls[ControlID.KERNEL_BUTTON].Size = new Size(128, 128);
-                        //this.panels[currentPanel]._PressedButtonControls[ControlID.KERNEL_BUTTON].BringToFront();
                         this.panels[currentPanel]._PressedButtonControls[ControlID.KERNEL_BUTTON].Visible = true;
                         this.panels[currentPanel]._UnpressedButtonControls[ControlID.KERNEL_BUTTON].Visible = false;
                         this.panels[currentPanel]._ButtonText[ControlID.KERNEL_BUTTON].Text = "Stop Kernel";
@@ -2432,36 +2406,19 @@ namespace WocketsApplication
                         this.Refresh();
 
 
-                        if (!Core._KernalStarted)
-                            Core.Start();
-                        else
-                        {
-                            if (Interaction.MsgBox("Do you want to restart it?", MsgBoxStyle.YesNo,"Kernel already running!")== MsgBoxResult.Yes)
-                            {
-                                //Make sure no kernels are running
-                                if (Core.Terminate())
-                                    Core.Start();
-                                else
-                                    MessageBox.Show("Failed to shutdown kernel");
-                            }
-                        }
 
-                        Thread.Sleep(5000);
-                        if (Core._KernalStarted)
-                        {
-                            if (!Core._Registered)
-                            {
-                                Core.Register();
-                                if (Core._Registered)
-                                {
-                                    kListenerThread = new Thread(new ThreadStart(KernelListener));
-                                    kListenerThread.Start();
-                                }
-                            }
-                        }
-                        statusLabel.Text = "Ready to connect";                     
-                        this.panels[currentPanel]._PressedButtonControls[ControlID.KERNEL_BUTTON].Enabled = true;
-                        clickTime = WocketsTimer.GetUnixTime();                        
+                        Core.SubscribeEvent(KernelResponse.STARTED, EventListener);
+                        Core.SubscribeEvent(KernelResponse.REGISTERED, EventListener);
+                        Core.SubscribeEvent(KernelResponse.UNREGISTERED, EventListener);
+                        Core.SubscribeEvent(KernelResponse.STOPPED, EventListener);
+                        Core.SubscribeEvent(KernelResponse.DISCOVERED, EventListener);
+                        Core.SubscribeEvent(KernelResponse.CONNECTED, EventListener);
+                        Core.SubscribeEvent(KernelResponse.DISCONNECTED, EventListener);
+                        Core.SubscribeEvent(KernelResponse.SENSORS_UPDATED, EventListener);
+                        Core.SubscribeEvent(KernelResponse.PING_RESPONSE, EventListener);
+                        startupThread = new Thread(new ThreadStart(LoadWockets));
+                        startupThread.Start();
+                        
                     }
                     else
                     {
@@ -2504,8 +2461,7 @@ namespace WocketsApplication
                                     for (int j = 0; j < activityList.Length; j++)
                                         this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Controls.Remove(activityList[j]);
                                 }
-                                activityButtons.Clear();
-                                //if (this._SaveFeatures)
+                                activityButtons.Clear();                 
                                 CleanupML();
                                 this.panels[currentPanel]._UnpressedButtonControls[ControlID.KERNEL_BUTTON].Visible = true;
                                 this.panels[currentPanel]._PressedButtonControls[ControlID.KERNEL_BUTTON].Visible = false;
@@ -2522,9 +2478,7 @@ namespace WocketsApplication
 
                             }
                             this.panels[currentPanel]._UnpressedButtonControls[ControlID.KERNEL_BUTTON].Enabled = true;
-                            statusLabel.Text = "Kernel Stopped";
-                            //this.panels[currentPanel].Refresh();
-                           
+                            statusLabel.Text = "Kernel Stopped";                  
                         }
                     }
 
@@ -2532,40 +2486,40 @@ namespace WocketsApplication
   
                 else if (name == ControlID.ACTIVITY_BUTTON)
                 {
-                    if (this.activityStatus == ActivityStatus.Annotating)
+                    if (Core._Connected)
                     {
-                        this.panels[currentPanel].Visible = false;
-                        this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Location = new Point(0, 0);
-                        this.panels[ControlID.ANNOTATION_BUTTON_PANEL].BringToFront();
-                        this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Visible = true;
-                        this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Dock = DockStyle.None;
-                        this.currentPanel = ControlID.ANNOTATION_BUTTON_PANEL;
-                    }
-                    else if (this.activityStatus == ActivityStatus.Measuring)
-                    {
-                        this.panels[currentPanel].Visible = false;
-                        this.panels[ControlID.CLASSIFICATION_PANEL].Location = new Point(0, 0);
-                        this.panels[ControlID.CLASSIFICATION_PANEL].BringToFront();
-                        this.panels[ControlID.CLASSIFICATION_PANEL].Visible = true;
-                        this.panels[ControlID.CLASSIFICATION_PANEL].Dock = DockStyle.None;
-                        this.currentPanel = ControlID.CLASSIFICATION_PANEL;
-                        
-                        /*this.panels[currentPanel].Visible = false;
-                        this.panels[ControlID.EE_PANEL].Location = new Point(0, 0);
-                        this.panels[ControlID.EE_PANEL].BringToFront();
-                        this.panels[ControlID.EE_PANEL].Visible = true;
-                        this.panels[ControlID.EE_PANEL].Dock = DockStyle.None;
-                        this.currentPanel = ControlID.EE_PANEL;*/
+                        if (this.activityStatus == ActivityStatus.Annotating)
+                        {
+                            this.panels[currentPanel].Visible = false;
+                            this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Location = new Point(0, 0);
+                            this.panels[ControlID.ANNOTATION_BUTTON_PANEL].BringToFront();
+                            this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Visible = true;
+                            this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Dock = DockStyle.None;
+                            this.currentPanel = ControlID.ANNOTATION_BUTTON_PANEL;
+                        }
+                        else if (this.activityStatus == ActivityStatus.Measuring)
+                        {
+                            this.panels[currentPanel].Visible = false;
+                            this.panels[ControlID.CLASSIFICATION_PANEL].Location = new Point(0, 0);
+                            this.panels[ControlID.CLASSIFICATION_PANEL].BringToFront();
+                            this.panels[ControlID.CLASSIFICATION_PANEL].Visible = true;
+                            this.panels[ControlID.CLASSIFICATION_PANEL].Dock = DockStyle.None;
+                            this.currentPanel = ControlID.CLASSIFICATION_PANEL;
+
+                        }
+                        else
+                        {
+                            this.panels[currentPanel].Visible = false;
+                            this.panels[ControlID.ACTIVITY_PANEL].Location = new Point(0, 0);
+                            this.panels[ControlID.ACTIVITY_PANEL].BringToFront();
+                            this.panels[ControlID.ACTIVITY_PANEL].Visible = true;
+                            this.panels[ControlID.ACTIVITY_PANEL].Dock = DockStyle.None;
+                            this.currentPanel = ControlID.ACTIVITY_PANEL;
+                        }
                     }
                     else
-                    {
-                        this.panels[currentPanel].Visible = false;
-                        this.panels[ControlID.ACTIVITY_PANEL].Location = new Point(0, 0);
-                        this.panels[ControlID.ACTIVITY_PANEL].BringToFront();
-                        this.panels[ControlID.ACTIVITY_PANEL].Visible = true;
-                        this.panels[ControlID.ACTIVITY_PANEL].Dock = DockStyle.None;
-                        this.currentPanel = ControlID.ACTIVITY_PANEL;
-                    }
+                        MessageBox.Show("Please connect to wockets!");
+
                 }
                 else if (name == ControlID.RESET_BUTTON)
                 {
@@ -2591,12 +2545,7 @@ namespace WocketsApplication
                         
                         //Cleanup the machine learning buffers if needed
                         CleanupML();
-
-                        //Terminate the kernel
-                        //if (Core._KernelGuid != null)
-                          //  Core.Send(KernelCommand.TERMINATE, Core._KernelGuid);
                         Core.Terminate();
-
                         Application.Exit();
                         System.Diagnostics.Process.GetCurrentProcess().Kill();
                     }
@@ -2604,13 +2553,6 @@ namespace WocketsApplication
                 else if (name == ControlID.SETTINGS_BUTTON)
                 {
 
-
-                    /*this.panels[currentPanel].Visible = false;
-                    this.panels[ControlID.SETTINGS_PANEL].Location = new Point(0, 0);
-                    this.panels[ControlID.SETTINGS_PANEL].BringToFront();
-                    this.panels[ControlID.SETTINGS_PANEL].Visible = true;
-                    this.panels[ControlID.SETTINGS_PANEL].Dock = DockStyle.None;
-                    this.currentPanel = ControlID.SETTINGS_PANEL;*/
 
                     if (!Core._KernalStarted)
                         MessageBox.Show("Please start the kernel before changing the settings", "Confirm", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
@@ -2622,8 +2564,7 @@ namespace WocketsApplication
                         {
 
                             this.panels[ControlID.HOME_PANEL].Visible = false;
-                            this.panels[ControlID.WOCKETS_PANEL].Location = new Point(0, 0);
-                            //this.panels[ControlID.WOCKETS_PANEL].BringToFront();                   
+                            this.panels[ControlID.WOCKETS_PANEL].Location = new Point(0, 0);                           
                             this.panels[ControlID.WOCKETS_PANEL].Visible = true;
                             this.panels[ControlID.WOCKETS_PANEL].Dock = DockStyle.None;
                             this.currentPanel = ControlID.WOCKETS_PANEL;
@@ -2723,8 +2664,17 @@ namespace WocketsApplication
                         this.panels[ControlID.PLOTTER_PANEL].Visible = true;
                         this.panels[ControlID.PLOTTER_PANEL].Dock = DockStyle.None;
                         this.currentPanel = ControlID.PLOTTER_PANEL;
-
-                        UpdatePlotter();
+                        //UpdatePlotter();
+                        if (plotter != null)
+                        {
+                            plotterTimer.Enabled = false;
+                            plotter.Dispose();
+                        }
+                        plotterPanel.Size = new Size(Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height);
+                        plotter = new WocketsScalablePlotter(plotterPanel);
+                        plotterPanel.Visible = true;
+                        plotterTimer.Enabled = true;
+                    
 
                     }
                     else
@@ -2733,72 +2683,8 @@ namespace WocketsApplication
                 }
                 else if (name == ControlID.ACTIVITY_BUTTON)
                 {
-                    //Annotation Button 
-                    /*if (Core._Connected)
-                    {
-                        if (this.selectedActivityProtocol != -1)
-                        {
-                            this.panels[currentPanel].Visible = false;
-                            this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Location = new Point(0, 0);
-                            this.panels[ControlID.ANNOTATION_BUTTON_PANEL].BringToFront();
-                            this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Visible = true;
-                            this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Dock = DockStyle.None;
-                            this.currentPanel = ControlID.ANNOTATION_BUTTON_PANEL;
-                        }
-                        else
-                        {
-                            this.panels[currentPanel].Visible = false;
-                            this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL].Location = new Point(0, 0);
-                            this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL].BringToFront();
-                            this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL].Visible = true;
-                            this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL].Dock = DockStyle.None;
-                            this.currentPanel = ControlID.ANNOTATION_PROTCOLS_PANEL;
-                        }
-                    }
-                    else
-                        MessageBox.Show("Cannot annotate without connecting wockets!", "Confirm", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
-                     */
                 }
-               /* else if (name == ControlID.RECORD_BUTTON)
-                {
-                    if (Core._Connected)
-                    {
-                        if (this.selectedActivityProtocol!=-1)
-                        {
-                            File.Copy(Constants.PATH + "Master\\Configuration.xml",
-                                Core._StoragePath + "\\Configuration.xml");
-                            this.configuration = new DTConfiguration();
-                            this.configuration.FromXML(Core._StoragePath + "\\Configuration.xml");
-                            FullFeatureExtractor.Initialize(selectedWockets.Count, 90, this.configuration, this.annotatedSession.OverlappingActivityLists[0]);
-                            if (trainingTW == null)
-                            {
-                                string arffFileName = Core._StoragePath + "\\output" + DateTime.Now.ToString().Replace('/', '_').Replace(':', '_').Replace(' ', '_') + ".arff";
-                                trainingTW = new StreamWriter(arffFileName);
-                                trainingTW.WriteLine("@RELATION wockets");
-                                string arffHeader = FullFeatureExtractor.GetArffHeader();
-                                arffHeader += "\n@ATTRIBUTE activity {";
-                                int i = 0;
-                                for (i = 0; (i < ((this.annotatedSession.OverlappingActivityLists[0]).Count - 1)); i++)
-                                    arffHeader += this.annotatedSession.OverlappingActivityLists[0][i]._Name.Replace(' ', '_') + ",";
-                                arffHeader += this.annotatedSession.OverlappingActivityLists[0][i]._Name.Replace(' ', '_') + "}\n";
-                                arffHeader += "\n@DATA\n\n";
 
-                                trainingTW.WriteLine(arffHeader);
-                                string structureArffFile = Core._StoragePath + "\\structure.arff";
-                                structureTW = new StreamWriter(structureArffFile);
-                                structureTW.WriteLine("@RELATION wockets");
-                                structureTW.WriteLine(arffHeader);
-                                mlThread = new Thread(new ThreadStart(MLThread));
-                                mlThread.Start();
-                            }
-
-                        }
-                        else
-                            MessageBox.Show("Cannot save features without choosing an activity protocol!", "Confirm", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
-                    }
-                    else
-                        MessageBox.Show("Cannot save features without connecting wockets!", "Confirm", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
-                }*/
             }
             else if (currentPanel == ControlID.SETTINGS_PANEL)
             {
@@ -2901,7 +2787,9 @@ namespace WocketsApplication
                 {
                     long numNewSamples = CurrentWockets._Controller._Decoders[i].TotalSamples - lastTotalSamples[i];
                     if (numNewSamples == 0)
+                    {
                         readyFV = false;
+                    }
                     else if (numNewSamples < fv._Length)
                     {
                         if (no_fv_iterations[i] > 7) // a disconnection occurred, so reset the window you are looking at

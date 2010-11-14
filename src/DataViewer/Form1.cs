@@ -258,7 +258,9 @@ namespace NESPDataViewer
             //if (ts.TotalHours > 1)//4 or more hours of data
             //    _minutesPage = 20;
             //else 
-            if (ts.TotalMinutes > 60)//between 1-4 hours of data
+            if (ts.TotalHours > 24)
+                _minutesPage = 720;
+            else if (ts.TotalMinutes > 60)//between 1-4 hours of data
                 _minutesPage = 20;
             else if (ts.TotalMinutes > 15) _minutesPage = 5; //between 15-60 minutes of data
             else _minutesPage = 1;

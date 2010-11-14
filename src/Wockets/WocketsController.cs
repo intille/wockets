@@ -584,8 +584,12 @@ namespace Wockets
                                     j++;
                                     if (j == 960)
                                         j = 0;
-                                }                              
-                                Core.WRITE_SAVED_ACs(i, countsaved);
+                                }                    
+                                if (countsaved>10)
+                                    Core.WRITE_SAVED_ACs(i, 10);
+                                else 
+                                    Core.WRITE_SAVED_ACs(i, countsaved);
+
                                 tw2.Close();                                
                             }
 
