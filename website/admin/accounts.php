@@ -134,6 +134,7 @@ $NXT_LIST_SETTINGS = {
 </head>
 
 <body>
+<a href="index.php">Admin Home</a>
 <div class="KT_tng" id="listACCOUNTS1">
   <h1> ACCOUNTS
     <?php

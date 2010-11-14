@@ -128,6 +128,7 @@ $NXT_LIST_SETTINGS = {
 </head>
 
 <body>
+<a href="index.php">Admin Home</a>
 <div class="KT_tng" id="listFILE_UPLOAD2">
   <h1> FILE_UPLOAD
     <?php
