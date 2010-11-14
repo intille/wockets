@@ -89,6 +89,7 @@ $NXT_FORM_SETTINGS = {
 </head>
 
 <body>
+<a href="index.php">Admin Home</a>
 <?php
 	echo $tNGs->getErrorMsg();
 ?>
@@ -129,8 +130,8 @@ if (@$totalRows_rsPHONES > 1) {
           <tr>
             <td class="KT_th"><label for="model_<?php echo $cnt1; ?>">Model:</label></td>
             <td><select name="model_<?php echo $cnt1; ?>" id="model_<?php echo $cnt1; ?>">
-              <option value="" >HTC Diamond Touch</option>
-              <option value="" >HTC Diamond Touch2</option>
+              <option value="HTC Diamond Touch" <?php if (!(strcmp("HTC Diamond Touch", KT_escapeAttribute($row_rsPHONES['model'])))) {echo "SELECTED";} ?>>HTC Diamond Touch</option>
+              <option value="HTC Diamond Touch2" <?php if (!(strcmp("HTC Diamond Touch2", KT_escapeAttribute($row_rsPHONES['model'])))) {echo "SELECTED";} ?>>HTC Diamond Touch2</option>
             </select>
                 <?php echo $tNGs->displayFieldError("PHONES", "model", $cnt1); ?> </td>
           </tr>

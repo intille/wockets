@@ -125,6 +125,7 @@ $NXT_LIST_SETTINGS = {
 </head>
 
 <body>
+<a href="index.php">Admin Home</a>
 <div class="KT_tng" id="listWOCKETS1">
   <h1> WOCKETS
     <?php

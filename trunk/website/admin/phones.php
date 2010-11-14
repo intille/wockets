@@ -119,6 +119,7 @@ $NXT_LIST_SETTINGS = {
 </head>
 
 <body>
+<a href="index.php">Admin Home</a>
 <div class="KT_tng" id="listPHONES1">
   <h1> PHONES
     <?php

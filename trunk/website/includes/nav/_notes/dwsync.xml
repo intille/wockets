@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <dwsync>
-<file name="NAV.php" local="129249824818441561" remote="129278445760000000" testing="129278445760000000" />
+<file name="NAV.php" local="129249824818441561" remote="129337414090000000" testing="129337414090000000" />
 <file name="NAV_AZ.class.php" local="129249824818561568" remote="129278445760000000" testing="129278445760000000" />
 <file name="NAV_AZ.inc.php" local="129249824818611570" remote="129278445770000000" testing="129278445770000000" />
 <file name="NAV_Category.class.php" local="129249824818671574" remote="129278445770000000" testing="129278445770000000" />
@@ -11,6 +11,6 @@
 <file name="NAV_Page_Navigation.inc.php" local="129249824819161602" remote="129278445780000000" testing="129278445780000000" />
 <file name="NAV_Page_Statistics.inc.php" local="129249824819211605" remote="129278445780000000" testing="129278445780000000" />
 <file name="NAV_Regular.class.php" local="129249824819251607" remote="129278445780000000" testing="129278445780000000" />
-<file name="NAV_Text_Navigation.inc.php" local="129249824819301610" remote="129278445790000000" testing="129278445790000000" />
-<file name="NAV_Text_Statistics.inc.php" local="129249824819341612" remote="129278445790000000" testing="129278445790000000" />
+<file name="NAV_Text_Navigation.inc.php" local="129249824819301610" remote="129337414110000000" testing="129337414110000000" />
+<file name="NAV_Text_Statistics.inc.php" local="129249824819341612" remote="129337414110000000" testing="129337414110000000" />
 </dwsync>

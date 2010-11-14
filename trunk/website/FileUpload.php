@@ -1,5 +1,23 @@
 <?php require_once('Connections/Wockets.php'); ?>
 <?php
+if ($_POST['KT_Insert1'])
+{	
+	$colname_Recordset1 = "-1";
+	if (isset($_POST['imei'])) {
+  	$colname_Recordset1 = (get_magic_quotes_gpc()) ? $_POST['imei'] : addslashes($_POST['imei']);
+	}
+	mysql_select_db($database_Wockets, $Wockets);
+	
+	$query_Recordset1 = sprintf("SELECT * FROM PHONES,PARTICIPANTS_PHONE WHERE PHONES.imei = ".$_POST['imei']." AND PHONES.id=PARTICIPANTS_PHONE.phone_id");
+	$Recordset1 = mysql_query($query_Recordset1, $Wockets) or die(mysql_error());
+	$row_Recordset1 = mysql_fetch_assoc($Recordset1);
+	$totalRows_Recordset1 = mysql_num_rows($Recordset1);
+
+	if (($totalRows_Recordset1==1) && ($_POST['relative_path']=="none"))	
+		$_POST['relative_path']="Subject".$row_Recordset1['participant_id'];	
+}
+?>
+<?php
 // Load the common classes
 require_once('includes/common/KT_common.php');
 
@@ -22,8 +40,37 @@ $formValidation->addField("imei", true, "text", "", "", "", "");
 $tNGs->prepareValidation($formValidation);
 // End trigger
 
+if (!function_exists("GetSQLValueString")) {
+function GetSQLValueString($theValue, $theType, $theDefinedValue = "", $theNotDefinedValue = "") 
+{
+  $theValue = get_magic_quotes_gpc() ? stripslashes($theValue) : $theValue;
+
+  $theValue = function_exists("mysql_real_escape_string") ? mysql_real_escape_string($theValue) : mysql_escape_string($theValue);
+
+  switch ($theType) {
+    case "text":
+      $theValue = ($theValue != "") ? "'" . $theValue . "'" : "NULL";
+      break;    
+    case "long":
+    case "int":
+      $theValue = ($theValue != "") ? intval($theValue) : "NULL";
+      break;
+    case "double":
+      $theValue = ($theValue != "") ? "'" . doubleval($theValue) . "'" : "NULL";
+      break;
+    case "date":
+      $theValue = ($theValue != "") ? "'" . $theValue . "'" : "NULL";
+      break;
+    case "defined":
+      $theValue = ($theValue != "") ? $theDefinedValue : $theNotDefinedValue;
+      break;
+  }
+  return $theValue;
+}
+}
+
+//$sdirectory="";
 //start Trigger_FileUpload trigger
-//remove this line if you want to edit the code by hand 
 function Trigger_FileUpload(&$tNG) {
   $uploadObj = new tNG_FileUpload($tNG);
   $uploadObj->setFormFieldName("filename");
@@ -132,3 +179,6 @@ if (!$_POST['KT_Insert1'])
 <?php } ?>
 </body>
 </html>
+<?php
+mysql_free_result($Recordset1);
+?>

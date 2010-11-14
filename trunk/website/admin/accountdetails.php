@@ -109,6 +109,7 @@ $NXT_FORM_SETTINGS = {
 </head>
 
 <body>
+<a href="index.php">Admin Home</a>
 <?php
 	echo $tNGs->getErrorMsg();
 ?>
