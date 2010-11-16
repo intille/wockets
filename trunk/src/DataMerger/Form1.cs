@@ -1360,13 +1360,13 @@ namespace DataMerger
 
                 //Session total time
                 summary += "<tr> <td>Session Total Time</td> <td>" + totalSeconds.ToString() + "</td>" +
-                            "<td>&nbsp;</td> <td>&nbsp;</td> </tr>";
+                            "<td>&nbsp;</td></tr>";   //<td>&nbsp;</td></tr>";
                 
                 //Add a blank column
-                summary += "<tr>\n <td>&nbsp;</td> <td>&nbsp;</td> <td>&nbsp;</td> <td>&nbsp;</td> </tr>";
+                summary += "<tr>\n <td>&nbsp;</td> <td>&nbsp;</td> <td>&nbsp;</td></tr>";  //<td>&nbsp;</td> </tr>";
 
                 //Headers for annotation metrics
-                summary += "<tr><td>Label</td><td>Duration</td><td>%Occurrence</td><td>Frequency</td></tr>";
+                summary += "<tr><td>Label</td><td>Duration</td><td>%Occurrence</td></tr>";  //"<td>Frequency</td></tr>";
 
 
                 //Scan through labels
