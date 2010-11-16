@@ -17,28 +17,40 @@ using Wockets;
 using Wockets.Data.Configuration;
 
 
+
+
+
+
 namespace DataMerger
 {
+
+
     public partial class Form1 : Form
     {
-        ProgressForm progressForm;
         
+        
+        ProgressForm progressForm;
+        private static Form2 f;
 
         public Form1()
         {
             InitializeComponent();
             progressForm = new ProgressForm();
             progressForm.Show();
-   
+
 
         }
 
-        private static Form2 f;
+
+
+        #region Initialize and Check If the Sensors Files Exist
 
 
         private void button2_Click(object sender, EventArgs e)
         {
             DialogResult result = this.folderBrowserDialog1.ShowDialog();
+            
+            
             if (result == DialogResult.OK)
             {
                 this.textBox1.Text = this.folderBrowserDialog1.SelectedPath;
@@ -101,15 +113,32 @@ namespace DataMerger
                     file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*rti*.csv");
                     foreach (string filename in file)
                         File.Delete(filename);
-                  
-                
-                    //annotation files   
-                    if (File.Exists(this.textBox1.Text+"\\"+ ANNOTATION_SUBDIRECTORY + "\\AnnotationIntervals.xml"))
-                        this.progressForm.AppendLog("Annotation File .....................Found\r\n");
+
+
+                    //annotation files  (Audio) 
+                    if (File.Exists(this.textBox1.Text + "\\" + ANNOTATION_SUBDIRECTORY + "\\audioannotation" + "\\AnnotationIntervals.xml"))
+                    {
+                        this.progressForm.AppendLog("Annotation File in Audio Folder................Found\r\n");
+                        ANNOTATION_SUBDIRECTORY = ANNOTATION_SUBDIRECTORY + "\\audioannotation";
+                    }
+                    else if (File.Exists(this.textBox1.Text + "\\" + ANNOTATION_SUBDIRECTORY + "\\PhoneAnnotation" + "\\AnnotationIntervals.xml"))
+                    {
+                        this.progressForm.AppendLog("Annotation File in Phone Folder.....................Found\r\n");
+                        ANNOTATION_SUBDIRECTORY = ANNOTATION_SUBDIRECTORY + "\\PhoneAnnotation";
+                    }
                     else
                         this.progressForm.AppendLog("Annotation File ..................... Not Found\r\n");
 
 
+                    #region commented
+                    //if (File.Exists(this.textBox1.Text+"\\"+ ANNOTATION_SUBDIRECTORY + "\\AnnotationIntervals.xml"))
+                    //    this.progressForm.AppendLog("Annotation File .....................Found\r\n");
+                    //else
+                    //    this.progressForm.AppendLog("Annotation File ..................... Not Found\r\n");
+                    #endregion 
+
+
+                    //activity labels for annotations (Wockets)
                     if (File.Exists(this.textBox1.Text + "\\" + WOCKETS_SUBDIRECTORY + "\\ActivityLabelsRealtime.xml"))
                         this.progressForm.AppendLog("Activity Labels File .....................Found\r\n");
                     else
@@ -347,6 +376,19 @@ namespace DataMerger
 
         }
 
+
+
+        #endregion
+
+
+
+        #region Thread that checks for the process status
+
+
+        private Thread aConversionThread;
+        private bool converted = false;
+
+
         private void ConversionThread()
         {
             string[] filter = new string[2];
@@ -373,12 +415,6 @@ namespace DataMerger
 
         }
 
-
-
-        private Thread aConversionThread;
-        private bool converted = false;
-
-
         private void button1_Click(object sender, EventArgs e)
         {
             if (converted == true)
@@ -395,10 +431,18 @@ namespace DataMerger
             this.timer1.Enabled = true;
             aConversionThread = new Thread(new ThreadStart(ConversionThread));
             aConversionThread.Start();
-            
+
 
 
         }
+
+
+        #endregion 
+
+
+
+        #region Timer
+
 
         private void timer1_Tick(object sender, EventArgs e)
         {
@@ -417,9 +461,17 @@ namespace DataMerger
         }
 
 
+        #endregion 
+
+
+
+        #region Generate the Results File with the Statistical Analysis Of the Data 
+
+
+
 
         public static void toQualityHTML(string aDataDirectory, string masterDirectory, int maxControllers, string[] filter)
-        {
+ {
             
             int ACCELEROMETER_STATISTICS_LENGTH=16;
             int WOCKETS_SR = 92;
@@ -428,9 +480,9 @@ namespace DataMerger
 
             if (CSVProgress == "")
                 CSVProgress = "Generating Quality Assessment Summary in HTML";
-            
 
-            //===================  Load the MITES DATA ==============================
+
+            #region ===================  Load the MITES/Wockets DATA ==============================
 
             //Calculate Data Gaps
             WocketsController wc = new WocketsController("", "", "");
@@ -447,6 +499,7 @@ namespace DataMerger
             {
                 sreader = new SXML.Reader(masterDirectory, aDataDirectory + "\\" + MITES_SUBDIRECTORY);
                 sannotation = sreader.parse(maxControllers);
+                
                 //remove the HR sensor
                 for (int i = 0; (i < sannotation.Sensors.Count); i++)
                     if ((Convert.ToInt32(((SXML.Sensor)sannotation.Sensors[i]).ID) == 0))
@@ -461,9 +514,11 @@ namespace DataMerger
             }
 
 
+            #endregion
 
 
-            // ============== Load annotation intervals =======================================
+
+            #region ============== Load Annotation Intervals =======================================
 
             Session session = new Session();
             session.FromXML(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\AnnotationIntervals.xml");
@@ -472,38 +527,51 @@ namespace DataMerger
             Hashtable postures = new Hashtable();
             int k = 0;
 
+
+            //If two categories are available
             if (session.OverlappingActivityLists.Count == 2)
             {
                 numPostures = session.OverlappingActivityLists[0].Count * session.OverlappingActivityLists[1].Count + 1;
+                
+                //Go through the activity list for the two categories
+                //This list will generate all combinations of postures-activities
                 for (int i = 0; (i < session.OverlappingActivityLists[1].Count); i++)
                     for (int j = 0; (j < session.OverlappingActivityLists[0].Count); j++)
                     {
-
-
                         postures.Add(session.OverlappingActivityLists[1][i]._Name + "_" + session.OverlappingActivityLists[0][j]._Name, k);
                         k++;
-
                     }
             }
             else if (session.OverlappingActivityLists.Count == 1)
             {
+
                 numPostures = session.OverlappingActivityLists[0].Count + 1;
+
+                //Go through the activity list for the available category
+                //This list will simply pass the elements in the category list to the postures data structure
                 for (int i = 0; (i < session.OverlappingActivityLists[0].Count); i++)
                 {
                     postures.Add(session.OverlappingActivityLists[0][i]._Name , k);
                     k++;
-
                 }
+
             }
 
-
+            //Check if postures contain the "unknown" label, otherwise add it
             postures.Add("unknown", k);
 
 
+            #endregion
 
 
 
-            //================= Compute Statistics based on Postures  ===========================
+
+            #region  ================= Compute Statistics based on Postures  ===========================
+
+
+
+            #region Create Data Structures & Variables
+
 
             int[] timeLostPostureSensorCounter = new int[numPostures];
             int[] wocketsSR = new int[wc._Sensors.Count];
@@ -531,9 +599,16 @@ namespace DataMerger
             int[] trueMitesSR = new int[mitesCount];
             int[][] modeMITesSR = new int[mitesCount][];
             Hashtable annotatedPostures=new Hashtable();
-           
-           // int[] wocketsCounter = new int[wc._Sensors.Count];
-           // int[] mitesCounter = new int[sannotation.Sensors.Count];
+
+
+            #endregion
+
+
+            #region Initialize Variables
+
+
+            // int[] wocketsCounter = new int[wc._Sensors.Count];
+            // int[] mitesCounter = new int[sannotation.Sensors.Count];
             int numSeconds = 0;
             for (int i = 0; (i < mitesCount); i++)
             {
@@ -541,8 +616,10 @@ namespace DataMerger
                 trueMitesSR[i] = 0;
                 modeMITesSR[i] = new int[1000];                
             }
-            int mitesStartIndex=3+session.OverlappingActivityLists.Count;
 
+
+
+            int mitesStartIndex=3+session.OverlappingActivityLists.Count;
             for (int i = 0; (i < wc._Sensors.Count); i++)
             {
                 wocketsSR[i]=0;
@@ -563,149 +640,237 @@ namespace DataMerger
             if (mitesCount == 0)
                 wocketsStartIndex = wocketsStartIndex - 1;
 
+
+            #endregion
+
+
+            #region Initialize Annotations
+
             int numCategories = session.OverlappingActivityLists.Count;
             int currentAnnotation = 0;
 
+            //Get the number of annotations
             int annotationsLength = session.Annotations.Count;
+
+            //Get the overall session time
             double startTime = session.Annotations[0]._StartUnix;
             double endTime = session.Annotations[annotationsLength-1]._EndUnix;
+
+            #endregion
+
+
+            #region Open the Summary CSV File
+
             TextReader tr = new StreamReader(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\MITesSummaryData.csv");
             string line = "";
             tr.ReadLine();
 
-            
+            #endregion
 
-            while ((line = tr.ReadLine()) != null)
-            {
 
+
+         //Scan the Annotation Intervals and Summary File to Access the Sensors Statistics
+         while ((line = tr.ReadLine()) != null)
+         {
+                
+                //Read Line of Summary File (Sensor Reading)
                 string[] tokens = line.Split(',');
                 double currentTime = Convert.ToDouble(tokens[0]);
                 string posture = tokens[2];
                 string current_posture = "unknown";
 
 
-
+                #region Determine if the sensor reading is within the annotation interval & compute its metrics
+                
+                
                 try
                 {
 
-                    if ((currentAnnotation < session.Annotations.Count - 1) && (session.Annotations[currentAnnotation]._EndUnix < currentTime))
+                    // If the sensor reading happens after the end of the annotation interval, 
+                    // advance to the next annotation
+                    if (  (currentAnnotation < session.Annotations.Count - 1) && 
+                          (session.Annotations[currentAnnotation]._EndUnix < currentTime) )
                         currentAnnotation++;
 
                   
-
+                    // If the sensor reading happens within the annotation interval,
+                    // proceed to compute the metrics
                     if ((currentTime >= session.Annotations[currentAnnotation]._StartUnix) &&
                         (currentTime <= session.Annotations[currentAnnotation]._EndUnix))
                     {
-                        /* Hack until selene fixes the audio annotator */
+
+                        #region Get the Label Name, Add it to the Hash Table, and Add the Annotated Seconds
+
+                        // If we have more than one category,
+                        // make the check for the second category (activities)
                         if (session.Annotations[currentAnnotation].Activities.Count > 1)
                         {
-                            if ((session.Annotations[currentAnnotation].Activities[1]._Name == "none") || (session.Annotations[currentAnnotation].Activities[1]._Name == "") || (session.Annotations[currentAnnotation].Activities[1]._Name == "-"))
-                                session.Annotations[currentAnnotation].Activities[1]._Name = "unknown";
+                            //If it is NOT a valid label, replace it for "unknown"
+                            if ((session.Annotations[currentAnnotation].Activities[1]._Name == "none") || 
+                                (session.Annotations[currentAnnotation].Activities[1]._Name == "")     || 
+                                (session.Annotations[currentAnnotation].Activities[1]._Name == "-"))
+                                     session.Annotations[currentAnnotation].Activities[1]._Name = "unknown";
                         }
-                        if ((session.Annotations[currentAnnotation].Activities[0]._Name == "none") || (session.Annotations[currentAnnotation].Activities[0]._Name == "") || (session.Annotations[currentAnnotation].Activities[0]._Name == "-"))
-                            session.Annotations[currentAnnotation].Activities[0]._Name = "unknown";
 
+
+                        //Make the check for all the first category (postures)
+                        if ((session.Annotations[currentAnnotation].Activities[0]._Name == "none") || 
+                            (session.Annotations[currentAnnotation].Activities[0]._Name == "")     || 
+                            (session.Annotations[currentAnnotation].Activities[0]._Name == "-"))
+                                   session.Annotations[currentAnnotation].Activities[0]._Name = "unknown";
+
+
+                        //Get the name of the annotation label 
                         if (session.Annotations[currentAnnotation].Activities.Count > 1)                        
                             current_posture = session.Annotations[currentAnnotation].Activities[1]._Name + "_" + session.Annotations[currentAnnotation].Activities[0]._Name;
                         else
                             current_posture = session.Annotations[currentAnnotation].Activities[0]._Name;
 
 
+                        // Search in the hash table the name of the current label,
+                        // If it doesn't exists, add it to the list of annotated postures
+                        // If it exists, add the number of seconds in the annotation
                         if (!annotatedPostures.ContainsKey(current_posture))
                             annotatedPostures.Add(current_posture, 1);
                         else
                         {
                             int annotatedSeconds = (int)annotatedPostures[current_posture] + 1;
                             annotatedPostures[current_posture] = annotatedSeconds;
-
                         }
+
+
+                        #endregion
+
                     }
 
-                    //Calculate quality metrics on data that has been annotated only
-                    if ((currentTime >= startTime) && (currentTime <= endTime))
-                    {
-                        //mites SR
-                        for (int i = 0; (i < mitesCount); i++)
+
+
+
+                     #region  Calculate quality metrics on data that has been annotated only
+                
+
+                        //If the sensor reading falls within the start-end of the session
+                        if ((currentTime >= startTime) && (currentTime <= endTime))
                         {
-
-                            int sr = Convert.ToInt32(tokens[mitesStartIndex + (ACCELEROMETER_STATISTICS_LENGTH * i)]);
-                            mitesSR[i] += sr;
-                            modeMITesSR[i][sr] = modeMITesSR[i][sr] + 1;
-
-                        }
+                             #region Calculate Metrics
 
 
-
-
-                        int currentPostureIndex = 0;
-
-
-                        currentPostureIndex = (int)postures[current_posture];
-
-
-                        //the number of seconds in  a particular posture
-
-                        timeLostPostureSensorCounter[currentPostureIndex] = timeLostPostureSensorCounter[currentPostureIndex] + 1;
-                        //wockets SR
-                        for (int i = 0; (i < wc._Sensors.Count); i++)
-                        {
-                            int sr = 0;
-                            try
-                            {
-                                sr = Convert.ToInt32(tokens[wocketsStartIndex + (ACCELEROMETER_STATISTICS_LENGTH * i)]);
-                                wocketsSR[i] += sr;
-                                modeWocketsSR[i][sr] = modeWocketsSR[i][sr] + 1;
-                            }
-                            catch (Exception e)
-                            {
-                            }
-                            //add the samples collected per activity
-
-                            timeLostPostureSensorDistribution[i][currentPostureIndex] = timeLostPostureSensorDistribution[i][currentPostureIndex] + sr;
-
-
-                            if (sr == 0)
-                            {
-                                zeroWocketsSR[i] = zeroWocketsSR[i] + 1;
-                                if (zeroWocketsSR[i] == 5)
+                                #region  mites SR
+                                
+                                for (int i = 0; (i < mitesCount); i++)
                                 {
-                                    disconnected[i] = true;
-                                    numDisconnected[i] = numDisconnected[i] + 1;
+                                    int sr = Convert.ToInt32(tokens[mitesStartIndex + (ACCELEROMETER_STATISTICS_LENGTH * i)]);
+                                    mitesSR[i] += sr;
+                                    modeMITesSR[i][sr] = modeMITesSR[i][sr] + 1;
                                 }
-                                disconnectionTimer[i]++;
-                            }
-                            else
-                            {
-                                if (disconnectionTimer[i] >= 5)
-                                    disconnectionDistribution[i].Add(disconnectionTimer[i]);
-                                zeroWocketsSR[i] = 0;
-                                disconnected[i] = false;
-                                disconnectionTimer[i] = 0;
-                            }
-                        }
 
-                        numSeconds++;
-                    }
-                }//end of try
-                catch (Exception e)
-                {
-                    //Launch exception when there is a index mistmatch in the ActivityIntervals.xml file
-                }
+                            #endregion
 
-            }//end of while
 
-            //calculate time lost, % data lost, burstiness
+
+                                #region  The number of seconds in a particular posture (adds to the global counter)
+
+                                int currentPostureIndex = 0;
+                                    currentPostureIndex = (int)postures[current_posture];
+                                    timeLostPostureSensorCounter[currentPostureIndex] = timeLostPostureSensorCounter[currentPostureIndex] + 1;
+                                
+                                #endregion
+
+
+
+                                #region  wockets SR
+
+                                for (int i = 0; (i < wc._Sensors.Count); i++)
+                                {
+
+                                    //Compute Wockets Sampling Rate
+                                    int sr = 0;
+                                    try
+                                    {
+                                        sr = Convert.ToInt32(tokens[wocketsStartIndex + (ACCELEROMETER_STATISTICS_LENGTH * i)]);
+                                        wocketsSR[i] += sr;
+                                        modeWocketsSR[i][sr] = modeWocketsSR[i][sr] + 1;
+                                    }
+                                    catch (Exception e)
+                                    {
+                                    }
+                                    
+                                    
+                                    //Add the samples collected per activity
+                                    timeLostPostureSensorDistribution[i][currentPostureIndex] = timeLostPostureSensorDistribution[i][currentPostureIndex] + sr;
+
+
+                                    //Compute the number of disconnections
+                                    if (sr == 0)
+                                    {
+                                        zeroWocketsSR[i] = zeroWocketsSR[i] + 1;
+                                        if (zeroWocketsSR[i] == 5)
+                                        {
+                                            disconnected[i] = true;
+                                            numDisconnected[i] = numDisconnected[i] + 1;
+                                        }
+                                        disconnectionTimer[i]++;
+                                    }
+                                    else
+                                    {
+                                        if (disconnectionTimer[i] >= 5)
+                                            disconnectionDistribution[i].Add(disconnectionTimer[i]);
+                                        zeroWocketsSR[i] = 0;
+                                        disconnected[i] = false;
+                                        disconnectionTimer[i] = 0;
+                                    }
+                                }
+
+                            #endregion
+
+
+                                numSeconds++;
+
+
+                            #endregion
+
+                        } //end of the if
+
+                   
+                    #endregion
+
+            
+            }//end of try
+            catch (Exception e)
+            {
+               //Launch exception when there is a index mistmatch in the ActivityIntervals.xml file
+            }
+
+        
+          #endregion
+
+
+         }//end of while
+
+
+        
+      
+        #region  Calculate time lost, % data lost, burstiness
 
 
 
             #region Wockets Loss Calculation
+
+
+            //The total session duration
             int totalSeconds = (int)((endTime - startTime) / 1000.0);
            
+
+            //initialize variables
             int expectedMITesSamples = MITES_SR * totalSeconds;
             int[] wocketsSecondsLost = new int[wc._Sensors.Count];
             int[] mitesSecondsLost = new int[mitesCount];
             int[] wocketsPercentLost = new int[wc._Sensors.Count];
             int[] mitesPercentLost = new int[mitesCount];
+
+     
+
+            //Compute Loss Based on Sampling Rate and Number of Samples
             for (int i = 0; (i < wc._Sensors.Count); i++)
             {
                 int expectedWocketsSamples = wc._Sensors[i]._SamplingRate * totalSeconds;
@@ -720,16 +885,31 @@ namespace DataMerger
                     disconnectionDistribution[i].Add(disconnectionTimer[i]);
 
             }
+
+
             #endregion Wockets Loss Calculation
 
-            #region Wockets per Activity Loss Calculation
+
+
+
+
+
+          #region Wockets per Activity Loss Calculation
+
+
+            //Scan through the list of annotated postures
             for (int i = 0; (i < timeLostPostureSensorCounter.Length); i++)
             {
 
-
+                //Scan through the list of sensors
                 for (int j = 0; (j < wc._Sensors.Count); j++)
                 {
+
+                    //expected samples
                     int expectedWocketsSamples = wc._Sensors[j]._SamplingRate * timeLostPostureSensorCounter[i];
+
+
+                    //compute loss
                     if (timeLostPostureSensorDistribution[j][i] < expectedWocketsSamples)
                     {
                         timeLostPostureSensorDistribution[j][i] = (int)Math.Floor((expectedWocketsSamples - timeLostPostureSensorDistribution[j][i]) / (double)wc._Sensors[j]._SamplingRate);
@@ -743,49 +923,89 @@ namespace DataMerger
 
                 }
 
-
             }
            
+
             #endregion Wockets per Activity Loss Calculation
 
+
+
+
+
             #region MEAN and SD Calculation
+
+            //Iterate through sensors
             for (int i = 0; (i < wc._Sensors.Count); i++)
             {
                numDisconnections[i]=disconnectionDistribution[i].Count;
                meanDisconnection[i] = 0;
+
+               
                for (int j = 0; (j < disconnectionDistribution[i].Count); j++)               
                    meanDisconnection[i] = meanDisconnection[i] + (int)disconnectionDistribution[i][j];    
+                
+
                 if (numDisconnections[i]>0)
                     meanDisconnection[i] = (meanDisconnection[i]-1) / numDisconnections[i];
                 
+
                for (int j = 0; (j < disconnectionDistribution[i].Count); j++)               
                    sdDisconnection[i] = sdDisconnection[i]  + (int) Math.Pow( ( (double) (int)disconnectionDistribution[i][j]- meanDisconnection[i]),2.0);
+
 
                if (disconnectionDistribution[i].Count > 1)
                    sdDisconnection[i] = (int)Math.Sqrt(sdDisconnection[i] / (disconnectionDistribution[i].Count - 1));
                else
                    sdDisconnection[i] = -1;
+
            }
+
 
            #endregion MEAN and SD Calculation
 
-           #region MITes Loss Calculation
-           for (int i = 0; (i < mitesCount); i++)
-           {
+
+
+
+
+
+            #region MITes Loss Calculation
+            
+
+            for (int i = 0; (i < mitesCount); i++)
+            {
                if (mitesSR[i] < expectedMITesSamples)
                    mitesSecondsLost[i] = (expectedMITesSamples - mitesSR[i]) / MITES_SR;
+               
                mitesPercentLost[i] = (int)(((double)mitesSecondsLost[i] / (double)totalSeconds) * 100.0);
-           }
+            }
+
+
+            
             #endregion MITes Loss Calculation
+
+
+
             tr.Close();
 
 
+
+
+
+            #region Percent Maxedout MITES
+
+
             int[] mitesMaxedOut = null;
+
             if (sannotation!=null)
                 mitesMaxedOut=new int[sannotation.MaximumSensorID + 1];
+
             int[] mitesSamplesCount = null;
+            
             if (sannotation!=null)
                 mitesSamplesCount=new int[sannotation.MaximumSensorID + 1];
+            
+     
+
             try
             {
                 MITesDecoder aMITesDecoder = new MITesDecoder();
@@ -807,7 +1027,14 @@ namespace DataMerger
             {
             }
 
+
+            #endregion
+
+
+
             #region Percent Maxed Out Wockets
+
+
             int[] maxedOut = new int[wc._Sensors.Count];
             int[] samplesCount = new int[wc._Sensors.Count];
 
@@ -819,41 +1046,65 @@ namespace DataMerger
                 wc._Sensors[i]._RootStorageDirectory = aDataDirectory+"\\"+ WOCKETS_SUBDIRECTORY + "\\data\\raw\\PLFormat\\";
                 try
                 {
+
                     int lastDecodedIndex = 0;
+                    
+                    
                     while (wc._Sensors[i].Load())
                     {
+
                         samplesCount[i] = samplesCount[i] + 1;
 
                         if (wc._Sensors[i]._Decoder._Head == 0)
                             lastDecodedIndex = wc._Sensors[i]._Decoder._Data.Length - 1;
                         else
-                            lastDecodedIndex = wc._Sensors[i]._Decoder._Head - 1;                      
+                            lastDecodedIndex = wc._Sensors[i]._Decoder._Head - 1;   
+                   
+
                         Wockets.Data.Accelerometers.AccelerationData data = (Wockets.Data.Accelerometers.AccelerationData)wc._Sensors[i]._Decoder._Data[lastDecodedIndex];
+                        
+                        
                         if ((data._X >= 1023) || (data._Y >= 1023) || (data._Z >= 1023))
                             maxedOut[i] = maxedOut[i] + 1;
+                    
                     }
                 }
                 catch (Exception e)
                 {
                 }
+     
             }
+
             #endregion Percent Maxed Out Wockets
+
+
+
+
+            #region Write Results to HTML
+
 
             string summary = "<h2>MITes and Wockets Data Loss, Disconnections and Maxing out Statistics </h2><TABLE border=\"1\">\n";
             int numRows = wc._Sensors.Count - 1 + mitesCount;
             string[] rows = new string[numRows];
             string header="<TR>\n";
-            
+       
+
             string[] hlabels= new string[]{"Placement\\Metric","Data Loss (seconds)","% Data Loss","Num Disconnections","Mean Disconnection (seconds)","SD Disconnection (seconds)","Num Maxed Out","% Maxed Out"};            
 
             for (int i=0;(i<hlabels.Length);i++)
                 header += "<TD><div align=\"center\"><strong>" + hlabels[i] + "</strong></div></TD>\n";
             
+
             header+="</TR>\n";
             summary+=header;
+     
+
+
+            #region Statistics Table for MITES
 
             for (int i = 0; (i < mitesCount); i++)
             {
+
                 string row="<TR>\n";
                 row += "<TD><div align=\"center\"><strong>MITes " + ((SXML.Sensor)sannotation.Sensors[i]).Location + "</strong></div></TD>\n";
 
@@ -880,10 +1131,21 @@ namespace DataMerger
                 row += "<TD><div align=\"center\">" + percent + "% </div></TD>\n";
                 row+="</TR>\n";                
                 summary+=row;
+
+
             }
 
 
             summary += "<TR><TD colspan=\"8\"></TD></TR><TR>\n";
+
+
+
+            #endregion
+
+
+
+            #region Statistics Table for Wockets
+
 
             for (int i = 0; (i < wc._Sensors.Count); i++)
             {
@@ -919,17 +1181,25 @@ namespace DataMerger
                 }
 
             }
+
             summary += "</TABLE>\n";
-
-
 
 
             summary = "<HTML><HEAD></HEAD><BODY>" + summary + "</BODY></HTML>";
             TextWriter tw = new StreamWriter(aDataDirectory + "\\result.html");
             tw.WriteLine(summary);
-           tw.WriteLine("\n<p>&nbsp;</p>\n");
+            tw.WriteLine("\n<p>&nbsp;</p>\n");
 
-           summary = "<h2>Wockets Data Loss by Posture and Activity Statistics</h2><TABLE border=\"1\">\n";
+
+
+            #endregion
+
+
+
+            #region Statistics per Activity Table
+
+
+            summary = "<h2>Wockets Data Loss by Posture and Activity Statistics</h2><TABLE border=\"1\">\n";
             numRows =numPostures;
             rows = new string[numRows];
             header = "<TR>\n<td><div align=\"center\"><strong>Activity</strong></div></td><td><div align=\"center\"><strong>Posture</strong></div></td><td><strong>Total Seconds Annotated</strong></td>\n";
@@ -938,6 +1208,9 @@ namespace DataMerger
             header += "</TR>\n";
             summary += header;
 
+
+     
+           
             int m = 0;
             if (session.OverlappingActivityLists.Count > 1)
             {
@@ -983,107 +1256,289 @@ namespace DataMerger
                     m++;
                 }
             }
+
             tw.WriteLine(summary + "</TABLE>\n");
 
 
+            #endregion
+
+
+
+            #region Other Sensors Statistics Table
+
             summary = "<h2>Other Sensors Statistics</h2><TABLE border=\"1\">\n";
-            header = "<TR>\n<td><div align=\"center\"><strong>Sensor Type</strong></div></td><td><div align=\"center\"><strong>Start Time</strong></div></td><td><strong>Data Present</strong></td><td><strong>Num Samples</strong></td><td><strong>Percent Loss</strong></td></TR>\n";
-            header += "</TR>\n";
-            summary += header;
+                header = "<TR>\n<td><div align=\"center\"><strong>Sensor Type</strong></div></td><td><div align=\"center\"><strong>Start Time</strong></div></td><td><strong>Data Present</strong></td><td><strong>Num Samples</strong></td><td><strong>Percent Loss</strong></td></TR>\n";
+                header += "</TR>\n";
+                summary += header;
 
-            int expectedOxyconRecords=totalSeconds/5;
-            double oxyconLoss=0;            
-            if (oxyconRecords<expectedOxyconRecords)
-                oxyconLoss = 100 - (((double)oxyconRecords / expectedOxyconRecords) * 100.0);
+                int expectedOxyconRecords=totalSeconds/5;
+                double oxyconLoss=0;            
+                if (oxyconRecords<expectedOxyconRecords)
+                    oxyconLoss = 100 - (((double)oxyconRecords / expectedOxyconRecords) * 100.0);
 
-            summary += "<TR>\n<td><div align=\"center\"><strong>Oxycon</strong></div></td><td>"+(oxyconStart==null?"&nbsp;":oxyconStart)+"</td><td>" + (hasOxycon ? "Yes" : "No") + "</td><td>" + oxyconRecords + "</td><td>" + oxyconLoss.ToString("0") + "%</td></TR>\n";
+                summary += "<TR>\n<td><div align=\"center\"><strong>Oxycon</strong></div></td><td>"+(oxyconStart==null?"&nbsp;":oxyconStart)+"</td><td>" + (hasOxycon ? "Yes" : "No") + "</td><td>" + oxyconRecords + "</td><td>" + oxyconLoss.ToString("0") + "%</td></TR>\n";
 
-            
-            double sensewearLoss = 0;
-            if (sensewearRecords < totalSeconds)
-                sensewearLoss = 100 - (((double)sensewearRecords / totalSeconds) * 100.0);
+                
+                double sensewearLoss = 0;
+                if (sensewearRecords < totalSeconds)
+                    sensewearLoss = 100 - (((double)sensewearRecords / totalSeconds) * 100.0);
 
-            summary += "<TR>\n<td><div align=\"center\"><strong>Sensewear</strong></div></td><td>" + (sensewearStart == null ? "&nbsp;" : sensewearStart) + "</td><td>" + (hasSensewear ? "Yes" : "No") + "</td><td>" + sensewearRecords + "</td><td>" + sensewearLoss.ToString("0") + "%</td></TR>\n";
-
-
-
-            summary += "<TR>\n<td><div align=\"center\"><strong>Actigraph</strong></div></td><td>" + (actigraphStart == null ? "&nbsp;" : actigraphStart) + "</td><td>" + (hasActigraph ? "Yes" : "No") + "</td><td>";
-
-            for (int r = 0; (r < actigraphData.Length); r++)
-            {
-                summary += actigraphData[r].Count;
-                if (r != (actigraphData.Length - 1))
-                    summary += " | ";
-            }
-            summary += "</td><td>";
-
-            for (int r = 0; (r < actigraphData.Length); r++)                        
-            {
-                double actigraphLoss = 0;
-                if (actigraphData[r].Count < totalSeconds)
-                    actigraphLoss = 100 - (((double)actigraphData[r].Count / totalSeconds) * 100.0);
-                summary += actigraphLoss.ToString("0")+" %";
-                if (r != (actigraphData.Length - 1))
-                    summary += " | ";
-            }
-            summary += "</td></TR>\n";
-
-            double zephyrLoss = 0;
-            if (zephyrRecords < totalSeconds)
-                zephyrLoss = 100 - (((double)zephyrRecords / totalSeconds) * 100.0);
-            summary += "<TR>\n<td><div align=\"center\"><strong>Zephyr</strong></div></td><td>" + (zephyrStart == null ? "&nbsp;" : zephyrStart) + "</td><td>" + (hasZephyr ? "Yes" : "No") + "</td><td>" + zephyrRecords + "</td><td>" + zephyrLoss.ToString("0") + "%</td></TR>\n";
-
-            double rtiLoss = 0;
-            if (rtiRecords < totalSeconds)
-                rtiLoss = 100 - (((double)rtiRecords / totalSeconds) * 100.0);
-            summary += "<TR>\n<td><div align=\"center\"><strong>RTI</strong></div></td><td>" + (rtiStart == null ? "&nbsp;" : rtiStart) + "</td><td>" + (hasRTI ? "Yes" : "No") + "</td><td>" + rtiRecords + "</td><td>" + rtiLoss.ToString("0") + "%</td></TR>\n";
-
-            double columbiaLoss = 0;
-            if (columbiaRecords <  totalSeconds)
-                columbiaLoss = 100 - (((double)columbiaRecords / totalSeconds) * 100.0);
-            summary += "<TR>\n<td><div align=\"center\"><strong>Columbia</strong></div></td><td>" + (columbiaStart == null ? "&nbsp;" : columbiaStart) + "</td><td>" + (hasColumbia ? "Yes" : "No") + "</td><td>" + columbiaRecords + "</td><td>" + columbiaLoss.ToString("0") + "%</td></TR>\n";
-
-            double gpsLoss = 0;
-            if (gpsRecords < totalSeconds)
-                gpsLoss = 100 - (((double)gpsRecords / totalSeconds) * 100.0);
-            summary += "<TR>\n<td><div align=\"center\"><strong>GPS</strong></div></td><td>" + (gpsStart == null ? "&nbsp;" : gpsStart) + "</td><td>" + (hasGPS ? "Yes" : "No") + "</td><td>" + gpsRecords + "</td><td>" + gpsLoss.ToString("0") + "%</td></TR>\n";
+                summary += "<TR>\n<td><div align=\"center\"><strong>Sensewear</strong></div></td><td>" + (sensewearStart == null ? "&nbsp;" : sensewearStart) + "</td><td>" + (hasSensewear ? "Yes" : "No") + "</td><td>" + sensewearRecords + "</td><td>" + sensewearLoss.ToString("0") + "%</td></TR>\n";
 
 
 
+                summary += "<TR>\n<td><div align=\"center\"><strong>Actigraph</strong></div></td><td>" + (actigraphStart == null ? "&nbsp;" : actigraphStart) + "</td><td>" + (hasActigraph ? "Yes" : "No") + "</td><td>";
 
+                for (int r = 0; (r < actigraphData.Length); r++)
+                {
+                    summary += actigraphData[r].Count;
+                    if (r != (actigraphData.Length - 1))
+                        summary += " | ";
+                }
+                summary += "</td><td>";
+
+                for (int r = 0; (r < actigraphData.Length); r++)                        
+                {
+                    double actigraphLoss = 0;
+                    if (actigraphData[r].Count < totalSeconds)
+                        actigraphLoss = 100 - (((double)actigraphData[r].Count / totalSeconds) * 100.0);
+                    summary += actigraphLoss.ToString("0")+" %";
+                    if (r != (actigraphData.Length - 1))
+                        summary += " | ";
+                }
+                summary += "</td></TR>\n";
+
+                double zephyrLoss = 0;
+                if (zephyrRecords < totalSeconds)
+                    zephyrLoss = 100 - (((double)zephyrRecords / totalSeconds) * 100.0);
+                summary += "<TR>\n<td><div align=\"center\"><strong>Zephyr</strong></div></td><td>" + (zephyrStart == null ? "&nbsp;" : zephyrStart) + "</td><td>" + (hasZephyr ? "Yes" : "No") + "</td><td>" + zephyrRecords + "</td><td>" + zephyrLoss.ToString("0") + "%</td></TR>\n";
+
+                double rtiLoss = 0;
+                if (rtiRecords < totalSeconds)
+                    rtiLoss = 100 - (((double)rtiRecords / totalSeconds) * 100.0);
+                summary += "<TR>\n<td><div align=\"center\"><strong>RTI</strong></div></td><td>" + (rtiStart == null ? "&nbsp;" : rtiStart) + "</td><td>" + (hasRTI ? "Yes" : "No") + "</td><td>" + rtiRecords + "</td><td>" + rtiLoss.ToString("0") + "%</td></TR>\n";
+
+                double columbiaLoss = 0;
+                if (columbiaRecords <  totalSeconds)
+                    columbiaLoss = 100 - (((double)columbiaRecords / totalSeconds) * 100.0);
+                summary += "<TR>\n<td><div align=\"center\"><strong>Columbia</strong></div></td><td>" + (columbiaStart == null ? "&nbsp;" : columbiaStart) + "</td><td>" + (hasColumbia ? "Yes" : "No") + "</td><td>" + columbiaRecords + "</td><td>" + columbiaLoss.ToString("0") + "%</td></TR>\n";
+
+                double gpsLoss = 0;
+                if (gpsRecords < totalSeconds)
+                    gpsLoss = 100 - (((double)gpsRecords / totalSeconds) * 100.0);
+                summary += "<TR>\n<td><div align=\"center\"><strong>GPS</strong></div></td><td>" + (gpsStart == null ? "&nbsp;" : gpsStart) + "</td><td>" + (hasGPS ? "Yes" : "No") + "</td><td>" + gpsRecords + "</td><td>" + gpsLoss.ToString("0") + "%</td></TR>\n";
+
+
+            #endregion
+
+
+            #endregion
+
+
+
+            #region Add the Annotations Summary
 
             summary += "</TABLE>\n";
-
             summary += "<h2>Annotation Summary</h2>\n";
 
+
+            //If the annotation summary file exists, add it to current summary
+            //If it doesn't exist, add the HTML to summary 
             if (File.Exists(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\AnnotationSummary.html"))
             {
                 TextReader ttr = new StreamReader(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\AnnotationSummary.html");
                 summary += ttr.ReadToEnd();
                 ttr.Close();
             }
+            else
+            {
+
+                #region Create HTML content with stats
+
+                //Create Table & Headers
+                summary += "<table border=\"1\">\n";
+
+                //Session total time
+                summary += "<tr> <td>Session Total Time</td> <td>" + totalSeconds.ToString() + "</td>" +
+                            "<td>&nbsp;</td> <td>&nbsp;</td> </tr>";
+                
+                //Add a blank column
+                summary += "<tr>\n <td>&nbsp;</td> <td>&nbsp;</td> <td>&nbsp;</td> <td>&nbsp;</td> </tr>";
+
+                //Headers for annotation metrics
+                summary += "<tr><td>Label</td><td>Duration</td><td>%Occurrence</td><td>Frequency</td></tr>";
+
+
+                //Scan through labels
+                string cur_activity = "";
+                int total_secs_activity = 0;
+                double percent_duration = 0.0;
+                int frequency = 0;
+
+                for (int n = 0; n < session.OverlappingActivityLists.Count; n++)
+                {
+                    for (int j = 0; j < session.OverlappingActivityLists[n].Count; j++)
+                    {
+                        cur_activity = session.OverlappingActivityLists[n][j]._Name;
+                        total_secs_activity = (int)annotatedPostures[cur_activity];
+                        percent_duration = ((double)total_secs_activity / totalSeconds) * 100.0;
+
+
+                        summary += "<tr>\n<td>" + cur_activity + "</td><td>" + total_secs_activity.ToString() + 
+                                   "</td><td>"  + String.Format("{0:0.0}%",percent_duration) + "</td></tr>";                       
+                    }
+                }
+
+
+                //Close table
+                summary +="</table>";
+
+                #endregion
+
+
+            }
 
                 
             summary +="</HTML>";
 
-            tw.WriteLine(summary);
+            #endregion 
 
 
-            tw.Close();
-   
+
+
+        tw.WriteLine(summary);
+        tw.Close();
+
+
+        SaveLabelsColorsToFile(aDataDirectory, session.OverlappingActivityLists.Count, session.OverlappingActivityLists);
+
+
+    #endregion
+
+    #endregion
+
+
+
+ }
+
+           
+
+
+     //--- This colors assigned to the annotation bar in the viewer are protocol specific  ----
+     //Check how I can make it more general
+     private static void SaveLabelsColorsToFile(string aDataDirectory, int number_of_categories, ConcurrentActivityLists list_of_activities)
+     {
+
+           
+            //Category
+            if (File.Exists(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\ActivityLabelsColors_1.csv"))
+            { File.Delete(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\ActivityLabelsColors_1.csv"); }
+            TextWriter labels_colors_csv_1 = new StreamWriter(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\ActivityLabelsColors_1.csv");
+
+
+            //Write headers
+            labels_colors_csv_1.WriteLine("Category,Label,Color,ARGB");
+
+            string label = "";
+            string csv = "";
+            string color = "";
+            string argb = "";
+            string category_name = "";
+
+
+            //Load the list according the number of activity categories 
+            for (int i = 0; i < number_of_categories; i++)
+            {
+
+               
+                    if (list_of_activities[i].Count > 0)
+                        category_name = list_of_activities[i][0]._Category;
+
+
+                    //load labels for each category
+                    for (int j = 0; j < list_of_activities[i].Count; j++)
+                    {
+
+                        label = list_of_activities[i][j]._Name;
+
+                        csv = "";
+                        color = "";
+                        argb = "";
+
+
+                        if (label.Trim().CompareTo("") != 0)
+                        {
+                            csv = category_name + "," + label + ",";
+
+                            if (i == 0)
+                            {
+                                if (label.CompareTo("unknown") == 0)
+                                {
+                                    color = Color.Gainsboro.Name;
+                                    argb = Color.Gainsboro.ToArgb().ToString();
+
+                                }
+                                else if (label.CompareTo("sync") == 0)
+                                {
+                                    color = Color.Plum.Name;
+                                    argb = Color.Plum.ToArgb().ToString();
+
+                                }
+                                else if (label.CompareTo("flap") == 0)
+                                {
+                                    color = Color.Green.Name;
+                                    argb = Color.FromArgb(150, Color.Green).ToArgb().ToString();
+
+                                }
+                                else if (label.CompareTo("rock") == 0)
+                                {
+                                    color = Color.Orange.Name;
+                                    argb = Color.FromArgb(200, Color.Orange).ToArgb().ToString();
+
+                                }
+                                else if (label.CompareTo("flap-rock") == 0)
+                                {
+                                    color = Color.DeepSkyBlue.Name;
+                                    argb = Color.FromArgb(200, Color.DeepSkyBlue).ToArgb().ToString();
+
+                                }
+
+
+                                labels_colors_csv_1.WriteLine(csv + color + "," + argb);
+                            }
+
+
+
+
+                        }//ends if
+                    }//ends for
+               
+
+
+            } //ends if for overlapping activity lists
+
+
+            //Close files
+            labels_colors_csv_1.Flush();
+            labels_colors_csv_1.Close();
 
         }
 
 
 
 
+#endregion
 
-        //directories
-        public static string MITES_SUBDIRECTORY = "mites";
+
+
+
+         #region Declare Variables
+
+ public static string MITES_SUBDIRECTORY = "mites";
         public static string WOCKETS_SUBDIRECTORY = "wockets";
         public static string OTHER_SUBDIRECTORY = "othersensors";
         public static string MERGED_SUBDIRECTORY = "merged";
-        public static string ANNOTATION_SUBDIRECTORY = "annotation\\audioannotation";
+        public static string ANNOTATION_SUBDIRECTORY = "annotation";
 
         public static string CSVProgress = "";
         public static bool hasActigraph = false;
@@ -1118,7 +1573,14 @@ namespace DataMerger
         static Hashtable[] actigraphData;
         static string[] actigraphType;
 
-        //Summary 
+
+
+        #endregion
+
+
+
+        #region Generate the Summary Files
+
         static TextWriter[] summaryCSV;
         static Hashtable[] summaryData;
         static int[] rawSummaryData;
@@ -2768,6 +3230,7 @@ namespace DataMerger
             {
                 masterCSV = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\MITesSummaryData.csv");
                 hrCSV = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\HeartRate_MITes.csv");
+                
                 for (int i = 0; (i < actigraphCSV.Length); i++)
                     actigraphCSV[i] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Actigraph" + (i + 1) + ".csv");
 
@@ -3702,7 +4165,9 @@ namespace DataMerger
 
 
             //sele check
-            //check annotation start and end times
+            #region check annotation start and end times
+            
+            
             if (aannotation != null)
             {
                 AXML.AnnotatedRecord record = ((AXML.AnnotatedRecord)aannotation.Data[0]);
@@ -3737,10 +4202,13 @@ namespace DataMerger
                     endmin = record.EndMinute + 5;
             }
 
+
+            #endregion
+
+
+
             DateTime startDateTime = new DateTime(startyear, startmonth, startday, starthr, startmin, startsec);
-            //startDateTime = startDateTime.AddMinutes(-15.0);
             DateTime endDateTime = new DateTime(endyear, endmonth, endday, endhr, endmin, endsec);
-            //endDateTime = endDateTime.AddMinutes(15.0);
             DateTime currentDateTime = startDateTime;
 
 
@@ -4765,6 +5233,15 @@ namespace DataMerger
             #endregion Close all files
 
 
+
+
         }
+
+
+        #endregion
+
+
+
+
     }
 }
