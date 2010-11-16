@@ -2484,6 +2484,15 @@ namespace NESPDataViewer
                                         case "Dominant Thigh":
                                             loc = "DT";
                                             break;
+                                        case "Torso":
+                                            loc = "TR";
+                                            break;
+                                        case "Right Wrist":
+                                            loc = "RW";
+                                            break;
+                                        case "Left Wrist":
+                                            loc = "LW";
+                                            break;
                                         default:
                                             loc = "lOC";
                                             break;
@@ -2695,42 +2704,63 @@ namespace NESPDataViewer
                #endregion
 
 
+               //====  add audio annotations  =======
+               //reading the corrected annotations in the merged folder
+               string file_annotations = path + "\\merged\\" + "AnnotationIntervals.csv";
+
+               if (File.Exists(file_annotations))
+               {
+                   string path_annotations_color = "";
+
+                   if (Directory.Exists(path + "\\annotation\\audioannotation\\"))
+                       path_annotations_color = path + "\\annotation\\audioannotation\\";
+                   else if (Directory.Exists(path + "\\annotation\\phoneannotation\\"))
+                       path_annotations_color = path + "\\annotation\\phoneannotation\\";
+
+                   CreateDiaryGraph(aPane, file_annotations, path_annotations_color, "Time: ", 20, "activity");
+                   CreateDiaryGraph(aPane, file_annotations, path_annotations_color, "Time:", 130, "posture");
+               }
 
 
+
+               #region commented
                //add audio annotations
-                if (Directory.Exists(path + "\\annotation\\audioannotation\\"))
-                {
-                    #region commented 
-                    /*
-                    files = Directory.GetFiles(path + "\\annotation\\audioannotation\\", "AnnotationIntervals.csv");
-                    for (int i = 0; i < files.Length; i++)
-                    {
-                        string name = Path.GetFileNameWithoutExtension(files[i]);
-                        CreateDiaryGraph(aPane, files[i], name, 10 + 20 * i);
-                    }
-                     */
+               // //if (Directory.Exists(path + "\\annotation\\audioannotation\\"))
+               //if (Directory.Exists(path + "\\annotation\\PhoneAnnotation\\"))
+               // {
+               //     #region commented 
+               //     /*
+               //     files = Directory.GetFiles(path + "\\annotation\\audioannotation\\", "AnnotationIntervals.csv");
+               //     for (int i = 0; i < files.Length; i++)
+               //     {
+               //         string name = Path.GetFileNameWithoutExtension(files[i]);
+               //         CreateDiaryGraph(aPane, files[i], name, 10 + 20 * i);
+               //     }
+               //      */
                     
  
-                    // commented old path for original annotations
-                    //string file_annotations = path + "\\annotation\\audioannotation\\" + "AnnotationIntervals.csv";
+               //     // commented old path for original annotations
+               //     //string file_annotations = path + "\\annotation\\audioannotation\\" + "AnnotationIntervals.csv";
 
-                    #endregion
+               //     #endregion
 
 
-                    //reading the corrected annotations in the merged folder
-                    string file_annotations = path + "\\merged\\" + "AnnotationIntervals.csv";
-                    string path_annotations_color = path + "\\annotation\\audioannotation\\";
+               //     //reading the corrected annotations in the merged folder
+               //     string file_annotations = path + "\\merged\\" + "AnnotationIntervals.csv";
+               //     //string path_annotations_color = path + "\\annotation\\audioannotation\\";
+               //     string path_annotations_color = path + "\\annotation\\PhoneAnnotation\\";
 
-                    if (File.Exists(file_annotations))
-                    {
-                        CreateDiaryGraph(aPane, file_annotations, path_annotations_color, "Time: ", 20, "activity");
-                        CreateDiaryGraph(aPane, file_annotations, path_annotations_color, "Time:", 130, "posture");
-                    }
-                     
+               //     if (File.Exists(file_annotations))
+               //     {
+               //         CreateDiaryGraph(aPane, file_annotations, path_annotations_color, "Time: ", 20, "activity");
+               //         CreateDiaryGraph(aPane, file_annotations, path_annotations_color, "Time:", 130, "posture");
+               //     }       
+               // }
+               #endregion
 
-                }
 
-                //add phone annotations
+
+               //add phone annotations
                 #region Phone Annotations
                 if (Directory.Exists(path + "\\annotation\\phoneannotation\\"))
                 {

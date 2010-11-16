@@ -1923,6 +1923,15 @@ namespace NESPDataViewer
                             case "Dominant Thigh":
                                 loc = "DT";
                                 break;
+                            case "Torso":
+                                loc = "TR";
+                                break;
+                            case "Right Wrist":
+                                loc = "RW";
+                                break;
+                            case "Left Wrist":
+                                loc = "LW";
+                                break;
                             default:
                                 loc = "lOC";
                                 break;
@@ -2080,9 +2089,9 @@ namespace NESPDataViewer
                 PointPairList listACT = new PointPairList();
                 listACT.Add(0, 0);
                 aPane.AddCurve("annotation", listACT, Color.White, SymbolType.TriangleDown);
-                
 
-                // add GPS
+
+                #region add GPS (commented)
                 /*paneOrders.Add(title, paneOrdering);
                 filepath = Path.Combine(path + "\\merged\\", "GPSlog.csv");
                 if (File.Exists(filepath))
@@ -2091,23 +2100,29 @@ namespace NESPDataViewer
                 if (File.Exists(filepath))
                     CreatePOIGraph(hPane, filepath);
                  */
+                #endregion
 
-                //add audio annotations
-                if (Directory.Exists(path + "\\annotation\\audioannotation\\"))
-                {
-                    //reading the corrected annotations in the merged folder
-                    string file_annotations = path + "\\merged\\" + "AnnotationIntervals.csv";
-                    string path_annotations_color = path + "\\annotation\\audioannotation\\";
 
-                    if (File.Exists(file_annotations))
-                    {
-                        CreateDiaryGraph(aPane, file_annotations, path_annotations_color, "Time: ", 20, "activity");
-                        CreateDiaryGraph(aPane, file_annotations, path_annotations_color, "Time:", 130, "posture");
-                    }
+               //====== add annotations =====
+               // reading the corrected annotations in the merged folder
+               string file_annotations = path + "\\merged\\" + "AnnotationIntervals.csv";
 
-                }
+               if (File.Exists(file_annotations))
+               {
+                   string path_annotations_color = "";
+                  
+                   if (Directory.Exists(path + "\\annotation\\audioannotation\\"))
+                       path_annotations_color = path + "\\annotation\\audioannotation\\";
+                   else if (Directory.Exists(path + "\\annotation\\phoneannotation\\"))
+                       path_annotations_color = path + "\\annotation\\phoneannotation\\";
+                       
+                    CreateDiaryGraph(aPane, file_annotations, path_annotations_color, "Time: ", 20, "activity");
+                    CreateDiaryGraph(aPane, file_annotations, path_annotations_color, "Time:", 130, "posture");
+               }
+                
 
-                //add phone annotations
+
+                //add other types of phone annotations
                 if (Directory.Exists(path + "\\annotation\\phoneannotation\\"))
                 {
                     filepath = Path.Combine(path + "\\annotation\\phoneannotation\\", "photos.csv");
@@ -2123,6 +2138,8 @@ namespace NESPDataViewer
                     if (files.Length > 0)
                         CreateAgreementGraph(hPane, files);
                 }
+
+
 
             }
             #endregion

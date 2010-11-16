@@ -41,6 +41,7 @@ namespace NESPDataViewer
 
         #endregion
 
+
         #region INITIALIZE
         
         public Form1()
@@ -78,6 +79,7 @@ namespace NESPDataViewer
         }
         
         #endregion
+
 
         #region LAYOUT and FORMATTING
         private void Form1_Resize(object sender, EventArgs e)
@@ -329,7 +331,10 @@ namespace NESPDataViewer
         }
         #endregion
 
+
         #region CHART CONTENT
+        
+        
         #region HEART RATE
         private void AddHeartCurve(GraphPane gp, string name, PointPairList ppl,Color lineColor, PointPairList pplInvalid)
         {
@@ -391,7 +396,10 @@ namespace NESPDataViewer
             }
 
         }
+        
         #endregion
+
+
 
         #region MITES
         private static DateTime ConvertUNIXDatTime(double timestamp)
@@ -471,6 +479,8 @@ namespace NESPDataViewer
             
 
         }
+        
+        
         private void CreateAccelerationGraph(int paneOrder, string filepath, string channel, string location,string type,string mac)
         {
             #region ACCELERATION X Y Z
@@ -685,9 +695,11 @@ namespace NESPDataViewer
         #endregion
 
 
+
         #region Wockets Summary
      
         #endregion Wockets Summary
+
 
 
         #region Columbia Graph
@@ -759,6 +771,7 @@ namespace NESPDataViewer
         }
 
         #endregion Columbia Graph
+
 
 
         #region RTI Graph
@@ -881,6 +894,7 @@ namespace NESPDataViewer
         #endregion RTI Graph
 
 
+
         #region GPS Graph
         private void CreateGPSDeviceGraph(GraphPane gp, string filePath)
         {
@@ -975,6 +989,8 @@ namespace NESPDataViewer
         }
 
         #endregion GPS Graph
+
+
 
         #region Actigraph
         Hashtable lineSegments = new Hashtable();
@@ -1235,6 +1251,8 @@ namespace NESPDataViewer
         }
         #endregion Zephyr
 
+
+
         #region Sensewear
         private void CreateSensewearGraph(GraphPane gp, string filePath)
         {
@@ -1305,8 +1323,11 @@ namespace NESPDataViewer
             WidenDatesIfNeeded(listACT);
         }
         #endregion Sensewear
+
+
         //ADD_GRAPH STEP 2
         #region Oxycon
+
         private void CreateOxyconGraph(GraphPane gp, string filePath)
         {
             string[] values = FileReadWrite.ReadLinesFromFile(filePath);
@@ -1523,7 +1544,9 @@ namespace NESPDataViewer
             WidenDatesIfNeeded(listHR);            
 
         }
+        
         #endregion
+
 
         #region GPS
         private void CreateGPSGraph(GraphPane gp, string filepath)
@@ -1589,6 +1612,8 @@ namespace NESPDataViewer
             WidenDatesIfNeeded(list);
         }
         #endregion
+
+
 
         #region ANNOTATION LABELS
         private void CreateDiaryGraph(GraphPane gp, string filepath, string title, int y)
@@ -1968,6 +1993,8 @@ namespace NESPDataViewer
 
         #endregion
 
+
+
         #region ANNOTATOR-CLASSIFIER
         private void CreateAgreementGraph(GraphPane gp, string[] files)
         {
@@ -2192,6 +2219,8 @@ namespace NESPDataViewer
 
 
         Hashtable paneOrders;
+        
+        
         // Build the Chart
         private void BuildCharts(string path)
         {
@@ -2263,6 +2292,12 @@ namespace NESPDataViewer
                                 case "Torso":
                                     loc = "TR";
                                     break;
+                                case "Right Wrist":
+                                    loc = "RW";
+                                    break;
+                                case "Left Wrist":
+                                    loc = "LW";
+                                    break;
                                 default:
                                     loc = "lOC";
                                     break;
@@ -2294,6 +2329,7 @@ namespace NESPDataViewer
             }
             #endregion
 
+
             #region Zephyr
             string zephyrFile = Path.Combine(path + "\\merged\\", "Zephyr.csv");
             if (File.Exists(zephyrFile))
@@ -2305,6 +2341,7 @@ namespace NESPDataViewer
                 paneOrdering++;
             }
             #endregion Zephyr
+
 
             #region Columbia
             string columbiaFile = Path.Combine(path + "\\merged\\", "Columbia.csv");
@@ -2332,6 +2369,7 @@ namespace NESPDataViewer
                 paneOrdering++;
             }
             #endregion
+
 
             #region GPS
             string gpsFile = Path.Combine(path + "\\merged\\", "GPS.csv");
@@ -2391,56 +2429,71 @@ namespace NESPDataViewer
             files = Directory.GetFiles(path + "\\merged\\", "HeartRate*");
             if (files.Length > 0)
             {
-                string title = "Heart Rate";
-                hPane = AddPane(title, "Beats Per Minute");
-                paneOrders.Add(title, paneOrdering);
-                CreateHeartRateGraph(hPane, files);
+                FileInfo finfo = new FileInfo(files[0]);
+                if( finfo.Length > 0)
+                {
+                    string title = "Heart Rate";
+                    hPane = AddPane(title, "Beats Per Minute");
+                    paneOrders.Add(title, paneOrdering);
+                    CreateHeartRateGraph(hPane, files);
+                }
             }
-            else if (AnyMatches(path + "\\merged\\", "GPS*,POI*"))
+
+            if (AnyMatches(path + "\\merged\\", "GPS*,POI*"))
             {
                 string title = paneOrdering + " Location";
                 hPane = AddPane(title, "");
             }
-            else if (AnyMatches(path + "\\annotation\\phoneannotation\\", "annotat*,photos*,surveys*"))
-            {
-                string title = paneOrdering + " Labels";
-                hPane = AddPane(title, "");
-            }
-            else if (AnyMatches(path + "\\annotation\\audioannotation\\", "annotat*"))
-            {
-                string title = paneOrdering + " Labels";
-                hPane = AddPane(title, "");
-            }
-            else if (AnyMatches(path + "\\annotation\\phoneannotation\\", "average-*"))
-            {
-                string title = paneOrdering + " Annotation";
-                hPane = AddPane(title, "");
-                hPane.YAxis.IsVisible = false;
-                _doesShowHover = false;
-            }
+
+            //if (AnyMatches(path + "\\annotation\\audioannotation\\", "annotat*"))
+            //{
+            //    string title = paneOrdering + " Labels";
+            //    hPane = AddPane(title, "");
+            //}
+
+            //if (AnyMatches(path + "\\annotation\\phoneannotation\\", "annotat*,photos*,surveys*"))
+            //{
+            //    string title = paneOrdering + " Labels";
+            //    hPane = AddPane(title, "");
+            //}
+            
+            //if (AnyMatches(path + "\\annotation\\phoneannotation\\", "average-*"))
+            //{
+            //    string title = paneOrdering + " Annotation";
+            //    hPane = AddPane(title, "");
+            //    hPane.YAxis.IsVisible = false;
+            //    _doesShowHover = false;
+            //}
             
             #endregion
 
 
             #region Annotations
 
-            if (hPane != null)
-            {
-                paneOrdering++;
-                string title = "Annotations";
-                GraphPane aPane = AddPane(title, "Annotations");
+                string ann_title = "Annotations";
+                GraphPane aPane = AddPane(ann_title, "Annotations");
                 aPane.YAxis.IsVisible = true;
 
-                //Uncomment if Heart Rate Graph is deleted
-                //paneOrders.Add(title, paneOrdering);
+                if (hPane != null)
+                {
+                    paneOrdering++;
+                }
+                else
+                {
+                    //Uncomment if Heart Rate Graph is deleted
+                    paneOrders.Add(ann_title, paneOrdering);
+                }
+
                 
-                //Hack - Dummy curve that forces the scale of the Y-axis and alignment not to change
+                
+               //Hack - Dummy curve that forces the scale of the Y-axis and alignment not to change
                PointPairList listACT = new PointPairList();
                listACT.Add(0, 0);
                aPane.AddCurve("annotation", listACT, Color.White, SymbolType.TriangleDown);
                
-                // add GPS
-                paneOrders.Add(title, paneOrdering);
+
+                //Add GPS
+                paneOrders.Add("Locations", paneOrdering);
                 filepath = Path.Combine(path + "\\merged\\", "GPSlog.csv");
                 if (File.Exists(filepath))
                     CreateGPSGraph(hPane, filepath);
@@ -2448,38 +2501,34 @@ namespace NESPDataViewer
                 if (File.Exists(filepath))
                     CreatePOIGraph(hPane, filepath);
 
-                //add audio annotations
-                if (Directory.Exists(path + "\\annotation\\audioannotation\\"))
+
+
+
+                //====  add audio annotations  =======
+                #region Audio/Phone Annottations
+                
+                //reading the corrected annotations in the merged folder
+                string file_annotations = path + "\\merged\\" + "AnnotationIntervals.csv";
+
+                if (File.Exists(file_annotations))
                 {
-                    #region commented 
-                    /*
-                    files = Directory.GetFiles(path + "\\annotation\\audioannotation\\", "AnnotationIntervals.csv");
-                    for (int i = 0; i < files.Length; i++)
-                    {
-                        string name = Path.GetFileNameWithoutExtension(files[i]);
-                        CreateDiaryGraph(aPane, files[i], name, 10 + 20 * i);
-                    }
-                     */
-                    #endregion
- 
-                    // commented old path for original annotations
-                    //string file_annotations = path + "\\annotation\\audioannotation\\" + "AnnotationIntervals.csv";
+                    string path_annotations_color = "";
 
-                    //reading the corrected annotations in the merged folder
-                    string file_annotations = path + "\\merged\\" + "AnnotationIntervals.csv";
-                    string path_annotations_color = path + "\\annotation\\audioannotation\\";
+                    if (Directory.Exists(path + "\\annotation\\audioannotation\\"))
+                        path_annotations_color = path + "\\annotation\\audioannotation\\";
+                    else if (Directory.Exists(path + "\\annotation\\phoneannotation\\"))
+                        path_annotations_color = path + "\\annotation\\phoneannotation\\";
 
-                    if (File.Exists(file_annotations))
-                    {
-                        CreateDiaryGraph(aPane, file_annotations, path_annotations_color, "Time: ", 20, "activity");
-                        CreateDiaryGraph(aPane, file_annotations, path_annotations_color, "Time:", 130, "posture");
-                    }
-                     
-
+                    CreateDiaryGraph(aPane, file_annotations, path_annotations_color, "Time: ", 20, "activity");
+                    CreateDiaryGraph(aPane, file_annotations, path_annotations_color, "Time:", 130, "posture");
                 }
+
+                #endregion
+
 
                 //add phone annotations
                 #region Phone Annotations
+
                 if (Directory.Exists(path + "\\annotation\\phoneannotation\\"))
                 {
                     filepath = Path.Combine(path + "\\annotation\\phoneannotation\\", "photos.csv");
@@ -2495,10 +2544,11 @@ namespace NESPDataViewer
                     if (files.Length > 0)
                         CreateAgreementGraph(hPane, files);
                 }
+
                 #endregion
 
 
-            }
+            
             #endregion
 
 
