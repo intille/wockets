@@ -1583,8 +1583,14 @@ namespace DataMerger
 
         static TextWriter[] summaryCSV;
         static Hashtable[] summaryData;
-        static int[] rawSummaryData;
+        //static int[] rawSummaryData;
+        static Hashtable[] rawSummaryData;
         static TextWriter[] rawSummaryCSV;
+        private static int[] rawCurrentSummary ;
+        private static int[] rawSummaryCounter;
+        private static double[] prevUnixTime;
+        private static double[] summaryStartUnixTime;
+
 
         public static void toCSV(string aDataDirectory, string masterDirectory, int maxControllers, string[] filter)
         {
@@ -3893,7 +3899,7 @@ namespace DataMerger
                         {
                             for (int k = 0; (k < CurrentWockets._Controller._Sensors.Count); k++)
                             {
-                                string[] matchingFiles = Directory.GetFiles(subdirectory + "\\" + i, "Sensor-*" + k + ".csv");
+                                string[] matchingFiles = Directory.GetFiles(subdirectory + "\\" + i, "SummaryAC-*" + k + ".csv");
                                 for (int j = 0; (j < matchingFiles.Length); j++)
                                     files[k].Add(matchingFiles[j]);
                             }
@@ -3904,7 +3910,12 @@ namespace DataMerger
                 summaryCSV = new TextWriter[CurrentWockets._Controller._Sensors.Count];
                 rawSummaryCSV = new TextWriter[CurrentWockets._Controller._Sensors.Count];
                 summaryData = new Hashtable[CurrentWockets._Controller._Sensors.Count];
-                rawSummaryData = new int[CurrentWockets._Controller._Sensors.Count];
+                //rawSummaryData = new int[CurrentWockets._Controller._Sensors.Count];
+                rawSummaryData = new Hashtable[CurrentWockets._Controller._Sensors.Count];
+                rawCurrentSummary = new int[CurrentWockets._Controller._Sensors.Count];
+                rawSummaryCounter = new int[CurrentWockets._Controller._Sensors.Count];
+                prevUnixTime = new double[CurrentWockets._Controller._Sensors.Count];
+                summaryStartUnixTime = new double[CurrentWockets._Controller._Sensors.Count];
 
                 try
                 {
@@ -3914,7 +3925,11 @@ namespace DataMerger
                         summaryCSV[i] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Wocket_" + i.ToString("00") + "_Summary.csv");
                         rawSummaryCSV[i] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Wocket_" + i.ToString("00") + "_RawSummary.csv");
                         summaryData[i] = new Hashtable();
-                        rawSummaryData[i] = 0;
+                        rawSummaryData[i] = new Hashtable();
+                        rawCurrentSummary[i] = 0;
+                        rawSummaryCounter[i] = 0;
+                        prevUnixTime[i] = -1;
+                        summaryStartUnixTime[i] = 0;
                     }
                     for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
                     {
@@ -3947,8 +3962,9 @@ namespace DataMerger
                                         if (summaryStart == null)
                                             summaryStart = summaryTime.Year + "/" + summaryTime.Month + "/" + summaryTime.Day + " " + summaryTime.Hour + ":" + summaryTime.Minute + ":" + summaryTime.Second;
 
+                                        if (summaryStartUnixTime[i]<=0)
+                                            summaryStartUnixTime[i] = summaryUnixTime;
 
-                                        //
                                         summaryData[i].Add(summaryKey, summaryLine);
 
                                     }
@@ -4049,21 +4065,22 @@ namespace DataMerger
 
             int month = 0;
             int day = 0;
-            int startyear = 0;
-            int startmonth = 0;
-            int startday = 0;
-            int starthr = 25;
-            int startmin = 0;
-            int startsec = 0;
+            int startyear = 2050;
+            int startmonth = 1;
+            int startday = 1;
+            int starthr = 1;
+            int startmin = 1;
+            int startsec = 1;
 
-            int endyear = 0;
-            int endmonth = 0;
-            int endday = 0;
-            int endhr = -1;
+            int endyear = 1971;
+            int endmonth = 1;
+            int endday = 1;
+            int endhr = 1;
             int endmin = 59;
             int endsec = 59;
 
-
+            DateTime startDateTime = new DateTime(startyear, startmonth, startday, starthr, startmin, startsec);
+            DateTime endDateTime = new DateTime(endyear, endmonth, endday, endhr, endmin, endsec);
 
             //check mites start and end times
             if (aMITesDecoder != null)
@@ -4083,7 +4100,7 @@ namespace DataMerger
                     month = Convert.ToInt32(datetokens[1]);
                     day = Convert.ToInt32(datetokens[2]);
 
-                    if ((startyear == 0) || (year < startyear))
+                  /*  if ((startyear == 0) || (year < startyear))
                         startyear = year;
                     if ((endyear == 0) || (year > endyear))
                         endyear = year;
@@ -4096,7 +4113,7 @@ namespace DataMerger
                     if ((startday == 0) || (day < startday))
                         startday = day;
                     if ((endday == 0) || (day > endday))
-                        endday = day;
+                        endday = day;*/
 
 
                     for (int i = 0; i < 30; i++)
@@ -4104,10 +4121,15 @@ namespace DataMerger
                         if (Directory.Exists(subdirectory + "\\" + i))
                         {
                             int hr = i;
-                            if (hr < starthr)
+                           /* if (hr < starthr)
                                 starthr = hr;
                             if (hr > endhr)
-                                endhr = hr;
+                                endhr = hr;*/
+                            DateTime d = new DateTime(year, month, day, hr, 0, 0);
+                            if (d.Subtract(startDateTime).TotalSeconds < 0)
+                                startDateTime = d;
+                            if (d.Subtract(endDateTime).TotalSeconds > 0)
+                                endDateTime = d;
                         }
 
                     }
@@ -4132,7 +4154,7 @@ namespace DataMerger
                     month = Convert.ToInt32(datetokens[1]);
                     day = Convert.ToInt32(datetokens[2]);
 
-                    if ((startyear == 0) || (year < startyear))
+                   /* if ((startyear == 0) || (year < startyear))
                         startyear = year;
                     if ((endyear == 0) || (year > endyear))
                         endyear = year;
@@ -4146,17 +4168,24 @@ namespace DataMerger
                         startday = day;
                     if ((endday == 0) || (day > endday))
                         endday = day;
-
+                    */
 
                     for (int i = 0; i < 30; i++)
                     {
                         if (Directory.Exists(subdirectory + "\\" + i))
                         {
                             int hr = i;
-                            if (hr < starthr)
+                           /* if (hr < starthr)
                                 starthr = hr;
                             if (hr > endhr)
-                                endhr = hr;
+                                endhr = hr;*/
+
+                            DateTime d = new DateTime(year, month, day, hr, 0, 0);
+                            if (d.Subtract(startDateTime).TotalSeconds < 0)
+                                startDateTime = d;
+                            d = new DateTime(year, month, day, hr, 59, 59);
+                            if (d.Subtract(endDateTime).TotalSeconds > 0)
+                                endDateTime = d;
                         }
 
                     }
@@ -4174,7 +4203,12 @@ namespace DataMerger
                 year = Convert.ToInt32(record.StartDate.Split('-')[2]);
                 month = Convert.ToInt32(record.StartDate.Split('-')[0]);
                 day = Convert.ToInt32(record.StartDate.Split('-')[1]);
-                if ((startyear == 0) || (year < startyear))
+
+                DateTime d = new DateTime(year, month, day, record.StartHour, 0, 0);
+                if (d.Subtract(startDateTime).TotalSeconds < 0)
+                    startDateTime = d;
+
+               /* if ((startyear == 0) || (year < startyear))
                     startyear = year;
 
                 if ((startmonth == 0) || (month < startmonth))
@@ -4184,12 +4218,15 @@ namespace DataMerger
 
                 if (record.StartHour < starthr)
                     starthr = record.StartHour;
-
+                */
                 record = ((AXML.AnnotatedRecord)aannotation.Data[aannotation.Data.Count - 1]);
                 year = Convert.ToInt32(record.StartDate.Split('-')[2]);
                 month = Convert.ToInt32(record.StartDate.Split('-')[0]);
                 day = Convert.ToInt32(record.StartDate.Split('-')[1]);
-
+                d = new DateTime(year, month, day, record.EndHour, 59,59);
+                if (d.Subtract(endDateTime).TotalSeconds > 0)
+                    endDateTime = d;
+                /*
                 if ((endyear == 0) || (year > endyear))
                     endyear = year;
                 if ((endmonth == 0) || (month > endmonth))
@@ -4200,6 +4237,7 @@ namespace DataMerger
                     endhr = record.EndHour;
                 if ((record.EndMinute < 54) && (record.EndMinute < endmin))
                     endmin = record.EndMinute + 5;
+                 */
             }
 
 
@@ -4207,8 +4245,32 @@ namespace DataMerger
 
 
 
-            DateTime startDateTime = new DateTime(startyear, startmonth, startday, starthr, startmin, startsec);
-            DateTime endDateTime = new DateTime(endyear, endmonth, endday, endhr, endmin, endsec);
+            if (summaryData != null)
+            {
+                for (int i = 0; (i < wcontroller._Sensors.Count); i++)
+                {
+                    DateTime d = new DateTime();
+                    UnixTime.GetDateTime((long)summaryStartUnixTime[i], out d);
+                   
+                    if (d.Subtract(startDateTime).TotalSeconds < 0)
+                        startDateTime = d;
+
+                    /*if ((startyear == 0) || (d.Year < startyear))
+                        startyear = d.Year;
+
+                    if ((startmonth == 0) || (d.Month < startmonth))
+                        startmonth = d.Month;
+
+                    if ((startday == 0) || (d.Day < startday))
+                        startday = d.Day;
+
+                    if ((starthr == 0) || (d.Hour < starthr))
+                        starthr = d.Hour;*/
+
+                }
+            }
+
+            
             DateTime currentDateTime = startDateTime;
 
 
@@ -4216,6 +4278,7 @@ namespace DataMerger
             TimeSpan diff;
             string timestamp = "";
             double currentUnixTime = 0;
+
 
 
 
@@ -4807,6 +4870,9 @@ namespace DataMerger
 
 
 
+
+
+
                         #region Append Wockets Statistics
 
                         int sensor_id = wcontroller._Sensors[i]._ID;
@@ -4858,11 +4924,25 @@ namespace DataMerger
                             master_csv_line += ((double)wRMZ[sensor_id]).ToString("00.00") + ",";
                             master_csv_line += ((double)wRMSize[sensor_id]).ToString("00.00") + ",";
                             master_csv_line += ((double)(wVMAG[sensor_id] / (double)wacCounters[sensor_id])).ToString("00.00");
-                         
-                            
-                            if (rawSummaryData!=null)
-                                rawSummaryData[i] += (int)((double)(wAUC[sensor_id, 0] + wAUC[sensor_id, 1] + wAUC[sensor_id, 2]));
 
+
+                            if (rawCurrentSummary != null)
+                            {
+                                rawCurrentSummary[wcontroller._Sensors[i]._ID] += (int)((double)(wAUC[wcontroller._Sensors[i]._ID, 0] + wAUC[wcontroller._Sensors[i]._ID, 1] + wAUC[wcontroller._Sensors[i]._ID, 2]));
+                                rawSummaryCounter[wcontroller._Sensors[i]._ID] = rawSummaryCounter[wcontroller._Sensors[i]._ID] + 1;
+                                if (prevUnixTime[wcontroller._Sensors[i]._ID] == -1)
+                                {
+                                    prevUnixTime[wcontroller._Sensors[i]._ID] = currentUnixTime;
+                        
+                                }
+                                if ((currentUnixTime - prevUnixTime[wcontroller._Sensors[i]._ID]) > 60000)
+                                {
+                                    rawSummaryData[wcontroller._Sensors[i]._ID].Add(key, rawCurrentSummary[wcontroller._Sensors[i]._ID]);
+                                    rawCurrentSummary[wcontroller._Sensors[i]._ID] = 0;
+                                    rawSummaryCounter[wcontroller._Sensors[i]._ID] = 0;
+                                    prevUnixTime[wcontroller._Sensors[i]._ID] = currentUnixTime;
+                                }
+                            }
                         }
                         else
                         {
@@ -4951,20 +5031,38 @@ namespace DataMerger
                         if (summaryData[i].ContainsKey(key) == false)
                         {
                             summaryCSV[i].WriteLine(summary_csv_line[i] + ",");
-                            rawSummaryCSV[i].WriteLine(summary_csv_line[i] + ",");
-                            master_csv_line = master_csv_line + ",,";
+                            master_csv_line = master_csv_line + ",";
                         }
                         else
                         {
                             string myline = summary_csv_line[i] + "," + summaryData[i][key];
                             summaryCSV[i].WriteLine(summary_csv_line[i] + "," + summaryData[i][key]);
-                            rawSummaryCSV[i].WriteLine(summary_csv_line[i] + "," + rawSummaryData[i]);
-                            master_csv_line = master_csv_line + "," + summaryData[i][key] + "," + rawSummaryData[i];
-                            rawSummaryData[i] = 0;
+                            master_csv_line = master_csv_line + "," + summaryData[i][key];
                         }
                     }
                 }
                 #endregion Write CSV lines for Wockets Summary
+
+
+                #region Write CSV lines for Raw Wockets Summary
+                if (rawSummaryData != null)
+                {
+                    for (int i = 0; (i < rawSummaryData.Length); i++)
+                    {
+                        if (rawSummaryData[i].ContainsKey(key) == false)
+                        {
+                            rawSummaryCSV[i].WriteLine(summary_csv_line[i] + ",");
+                            master_csv_line = master_csv_line + ",";
+                        }
+                        else
+                        {
+                            string myline = summary_csv_line[i] + "," + rawSummaryData[i][key];         
+                            rawSummaryCSV[i].WriteLine(summary_csv_line[i] + "," + rawSummaryData[i][key]);
+                            master_csv_line = master_csv_line + "," + rawSummaryData[i][key];                            
+                        }
+                    }
+                }
+                #endregion Write CSV lines for Raw Wockets Summary
 
                 #region Write CSV line for Sensewear
                 if ((sensewearFound) && (sensewearCSV != null))

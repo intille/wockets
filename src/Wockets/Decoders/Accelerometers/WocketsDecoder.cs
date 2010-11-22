@@ -479,7 +479,7 @@ namespace Wockets.Decoders.Accelerometers
 
 
                                     //to recover from resets
-                                    if ((this._LastActivityCountIndex!=-1) && (((this._ActivityCounts[this._LastActivityCountIndex]._SeqNum)- ac._SeqNum)>20))
+                                    if ((this._LastActivityCountIndex!=-1) && (ac._SeqNum==0) && (((this._ActivityCounts[this._LastActivityCountIndex]._SeqNum)- ac._SeqNum)>20))
                                         this._LastActivityCountIndex = -1;
 
                                     if ((this._LastActivityCountIndex==-1) //First time base it on the sampling rate
@@ -491,7 +491,7 @@ namespace Wockets.Decoders.Accelerometers
                                         ac_refseq=0;
                                     }
                                     else if (ac_delta == 0) //First sample after ACC, handles overflow as well
-                                    {
+                                    { 
                                           ac_unixtime = this._ActivityCounts[this._LastActivityCountIndex]._TimeStamp;
                                           ac_refseq = this._ActivityCounts[this._LastActivityCountIndex]._SeqNum;
                                           ac_delta = (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[this._ID])._CurrentConnectionUnixTime - ((this._ActivityCountOffset * 1000.0) / this._ExpectedSamplingRate) - this._ActivityCounts[this._LastActivityCountIndex]._TimeStamp) / (acc_count - ac_refseq);                          
@@ -501,7 +501,7 @@ namespace Wockets.Decoders.Accelerometers
                                     //with some ACs that were received and others that were not
                                     //ac._TimeStamp = ac_unixtime + (++_ACIndex * ac_delta);
                                     ++_ACIndex;
-                                    ac._TimeStamp = ac_unixtime + ((ac._SeqNum-ac_refseq) * ac_delta);
+                                    ac._TimeStamp = ac_unixtime + (((ac._SeqNum-ac_refseq)+1) * ac_delta);
 #if (PocketPC)
                                     if (_ACIndex == 10)
                                             ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[this._ID]).Write(new Wockets.Data.Commands.ACK()._Bytes);                                    
@@ -523,7 +523,7 @@ namespace Wockets.Decoders.Accelerometers
                                         }
                                     }
 
-                                    Logger.Warn("ACC,"+acc_count+","+this._ActivityCounts[this._LastActivityCountIndex]._SeqNum+"," + ac._SeqNum + "," + ac._Count);
+                                    Logger.Warn("ACC"+this._ID+","+acc_count+","+this._ActivityCounts[this._LastActivityCountIndex]._SeqNum+"," + ac._SeqNum + "," + ac._Count);
                                     FireEvent(ac);
                                     break;
 

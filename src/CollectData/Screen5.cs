@@ -181,6 +181,9 @@ namespace CollectData
         delegate void UpdateTimeCallback();
         private bool disposed = false;
         private int counter = 0;
+        private int prevSuccessful = -1;
+        private int prevFailed = -1;
+        private int uploadCounter = 0;
         public void UpdateTime()
         {
             if (!disposed)
@@ -234,6 +237,12 @@ namespace CollectData
                         this.label19.Text = CurrentWockets._UploadDuration;
                         this.label18.Text = CurrentWockets._UploadSuccessFiles + " successful";
                         this.label20.Text = CurrentWockets._UploadFailedFiles + " failed";
+
+                        if ((prevSuccessful != CurrentWockets._UploadSuccessFiles) || (prevFailed != CurrentWockets._UploadFailedFiles))
+                            uploadCounter = 0;
+                        prevSuccessful = CurrentWockets._UploadSuccessFiles;
+                        prevFailed = CurrentWockets._UploadFailedFiles;
+
                         counter = 0;
 
                         try
@@ -245,13 +254,42 @@ namespace CollectData
                                 for (int i = 0; (i < processes.Length); i++)
                                 {
                                     if (processes[i].FullPath.IndexOf("DataUploader.exe") >= 0)
-                                        found = true;                                  
+                                    {
+                                        found = true;
+                                        
+                                        uploadCounter++;
+                                        try
+                                        {
+                                            if (uploadCounter > 60)
+                                            {                                                
+                                                try
+                                                {
+                                                    NamedEvents namedEvent = new NamedEvents();                                                                                                     
+                                                    namedEvent.Send("TerminateUploader");
+                                                    Thread.Sleep(5000);
+                                                    _UploaderProcess = null;
+                                                }
+                                                catch (Exception e)
+                                                {                                                    
+                                                }                                            
+                                            }
+                                        }
+                                        catch 
+                                        
+                                        {
+                                        }
+                                        break;
+                                    }
                                 }
                                 this.button1.Enabled = !found;
+                                                                    
                             }
                         }
                         catch { }
-                        if ((!this.button1.Enabled)&& (_UploaderProcess!=null) && (_UploaderProcess.HasExited))
+
+                        if (_UploaderProcess==null)
+                            this.button1.Enabled = true;
+                        else if ((!this.button1.Enabled)&& ((_UploaderProcess!=null) && (_UploaderProcess.HasExited)))
                             this.button1.Enabled = true;
 
                                            
@@ -342,10 +380,12 @@ namespace CollectData
             {
                 try
                 {
+                    uploadCounter = 0;
+                    prevFailed = prevSuccessful = -1;
                     //System.Diagnostics.Process po = new System.Diagnostics.Process();
                     ProcessStartInfo startInfo = new ProcessStartInfo();
-                    startInfo.WorkingDirectory = Core.KERNEL_PATH;
-                    startInfo.FileName = Core.KERNEL_PATH + "DataUploader.exe";
+                    startInfo.WorkingDirectory = Core.KERNEL_PATH + "wocketsuploader\\";
+                    startInfo.FileName = Core.KERNEL_PATH+"wocketsuploader\\" + "DataUploader.exe";
                     startInfo.UseShellExecute = false;                    
                     _UploaderProcess = System.Diagnostics.Process.Start(startInfo.FileName, "");
                     this.button1.Enabled = false;
