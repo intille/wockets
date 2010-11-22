@@ -567,7 +567,7 @@ namespace Wockets
                                 if (!Directory.Exists(this._StorageDirectory + "\\data\\summary\\" + hourlyPath))                                
                                     Directory.CreateDirectory(this._StorageDirectory + "\\data\\summary\\" + hourlyPath);                                
 
-                                TextWriter tw2 = new StreamWriter(this._StorageDirectory+ "\\data\\summary\\"+hourlyPath+"\\Sensor-" + this._Sensors[i]._Location + "-" + i + ".csv", true);
+                                TextWriter tw2 = new StreamWriter(this._StorageDirectory+ "\\data\\summary\\"+hourlyPath+"\\SummaryAC-" + this._Sensors[i]._Location + "-" + i + ".csv", true);
                                 int nextACIndex = LastACIndex[i] + 1;
                                 if (nextACIndex == 960)
                                     nextACIndex = 0;

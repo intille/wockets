@@ -267,6 +267,7 @@ namespace Wockets.Utils.Http
             return files;
         }
 
+        public static Stream rstream = null;
         /// <summary>
         /// Uploads a stream using a multipart/form-data POST.
         /// </summary>
@@ -287,11 +288,14 @@ namespace Wockets.Utils.Http
         /// http://tools.ietf.org/html/rfc2388
         /// http://www.w3.org/TR/html401/interact/forms.html#h-17.13.4.2
         /// 
-        public static HttpWebRequest webrequest;
+        //public static HttpWebRequest webrequest;
         public static WebResponse Post(Uri requestUri, NameValueCollection postData, Stream fileData, string fileName,
                                            string fileContentType, string fileFieldName, NameValueCollection headers)
         {
-            webrequest = (HttpWebRequest)WebRequest.Create(requestUri);
+
+            Logger.Error("FileUploader: Post 2: posting file: " + fileName);
+            HttpWebRequest webrequest = (HttpWebRequest)WebRequest.Create(requestUri);
+            WebResponse webresponse = null;
 
 
             string ctype;
@@ -357,35 +361,57 @@ namespace Wockets.Utils.Http
             long contentLength = header.Length + (fileData != null ? fileData.Length : 0) + footer.Length;
 
             webrequest.ContentLength = contentLength;
-            webrequest.Timeout = 30000;
-            webrequest.KeepAlive = true;
+            webrequest.AllowWriteStreamBuffering = false;
+
+            //webrequest.Timeout = 30000;
+            //webrequest.KeepAlive = true;
             //webrequest.ReadWriteTimeout = 90000;
-            
+
             //webrequest.
+            //Logger.Debug("Uploading:" + fileName);
+            Logger.Error("FileUploader: Post 2: data ready, getting stream");
             using (Stream requestStream = webrequest.GetRequestStream())
             {
-                requestStream.Write(header, 0, header.Length);
-
-
-                if (fileData != null)
+                try
                 {
-                    // write the file data, if any
-                    byte[] buffer = new Byte[checked((uint)System.Math.Min(4096, (int)fileData.Length))];
-                    int bytesRead;
-                    while ((bytesRead = fileData.Read(buffer, 0, buffer.Length)) != 0)
+                    Logger.Error("FileUploader: Post 2: data ready, got stream");
+                    rstream = requestStream;
+                    requestStream.Write(header, 0, header.Length);
+
+
+                    if (fileData != null)
                     {
-                        requestStream.Write(buffer, 0, bytesRead);
+                        // write the file data, if any
+                        byte[] buffer = new Byte[checked((uint)System.Math.Min(4096, (int)fileData.Length))];
+                        int bytesRead;
+                        while ((bytesRead = fileData.Read(buffer, 0, buffer.Length)) != 0)
+                        {
+                            requestStream.Write(buffer, 0, bytesRead);
+                        }
                     }
+
+                    // write footer
+                    requestStream.Write(footer, 0, footer.Length);
+                    requestStream.Flush();
+                    System.Threading.Thread.Sleep(5000);
+                    webresponse = webrequest.GetResponse();
                 }
-
-                // write footer
-                requestStream.Write(footer, 0, footer.Length);
-                requestStream.Close();
-                return webrequest.GetResponse();               
-            }
-
-            webrequest.Abort();            
-            return null;
+                catch (Exception e)
+                {                    
+                    Logger.Error("FileUploader: Post 2: exception 1: "+e.Message);             
+                }
+                finally
+                {
+                    Logger.Error("FileUploader: Post 2: finalizing file: " + fileName);
+                    requestStream.Close();
+                    rstream = null;
+                    webrequest.Abort();
+                    webrequest = null;
+                   
+                }
+                Logger.Error("FileUploader: Post 2: Getting response");
+                return webresponse;                
+            }        
         }
 
         /// <summary>
@@ -406,10 +432,26 @@ namespace Wockets.Utils.Http
                                            string fileContentType, string fileFieldName,
                                            NameValueCollection headers)
         {
+            Logger.Error("FileUploader: Post 1: posting file: "+fileName);
+
             using (FileStream fileData = File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
-                return Post(requestUri, postData, fileData, fileName, fileContentType, fileFieldName,
-                                headers);
+                WebResponse response=null;
+                try
+                {
+                    response=Post(requestUri, postData, fileData, fileName, fileContentType, fileFieldName,
+                                    headers);
+                }
+                catch (Exception e) 
+                {
+                    Logger.Error("FileUploader: Post 1: exception 1:" + e.Message);
+                }
+                finally
+                {
+                    fileData.Close();
+                    
+                }
+                return response;
             }
         }
    

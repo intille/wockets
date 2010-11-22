@@ -650,7 +650,7 @@ namespace NESPDataViewer
             }
             #endregion
 
-
+            WidenDatesIfNeeded(listWKTActivityCounts); 
 
             #region WKT Raw ACTIVITY COUNTS
             string[] rawwktcounts = new string[0];
@@ -687,9 +687,10 @@ namespace NESPDataViewer
                 AddAccelerationCurve(mac, location, listX, listY, listZ, listActivityCounts, listWKTActivityCounts,listRawWKTActivityCounts, listSampleRates, listAUCs, listVMAGs);
                 paneOrders.Add(mac, paneOrder);
             }
-
+            WidenDatesIfNeeded(listRawWKTActivityCounts);
           
             WidenDatesIfNeeded(listX);
+
         }
 
         #endregion

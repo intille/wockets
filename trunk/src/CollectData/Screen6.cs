@@ -84,11 +84,11 @@ namespace CollectData
                     this.label10.Text = CurrentWockets._Controller._Sensors[_ID]._Empty + " batches";
                     this.label3.Text = "Sensor " + _ID;
                     //this.label13.Text = CurrentWockets._Controller._Sensors[_ID]._ReceivedACs + " counts";
-                    this.label21.Text = "new:"+CurrentWockets._Controller._Sensors[_ID]._SavedACs + " - total:" + CurrentWockets._Controller._Sensors[_ID]._TotalSavedACs;
-                    this.label21.Invalidate();
+                    this.label21.Text = "new:"+CurrentWockets._Controller._Sensors[_ID]._SavedACs + " - total:" + CurrentWockets._Controller._Sensors[_ID]._TotalSavedACs;                    
                     this.label22.Text = "last:"+CurrentWockets._Controller._Sensors[_ID]._ReceivedACs + " - total:" + CurrentWockets._Controller._Sensors[_ID]._TotalReceivedACs;
-                    this.label22.Invalidate();
-
+                    //this.label3.Invalidate();
+                    //this.label21.Invalidate();
+                    //this.label22.Invalidate();
                     this.Invalidate();
 
                 }
