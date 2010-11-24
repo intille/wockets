@@ -528,6 +528,20 @@ namespace DataMerger
             int k = 0;
 
 
+            //Think how to handle this when there are more than one activity type
+            Hashtable means_per_class = new Hashtable();
+            Hashtable std_per_class = new Hashtable();
+            Hashtable freq_per_class = new Hashtable();
+            Hashtable min_per_class = new Hashtable();
+            Hashtable max_per_class = new Hashtable();
+
+
+            //Check if the "unknown" class is specified
+            bool is_unknown_specified = false;
+
+
+
+
             //If two categories are available
             if (session.OverlappingActivityLists.Count == 2)
             {
@@ -551,14 +565,37 @@ namespace DataMerger
                 //This list will simply pass the elements in the category list to the postures data structure
                 for (int i = 0; (i < session.OverlappingActivityLists[0].Count); i++)
                 {
-                    postures.Add(session.OverlappingActivityLists[0][i]._Name , k);
+                    if (session.OverlappingActivityLists[0][i]._Name.CompareTo("unknown") == 0)
+                        is_unknown_specified = true;
+
+                    postures.Add(session.OverlappingActivityLists[0][i]._Name, k);
                     k++;
+
+                    //initialize the class stats structure
+                    means_per_class.Add(session.OverlappingActivityLists[0][i]._Name, (double)0.0);
+                    std_per_class.Add(session.OverlappingActivityLists[0][i]._Name, (double)0.0);
+                    freq_per_class.Add(session.OverlappingActivityLists[0][i]._Name, (int)0);
+                    min_per_class.Add(session.OverlappingActivityLists[0][i]._Name, (double)10000.0);
+                    max_per_class.Add(session.OverlappingActivityLists[0][i]._Name, (double)0.0);
                 }
+
 
             }
 
+
             //Check if postures contain the "unknown" label, otherwise add it
-            postures.Add("unknown", k);
+            if (!is_unknown_specified)
+            {
+                postures.Add("unknown", k);
+
+                //initialize the class stats structure
+                means_per_class.Add("unknown", (double)0.0);
+                std_per_class.Add("unknown", (double)0.0);
+                freq_per_class.Add("unknown", (int)0);
+                min_per_class.Add("unknown", (double)10000.0);
+                max_per_class.Add("unknown", (double)0.0);
+            }
+
 
 
             #endregion
@@ -644,7 +681,7 @@ namespace DataMerger
             #endregion
 
 
-            #region Initialize Annotations
+            #region Initialize Annotations & Compute Descripte Statistics
 
             int numCategories = session.OverlappingActivityLists.Count;
             int currentAnnotation = 0;
@@ -654,9 +691,76 @@ namespace DataMerger
 
             //Get the overall session time
             double startTime = session.Annotations[0]._StartUnix;
-            double endTime = session.Annotations[annotationsLength-1]._EndUnix;
+            double endTime = session.Annotations[annotationsLength - 1]._EndUnix;
+
+            string name = "";
+            double duration_secs = 0.0;
+
+
+
+            //Scan annotations and compute the duration min/max stats
+            try
+            {
+                for (int c1 = 0; c1 < annotationsLength; c1++)
+                {
+                    name = session.Annotations[c1].Activities[0]._Name;
+                    freq_per_class[name] = ((int)freq_per_class[name]) + 1;
+
+                    //compute the duration of the label
+                    duration_secs = (session.Annotations[c1]._EndUnix - session.Annotations[c1]._StartUnix) / 1000;
+
+                    means_per_class[name] = ((double)means_per_class[name]) + duration_secs;
+
+                    if (duration_secs < ((double)min_per_class[name]))
+                        min_per_class[name] = duration_secs;
+
+                    if (duration_secs > ((double)max_per_class[name]))
+                        max_per_class[name] = duration_secs;
+                }
+
+
+                //compute the mean for each class
+                for (int c2 = 0; c2 < means_per_class.Count; c2++)
+                {
+                    if (c2 < session.OverlappingActivityLists[0].Count)
+                    {
+                        name = session.OverlappingActivityLists[0][c2]._Name;
+                        means_per_class[name] = ((double)means_per_class[name]) / ((int)freq_per_class[name]);
+                    }
+                }
+
+
+                //Compute the standard deviation of durations for each class
+                for (int c3 = 0; c3 < annotationsLength; c3++)
+                {
+                    name = session.Annotations[c3].Activities[0]._Name;
+
+                    //compute the duration of the label
+                    duration_secs = (session.Annotations[c3]._EndUnix - session.Annotations[c3]._StartUnix) / 1000;
+
+                    std_per_class[name] = ((double)std_per_class[name]) + Math.Pow((duration_secs - ((double)means_per_class[name])), 2.0);
+                }
+
+
+                for (int c4 = 0; c4 < means_per_class.Count; c4++)
+                {
+                    if (c4 < session.OverlappingActivityLists[0].Count)
+                    {
+                        name = session.OverlappingActivityLists[0][c4]._Name;
+                        std_per_class[name] = Math.Sqrt(((double)std_per_class[name]) / ((int)freq_per_class[name]));
+                    }
+                }
+
+            }
+            catch
+            {  //The computation of the descriptive stats of annotations has failed
+            }
 
             #endregion
+
+
+
+
 
 
             #region Open the Summary CSV File
@@ -1338,71 +1442,87 @@ namespace DataMerger
 
             #region Add the Annotations Summary
 
-            summary += "</TABLE>\n";
-            summary += "<h2>Annotation Summary</h2>\n";
+                summary += "</TABLE>\n";
+                summary += "<h2>Annotation Summary</h2>\n";
 
 
-            //If the annotation summary file exists, add it to current summary
-            //If it doesn't exist, add the HTML to summary 
-            if (File.Exists(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\AnnotationSummary.html"))
-            {
-                TextReader ttr = new StreamReader(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\AnnotationSummary.html");
-                summary += ttr.ReadToEnd();
-                ttr.Close();
-            }
-            else
-            {
-
-                #region Create HTML content with stats
-
-                //Create Table & Headers
-                summary += "<table border=\"1\">\n";
-
-                //Session total time
-                summary += "<tr> <td>Session Total Time</td> <td>" + totalSeconds.ToString() + "</td>" +
-                            "<td>&nbsp;</td></tr>";   //<td>&nbsp;</td></tr>";
-                
-                //Add a blank column
-                summary += "<tr>\n <td>&nbsp;</td> <td>&nbsp;</td> <td>&nbsp;</td></tr>";  //<td>&nbsp;</td> </tr>";
-
-                //Headers for annotation metrics
-                summary += "<tr><td>Label</td><td>Duration</td><td>%Occurrence</td></tr>";  //"<td>Frequency</td></tr>";
-
-
-                //Scan through labels
-                string cur_activity = "";
-                int total_secs_activity = 0;
-                double percent_duration = 0.0;
-                int frequency = 0;
-
-                for (int n = 0; n < session.OverlappingActivityLists.Count; n++)
+                //If the annotation summary file exists, add it to current summary
+                //If it doesn't exist, add the HTML to summary 
+                if (File.Exists(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\AnnotationSummary.html"))
                 {
-                    for (int j = 0; j < session.OverlappingActivityLists[n].Count; j++)
+                    TextReader ttr = new StreamReader(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\AnnotationSummary.html");
+                    summary += ttr.ReadToEnd();
+                    ttr.Close();
+                }
+                else
+                {
+
+                    #region Create HTML content with stats
+
+                    //Create Table & Headers
+                    summary += "<table border=\"1\">\n";
+
+                    TimeSpan ttime = new TimeSpan(0, 0, totalSeconds);
+                    //Session total time
+                    summary += "<tr> <td><div align=\"center\"><strong>Session Total Time (hh:mm:ss.ms)</strong></div></td>" +
+                                    "<td>" + String.Format("{0:HH mm ss ff}", ttime) + "</td>" +
+                               "</tr>";
+
+
+                    //Headers for annotation metrics
+                    summary += "<tr>" + "<td><div align=\"center\"><strong> Label </strong></div></td>" +
+                                        "<td><div align=\"center\"><strong> Duration in Seconds </strong></div></td>" +
+                                        "<td><div align=\"center\"><strong> %Occurrence </strong></div></td>" +
+                                        "<td><div align=\"center\"><strong> Frequency </strong></div></td>" +
+                                        "<td><div align=\"center\"><strong> Mean (sec) </strong></div></td>" +
+                                        "<td><div align=\"center\"><strong> STD (sec) </strong></div></td>" +
+                                        "<td><div align=\"center\"><strong> Min (sec) </strong></div></td>" +
+                                        "<td><div align=\"center\"><strong> Max (sec) </strong></div></td>" +
+                               "</tr>";
+
+
+                    //Scan through labels
+                    int total_secs_activity = 0;
+                    double percent_duration = 0.0;
+
+
+
+                    //for (int n = 0; n < session.OverlappingActivityLists.Count; n++)
+                    //{
+                    for (int j = 0; j < session.OverlappingActivityLists[0].Count; j++)
                     {
-                        cur_activity = session.OverlappingActivityLists[n][j]._Name;
-                        total_secs_activity = (int)annotatedPostures[cur_activity];
+
+                        name = session.OverlappingActivityLists[0][j]._Name;
+                        total_secs_activity = (int)annotatedPostures[name];
                         percent_duration = ((double)total_secs_activity / totalSeconds) * 100.0;
 
+                        summary += "<tr>\n" +
+                                   "<td><div align=\"center\"><strong>" + name + "</strong></div></td>" +
+                                   "<td>" + total_secs_activity.ToString() + "</td>" +
+                                   "<td>" + String.Format("{0:0.0}%", percent_duration) + "</td>" +
+                                   "<td>" + String.Format("{0:0}", freq_per_class[name]) + "</td>" +
+                                   "<td>" + String.Format("{0:0.00}", means_per_class[name]) + "</td>" +
+                                   "<td>" + String.Format("{0:0.00}", std_per_class[name]) + "</td>" +
+                                   "<td>" + String.Format("{0:0.00}", min_per_class[name]) + "</td>" +
+                                   "<td>" + String.Format("{0:0.00}", max_per_class[name]) + "</td>" +
+                                   "</tr>";
 
-                        summary += "<tr>\n<td>" + cur_activity + "</td><td>" + total_secs_activity.ToString() + 
-                                   "</td><td>"  + String.Format("{0:0.0}%",percent_duration) + "</td></tr>";                       
                     }
+                    //}
+
+
+                    //Close table
+                    summary += "</table>";
+
+                    #endregion
+
+
                 }
 
 
-                //Close table
-                summary +="</table>";
+                summary += "</HTML>";
 
-                #endregion
-
-
-            }
-
-                
-            summary +="</HTML>";
-
-            #endregion 
-
+        #endregion 
 
 
 
