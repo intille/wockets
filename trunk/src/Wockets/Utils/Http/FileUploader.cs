@@ -138,7 +138,7 @@ namespace Wockets.Utils.Http
             }
 
             //Write files that were successfully uploaded
-            try
+           /* try
             {
                 TextWriter tw = new StreamWriter(_HourlyPath + "success.upload.wockets-" + DateTime.Now.ToString("yyyy-MM-dd-HH-mm-tt"));
                 foreach (string filename in _Success.Keys)
@@ -147,11 +147,11 @@ namespace Wockets.Utils.Http
             }
             catch (Exception e)
             {
-            }
+            }*/
 
 
             //Write files that were unsuccessfully uploaded
-            try
+/*            try
             {
                 TextWriter tw = new StreamWriter(_HourlyPath + "failed.upload.wockets-" + DateTime.Now.ToString("yyyy-MM-dd-HH-mm-tt"));
                 foreach (string filename in _Failure.Keys)
@@ -160,7 +160,7 @@ namespace Wockets.Utils.Http
             }
             catch (Exception e)
             {
-            }
+            }*/
         }
 
         public static Dictionary<string, DateTime> Scan(DateTime from, DateTime until)
@@ -202,7 +202,10 @@ namespace Wockets.Utils.Http
                 DateTime creationTime = File.GetCreationTime(scannedfiles[i]);
                 FileInfo f = new FileInfo(scannedfiles[i]);
 
-                if ( (f.Length>0) && (((creationTime.Day != DateTime.Now.Day) || (creationTime.Hour != DateTime.Now.Hour) || (creationTime.Month != DateTime.Now.Month) ||
+                if ((scannedfiles[i].IndexOf("files.toupload.wockets") >= 0) || (scannedfiles[i].IndexOf("files.uploaded.wockets") >= 0))
+                    continue;
+
+                if ((f.Length>0) && (((creationTime.Day != DateTime.Now.Day) || (creationTime.Hour != DateTime.Now.Hour) || (creationTime.Month != DateTime.Now.Month) ||
                     (creationTime.Year != DateTime.Now.Year)) && (DateTime.Compare(creationTime,from)>=0) && 
                     (DateTime.Now.Subtract(creationTime).Hours>=2)))
                     files.Add(scannedfiles[i], creationTime);
@@ -292,126 +295,150 @@ namespace Wockets.Utils.Http
         public static WebResponse Post(Uri requestUri, NameValueCollection postData, Stream fileData, string fileName,
                                            string fileContentType, string fileFieldName, NameValueCollection headers)
         {
+            int count = 5;
 
-            Logger.Error("FileUploader: Post 2: posting file: " + fileName);
-            HttpWebRequest webrequest = (HttpWebRequest)WebRequest.Create(requestUri);
-            WebResponse webresponse = null;
-
-
-            string ctype;
-
-
-            fileFieldName = string.IsNullOrEmpty(fileFieldName) ? "file" : fileFieldName;
-
-            if (headers != null)
+            while (count-- != 0)
             {
-                // set the headers
-                foreach (string key in headers.AllKeys)
+                fileData.Seek(0,SeekOrigin.Begin);
+                Logger.Error("FileUploader: Post 2: posting file: " + fileName);
+                HttpWebRequest webrequest = (HttpWebRequest)WebRequest.Create(requestUri);
+                WebResponse webresponse = null;
+
+                string ctype;
+
+
+                fileFieldName = string.IsNullOrEmpty(fileFieldName) ? "file" : fileFieldName;
+
+                if (headers != null)
                 {
-                    string[] values = headers.GetValues(key);
-                    if (values != null)
-                        foreach (string value in values)
-                        {
-                            webrequest.Headers.Add(key, value);
-                        }
-                }
-            }
-            webrequest.Method = "POST";
-
-
-
-            string boundary = "----------" + DateTime.Now.Ticks.ToString("x", CultureInfo.InvariantCulture);
-
-            webrequest.ContentType = "multipart/form-data; boundary=" + boundary;
-
-            string sbHeader = "";
-
-            // add form fields, if any
-            if (postData != null)
-            {
-                foreach (string key in postData.AllKeys)
-                {
-                    string[] values = postData.GetValues(key);
-                    if (values != null)
-                        foreach (string value in values)
-                        {
-                            sbHeader += string.Format("--{0}\r\n", boundary);
-                            sbHeader += string.Format("Content-Disposition: form-data; name=\"{0}\";\r\n\r\n{1}\r\n", key,
-                                                  value);
-                        }
-                }
-            }
-
-
-            if (fileData != null)
-            {
-                sbHeader += string.Format("--{0}\r\n", boundary);
-                sbHeader += string.Format("Content-Disposition: form-data; name=\"{0}\"; {1}\r\n", fileFieldName,
-                                      string.IsNullOrEmpty(fileName)
-                                          ?
-                                              ""
-                                          : string.Format(CultureInfo.InvariantCulture, "filename=\"{0}\";",
-                                                          Path.GetFileName(fileName)));
-
-                sbHeader += string.Format("Content-Type: {0}\r\n\r\n", fileContentType);
-            }
-
-            byte[] header = Encoding.UTF8.GetBytes(sbHeader.ToString());
-            byte[] footer = Encoding.ASCII.GetBytes("\r\n--" + boundary + "--\r\n");
-            long contentLength = header.Length + (fileData != null ? fileData.Length : 0) + footer.Length;
-
-            webrequest.ContentLength = contentLength;
-            webrequest.AllowWriteStreamBuffering = false;
-
-            //webrequest.Timeout = 30000;
-            //webrequest.KeepAlive = true;
-            //webrequest.ReadWriteTimeout = 90000;
-
-            //webrequest.
-            //Logger.Debug("Uploading:" + fileName);
-            Logger.Error("FileUploader: Post 2: data ready, getting stream");
-            using (Stream requestStream = webrequest.GetRequestStream())
-            {
-                try
-                {
-                    Logger.Error("FileUploader: Post 2: data ready, got stream");
-                    rstream = requestStream;
-                    requestStream.Write(header, 0, header.Length);
-
-
-                    if (fileData != null)
+                    // set the headers
+                    foreach (string key in headers.AllKeys)
                     {
-                        // write the file data, if any
-                        byte[] buffer = new Byte[checked((uint)System.Math.Min(4096, (int)fileData.Length))];
-                        int bytesRead;
-                        while ((bytesRead = fileData.Read(buffer, 0, buffer.Length)) != 0)
-                        {
-                            requestStream.Write(buffer, 0, bytesRead);
-                        }
+                        string[] values = headers.GetValues(key);
+                        if (values != null)
+                            foreach (string value in values)
+                            {
+                                webrequest.Headers.Add(key, value);
+                            }
                     }
+                }
+                webrequest.Method = "POST";
 
-                    // write footer
-                    requestStream.Write(footer, 0, footer.Length);
-                    requestStream.Flush();
-                    System.Threading.Thread.Sleep(5000);
-                    webresponse = webrequest.GetResponse();
-                }
-                catch (Exception e)
-                {                    
-                    Logger.Error("FileUploader: Post 2: exception 1: "+e.Message);             
-                }
-                finally
+
+
+                string boundary = "----------" + DateTime.Now.Ticks.ToString("x", CultureInfo.InvariantCulture);
+
+                webrequest.ContentType = "multipart/form-data; boundary=" + boundary;
+
+                string sbHeader = "";
+
+                // add form fields, if any
+                if (postData != null)
                 {
-                    Logger.Error("FileUploader: Post 2: finalizing file: " + fileName);
-                    requestStream.Close();
-                    rstream = null;
-                    webrequest.Abort();
-                    webrequest = null;
-                   
+                    foreach (string key in postData.AllKeys)
+                    {
+                        string[] values = postData.GetValues(key);
+                        if (values != null)
+                            foreach (string value in values)
+                            {
+                                sbHeader += string.Format("--{0}\r\n", boundary);
+                                sbHeader += string.Format("Content-Disposition: form-data; name=\"{0}\";\r\n\r\n{1}\r\n", key,
+                                                      value);
+                            }
+                    }
                 }
-                Logger.Error("FileUploader: Post 2: Getting response");
-                return webresponse;                
-            }        
+
+
+                if (fileData != null)
+                {
+                    sbHeader += string.Format("--{0}\r\n", boundary);
+                    sbHeader += string.Format("Content-Disposition: form-data; name=\"{0}\"; {1}\r\n", fileFieldName,
+                                          string.IsNullOrEmpty(fileName)
+                                              ?
+                                                  ""
+                                              : string.Format(CultureInfo.InvariantCulture, "filename=\"{0}\";",
+                                                              Path.GetFileName(fileName)));
+
+                    sbHeader += string.Format("Content-Type: {0}\r\n\r\n", fileContentType);
+                }
+
+                byte[] header = Encoding.UTF8.GetBytes(sbHeader.ToString());
+                byte[] footer = Encoding.ASCII.GetBytes("\r\n--" + boundary + "--\r\n");
+                long contentLength = header.Length + (fileData != null ? fileData.Length : 0) + footer.Length;
+
+                webrequest.ContentLength = contentLength;
+                webrequest.AllowWriteStreamBuffering = false;
+
+                webrequest.Timeout = 600000; //10 mins to timeout
+                webrequest.KeepAlive =true;
+                webrequest.ReadWriteTimeout = 90000;
+                webrequest.SendChunked = true;
+
+
+                //webrequest.ServicePoint.ConnectionLimit = 100;
+
+
+                //webrequest.
+                //Logger.Debug("Uploading:" + fileName);
+                Logger.Error("FileUploader: Post 2: data ready, getting stream");
+                using (Stream requestStream = webrequest.GetRequestStream())
+                {
+                    try
+                    {
+                        Logger.Error("FileUploader: Post 2: setting service point max idle");
+                        //webrequest.ServicePoint.MaxIdleTime = 20000;
+                        //webrequest.ServicePoint.ConnectionLimit = 100;
+                        //requestStream.SetLength(819200);
+                        Logger.Error("FileUploader: Post 2: data ready, got stream");
+                        rstream = requestStream;
+                        Logger.Error("FileUploader: Post 2: writing header");
+                        requestStream.Write(header, 0, header.Length);
+
+
+
+                        if (fileData != null)
+                        {
+                            Logger.Error("FileUploader: Post 2: writing content");
+                            // write the file data, if any
+                            byte[] buffer = new Byte[checked((uint)System.Math.Min(8192, (int)fileData.Length))];
+                            int bytesRead;
+                            int totalRead = 0;
+                            while ((bytesRead = fileData.Read(buffer, 0, buffer.Length)) != 0)
+                            {
+                                totalRead += bytesRead;
+                                Logger.Error("FileUploader: Post 2: writing content," + fileData.Length + "," + totalRead + "," + bytesRead);
+                                requestStream.Write(buffer, 0, bytesRead);
+                                requestStream.Flush();
+                            }
+                        }
+
+                        // write footer
+                        Logger.Error("FileUploader: Post 2: flushing and closing file");
+                        requestStream.Write(footer, 0, footer.Length);
+                        requestStream.Flush();
+                        requestStream.Close();
+                        rstream = null;
+                        Logger.Error("FileUploader: Post 2: getting response");
+                        webresponse = webrequest.GetResponse();
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Error("FileUploader: Post 2: exception 1: " + e.Message + "," + fileName);
+                        continue;
+                    }
+                    finally
+                    {
+                        Logger.Error("FileUploader: Post 2: finalizing file: " + fileName);                       
+                        //webrequest.Abort();
+                        //webrequest = null;
+
+                    }
+                    Logger.Error("FileUploader: Post 2: Getting response");
+                    return webresponse;
+                }
+            }
+
+            return null;
         }
 
         /// <summary>
