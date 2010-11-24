@@ -631,7 +631,7 @@ namespace Wockets
                             }
 
                             Thread.Sleep(1000);
-                            if (DateTime.Now.Subtract(lastActivity).TotalSeconds > 30)
+                            if ((bpower.BatteryCurrent<0) && (DateTime.Now.Subtract(lastActivity).TotalSeconds > 30))
                               SetSystemPowerState(null, POWER_STATE_SUSPEND, POWER_FORCE);
 
                         }
