@@ -120,9 +120,11 @@ namespace DataUploader
 
                     startTime = DateTime.Now;
                     string md5 = "";
+                    string localmd5 = Hash.GetMD5HashFromFile(filename);
                     Logger.Debug("PostThread: about to upload"+filename);
                     using (WebResponse response = FileUploader.Post(new Uri(FileUploader._Uri), postData, filename, "application/octet-stream", "filename", null))
                     {
+                       
                         StreamReader reader =null;
                         try
                         {
@@ -152,7 +154,7 @@ namespace DataUploader
                         int md5end = md5.IndexOf("</filemd5>");
                         md5 = md5.Substring(md5start, md5end - md5start);
                     }
-                    string localmd5 = Hash.GetMD5HashFromFile(filename);
+                  
                     if (md5 == localmd5)
                     {
                         Logger.Debug("PostThread: MD5 Match:" + md5);
@@ -170,6 +172,9 @@ namespace DataUploader
                     }
 
                     Thread.Sleep(5000);
+                    SYSTEM_POWER_STATUS_EX2 bpower = Battery.GetSystemPowerStatus();
+                    if (bpower.BatteryCurrent < 0)
+                        break;
 
                 }
                 catch (Exception e)

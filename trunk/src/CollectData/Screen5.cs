@@ -257,7 +257,7 @@ namespace CollectData
                                     {
                                         found = true;
                                         
-                                        uploadCounter++;
+                                       /* uploadCounter++;
                                         try
                                         {
                                             if (uploadCounter > 60)
@@ -277,7 +277,7 @@ namespace CollectData
                                         catch 
                                         
                                         {
-                                        }
+                                        }*/
                                         break;
                                     }
                                 }
