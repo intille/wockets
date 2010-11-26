@@ -1,5 +1,7 @@
 <?php require_once('Connections/Wockets.php'); ?>
 <?php
+set_time_limit (600);
+$participant_id=-1;
 if ($_POST['KT_Insert1'])
 {	
 	$colname_Recordset1 = "-1";
@@ -13,8 +15,11 @@ if ($_POST['KT_Insert1'])
 	$row_Recordset1 = mysql_fetch_assoc($Recordset1);
 	$totalRows_Recordset1 = mysql_num_rows($Recordset1);
 
-	if (($totalRows_Recordset1==1) && ($_POST['relative_path']=="none"))	
-		$_POST['relative_path']="Subject".$row_Recordset1['participant_id'];	
+	if (($totalRows_Recordset1==1) && (isset($_POST['root_path'])) && ($_POST['root_path']=="none"))
+	{
+		$participant_id=$row_Recordset1['participant_id'];
+		$_POST['relative_path']="Subject".$participant_id. "/" . $_POST['relative_path'];	
+	}
 }
 ?>
 <?php
@@ -78,7 +83,7 @@ function Trigger_FileUpload(&$tNG) {
   $uploadObj->setFolder("WocketsData\\{relative_path}\\");
   $uploadObj->setMaxSize(5000);
   $uploadObj->setAllowedExtensions("txt, xml, PLFormat, csv");
-  $uploadObj->setRename("auto");
+//  $uploadObj->setRename("auto");
   return $uploadObj->Execute();
 }
 //end Trigger_FileUpload trigger
@@ -173,7 +178,61 @@ if (!$_POST['KT_Insert1'])
 
 <?php }else{ 
 
+	//File successfully uploaded
 	echo "<filemd5>".md5_file($file)."</filemd5>\n";
+	if (strrpos($file,"SummaryAC-",0)>0)
+	{
+			$filenameWithoutExt = explode(".", basename($file));
+			$splittedFile = explode("-", $filenameWithoutExt[0]);
+			$wocketNum = $splittedFile[2];
+			$wornLocation = $splittedFile[1];
+					
+			if (($handle = fopen("$file", "r")) !== FALSE) 
+			{
+    			while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) 
+				{
+	        		if (count($data)==6)
+					{
+						$datetime = $data[3];
+	        			$unixtime = $data[4];
+        				$activity = $data[5];
+						
+						mysql_select_db($database_Wockets, $Wockets);	
+						$query_Recordset3 = "INSERT INTO activity (subject_id, date_time, unix_time, activity, device_num) VALUES (".$participant_id.",'".$datetime."', '".$unixtime."','".$activity."', ".$wocketNum.")";
+						//echo "$query_Recordset3";
+//						$Recordset3 = mysql_query($query_Recordset3, $Wockets) or die(mysql_error());
+												        		
+					}
+				}
+			}		
+	}else if (strrpos($file,"log.csv",0)>0)
+	{
+		if (($handle = fopen("$file", "r")) !== FALSE) 
+			{
+    			while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) 
+				{
+	        		if (count($data)==18)
+					{
+						$unixtime = $data[0];
+        				$datetime = $data[3];
+        				$batteryLife = $data[4];
+        				$currentConsumptionChange = $data[6];
+        				$receivedSample1 = $data[8];
+        				$receivedSample2 = $data[13];
+						
+						mysql_select_db($database_Wockets, $Wockets);	
+						$query_Recordset4 = "INSERT INTO phone_battery_tracking (subject_id, date_time, unix_time, battery, current_change) VALUES (".$participant_id.",'".$datetime."', '".$unixtime."','".$batteryLife."',".$currentConsumptionChange.")";
+		//				$Recordset4 = mysql_query($query_Recordset4, $Wockets) or die(mysql_error());
+						
+						
+						$query_Recordset5 = "INSERT INTO received_samples (subject_id, date_time, unix_time, wocket1_received, wocket2_received) VALUES (".$participant_id.",'".$datetime."', '".$unixtime."',".$receivedSample1.",".$receivedSample2.")";
+	//					$Recordset5 = mysql_query($query_Recordset5, $Wockets) or die(mysql_error());
+												        		
+					}
+				}
+			}		
+	}
+
 ?>
 
 <?php } ?>
@@ -181,4 +240,8 @@ if (!$_POST['KT_Insert1'])
 </html>
 <?php
 mysql_free_result($Recordset1);
+mysql_free_result($Recordset3);
+mysql_free_result($Recordset4);
+mysql_free_result($Recordset5);
+flush();
 ?>
