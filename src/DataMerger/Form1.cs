@@ -399,12 +399,15 @@ namespace DataMerger
             try
             {
                 toCSV(this.textBox1.Text, "..\\NeededFiles\\Master\\", 3, filter);
+
+
                 try
-                {
-                    toQualityHTML(this.textBox1.Text, "..\\NeededFiles\\Master\\", 3, filter);
-                }catch (Exception ee)
-                {
+                {  toQualityHTML(this.textBox1.Text, "..\\NeededFiles\\Master\\", 3, filter);
                 }
+                catch (Exception ee)
+                {}
+
+
             }
             catch (Exception e)
             {
@@ -414,6 +417,8 @@ namespace DataMerger
             converted = true;
 
         }
+
+
 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -474,7 +479,7 @@ namespace DataMerger
  {
             
             int ACCELEROMETER_STATISTICS_LENGTH=16;
-            int WOCKETS_SR = 92;
+            //int WOCKETS_SR = 92;
             int MITES_SR = 45;
 
 
@@ -1457,7 +1462,7 @@ namespace DataMerger
                 else
                 {
 
-                    #region Create HTML content with stats
+                    #region Create HTML content with stats for Autism Data
 
                     //Create Table & Headers
                     summary += "<table border=\"1\">\n";
@@ -1487,8 +1492,7 @@ namespace DataMerger
 
 
 
-                    //for (int n = 0; n < session.OverlappingActivityLists.Count; n++)
-                    //{
+                    
                     for (int j = 0; j < session.OverlappingActivityLists[0].Count; j++)
                     {
 
@@ -1506,13 +1510,16 @@ namespace DataMerger
                                    "<td>" + String.Format("{0:0.00}", min_per_class[name]) + "</td>" +
                                    "<td>" + String.Format("{0:0.00}", max_per_class[name]) + "</td>" +
                                    "</tr>";
-
                     }
-                    //}
+                    
 
 
                     //Close table
                     summary += "</table>";
+
+                    //Generate the colors code for Autistic Labels
+                    SaveLabelsColorsToFile(aDataDirectory, session.OverlappingActivityLists.Count, session.OverlappingActivityLists);
+
 
                     #endregion
 
@@ -1530,8 +1537,7 @@ namespace DataMerger
         tw.Close();
 
 
-        SaveLabelsColorsToFile(aDataDirectory, session.OverlappingActivityLists.Count, session.OverlappingActivityLists);
-
+       
 
     #endregion
 
@@ -1715,6 +1721,8 @@ namespace DataMerger
         public static void toCSV(string aDataDirectory, string masterDirectory, int maxControllers, string[] filter)
         {
 
+            #region Declare Variables
+
             double previousUnixTime = -1;
 
             /**** MITes,wockets Variables ****/
@@ -1744,13 +1752,6 @@ namespace DataMerger
             double[] RMZ = null;
             int[] RMSize = null;
 
-
-
-            //Size of the moving average
-            int RM_DURATION = 1000;
-            int SAMPLING_RATE = 40;
-            int RM_SIZE = (RM_DURATION / 1000) * SAMPLING_RATE;
-            
 
             //CSV files that store data                    
             TextWriter[] activityCountCSVs = null; //old activity count files
@@ -1796,16 +1797,8 @@ namespace DataMerger
             int[] wRMSize = null;
 
 
-
-
-
-
-
             TextWriter masterCSV;      //Master CSV
             TextWriter hrCSV;       //HR CSV
-
-            
-
 
 
             //Zephyr
@@ -1942,6 +1935,7 @@ namespace DataMerger
             bool rt3Found=false;
 
 
+            //Sensor Offsets
             double actigraphOffset = 0;
             double sensewearOffset = 0;
             double zephyrOffset = 0;
@@ -1967,6 +1961,10 @@ namespace DataMerger
 
 
 
+            #endregion
+
+
+            #region Load Wockets Configuration File
 
             WocketsConfiguration configuration = new WocketsConfiguration();
             try
@@ -1978,6 +1976,9 @@ namespace DataMerger
              //   configuration.FromXML(aDataDirectory + "\\Configuration.xml");
             }
             CurrentWockets._Configuration = configuration;
+
+
+            #endregion Load Wockets Configuration File
 
 
             #region Read RTI data
@@ -2173,7 +2174,6 @@ namespace DataMerger
             #endregion Read RTI data
 
 
-
             #region Read Columbia data
             file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*-columbia*.csv");
 
@@ -2241,7 +2241,6 @@ namespace DataMerger
                 throw new Exception("Columbia: Parsing failed " + e.Message);
             }
             #endregion Read Columbia data
-
 
 
             #region Read GPS data
@@ -2312,7 +2311,6 @@ namespace DataMerger
             #endregion Read GPS data
 
 
-
             #region Read Omron data
             file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*-omron.csv");
             string omron_line = "";
@@ -2343,6 +2341,7 @@ namespace DataMerger
                 throw new Exception("Omron: Parsing failed " + e.Message);
             }
             #endregion Read Omron data
+
 
             #region Read Actigraph data
             file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*-actigraph*.csv");
@@ -2531,7 +2530,6 @@ namespace DataMerger
             #endregion Read Actigraph data
 
 
-
             #region Read Zephyr data
             file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*-zephyr*.csv");
 
@@ -2629,6 +2627,7 @@ namespace DataMerger
                 throw new Exception("Zephyr: Parsing failed " + e.Message);
             }
             #endregion Read Zephyr data
+
 
             #region Read Oxycon data
 
@@ -3167,6 +3166,7 @@ namespace DataMerger
             oxyconRecords = oxyconData.Count;
             #endregion Read Oxycon data
 
+
             #region Read Sensewear data
             file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*-sensewear*.csv");
             string sensewear_line = "";
@@ -3292,8 +3292,6 @@ namespace DataMerger
             #endregion Read Sensewear data
 
 
-
-
             #region Read RT3 data
             file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*-rt3*.csv");
             string rt3_line = "";
@@ -3349,8 +3347,6 @@ namespace DataMerger
             #endregion Read RT3 data
 
 
-
-
             #region Setup master and other sensor files
             try
             {
@@ -3387,7 +3383,8 @@ namespace DataMerger
 
             #endregion Setup master and other sensor files
 
-            #region Load Annotation
+
+            #region Load Annotations
 
             AXML.Annotation aannotation = null;
             try
@@ -3502,12 +3499,17 @@ namespace DataMerger
                 throw new Exception("MITes Configuration Files: Parsing failed " + e.Message);
             }
 
+
             if (aannotation != null)
             {
                 foreach (AXML.Category category in aannotation.Categories)
                     master_csv_header += "," + category.Name;
             }
-            #endregion Load Annotation
+
+
+
+            #endregion Load Annotations
+
 
             #region Setup MITes Data
 
@@ -3515,6 +3517,31 @@ namespace DataMerger
             MITesHRAnalyzer aMITesHRAnalyzer = null;
             MITesLoggerReader aMITesLoggerReader = null;
             SXML.SensorAnnotation sannotation = null;
+
+
+            //Set Mites Sampling Rate 
+            int mites_SAMPLING_RATE = 45;
+
+            //Size of the moving average 
+            int mites_RM_DURATION = 1000;
+            int mites_RM_SIZE = (mites_RM_DURATION / 1000) * mites_SAMPLING_RATE;
+
+
+            if (Directory.Exists(aDataDirectory + "\\" + MITES_SUBDIRECTORY + "\\data\\"))
+            {
+                try
+                {
+                    SXML.Reader sreader = new SXML.Reader(masterDirectory, aDataDirectory + "\\" + MITES_SUBDIRECTORY);
+                    sannotation = sreader.parse(maxControllers);
+                }
+                catch (Exception e)
+                {
+                    throw new Exception("MITes Configuration Files: Parsing failed " + e.Message);
+                }
+            }
+
+            
+            
 
             if (Directory.Exists(aDataDirectory + "\\" + MITES_SUBDIRECTORY + "\\data\\"))
             {
@@ -3597,12 +3624,12 @@ namespace DataMerger
 
 
                 //Initialize arrays based on number of sensors
-                rawData = new int[sannotation.MaximumSensorID + 1, 3, RM_SIZE];
+                rawData = new int[sannotation.MaximumSensorID + 1, 3, mites_RM_SIZE];
                 for (int i = 0; (i < sannotation.MaximumSensorID + 1); i++)
                     for (int j=0;(j<3);j++)
-                        for (int k=0;(k<RM_SIZE);k++)
+                        for (int k = 0; (k < mites_RM_SIZE); k++)
                             rawData[i,j,k]=-1;
-                timeData = new long[sannotation.MaximumSensorID + 1, RM_SIZE];
+                timeData = new long[sannotation.MaximumSensorID + 1, mites_RM_SIZE];
                 AUC = new int[sannotation.MaximumSensorID + 1, 3];
                 VMAG = new double[sannotation.MaximumSensorID + 1];
                 head = new int[sannotation.MaximumSensorID + 1];
@@ -3632,6 +3659,9 @@ namespace DataMerger
 
             #endregion Setup MITes Data
 
+
+            #region Scan Annotation Records
+
             int channel = 0, x = 0, y = 0, z = 0;
             double unixtimestamp = 0.0;
             string current_activity = "";
@@ -3653,16 +3683,41 @@ namespace DataMerger
 
             }
 
+            #endregion
+
+
             #region Setup Wockets Data
+
             int[] lastDecodedIndex = null;
             WocketsController wcontroller = null;
             double[] wunixtimestamp = null;
+
+            //Initialize Wockets Sampling Rate 
+            int SAMPLING_RATE = 0;
+
+            //Size of the moving average 
+            int RM_DURATION = 1000;
+            int RM_SIZE = 0;  
+
+
 
             if ((Directory.Exists(aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY)) && (Directory.GetFiles(aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY).Length>0))
             {
                 wcontroller = new WocketsController("", "", "");
                 CurrentWockets._Controller = wcontroller;
                 wcontroller.FromXML(aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY + "\\SensorData.xml");
+
+
+                //Set Wockets Sampling Rate & size of moving average 
+                //---Check with Fahd how to handle the case when more than one sensor ---
+                if (wcontroller._Sensors.Count > 0)
+                {
+                    SAMPLING_RATE = wcontroller._Sensors[0]._SamplingRate;
+                    RM_SIZE = (RM_DURATION / 1000) * SAMPLING_RATE;
+                }
+
+
+
                 for (int r = 0; (r < wcontroller._Decoders.Count); r++)
                     wcontroller._Decoders[r].Initialize();
                 wunixtimestamp = new double[wcontroller._Sensors.Count];
@@ -4103,6 +4158,7 @@ namespace DataMerger
             #endregion Read Summary data
 
 
+            #region Actigraph Summary Header
 
             for (int i = 0; (i < actigraphData.Length); i++)
             {
@@ -4123,6 +4179,10 @@ namespace DataMerger
                 }
             }
 
+            #endregion Actigraph Summary Header
+
+
+            #region Wockets Summary Header
 
             if (summaryData != null)
             {
@@ -4132,6 +4192,13 @@ namespace DataMerger
                     summaryCSV[i].WriteLine(summary_csv_header);
                 }
             }
+
+            #endregion Wockets Summary Header
+
+
+
+            #region Other Sensors Headers
+
             if (sensewearFound)
                 master_csv_header += ",SensewearSR,Sensewear_AVTranAcc,Senserwear_AVLongAcc,Sensewear_AVForAcc";
             else if (sensewearVanderbiltFound)
@@ -4175,6 +4242,7 @@ namespace DataMerger
                 rt3CSV.WriteLine(rt3_csv_header);
 
 
+            #endregion Other Sensors Headers
 
 
 
@@ -4392,8 +4460,6 @@ namespace DataMerger
 
             
             DateTime currentDateTime = startDateTime;
-
-
             DateTime origin = new DateTime(1970, 1, 1, 0, 0, 0, 0); ;
             TimeSpan diff;
             string timestamp = "";
@@ -4431,6 +4497,8 @@ namespace DataMerger
                 string rt3_csv_line = "";
             #endregion Initialize CSV lines
 
+
+
             TextReader[] wocketsTR1=null;
             if (wcontroller != null)
             {
@@ -4438,6 +4506,9 @@ namespace DataMerger
                 for (int k = 0; (k < wcontroller._Sensors.Count); k++)
                     wocketsTR1[k] = new StreamReader(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "Wocket_" + wcontroller._Sensors[k]._ID.ToString("00") + "_RawCorrectedData_" + wcontroller._Sensors[k]._Location.Replace(' ', '-') + ".csv");
             }
+
+
+
             while (((TimeSpan)endDateTime.Subtract(currentDateTime)).TotalSeconds >= 0)
             {
                 string key = currentDateTime.Year + "-" + currentDateTime.Month + "-" + currentDateTime.Day + "-" + currentDateTime.Hour + "-" + currentDateTime.Minute + "-" + currentDateTime.Second;
@@ -4447,6 +4518,8 @@ namespace DataMerger
 
       
                 #region Setup prefix of CSV lines
+
+
                 master_csv_line = timestamp;
                 hr_csv_line = timestamp;
                 for (int i = 0; (i < actigraphData.Length); i++)
@@ -4468,6 +4541,9 @@ namespace DataMerger
                 
                 if (aannotation != null)
                     master_csv_line += "," + current_activity;
+
+
+
                 #endregion Setup prefix of CSV lines
 
 
@@ -4475,10 +4551,13 @@ namespace DataMerger
                 if (CSVProgress == "")
                     CSVProgress = "Synchronizing " + currentDateTime.ToLongDateString() + " " + currentDateTime.ToLongTimeString();
 
+
+
                 if (aannotation != null)
                 {
 
-                    #region Load Activity Label
+                    #region Load Activity Labels
+                    
                     if (currentUnixTime > annotatedRecord.EndUnix)
                     {
                         current_activity = "";
@@ -4517,21 +4596,26 @@ namespace DataMerger
                         current_activity = Regex.Replace(current_activity, "^[_]+", "");
                         current_activity = Regex.Replace(current_activity, "[_]+$", "");
                     }
-                    #endregion Load Activity Label
 
+
+                    #endregion Load Activity Label
                 }
 
 
+                
+
+
+
+                #region if there is MITes data
                 double mitesTime = 0;
 
-                //if there is MITes data
                 if (aMITesDecoder != null)
                 {
 
                     #region Load MITes data if needed
 
                     //always have at least 5 seconds worth of data for the MITes
-                    while (((unixtimestamp - currentUnixTime) <= RM_DURATION) && (aMITesLoggerReader.GetSensorData(10)))
+                    while (((unixtimestamp - currentUnixTime) <= mites_RM_DURATION) && (aMITesLoggerReader.GetSensorData(10)))
                     {
                         channel = aMITesDecoder.GetSomeMITesData()[0].channel;
 
@@ -4547,7 +4631,7 @@ namespace DataMerger
                                 
                                 mitesTime = unixtimestamp;
                                 timeData[channel, head[channel]] = (long)mitesTime;
-                                head[channel] = (head[channel] + 1) % RM_SIZE;
+                                head[channel] = (head[channel] + 1) % mites_RM_SIZE;
 
                             }
                         }
@@ -4573,7 +4657,7 @@ namespace DataMerger
                             //UnixTime.GetDateTime((long)mitesTime,out d2);
 
                             timeData[channel, head[channel]] = (long)mitesTime;
-                            head[channel] = (head[channel] + 1) % RM_SIZE;
+                            head[channel] = (head[channel] + 1) % mites_RM_SIZE;
 
                             
                         }
@@ -4581,6 +4665,8 @@ namespace DataMerger
                     }
 
                     #endregion Load MITes data if needed
+
+
 
                     #region Calculate Statistics
 
@@ -4797,7 +4883,7 @@ namespace DataMerger
                                 }
                                 headPtr--;
                                 if (headPtr < 0)
-                                    headPtr = RM_SIZE-1;
+                                    headPtr = mites_RM_SIZE-1;
                             }
                             if (hrCount > 0)
                             {
@@ -4832,7 +4918,8 @@ namespace DataMerger
 
                     #endregion Calculate Statistics
 
-                    #region Append MITes Statistics
+
+                    #region Append MITes Statistics (Deleted)
 
                     #region Write CSV line for MITes HR
 
@@ -4843,8 +4930,12 @@ namespace DataMerger
 
                 }
 
+            #endregion if there is MITes data
 
-                //if there is Wockets data
+
+
+                #region if there is Wockets data
+
                 if (wcontroller != null)
                 {
                     
@@ -4868,6 +4959,8 @@ namespace DataMerger
                     }
 
                     #endregion Load Wockets data if needed
+
+
 
                     #region Calculate Statistics
 
@@ -5110,8 +5203,16 @@ namespace DataMerger
 
                 }
 
+            #endregion if there is Wockets data
+
+
+
+                #region Write the CSV lines for each sensor
+
 
                 #region Write CSV lines for Actigraphs
+
+
                 for (int i = 0; (i < actigraphData.Length); i++)
                 {
                     if (actigraphData[i].ContainsKey(key) == false)
@@ -5144,6 +5245,8 @@ namespace DataMerger
 
 
                 #region Write CSV lines for Wockets Summary
+                
+                
                 if (summaryData != null)
                 {
                     for (int i = 0; (i < summaryData.Length); i++)
@@ -5165,6 +5268,8 @@ namespace DataMerger
 
 
                 #region Write CSV lines for Raw Wockets Summary
+                
+                
                 if (rawSummaryData != null)
                 {
                     for (int i = 0; (i < rawSummaryData.Length); i++)
@@ -5364,12 +5469,19 @@ namespace DataMerger
                 #endregion Write master CSV line
 
 
+                #endregion Write the CSV lines for each sensor
+
+
+
                 //reinitialize variables
                 hrCount = 0;
                 sumHR = 0;
 
                 currentDateTime = currentDateTime.AddSeconds(1.0);
+
             }
+
+
 
 
             #region Close all files

@@ -2440,11 +2440,11 @@ namespace NESPDataViewer
                 }
             }
 
-            if (AnyMatches(path + "\\merged\\", "GPS*,POI*"))
-            {
-                string title = paneOrdering + " Location";
-                hPane = AddPane(title, "");
-            }
+            //if (AnyMatches(path + "\\merged\\", "GPS*,POI*"))
+            //{
+            //    string title = paneOrdering + " Location";
+            //    hPane = AddPane(title, "");
+            //}
 
             //if (AnyMatches(path + "\\annotation\\audioannotation\\", "annotat*"))
             //{
