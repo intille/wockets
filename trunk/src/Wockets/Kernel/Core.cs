@@ -534,11 +534,16 @@ namespace Wockets.Kernel
                 }
             });
         }
-        
+
+
+        public static void Connect()
+        {
+            Connect(TransmissionMode.Continuous);
+        }
         /// <summary>
         /// Sends a request to the kernel to connect to the currently selected wockets
         /// </summary>        
-        public static void Connect()
+        public static void Connect(TransmissionMode tmode)
         {
             ThreadPool.QueueUserWorkItem(func =>
             {
@@ -550,6 +555,7 @@ namespace Wockets.Kernel
                     RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
                     rk.SetValue("Message", KernelCommand.CONNECT.ToString(), RegistryValueKind.String);
                     rk.SetValue("Param", "all", RegistryValueKind.String);
+                    rk.SetValue("TMode",tmode.ToString(), RegistryValueKind.String);
                     rk.Flush();
                     rk.Close();
                     kernelLock.Release();

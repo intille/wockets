@@ -447,6 +447,11 @@ namespace Wockets.Kernel
                                 CurrentWockets._Controller._StorageDirectory = Storage.GenerateStoragePath();
                                 CurrentWockets._Controller.FromXML(path + "//NeededFiles//Master//SensorData.xml");
                                 CurrentWockets._Controller._Mode = MemoryMode.BluetoothToShared;
+                                string tmodevalue = (string)rk.GetValue("TMode");
+                                TransmissionMode tmode = (TransmissionMode)Enum.Parse(typeof(TransmissionMode),
+                                    tmodevalue, true);
+                                CurrentWockets._Controller._TMode = tmode;
+                                
                                 try
                                 {
                                     File.Copy(path + "//NeededFiles//Master//Configuration.xml", CurrentWockets._Controller._StorageDirectory + "\\Configuration.xml");
