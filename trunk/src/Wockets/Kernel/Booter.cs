@@ -191,31 +191,31 @@ namespace Wockets.Kernel
                         rk.SetValue("Storage", "", RegistryValueKind.String);
                         rk.Close();
                         rk = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_WOCKETS_PATH + "\\Kernel\\Commands");
-                        rk.SetValue("GET_BT", 0, RegistryValueKind.DWord);
-                        rk.SetValue("GET_PC", 1, RegistryValueKind.DWord);
-                        rk.SetValue("GET_SM", 2, RegistryValueKind.DWord);
-                        rk.SetValue("SET_SM", 3, RegistryValueKind.DWord);
-                        rk.SetValue("GET_SEN", 6, RegistryValueKind.DWord);
-                        rk.SetValue("SET_SEN", 7, RegistryValueKind.DWord);
-                        rk.SetValue("GET_CAL", 8, RegistryValueKind.DWord);
-                        rk.SetValue("SET_CAL", 9, RegistryValueKind.DWord);
-                        rk.SetValue("GET_TP", 10, RegistryValueKind.DWord);
-                        rk.SetValue("SET_TP", 11, RegistryValueKind.DWord);
-                        rk.SetValue("GET_SR", 12, RegistryValueKind.DWord);
-                        rk.SetValue("SET_SR", 13, RegistryValueKind.DWord);
+                        rk.SetValue("GET_BT",   0, RegistryValueKind.DWord);
+                        rk.SetValue("GET_PC",   1, RegistryValueKind.DWord);
+                        rk.SetValue("GET_SM",   2, RegistryValueKind.DWord);
+                        rk.SetValue("SET_SM",   3, RegistryValueKind.DWord);
+                        rk.SetValue("GET_SEN",  6, RegistryValueKind.DWord);
+                        rk.SetValue("SET_SEN",  7, RegistryValueKind.DWord);
+                        rk.SetValue("GET_CAL",  8, RegistryValueKind.DWord);
+                        rk.SetValue("SET_CAL",  9, RegistryValueKind.DWord);
+                        rk.SetValue("GET_TP",  10, RegistryValueKind.DWord);
+                        rk.SetValue("SET_TP",  11, RegistryValueKind.DWord);
+                        rk.SetValue("GET_SR",  12, RegistryValueKind.DWord);
+                        rk.SetValue("SET_SR",  13, RegistryValueKind.DWord);
                         rk.SetValue("GET_DSC", 14, RegistryValueKind.DWord);
                         rk.SetValue("SET_DSC", 15, RegistryValueKind.DWord);
-                        rk.SetValue("GET_TM", 16, RegistryValueKind.DWord);
-                        rk.SetValue("SET_TM", 17, RegistryValueKind.DWord);
+                        rk.SetValue("GET_TM",  16, RegistryValueKind.DWord);
+                        rk.SetValue("SET_TM",  17, RegistryValueKind.DWord);
                         rk.SetValue("GET_ALT", 18, RegistryValueKind.DWord);
                         rk.SetValue("SET_ALT", 19, RegistryValueKind.DWord);
                         rk.SetValue("GET_PDT", 20, RegistryValueKind.DWord);
                         rk.SetValue("SET_PDT", 21, RegistryValueKind.DWord);
-                        rk.SetValue("RST_WK", 22, RegistryValueKind.DWord);
+                        rk.SetValue("RST_WK",  22, RegistryValueKind.DWord);
                         rk.SetValue("GET_CFT", 23, RegistryValueKind.DWord);
                         rk.SetValue("SET_CFT", 24, RegistryValueKind.DWord);
-                        rk.SetValue("GET_BR", 25, RegistryValueKind.DWord);
-                        rk.SetValue("SET_BR", 26, RegistryValueKind.DWord);
+                        rk.SetValue("GET_BR",  25, RegistryValueKind.DWord);
+                        rk.SetValue("SET_BR",  26, RegistryValueKind.DWord);
                         rk.Flush();
                         rk.Close();
                         rk = Registry.LocalMachine.CreateSubKey(Core.COMMAND_CHANNEL);
@@ -277,6 +277,7 @@ namespace Wockets.Kernel
                 System.Diagnostics.Process.GetCurrentProcess().Kill();
             }
         }
+
 
 
 
@@ -397,17 +398,24 @@ namespace Wockets.Kernel
             }
         }
 
+
+
+
         /// <summary>
         /// Handler for processing application messages
         /// </summary>
         public static void ApplicationHandler()
         {
+
             int tid = Thread.CurrentThread.ManagedThreadId;
             string commandPath = Core.REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + (string)applicationPaths[tid] + "}";
             NamedEvents namedEvent = new NamedEvents();
             string applicationGuid = ((string)applicationPaths[tid]);
             string channel = applicationGuid + "-kernel";
             //WocketsController lwcontroller = null;
+
+
+
             while (true)
             {
                 //ensures prior synchronization
@@ -416,6 +424,7 @@ namespace Wockets.Kernel
                 lock (terminationLock)
                 {
                     kernelLock.WaitOne();
+
                     RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
                     string msg = (string)rk.GetValue("Message");
                     string param = (string)rk.GetValue("Param");
@@ -447,9 +456,12 @@ namespace Wockets.Kernel
                                 CurrentWockets._Controller._StorageDirectory = Storage.GenerateStoragePath();
                                 CurrentWockets._Controller.FromXML(path + "//NeededFiles//Master//SensorData.xml");
                                 CurrentWockets._Controller._Mode = MemoryMode.BluetoothToShared;
+
+                                rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
                                 string tmodevalue = (string)rk.GetValue("TMode");
-                                TransmissionMode tmode = (TransmissionMode)Enum.Parse(typeof(TransmissionMode),
-                                    tmodevalue, true);
+                                rk.Close();
+
+                                TransmissionMode tmode = (TransmissionMode)Enum.Parse(typeof(TransmissionMode), tmodevalue, true);
                                 CurrentWockets._Controller._TMode = tmode;
                                 
                                 try
