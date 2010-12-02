@@ -3975,8 +3975,9 @@ namespace DataMerger
                             }
 
 
-                            while ((lastSecond != unixtime) && (unixtime!=0))
+                            while ((lastSecond < unixtime) && (unixtime!=0))
                             {
+                               
                                 loadedIndex++;
                                 if (loadedIndex == LoadedSeconds)
                                     loadedIndex = 0;

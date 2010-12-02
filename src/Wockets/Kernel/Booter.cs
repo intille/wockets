@@ -455,6 +455,7 @@ namespace Wockets.Kernel
                                 CurrentWockets._Controller = new WocketsController("", "", "");
                                 CurrentWockets._Controller._StorageDirectory = Storage.GenerateStoragePath();
                                 CurrentWockets._Controller.FromXML(path + "//NeededFiles//Master//SensorData.xml");
+
                                 CurrentWockets._Controller._Mode = MemoryMode.BluetoothToShared;
 
                                 rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
@@ -463,6 +464,7 @@ namespace Wockets.Kernel
 
                                 TransmissionMode tmode = (TransmissionMode)Enum.Parse(typeof(TransmissionMode), tmodevalue, true);
                                 CurrentWockets._Controller._TMode = tmode;
+
                                 
                                 try
                                 {

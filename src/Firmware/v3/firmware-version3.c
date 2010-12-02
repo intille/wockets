@@ -103,7 +103,7 @@ unsigned short blink_counter;
 unsigned char isdocked=0;
 unsigned int dockcounter=0;
 unsigned int pseq=0;
-
+unsigned int cc=0;
 
 unsigned short Filter(unsigned short data,int axis)
 {
@@ -217,6 +217,7 @@ int main()
 			y=_atmega_a2dConvert10bit(ADC1);
 
 			z=_atmega_a2dConvert10bit(ADC2);
+			x=y=z=cc++;
 
 				vmag+=Filter(x,0)+Filter(y,1)+Filter(z,2);
 			
@@ -305,7 +306,8 @@ int main()
 					_send_tm();
 					justconnected=2;
 				}		
-				_send_pdu(x,y,z);
+				//_send_pdu(x,y,z);
+				_send_uncompressed_pdu(x, y, z);
 
 				
 					//Send summary activity count
@@ -358,30 +360,30 @@ int main()
 							m_GET_X(x,data[i].byte1,data[i].byte2,0);
 							m_GET_Y(y,data[i].byte2,data[i].byte3,0);
 							m_GET_Z(z,data[i].byte3,data[i].byte4,0);							
-							_send_uncompressed_pdu(x, y, z);
+							//_send_uncompressed_pdu(x, y, z);
 							
-							//_send_pdu(x,y,z);
+							_send_pdu(x,y,z);
 
 							m_GET_X(x,data[i].byte4,data[i].byte5,1);
 							m_GET_Y(y,data[i].byte6,data[i].byte7,1);
 							m_GET_Z(z,data[i].byte7,data[i].byte8,1);							
-							_send_uncompressed_pdu(x,y, z);
+							//_send_uncompressed_pdu(x,y, z);
 							
-							//_send_pdu(x,y,z);
+							_send_pdu(x,y,z);
 
 							m_GET_X(x,data[i].byte8,data[i].byte9,2);
 							m_GET_Y(y,data[i].byte9,data[i].byte10,2);
 							m_GET_Z(z,data[i].byte11,data[i].byte12,2);
-							_send_uncompressed_pdu(x, y, z);
+							//_send_uncompressed_pdu(x, y, z);
 							
-							//_send_pdu(x,y,z);
+							_send_pdu(x,y,z);
 
 							m_GET_X(x,data[i].byte12,data[i].byte13,3);
 							m_GET_Y(y,data[i].byte13,data[i].byte14,3);
 							m_GET_Z(z,data[i].byte14,data[i].byte15,3);							
-							_send_uncompressed_pdu(x, y, z);
+							//_send_uncompressed_pdu(x, y, z);
 							
-							//_send_pdu(x,y,z);
+							_send_pdu(x,y,z);
 
 							_receive_data();
 						}
@@ -418,30 +420,30 @@ int main()
 							m_GET_X(x,data[current].byte1,data[current].byte2,0);
 							m_GET_Y(y,data[current].byte2,data[current].byte3,0);
 							m_GET_Z(z,data[current].byte3,data[current].byte4,0);							
-							_send_uncompressed_pdu(x, y, z);
+							//_send_uncompressed_pdu(x, y, z);
 							
-							//_send_pdu(x,y,z);
+							_send_pdu(x,y,z);
 
 							m_GET_X(x,data[current].byte4,data[current].byte5,1);
 							m_GET_Y(y,data[current].byte6,data[current].byte7,1);
 							m_GET_Z(z,data[current].byte7,data[current].byte8,1);							
-							_send_uncompressed_pdu(x, y, z);
+							//_send_uncompressed_pdu(x, y, z);
 							
-							//_send_pdu(x,y,z);
+							_send_pdu(x,y,z);
 
 							m_GET_X(x,data[current].byte8,data[current].byte9,2);
 							m_GET_Y(y,data[current].byte9,data[current].byte10,2);
 							m_GET_Z(z,data[current].byte11,data[current].byte12,2);
-							_send_uncompressed_pdu(x, y, z);
+							//_send_uncompressed_pdu(x, y, z);
 							
-							//_send_pdu(x,y,z);
+							_send_pdu(x,y,z);
 
 							m_GET_X(x,data[current].byte12,data[current].byte13,3);
 							m_GET_Y(y,data[current].byte13,data[current].byte14,3);
 							m_GET_Z(z,data[current].byte14,data[current].byte15,3);							
-							_send_uncompressed_pdu(x,y, z);
+							//_send_uncompressed_pdu(x,y, z);
 							
-							//_send_pdu(x,y,z);
+							_send_pdu(x,y,z);
 
 							current++;
 							if (current==750)
