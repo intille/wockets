@@ -72,7 +72,8 @@ namespace Wockets.Utils.Http
                     while ((line = tr.ReadLine()) != null)
                     {
                         string[] tokens = line.Split(new char[] { ',' });
-                        _NotUploaded.Add(tokens[0], DateTime.ParseExact(tokens[1], "yyyy-MM-dd HH:mm tt", null));
+                        if (!_NotUploaded.ContainsKey(tokens[0]))
+                            _NotUploaded.Add(tokens[0], DateTime.ParseExact(tokens[1], "yyyy-MM-dd HH:mm tt", null));
                     }
                     tr.Close();
                 }
@@ -93,7 +94,8 @@ namespace Wockets.Utils.Http
                     while ((line = tr.ReadLine()) != null)
                     {
                         string[] tokens = line.Split(new char[] { ',' });
-                        _Success.Add(tokens[0], DateTime.ParseExact(tokens[1], "yyyy-MM-dd HH:mm tt", null));
+                        if (!_Success.ContainsKey(tokens[0]))
+                            _Success.Add(tokens[0], DateTime.ParseExact(tokens[1], "yyyy-MM-dd HH:mm tt", null));
                     }
                     tr.Close();
                 }
@@ -104,14 +106,16 @@ namespace Wockets.Utils.Http
             }
         }
 
-
+     
 
         public static void Save()
         {
+           
             //Save not uploaded files
             try
             {
-                TextWriter tw = new StreamWriter(_HistoryPath + "files.notuploaded.wockets");
+                TextWriter tw = null;     
+                tw = new StreamWriter(_HistoryPath + "files.notuploaded.wockets");
                 foreach (string filename in _Failure.Keys)
                     tw.WriteLine(filename + "," + File.GetCreationTime(filename).ToString("yyyy-MM-dd HH:mm tt"));
                 tw.Close();
@@ -124,7 +128,8 @@ namespace Wockets.Utils.Http
             //Save uploaded files
             try
             {
-                TextWriter tw = new StreamWriter(_HistoryPath + "files.uploaded.wockets");
+                TextWriter tw = null;
+                tw = new StreamWriter(_HistoryPath + "files.uploaded.wockets");
                 foreach (string filename in _Success.Keys)
                 {
                     DateTime creationTime=File.GetCreationTime(filename);

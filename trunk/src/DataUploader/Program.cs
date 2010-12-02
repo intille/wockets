@@ -85,7 +85,7 @@ namespace DataUploader
 
             CurrentPhone._Number = "";
             CurrentSubject._ID = 1;
-            Dictionary<string, DateTime> files = FileUploader.Scan(DateTime.Now.Subtract(new TimeSpan(10, 0, 0, 0)), DateTime.Now.Subtract(new TimeSpan(0, 0, 0, 0)));
+            Dictionary<string, DateTime> files = FileUploader.Scan(DateTime.Now.Subtract(new TimeSpan(20, 0, 0, 0)), DateTime.Now.Subtract(new TimeSpan(0, 0, 0, 0)));
             //Sort files by creation time 
             var sortedFiles = from k in FileUploader._NotUploaded.Keys
                               orderby FileUploader._NotUploaded[k] descending
@@ -167,7 +167,8 @@ namespace DataUploader
                     {
                         Logger.Debug("PostThread: MD5 Mismatch:" + md5+","+localmd5);
                         failure++;
-                        FileUploader._Failure.Add(filename, creationTime);
+                        if (!FileUploader._Failure.ContainsKey(filename))
+                            FileUploader._Failure.Add(filename, creationTime);
                         Core.WRITE_LAST_UPLOAD_FAILEDFILES(failure);
                     }
 
