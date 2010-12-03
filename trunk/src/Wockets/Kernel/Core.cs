@@ -372,9 +372,19 @@ namespace Wockets.Kernel
                     startInfo.FileName = KERNEL_PATH + KERNEL_EXECUTABLE;
                     //startInfo.FileName = startInfo.FileName;
                     startInfo.UseShellExecute = false;
-                     //System.Diagnostics.Process.Start(
+                    //System.Diagnostics.Process.Start(
                     //po.StartInfo = startInfo;
-                    return ((_KernelProcess=System.Diagnostics.Process.Start(startInfo.FileName, ""))!=null);
+
+
+                    if ( (_KernelProcess = System.Diagnostics.Process.Start(startInfo.FileName, "")) != null)
+                    { Core._KernalStarted = true;  }
+                    else
+                    { Core._KernalStarted = false; }
+
+
+                    //return (Core._KernalStarted = ((_KernelProcess = System.Diagnostics.Process.Start(startInfo.FileName, "")) != null));
+                    return Core._KernalStarted;
+                
                 }
                 catch (Exception e)
                 {
@@ -452,36 +462,39 @@ namespace Wockets.Kernel
         /// <param name="s">a list of mac addresses</param>
         public static void SetSensors(ArrayList s)
         {
-            ThreadPool.QueueUserWorkItem(func =>
+            if (s != null)
             {
-
-                if ((Core._Registered) && (!Core._Connected) && (s.Count <= 5))
+                ThreadPool.QueueUserWorkItem(func =>
                 {
-                    string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + _IcomingChannel + "}";
-                    NamedEvents namedEvent = new NamedEvents();
-                    kernelLock.WaitOne();
-                    RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
-                    rk.SetValue("Message", KernelCommand.SET_WOCKETS.ToString(), RegistryValueKind.String);
-                    rk.Flush();
-                    rk.Close();
-                    for (int i = 0; (i < 5); i++)
+
+                    if ((Core._Registered) && (!Core._Connected) && (s.Count <= 5))
                     {
-                        rk = Registry.LocalMachine.CreateSubKey(REGISTRY_SENSORS_PATH + "\\" + i.ToString("0"));
-                        if (s.Count > i)
-                        {
-                            rk.SetValue("MacAddress", (string)s[i], RegistryValueKind.String);
-                            rk.SetValue("Status", 1, RegistryValueKind.DWord);
-                        }
-                        else
-                            rk.SetValue("Status", 0, RegistryValueKind.DWord);
+                        string commandPath = REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + _IcomingChannel + "}";
+                        NamedEvents namedEvent = new NamedEvents();
+                        kernelLock.WaitOne();
+                        RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
+                        rk.SetValue("Message", KernelCommand.SET_WOCKETS.ToString(), RegistryValueKind.String);
                         rk.Flush();
                         rk.Close();
+                        for (int i = 0; (i < 5); i++)
+                        {
+                            rk = Registry.LocalMachine.CreateSubKey(REGISTRY_SENSORS_PATH + "\\" + i.ToString("0"));
+                            if (s.Count > i)
+                            {
+                                rk.SetValue("MacAddress", (string)s[i], RegistryValueKind.String);
+                                rk.SetValue("Status", 1, RegistryValueKind.DWord);
+                            }
+                            else
+                                rk.SetValue("Status", 0, RegistryValueKind.DWord);
+                            rk.Flush();
+                            rk.Close();
+                        }
+                        kernelLock.Release();
+                        namedEvent.Send(Core._OutgoingChannel);
                     }
-                    kernelLock.Release();
-                    namedEvent.Send(Core._OutgoingChannel);           
-                }
-                
-            });
+
+                });
+            }
 
         }
 
