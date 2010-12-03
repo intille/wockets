@@ -367,23 +367,25 @@ namespace Wockets.Kernel
                 {
                     //System.Diagnostics.Process po = new System.Diagnostics.Process();
                     ProcessStartInfo startInfo = new ProcessStartInfo();
+                    
                     //startInfo.
                     startInfo.WorkingDirectory = KERNEL_PATH;
                     startInfo.FileName = KERNEL_PATH + KERNEL_EXECUTABLE;
                     //startInfo.FileName = startInfo.FileName;
                     startInfo.UseShellExecute = false;
+                    
                     //System.Diagnostics.Process.Start(
                     //po.StartInfo = startInfo;
 
 
                     if ( (_KernelProcess = System.Diagnostics.Process.Start(startInfo.FileName, "")) != null)
-                    { Core._KernalStarted = true;  }
+                     Core._KernalStarted = true;  
                     else
-                    { Core._KernalStarted = false; }
+                     Core._KernalStarted = false; 
 
-
-                    //return (Core._KernalStarted = ((_KernelProcess = System.Diagnostics.Process.Start(startInfo.FileName, "")) != null));
                     return Core._KernalStarted;
+                    //return (Core._KernalStarted = ((_KernelProcess = System.Diagnostics.Process.Start(startInfo.FileName, "")) != null));
+                    
                 
                 }
                 catch (Exception e)
