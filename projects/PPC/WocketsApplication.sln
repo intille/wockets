@@ -46,6 +46,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleApp", "SimpleApp.cspr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KernelApp", "KernelApp.csproj", "{E7B86B8C-09E4-4A15-9B49-773A98ED2070}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CollectDataUser", "CollectDataUser.csproj", "{6978AB6A-121D-466B-BC0B-492055B63FC6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -369,6 +371,24 @@ Global
 		{E7B86B8C-09E4-4A15-9B49-773A98ED2070}.Release|Pocket PC 2003 (ARMV4).ActiveCfg = Release|Any CPU
 		{E7B86B8C-09E4-4A15-9B49-773A98ED2070}.Release|Win32.ActiveCfg = Release|Any CPU
 		{E7B86B8C-09E4-4A15-9B49-773A98ED2070}.Release|Windows Mobile 5.0 Pocket PC SDK (ARMV4I).ActiveCfg = Release|Any CPU
+		{6978AB6A-121D-466B-BC0B-492055B63FC6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6978AB6A-121D-466B-BC0B-492055B63FC6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6978AB6A-121D-466B-BC0B-492055B63FC6}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{6978AB6A-121D-466B-BC0B-492055B63FC6}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{6978AB6A-121D-466B-BC0B-492055B63FC6}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{6978AB6A-121D-466B-BC0B-492055B63FC6}.Debug|Mixed Platforms.Deploy.0 = Debug|Any CPU
+		{6978AB6A-121D-466B-BC0B-492055B63FC6}.Debug|Pocket PC 2003 (ARMV4).ActiveCfg = Debug|Any CPU
+		{6978AB6A-121D-466B-BC0B-492055B63FC6}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{6978AB6A-121D-466B-BC0B-492055B63FC6}.Debug|Windows Mobile 5.0 Pocket PC SDK (ARMV4I).ActiveCfg = Debug|Any CPU
+		{6978AB6A-121D-466B-BC0B-492055B63FC6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6978AB6A-121D-466B-BC0B-492055B63FC6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6978AB6A-121D-466B-BC0B-492055B63FC6}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{6978AB6A-121D-466B-BC0B-492055B63FC6}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{6978AB6A-121D-466B-BC0B-492055B63FC6}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{6978AB6A-121D-466B-BC0B-492055B63FC6}.Release|Mixed Platforms.Deploy.0 = Release|Any CPU
+		{6978AB6A-121D-466B-BC0B-492055B63FC6}.Release|Pocket PC 2003 (ARMV4).ActiveCfg = Release|Any CPU
+		{6978AB6A-121D-466B-BC0B-492055B63FC6}.Release|Win32.ActiveCfg = Release|Any CPU
+		{6978AB6A-121D-466B-BC0B-492055B63FC6}.Release|Windows Mobile 5.0 Pocket PC SDK (ARMV4I).ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -379,12 +399,13 @@ Global
 		{34F77491-3D6F-45AC-B87F-64C5B349765B} = {9A3D79FB-4929-442D-A149-3B15FF4D873C}
 		{0A985FCE-B468-4F47-A6F1-B96BC7B0065C} = {0A35A8AF-6C86-4132-8576-4357B1F56B54}
 		{E7B86B8C-09E4-4A15-9B49-773A98ED2070} = {0A35A8AF-6C86-4132-8576-4357B1F56B54}
+		{6978AB6A-121D-466B-BC0B-492055B63FC6} = {0A35A8AF-6C86-4132-8576-4357B1F56B54}
 		{DEF78C4F-8240-497A-ABEB-6552D502DD61} = {E84C4FDF-3EE6-40DF-847C-4EA3E9310844}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		BuildVersion_UpdateAssemblyVersion = False
-		BuildVersion_StartDate = 2010/9/21
-		BuildVersion_UpdateFileVersion = False
 		BuildVersion_BuildVersioningStyle = None.Increment.None.DayStamp
+		BuildVersion_UpdateFileVersion = False
+		BuildVersion_StartDate = 2010/9/21
+		BuildVersion_UpdateAssemblyVersion = False
 	EndGlobalSection
 EndGlobal
