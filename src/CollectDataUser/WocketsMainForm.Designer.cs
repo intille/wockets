@@ -35,7 +35,6 @@
             this.textBox_elapsed_time = new System.Windows.Forms.TextBox();
             this.label_software_version = new System.Windows.Forms.Label();
             this.SwapPanel = new System.Windows.Forms.Panel();
-            this.ConnectButton = new System.Windows.Forms.Button();
             this.textBox_sensor_location_1 = new System.Windows.Forms.TextBox();
             this.textBox_sensor_location_0 = new System.Windows.Forms.TextBox();
             this.SwapSensorsButton = new System.Windows.Forms.Button();
@@ -84,13 +83,13 @@
             this.UploadButton = new System.Windows.Forms.Button();
             this.label_upload_data_status = new System.Windows.Forms.Label();
             this.ElapsedTimePanel = new System.Windows.Forms.Panel();
+            this.label_phone_IMEI = new System.Windows.Forms.Label();
             this.MainActionsPanel = new System.Windows.Forms.Panel();
             this.textBox_main_sensor_set_ID = new System.Windows.Forms.TextBox();
             this.textBox_main_sensor_status = new System.Windows.Forms.TextBox();
             this.SensorsStatusButton = new System.Windows.Forms.Button();
             this.UploadDataActionButton = new System.Windows.Forms.Button();
             this.SelectSensorsButton = new System.Windows.Forms.Button();
-            this.label_phone_IMEI = new System.Windows.Forms.Label();
             this.SwapPanel.SuspendLayout();
             this.SensorStatusPanel.SuspendLayout();
             this.ConnectPanel.SuspendLayout();
@@ -116,16 +115,20 @@
             // 
             // textBox_elapsed_time
             // 
+            this.textBox_elapsed_time.BackColor = System.Drawing.Color.White;
             this.textBox_elapsed_time.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox_elapsed_time.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold);
             this.textBox_elapsed_time.ForeColor = System.Drawing.Color.DimGray;
-            this.textBox_elapsed_time.Location = new System.Drawing.Point(5, 22);
+            this.textBox_elapsed_time.Location = new System.Drawing.Point(5, 23);
             this.textBox_elapsed_time.Multiline = true;
             this.textBox_elapsed_time.Name = "textBox_elapsed_time";
+            this.textBox_elapsed_time.ReadOnly = true;
             this.textBox_elapsed_time.Size = new System.Drawing.Size(215, 20);
             this.textBox_elapsed_time.TabIndex = 1;
-            this.textBox_elapsed_time.Text = "00:00:00";
+            this.textBox_elapsed_time.TabStop = false;
+            this.textBox_elapsed_time.Text = "00h:00m:00s";
             this.textBox_elapsed_time.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.textBox_elapsed_time.WordWrap = false;
             // 
             // label_software_version
             // 
@@ -133,12 +136,11 @@
             this.label_software_version.ForeColor = System.Drawing.SystemColors.ControlDark;
             this.label_software_version.Location = new System.Drawing.Point(11, 5);
             this.label_software_version.Name = "label_software_version";
-            this.label_software_version.Size = new System.Drawing.Size(100, 20);
+            this.label_software_version.Size = new System.Drawing.Size(100, 14);
             this.label_software_version.Text = "Version:";
             // 
             // SwapPanel
             // 
-            this.SwapPanel.Controls.Add(this.ConnectButton);
             this.SwapPanel.Controls.Add(this.textBox_sensor_location_1);
             this.SwapPanel.Controls.Add(this.textBox_sensor_location_0);
             this.SwapPanel.Controls.Add(this.SwapSensorsButton);
@@ -149,17 +151,6 @@
             this.SwapPanel.Name = "SwapPanel";
             this.SwapPanel.Size = new System.Drawing.Size(230, 304);
             // 
-            // ConnectButton
-            // 
-            this.ConnectButton.BackColor = System.Drawing.Color.LightSlateGray;
-            this.ConnectButton.ForeColor = System.Drawing.Color.White;
-            this.ConnectButton.Location = new System.Drawing.Point(45, 246);
-            this.ConnectButton.Name = "ConnectButton";
-            this.ConnectButton.Size = new System.Drawing.Size(137, 52);
-            this.ConnectButton.TabIndex = 0;
-            this.ConnectButton.Text = "Connect";
-            this.ConnectButton.Click += new System.EventHandler(this.ConnectButton_Click);
-            // 
             // textBox_sensor_location_1
             // 
             this.textBox_sensor_location_1.BackColor = System.Drawing.Color.White;
@@ -168,6 +159,7 @@
             this.textBox_sensor_location_1.Location = new System.Drawing.Point(34, 83);
             this.textBox_sensor_location_1.Multiline = true;
             this.textBox_sensor_location_1.Name = "textBox_sensor_location_1";
+            this.textBox_sensor_location_1.ReadOnly = true;
             this.textBox_sensor_location_1.Size = new System.Drawing.Size(166, 21);
             this.textBox_sensor_location_1.TabIndex = 6;
             this.textBox_sensor_location_1.Text = "Sensor 2FFFF At Ankle";
@@ -181,6 +173,7 @@
             this.textBox_sensor_location_0.Location = new System.Drawing.Point(34, 62);
             this.textBox_sensor_location_0.Multiline = true;
             this.textBox_sensor_location_0.Name = "textBox_sensor_location_0";
+            this.textBox_sensor_location_0.ReadOnly = true;
             this.textBox_sensor_location_0.Size = new System.Drawing.Size(166, 21);
             this.textBox_sensor_location_0.TabIndex = 5;
             this.textBox_sensor_location_0.Text = "Sensor 2FF34 At Wrist";
@@ -205,6 +198,7 @@
             this.textBox1.Location = new System.Drawing.Point(6, 34);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
+            this.textBox1.ReadOnly = true;
             this.textBox1.Size = new System.Drawing.Size(112, 23);
             this.textBox1.TabIndex = 2;
             this.textBox1.Text = "Sensor Status:";
@@ -219,6 +213,7 @@
             this.textBox_sensors_status.Location = new System.Drawing.Point(116, 34);
             this.textBox_sensors_status.Multiline = true;
             this.textBox_sensors_status.Name = "textBox_sensors_status";
+            this.textBox_sensors_status.ReadOnly = true;
             this.textBox_sensors_status.Size = new System.Drawing.Size(111, 23);
             this.textBox_sensors_status.TabIndex = 0;
             this.textBox_sensors_status.Text = "Disconnected";
@@ -278,6 +273,7 @@
             this.textBox_spanel_ac_full_1.Location = new System.Drawing.Point(116, 205);
             this.textBox_spanel_ac_full_1.Multiline = true;
             this.textBox_spanel_ac_full_1.Name = "textBox_spanel_ac_full_1";
+            this.textBox_spanel_ac_full_1.ReadOnly = true;
             this.textBox_spanel_ac_full_1.Size = new System.Drawing.Size(100, 18);
             this.textBox_spanel_ac_full_1.TabIndex = 35;
             this.textBox_spanel_ac_full_1.Text = "0";
@@ -292,6 +288,7 @@
             this.textBox19.Location = new System.Drawing.Point(14, 205);
             this.textBox19.Multiline = true;
             this.textBox19.Name = "textBox19";
+            this.textBox19.ReadOnly = true;
             this.textBox19.Size = new System.Drawing.Size(100, 18);
             this.textBox19.TabIndex = 34;
             this.textBox19.Text = "Full";
@@ -305,6 +302,7 @@
             this.textBox_spanel_ac_last_1.Location = new System.Drawing.Point(116, 277);
             this.textBox_spanel_ac_last_1.Multiline = true;
             this.textBox_spanel_ac_last_1.Name = "textBox_spanel_ac_last_1";
+            this.textBox_spanel_ac_last_1.ReadOnly = true;
             this.textBox_spanel_ac_last_1.Size = new System.Drawing.Size(100, 18);
             this.textBox_spanel_ac_last_1.TabIndex = 33;
             this.textBox_spanel_ac_last_1.Text = "0";
@@ -319,6 +317,7 @@
             this.textBox21.Location = new System.Drawing.Point(14, 277);
             this.textBox21.Multiline = true;
             this.textBox21.Name = "textBox21";
+            this.textBox21.ReadOnly = true;
             this.textBox21.Size = new System.Drawing.Size(100, 18);
             this.textBox21.TabIndex = 32;
             this.textBox21.Text = "Last";
@@ -332,6 +331,7 @@
             this.textBox_spanel_ac_new_1.Location = new System.Drawing.Point(116, 259);
             this.textBox_spanel_ac_new_1.Multiline = true;
             this.textBox_spanel_ac_new_1.Name = "textBox_spanel_ac_new_1";
+            this.textBox_spanel_ac_new_1.ReadOnly = true;
             this.textBox_spanel_ac_new_1.Size = new System.Drawing.Size(100, 18);
             this.textBox_spanel_ac_new_1.TabIndex = 31;
             this.textBox_spanel_ac_new_1.Text = "0";
@@ -346,6 +346,7 @@
             this.textBox23.Location = new System.Drawing.Point(14, 259);
             this.textBox23.Multiline = true;
             this.textBox23.Name = "textBox23";
+            this.textBox23.ReadOnly = true;
             this.textBox23.Size = new System.Drawing.Size(100, 18);
             this.textBox23.TabIndex = 30;
             this.textBox23.Text = "New";
@@ -359,6 +360,7 @@
             this.textBox_spanel_ac_empty_1.Location = new System.Drawing.Point(116, 241);
             this.textBox_spanel_ac_empty_1.Multiline = true;
             this.textBox_spanel_ac_empty_1.Name = "textBox_spanel_ac_empty_1";
+            this.textBox_spanel_ac_empty_1.ReadOnly = true;
             this.textBox_spanel_ac_empty_1.Size = new System.Drawing.Size(100, 18);
             this.textBox_spanel_ac_empty_1.TabIndex = 29;
             this.textBox_spanel_ac_empty_1.Text = "0";
@@ -373,6 +375,7 @@
             this.textBox25.Location = new System.Drawing.Point(14, 241);
             this.textBox25.Multiline = true;
             this.textBox25.Name = "textBox25";
+            this.textBox25.ReadOnly = true;
             this.textBox25.Size = new System.Drawing.Size(100, 18);
             this.textBox25.TabIndex = 28;
             this.textBox25.Text = "Lost";
@@ -386,6 +389,7 @@
             this.textBox_spanel_ac_partial_1.Location = new System.Drawing.Point(116, 223);
             this.textBox_spanel_ac_partial_1.Multiline = true;
             this.textBox_spanel_ac_partial_1.Name = "textBox_spanel_ac_partial_1";
+            this.textBox_spanel_ac_partial_1.ReadOnly = true;
             this.textBox_spanel_ac_partial_1.Size = new System.Drawing.Size(100, 18);
             this.textBox_spanel_ac_partial_1.TabIndex = 27;
             this.textBox_spanel_ac_partial_1.Text = "0";
@@ -400,6 +404,7 @@
             this.textBox27.Location = new System.Drawing.Point(14, 223);
             this.textBox27.Multiline = true;
             this.textBox27.Name = "textBox27";
+            this.textBox27.ReadOnly = true;
             this.textBox27.Size = new System.Drawing.Size(100, 18);
             this.textBox27.TabIndex = 26;
             this.textBox27.Text = "Partial";
@@ -413,6 +418,7 @@
             this.textBox_spanel_ac_full_0.Location = new System.Drawing.Point(116, 80);
             this.textBox_spanel_ac_full_0.Multiline = true;
             this.textBox_spanel_ac_full_0.Name = "textBox_spanel_ac_full_0";
+            this.textBox_spanel_ac_full_0.ReadOnly = true;
             this.textBox_spanel_ac_full_0.Size = new System.Drawing.Size(100, 18);
             this.textBox_spanel_ac_full_0.TabIndex = 25;
             this.textBox_spanel_ac_full_0.Text = "0";
@@ -427,6 +433,7 @@
             this.textBox8.Location = new System.Drawing.Point(14, 80);
             this.textBox8.Multiline = true;
             this.textBox8.Name = "textBox8";
+            this.textBox8.ReadOnly = true;
             this.textBox8.Size = new System.Drawing.Size(100, 18);
             this.textBox8.TabIndex = 24;
             this.textBox8.Text = "Full";
@@ -440,6 +447,7 @@
             this.textBox_spanel_ac_last_0.Location = new System.Drawing.Point(116, 152);
             this.textBox_spanel_ac_last_0.Multiline = true;
             this.textBox_spanel_ac_last_0.Name = "textBox_spanel_ac_last_0";
+            this.textBox_spanel_ac_last_0.ReadOnly = true;
             this.textBox_spanel_ac_last_0.Size = new System.Drawing.Size(100, 18);
             this.textBox_spanel_ac_last_0.TabIndex = 23;
             this.textBox_spanel_ac_last_0.Text = "0";
@@ -454,6 +462,7 @@
             this.textBox11.Location = new System.Drawing.Point(14, 152);
             this.textBox11.Multiline = true;
             this.textBox11.Name = "textBox11";
+            this.textBox11.ReadOnly = true;
             this.textBox11.Size = new System.Drawing.Size(100, 18);
             this.textBox11.TabIndex = 22;
             this.textBox11.Text = "Last";
@@ -467,6 +476,7 @@
             this.textBox_spanel_ac_new_0.Location = new System.Drawing.Point(116, 134);
             this.textBox_spanel_ac_new_0.Multiline = true;
             this.textBox_spanel_ac_new_0.Name = "textBox_spanel_ac_new_0";
+            this.textBox_spanel_ac_new_0.ReadOnly = true;
             this.textBox_spanel_ac_new_0.Size = new System.Drawing.Size(100, 18);
             this.textBox_spanel_ac_new_0.TabIndex = 21;
             this.textBox_spanel_ac_new_0.Text = "0";
@@ -481,6 +491,7 @@
             this.textBox13.Location = new System.Drawing.Point(14, 134);
             this.textBox13.Multiline = true;
             this.textBox13.Name = "textBox13";
+            this.textBox13.ReadOnly = true;
             this.textBox13.Size = new System.Drawing.Size(100, 18);
             this.textBox13.TabIndex = 20;
             this.textBox13.Text = "New";
@@ -494,6 +505,7 @@
             this.textBox_spanel_ac_empty_0.Location = new System.Drawing.Point(116, 116);
             this.textBox_spanel_ac_empty_0.Multiline = true;
             this.textBox_spanel_ac_empty_0.Name = "textBox_spanel_ac_empty_0";
+            this.textBox_spanel_ac_empty_0.ReadOnly = true;
             this.textBox_spanel_ac_empty_0.Size = new System.Drawing.Size(100, 18);
             this.textBox_spanel_ac_empty_0.TabIndex = 19;
             this.textBox_spanel_ac_empty_0.Text = "0";
@@ -508,6 +520,7 @@
             this.textBox15.Location = new System.Drawing.Point(14, 116);
             this.textBox15.Multiline = true;
             this.textBox15.Name = "textBox15";
+            this.textBox15.ReadOnly = true;
             this.textBox15.Size = new System.Drawing.Size(100, 18);
             this.textBox15.TabIndex = 18;
             this.textBox15.Text = "Lost";
@@ -521,6 +534,7 @@
             this.textBox_spanel_ac_partial_0.Location = new System.Drawing.Point(116, 98);
             this.textBox_spanel_ac_partial_0.Multiline = true;
             this.textBox_spanel_ac_partial_0.Name = "textBox_spanel_ac_partial_0";
+            this.textBox_spanel_ac_partial_0.ReadOnly = true;
             this.textBox_spanel_ac_partial_0.Size = new System.Drawing.Size(100, 18);
             this.textBox_spanel_ac_partial_0.TabIndex = 17;
             this.textBox_spanel_ac_partial_0.Text = "0";
@@ -535,6 +549,7 @@
             this.textBox17.Location = new System.Drawing.Point(14, 98);
             this.textBox17.Multiline = true;
             this.textBox17.Name = "textBox17";
+            this.textBox17.ReadOnly = true;
             this.textBox17.Size = new System.Drawing.Size(100, 18);
             this.textBox17.TabIndex = 16;
             this.textBox17.Text = "Partial";
@@ -547,6 +562,7 @@
             this.textBox_spanel_sensors_location_1.Location = new System.Drawing.Point(15, 186);
             this.textBox_spanel_sensors_location_1.Multiline = true;
             this.textBox_spanel_sensors_location_1.Name = "textBox_spanel_sensors_location_1";
+            this.textBox_spanel_sensors_location_1.ReadOnly = true;
             this.textBox_spanel_sensors_location_1.Size = new System.Drawing.Size(201, 21);
             this.textBox_spanel_sensors_location_1.TabIndex = 6;
             this.textBox_spanel_sensors_location_1.Text = "Sensor 2FFFF At Ankle";
@@ -560,6 +576,7 @@
             this.textBox_spanel_sensors_location_0.Location = new System.Drawing.Point(14, 60);
             this.textBox_spanel_sensors_location_0.Multiline = true;
             this.textBox_spanel_sensors_location_0.Name = "textBox_spanel_sensors_location_0";
+            this.textBox_spanel_sensors_location_0.ReadOnly = true;
             this.textBox_spanel_sensors_location_0.Size = new System.Drawing.Size(202, 21);
             this.textBox_spanel_sensors_location_0.TabIndex = 5;
             this.textBox_spanel_sensors_location_0.Text = "Sensor 2FF34 At Wrist";
@@ -574,6 +591,7 @@
             this.textBox_spanel_sensors_status.Location = new System.Drawing.Point(3, 32);
             this.textBox_spanel_sensors_status.Multiline = true;
             this.textBox_spanel_sensors_status.Name = "textBox_spanel_sensors_status";
+            this.textBox_spanel_sensors_status.ReadOnly = true;
             this.textBox_spanel_sensors_status.Size = new System.Drawing.Size(225, 23);
             this.textBox_spanel_sensors_status.TabIndex = 0;
             this.textBox_spanel_sensors_status.Text = "Disconnected";
@@ -597,7 +615,7 @@
             // ConnectPanel
             // 
             this.ConnectPanel.Controls.Add(this.label_kernel_status);
-            this.ConnectPanel.Location = new System.Drawing.Point(3, 49);
+            this.ConnectPanel.Location = new System.Drawing.Point(3, 50);
             this.ConnectPanel.Name = "ConnectPanel";
             this.ConnectPanel.Size = new System.Drawing.Size(230, 304);
             // 
@@ -638,6 +656,7 @@
             this.textBox_updater_last_update.Location = new System.Drawing.Point(117, 163);
             this.textBox_updater_last_update.Multiline = true;
             this.textBox_updater_last_update.Name = "textBox_updater_last_update";
+            this.textBox_updater_last_update.ReadOnly = true;
             this.textBox_updater_last_update.Size = new System.Drawing.Size(100, 21);
             this.textBox_updater_last_update.TabIndex = 15;
             this.textBox_updater_last_update.Text = "...";
@@ -652,6 +671,7 @@
             this.textBox6.Location = new System.Drawing.Point(13, 163);
             this.textBox6.Multiline = true;
             this.textBox6.Name = "textBox6";
+            this.textBox6.ReadOnly = true;
             this.textBox6.Size = new System.Drawing.Size(100, 21);
             this.textBox6.TabIndex = 14;
             this.textBox6.Text = "Last Upload";
@@ -666,6 +686,7 @@
             this.textBox3.Location = new System.Drawing.Point(12, 134);
             this.textBox3.Multiline = true;
             this.textBox3.Name = "textBox3";
+            this.textBox3.ReadOnly = true;
             this.textBox3.Size = new System.Drawing.Size(204, 21);
             this.textBox3.TabIndex = 12;
             this.textBox3.Text = "Upload Status";
@@ -677,9 +698,10 @@
             this.textBox_uploader_failed_files.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox_uploader_failed_files.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold);
             this.textBox_uploader_failed_files.ForeColor = System.Drawing.Color.DimGray;
-            this.textBox_uploader_failed_files.Location = new System.Drawing.Point(116, 275);
+            this.textBox_uploader_failed_files.Location = new System.Drawing.Point(117, 275);
             this.textBox_uploader_failed_files.Multiline = true;
             this.textBox_uploader_failed_files.Name = "textBox_uploader_failed_files";
+            this.textBox_uploader_failed_files.ReadOnly = true;
             this.textBox_uploader_failed_files.Size = new System.Drawing.Size(100, 21);
             this.textBox_uploader_failed_files.TabIndex = 10;
             this.textBox_uploader_failed_files.Text = "0";
@@ -691,9 +713,10 @@
             this.textBox9.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox9.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold);
             this.textBox9.ForeColor = System.Drawing.Color.DimGray;
-            this.textBox9.Location = new System.Drawing.Point(12, 275);
+            this.textBox9.Location = new System.Drawing.Point(13, 275);
             this.textBox9.Multiline = true;
             this.textBox9.Name = "textBox9";
+            this.textBox9.ReadOnly = true;
             this.textBox9.Size = new System.Drawing.Size(100, 21);
             this.textBox9.TabIndex = 9;
             this.textBox9.Text = "Failed";
@@ -705,9 +728,10 @@
             this.textBox_uploader_successful_files.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox_uploader_successful_files.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold);
             this.textBox_uploader_successful_files.ForeColor = System.Drawing.Color.DimGray;
-            this.textBox_uploader_successful_files.Location = new System.Drawing.Point(116, 246);
+            this.textBox_uploader_successful_files.Location = new System.Drawing.Point(117, 246);
             this.textBox_uploader_successful_files.Multiline = true;
             this.textBox_uploader_successful_files.Name = "textBox_uploader_successful_files";
+            this.textBox_uploader_successful_files.ReadOnly = true;
             this.textBox_uploader_successful_files.Size = new System.Drawing.Size(100, 21);
             this.textBox_uploader_successful_files.TabIndex = 8;
             this.textBox_uploader_successful_files.Text = "0";
@@ -719,9 +743,10 @@
             this.textBox7.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox7.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold);
             this.textBox7.ForeColor = System.Drawing.Color.DimGray;
-            this.textBox7.Location = new System.Drawing.Point(12, 246);
+            this.textBox7.Location = new System.Drawing.Point(13, 246);
             this.textBox7.Multiline = true;
             this.textBox7.Name = "textBox7";
+            this.textBox7.ReadOnly = true;
             this.textBox7.Size = new System.Drawing.Size(100, 21);
             this.textBox7.TabIndex = 7;
             this.textBox7.Text = "Successful";
@@ -733,9 +758,10 @@
             this.textBox_uploader_duration.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox_uploader_duration.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold);
             this.textBox_uploader_duration.ForeColor = System.Drawing.Color.DimGray;
-            this.textBox_uploader_duration.Location = new System.Drawing.Point(116, 217);
+            this.textBox_uploader_duration.Location = new System.Drawing.Point(117, 217);
             this.textBox_uploader_duration.Multiline = true;
             this.textBox_uploader_duration.Name = "textBox_uploader_duration";
+            this.textBox_uploader_duration.ReadOnly = true;
             this.textBox_uploader_duration.Size = new System.Drawing.Size(100, 21);
             this.textBox_uploader_duration.TabIndex = 6;
             this.textBox_uploader_duration.Text = "0";
@@ -747,9 +773,10 @@
             this.textBox5.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox5.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold);
             this.textBox5.ForeColor = System.Drawing.Color.DimGray;
-            this.textBox5.Location = new System.Drawing.Point(12, 217);
+            this.textBox5.Location = new System.Drawing.Point(13, 217);
             this.textBox5.Multiline = true;
             this.textBox5.Name = "textBox5";
+            this.textBox5.ReadOnly = true;
             this.textBox5.Size = new System.Drawing.Size(100, 21);
             this.textBox5.TabIndex = 5;
             this.textBox5.Text = "Duration";
@@ -761,9 +788,10 @@
             this.textBox_uploader_new_files.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox_uploader_new_files.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold);
             this.textBox_uploader_new_files.ForeColor = System.Drawing.Color.DimGray;
-            this.textBox_uploader_new_files.Location = new System.Drawing.Point(116, 190);
+            this.textBox_uploader_new_files.Location = new System.Drawing.Point(117, 190);
             this.textBox_uploader_new_files.Multiline = true;
             this.textBox_uploader_new_files.Name = "textBox_uploader_new_files";
+            this.textBox_uploader_new_files.ReadOnly = true;
             this.textBox_uploader_new_files.Size = new System.Drawing.Size(100, 21);
             this.textBox_uploader_new_files.TabIndex = 4;
             this.textBox_uploader_new_files.Text = "0";
@@ -775,9 +803,10 @@
             this.textBox2.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox2.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold);
             this.textBox2.ForeColor = System.Drawing.Color.DimGray;
-            this.textBox2.Location = new System.Drawing.Point(12, 190);
+            this.textBox2.Location = new System.Drawing.Point(13, 190);
             this.textBox2.Multiline = true;
             this.textBox2.Name = "textBox2";
+            this.textBox2.ReadOnly = true;
             this.textBox2.Size = new System.Drawing.Size(100, 21);
             this.textBox2.TabIndex = 3;
             this.textBox2.Text = "New Files";
@@ -811,6 +840,15 @@
             this.ElapsedTimePanel.Location = new System.Drawing.Point(3, 3);
             this.ElapsedTimePanel.Name = "ElapsedTimePanel";
             this.ElapsedTimePanel.Size = new System.Drawing.Size(233, 46);
+            // 
+            // label_phone_IMEI
+            // 
+            this.label_phone_IMEI.Font = new System.Drawing.Font("Tahoma", 8F, System.Drawing.FontStyle.Regular);
+            this.label_phone_IMEI.ForeColor = System.Drawing.SystemColors.ControlDark;
+            this.label_phone_IMEI.Location = new System.Drawing.Point(113, 5);
+            this.label_phone_IMEI.Name = "label_phone_IMEI";
+            this.label_phone_IMEI.Size = new System.Drawing.Size(100, 14);
+            this.label_phone_IMEI.Text = "IMEI:";
             // 
             // MainActionsPanel
             // 
@@ -847,6 +885,7 @@
             this.textBox_main_sensor_status.Location = new System.Drawing.Point(3, 31);
             this.textBox_main_sensor_status.Multiline = true;
             this.textBox_main_sensor_status.Name = "textBox_main_sensor_status";
+            this.textBox_main_sensor_status.ReadOnly = true;
             this.textBox_main_sensor_status.Size = new System.Drawing.Size(230, 23);
             this.textBox_main_sensor_status.TabIndex = 3;
             this.textBox_main_sensor_status.Text = "Disconnected";
@@ -885,15 +924,6 @@
             this.SelectSensorsButton.Text = "Swap Wockets";
             this.SelectSensorsButton.Click += new System.EventHandler(this.SelectSensorsButton_Click);
             // 
-            // label_phone_IMEI
-            // 
-            this.label_phone_IMEI.Font = new System.Drawing.Font("Tahoma", 8F, System.Drawing.FontStyle.Regular);
-            this.label_phone_IMEI.ForeColor = System.Drawing.SystemColors.ControlDark;
-            this.label_phone_IMEI.Location = new System.Drawing.Point(113, 5);
-            this.label_phone_IMEI.Name = "label_phone_IMEI";
-            this.label_phone_IMEI.Size = new System.Drawing.Size(107, 20);
-            this.label_phone_IMEI.Text = "IMEI:";
-            // 
             // WocketsMainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
@@ -901,11 +931,11 @@
             this.AutoScroll = true;
             this.ClientSize = new System.Drawing.Size(240, 294);
             this.Controls.Add(this.ElapsedTimePanel);
-            this.Controls.Add(this.SensorStatusPanel);
             this.Controls.Add(this.SwapPanel);
             this.Controls.Add(this.ConnectPanel);
             this.Controls.Add(this.UploadDataPanel);
             this.Controls.Add(this.MainActionsPanel);
+            this.Controls.Add(this.SensorStatusPanel);
             this.Location = new System.Drawing.Point(0, 0);
             this.Menu = this.mainMenu1;
             this.MinimizeBox = false;
@@ -938,7 +968,6 @@
         private System.Windows.Forms.Panel ConnectPanel;
         private System.Windows.Forms.Panel ElapsedTimePanel;
         private System.Windows.Forms.Label label_kernel_status;
-        private System.Windows.Forms.Button ConnectButton;
         private System.Windows.Forms.Panel MainActionsPanel;
         private System.Windows.Forms.Button SensorsStatusButton;
         private System.Windows.Forms.Button UploadDataActionButton;
