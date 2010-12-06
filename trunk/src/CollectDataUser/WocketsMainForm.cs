@@ -241,9 +241,9 @@ namespace CollectDataUser
  
          //Check which sensor set was used in previous run
          if (this.sensor_set.CompareTo("red") == 0)
-            wockets_controller.FromXML(Core.KERNEL_PATH + "\\updater_SensorData1.xml");
+            wockets_controller.FromXML(Core.KERNEL_PATH + "\\SensorData1.xml");
          else 
-            wockets_controller.FromXML(Core.KERNEL_PATH + "\\updater_SensorData2.xml");
+            wockets_controller.FromXML(Core.KERNEL_PATH + "\\SensorData2.xml");
          
 
          // point kernel to wockets controller
@@ -304,21 +304,9 @@ namespace CollectDataUser
          #endregion
 
 
-         #region Write To Registry Upload/ACs
+         #region Initialize Registry for Uploaded files & ACs
          
-         Core.WRITE_LAST_UPLOAD_FAILEDFILES(0);
-         Core.WRITE_LAST_UPLOAD_SUCCESSFILES(0);
-         Core.WRITE_LAST_UPLOAD_NEWFILES(0);
-
-
-         for (int i = 0; (i < 2); i++)
-         {
-             Core.WRITE_FULL_RECEIVED_COUNT(i, 0);
-             Core.WRITE_PARTIAL_RECEIVED_COUNT(i, 0);
-             Core.WRITE_EMPTY_RECEIVED_COUNT(i, 0);
-             Core.WRITE_RECEIVED_ACs(i, -1);
-             Core.WRITE_SAVED_ACs(i, -1);
-         }
+         ResetACsCounters(wockets_controller);
 
         #endregion
 
@@ -334,7 +322,7 @@ namespace CollectDataUser
 
          //Hide the timer label
          textBox_elapsed_time.Visible = false;
-         textBox_elapsed_time.Text = "00:00:00";
+         textBox_elapsed_time.Text = "00h:00m:00s";
 
         #endregion
 
@@ -355,15 +343,16 @@ namespace CollectDataUser
              SensorStatusPanel.Visible = false;
              SensorStatusPanel.Enabled = false;
 
+             //Setup the main menu commands
+             menuMainAppActions.Text = "Main Menu";
+             menuQuitApp.Text = "Connect";
+
              //Show the swap panel
              SwapPanel.BringToFront();
              SwapPanel.Enabled = true;
              SwapPanel.Visible = true;
 
-             //Show the Action Button Panel (Connect Button)
-             ConnectButton.Enabled = true;
-             ConnectButton.Text = "Connect";
-
+             
              //update the sensor set/swap panel
              Show_Swap_Panel("Disconnected", sensor_set, CurrentWockets._Controller);
 
@@ -374,9 +363,7 @@ namespace CollectDataUser
              SwapPanel.Enabled = false;
              SwapPanel.Visible = false;
 
-             //Hide the Action Button Panel (Connect Button)
-             ConnectButton.Enabled = false;
-             ConnectButton.Text = "Connect";
+             
 
              //Hide the Main Actions Buttons Panel
              MainActionsPanel.Visible = false;
@@ -453,7 +440,7 @@ namespace CollectDataUser
 
       #region Swap Sensors
 
-            private void Show_Swap_Panel(String status, String set, WocketsController wc)
+        private void Show_Swap_Panel(String status, String set, WocketsController wc)
         {
             SwapSensorsButton.Enabled = true;
 
@@ -520,7 +507,7 @@ namespace CollectDataUser
             {
                 if (wc._Receivers.Count > 0)
                 {
-                    textBox_spanel_sensors_location_0.Text= textBox_sensor_location_0.Text = "Sesor " +((RFCOMMReceiver)wc._Receivers[0])._Address.Substring(7);
+                    textBox_spanel_sensors_location_0.Text= textBox_sensor_location_0.Text = "Wocket " +((RFCOMMReceiver)wc._Receivers[0])._Address.Substring(7);
                     
                     if(  wc._Sensors[0]._Location != null)
                         textBox_spanel_sensors_location_0.Text = textBox_sensor_location_0.Text = textBox_sensor_location_0.Text + " At " + wc._Sensors[0]._Location.Substring(9);
@@ -529,7 +516,7 @@ namespace CollectDataUser
 
                     if (CurrentWockets._Controller._Receivers.Count > 1)
                     {
-                        textBox_spanel_sensors_location_1.Text = textBox_sensor_location_1.Text = "Sesor " + ((RFCOMMReceiver)wc._Receivers[1])._Address.Substring(7);
+                        textBox_spanel_sensors_location_1.Text = textBox_sensor_location_1.Text = "Wocket " + ((RFCOMMReceiver)wc._Receivers[1])._Address.Substring(7);
                         
                         if (wc._Sensors[1]._Location != null)
                             textBox_spanel_sensors_location_1.Text = textBox_sensor_location_1.Text = textBox_sensor_location_1.Text + " At " + wc._Sensors[1]._Location.Substring(9);
@@ -540,7 +527,7 @@ namespace CollectDataUser
 
         }
 
-            private void SwapSensorsButton_Click(object sender, EventArgs e)
+        private void SwapSensorsButton_Click(object sender, EventArgs e)
         {
 
             SwapSensorsButton.Enabled = false;
@@ -576,12 +563,12 @@ namespace CollectDataUser
                 if (this.sensor_set.CompareTo("red") == 0)
                 {
                     sensor_set = "green";
-                    wockets_controller.FromXML(Core.KERNEL_PATH + "\\updater_SensorData2.xml");
+                    wockets_controller.FromXML(Core.KERNEL_PATH + "\\SensorData2.xml");
                 }
                 else
                 {
                     sensor_set = "red";
-                    wockets_controller.FromXML(Core.KERNEL_PATH + "\\updater_SensorData1.xml");
+                    wockets_controller.FromXML(Core.KERNEL_PATH + "\\SensorData1.xml");
                 }
 
 
@@ -596,6 +583,9 @@ namespace CollectDataUser
                 sensors_list.Clear();
                 for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
                     sensors_list.Add(((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address);
+
+                //Reset ACs Counter
+                ResetACsCounters(wockets_controller);
 
                 Thread.Sleep(1000);
 
@@ -764,22 +754,12 @@ namespace CollectDataUser
                               //Update the main application menu options
                                menuMainAppActions.Text = "Main Menu";
 
-                              //TODO: Launch the elapsed time connection timer
-                              textBox_elapsed_time.Visible = true;
-                              textBox_elapsed_time.Text = "00h:00m:00s";
-
-                              //Launch the update thread
-                              StartUpdateTimerThread();
-
                               //Wait to stabilize system
                               Thread.Sleep(2000);
 
                             break;
 
                             case KernelResponse.DISCONNECTED:
-
-                                //TODO: Ask Fahd if stopping the thread here is optimal
-                                StopUpdateTimerThread();
 
                                 //Wait to stabilize system
                                 Thread.Sleep(5000);
@@ -798,12 +778,12 @@ namespace CollectDataUser
                                     if (this.sensor_set.CompareTo("red") == 0)
                                     {
                                         sensor_set = "green";
-                                        wockets_controller.FromXML(Core.KERNEL_PATH + "\\updater_SensorData2.xml");
+                                        wockets_controller.FromXML(Core.KERNEL_PATH + "\\SensorData2.xml");
                                     }
                                     else
                                     {
                                         sensor_set = "red";
-                                        wockets_controller.FromXML(Core.KERNEL_PATH + "\\updater_SensorData1.xml");
+                                        wockets_controller.FromXML(Core.KERNEL_PATH + "\\SensorData1.xml");
                                     }
 
                                     //point kernel to new wockets controller
@@ -819,6 +799,9 @@ namespace CollectDataUser
                                         sensors_list.Add(((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address);
 
 
+                                    //Reset ACs Counter
+                                    ResetACsCounters(wockets_controller);
+
                                     //Update status message
                                     UpdateMsg("Wockets Swapped");
 
@@ -828,7 +811,6 @@ namespace CollectDataUser
                                     Core.SetSensors(this.sensors_list);
 
                                     Thread.Sleep(2000);
-
                                 }
 
                                 break;
@@ -851,7 +833,7 @@ namespace CollectDataUser
 
             delegate void UpdateMsgCallback(string msg);
             private void UpdateMsg(string msg)
-        {
+            {
             try
             {
                 // InvokeRequired required compares the thread ID of the
@@ -941,145 +923,165 @@ namespace CollectDataUser
         //If minimize button is clicked
         private void menuQuitApp_Click(object sender, EventArgs e)
         {
-           
-            menuQuitApp.Enabled = false;
-            menuMainAppActions.Enabled = false;
 
-
-            #region Exit Application
-
-            #region Check which panel is open
-
-            string panel_open = "";
-
-            //Hide the swap panel
-            if (SwapPanel.Visible)
+            if (menuQuitApp.Text.CompareTo("Quit") == 0)
             {
-                SwapPanel.Visible = false;
-                SwapPanel.Enabled = false;
-                panel_open = "Swap";
-            }
+                menuQuitApp.Enabled = false;
+                menuMainAppActions.Enabled = false;
 
 
-            //Hide the main actions panel
-            if (MainActionsPanel.Visible)
-            {
-                MainActionsPanel.Visible = false;
-                MainActionsPanel.Enabled = false;
-                panel_open = "Main";
-            }
+                #region Exit Application
 
-            //Hide the upload panel
-            if (UploadDataPanel.Visible)
-            {
-                UploadDataPanel.Visible = false;
-                UploadDataPanel.Enabled = false;
-                panel_open = "Upload";
-            }
+                #region Check which panel is open
 
-            //Hide the sensors status panel
-            if (SensorStatusPanel.Visible)
-            {
-                SensorStatusPanel.Visible = false;
-                SensorStatusPanel.Enabled = false;
-                panel_open = "Status";
-            }
+                string panel_open = "";
 
-            #endregion
-
-
-            //Show the connect status panel
-            label_kernel_status.Text = "...";
-            ConnectPanel.BringToFront();
-            ConnectPanel.Visible = true;
-            ConnectPanel.Enabled = true;
-
-            Application.DoEvents();
-
-
-            if (MessageBox.Show("Are you sure you want to exit?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
-            {
-                label_kernel_status.Text = "Exiting Application";
-                Application.DoEvents();
-
-                try
+                //Hide the swap panel
+                if (SwapPanel.Visible)
                 {
-                    //Indicate that application was terminated by the user
-                    StreamWriter wr_status = new StreamWriter(Core.KERNEL_PATH + "\\updater_last_status.txt");
-                    wr_status.WriteLine("normal_start");
-                    wr_status.Flush();
-                    wr_status.Close();
+                    SwapPanel.Visible = false;
+                    SwapPanel.Enabled = false;
+                    panel_open = "Swap";
                 }
-                catch { }
-
-                TerminateApp();
-
-            }
-            else
-            {
-                //Hide the connect panel
-                ConnectPanel.Visible = false;
-                ConnectPanel.Enabled = false;
 
 
-                #region Show the panel that was originally open
-                
-                switch (panel_open)
+                //Hide the main actions panel
+                if (MainActionsPanel.Visible)
                 {
-                    case "Swap":
-                            SwapPanel.BringToFront();
-                            SwapPanel.Visible = true;
-                            SwapPanel.Enabled = true;
-                        break;
-                    case "Main":
-                        MainActionsPanel.BringToFront();
-                        MainActionsPanel.Visible = true;
-                        MainActionsPanel.Enabled = true;
-                        break;
-                    case "Upload":
-                        UploadDataPanel.BringToFront();
-                        UploadDataPanel.Visible = true;
-                        UploadDataPanel.Enabled = true;
-                        break;
-                    case "Status":
-                        SensorStatusPanel.BringToFront();
-                        SensorStatusPanel.Visible = true;
-                        SensorStatusPanel.Enabled = true;
-                        break;
+                    MainActionsPanel.Visible = false;
+                    MainActionsPanel.Enabled = false;
+                    panel_open = "Main";
+                }
 
-                    default:
-                        break;
+                //Hide the upload panel
+                if (UploadDataPanel.Visible)
+                {
+                    UploadDataPanel.Visible = false;
+                    UploadDataPanel.Enabled = false;
+                    panel_open = "Upload";
+                }
+
+                //Hide the sensors status panel
+                if (SensorStatusPanel.Visible)
+                {
+                    SensorStatusPanel.Visible = false;
+                    SensorStatusPanel.Enabled = false;
+                    panel_open = "Status";
                 }
 
                 #endregion
 
+
+                //Show the connect status panel
+                label_kernel_status.Text = "...";
+                ConnectPanel.BringToFront();
+                ConnectPanel.Visible = true;
+                ConnectPanel.Enabled = true;
+
+                Application.DoEvents();
+
+
+                if (MessageBox.Show("Are you sure you want to exit?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
+                {
+                    label_kernel_status.Text = "Exiting Application";
+                    Application.DoEvents();
+
+                    try
+                    {
+                        //Indicate that application was terminated by the user
+                        StreamWriter wr_status = new StreamWriter(Core.KERNEL_PATH + "\\updater_last_status.txt");
+                        wr_status.WriteLine("normal_start");
+                        wr_status.Flush();
+                        wr_status.Close();
+                    }
+                    catch { }
+
+                    TerminateApp();
+
+                }
+                else
+                {
+                    //Hide the connect panel
+                    ConnectPanel.Visible = false;
+                    ConnectPanel.Enabled = false;
+
+
+                    #region Show the panel that was originally open
+
+                    switch (panel_open)
+                    {
+                        case "Swap":
+                            SwapPanel.BringToFront();
+                            SwapPanel.Visible = true;
+                            SwapPanel.Enabled = true;
+                            break;
+                        case "Main":
+                            MainActionsPanel.BringToFront();
+                            MainActionsPanel.Visible = true;
+                            MainActionsPanel.Enabled = true;
+                            break;
+                        case "Upload":
+                            UploadDataPanel.BringToFront();
+                            UploadDataPanel.Visible = true;
+                            UploadDataPanel.Enabled = true;
+                            break;
+                        case "Status":
+                            SensorStatusPanel.BringToFront();
+                            SensorStatusPanel.Visible = true;
+                            SensorStatusPanel.Enabled = true;
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                    #endregion
+
+                }
+
+
+                #endregion
+
+
+                menuQuitApp.Enabled = true;
+                menuMainAppActions.Enabled = true;
             }
-        
+            else if (menuQuitApp.Text.CompareTo("Connect") == 0)
+            {
 
-            #endregion
+                menuQuitApp.Enabled = false;
+                menuQuitApp.Text = "";
+
+                //Hide the swap panel
+                SwapPanel.Enabled = false;
+                SwapPanel.Visible = false;
+
+                //Show the connect panel
+                label_kernel_status.Text = "Load Wockets";
+                ConnectPanel.BringToFront();
+                ConnectPanel.Enabled = true;
+                ConnectPanel.Visible = true;
+
+                //Start the kernel connection sequence
+                StartLoadingWocketsToKernel();
+
+                menuQuitApp.Text = "Quit";
+                menuQuitApp.Enabled = true;
+                
+            }
 
 
-            menuQuitApp.Enabled = true;
-            menuMainAppActions.Enabled = true;
         }
 
 
         public void TerminateApp()
-        {
-            //TODO: check with fahd if stopping the thread here is optimal 
-            StopUpdateTimerThread();
-
-            //Wait for system to stabilize
-            Thread.Sleep(2000);
-
+        {   
             //Terminate the kernel
-            if (TerminateKernel())
-            //if (!Core._KernalStarted)
+            if (TerminateKernel()) //if (!Core._KernalStarted)
             {
                 Application.Exit();
                 System.Diagnostics.Process.GetCurrentProcess().Kill();
             }
-
         }
 
 
@@ -1096,7 +1098,7 @@ namespace CollectDataUser
 
       #region Menu Main Application Actions
 
-            private void menuMainAppActions_Click(object sender, EventArgs e)
+        private void menuMainAppActions_Click(object sender, EventArgs e)
         {
 
             try
@@ -1123,6 +1125,11 @@ namespace CollectDataUser
                     {
                         UploadDataPanel.Visible = false;
                         UploadDataPanel.Enabled = false;
+                        StopUpdateTimerThread();
+
+                       //Hide the elapsed time label
+                       textBox_elapsed_time.Visible = false;
+
                     }
                     else if (SensorStatusPanel.Visible)
                     {
@@ -1144,13 +1151,13 @@ namespace CollectDataUser
         }
 
 
-            private void Minimize_Main_Window()
+        private void Minimize_Main_Window()
         {
             ShowWindow(this.Handle, SW_MINIMIZED);
         }
 
     
-       #endregion 
+     #endregion 
 
       
 
@@ -1160,10 +1167,7 @@ namespace CollectDataUser
         // replace it with Quit
         private void ConnectButton_Click(object sender, EventArgs e)
         {
-            //disable and hide connect button
-            ConnectButton.Enabled = false;
-            ConnectButton.Visible = false;
-
+            
             //Hide the swap panel
             SwapPanel.Enabled = false;
             SwapPanel.Visible = false;
@@ -1227,10 +1231,16 @@ namespace CollectDataUser
             //Update Main App Actions Menu
             menuMainAppActions.Text = "Main Menu";
 
+            //Show elapsed time timer label
+            textBox_elapsed_time.Visible = true;
+            
             //Show Upload Panel
             UploadDataPanel.BringToFront();
             UploadDataPanel.Visible = true;
             UploadDataPanel.Enabled = true;
+
+            //Launch the update upload and timer thread
+            StartUpdateTimerThread();
 
             UploadDataActionButton.Enabled = true;
 
@@ -1293,8 +1303,6 @@ namespace CollectDataUser
                     ProcessStartInfo startInfo = new ProcessStartInfo();
                     startInfo.WorkingDirectory = Core.KERNEL_PATH + "wocketsuploader\\";
                     startInfo.FileName = Core.KERNEL_PATH + "wocketsuploader\\" + "DataUploader.exe";
-                    //startInfo.WorkingDirectory = Core.KERNEL_PATH;
-                    //startInfo.FileName = Core.KERNEL_PATH + "DataUploader.exe";
                     startInfo.UseShellExecute = false;
                     _UploaderProcess = System.Diagnostics.Process.Start(startInfo.FileName, "");
 
@@ -1322,24 +1330,23 @@ namespace CollectDataUser
       #endregion
 
 
-      #region Update Timer Thread
+      #region Update Timer & Upload Thread
       
-        public void StartUpdateTimerThread()
+      public void StartUpdateTimerThread()
       {
           //Start Timer Thread
           timerThread = new Thread(new ThreadStart(RunTimerThread));
           timerThread.Start();
-
-          //TODO: If started via the updater, minimize window
       }
 
-        public void StopUpdateTimerThread()
+      public void StopUpdateTimerThread()
       {
           if (timerThread != null)
-              timerThread.Abort();
+              timerThread.Abort();  
       }
 
-        private void RunTimerThread()
+      
+      private void RunTimerThread()
       {
           while (true)
           {
@@ -1515,6 +1522,20 @@ namespace CollectDataUser
 
       #region Read ACs for Sensor Status
 
+        private void ResetACsCounters(WocketsController wc)
+      {
+         
+          for (int i = 0; (i < wc._Receivers.Count); i++)
+          {
+              Core.WRITE_FULL_RECEIVED_COUNT(i, 0);
+              Core.WRITE_PARTIAL_RECEIVED_COUNT(i, 0);
+              Core.WRITE_EMPTY_RECEIVED_COUNT(i, 0);
+              Core.WRITE_RECEIVED_ACs(i, -1);
+              Core.WRITE_SAVED_ACs(i, -1);
+          }
+      
+      }
+
 
         void ACsUpdateTimer_Tick(object sender, EventArgs e)
       {
@@ -1620,28 +1641,6 @@ namespace CollectDataUser
       #endregion
 
        
-        
-      
-
-       
-       
-       
-
-
-       
-
-       
-
-       
-
-       
-
-
-
-
-
-
-
 
     }
 
