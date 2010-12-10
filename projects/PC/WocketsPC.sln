@@ -34,7 +34,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WocketsTestApp", "WocketsTe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WocketsProgrammer", "WocketsProgrammer.csproj", "{14487665-253E-4ABC-A87F-7ED2FDAD4B48}"
 EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "WocketsSetup", "..\WocketsSetup\WocketsSetup.vdproj", "{FBF809F2-0B07-4B77-A1B5-15B660A64828}"
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "WocketsSetup", "..\..\src\WocketsSetup\WocketsSetup.vdproj", "{FBF809F2-0B07-4B77-A1B5-15B660A64828}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
