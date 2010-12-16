@@ -292,9 +292,27 @@ namespace Wockets.Receivers
             try
             {
                 if (this.reconnectionThread != null)
-                    this.reconnectionThread.Abort(); 
-                if (this.bluetoothStream!=null)
+                    this.reconnectionThread.Abort();
+            }
+            catch
+            {
+            }
+            finally
+            {
+                this.reconnectionThread = null;
+            }
+
+            try
+            {
+                if (this.bluetoothStream != null)
                     this.bluetoothStream._Status = BluetoothStatus.Disconnected;
+            }
+            catch { }
+            finally
+            {
+                this.bluetoothStream = null;
+            }
+            try{
                 this._Status = ReceiverStatus.Disconnected;
                 this._Reconnections = 0;
                 this._SuccessfulConnections = 0;

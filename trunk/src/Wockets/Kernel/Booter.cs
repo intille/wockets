@@ -563,6 +563,7 @@ namespace Wockets.Kernel
                             {
                                 CurrentWockets._Controller.Dispose();
                                 _WocketsRunning = false;
+                                CurrentWockets._Controller = null;
                             }
                             foreach (string guid in applicationPaths.Values)
                                 Send(KernelResponse.DISCONNECTED, guid);
