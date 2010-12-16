@@ -732,6 +732,11 @@ namespace Wockets
         public void Dispose()
         {
 
+            if (dataCollectionThread != null)
+                dataCollectionThread.Abort();
+
+            if (interfaceActivityThread != null)
+                interfaceActivityThread.Abort();
 
             if (aPollingThread != null)            
                 aPollingThread.Abort();            
@@ -760,16 +765,23 @@ namespace Wockets
                 {
                     this._Receivers[i].Dispose();
                     Thread.Sleep(1000);
+                    this._Receivers[i] = null;
                 }
             }
+
+            this._Receivers = null;
 
             for (int i = 0; (i < this._Sensors.Count); i++)
                 if (this._Sensors[i]._Loaded)
                 {
                     this._Sensors[i].Dispose();
                     this._Decoders[i].Dispose();
+                    this._Sensors[i] = null;
+                    this._Decoders[i] = null;
                 }
 
+            this._Sensors = null;
+            this._Decoders = null;
             
             //NetworkStacks._BluetoothStack.Dispose();
 

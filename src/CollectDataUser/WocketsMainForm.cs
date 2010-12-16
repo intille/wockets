@@ -44,7 +44,7 @@ namespace CollectDataUser
         private ArrayList sensors_list;  
 
         //Data Uploader
-        private Thread timerThread;
+        private Thread uploadThread;
         private static System.Diagnostics.Process _UploaderProcess = null;
 
         //Application Running Elapsed Time
@@ -85,6 +85,12 @@ namespace CollectDataUser
         const int SW_MINIMIZED = 6;
         const int SW_NORMAL = 1;
 
+        //Connection Status Monitoring
+        private int[] PrevFullPkg;
+        private int[] PrevPartialPkg;
+        private int[] PrevEmptyPkg;
+        private TimeSpan ElapsedConnectionTime_0 = TimeSpan.Zero;
+        private TimeSpan ElapsedConnectionTime_1 = TimeSpan.Zero;
 
         #endregion 
 
@@ -141,12 +147,13 @@ namespace CollectDataUser
         #endregion  Initialize Internal Message Window
             
 
-         #region Read the sowftware version
+         #region Read the Sowftware Version
             System.Reflection.Assembly a = System.Reflection.Assembly.GetExecutingAssembly();
             System.Reflection.AssemblyName an = a.GetName();
             software_version = "Version " + an.Version.ToString();
             this.label_software_version.Text = software_version;
          #endregion
+
 
          #region Read Phone IMEI
 
@@ -304,7 +311,7 @@ namespace CollectDataUser
          #endregion
 
 
-         #region Initialize Registry for Uploaded files & ACs
+         #region Initialize Registry for Received Data Packages
          
          ResetACsCounters(wockets_controller);
 
@@ -318,13 +325,24 @@ namespace CollectDataUser
         #endregion
 
 
-         #region Initialize Elapsed Time Counter
+         #region Initialize Elapsed Time Counter On File Upload Screen
 
          //Hide the timer label
          textBox_elapsed_time.Visible = false;
          textBox_elapsed_time.Text = "00h:00m:00s";
 
         #endregion
+
+
+         #region Initialize Sensors Data Received Status
+
+         ACsUpdateTimer = new System.Windows.Forms.Timer();
+         ACsUpdateTimer.Interval = 1000;
+         ACsUpdateTimer.Tick += new EventHandler(ACsUpdateTimer_Tick);
+         ACsUpdateTimer.Enabled = false;
+
+         #endregion
+
 
 
          #region Try to connect to kernel, using the loaded settings
@@ -387,13 +405,22 @@ namespace CollectDataUser
           #endregion
 
 
-         #region Initialize Sensors ACs Timer
-             ACsUpdateTimer = new System.Windows.Forms.Timer();
-             ACsUpdateTimer.Interval = 500;
-             ACsUpdateTimer.Tick += new EventHandler(ACsUpdateTimer_Tick);
-             ACsUpdateTimer.Enabled = false;
-         #endregion
 
+         #region Connection Status Initialization
+            
+            PrevFullPkg = new int[wockets_controller._Receivers.Count];
+            for (int np = 0; np < wockets_controller._Receivers.Count; np++)
+                PrevFullPkg[np] = 0;
+
+            PrevPartialPkg = new int[wockets_controller._Receivers.Count];
+            for (int np = 0; np < wockets_controller._Receivers.Count; np++)
+                PrevPartialPkg[np] = 0;
+
+            PrevEmptyPkg = new int[wockets_controller._Receivers.Count];
+            for (int np = 0; np < wockets_controller._Receivers.Count; np++)
+                PrevEmptyPkg[np] = 0;
+
+         #endregion
 
          
          #region Initialize Storage Card Settings
@@ -431,7 +458,8 @@ namespace CollectDataUser
 
           #endregion 
 
-
+            
+           
         }
 
 
@@ -584,9 +612,7 @@ namespace CollectDataUser
                 for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
                     sensors_list.Add(((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address);
 
-                //Reset ACs Counter
-                ResetACsCounters(wockets_controller);
-
+                
                 Thread.Sleep(1000);
 
                 //Hide the connect status panel
@@ -605,13 +631,14 @@ namespace CollectDataUser
 
         }
 
-        #endregion Swap Sensors
+      #endregion Swap Sensors
+
 
 
       #region Kernel Related Functions
 
         
-            private void SuscribeToKernelEvents()
+       private void SuscribeToKernelEvents()
         {
             // Kernel response events that the application wants to listen to
             Core.SubscribeEvent(KernelResponse.STARTED, EventListener);
@@ -629,47 +656,47 @@ namespace CollectDataUser
         }
 
 
-            private void StartLoadingWocketsToKernel()
+       private void StartLoadingWocketsToKernel()
         {
             startupThread = new Thread(new ThreadStart(LoadWocketsToKernel));
             startupThread.Start();
         }
 
 
-            private void LoadWocketsToKernel()
-        {
+       private void LoadWocketsToKernel()
+       {
 
-            if (!Core._KernalStarted)
-            {
-                if (!Core.Start())
-                    MessageBox.Show("failed to start kernel");
-                else
-                    Thread.Sleep(5000);
-            }
-            else
-            {
-                //Make sure no kernels are running
-                if (Core.Terminate())
-                {
-                    if (!Core.Start())
-                        MessageBox.Show("Failed to start kernel");
-                    else
-                        Thread.Sleep(5000);
-                }
-                else
-                    MessageBox.Show("Failed to shutdown kernel");
+            //if (!Core._KernalStarted)
+            //{
+            //    if (!Core.Start())
+            //        MessageBox.Show("failed to start kernel");
+            //    else
+            //        Thread.Sleep(5000);
+            //}
+            //else
+            //{
+            //    //Make sure no kernels are running
+            //    if (Core.Terminate())
+            //    {
+            //        if (!Core.Start())
+            //            MessageBox.Show("Failed to start kernel");
+            //        else
+            //            Thread.Sleep(5000);
+            //    }
+            //    else
+            //        MessageBox.Show("Failed to shutdown kernel");
 
-            }
+            //}
 
             Thread.Sleep(5000);
             Core.Ping();
         }
 
 
-            #region Kernel Response CallBacks and Event Listener
+       
+       #region Kernel Response CallBacks and Event Listener
 
             delegate void UpdateFormCallback(KernelResponse response);
-       
             /// Handles kernel response events
             private void EventListener(KernelResponse rsp)
             {
@@ -730,7 +757,8 @@ namespace CollectDataUser
 
                                     //App status file
                                     app_status = "running";
-                                    //Indicate that application was terminated by the user
+                                    
+                                   //Indicate that application was terminated by the user
                                     StreamWriter wr_status = new StreamWriter(Core.KERNEL_PATH + "\\updater_last_status.txt");
                                     wr_status.WriteLine("running");
                                     wr_status.Flush();
@@ -739,7 +767,7 @@ namespace CollectDataUser
                                 catch { }
 
 
-                               //Update the sensors status variable on screen
+                               //Update the sensors status variable on the swap panel screen
                                Show_Swap_Panel("Connected", sensor_set, wockets_controller);
                                
                                //Hide the connect panel
@@ -754,25 +782,49 @@ namespace CollectDataUser
                               //Update the main application menu options
                                menuMainAppActions.Text = "Main Menu";
 
-                              //Wait to stabilize system
-                              Thread.Sleep(2000);
+                               //Wait to stabilize system
+                               Thread.Sleep(2000);
+
+                              //Start the connection status thread 
+                              if( !ACsUpdateTimer.Enabled )
+                                StartACsUpdater();
+
+                              LastPkgTime = DateTime.Now;
+                             
 
                             break;
 
+
                             case KernelResponse.DISCONNECTED:
 
+                                //Stop the connection status thread 
+                                if (ACsUpdateTimer.Enabled)
+                                    StopACsUpdater();
+                               
                                 //Wait to stabilize system
-                                Thread.Sleep(5000);
-                             
+                                Thread.Sleep(3000);
+
                                 //if disconnected, swap sensors if the app is running
                                 if (app_status.CompareTo("running") == 0)
                                 {
                                     UpdateMsg("Swap Wockets");
-                                    
+
+                                    //Reset Data Packets & AC Count 
+                                    ResetACsCounters(wockets_controller);
+                                    for (int i = 0; i < wockets_controller._Receivers.Count; i++)
+                                    {   PrevFullPkg[i]    = 0;
+                                        PrevPartialPkg[i] = 0;
+                                        PrevEmptyPkg[i]   = 0;
+                                    }
+                                
                                     //Dispose the old wockets controller
                                     wockets_controller.Dispose();
-                                    wockets_controller = new Wockets.WocketsController("", "", "");
 
+                                    //Wait to stabilize system
+                                    Thread.Sleep(2000);
+
+                                    //Create new wockets controller
+                                    wockets_controller = new Wockets.WocketsController("", "", "");
 
                                     //Determine which set will be used & load the corresponding Xml File
                                     if (this.sensor_set.CompareTo("red") == 0)
@@ -798,10 +850,6 @@ namespace CollectDataUser
                                     for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
                                         sensors_list.Add(((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address);
 
-
-                                    //Reset ACs Counter
-                                    ResetACsCounters(wockets_controller);
-
                                     //Update status message
                                     UpdateMsg("Wockets Swapped");
 
@@ -811,9 +859,10 @@ namespace CollectDataUser
                                     Core.SetSensors(this.sensors_list);
 
                                     Thread.Sleep(2000);
-                                }
 
+                                }
                                 break;
+
                             default:
                                 break;
                         }
@@ -826,13 +875,13 @@ namespace CollectDataUser
                 }
             }
 
-            #endregion 
+       #endregion 
 
 
-            #region Kernel Message Updater
+      #region Kernel Message Updater
 
-            delegate void UpdateMsgCallback(string msg);
-            private void UpdateMsg(string msg)
+        delegate void UpdateMsgCallback(string msg);
+        private void UpdateMsg(string msg)
             {
             try
             {
@@ -856,9 +905,9 @@ namespace CollectDataUser
         }
 
 
-            //TODO: check how often this function is used
-            delegate void UpdateSensorStatusCallback(string status_msg);
-            private void UpdateSensorStatus(string status_msg)
+        //TODO: check how often this function is used
+        delegate void UpdateSensorStatusCallback(string status_msg);
+        private void UpdateSensorStatus(string status_msg)
         {
             try
             {
@@ -872,9 +921,7 @@ namespace CollectDataUser
                 }
                 else
                 {
-
-                    textBox_sensors_status.Text = status_msg;
-
+ 
                     if (status_msg.CompareTo("Connected") == 0)
                     {
                         textBox_sensors_status.Text = "Connected";
@@ -888,39 +935,51 @@ namespace CollectDataUser
                         textBox_main_sensor_status.Text = "Connected";
                         textBox_main_sensor_status.ForeColor = Color.Green;
                     }
-                    else
+                    else if (status_msg.CompareTo("Disconnected") == 0)
                     {
                         textBox_sensors_status.Text = "Disconnected";
                         textBox_sensors_status.ForeColor = Color.DimGray;
 
-                        //update sensors status panel
-                        textBox_spanel_sensors_ID.Text = "GREEN SET";
-                        textBox_spanel_sensors_ID.BackColor = Color.YellowGreen;
+                        //update the sensor status panel
+                        textBox_spanel_sensors_status.Text = "Disconnected";
+                        textBox_spanel_sensors_status.ForeColor = Color.DimGray;
 
                         //update fields in main app actions panel
                         textBox_main_sensor_status.Text = "Disconnected";
                         textBox_main_sensor_status.ForeColor = Color.DimGray;
                     }
+                    else
+                    {
+                        textBox_sensors_status.Text = status_msg;
+                        textBox_sensors_status.ForeColor = Color.DimGray;
+
+                        //update the sensor status panel
+                        textBox_spanel_sensors_status.Text = status_msg;
+                        textBox_spanel_sensors_status.ForeColor = Color.DimGray;
+
+                        //update fields in main app actions panel
+                        textBox_main_sensor_status.Text = status_msg;
+                        textBox_main_sensor_status.ForeColor = Color.DimGray;
+                    }
 
                     Application.DoEvents();
-
                 }
             }
             catch
-            {
+            { 
+                //Fail updating the sensors connection status
             }
         }
 
-
-            #endregion 
+      #endregion 
 
 
       #endregion
 
 
-      #region Exit Application
 
-        //If minimize button is clicked
+      #region Exit/Connect Button (From Main Menu Bar)
+
         private void menuQuitApp_Click(object sender, EventArgs e)
         {
 
@@ -934,40 +993,36 @@ namespace CollectDataUser
 
                 #region Check which panel is open
 
-                string panel_open = "";
+                    string panel_open = "";
 
-                //Hide the swap panel
-                if (SwapPanel.Visible)
-                {
-                    SwapPanel.Visible = false;
-                    SwapPanel.Enabled = false;
-                    panel_open = "Swap";
-                }
-
-
-                //Hide the main actions panel
-                if (MainActionsPanel.Visible)
-                {
-                    MainActionsPanel.Visible = false;
-                    MainActionsPanel.Enabled = false;
-                    panel_open = "Main";
-                }
-
-                //Hide the upload panel
-                if (UploadDataPanel.Visible)
-                {
-                    UploadDataPanel.Visible = false;
-                    UploadDataPanel.Enabled = false;
-                    panel_open = "Upload";
-                }
-
-                //Hide the sensors status panel
-                if (SensorStatusPanel.Visible)
-                {
-                    SensorStatusPanel.Visible = false;
-                    SensorStatusPanel.Enabled = false;
-                    panel_open = "Status";
-                }
+                    //Hide the swap panel
+                    if (SwapPanel.Visible)
+                    {
+                        SwapPanel.Visible = false;
+                        SwapPanel.Enabled = false;
+                        panel_open = "Swap";
+                    }
+                    //Hide the main actions panel
+                    else if (MainActionsPanel.Visible)
+                    {
+                        MainActionsPanel.Visible = false;
+                        MainActionsPanel.Enabled = false;
+                        panel_open = "Main";
+                    }
+                    //Hide the upload panel
+                    else if (UploadDataPanel.Visible)
+                    {
+                        UploadDataPanel.Visible = false;
+                        UploadDataPanel.Enabled = false;
+                        panel_open = "Upload";
+                    }
+                    //Hide the sensors status panel
+                    else if (SensorStatusPanel.Visible)
+                    {
+                        SensorStatusPanel.Visible = false;
+                        SensorStatusPanel.Enabled = false;
+                        panel_open = "Status";
+                    }
 
                 #endregion
 
@@ -994,7 +1049,8 @@ namespace CollectDataUser
                         wr_status.Flush();
                         wr_status.Close();
                     }
-                    catch { }
+                    catch 
+                    { }
 
                     TerminateApp();
 
@@ -1042,13 +1098,11 @@ namespace CollectDataUser
 
                 #endregion
 
-
                 menuQuitApp.Enabled = true;
                 menuMainAppActions.Enabled = true;
             }
             else if (menuQuitApp.Text.CompareTo("Connect") == 0)
             {
-
                 menuQuitApp.Enabled = false;
                 menuQuitApp.Text = "";
 
@@ -1073,9 +1127,14 @@ namespace CollectDataUser
 
         }
 
-
         public void TerminateApp()
-        {   
+        {
+            //Launch status monitoring thread
+            StopACsUpdater();
+
+            //Wait for the system to stabilize and check that threads have finished
+            Thread.Sleep(2000);
+
             //Terminate the kernel
             if (TerminateKernel()) //if (!Core._KernalStarted)
             {
@@ -1084,19 +1143,17 @@ namespace CollectDataUser
             }
         }
 
-
         private bool TerminateKernel()
         {
             Core.Unregister();
             return Core.Terminate();
         }
 
-       
       #endregion
 
 
 
-      #region Menu Main Application Actions
+      #region Minimize/Main Menu Button Actions
 
         private void menuMainAppActions_Click(object sender, EventArgs e)
         {
@@ -1125,17 +1182,15 @@ namespace CollectDataUser
                     {
                         UploadDataPanel.Visible = false;
                         UploadDataPanel.Enabled = false;
-                        StopUpdateTimerThread();
+                        StopUpdateUploadThread();
 
                        //Hide the elapsed time label
                        textBox_elapsed_time.Visible = false;
-
                     }
                     else if (SensorStatusPanel.Visible)
                     {
                         SensorStatusPanel.Visible = false;
                         SensorStatusPanel.Enabled = false;
-                        StopACsUpdater();
                     }
 
                     #endregion
@@ -1150,43 +1205,16 @@ namespace CollectDataUser
             catch(Exception ex) {}
         }
 
-
         private void Minimize_Main_Window()
         {
             ShowWindow(this.Handle, SW_MINIMIZED);
         }
 
-    
-     #endregion 
+    #endregion 
 
       
-
-      #region Connect Button
-
-        //TODO: Move the initial connect button to main manu and when connected
-        // replace it with Quit
-        private void ConnectButton_Click(object sender, EventArgs e)
-        {
-            
-            //Hide the swap panel
-            SwapPanel.Enabled = false;
-            SwapPanel.Visible = false;
-
-            //Show the connect panel
-            label_kernel_status.Text = "Load Wockets";
-            ConnectPanel.BringToFront();
-            ConnectPanel.Enabled = true;
-            ConnectPanel.Visible = true;
-
-            //Start the kernel connection sequence
-            StartLoadingWocketsToKernel();
- 
-        }
-
-        #endregion
-
-
-      #region Main Actions Panel Buttons
+    
+    #region Main Actions Panel Buttons
 
         private void SelectSensorsButton_Click(object sender, EventArgs e)
         {
@@ -1240,7 +1268,7 @@ namespace CollectDataUser
             UploadDataPanel.Enabled = true;
 
             //Launch the update upload and timer thread
-            StartUpdateTimerThread();
+            StartUpdateUploadThread();
 
             UploadDataActionButton.Enabled = true;
 
@@ -1270,24 +1298,23 @@ namespace CollectDataUser
             SensorStatusPanel.Visible = true;
             SensorStatusPanel.Enabled = true;
 
+            #region commented
             //Load ACs To Kernel
-            Core.READ_MAC();
-            Core.READ_EMPTY_RECEIVED_COUNT();
-            Core.READ_FULL_RECEIVED_COUNT();
-            Core.READ_PARTIAL_RECEIVED_COUNT();
-
-
+            //Core.READ_EMPTY_RECEIVED_COUNT();
+            //Core.READ_FULL_RECEIVED_COUNT();
+            //Core.READ_PARTIAL_RECEIVED_COUNT();
             //TODO: Launch the thread to read sensors ACs
-            StartACsUpdater();
+            //StartACsUpdater();
+            #endregion
 
             SensorsStatusButton.Enabled = true;
 
         }
 
-      #endregion
+    #endregion
 
       
-      #region Upload Data
+    #region Upload Data
         
         //Upload Button From UploadDataPanel
         private void UploadButton_Click(object sender, EventArgs e)
@@ -1295,7 +1322,7 @@ namespace CollectDataUser
             UploadButton.Enabled = false;
 
            try
-           {        //initialize counters
+           {        
                     //uploadCounter = 0;
                     prevFailed = prevSuccessful = -1;
                  
@@ -1327,26 +1354,25 @@ namespace CollectDataUser
            }
         }
 
-      #endregion
+    #endregion
 
 
-      #region Update Timer & Upload Thread
+    #region Elapsed Time Counter & Upload Thread
       
-      public void StartUpdateTimerThread()
+      public void StartUpdateUploadThread()
       {
           //Start Timer Thread
-          timerThread = new Thread(new ThreadStart(RunTimerThread));
-          timerThread.Start();
+          uploadThread = new Thread(new ThreadStart(RunUploadThread));
+          uploadThread.Start();
       }
 
-      public void StopUpdateTimerThread()
+      public void StopUpdateUploadThread()
       {
-          if (timerThread != null)
-              timerThread.Abort();  
+          if (uploadThread != null)
+              uploadThread.Abort();  
       }
 
-      
-      private void RunTimerThread()
+      private void RunUploadThread()
       {
           while (true)
           {
@@ -1359,20 +1385,18 @@ namespace CollectDataUser
                 ElapsedTime = elapsed_duration.Hours.ToString("00") + "h:" + elapsed_duration.Minutes.ToString("00") + "m:" + elapsed_duration.Seconds.ToString("00") + "s";
 
 
-              UpdateTime();
+              UpdateFilesUploaded();
               Thread.Sleep(500);
           }
       }
 
-     #endregion
+   #endregion
 
 
       #region Update Callback
 
       delegate void UpdateTimeCallback();
-      
-
-      public void UpdateTime()
+      public void UpdateFilesUploaded()
       {
           if (!disposed)
           {
@@ -1381,15 +1405,13 @@ namespace CollectDataUser
               // calling thread to the thread ID of the creating thread.
               // If these threads are different, it returns true.
               {
-                  UpdateTimeCallback d = new UpdateTimeCallback(UpdateTime);
+                  UpdateTimeCallback d = new UpdateTimeCallback(UpdateFilesUploaded);
                   this.Invoke(d, new object[] { });
               }
               else
               {
                   //TODO: Duration Label
                   textBox_elapsed_time.Text = ElapsedTime;
-
-                  //TODO: Update the Storage Card Memory 
 
                   counter++;
 
@@ -1407,7 +1429,7 @@ namespace CollectDataUser
                       textBox_uploader_new_files.Text = CurrentWockets._UploadNewFiles.ToString();
 
 
-                      #region Compute duration of saved and only upload the last 2 days
+                      #region Compute elapsed time since last upload
                       
 
                       if (CurrentWockets._UploadLastTime.Year != 1961)
@@ -1499,16 +1521,6 @@ namespace CollectDataUser
                           label_upload_data_status.ForeColor = Color.DimGray;
                           this.UploadButton.Enabled = true;
                       }
-
-
-                      //TODO: Update the phone power status
-                      //try
-                      //{
-                      //    SYSTEM_POWER_STATUS_EX2 bpower = Battery.GetSystemPowerStatus();
-                      //    this.label6.Text = bpower.BatteryLifePercent + "%";
-                      //}
-                      //catch { }
-
                   }
 
                   this.Invalidate();
@@ -1520,11 +1532,10 @@ namespace CollectDataUser
 
 
 
-      #region Read ACs for Sensor Status
+    #region Read ACs for Sensor Status
 
-        private void ResetACsCounters(WocketsController wc)
+     private void ResetACsCounters(WocketsController wc)
       {
-         
           for (int i = 0; (i < wc._Receivers.Count); i++)
           {
               Core.WRITE_FULL_RECEIVED_COUNT(i, 0);
@@ -1533,38 +1544,111 @@ namespace CollectDataUser
               Core.WRITE_RECEIVED_ACs(i, -1);
               Core.WRITE_SAVED_ACs(i, -1);
           }
-      
       }
 
 
-        void ACsUpdateTimer_Tick(object sender, EventArgs e)
-      {
-          //Load the AC Counts to Kernel
-          Core.READ_EMPTY_RECEIVED_COUNT();
-          Core.READ_FULL_RECEIVED_COUNT();
-          Core.READ_PARTIAL_RECEIVED_COUNT();
-          Core.READ_RECEIVED_ACs();
-          Core.READ_SAVED_ACs();
+
+     DateTime LastPkgTime = DateTime.Now; 
+     
+     void ACsUpdateTimer_Tick(object sender, EventArgs e)
+     {
+         if (CurrentWockets._Controller._Sensors != null)
+         {
+             if (CurrentWockets._Controller._Sensors.Count > 0)
+             {
+                 //== Compute the elapsed time since the last connection
+                 ElapsedConnectionTime_0 = DateTime.Now.Subtract(LastPkgTime);
+
+                 //if et>1min check pkg status
+                 if (ElapsedConnectionTime_0.TotalMinutes > 1.0)
+                 {
+
+                     //Load the AC Counts to Kernel
+                     Core.READ_EMPTY_RECEIVED_COUNT();
+                     Core.READ_FULL_RECEIVED_COUNT();
+                     Core.READ_PARTIAL_RECEIVED_COUNT();
+                     Core.READ_RECEIVED_ACs();
+                     Core.READ_SAVED_ACs();
 
 
-          //Update the ACs For Sensor ID=0 on the Screen
-          _ID = 0;
-          this.textBox_spanel_ac_full_0.Text = CurrentWockets._Controller._Sensors[_ID]._Full.ToString();
-          this.textBox_spanel_ac_partial_0.Text = CurrentWockets._Controller._Sensors[_ID]._Partial.ToString();
-          this.textBox_spanel_ac_empty_0.Text = CurrentWockets._Controller._Sensors[_ID]._Empty.ToString(); 
+                     //Update the ACs on the Screen
+                     for (int i = 0; i < CurrentWockets._Controller._Sensors.Count; i++)
+                     {
+                         if (i == 0)
+                         {
+                             this.textBox_spanel_ac_full_0.Text = CurrentWockets._Controller._Sensors[_ID]._Full.ToString();
+                             this.textBox_spanel_ac_partial_0.Text = CurrentWockets._Controller._Sensors[i]._Partial.ToString();
+                             this.textBox_spanel_ac_empty_0.Text = CurrentWockets._Controller._Sensors[i]._Empty.ToString();
+
+                             this.textBox_spanel_ac_new_0.Text = CurrentWockets._Controller._Sensors[i]._SavedACs + " - " + CurrentWockets._Controller._Sensors[i]._TotalSavedACs;
+                             this.textBox_spanel_ac_last_0.Text = CurrentWockets._Controller._Sensors[i]._ReceivedACs + " - " + CurrentWockets._Controller._Sensors[i]._TotalReceivedACs;
+                         }
+                         else
+                         {
+                             this.textBox_spanel_ac_full_1.Text = CurrentWockets._Controller._Sensors[i]._Full.ToString();
+                             this.textBox_spanel_ac_partial_1.Text = CurrentWockets._Controller._Sensors[i]._Partial.ToString();
+                             this.textBox_spanel_ac_empty_1.Text = CurrentWockets._Controller._Sensors[i]._Empty.ToString();
+
+                             this.textBox_spanel_ac_new_1.Text = CurrentWockets._Controller._Sensors[i]._SavedACs + " - " + CurrentWockets._Controller._Sensors[i]._TotalSavedACs;
+                             this.textBox_spanel_ac_last_1.Text = CurrentWockets._Controller._Sensors[i]._ReceivedACs + " - " + CurrentWockets._Controller._Sensors[i]._TotalReceivedACs;
+                         }
+
+
+                         //If Full/Partial Packages Changed
+                         if ( CurrentWockets._Controller._Sensors[i]._Full > PrevFullPkg[i] ||
+                              CurrentWockets._Controller._Sensors[i]._Partial > PrevPartialPkg[i])
+                         {
+                             textBox_sensors_status.Text = "Receiving Data";
+                             PrevFullPkg[i] = CurrentWockets._Controller._Sensors[i]._Full;
+                             PrevPartialPkg[i] = CurrentWockets._Controller._Sensors[i]._Partial;
+
+                             LastPkgTime = DateTime.Now;
+                         }
+                         //If Empty Packages Changed
+                         else if (CurrentWockets._Controller._Sensors[i]._Empty > PrevEmptyPkg[i])
+                         {
+                             PrevEmptyPkg[i] = CurrentWockets._Controller._Sensors[i]._Empty;
+                             textBox_sensors_status.Text = "Data Lost"; 
+                         }
+                         //If the # of packages didn't changed
+                         else
+                         {   
+                             if (ElapsedConnectionTime_0.TotalMinutes <= 5.0)
+                                 textBox_sensors_status.Text = "..."; 
+                             else 
+                                 textBox_sensors_status.Text = "No Receiving Data"; 
+                         }
+                     }
+                 }
+                 else
+                 {
+                     for (int i = 0; i < CurrentWockets._Controller._Sensors.Count; i++)
+                     {
+                         //If Full/Partial Packages == 0 never received data                     
+                         if (CurrentWockets._Controller._Sensors[i]._Full == 0 &
+                             CurrentWockets._Controller._Sensors[i]._Partial == 0)
+                             textBox_sensors_status.Text = "---";
+                         else
+                             textBox_sensors_status.Text = "Data Received";
+                     }
+                 }
+                 
+             }//if sensors count >0
+         }//if sensors list != null
+                
+                 
+
+
+               
+
+                
+
+                 
+             
+
+            
+         
           
-          this.textBox_spanel_ac_new_0.Text     = CurrentWockets._Controller._Sensors[_ID]._SavedACs + " - " + CurrentWockets._Controller._Sensors[_ID]._TotalSavedACs;
-          this.textBox_spanel_ac_last_0.Text    = CurrentWockets._Controller._Sensors[_ID]._ReceivedACs + " - " + CurrentWockets._Controller._Sensors[_ID]._TotalReceivedACs;
-
-
-          //Update the ACs For Sensor ID=1 on the Screen
-          _ID = 1;
-          this.textBox_spanel_ac_full_1.Text = CurrentWockets._Controller._Sensors[_ID]._Full.ToString();
-          this.textBox_spanel_ac_partial_1.Text = CurrentWockets._Controller._Sensors[_ID]._Partial.ToString();
-          this.textBox_spanel_ac_empty_1.Text = CurrentWockets._Controller._Sensors[_ID]._Empty.ToString(); 
-
-          this.textBox_spanel_ac_new_1.Text = CurrentWockets._Controller._Sensors[_ID]._SavedACs + " - " + CurrentWockets._Controller._Sensors[_ID]._TotalSavedACs;
-          this.textBox_spanel_ac_last_1.Text = CurrentWockets._Controller._Sensors[_ID]._ReceivedACs + " - " + CurrentWockets._Controller._Sensors[_ID]._TotalReceivedACs;
 
       }
 
@@ -1580,8 +1664,10 @@ namespace CollectDataUser
         }
 
 
-        delegate void UpdateACsCallback();
 
+#region Update ACs Event Listener
+
+        delegate void UpdateACsCallback();
         private void UpdateACsEventListener()
         {
             try
@@ -1619,7 +1705,7 @@ namespace CollectDataUser
                     _ID = 1;
                     this.textBox_spanel_ac_full_1.Text = CurrentWockets._Controller._Sensors[_ID]._Full.ToString();
                     this.textBox_spanel_ac_partial_1.Text = CurrentWockets._Controller._Sensors[_ID]._Partial.ToString();
-                    this.textBox_spanel_ac_empty_1.Text = CurrentWockets._Controller._Sensors[_ID]._Empty.ToString(); 
+                    this.textBox_spanel_ac_empty_1.Text = CurrentWockets._Controller._Sensors[_ID]._Empty.ToString();
 
                     this.textBox_spanel_ac_new_1.Text = CurrentWockets._Controller._Sensors[_ID]._SavedACs + " - " + CurrentWockets._Controller._Sensors[_ID]._TotalSavedACs;
                     this.textBox_spanel_ac_last_1.Text = CurrentWockets._Controller._Sensors[_ID]._ReceivedACs + " - " + CurrentWockets._Controller._Sensors[_ID]._TotalReceivedACs;
@@ -1636,11 +1722,12 @@ namespace CollectDataUser
 
         }
 
+#endregion
 
 
       #endregion
 
-       
+
 
     }
 
