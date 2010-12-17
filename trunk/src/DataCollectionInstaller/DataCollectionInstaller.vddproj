@@ -1756,7 +1756,7 @@
         {
             "{BA458234-9B71-4F46-8107-E91156377184}:_025ECAB44F4741739A4F41312F4F12C5"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\Resources\\text_foreground.png"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\Resources\\text_foreground.png"
             "TargetName" = "8:text_foreground.png"
             "Tag" = "8:"
             "Folder" = "8:_460627BB44A64B538F55279C2602DB4F"
@@ -1838,7 +1838,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_0A8B00AFE60748A1AF7C372C15160A1F"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\Master\\ActivityProtocols.xsx"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\Master\\ActivityProtocols.xsx"
             "TargetName" = "8:ActivityProtocols.xsx"
             "Tag" = "8:"
             "Folder" = "8:_0478698C3D57484DBDE60CB527A79567"
@@ -1856,7 +1856,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_0B850583144C4DDA8584D80505B2C655"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\log\\log-2008-04-07.txt"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\log\\log-2008-04-07.txt"
             "TargetName" = "8:log-2008-04-07.txt"
             "Tag" = "8:"
             "Folder" = "8:_6F699F09A5C142698EEA94D9EDF117C6"
@@ -1928,7 +1928,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_138D0D7C2B72472083DEA60263C76B22"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\Master\\logo.ICO"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\Master\\logo.ICO"
             "TargetName" = "8:logo.ICO"
             "Tag" = "8:"
             "Folder" = "8:_0478698C3D57484DBDE60CB527A79567"
@@ -2010,7 +2010,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_19CEA8A400B64F5383A318CF2F70321D"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\Master\\SensorConfigurations.xml"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\Master\\SensorConfigurations.xml"
             "TargetName" = "8:SensorConfigurations.xml"
             "Tag" = "8:"
             "Folder" = "8:_0478698C3D57484DBDE60CB527A79567"
@@ -2046,7 +2046,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_1BDFA67D8DF642C190D953DC8A3EC819"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\Master\\SensorConfigurations.xsd"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\Master\\SensorConfigurations.xsd"
             "TargetName" = "8:SensorConfigurations.xsd"
             "Tag" = "8:"
             "Folder" = "8:_0478698C3D57484DBDE60CB527A79567"
@@ -2138,7 +2138,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_24C6F24E490A48CD8D64651EB15471BA"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\SensorConfigurations\\SensorDataFahd.xml"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\SensorConfigurations\\SensorDataFahd.xml"
             "TargetName" = "8:SensorDataFahd.xml"
             "Tag" = "8:"
             "Folder" = "8:_F0509E09D2FC4120A81E1F43519C644A"
@@ -2174,7 +2174,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_252BFE892E7A404A9169531D10C5D1A7"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\SensorConfigurations\\SensorDataAutism.xml"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\SensorConfigurations\\SensorDataAutism.xml"
             "TargetName" = "8:SensorDataAutism.xml"
             "Tag" = "8:"
             "Folder" = "8:_F0509E09D2FC4120A81E1F43519C644A"
@@ -2274,7 +2274,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_2A58973DDF8B4C46AB9651F0990C852B"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\ActivityProtocols\\ActivityLabelsAutism.xml"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\ActivityProtocols\\ActivityLabelsAutism.xml"
             "TargetName" = "8:ActivityLabelsAutism.xml"
             "Tag" = "8:"
             "Folder" = "8:_10C514C2D1CB4A08AC5A9E88086A994D"
@@ -2292,7 +2292,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_2BAE565C58B1406AB39B6B4A5BE4F9E2"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\Master\\Configuration2.xml"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\Master\\Configuration2.xml"
             "TargetName" = "8:Configuration2.xml"
             "Tag" = "8:"
             "Folder" = "8:_0478698C3D57484DBDE60CB527A79567"
@@ -2310,7 +2310,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_2D39C3D66B324E61B05A526904D4EADB"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\Resources\\mac_overlay.png"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\Resources\\mac_overlay.png"
             "TargetName" = "8:mac_overlay.png"
             "Tag" = "8:"
             "Folder" = "8:_460627BB44A64B538F55279C2602DB4F"
@@ -2328,7 +2328,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_2DFD52D46DAE44898A2802ADAADE9584"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\Master\\ActivityLabelsRealtime.xsd"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\Master\\ActivityLabelsRealtime.xsd"
             "TargetName" = "8:ActivityLabelsRealtime.xsd"
             "Tag" = "8:"
             "Folder" = "8:_0478698C3D57484DBDE60CB527A79567"
@@ -2410,7 +2410,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_328CBE77B07F44CD9282FE4B95C3BEE8"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\Resources\\Folder.gif"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\Resources\\Folder.gif"
             "TargetName" = "8:Folder.gif"
             "Tag" = "8:"
             "Folder" = "8:_460627BB44A64B538F55279C2602DB4F"
@@ -2428,7 +2428,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_3EAE26D3F4CA45A1B40AC9F34DBC8C5F"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\Master\\SensorData.xml"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\Master\\SensorData.xml"
             "TargetName" = "8:SensorData.xml"
             "Tag" = "8:"
             "Folder" = "8:_0478698C3D57484DBDE60CB527A79567"
@@ -2446,7 +2446,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_3F79B76DFBAA42ABB375BDF0603A2FF2"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\Resources\\Device.gif"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\Resources\\Device.gif"
             "TargetName" = "8:Device.gif"
             "Tag" = "8:"
             "Folder" = "8:_460627BB44A64B538F55279C2602DB4F"
@@ -2464,7 +2464,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_40D55003182048CC9E07086E243B826F"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\log\\log-2008-04-15.txt"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\log\\log-2008-04-15.txt"
             "TargetName" = "8:log-2008-04-15.txt"
             "Tag" = "8:"
             "Folder" = "8:_6F699F09A5C142698EEA94D9EDF117C6"
@@ -2518,7 +2518,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_444AE54857734903ABC573239428FAFE"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\ActivityProtocols\\ActivityLabelsStanford.xml"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\ActivityProtocols\\ActivityLabelsStanford.xml"
             "TargetName" = "8:ActivityLabelsStanford.xml"
             "Tag" = "8:"
             "Folder" = "8:_10C514C2D1CB4A08AC5A9E88086A994D"
@@ -2536,7 +2536,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_461A5C98D03F46D1ABFF0F8BE1A00802"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\images\\network\\1.gif"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\images\\network\\1.gif"
             "TargetName" = "8:1.gif"
             "Tag" = "8:"
             "Folder" = "8:_7C56181DC3584BA5B467D76C9664CCE7"
@@ -2554,7 +2554,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_474EF1CBD83A426ABBA16BF17B0298D8"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\Master\\Configuration.xml"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\Master\\Configuration.xml"
             "TargetName" = "8:Configuration.xml"
             "Tag" = "8:"
             "Folder" = "8:_0478698C3D57484DBDE60CB527A79567"
@@ -2590,7 +2590,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_4B8BD0A655F8458B99B065F4B7406FBE"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\images\\network\\disconnected.gif"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\images\\network\\disconnected.gif"
             "TargetName" = "8:disconnected.gif"
             "Tag" = "8:"
             "Folder" = "8:_7C56181DC3584BA5B467D76C9664CCE7"
@@ -2608,7 +2608,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_4E88EE34EF984759AB1BE305F24DD6E1"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\images\\network\\5.GIF"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\images\\network\\5.GIF"
             "TargetName" = "8:5.GIF"
             "Tag" = "8:"
             "Folder" = "8:_7C56181DC3584BA5B467D76C9664CCE7"
@@ -2626,7 +2626,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_4E8C74DD1F4A47FC89AFF8B248088C3C"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\Master\\SensorData.xsd"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\Master\\SensorData.xsd"
             "TargetName" = "8:SensorData.xsd"
             "Tag" = "8:"
             "Folder" = "8:_0478698C3D57484DBDE60CB527A79567"
@@ -2644,7 +2644,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_4F2656F392B64039AC769AA157417762"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\log\\log-2008-04-04.txt"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\log\\log-2008-04-04.txt"
             "TargetName" = "8:log-2008-04-04.txt"
             "Tag" = "8:"
             "Folder" = "8:_6F699F09A5C142698EEA94D9EDF117C6"
@@ -2690,7 +2690,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_5070ACAC55B84756BE61D9A7EE69DF9F"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\log\\log-2008-04-08.txt"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\log\\log-2008-04-08.txt"
             "TargetName" = "8:log-2008-04-08.txt"
             "Tag" = "8:"
             "Folder" = "8:_6F699F09A5C142698EEA94D9EDF117C6"
@@ -2772,7 +2772,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_5409CEA928B44DF58D7F279E3AD52819"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\Master\\ActivitySummary.xml"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\Master\\ActivitySummary.xml"
             "TargetName" = "8:ActivitySummary.xml"
             "Tag" = "8:"
             "Folder" = "8:_0478698C3D57484DBDE60CB527A79567"
@@ -2790,7 +2790,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_551EED2CC15D4EFC93FE30805CE9EA02"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\Master\\ActivityLabelsRealtime.xsx"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\Master\\ActivityLabelsRealtime.xsx"
             "TargetName" = "8:ActivityLabelsRealtime.xsx"
             "Tag" = "8:"
             "Folder" = "8:_0478698C3D57484DBDE60CB527A79567"
@@ -2808,7 +2808,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_56D3F3D636E443B7911724B6384E4048"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\images\\network\\3.GIF"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\images\\network\\3.GIF"
             "TargetName" = "8:3.GIF"
             "Tag" = "8:"
             "Folder" = "8:_7C56181DC3584BA5B467D76C9664CCE7"
@@ -2826,7 +2826,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_5BD2E6C7191A44CCBE2E90E2030AB21B"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\Master\\WocketsControllers.xml"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\Master\\WocketsControllers.xml"
             "TargetName" = "8:WocketsControllers.xml"
             "Tag" = "8:"
             "Folder" = "8:_0478698C3D57484DBDE60CB527A79567"
@@ -2862,7 +2862,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_5CEEA0717DD548B2B4A2C5B5CBECFEE6"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\Master\\install.ini"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\Master\\install.ini"
             "TargetName" = "8:install.ini"
             "Tag" = "8:"
             "Folder" = "8:_0478698C3D57484DBDE60CB527A79567"
@@ -2898,7 +2898,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_6196D32189094C41AA1C28AC81A1EED2"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\Resources\\xp_background.png"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\Resources\\xp_background.png"
             "TargetName" = "8:xp_background.png"
             "Tag" = "8:"
             "Folder" = "8:_460627BB44A64B538F55279C2602DB4F"
@@ -2916,7 +2916,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_62008B7C71F74A61A39803F8B03EC663"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\log\\log-2008-04-19.txt"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\log\\log-2008-04-19.txt"
             "TargetName" = "8:log-2008-04-19.txt"
             "Tag" = "8:"
             "Folder" = "8:_6F699F09A5C142698EEA94D9EDF117C6"
@@ -2962,7 +2962,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_6B631A151F8F4A0185C005E9876A3A52"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\sounds\\stop.wav"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\sounds\\stop.wav"
             "TargetName" = "8:stop.wav"
             "Tag" = "8:"
             "Folder" = "8:_076049C540754FA0BD7430017C913822"
@@ -2980,7 +2980,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_6EE13508CDCF47CEBE5AF3E0C64A68E0"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\log\\log-2008-04-20.txt"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\log\\log-2008-04-20.txt"
             "TargetName" = "8:log-2008-04-20.txt"
             "Tag" = "8:"
             "Folder" = "8:_6F699F09A5C142698EEA94D9EDF117C6"
@@ -3044,7 +3044,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_705BBA13492E4DFE939A6C6B1167D9D1"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\Resources\\xp_foreground.png"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\Resources\\xp_foreground.png"
             "TargetName" = "8:xp_foreground.png"
             "Tag" = "8:"
             "Folder" = "8:_460627BB44A64B538F55279C2602DB4F"
@@ -3062,7 +3062,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_723DCA0A579F403E990A88CE9E2111CB"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\Master\\MITesInstructions-02-21-08.pdf"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\Master\\MITesInstructions-02-21-08.pdf"
             "TargetName" = "8:MITesInstructions-02-21-08.pdf"
             "Tag" = "8:"
             "Folder" = "8:_0478698C3D57484DBDE60CB527A79567"
@@ -3144,7 +3144,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_777EBAEDD3CD4F51806EC2B7E11EA64F"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\log\\log-2008-04-10.txt"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\log\\log-2008-04-10.txt"
             "TargetName" = "8:log-2008-04-10.txt"
             "Tag" = "8:"
             "Folder" = "8:_6F699F09A5C142698EEA94D9EDF117C6"
@@ -3198,7 +3198,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_7EC3CB00ECCB425697EC7470BB9CB91E"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\images\\mites\\horizontal288288.jpg"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\images\\mites\\horizontal288288.jpg"
             "TargetName" = "8:horizontal288288.jpg"
             "Tag" = "8:"
             "Folder" = "8:_7D6A611FAEF64E8DA0F7FC2BD3D9D865"
@@ -3244,7 +3244,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_7FAF8A3E5E25418AB727A3F7691C6A95"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\log\\log-2008-04-09.txt"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\log\\log-2008-04-09.txt"
             "TargetName" = "8:log-2008-04-09.txt"
             "Tag" = "8:"
             "Folder" = "8:_6F699F09A5C142698EEA94D9EDF117C6"
@@ -3262,7 +3262,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_7FB9B803D58444AAB6CCA3C7F7CA817A"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\images\\mites\\vertical288288.jpg"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\images\\mites\\vertical288288.jpg"
             "TargetName" = "8:vertical288288.jpg"
             "Tag" = "8:"
             "Folder" = "8:_7D6A611FAEF64E8DA0F7FC2BD3D9D865"
@@ -3298,7 +3298,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_84357F544DEC4453B2CBD7287EE3B735"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\SensorConfigurations\\SensorDataStanford2.xml"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\SensorConfigurations\\SensorDataStanford2.xml"
             "TargetName" = "8:SensorDataStanford2.xml"
             "Tag" = "8:"
             "Folder" = "8:_F0509E09D2FC4120A81E1F43519C644A"
@@ -3352,7 +3352,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_88F6B067E4C04F7C99BCC1716C0D6E85"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\Resources\\text_background.png"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\Resources\\text_background.png"
             "TargetName" = "8:text_background.png"
             "Tag" = "8:"
             "Folder" = "8:_460627BB44A64B538F55279C2602DB4F"
@@ -3370,7 +3370,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_899878941D524D368F32FBD28F325600"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\Resources\\vista_background.png"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\Resources\\vista_background.png"
             "TargetName" = "8:vista_background.png"
             "Tag" = "8:"
             "Folder" = "8:_460627BB44A64B538F55279C2602DB4F"
@@ -3416,7 +3416,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_8D8BF55677D94448B647B10A01E96401"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\images\\network\\connected.gif"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\images\\network\\connected.gif"
             "TargetName" = "8:connected.gif"
             "Tag" = "8:"
             "Folder" = "8:_7C56181DC3584BA5B467D76C9664CCE7"
@@ -3434,7 +3434,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_8DBC076A11C64816A61A5374D6E38DFB"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\Master\\ActivityProtocols.xml"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\Master\\ActivityProtocols.xml"
             "TargetName" = "8:ActivityProtocols.xml"
             "Tag" = "8:"
             "Folder" = "8:_0478698C3D57484DBDE60CB527A79567"
@@ -3452,7 +3452,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_8DDDDE695B3E442594E00088ED2453A2"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\Resources\\mac_foreground.png"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\Resources\\mac_foreground.png"
             "TargetName" = "8:mac_foreground.png"
             "Tag" = "8:"
             "Folder" = "8:_460627BB44A64B538F55279C2602DB4F"
@@ -3534,7 +3534,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_99BA8D3E4A004895964B92B0C1420C8E"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\images\\mites\\vertical9696.jpg"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\images\\mites\\vertical9696.jpg"
             "TargetName" = "8:vertical9696.jpg"
             "Tag" = "8:"
             "Folder" = "8:_7D6A611FAEF64E8DA0F7FC2BD3D9D865"
@@ -3552,7 +3552,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_99E6DFD1DE594E50A26147C912ECB09D"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\Master\\ActivityProtocols.xml~"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\Master\\ActivityProtocols.xml~"
             "TargetName" = "8:ActivityProtocols.xml~"
             "Tag" = "8:"
             "Folder" = "8:_0478698C3D57484DBDE60CB527A79567"
@@ -3570,7 +3570,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_9A66EAC61188405B95B3B4E98D00AA6A"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\Resources\\PC.gif"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\Resources\\PC.gif"
             "TargetName" = "8:PC.gif"
             "Tag" = "8:"
             "Folder" = "8:_460627BB44A64B538F55279C2602DB4F"
@@ -3588,7 +3588,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_9D76678803894F8388C0E2E6B4137255"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\Resources\\vista_foreground.png"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\Resources\\vista_foreground.png"
             "TargetName" = "8:vista_foreground.png"
             "Tag" = "8:"
             "Folder" = "8:_460627BB44A64B538F55279C2602DB4F"
@@ -3680,7 +3680,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_A068148C1B734509826CA6E4852425C0"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\Resources\\mac_background.png"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\Resources\\mac_background.png"
             "TargetName" = "8:mac_background.png"
             "Tag" = "8:"
             "Folder" = "8:_460627BB44A64B538F55279C2602DB4F"
@@ -3744,7 +3744,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_AE025FA6DE7B4A60AA92B7EDA7AEDB3F"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\sounds\\Disconnected.wav"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\sounds\\Disconnected.wav"
             "TargetName" = "8:Disconnected.wav"
             "Tag" = "8:"
             "Folder" = "8:_076049C540754FA0BD7430017C913822"
@@ -3762,7 +3762,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_B06E9A2D7F9C424BBCD448AACC55617D"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\sounds\\Connected.wav"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\sounds\\Connected.wav"
             "TargetName" = "8:Connected.wav"
             "Tag" = "8:"
             "Folder" = "8:_076049C540754FA0BD7430017C913822"
@@ -3826,7 +3826,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_B4560F8DF27E42D29178954343368B5C"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\sounds\\Maxout.wav"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\sounds\\Maxout.wav"
             "TargetName" = "8:Maxout.wav"
             "Tag" = "8:"
             "Folder" = "8:_076049C540754FA0BD7430017C913822"
@@ -3862,7 +3862,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_B7962EA2FBCC4CC1ADCB0919443D7254"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\Resources\\xp_foreground1.png"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\Resources\\xp_foreground1.png"
             "TargetName" = "8:xp_foreground1.png"
             "Tag" = "8:"
             "Folder" = "8:_460627BB44A64B538F55279C2602DB4F"
@@ -3990,7 +3990,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_BDFBB837C94E421B8B81C58E685A2CF8"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\Resources\\Card.gif"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\Resources\\Card.gif"
             "TargetName" = "8:Card.gif"
             "Tag" = "8:"
             "Folder" = "8:_460627BB44A64B538F55279C2602DB4F"
@@ -4054,7 +4054,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_C48EB4B85C4A41F1B3D3678481580698"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\images\\mites\\horizontal9696.jpg"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\images\\mites\\horizontal9696.jpg"
             "TargetName" = "8:horizontal9696.jpg"
             "Tag" = "8:"
             "Folder" = "8:_7D6A611FAEF64E8DA0F7FC2BD3D9D865"
@@ -4136,7 +4136,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_C9E7B73E6A7D4106A050AA4E6C6783E8"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\Master\\ActivityProtocols.xsd"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\Master\\ActivityProtocols.xsd"
             "TargetName" = "8:ActivityProtocols.xsd"
             "Tag" = "8:"
             "Folder" = "8:_0478698C3D57484DBDE60CB527A79567"
@@ -4154,7 +4154,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_CABFC4CA7E6346BD862A048309684F52"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\Resources\\xp_overlay.png"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\Resources\\xp_overlay.png"
             "TargetName" = "8:xp_overlay.png"
             "Tag" = "8:"
             "Folder" = "8:_460627BB44A64B538F55279C2602DB4F"
@@ -4172,7 +4172,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_CF28247962E845798D9D850935FC54FE"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\Resources\\vista_overlay.png"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\Resources\\vista_overlay.png"
             "TargetName" = "8:vista_overlay.png"
             "Tag" = "8:"
             "Folder" = "8:_460627BB44A64B538F55279C2602DB4F"
@@ -4264,7 +4264,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_DC46EAAF6D7C44A293A5024F828B1983"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\images\\network\\2.GIF"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\images\\network\\2.GIF"
             "TargetName" = "8:2.GIF"
             "Tag" = "8:"
             "Folder" = "8:_7C56181DC3584BA5B467D76C9664CCE7"
@@ -4300,7 +4300,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_DE034C9A2B7440CCB7B8BE8505AA46DE"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\log\\log-2008-04-11.txt"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\log\\log-2008-04-11.txt"
             "TargetName" = "8:log-2008-04-11.txt"
             "Tag" = "8:"
             "Folder" = "8:_6F699F09A5C142698EEA94D9EDF117C6"
@@ -4318,7 +4318,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_DEEA926EEA254472B0C706B1DC5E62FE"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\log\\log-2008-04-21.txt"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\log\\log-2008-04-21.txt"
             "TargetName" = "8:log-2008-04-21.txt"
             "Tag" = "8:"
             "Folder" = "8:_6F699F09A5C142698EEA94D9EDF117C6"
@@ -4364,7 +4364,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_E51ADD6C11B745E4B633491993712E38"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\sounds\\start.wav"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\sounds\\start.wav"
             "TargetName" = "8:start.wav"
             "Tag" = "8:"
             "Folder" = "8:_076049C540754FA0BD7430017C913822"
@@ -4400,7 +4400,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_E97314EEFA8A41858655CFABB48642AC"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\Master\\MITesInstructions-05-22-08.pdf"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\Master\\MITesInstructions-05-22-08.pdf"
             "TargetName" = "8:MITesInstructions-05-22-08.pdf"
             "Tag" = "8:"
             "Folder" = "8:_0478698C3D57484DBDE60CB527A79567"
@@ -4418,7 +4418,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_EA7F82DA1EA343D99DFA4090BBE4132E"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\SensorConfigurations\\SensorDataStanford3.xml"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\SensorConfigurations\\SensorDataStanford3.xml"
             "TargetName" = "8:SensorDataStanford3.xml"
             "Tag" = "8:"
             "Folder" = "8:_F0509E09D2FC4120A81E1F43519C644A"
@@ -4482,7 +4482,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_EC9EDE886F6247249798361F20B98D19"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\log\\log-2008-04-14.txt"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\log\\log-2008-04-14.txt"
             "TargetName" = "8:log-2008-04-14.txt"
             "Tag" = "8:"
             "Folder" = "8:_6F699F09A5C142698EEA94D9EDF117C6"
@@ -4500,7 +4500,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_EED8DF6E3B3B4E9A8833FF8110D73563"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\sounds\\reset.wav"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\sounds\\reset.wav"
             "TargetName" = "8:reset.wav"
             "Tag" = "8:"
             "Folder" = "8:_076049C540754FA0BD7430017C913822"
@@ -4546,7 +4546,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_F37A91396B4142628BEDB74AC980EEE5"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\SensorConfigurations\\SensorDataStanford1.xml"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\SensorConfigurations\\SensorDataStanford1.xml"
             "TargetName" = "8:SensorDataStanford1.xml"
             "Tag" = "8:"
             "Folder" = "8:_F0509E09D2FC4120A81E1F43519C644A"
@@ -4628,7 +4628,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_FCDD29942E9548BFBD897D01985673A8"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\images\\network\\6.GIF"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\images\\network\\6.GIF"
             "TargetName" = "8:6.GIF"
             "Tag" = "8:"
             "Folder" = "8:_7C56181DC3584BA5B467D76C9664CCE7"
@@ -4646,7 +4646,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_FDCF4E19D6E14C0D81CB8516D1AFA372"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\SensorConfigurations\\SensorDataStanford4.xml"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\SensorConfigurations\\SensorDataStanford4.xml"
             "TargetName" = "8:SensorDataStanford4.xml"
             "Tag" = "8:"
             "Folder" = "8:_F0509E09D2FC4120A81E1F43519C644A"
@@ -4664,7 +4664,7 @@
             }
             "{BA458234-9B71-4F46-8107-E91156377184}:_FE19B173F98D4F1DB408F8F66D2CFB30"
             {
-            "SourcePath" = "8:C:\\Users\\albinali\\Desktop\\NeededFiles\\images\\network\\4.GIF"
+            "SourcePath" = "8:..\\..\\bin\\NeededFiles\\images\\network\\4.GIF"
             "TargetName" = "8:4.GIF"
             "Tag" = "8:"
             "Folder" = "8:_7C56181DC3584BA5B467D76C9664CCE7"
