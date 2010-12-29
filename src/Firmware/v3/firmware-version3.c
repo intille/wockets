@@ -308,8 +308,8 @@ int main()
 					_send_tm();
 					justconnected=2;
 				}		
-				_send_pdu(x,y,z);
-				//_send_uncompressed_pdu(x, y, z);
+				//_send_pdu(x,y,z);
+				_send_uncompressed_pdu(x, y, z);
 
 				
 					//Send summary activity count

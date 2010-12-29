@@ -77,7 +77,9 @@ namespace DataUploader
         //static WebResponse response;
         static void PostThread()
         {
-
+            Core.WRITE_LAST_UPLOAD_NEWFILES(0);
+            Core.WRITE_LAST_UPLOAD_SUCCESSFILES(0);
+            Core.WRITE_LAST_UPLOAD_FAILEDFILES(0);
             DateTime startTime = DateTime.Now;
             Core.WRITE_LAST_UPLOAD_TIME(startTime);
             stayUpThread = new Thread(new ThreadStart(StayUp));
@@ -94,6 +96,7 @@ namespace DataUploader
 
             Core.WRITE_LAST_UPLOAD_NEWFILES(files.Count);
             FileUploader._Uri = "http://wockets.media.mit.edu/FileUpload.php";
+            String getUri = "http://wockets.media.mit.edu/CheckFile.php";
             int success = 0;
             int failure = 0;
             //foreach (string filename in sortedFiles)
@@ -105,12 +108,70 @@ namespace DataUploader
                 {
 
                     int start = filename.IndexOf("\\Wockets\\") + 9;
-                    int length = filename.LastIndexOf("\\") - start;
+                    int length = filename.LastIndexOf("\\") - start;                   
                     string relative_path = "";
                     if (length > 0)
                         relative_path = filename.Substring(start, length);
                     NameValueCollection postData = new NameValueCollection();
+                    NameValueCollection getData = new NameValueCollection();
                     relative_path = relative_path.Replace("\\", "/");
+
+
+
+                    //Check file on server
+                    //relative_path = "IMEI-" + CurrentPhone._IMEI + "/" + relative_path;
+                    getData.Add("relative_path", relative_path);
+                    getData.Add("filename", filename.Substring(filename.LastIndexOf("\\")+1));
+                    getData.Add("imei", CurrentPhone._IMEI);
+
+                    startTime = DateTime.Now;
+                    string checkresponse = ""; 
+                    string md5 = "";
+                    string localmd5 = Hash.GetMD5HashFromFile(filename);
+                    using (WebResponse response = FileUploader.Get(new Uri(getUri), getData))
+                    {
+
+                        StreamReader reader = null;
+                        try
+                        {
+                            reader = new StreamReader(response.GetResponseStream());
+                            string str = reader.ReadLine();
+                            if (str!=null)
+                                checkresponse += str;
+                            while (str != null)
+                            {
+                                str = reader.ReadLine();
+                                if (str!=null)
+                                checkresponse += str;
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Logger.Debug("PostThread: exception 1:" + e.Message);
+                        }
+                        finally
+                        {
+                            if (reader != null) reader.Close();
+                            if (response != null) response.Close();
+                        }
+                    }
+
+                    if ((checkresponse.Length > 0) && (checkresponse!="false"))
+                    {
+                        string[] tokens = checkresponse.Split(new char[]{','});
+                        DateTime serverTime=DateTime.Parse(tokens[2]);
+                        DateTime senderTime=DateTime.Parse(tokens[3]);
+                        if ((tokens[0] == "true") && (localmd5 == tokens[1]) &&
+                            (DateTime.Now.Subtract(serverTime).TotalDays >= 2) &&
+                            (DateTime.Now.Subtract(senderTime).TotalDays >= 2))
+                        {
+                            File.Delete(filename);
+                            success++;
+                            Core.WRITE_LAST_UPLOAD_SUCCESSFILES(success);
+                            continue;
+                        }
+                    }
+
                     //relative_path = "IMEI-" + CurrentPhone._IMEI + "/" + relative_path;
                     postData.Add("relative_path", relative_path);
                     postData.Add("root_path", "none");
@@ -119,8 +180,8 @@ namespace DataUploader
                     postData.Add("KT_Insert1", "Insert");
 
                     startTime = DateTime.Now;
-                    string md5 = "";
-                    string localmd5 = Hash.GetMD5HashFromFile(filename);
+                    //string md5 = "";
+                    //string localmd5 = Hash.GetMD5HashFromFile(filename);
                     Logger.Debug("PostThread: about to upload"+filename);
                     using (WebResponse response = FileUploader.Post(new Uri(FileUploader._Uri), postData, filename, "application/octet-stream", "filename", null))
                     {
@@ -159,16 +220,16 @@ namespace DataUploader
                     {
                         Logger.Debug("PostThread: MD5 Match:" + md5);
                         success++;
-                        if (!FileUploader._Success.ContainsKey(filename))
-                            FileUploader._Success.Add(filename, creationTime);
+                        //if (!FileUploader._Success.ContainsKey(filename))
+                        //    FileUploader._Success.Add(filename, creationTime);
                         Core.WRITE_LAST_UPLOAD_SUCCESSFILES(success);
                     }
                     else if (!FileUploader._Failure.ContainsKey(filename))
                     {
                         Logger.Debug("PostThread: MD5 Mismatch:" + md5+","+localmd5);
                         failure++;
-                        if (!FileUploader._Failure.ContainsKey(filename))
-                            FileUploader._Failure.Add(filename, creationTime);
+                        //if (!FileUploader._Failure.ContainsKey(filename))
+                        //    FileUploader._Failure.Add(filename, creationTime);
                         Core.WRITE_LAST_UPLOAD_FAILEDFILES(failure);
                     }
 
@@ -182,15 +243,15 @@ namespace DataUploader
                 {
                     Logger.Debug("PostThread: exception 2:" + e.Message);
                     failure++;
-                    if (!FileUploader._Failure.ContainsKey(filename))
-                        FileUploader._Failure.Add(filename, creationTime);
+                    //if (!FileUploader._Failure.ContainsKey(filename))
+                    //    FileUploader._Failure.Add(filename, creationTime);
                     Core.WRITE_LAST_UPLOAD_FAILEDFILES(failure);
                 }               
 
-                FileUploader.Save();
+                //FileUploader.Save();
             }
             Core.WRITE_LAST_UPLOAD_DURATION(DateTime.Now.Subtract(startTime));
-            FileUploader.Save();
+            //FileUploader.Save();
             notdone = false;
 
         }
