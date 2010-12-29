@@ -72,6 +72,12 @@ unsigned char interrupts_passed=0;
 unsigned char interrupt_reps=0;
 
 
+unsigned char test1_inprogress=0;
+unsigned char test2_inprogress=0;
+unsigned char test3_inprogress=0;
+
+
+
 
 int main()
 {
@@ -79,6 +85,16 @@ int main()
 scounter=0;
 
 
+	if (test1_inprogress==0)
+	{
+			_greenled_turn_on();		
+			for(int i=0;(i<400);i++)
+				_delay_ms(5);
+			_greenled_turn_off();
+	}
+
+	for(int i=0;(i<400);i++)
+		_delay_ms(5);
 	//Initialized data buffer
 	dataIndex=0;
 	// Blink green for 5 seconds	
@@ -99,6 +115,26 @@ scounter=0;
 	zsum=0;
 	sampleFlag=1;
 
+	test1_inprogress=1;
+
+
+	for(int i=0;(i<400);i++)
+		_delay_ms(5);
+
+	if (test2_inprogress==0)
+	{
+			_greenled_turn_on();		
+			for(int i=0;(i<40);i++)
+				_delay_ms(5);
+			_greenled_turn_off();									
+			for(int i=0;(i<40);i++)
+				_delay_ms(5);
+			_greenled_turn_on();		
+			for(int i=0;(i<40);i++)
+				_delay_ms(5);
+			_greenled_turn_off();
+	}
+	test2_inprogress=1;
 
 	while(1){
 			
@@ -156,27 +192,199 @@ scounter=0;
 				zsum=sqrt(zsum/900);
 				bsum=sqrt(bsum/900);
 
+				if  (xsum==0){
 
-				if ( (xsum>3) || (ysum>3) || (zsum>3) || (xsum==0) || (ysum==0) || (zsum==0))
-				{
-
-					while(1)
-					{
+					for(int k=0;(k<5);k++){
 						_yellowled_turn_on();		
-						for(int i=0;(i<200);i++)
+						for(int i=0;(i<40);i++)
 							_delay_ms(5);
 						_yellowled_turn_off();
-						for(int i=0;(i<200);i++)
+						for(int i=0;(i<400);i++)
 							_delay_ms(5);
-					}			
+					}
 
 				}
 
+
+
+				if  (ysum==0){
+
+					for(int k=0;(k<5);k++){
+						_yellowled_turn_on();		
+						for(int i=0;(i<40);i++)
+							_delay_ms(5);
+						_yellowled_turn_off();
+						for(int i=0;(i<40);i++)
+							_delay_ms(5);
+						_yellowled_turn_on();		
+						for(int i=0;(i<40);i++)
+							_delay_ms(5);
+						_yellowled_turn_off();
+						for(int i=0;(i<400);i++)
+							_delay_ms(5);
+					}
+				}
+
+
+
+
+				if  (zsum==0){
+
+					for(int k=0;(k<5);k++){
+						_yellowled_turn_on();		
+						for(int i=0;(i<40);i++)
+							_delay_ms(5);
+						_yellowled_turn_off();
+						for(int i=0;(i<40);i++)
+							_delay_ms(5);
+						_yellowled_turn_on();		
+						for(int i=0;(i<40);i++)
+							_delay_ms(5);
+						_yellowled_turn_off();
+						for(int i=0;(i<40);i++)
+							_delay_ms(5);
+						_yellowled_turn_on();		
+						for(int i=0;(i<40);i++)
+							_delay_ms(5);
+						_yellowled_turn_off();
+						for(int i=0;(i<400);i++)
+							_delay_ms(5);
+					}
+				}
+
+
+
+
+
+			for(int i=0;(i<800);i++)
+				_delay_ms(5);
+
+			if (test3_inprogress==0)
+			{
+				_greenled_turn_on();		
+				for(int i=0;(i<40);i++)
+					_delay_ms(5);
+				_greenled_turn_off();									
+				for(int i=0;(i<40);i++)
+					_delay_ms(5);
+				_greenled_turn_on();		
+				for(int i=0;(i<40);i++)
+					_delay_ms(5);
+				_greenled_turn_off();
+
+				for(int i=0;(i<40);i++)
+					_delay_ms(5);
+				_greenled_turn_on();		
+				for(int i=0;(i<40);i++)
+					_delay_ms(5);
+				_greenled_turn_off();
+			}
+			test3_inprogress=1;
+
+			for(int i=0;(i<400);i++)
+				_delay_ms(5);
+			
+			if  (xsum>3){
+
+					for(int k=0;(k<5);k++){
+						_yellowled_turn_on();		
+						for(int i=0;(i<40);i++)
+							_delay_ms(5);
+						_yellowled_turn_off();
+						for(int i=0;(i<400);i++)
+							_delay_ms(5);
+					}
+
+				}
+
+
+
+	
+
+				if  (ysum>3){
+
+					for(int k=0;(k<5);k++){
+						_yellowled_turn_on();		
+						for(int i=0;(i<40);i++)
+							_delay_ms(5);
+						_yellowled_turn_off();
+						for(int i=0;(i<40);i++)
+							_delay_ms(5);
+						_yellowled_turn_on();		
+						for(int i=0;(i<40);i++)
+							_delay_ms(5);
+						_yellowled_turn_off();
+						for(int i=0;(i<400);i++)
+							_delay_ms(5);
+					}
+				}
+
+
+
+				if  (zsum>3){
+
+					for(int k=0;(k<5);k++){
+						_yellowled_turn_on();		
+						for(int i=0;(i<40);i++)
+							_delay_ms(5);
+						_yellowled_turn_off();
+						for(int i=0;(i<40);i++)
+							_delay_ms(5);
+						_yellowled_turn_on();		
+						for(int i=0;(i<40);i++)
+							_delay_ms(5);
+						_yellowled_turn_off();
+						for(int i=0;(i<40);i++)
+							_delay_ms(5);
+						_yellowled_turn_on();		
+						for(int i=0;(i<40);i++)
+							_delay_ms(5);
+						_yellowled_turn_off();
+						for(int i=0;(i<400);i++)
+							_delay_ms(5);
+					}
+				}
+
+
+
+			for(int i=0;(i<800);i++)
+				_delay_ms(5);
+
+				_greenled_turn_on();		
+				for(int i=0;(i<40);i++)
+					_delay_ms(5);
+				_greenled_turn_off();									
+				for(int i=0;(i<40);i++)
+					_delay_ms(5);
+				_greenled_turn_on();		
+				for(int i=0;(i<40);i++)
+					_delay_ms(5);
+				_greenled_turn_off();
+
+				for(int i=0;(i<40);i++)
+					_delay_ms(5);
+				_greenled_turn_on();		
+				for(int i=0;(i<40);i++)
+					_delay_ms(5);
+				_greenled_turn_off();
+
+				for(int i=0;(i<40);i++)
+					_delay_ms(5);
+				_greenled_turn_on();		
+				for(int i=0;(i<40);i++)
+					_delay_ms(5);
+				_greenled_turn_off();
+
+
+			for(int i=0;(i<400);i++)
+				_delay_ms(5);
+
 				if (bsum>1)
 					_yellowled_turn_on();
-				
-				_greenled_turn_on();
-				//_atmega_finalize();
+				else				
+					_greenled_turn_on();
+
+				while(1);
 
 
 			}
@@ -191,7 +399,7 @@ scounter=0;
 		}	
 		
 		_yellowled_turn_off();
-		_greenled_turn_on();
+		_greenled_turn_off();
 			cli();
 			set_sleep_mode(SLEEP_MODE_IDLE);
 			//set_sleep_mode(SLEEP_MODE_PWR_SAVE);
