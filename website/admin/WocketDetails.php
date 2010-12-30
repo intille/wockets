@@ -15,6 +15,12 @@ $tNGs = new tNG_dispatcher("../");
 // Make unified connection variable
 $conn_Wockets = new KT_connection($Wockets, $database_Wockets);
 
+//Start Restrict Access To Page
+$restrict = new tNG_RestrictAccess($conn_Wockets, "../");
+//Grand Levels: Any
+$restrict->Execute();
+//End Restrict Access To Page
+
 // Start trigger
 $formValidation = new tNG_FormValidation();
 $formValidation->addField("mac", true, "text", "", "", "", "");
@@ -152,6 +158,15 @@ $del_WOCKETS->registerTrigger("AFTER", "Trigger_FileDelete2", 98);
 $del_WOCKETS->setTable("WOCKETS");
 $del_WOCKETS->setPrimaryKey("id", "NUMERIC_TYPE", "GET", "id");
 
+// Make a logout transaction instance
+$logoutTransaction = new tNG_logoutTransaction($conn_Wockets);
+$tNGs->addTransaction($logoutTransaction);
+// Register triggers
+$logoutTransaction->registerTrigger("STARTER", "Trigger_Default_Starter", 1, "GET", "KT_logout_now");
+$logoutTransaction->registerTrigger("END", "Trigger_Default_Redirect", 99, "../index.php");
+// Add columns
+// End of logout transaction instance
+
 // Execute all the registered transactions
 $tNGs->executeTransactions();
 
@@ -159,11 +174,21 @@ $tNGs->executeTransactions();
 $rsWOCKETS = $tNGs->getRecordset("WOCKETS");
 $row_rsWOCKETS = mysql_fetch_assoc($rsWOCKETS);
 $totalRows_rsWOCKETS = mysql_num_rows($rsWOCKETS);
+
+// Get the transaction recordset
+$rscustom = $tNGs->getRecordset("custom");
+$row_rscustom = mysql_fetch_assoc($rscustom);
+$totalRows_rscustom = mysql_num_rows($rscustom);
 ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
 <title>Untitled Document</title>
+<script src="../includes/cssmenus2/js/cssmenus.js" type="text/javascript"></script>
+<link href="../includes/cssmenus2/skins/interakt_blue/horizontal.css" rel="stylesheet" type="text/css" />
+<script src="../includes/common/js/base.js" type="text/javascript"></script>
+<script src="../includes/common/js/utility.js" type="text/javascript"></script>
+
 <link href="../includes/skins/mxkollection3.css" rel="stylesheet" type="text/css" media="all" />
 <script src="../includes/common/js/base.js" type="text/javascript"></script>
 <script src="../includes/common/js/utility.js" type="text/javascript"></script>
@@ -181,10 +206,49 @@ $NXT_FORM_SETTINGS = {
 </head>
 
 <body>
-<a href="index.php">Admin Home</a>
-<?php
-	echo $tNGs->getErrorMsg();
-?>
+
+
+<p> </p>
+<div id="cssMenu1" class="horizontal" >
+  <ul class="interakt_blue">
+    <li> <a href="../main.php" title="Logout">Home</a> </li>
+    <li> <a href="#" title="Study">Study</a>
+        <ul>
+          <li> <a href="phones.php" title="Phones">Phones</a> </li>
+          <li> <a href="wockets.php" title="Wockets">Wockets</a> </li>
+          <li> <a href="participants.php" title="Participants">Participants</a> </li>
+      </ul>
+    </li>
+    <li> <a href="#" title="Export">Actions</a>
+        <ul>
+          <li> <a href="participant_phone.php" title="Assign phone to participant">Assign Phone</a> </li>
+          <li> <a href="participant_wocket.php" title="Assign Wocket">Assign Wocket</a> </li>
+          <li> <a href="ExportData.php" title="Export Data">Export Data</a> </li>
+      </ul>
+    </li>
+    <li> <a href="#" title="Advanced">Advanced</a>
+        <ul>
+          <li> <a href="accounts.php" title="User Accounts">User Accounts</a> </li>
+          <li> <a href="Files.php" title="Files">Files</a> </li>
+          <li> <a href="phone_stats.php" title="Phone Statistics">Phone Statistics</a> </li>
+          <li> <a href="wocket_stats.php" title="Wockets Statistics">Wockets Statistics</a> </li>
+      </ul>
+    </li>
+    <li> <a href="<?php echo $logoutTransaction->getLogoutLink(); ?>" title="">Logout</a> </li>
+  </ul>
+  <br />
+  <script type="text/javascript">
+	<!--
+    var obj_cssMenu1 = new CSSMenu("cssMenu1");
+    obj_cssMenu1.setTimeouts(400, 200, 800);
+    obj_cssMenu1.setSubMenuOffset(0, 0, 0, 0);
+    obj_cssMenu1.setHighliteCurrent(true);
+    obj_cssMenu1.show();
+   //-->
+  </script>
+</div>
+<p>&nbsp;</p>
+
 <div class="KT_tng">
   <h1>
     <?php 

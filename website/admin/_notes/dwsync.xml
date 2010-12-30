@@ -1,12 +1,22 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <dwsync>
-<file name="accountdetails.php" local="129380548466454901" remote="129381328080000000" testing="129381328080000000" />
-<file name="accounts.php" local="129380548466314893" remote="129381328080000000" testing="129381328080000000" />
-<file name="phones.php" local="129380548466254890" remote="129381328080000000" testing="129381328080000000" />
-<file name="phones_details.php" local="129380548466354895" remote="129381328080000000" testing="129381328080000000" />
-<file name="wockets.php" local="129380548466284891" remote="129381328080000000" testing="129381328080000000" />
-<file name="WocketDetails.php" local="129380548466434900" remote="129381328080000000" testing="129381328080000000" />
-<file name="participants.php" local="129380548466374896" remote="129381328080000000" testing="129381328080000000" />
-<file name="FileDetails.php" local="129380548466484903" remote="129381328080000000" testing="129381328080000000" />
-<file name="Files.php" local="129380548466404898" remote="129381328080000000" testing="129381328080000000" />
+<file name="accountdetails.php" local="129382131482386951" remote="129382099870000000" testing="129382099870000000" />
+<file name="accounts.php" local="129382131627725263" remote="129382099870000000" testing="129382099870000000" />
+<file name="phones.php" local="129382137147590982" remote="129382099880000000" testing="129382099880000000" />
+<file name="phones_details.php" local="129382137292379263" remote="129382099880000000" testing="129382099880000000" />
+<file name="wockets.php" local="129382138179179985" remote="129382099880000000" testing="129382099880000000" />
+<file name="WocketDetails.php" local="129382138013110487" remote="129382099880000000" testing="129382099880000000" />
+<file name="participants.php" local="129382138234453147" remote="129382099880000000" testing="129382099880000000" />
+<file name="FileDetails.php" local="129382138243153644" remote="129382099880000000" testing="129382099880000000" />
+<file name="Files.php" local="129382138241843569" remote="129382099880000000" testing="129382099880000000" />
+<file name="participant_phone.php" local="129382138239483434" remote="129382099880000000" testing="129382099880000000" />
+<file name="participants_details.php" local="129382135787033162" remote="129382099880000000" testing="129382099880000000" />
+<file name="participant_wocket_details.php" local="129382138235853227" remote="129382099880000000" testing="129382099880000000" />
+<file name="participant_wocket.php" local="129382138237013293" remote="129382099880000000" testing="129382099880000000" />
+<file name="FilesDetails.php" local="129382138240823511" remote="129382099880000000" testing="129382099880000000" />
+<file name="participant_phone_details.php" local="129382138238353370" remote="129382099880000000" testing="129382099880000000" />
+<file name="phone_stats.php" local="129382136718926463" remote="129382099880000000" testing="129382099880000000" />
+<file name="phone_stats_details.php" local="129382136962140375" remote="129382099880000000" testing="129382099880000000" />
+<file name="wocket_stats.php" local="129382137610000000" remote="129382099890000000" testing="129382099890000000" />
+<file name="wocket_stats_details.php" local="129382137856211512" remote="129382099890000000" testing="129382099890000000" />
 </dwsync>

@@ -23,48 +23,46 @@ $restrict->Execute();
 
 // Start trigger
 $formValidation = new tNG_FormValidation();
-$formValidation->addField("imei", true, "text", "", "", "", "");
-$formValidation->addField("model", true, "text", "", "", "", "");
+$formValidation->addField("filename", true, "numeric", "", "", "", "");
+$formValidation->addField("relative_path", true, "text", "", "", "", "");
 $tNGs->prepareValidation($formValidation);
 // End trigger
 
 // Make an insert transaction instance
-$ins_PHONES = new tNG_multipleInsert($conn_Wockets);
-$tNGs->addTransaction($ins_PHONES);
+$ins_FILE_UPLOAD = new tNG_multipleInsert($conn_Wockets);
+$tNGs->addTransaction($ins_FILE_UPLOAD);
 // Register triggers
-$ins_PHONES->registerTrigger("STARTER", "Trigger_Default_Starter", 1, "POST", "KT_Insert1");
-$ins_PHONES->registerTrigger("BEFORE", "Trigger_Default_FormValidation", 10, $formValidation);
-$ins_PHONES->registerTrigger("END", "Trigger_Default_Redirect", 99, "../includes/nxt/back.php");
+$ins_FILE_UPLOAD->registerTrigger("STARTER", "Trigger_Default_Starter", 1, "POST", "KT_Insert1");
+$ins_FILE_UPLOAD->registerTrigger("BEFORE", "Trigger_Default_FormValidation", 10, $formValidation);
+$ins_FILE_UPLOAD->registerTrigger("END", "Trigger_Default_Redirect", 99, "../includes/nxt/back.php");
 // Add columns
-$ins_PHONES->setTable("PHONES");
-$ins_PHONES->addColumn("imei", "STRING_TYPE", "POST", "imei");
-$ins_PHONES->addColumn("model", "STRING_TYPE", "POST", "model");
-$ins_PHONES->addColumn("notes", "STRING_TYPE", "POST", "notes");
-$ins_PHONES->setPrimaryKey("id", "NUMERIC_TYPE");
+$ins_FILE_UPLOAD->setTable("FILE_UPLOAD");
+$ins_FILE_UPLOAD->addColumn("filename", "NUMERIC_TYPE", "POST", "filename");
+$ins_FILE_UPLOAD->addColumn("relative_path", "STRING_TYPE", "POST", "relative_path");
+$ins_FILE_UPLOAD->setPrimaryKey("id", "NUMERIC_TYPE");
 
 // Make an update transaction instance
-$upd_PHONES = new tNG_multipleUpdate($conn_Wockets);
-$tNGs->addTransaction($upd_PHONES);
+$upd_FILE_UPLOAD = new tNG_multipleUpdate($conn_Wockets);
+$tNGs->addTransaction($upd_FILE_UPLOAD);
 // Register triggers
-$upd_PHONES->registerTrigger("STARTER", "Trigger_Default_Starter", 1, "POST", "KT_Update1");
-$upd_PHONES->registerTrigger("BEFORE", "Trigger_Default_FormValidation", 10, $formValidation);
-$upd_PHONES->registerTrigger("END", "Trigger_Default_Redirect", 99, "../includes/nxt/back.php");
+$upd_FILE_UPLOAD->registerTrigger("STARTER", "Trigger_Default_Starter", 1, "POST", "KT_Update1");
+$upd_FILE_UPLOAD->registerTrigger("BEFORE", "Trigger_Default_FormValidation", 10, $formValidation);
+$upd_FILE_UPLOAD->registerTrigger("END", "Trigger_Default_Redirect", 99, "../includes/nxt/back.php");
 // Add columns
-$upd_PHONES->setTable("PHONES");
-$upd_PHONES->addColumn("imei", "STRING_TYPE", "POST", "imei");
-$upd_PHONES->addColumn("model", "STRING_TYPE", "POST", "model");
-$upd_PHONES->addColumn("notes", "STRING_TYPE", "POST", "notes");
-$upd_PHONES->setPrimaryKey("id", "NUMERIC_TYPE", "GET", "id");
+$upd_FILE_UPLOAD->setTable("FILE_UPLOAD");
+$upd_FILE_UPLOAD->addColumn("filename", "NUMERIC_TYPE", "POST", "filename");
+$upd_FILE_UPLOAD->addColumn("relative_path", "STRING_TYPE", "POST", "relative_path");
+$upd_FILE_UPLOAD->setPrimaryKey("id", "NUMERIC_TYPE", "GET", "id");
 
 // Make an instance of the transaction object
-$del_PHONES = new tNG_multipleDelete($conn_Wockets);
-$tNGs->addTransaction($del_PHONES);
+$del_FILE_UPLOAD = new tNG_multipleDelete($conn_Wockets);
+$tNGs->addTransaction($del_FILE_UPLOAD);
 // Register triggers
-$del_PHONES->registerTrigger("STARTER", "Trigger_Default_Starter", 1, "POST", "KT_Delete1");
-$del_PHONES->registerTrigger("END", "Trigger_Default_Redirect", 99, "../includes/nxt/back.php");
+$del_FILE_UPLOAD->registerTrigger("STARTER", "Trigger_Default_Starter", 1, "POST", "KT_Delete1");
+$del_FILE_UPLOAD->registerTrigger("END", "Trigger_Default_Redirect", 99, "../includes/nxt/back.php");
 // Add columns
-$del_PHONES->setTable("PHONES");
-$del_PHONES->setPrimaryKey("id", "NUMERIC_TYPE", "GET", "id");
+$del_FILE_UPLOAD->setTable("FILE_UPLOAD");
+$del_FILE_UPLOAD->setPrimaryKey("id", "NUMERIC_TYPE", "GET", "id");
 
 // Make a logout transaction instance
 $logoutTransaction = new tNG_logoutTransaction($conn_Wockets);
@@ -79,9 +77,9 @@ $logoutTransaction->registerTrigger("END", "Trigger_Default_Redirect", 99, "../i
 $tNGs->executeTransactions();
 
 // Get the transaction recordset
-$rsPHONES = $tNGs->getRecordset("PHONES");
-$row_rsPHONES = mysql_fetch_assoc($rsPHONES);
-$totalRows_rsPHONES = mysql_num_rows($rsPHONES);
+$rsFILE_UPLOAD = $tNGs->getRecordset("FILE_UPLOAD");
+$row_rsFILE_UPLOAD = mysql_fetch_assoc($rsFILE_UPLOAD);
+$totalRows_rsFILE_UPLOAD = mysql_num_rows($rsFILE_UPLOAD);
 
 // Get the transaction recordset
 $rscustom = $tNGs->getRecordset("custom");
@@ -114,6 +112,7 @@ $NXT_FORM_SETTINGS = {
 </head>
 
 <body>
+
 
 <p> </p>
 <div id="cssMenu1" class="horizontal" >
@@ -155,6 +154,12 @@ $NXT_FORM_SETTINGS = {
   </script>
 </div>
 <p>&nbsp;</p>
+
+
+
+<?php
+	echo $tNGs->getErrorMsg();
+?>
 <div class="KT_tng">
   <h1>
     <?php 
@@ -169,7 +174,7 @@ if (@$_GET['id'] == "") {
       <?php } 
 // endif Conditional region1
 ?>
-    PHONES </h1>
+    FILE_UPLOAD </h1>
   <div class="KT_tngform">
     <form method="post" id="form1" action="<?php echo KT_escapeAttribute(KT_getFullUri()); ?>">
       <?php $cnt1 = 0; ?>
@@ -177,7 +182,7 @@ if (@$_GET['id'] == "") {
         <?php $cnt1++; ?>
         <?php 
 // Show IF Conditional region1 
-if (@$totalRows_rsPHONES > 1) {
+if (@$totalRows_rsFILE_UPLOAD > 1) {
 ?>
           <h2><?php echo NXT_getResource("Record_FH"); ?> <?php echo $cnt1; ?></h2>
           <?php } 
@@ -185,26 +190,18 @@ if (@$totalRows_rsPHONES > 1) {
 ?>
         <table cellpadding="2" cellspacing="0" class="KT_tngtable">
           <tr>
-            <td class="KT_th"><label for="imei_<?php echo $cnt1; ?>">IMEI:</label></td>
-            <td><input type="text" name="imei_<?php echo $cnt1; ?>" id="imei_<?php echo $cnt1; ?>" value="<?php echo KT_escapeAttribute($row_rsPHONES['imei']); ?>" size="32" maxlength="100" />
-                <?php echo $tNGs->displayFieldHint("imei");?> <?php echo $tNGs->displayFieldError("PHONES", "imei", $cnt1); ?> </td>
+            <td class="KT_th"><label for="filename_<?php echo $cnt1; ?>">Filename:</label></td>
+            <td><input type="text" name="filename_<?php echo $cnt1; ?>" id="filename_<?php echo $cnt1; ?>" value="<?php echo KT_escapeAttribute($row_rsFILE_UPLOAD['filename']); ?>" size="32" maxlength="45" />
+                <?php echo $tNGs->displayFieldHint("filename");?> <?php echo $tNGs->displayFieldError("FILE_UPLOAD", "filename", $cnt1); ?> </td>
           </tr>
           <tr>
-            <td class="KT_th"><label for="model_<?php echo $cnt1; ?>">Model:</label></td>
-            <td><select name="model_<?php echo $cnt1; ?>" id="model_<?php echo $cnt1; ?>">
-              <option value="HTC Diamond Touch" <?php if (!(strcmp("HTC Diamond Touch", KT_escapeAttribute($row_rsPHONES['model'])))) {echo "SELECTED";} ?>>HTC Diamond Touch</option>
-              <option value="HTC Diamond Touch2" <?php if (!(strcmp("HTC Diamond Touch2", KT_escapeAttribute($row_rsPHONES['model'])))) {echo "SELECTED";} ?>>HTC Diamond Touch2</option>
-            </select>
-                <?php echo $tNGs->displayFieldError("PHONES", "model", $cnt1); ?> </td>
-          </tr>
-          <tr>
-            <td class="KT_th"><label for="notes_<?php echo $cnt1; ?>">Notes:</label></td>
-            <td><textarea name="notes_<?php echo $cnt1; ?>" id="notes_<?php echo $cnt1; ?>" cols="50" rows="5"><?php echo KT_escapeAttribute($row_rsPHONES['notes']); ?></textarea>
-                <?php echo $tNGs->displayFieldHint("notes");?> <?php echo $tNGs->displayFieldError("PHONES", "notes", $cnt1); ?> </td>
+            <td class="KT_th"><label for="relative_path_<?php echo $cnt1; ?>">Relative_path:</label></td>
+            <td><input type="text" name="relative_path_<?php echo $cnt1; ?>" id="relative_path_<?php echo $cnt1; ?>" value="<?php echo KT_escapeAttribute($row_rsFILE_UPLOAD['relative_path']); ?>" size="32" />
+                <?php echo $tNGs->displayFieldHint("relative_path");?> <?php echo $tNGs->displayFieldError("FILE_UPLOAD", "relative_path", $cnt1); ?> </td>
           </tr>
         </table>
-        <input type="hidden" name="kt_pk_PHONES_<?php echo $cnt1; ?>" class="id_field" value="<?php echo KT_escapeAttribute($row_rsPHONES['kt_pk_PHONES']); ?>" />
-        <?php } while ($row_rsPHONES = mysql_fetch_assoc($rsPHONES)); ?>
+        <input type="hidden" name="kt_pk_FILE_UPLOAD_<?php echo $cnt1; ?>" class="id_field" value="<?php echo KT_escapeAttribute($row_rsFILE_UPLOAD['kt_pk_FILE_UPLOAD']); ?>" />
+        <?php } while ($row_rsFILE_UPLOAD = mysql_fetch_assoc($rsFILE_UPLOAD)); ?>
       <div class="KT_bottombuttons">
         <div>
           <?php 

@@ -33,6 +33,21 @@ transmitted_bytes2,received_bytes2 FROM PHONE_STATS,PARTICIPANTS_PHONE,PHONES WH
 	$transmitted_bytes2="";	
 	$received_bytes2="";
 	
+	
+	$query_Recordset2 ="select sender_date,mac,activity_count FROM WOCKET_STATS,PARTICIPANTS_PHONE,PHONES WHERE DATE(sender_date)='".$_GET['date']."' AND PARTICIPANTS_PHONE.participant_id='".$_GET['participant_id']."' AND PHONES.imei=WOCKET_STATS.imei AND PHONES.id=PARTICIPANTS_PHONE.phone_id AND wocket_id=0  ORDER BY sender_date";
+	$Recordset2 = mysql_query($query_Recordset2, $Wockets) or die(mysql_error());
+	$row_Recordset2 = mysql_fetch_assoc($Recordset2);
+	$totalRows_Recordset2 = mysql_num_rows($Recordset2);
+	
+	
+	$query_Recordset3 ="select sender_date,mac,activity_count FROM WOCKET_STATS,PARTICIPANTS_PHONE,PHONES WHERE DATE(sender_date)='".$_GET['date']."' AND PARTICIPANTS_PHONE.participant_id='".$_GET['participant_id']."' AND PHONES.imei=WOCKET_STATS.imei AND PHONES.id=PARTICIPANTS_PHONE.phone_id AND wocket_id=1  ORDER BY sender_date";
+	$Recordset3 = mysql_query($query_Recordset3, $Wockets) or die(mysql_error());
+	$row_Recordset3 = mysql_fetch_assoc($Recordset3);
+	$totalRows_Recordset3 = mysql_num_rows($Recordset3);	
+	$activity_count0="";
+	$activity_count1="";
+	
+	
 	for ($hour=0;($hour<24);$hour++)
 		for ($min=0;($min<60);$min++){
 				$current_datetime=$_GET['date']." ".sprintf("%02d:",$hour) . sprintf("%02d",$min);
@@ -53,6 +68,23 @@ transmitted_bytes2,received_bytes2 FROM PHONE_STATS,PARTICIPANTS_PHONE,PHONES WH
 						while($current_datetime==substr($row_Recordset1['sender_date'],0,16))
 							$row_Recordset1 = mysql_fetch_assoc($Recordset1);
 				}
+				
+				
+				if ($current_datetime==	substr($row_Recordset2['sender_date'],0,16))
+				{
+						$activity_count0=$activity_count0. $row_Recordset2['activity_count'];
+						while($current_datetime==substr($row_Recordset2['sender_date'],0,16))
+							$row_Recordset2 = mysql_fetch_assoc($Recordset2);
+				}else
+					$activity_count0=$activity_count0. "0";
+				
+				if ($current_datetime==	substr($row_Recordset3['sender_date'],0,16))
+				{
+						$activity_count1=$activity_count1. $row_Recordset3['activity_count'];
+						while($current_datetime==substr($row_Recordset3['sender_date'],0,16))
+							$row_Recordset3 = mysql_fetch_assoc($Recordset3);
+				}else
+					$activity_count1=$activity_count1. "0";
 			
 				if (!(($hour==23) && ($min==59) && ($sec==59))){
 					$phone_battery_data=$phone_battery_data."|";
@@ -65,13 +97,17 @@ transmitted_bytes2,received_bytes2 FROM PHONE_STATS,PARTICIPANTS_PHONE,PHONES WH
 					$battery2=$battery2."|";
 					$transmitted_bytes2=$transmitted_bytes2."|";	
 					$received_bytes2=$received_bytes2."|";	
+					
+					$activity_count0=$activity_count0."|";
+					$activity_count1=$activity_count1."|";					
 				}							
 			
 			}
 
+	
 ?>
 
-<dataset seriesName="Phone Battery">+
+<dataset seriesName="Phone Battery">
 <?php echo $phone_battery_data; ?>
 </dataset>
 
@@ -97,6 +133,10 @@ transmitted_bytes2,received_bytes2 FROM PHONE_STATS,PARTICIPANTS_PHONE,PHONES WH
 </dataset>
 
 
+<dataset seriesName="Wockets 1- Activity Count">
+<?php echo $activity_count0; ?>
+</dataset>
+
 <dataset seriesName="Wockets 2- Battery">
 <?php echo $battery2; ?>
 </dataset>
@@ -107,6 +147,10 @@ transmitted_bytes2,received_bytes2 FROM PHONE_STATS,PARTICIPANTS_PHONE,PHONES WH
 
 <dataset seriesName="Wockets 2- Received Bytes">
 <?php echo $received_bytes2; ?>
+</dataset>
+
+<dataset seriesName="Wockets 2- Activity Count">
+<?php echo $activity_count1; ?>
 </dataset>
 
 </chart>
