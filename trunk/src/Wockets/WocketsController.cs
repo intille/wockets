@@ -549,7 +549,10 @@ namespace Wockets
                             
                             for (int i = 0; (i < this._Sensors.Count); i++)
                             {
-                                upload_log += "," + this._Sensors[i]._BatteryLevel + "," + ((WocketsDecoder)this._Decoders[i])._ExpectedBatchCount + "," + this._Sensors[i]._ReceivedPackets;
+                                if ((this._Sensors[i]._ReceivedPackets > 4000) || (((WocketsDecoder)this._Decoders[i])._ExpectedBatchCount>4000))
+                                    upload_log += "," + this._Sensors[i]._BatteryLevel + "," + 0 + "," + 0;
+                                else
+                                    upload_log += "," + this._Sensors[i]._BatteryLevel + "," + ((WocketsDecoder)this._Decoders[i])._ExpectedBatchCount + "," + this._Sensors[i]._ReceivedPackets;
                                 if (this._Sensors[i]._ReceivedPackets == ((WocketsDecoder)this._Decoders[i])._ExpectedBatchCount)
                                     full[i] = full[i] + 1;
                                 else if (this._Sensors[i]._ReceivedPackets ==0)
@@ -585,6 +588,7 @@ namespace Wockets
                                     WocketsTimer.GetDateTime((long)((WocketsDecoder)this._Decoders[i])._ActivityCounts[j]._TimeStamp, out ac_dt);
                                     string ac_currentTime = ac_dt.ToString("yyyy-MM-dd HH:mm:ss");
                                     tw2.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")+","+j+","+((WocketsDecoder)this._Decoders[i])._ActivityCounts[j]._SeqNum + "," + ac_currentTime + "," + ((WocketsDecoder)this._Decoders[i])._ActivityCounts[j]._TimeStamp + "," + ((WocketsDecoder)this._Decoders[i])._ActivityCounts[j]._Count);
+                                    SynchronizedLogger.Write(i + "," + ac_currentTime + "," + ((RFCOMMReceiver)this._Receivers[i])._Address + "," + ((WocketsDecoder)this._Decoders[i])._ActivityCounts[j]._Count);
                                     LastSeqNum[i] = ((WocketsDecoder)this._Decoders[i])._ActivityCounts[j]._SeqNum;
                                     LastACIndex[i] = j;
                                     countsaved++;
