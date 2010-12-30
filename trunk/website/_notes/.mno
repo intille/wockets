@@ -4,4 +4,8 @@
 	<infoitem key="MM_Session_Count" value="3" />
 	<infoitem key="MM_Session2" value="kt_login_user" />
 	<infoitem key="MM_Session3" value="kt_user_type" />
+	<infoitem key="MM_URL1" value="date" />
+	<infoitem key="MM_URL_Count" value="3" />
+	<infoitem key="MM_URL2" value="date_sf" />
+	<infoitem key="MM_URL3" value="view" />
 </info>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <dwsync>
-<file name="captcha.png" local="129380548558900189" remote="129380510880000000" testing="129380510880000000" />
-<file name="KT_Captcha.config.php" local="129380548559040197" remote="129380510900000000" testing="129380510900000000" />
-<file name="KT_Captcha.php" local="129380548558970193" remote="129380510900000000" testing="129380510900000000" />
-<file name="KT_CaptchaImage.class.php" local="129380548559110201" remote="129380510900000000" testing="129380510900000000" />
+<file name="captcha.png" local="129380548558900189" remote="129381328130000000" testing="129381328130000000" />
+<file name="KT_Captcha.config.php" local="129380548559040197" remote="129381328140000000" testing="129381328140000000" />
+<file name="KT_Captcha.php" local="129380548558970193" remote="129381328140000000" testing="129381328140000000" />
+<file name="KT_CaptchaImage.class.php" local="129380548559110201" remote="129381328140000000" testing="129381328140000000" />
 </dwsync>
