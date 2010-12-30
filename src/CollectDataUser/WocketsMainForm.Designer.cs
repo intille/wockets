@@ -35,6 +35,7 @@
             this.textBox_elapsed_time = new System.Windows.Forms.TextBox();
             this.label_software_version = new System.Windows.Forms.Label();
             this.SwapPanel = new System.Windows.Forms.Panel();
+            this.button_reboot_phone = new System.Windows.Forms.Button();
             this.textBox_sensors_status_1 = new System.Windows.Forms.TextBox();
             this.textBox_sensors_status_0 = new System.Windows.Forms.TextBox();
             this.textBox_sensor_location_1 = new System.Windows.Forms.TextBox();
@@ -138,11 +139,12 @@
             this.label_software_version.ForeColor = System.Drawing.SystemColors.ControlDark;
             this.label_software_version.Location = new System.Drawing.Point(11, 5);
             this.label_software_version.Name = "label_software_version";
-            this.label_software_version.Size = new System.Drawing.Size(100, 14);
+            this.label_software_version.Size = new System.Drawing.Size(101, 15);
             this.label_software_version.Text = "Version:";
             // 
             // SwapPanel
             // 
+            this.SwapPanel.Controls.Add(this.button_reboot_phone);
             this.SwapPanel.Controls.Add(this.textBox_sensors_status_1);
             this.SwapPanel.Controls.Add(this.textBox_sensors_status_0);
             this.SwapPanel.Controls.Add(this.textBox_sensor_location_1);
@@ -154,6 +156,17 @@
             this.SwapPanel.Location = new System.Drawing.Point(2, 49);
             this.SwapPanel.Name = "SwapPanel";
             this.SwapPanel.Size = new System.Drawing.Size(230, 304);
+            // 
+            // button_reboot_phone
+            // 
+            this.button_reboot_phone.BackColor = System.Drawing.Color.LightSlateGray;
+            this.button_reboot_phone.ForeColor = System.Drawing.Color.White;
+            this.button_reboot_phone.Location = new System.Drawing.Point(45, 243);
+            this.button_reboot_phone.Name = "button_reboot_phone";
+            this.button_reboot_phone.Size = new System.Drawing.Size(137, 52);
+            this.button_reboot_phone.TabIndex = 9;
+            this.button_reboot_phone.Text = "Reboot Phone";
+            this.button_reboot_phone.Click += new System.EventHandler(this.button_reboot_phone_Click);
             // 
             // textBox_sensors_status_1
             // 
@@ -876,9 +889,9 @@
             // 
             this.label_phone_IMEI.Font = new System.Drawing.Font("Tahoma", 8F, System.Drawing.FontStyle.Regular);
             this.label_phone_IMEI.ForeColor = System.Drawing.SystemColors.ControlDark;
-            this.label_phone_IMEI.Location = new System.Drawing.Point(113, 5);
+            this.label_phone_IMEI.Location = new System.Drawing.Point(116, 5);
             this.label_phone_IMEI.Name = "label_phone_IMEI";
-            this.label_phone_IMEI.Size = new System.Drawing.Size(100, 14);
+            this.label_phone_IMEI.Size = new System.Drawing.Size(118, 15);
             this.label_phone_IMEI.Text = "IMEI:";
             // 
             // MainActionsPanel
@@ -973,6 +986,7 @@
             this.Name = "WocketsMainForm";
             this.Text = "Wockets";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
+            this.Closing += new System.ComponentModel.CancelEventHandler(this.WocketsMainForm_Closing);
             this.SwapPanel.ResumeLayout(false);
             this.SensorStatusPanel.ResumeLayout(false);
             this.ConnectPanel.ResumeLayout(false);
@@ -1047,6 +1061,7 @@
         private System.Windows.Forms.Label label_phone_IMEI;
         private System.Windows.Forms.TextBox textBox_sensors_status_1;
         private System.Windows.Forms.TextBox textBox_sensors_status_0;
+        private System.Windows.Forms.Button button_reboot_phone;
     }
 }
 

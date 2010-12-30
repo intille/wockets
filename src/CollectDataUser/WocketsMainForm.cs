@@ -20,6 +20,7 @@ using Wockets.Data.Types;
 using Wockets.Receivers;
 using Wockets.Utils;
 using Wockets.Utils.IPC;
+using Wockets.Utils.feedback;
 
 
 namespace CollectDataUser
@@ -39,9 +40,11 @@ namespace CollectDataUser
         private String software_version = "";
 
         //Wockets Controller
-        private WocketsController wockets_controller; 
-        private Thread startupThread;    //starts kernel and load wockets
-        private ArrayList sensors_list;  
+        private WocketsController wockets_controller = null; 
+        private Thread startupThread = null;    //starts kernel and load wockets
+        private ArrayList sensors_list = null;
+        private string[] sensor_data = null;
+
 
         //Data Uploader
         private Thread uploadThread;
@@ -92,7 +95,54 @@ namespace CollectDataUser
         private DateTime[] LastPkgTime;
         private TimeSpan[] ElapsedConnectionTime;
         
+
+        
         #endregion 
+
+
+        private static IntPtr handle_blt = IntPtr.Zero;
+
+        public enum CEDEVICE_POWER_STATE
+        {
+            PwrDeviceUnspecified = -1,
+            D0 = 0,  // on
+            D1,      // low power
+            D2,      // standby, system cannot wakeup the system
+            D3,      // sleep, device can wakeup the system
+            D4,      // off
+            PwrDeviceMaximum
+        }
+
+        public enum PowerStateRequirement
+        {
+            POWER_NAME = 0x00000001,         // default
+            POWER_FORCE = 0x00001000,
+            POWER_DUMPDW = 0x00002000        // Calling CaptureDumpFileOnDevice() before entering this state.
+        }
+
+
+        public enum PowerState
+        {
+            POWER_STATE_ON = 0x00010000,         // power state in P3600
+            POWER_STATE_OFF = 0x00020000,
+            POWER_STATE_CRITICAL = 0x00040000,
+            POWER_STATE_BOOT = 0x00080000,
+            POWER_STATE_IDLE = 0x00100000,         //---> screen off,  touch disabled
+            POWER_STATE_SUSPEND = 0x00200000,
+            POWER_STATE_UNATTENDED = 0x00400000,
+            POWER_STATE_RESET = 0x00800000,
+            POWER_STATE_USERIDLE = 0x01000000,     //---> user idle, screen off, but touch enabled
+            POWER_STATE_PASSWORD = 0x10000000,     //---> resuming
+            POWER_STATE_BACKLIGHTOFF = 0x10010000, //---> bkl-off
+            POWER_STATE_POWERON = 0x12010000       // power state in P3300
+        }
+
+
+        [DllImport("coredll.dll", SetLastError = true)]
+        extern private static int SetDevicePower(string psDevice, PowerStateRequirement dflags, CEDEVICE_POWER_STATE device_state);
+
+        [DllImport("coredll.dll", SetLastError = true)]
+        extern private static int SetSystemPowerState(string psState, PowerState stateflags, int options);
 
 
       #region Initialize Form
@@ -103,6 +153,7 @@ namespace CollectDataUser
 
             InitializeComponent();
 
+            
 
             #region Initialize Internal Message Window
 
@@ -146,8 +197,6 @@ namespace CollectDataUser
 
             #endregion  Initialize Internal Message Window
 
-
-
             #region Identify the Storage Card
 
             string firstCard = "";
@@ -189,22 +238,65 @@ namespace CollectDataUser
             #endregion
 
 
-            #region Read the Sowftware Version
-            System.Reflection.Assembly a = System.Reflection.Assembly.GetExecutingAssembly();
-            System.Reflection.AssemblyName an = a.GetName();
-            software_version = "Version " + an.Version.ToString();
-            this.label_software_version.Text = software_version;
-            #endregion
-
-
-            #region Read Phone IMEI
-
-            label_phone_IMEI.Text = CurrentPhone._IMEI;
-
-            #endregion
-
-
             #region Read the last sensor set, kernel status, and master list files
+
+
+            #region Read the last kernel status
+
+            try
+            {
+                if (File.Exists(Core.KERNEL_PATH + "\\updater_last_status.txt"))
+                {
+                    StreamReader tr_status = new StreamReader(Core.KERNEL_PATH + "\\updater_last_status.txt");
+                    
+                    app_status = tr_status.ReadLine();
+                    string vibrate_mode = tr_status.ReadLine();
+                    string mute_mode    = tr_status.ReadLine();
+                    string volume_mode = tr_status.ReadLine();
+
+                    tr_status.Close();
+
+
+                    if (this.app_status.CompareTo("") == 0)
+                    { this.app_status = "normal_start"; }
+
+
+                    //if (vibrate_mode != null && vibrate_mode.CompareTo("vibrate") == 0)
+                    //    SetProfileVibrate();
+                    //else if ( mute_mode!= null && mute_mode.CompareTo("muted") == 0)
+                    //    SetProfileMuted();
+                    //else
+
+                    //waveOutSetVolume(IntPtr.Zero, (int)Volumes.MEDIUM);
+
+                    //SetProfileNormal(SND_EVENT.RingLine1);
+                    //SetProfileNormal(SND_EVENT.KnownCallerLine1);
+
+                    //if (this.app_status.CompareTo("normal_start") != 0)
+                    //{
+                        //DisplayPower.PowerOff();
+                        //SetDevicePower("BKL1:", PowerStateRequirement.POWER_NAME, CEDEVICE_POWER_STATE.D4);
+                        SetSystemPowerState(null, PowerState.POWER_STATE_USERIDLE, 0);
+                    //}
+                }
+                else
+                {
+                    //set the app to start from beginning
+                    this.app_status = "normal_start";
+
+                    //set audio settings to normal
+                    //SetProfileNormal(SND_EVENT.All);
+                    //waveOutSetVolume(IntPtr.Zero, (int)Volumes.MEDIUM);
+
+                }
+            }
+            catch
+            {
+                this.app_status = "normal_start";
+            }
+
+            #endregion
+
 
             #region Read the last sensor set
 
@@ -231,69 +323,35 @@ namespace CollectDataUser
 
             #endregion
 
-
-
-            #region Read the last kernel status
+            #region Read Master List File
 
             try
             {
-                if (File.Exists(Core.KERNEL_PATH + "\\updater_last_status.txt"))
+                if (File.Exists(Core.KERNEL_PATH + "\\MasterList.txt"))
                 {
-                    StreamReader tr_status = new StreamReader(Core.KERNEL_PATH + "\\updater_last_status.txt");
-                    app_status = tr_status.ReadLine();
-                    tr_status.Close();
-
-                    if (this.app_status.CompareTo("") == 0)
-                    { this.sensor_set = "normal_start"; }
-                }
-                else
-                {
-                    //set the app to start from beginning
-                    this.app_status = "normal_start";
+                    StreamReader tr_sensors_data = new StreamReader(Core.KERNEL_PATH + "\\MasterList.txt");
+                    string rline = tr_sensors_data.ReadLine();
+                    sensor_data = rline.Split(',');
+                    tr_sensors_data.Close();
                 }
             }
             catch
-            {
-                this.app_status = "normal_start";
+            {  
+                Logger.Debug("sensor master file couldn't be access correctly.");
             }
 
-            #endregion
-
-
-
-            #region Read Master List File
-
-            //string[] sensor_data;
-            //try
-            //{
-            //    if (File.Exists(Core.KERNEL_PATH + "\\MasterListTemplate.txt"))
-            //    {
-            //        StreamReader tr_sensors_data = new StreamReader(Core.KERNEL_PATH + "\\MasterListTemplate.txt");
-            //        string rline = tr_sensors_data.ReadLine();
-            //        sensor_data = rline.Split(',');
-            //        tr_sensors_data.Close();
-            //    }
-            //}
-            //catch
-            //{  //AppLogger.WriteLine("sensor master file couldn't be access correctly.");
-            //}
 
             #endregion
 
 
             #endregion
 
-
-            #region Load SensorData From XML
+            
+            #region Check updates from master list
 
             wockets_controller = new Wockets.WocketsController("", "", "");
 
-            //Check which sensor set was used in previous run
-            if (this.sensor_set.CompareTo("red") == 0)
-                wockets_controller.FromXML(Core.KERNEL_PATH + "\\SensorData1.xml");
-            else
-                wockets_controller.FromXML(Core.KERNEL_PATH + "\\SensorData2.xml");
-
+            LoadSensorsFromMasterList(wockets_controller, sensor_data, this.sensor_set);
 
             // point kernel to wockets controller
             CurrentWockets._Controller = wockets_controller;
@@ -305,54 +363,28 @@ namespace CollectDataUser
 
             Logger.Debug("Sensor Info Loaded From Xml, Sensor Set: " + sensor_set);
 
-            #endregion
-
-
-            #region Check updates from master list
-
-            #region === Sensors Master File Parameters ===
-            // (Parameter = ID)
-            // IMEI=0,
-            // SetID_1=1,force_update_1=2,MAC_S1_1=3,MAC_S1_2=4
-            // SetID_2=5,force_update_2=6,MAC_S2_1=7,MAC_S2_2=8
-            #endregion
-            //if (sensor_data != null)
-            //{
-            //    //Check which sensor set was used in previous run
-            //    if (this.sensor_set.CompareTo(sensor_data[1]) == 0)
-            //    {
-            //        CurrentWockets._Controller.FromXML(Core.KERNEL_PATH + "\\updater_SensorData1.xml");
-            //    }
-            //    else if (this.sensor_set.CompareTo(sensor_data[5]) == 0)
-            //    {
-            //        CurrentWockets._Controller.FromXML(Core.KERNEL_PATH + "\\updater_SensorData2.xml");
-            //    }
-
-
-            //    #region If the sensors are different from the ones in the sensor master list, update controller settings
-
-            //    // Inquire the sensor calibration parameters from the wocket 
-            //    if ((((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0])._Address.CompareTo(sensor_data[3]) != 0))
-            //    {
-            //        //replace the mac address 
-            //        ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[0])._Address = sensor_data[3];
-            //        //send commands to get the sensor calibration values & effective sampling rate
-            //    }
-
-
-            //    if ((((RFCOMMReceiver)CurrentWockets._Controller._Receivers[1])._Address.CompareTo(sensor_data[4]) != 0))
-            //    {
-            //        //replace the mac address
-            //        ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[1])._Address = sensor_data[4];
-            //        //send commands to get the sensor calibration values & effective sampling rate
-            //    }
-
-            //    #endregion
-
-            //}
 
             #endregion
 
+
+
+            #region Read the Sowftware Version
+            
+            System.Reflection.Assembly a = System.Reflection.Assembly.GetExecutingAssembly();
+            System.Reflection.AssemblyName an = a.GetName();
+            software_version = "Version " + an.Version.ToString();
+            this.label_software_version.Text = software_version.Substring(0, 11);
+            
+            #endregion
+
+
+            #region Read Phone IMEI
+
+            label_phone_IMEI.Text = CurrentPhone._IMEI;
+
+            #endregion
+
+            
 
             #region Initialize Registry for Received Data Packages
 
@@ -406,7 +438,9 @@ namespace CollectDataUser
 
                 //Setup the main menu commands
                 menuMainAppActions.Text = "Main Menu";
-                menuQuitApp.Text = "Connect";
+                
+                //menuQuitApp.Text = "Connect";
+                menuQuitApp.Text = "Quit";
 
                 //Show the swap panel
                 SwapPanel.BringToFront();
@@ -664,9 +698,83 @@ namespace CollectDataUser
             }
             catch
             {
-                Logger.Debug("Swapping After Button Click Filed");
+                Logger.Debug("An exception ocurred when the swap button was clicked.");
             }
 
+        }
+
+        private void LoadSensorsFromMasterList(WocketsController wc, string[] loaded_sensor_data, string sensor_set_id)
+        {
+            //TODO: Verify that Xml files exist
+                
+            #region === Sensors Master File Parameters ===
+            // (Parameter = ID)
+            // IMEI=0,
+            // SetID_1=1,force_update_1=2,MAC_S1_1=3,MAC_S1_2=4
+            // SetID_2=5,force_update_2=6,MAC_S2_1=7,MAC_S2_2=8
+            #endregion
+            if (loaded_sensor_data != null)
+            {
+                //TODO: check that the SensorData File exist
+                //Check which sensor set was used in previous run
+                if (sensor_set_id.CompareTo(loaded_sensor_data[1]) == 0)
+                {
+                    wc.FromXML(Core.KERNEL_PATH + "\\updater_SensorData1.xml");
+
+                    #region If the sensors are different from the ones in the red set in the master list, update controller settings
+
+                    if ((((RFCOMMReceiver)wc._Receivers[0])._Address.CompareTo(loaded_sensor_data[3]) != 0))
+                    {
+                        //replace the mac address 
+                        ((RFCOMMReceiver)wc._Receivers[0])._Address = loaded_sensor_data[3];
+                        //send commands to get the sensor calibration values & effective sampling rate
+                    }
+
+
+                    if ((((RFCOMMReceiver)wc._Receivers[1])._Address.CompareTo(loaded_sensor_data[4]) != 0))
+                    {
+                        //replace the mac address
+                        ((RFCOMMReceiver)wc._Receivers[1])._Address = loaded_sensor_data[4];
+                        //send commands to get the sensor calibration values & effective sampling rate
+                    }
+
+                    #endregion
+
+                }
+                else 
+                {
+                    wc.FromXML(Core.KERNEL_PATH + "\\updater_SensorData2.xml");
+
+                    #region If the sensors are different from the ones in the green set in the master list, update controller settings
+
+                    if ((((RFCOMMReceiver)wc._Receivers[0])._Address.CompareTo(loaded_sensor_data[7]) != 0))
+                    {
+                        //replace the mac address 
+                        ((RFCOMMReceiver)wc._Receivers[0])._Address = loaded_sensor_data[7];
+                        //send commands to get the sensor calibration values & effective sampling rate
+                    }
+
+
+                    if ((((RFCOMMReceiver)wc._Receivers[1])._Address.CompareTo(loaded_sensor_data[8]) != 0))
+                    {
+                        //replace the mac address
+                        ((RFCOMMReceiver)wc._Receivers[1])._Address = loaded_sensor_data[8];
+                        //send commands to get the sensor calibration values & effective sampling rate
+                    }
+
+                    #endregion
+                
+                }
+
+            }
+            else
+            {
+                //Load Sensor data directly from Xml files
+                if (sensor_set_id.CompareTo("red") == 0)
+                    wockets_controller.FromXML(Core.KERNEL_PATH + "\\updater_SensorData1.xml");
+                else
+                    wockets_controller.FromXML(Core.KERNEL_PATH + "\\updater_SensorData2.xml");
+            }
         }
 
       #endregion Swap Sensors
@@ -919,12 +1027,12 @@ namespace CollectDataUser
                                     if (this.sensor_set.CompareTo("red") == 0)
                                     {
                                         sensor_set = "green";
-                                        wockets_controller.FromXML(Core.KERNEL_PATH + "\\SensorData2.xml");
+                                        wockets_controller.FromXML(Core.KERNEL_PATH + "\\updater_SensorData2.xml");
                                     }
                                     else
                                     {
                                         sensor_set = "red";
-                                        wockets_controller.FromXML(Core.KERNEL_PATH + "\\SensorData1.xml");
+                                        wockets_controller.FromXML(Core.KERNEL_PATH + "\\updater_SensorData1.xml");
                                     }
 
                                     //TODO: Check if macs against the master list file
@@ -1093,6 +1201,213 @@ namespace CollectDataUser
       #endregion
 
 
+      #region Reboot Phone
+
+
+#region restart silently
+
+       public enum SND_SOUNDTYPE
+        {
+            On,
+            File,
+            Vibrate,
+            None
+        }
+
+       private enum SND_EVENT
+        {
+            All,
+            RingLine1,
+            RingLine2,
+            KnownCallerLine1,
+            RoamingLine1,
+            RingVoip
+        }
+
+       [StructLayout(LayoutKind.Sequential)]
+       private struct SNDFILEINFO
+        {
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
+            public string szPathName;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
+            public string szDisplayName;
+            public SND_SOUNDTYPE sstType;
+        }
+
+       [DllImport("coredll.dll")]
+       public static extern void AudioUpdateFromRegistry();
+
+       [DllImport("aygshell.dll", SetLastError = true)]
+       private static extern uint SndSetSound(SND_EVENT seSoundEvent, ref SNDFILEINFO pSoundFileInfo, bool fSuppressUI);
+
+       [DllImport("aygshell.dll", SetLastError = true)]
+       private static extern uint SndGetSound(SND_EVENT seSoundEvent, ref SNDFILEINFO pSoundFileInfo);
+
+
+       static void SetProfileNormal(SND_EVENT mysnd)
+       {
+           SNDFILEINFO soundFileInfo = new SNDFILEINFO();
+           soundFileInfo.sstType = SND_SOUNDTYPE.On;
+           uint num = SndSetSound(mysnd, ref soundFileInfo, true);
+           AudioUpdateFromRegistry();
+
+       }
+
+       static void SetProfileVibrate()
+       {
+           SNDFILEINFO soundFileInfo = new SNDFILEINFO();
+           soundFileInfo.sstType = SND_SOUNDTYPE.Vibrate;
+           uint num = SndSetSound(SND_EVENT.All, ref soundFileInfo, true);
+           AudioUpdateFromRegistry();
+       }
+
+       static void SetProfileMuted()
+       {
+           SNDFILEINFO soundFileInfo = new SNDFILEINFO();
+           soundFileInfo.sstType = SND_SOUNDTYPE.None;
+           uint num = SndSetSound(SND_EVENT.All, ref soundFileInfo, true);
+           AudioUpdateFromRegistry();
+       }
+
+       private bool IsInVibrateMode()
+       {
+           SNDFILEINFO info = new SNDFILEINFO();
+           SndGetSound(SND_EVENT.All, ref info);
+           return (info.sstType == SND_SOUNDTYPE.Vibrate);
+       }
+
+       private bool IsMuted()
+       {
+           SNDFILEINFO info = new SNDFILEINFO();
+           SndGetSound(SND_EVENT.All, ref info);
+           return (info.sstType == SND_SOUNDTYPE.None);
+       }
+
+
+       public enum Volumes : int
+       {
+           OFF = 0,
+
+           LOW = 858993459,
+
+           NORMAL = 1717986918,
+
+           MEDIUM = -1717986919,
+
+           HIGH = -858993460,
+
+           VERY_HIGH = -1
+       }
+
+
+       [DllImport("coredll.dll", SetLastError = true)]
+        internal static extern int waveOutSetVolume(IntPtr device, int volume);
+
+       [DllImport("coredll.dll", SetLastError = true)]
+        internal static extern int waveOutGetVolume(IntPtr device, ref int volume);
+       
+
+
+#endregion
+
+
+        [DllImport("aygshell.dll")]
+        private static extern bool ExitWindowsEx(uint uFlags, int dwReserved);
+         
+        enum ExitWindowsAction : uint
+        {
+            EWX_LOGOFF = 0,
+            EWX_SHUTDOWN = 1,
+            EWX_REBOOT = 2,
+            EWX_FORCE = 4,
+            EWX_POWEROFF = 8
+        }
+
+
+        void rebootDevice()
+        {
+           
+            Logger.Debug("save the device status to file, before rebooting");
+
+            try
+            {
+               
+                //Indicate that application was terminated in reboot mode
+                StreamWriter wr_status = new StreamWriter(Core.KERNEL_PATH + "\\updater_last_status.txt");
+                wr_status.WriteLine("running");
+
+
+                if (IsInVibrateMode())
+                    wr_status.WriteLine("vibrate");
+                else
+                    wr_status.WriteLine("no_vibrate");
+
+                if (IsMuted())
+                    wr_status.WriteLine("muted");
+                else
+                    wr_status.WriteLine("no_muted");
+
+
+                int volume = (int)0;
+                waveOutGetVolume(IntPtr.Zero, ref volume);
+                wr_status.WriteLine(volume.ToString());
+
+                wr_status.Flush();
+                wr_status.Close();
+            }
+            catch
+            {
+                Logger.Debug("An exception occurred when saving the reboot status to file.");
+            }
+
+            //Mute Phone
+           // waveOutSetVolume(IntPtr.Zero, (int)Volumes.OFF);
+
+            //SetProfileMuted();
+            Thread.Sleep(1000);
+            //Application.DoEvents();
+
+            //if (this.app_status.CompareTo("normal_start") != 0)
+            //{
+                //DisplayPower.PowerOff();
+            SetDevicePower("BKL1:", PowerStateRequirement.POWER_NAME, CEDEVICE_POWER_STATE.D0);
+            SetSystemPowerState(null, PowerState.POWER_STATE_USERIDLE, 0);
+            //}
+            
+            //Reboot
+            ExitWindowsEx((uint)ExitWindowsAction.EWX_REBOOT, 0);
+        }
+
+
+        private void button_reboot_phone_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Logger.Debug("Starting to reboot the phone");
+
+                //Stop status monitoring thread
+                StopACsUpdater();
+
+                //Wait for the system to stabilize and check that threads have finished
+                Thread.Sleep(2000);
+
+                //Terminate the kernel
+                if (TerminateKernel()) 
+                {
+                    this.messageWindow.Dispose();
+                    Application.Exit();
+                    rebootDevice();
+                }
+            }
+            catch
+            {
+                Logger.Debug("An exception occurred when trying to reboot the device");
+            }   
+        }
+
+      
+      #endregion
+
 
       #region Exit/Connect Button (From Main Menu Bar)
 
@@ -1164,6 +1479,17 @@ namespace CollectDataUser
                         //Indicate that application was terminated by the user
                         StreamWriter wr_status = new StreamWriter(Core.KERNEL_PATH + "\\updater_last_status.txt");
                         wr_status.WriteLine("normal_start");
+
+                        if (IsInVibrateMode())
+                            wr_status.WriteLine("vibrate");
+                        else
+                            wr_status.WriteLine("no_vibrate");
+
+                        if (IsMuted())
+                            wr_status.WriteLine("muted");
+                        else
+                            wr_status.WriteLine("no_muted");
+
                         wr_status.Flush();
                         wr_status.Close();
                     }
@@ -1261,7 +1587,7 @@ namespace CollectDataUser
             {
                 Logger.Debug("Starting to quit application");
 
-                //Launch status monitoring thread
+                //Stop status monitoring thread
                 StopACsUpdater();
 
                 //Wait for the system to stabilize and check that threads have finished
@@ -1270,6 +1596,7 @@ namespace CollectDataUser
                 //Terminate the kernel
                 if (TerminateKernel()) //if (!Core._KernalStarted)
                 {
+                    this.messageWindow.Dispose();
                     Application.Exit();
                     System.Diagnostics.Process.GetCurrentProcess().Kill();
                 }
@@ -1294,6 +1621,11 @@ namespace CollectDataUser
                 //Here try more agressive methods to stop the kernel
                 return true;
             }
+        }
+
+        private void WocketsMainForm_Closing(object sender, CancelEventArgs e)
+        {
+            TerminateApp();
         }
 
       #endregion
@@ -1722,13 +2054,8 @@ namespace CollectDataUser
           }
       }
 
-
-
      
-     
-
-     
-     void ACsUpdateTimer_Tick(object sender, EventArgs e)
+     private void ACsUpdateTimer_Tick(object sender, EventArgs e)
      {
          bool received_count_read = false;
 
@@ -1933,19 +2260,19 @@ namespace CollectDataUser
      }
 
 
-        public void StartACsUpdater()
+     private void StartACsUpdater()
         {
             ACsUpdateTimer.Enabled = true;
         }
 
-        public void StopACsUpdater()
+     private void StopACsUpdater()
         {
             ACsUpdateTimer.Enabled = false;
         }
 
+       
 
-
-        #region Update ACs Event Listener
+     #region Update ACs Event Listener
 
         //delegate void UpdateACsCallback();
         //private void UpdateACsEventListener()
