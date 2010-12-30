@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<info>
+	<infoitem key="UD_Recordset1" value="name:first_name;datatype:string,name:last_name;datatype:string" />
+	<infoitem key="UD_Recordset2" value="name:id;datatype:int,name:title;datatype:string,name:desc;datatype:string,name:start;datatype:datetime,name:end;datatype:datetime,name:recurring;datatype:string" />
+	<infoitem key="MM_css_include" value="" />
+</info>
