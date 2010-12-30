@@ -121,7 +121,7 @@ namespace DataUploader
                     //Check file on server
                     //relative_path = "IMEI-" + CurrentPhone._IMEI + "/" + relative_path;
                     getData.Add("relative_path", relative_path);
-                    getData.Add("filename", filename.Substring(filename.LastIndexOf("\\")+1));
+                    getData.Add("sender_date", filename.Substring(filename.LastIndexOf("\\") + 1));
                     getData.Add("imei", CurrentPhone._IMEI);
 
                     startTime = DateTime.Now;
@@ -156,19 +156,30 @@ namespace DataUploader
                         }
                     }
 
-                    if ((checkresponse.Length > 0) && (checkresponse!="false"))
+                    if ((checkresponse!=null) && (checkresponse.Length > 0) && (checkresponse != "false"))
                     {
-                        string[] tokens = checkresponse.Split(new char[]{','});
-                        DateTime serverTime=DateTime.Parse(tokens[2]);
-                        DateTime senderTime=DateTime.Parse(tokens[3]);
-                        if ((tokens[0] == "true") && (localmd5 == tokens[1]) &&
-                            (DateTime.Now.Subtract(serverTime).TotalDays >= 2) &&
-                            (DateTime.Now.Subtract(senderTime).TotalDays >= 2))
+                        string[] tokens = checkresponse.Split(new char[] { ',' });
+                        if ((tokens != null) && (tokens.Length == 4))
                         {
-                            File.Delete(filename);
-                            success++;
-                            Core.WRITE_LAST_UPLOAD_SUCCESSFILES(success);
-                            continue;
+                            DateTime serverTime = DateTime.Parse(tokens[2]);
+                            DateTime senderTime = DateTime.Parse(tokens[3]);
+                            if ((tokens[0] == "true") && (localmd5 == tokens[1]))
+                            {
+                                if ((DateTime.Now.Subtract(serverTime).TotalDays >= 2) &&
+                                    (DateTime.Now.Subtract(senderTime).TotalDays >= 2))
+                                {
+                                    try
+                                    {
+                                        File.Delete(filename);
+                                    }
+                                    catch
+                                    {
+                                    }
+                                }
+                                success++;
+                                Core.WRITE_LAST_UPLOAD_SUCCESSFILES(success);
+                                continue;
+                            }
                         }
                     }
 

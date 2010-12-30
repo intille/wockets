@@ -538,11 +538,18 @@ namespace Wockets
                             string currentTime = now.ToString("yyyy-MM-dd HH:mm:ss");
                             string log_line = ++k + "," + currentTime + "," + bpower.BatteryLifePercent + "," + bpower.BatteryVoltage + "," + bpower.BatteryCurrent + "," + bpower.BatteryTemperature;
                             string hourlyPath = now.ToString("yyyy-MM-dd") + "\\" + now.Hour;
+
+                            DiskSpace space1 = Memory.GetDiskSpace(this._StorageDirectory);
+                            DiskSpace space2 = Memory.GetDiskSpace("/");
+                            int remainingStorage1=(int)(space1.TotalNumberOfBytes /  System.Math.Pow(2, 20));
+                            int remainingStorage2=(int)(space2.TotalNumberOfBytes /  System.Math.Pow(2, 20));
+
+                            string upload_log = currentTime + "," + bpower.BatteryLifePercent + "," + remainingStorage2 + "," + remainingStorage1;
                             
                             
                             for (int i = 0; (i < this._Sensors.Count); i++)
                             {
-
+                                upload_log += "," + this._Sensors[i]._BatteryLevel + "," + ((WocketsDecoder)this._Decoders[i])._ExpectedBatchCount + "," + this._Sensors[i]._ReceivedPackets;
                                 if (this._Sensors[i]._ReceivedPackets == ((WocketsDecoder)this._Decoders[i])._ExpectedBatchCount)
                                     full[i] = full[i] + 1;
                                 else if (this._Sensors[i]._ReceivedPackets ==0)
@@ -610,12 +617,10 @@ namespace Wockets
                                 Thread.Sleep(1000);
                             }
 
+                            SynchronizedLogger.Write(upload_log);
                             //TextWriter tw = new StreamWriter(this._StorageDirectory + "\\data\\log\\" + hourlyPath + "\\stats.csv", true);
                             Logger.Log(log_line);
                             //tw.Close();
-
-
-
 
                             SystemIdleTimerReset();
                             for (int i = 0; (i < this._Sensors.Count); i++)
