@@ -60,7 +60,7 @@ $totalRows_rscustom = mysql_num_rows($rscustom);
 </head>
 
 <body>
-<p><img src="images/logo.png" alt="Wockets" width="128" height="136" longdesc="http://web.mit.edu/wockets/" /><span class="style1">Wockets Login</span></p>
+<p><span class="style1">Wockets Data Review Login</span></p>
 <p>&nbsp;
   <?php
 	echo $tNGs->getLoginMsg();

@@ -23,48 +23,87 @@ $restrict->Execute();
 
 // Start trigger
 $formValidation = new tNG_FormValidation();
-$formValidation->addField("imei", true, "text", "", "", "", "");
-$formValidation->addField("model", true, "text", "", "", "", "");
+$formValidation->addField("participant_id", true, "numeric", "", "", "", "");
+$formValidation->addField("phone_id", true, "numeric", "", "", "", "");
 $tNGs->prepareValidation($formValidation);
 // End trigger
 
+if (!function_exists("GetSQLValueString")) {
+function GetSQLValueString($theValue, $theType, $theDefinedValue = "", $theNotDefinedValue = "") 
+{
+  $theValue = get_magic_quotes_gpc() ? stripslashes($theValue) : $theValue;
+
+  $theValue = function_exists("mysql_real_escape_string") ? mysql_real_escape_string($theValue) : mysql_escape_string($theValue);
+
+  switch ($theType) {
+    case "text":
+      $theValue = ($theValue != "") ? "'" . $theValue . "'" : "NULL";
+      break;    
+    case "long":
+    case "int":
+      $theValue = ($theValue != "") ? intval($theValue) : "NULL";
+      break;
+    case "double":
+      $theValue = ($theValue != "") ? "'" . doubleval($theValue) . "'" : "NULL";
+      break;
+    case "date":
+      $theValue = ($theValue != "") ? "'" . $theValue . "'" : "NULL";
+      break;
+    case "defined":
+      $theValue = ($theValue != "") ? $theDefinedValue : $theNotDefinedValue;
+      break;
+  }
+  return $theValue;
+}
+}
+
+mysql_select_db($database_Wockets, $Wockets);
+$query_Recordset1 = "SELECT * FROM PARTICIPANTS ORDER BY last_name ASC";
+$Recordset1 = mysql_query($query_Recordset1, $Wockets) or die(mysql_error());
+$row_Recordset1 = mysql_fetch_assoc($Recordset1);
+$totalRows_Recordset1 = mysql_num_rows($Recordset1);
+
+mysql_select_db($database_Wockets, $Wockets);
+$query_Recordset2 = "SELECT * FROM PHONES ORDER BY imei ASC";
+$Recordset2 = mysql_query($query_Recordset2, $Wockets) or die(mysql_error());
+$row_Recordset2 = mysql_fetch_assoc($Recordset2);
+$totalRows_Recordset2 = mysql_num_rows($Recordset2);
+
 // Make an insert transaction instance
-$ins_PHONES = new tNG_multipleInsert($conn_Wockets);
-$tNGs->addTransaction($ins_PHONES);
+$ins_PARTICIPANTS_PHONE = new tNG_multipleInsert($conn_Wockets);
+$tNGs->addTransaction($ins_PARTICIPANTS_PHONE);
 // Register triggers
-$ins_PHONES->registerTrigger("STARTER", "Trigger_Default_Starter", 1, "POST", "KT_Insert1");
-$ins_PHONES->registerTrigger("BEFORE", "Trigger_Default_FormValidation", 10, $formValidation);
-$ins_PHONES->registerTrigger("END", "Trigger_Default_Redirect", 99, "../includes/nxt/back.php");
+$ins_PARTICIPANTS_PHONE->registerTrigger("STARTER", "Trigger_Default_Starter", 1, "POST", "KT_Insert1");
+$ins_PARTICIPANTS_PHONE->registerTrigger("BEFORE", "Trigger_Default_FormValidation", 10, $formValidation);
+$ins_PARTICIPANTS_PHONE->registerTrigger("END", "Trigger_Default_Redirect", 99, "../includes/nxt/back.php");
 // Add columns
-$ins_PHONES->setTable("PHONES");
-$ins_PHONES->addColumn("imei", "STRING_TYPE", "POST", "imei");
-$ins_PHONES->addColumn("model", "STRING_TYPE", "POST", "model");
-$ins_PHONES->addColumn("notes", "STRING_TYPE", "POST", "notes");
-$ins_PHONES->setPrimaryKey("id", "NUMERIC_TYPE");
+$ins_PARTICIPANTS_PHONE->setTable("PARTICIPANTS_PHONE");
+$ins_PARTICIPANTS_PHONE->addColumn("participant_id", "NUMERIC_TYPE", "POST", "participant_id");
+$ins_PARTICIPANTS_PHONE->addColumn("phone_id", "NUMERIC_TYPE", "POST", "phone_id");
+$ins_PARTICIPANTS_PHONE->setPrimaryKey("id", "NUMERIC_TYPE");
 
 // Make an update transaction instance
-$upd_PHONES = new tNG_multipleUpdate($conn_Wockets);
-$tNGs->addTransaction($upd_PHONES);
+$upd_PARTICIPANTS_PHONE = new tNG_multipleUpdate($conn_Wockets);
+$tNGs->addTransaction($upd_PARTICIPANTS_PHONE);
 // Register triggers
-$upd_PHONES->registerTrigger("STARTER", "Trigger_Default_Starter", 1, "POST", "KT_Update1");
-$upd_PHONES->registerTrigger("BEFORE", "Trigger_Default_FormValidation", 10, $formValidation);
-$upd_PHONES->registerTrigger("END", "Trigger_Default_Redirect", 99, "../includes/nxt/back.php");
+$upd_PARTICIPANTS_PHONE->registerTrigger("STARTER", "Trigger_Default_Starter", 1, "POST", "KT_Update1");
+$upd_PARTICIPANTS_PHONE->registerTrigger("BEFORE", "Trigger_Default_FormValidation", 10, $formValidation);
+$upd_PARTICIPANTS_PHONE->registerTrigger("END", "Trigger_Default_Redirect", 99, "../includes/nxt/back.php");
 // Add columns
-$upd_PHONES->setTable("PHONES");
-$upd_PHONES->addColumn("imei", "STRING_TYPE", "POST", "imei");
-$upd_PHONES->addColumn("model", "STRING_TYPE", "POST", "model");
-$upd_PHONES->addColumn("notes", "STRING_TYPE", "POST", "notes");
-$upd_PHONES->setPrimaryKey("id", "NUMERIC_TYPE", "GET", "id");
+$upd_PARTICIPANTS_PHONE->setTable("PARTICIPANTS_PHONE");
+$upd_PARTICIPANTS_PHONE->addColumn("participant_id", "NUMERIC_TYPE", "POST", "participant_id");
+$upd_PARTICIPANTS_PHONE->addColumn("phone_id", "NUMERIC_TYPE", "POST", "phone_id");
+$upd_PARTICIPANTS_PHONE->setPrimaryKey("id", "NUMERIC_TYPE", "GET", "id");
 
 // Make an instance of the transaction object
-$del_PHONES = new tNG_multipleDelete($conn_Wockets);
-$tNGs->addTransaction($del_PHONES);
+$del_PARTICIPANTS_PHONE = new tNG_multipleDelete($conn_Wockets);
+$tNGs->addTransaction($del_PARTICIPANTS_PHONE);
 // Register triggers
-$del_PHONES->registerTrigger("STARTER", "Trigger_Default_Starter", 1, "POST", "KT_Delete1");
-$del_PHONES->registerTrigger("END", "Trigger_Default_Redirect", 99, "../includes/nxt/back.php");
+$del_PARTICIPANTS_PHONE->registerTrigger("STARTER", "Trigger_Default_Starter", 1, "POST", "KT_Delete1");
+$del_PARTICIPANTS_PHONE->registerTrigger("END", "Trigger_Default_Redirect", 99, "../includes/nxt/back.php");
 // Add columns
-$del_PHONES->setTable("PHONES");
-$del_PHONES->setPrimaryKey("id", "NUMERIC_TYPE", "GET", "id");
+$del_PARTICIPANTS_PHONE->setTable("PARTICIPANTS_PHONE");
+$del_PARTICIPANTS_PHONE->setPrimaryKey("id", "NUMERIC_TYPE", "GET", "id");
 
 // Make a logout transaction instance
 $logoutTransaction = new tNG_logoutTransaction($conn_Wockets);
@@ -79,9 +118,9 @@ $logoutTransaction->registerTrigger("END", "Trigger_Default_Redirect", 99, "../i
 $tNGs->executeTransactions();
 
 // Get the transaction recordset
-$rsPHONES = $tNGs->getRecordset("PHONES");
-$row_rsPHONES = mysql_fetch_assoc($rsPHONES);
-$totalRows_rsPHONES = mysql_num_rows($rsPHONES);
+$rsPARTICIPANTS_PHONE = $tNGs->getRecordset("PARTICIPANTS_PHONE");
+$row_rsPARTICIPANTS_PHONE = mysql_fetch_assoc($rsPARTICIPANTS_PHONE);
+$totalRows_rsPARTICIPANTS_PHONE = mysql_num_rows($rsPARTICIPANTS_PHONE);
 
 // Get the transaction recordset
 $rscustom = $tNGs->getRecordset("custom");
@@ -114,6 +153,8 @@ $NXT_FORM_SETTINGS = {
 </head>
 
 <body>
+
+
 
 <p> </p>
 <div id="cssMenu1" class="horizontal" >
@@ -155,6 +196,8 @@ $NXT_FORM_SETTINGS = {
   </script>
 </div>
 <p>&nbsp;</p>
+
+
 <div class="KT_tng">
   <h1>
     <?php 
@@ -169,7 +212,7 @@ if (@$_GET['id'] == "") {
       <?php } 
 // endif Conditional region1
 ?>
-    PHONES </h1>
+    PARTICIPANTS_PHONE </h1>
   <div class="KT_tngform">
     <form method="post" id="form1" action="<?php echo KT_escapeAttribute(KT_getFullUri()); ?>">
       <?php $cnt1 = 0; ?>
@@ -177,7 +220,7 @@ if (@$_GET['id'] == "") {
         <?php $cnt1++; ?>
         <?php 
 // Show IF Conditional region1 
-if (@$totalRows_rsPHONES > 1) {
+if (@$totalRows_rsPARTICIPANTS_PHONE > 1) {
 ?>
           <h2><?php echo NXT_getResource("Record_FH"); ?> <?php echo $cnt1; ?></h2>
           <?php } 
@@ -185,26 +228,46 @@ if (@$totalRows_rsPHONES > 1) {
 ?>
         <table cellpadding="2" cellspacing="0" class="KT_tngtable">
           <tr>
-            <td class="KT_th"><label for="imei_<?php echo $cnt1; ?>">IMEI:</label></td>
-            <td><input type="text" name="imei_<?php echo $cnt1; ?>" id="imei_<?php echo $cnt1; ?>" value="<?php echo KT_escapeAttribute($row_rsPHONES['imei']); ?>" size="32" maxlength="100" />
-                <?php echo $tNGs->displayFieldHint("imei");?> <?php echo $tNGs->displayFieldError("PHONES", "imei", $cnt1); ?> </td>
-          </tr>
-          <tr>
-            <td class="KT_th"><label for="model_<?php echo $cnt1; ?>">Model:</label></td>
-            <td><select name="model_<?php echo $cnt1; ?>" id="model_<?php echo $cnt1; ?>">
-              <option value="HTC Diamond Touch" <?php if (!(strcmp("HTC Diamond Touch", KT_escapeAttribute($row_rsPHONES['model'])))) {echo "SELECTED";} ?>>HTC Diamond Touch</option>
-              <option value="HTC Diamond Touch2" <?php if (!(strcmp("HTC Diamond Touch2", KT_escapeAttribute($row_rsPHONES['model'])))) {echo "SELECTED";} ?>>HTC Diamond Touch2</option>
+            <td class="KT_th"><label for="participant_id_<?php echo $cnt1; ?>">Participant:</label></td>
+            <td><select name="participant_id_<?php echo $cnt1; ?>" id="participant_id_<?php echo $cnt1; ?>">
+              <option value=""><?php echo NXT_getResource("Select one..."); ?></option>
+              <?php 
+do {  
+?>
+              <option value="<?php echo $row_Recordset1['id']?>"<?php if (!(strcmp($row_Recordset1['id'], $row_rsPARTICIPANTS_PHONE['participant_id']))) {echo "SELECTED";} ?>><?php echo $row_Recordset1['last_name']?></option>
+              <?php
+} while ($row_Recordset1 = mysql_fetch_assoc($Recordset1));
+  $rows = mysql_num_rows($Recordset1);
+  if($rows > 0) {
+      mysql_data_seek($Recordset1, 0);
+	  $row_Recordset1 = mysql_fetch_assoc($Recordset1);
+  }
+?>
             </select>
-                <?php echo $tNGs->displayFieldError("PHONES", "model", $cnt1); ?> </td>
+                <?php echo $tNGs->displayFieldError("PARTICIPANTS_PHONE", "participant_id", $cnt1); ?> </td>
           </tr>
           <tr>
-            <td class="KT_th"><label for="notes_<?php echo $cnt1; ?>">Notes:</label></td>
-            <td><textarea name="notes_<?php echo $cnt1; ?>" id="notes_<?php echo $cnt1; ?>" cols="50" rows="5"><?php echo KT_escapeAttribute($row_rsPHONES['notes']); ?></textarea>
-                <?php echo $tNGs->displayFieldHint("notes");?> <?php echo $tNGs->displayFieldError("PHONES", "notes", $cnt1); ?> </td>
+            <td class="KT_th"><label for="phone_id_<?php echo $cnt1; ?>">Phone:</label></td>
+            <td><select name="phone_id_<?php echo $cnt1; ?>" id="phone_id_<?php echo $cnt1; ?>">
+              <option value=""><?php echo NXT_getResource("Select one..."); ?></option>
+              <?php 
+do {  
+?>
+              <option value="<?php echo $row_Recordset2['id']?>"<?php if (!(strcmp($row_Recordset2['id'], $row_rsPARTICIPANTS_PHONE['phone_id']))) {echo "SELECTED";} ?>><?php echo $row_Recordset2['imei']?></option>
+              <?php
+} while ($row_Recordset2 = mysql_fetch_assoc($Recordset2));
+  $rows = mysql_num_rows($Recordset2);
+  if($rows > 0) {
+      mysql_data_seek($Recordset2, 0);
+	  $row_Recordset2 = mysql_fetch_assoc($Recordset2);
+  }
+?>
+            </select>
+                <?php echo $tNGs->displayFieldError("PARTICIPANTS_PHONE", "phone_id", $cnt1); ?> </td>
           </tr>
         </table>
-        <input type="hidden" name="kt_pk_PHONES_<?php echo $cnt1; ?>" class="id_field" value="<?php echo KT_escapeAttribute($row_rsPHONES['kt_pk_PHONES']); ?>" />
-        <?php } while ($row_rsPHONES = mysql_fetch_assoc($rsPHONES)); ?>
+        <input type="hidden" name="kt_pk_PARTICIPANTS_PHONE_<?php echo $cnt1; ?>" class="id_field" value="<?php echo KT_escapeAttribute($row_rsPARTICIPANTS_PHONE['kt_pk_PARTICIPANTS_PHONE']); ?>" />
+        <?php } while ($row_rsPARTICIPANTS_PHONE = mysql_fetch_assoc($rsPARTICIPANTS_PHONE)); ?>
       <div class="KT_bottombuttons">
         <div>
           <?php 
@@ -233,3 +296,8 @@ if (@$totalRows_rsPHONES > 1) {
 <p>&nbsp;</p>
 </body>
 </html>
+<?php
+mysql_free_result($Recordset1);
+
+mysql_free_result($Recordset2);
+?>

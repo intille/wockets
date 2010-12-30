@@ -1,0 +1,4 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<info>
+	<infoitem key="UD_rsACCOUNTS" value="name:user_id;datatype:int,name:username;datatype:int,name:password;datatype:int,name:first_name;datatype:int,name:last_name;datatype:int,name:email;datatype:int,name:registration_datetime;datatype:int,name:active;datatype:int,name:user_type;datatype:int,name:disable_date;datatype:int,name:attempts;datatype:int" />
+</info>

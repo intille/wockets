@@ -23,48 +23,52 @@ $restrict->Execute();
 
 // Start trigger
 $formValidation = new tNG_FormValidation();
-$formValidation->addField("imei", true, "text", "", "", "", "");
-$formValidation->addField("model", true, "text", "", "", "", "");
 $tNGs->prepareValidation($formValidation);
 // End trigger
 
 // Make an insert transaction instance
-$ins_PHONES = new tNG_multipleInsert($conn_Wockets);
-$tNGs->addTransaction($ins_PHONES);
+$ins_WOCKET_STATS = new tNG_multipleInsert($conn_Wockets);
+$tNGs->addTransaction($ins_WOCKET_STATS);
 // Register triggers
-$ins_PHONES->registerTrigger("STARTER", "Trigger_Default_Starter", 1, "POST", "KT_Insert1");
-$ins_PHONES->registerTrigger("BEFORE", "Trigger_Default_FormValidation", 10, $formValidation);
-$ins_PHONES->registerTrigger("END", "Trigger_Default_Redirect", 99, "../includes/nxt/back.php");
+$ins_WOCKET_STATS->registerTrigger("STARTER", "Trigger_Default_Starter", 1, "POST", "KT_Insert1");
+$ins_WOCKET_STATS->registerTrigger("BEFORE", "Trigger_Default_FormValidation", 10, $formValidation);
+$ins_WOCKET_STATS->registerTrigger("END", "Trigger_Default_Redirect", 99, "../includes/nxt/back.php");
 // Add columns
-$ins_PHONES->setTable("PHONES");
-$ins_PHONES->addColumn("imei", "STRING_TYPE", "POST", "imei");
-$ins_PHONES->addColumn("model", "STRING_TYPE", "POST", "model");
-$ins_PHONES->addColumn("notes", "STRING_TYPE", "POST", "notes");
-$ins_PHONES->setPrimaryKey("id", "NUMERIC_TYPE");
+$ins_WOCKET_STATS->setTable("WOCKET_STATS");
+$ins_WOCKET_STATS->addColumn("imei", "STRING_TYPE", "POST", "imei");
+$ins_WOCKET_STATS->addColumn("server_date", "DATE_TYPE", "POST", "server_date");
+$ins_WOCKET_STATS->addColumn("sender_date", "DATE_TYPE", "POST", "sender_date");
+$ins_WOCKET_STATS->addColumn("mac", "STRING_TYPE", "POST", "mac");
+$ins_WOCKET_STATS->addColumn("wocket_id", "NUMERIC_TYPE", "POST", "wocket_id");
+$ins_WOCKET_STATS->addColumn("activity_count", "NUMERIC_TYPE", "POST", "activity_count");
+$ins_WOCKET_STATS->setPrimaryKey("id", "NUMERIC_TYPE");
 
 // Make an update transaction instance
-$upd_PHONES = new tNG_multipleUpdate($conn_Wockets);
-$tNGs->addTransaction($upd_PHONES);
+$upd_WOCKET_STATS = new tNG_multipleUpdate($conn_Wockets);
+$tNGs->addTransaction($upd_WOCKET_STATS);
 // Register triggers
-$upd_PHONES->registerTrigger("STARTER", "Trigger_Default_Starter", 1, "POST", "KT_Update1");
-$upd_PHONES->registerTrigger("BEFORE", "Trigger_Default_FormValidation", 10, $formValidation);
-$upd_PHONES->registerTrigger("END", "Trigger_Default_Redirect", 99, "../includes/nxt/back.php");
+$upd_WOCKET_STATS->registerTrigger("STARTER", "Trigger_Default_Starter", 1, "POST", "KT_Update1");
+$upd_WOCKET_STATS->registerTrigger("BEFORE", "Trigger_Default_FormValidation", 10, $formValidation);
+$upd_WOCKET_STATS->registerTrigger("END", "Trigger_Default_Redirect", 99, "../includes/nxt/back.php");
 // Add columns
-$upd_PHONES->setTable("PHONES");
-$upd_PHONES->addColumn("imei", "STRING_TYPE", "POST", "imei");
-$upd_PHONES->addColumn("model", "STRING_TYPE", "POST", "model");
-$upd_PHONES->addColumn("notes", "STRING_TYPE", "POST", "notes");
-$upd_PHONES->setPrimaryKey("id", "NUMERIC_TYPE", "GET", "id");
+$upd_WOCKET_STATS->setTable("WOCKET_STATS");
+$upd_WOCKET_STATS->addColumn("imei", "STRING_TYPE", "POST", "imei");
+$upd_WOCKET_STATS->addColumn("server_date", "DATE_TYPE", "POST", "server_date");
+$upd_WOCKET_STATS->addColumn("sender_date", "DATE_TYPE", "POST", "sender_date");
+$upd_WOCKET_STATS->addColumn("mac", "STRING_TYPE", "POST", "mac");
+$upd_WOCKET_STATS->addColumn("wocket_id", "NUMERIC_TYPE", "POST", "wocket_id");
+$upd_WOCKET_STATS->addColumn("activity_count", "NUMERIC_TYPE", "POST", "activity_count");
+$upd_WOCKET_STATS->setPrimaryKey("id", "NUMERIC_TYPE", "GET", "id");
 
 // Make an instance of the transaction object
-$del_PHONES = new tNG_multipleDelete($conn_Wockets);
-$tNGs->addTransaction($del_PHONES);
+$del_WOCKET_STATS = new tNG_multipleDelete($conn_Wockets);
+$tNGs->addTransaction($del_WOCKET_STATS);
 // Register triggers
-$del_PHONES->registerTrigger("STARTER", "Trigger_Default_Starter", 1, "POST", "KT_Delete1");
-$del_PHONES->registerTrigger("END", "Trigger_Default_Redirect", 99, "../includes/nxt/back.php");
+$del_WOCKET_STATS->registerTrigger("STARTER", "Trigger_Default_Starter", 1, "POST", "KT_Delete1");
+$del_WOCKET_STATS->registerTrigger("END", "Trigger_Default_Redirect", 99, "../includes/nxt/back.php");
 // Add columns
-$del_PHONES->setTable("PHONES");
-$del_PHONES->setPrimaryKey("id", "NUMERIC_TYPE", "GET", "id");
+$del_WOCKET_STATS->setTable("WOCKET_STATS");
+$del_WOCKET_STATS->setPrimaryKey("id", "NUMERIC_TYPE", "GET", "id");
 
 // Make a logout transaction instance
 $logoutTransaction = new tNG_logoutTransaction($conn_Wockets);
@@ -79,9 +83,9 @@ $logoutTransaction->registerTrigger("END", "Trigger_Default_Redirect", 99, "../i
 $tNGs->executeTransactions();
 
 // Get the transaction recordset
-$rsPHONES = $tNGs->getRecordset("PHONES");
-$row_rsPHONES = mysql_fetch_assoc($rsPHONES);
-$totalRows_rsPHONES = mysql_num_rows($rsPHONES);
+$rsWOCKET_STATS = $tNGs->getRecordset("WOCKET_STATS");
+$row_rsWOCKET_STATS = mysql_fetch_assoc($rsWOCKET_STATS);
+$totalRows_rsWOCKET_STATS = mysql_num_rows($rsWOCKET_STATS);
 
 // Get the transaction recordset
 $rscustom = $tNGs->getRecordset("custom");
@@ -114,6 +118,7 @@ $NXT_FORM_SETTINGS = {
 </head>
 
 <body>
+
 
 <p> </p>
 <div id="cssMenu1" class="horizontal" >
@@ -155,6 +160,7 @@ $NXT_FORM_SETTINGS = {
   </script>
 </div>
 <p>&nbsp;</p>
+
 <div class="KT_tng">
   <h1>
     <?php 
@@ -169,7 +175,7 @@ if (@$_GET['id'] == "") {
       <?php } 
 // endif Conditional region1
 ?>
-    PHONES </h1>
+    WOCKET_STATS </h1>
   <div class="KT_tngform">
     <form method="post" id="form1" action="<?php echo KT_escapeAttribute(KT_getFullUri()); ?>">
       <?php $cnt1 = 0; ?>
@@ -177,7 +183,7 @@ if (@$_GET['id'] == "") {
         <?php $cnt1++; ?>
         <?php 
 // Show IF Conditional region1 
-if (@$totalRows_rsPHONES > 1) {
+if (@$totalRows_rsWOCKET_STATS > 1) {
 ?>
           <h2><?php echo NXT_getResource("Record_FH"); ?> <?php echo $cnt1; ?></h2>
           <?php } 
@@ -185,26 +191,38 @@ if (@$totalRows_rsPHONES > 1) {
 ?>
         <table cellpadding="2" cellspacing="0" class="KT_tngtable">
           <tr>
-            <td class="KT_th"><label for="imei_<?php echo $cnt1; ?>">IMEI:</label></td>
-            <td><input type="text" name="imei_<?php echo $cnt1; ?>" id="imei_<?php echo $cnt1; ?>" value="<?php echo KT_escapeAttribute($row_rsPHONES['imei']); ?>" size="32" maxlength="100" />
-                <?php echo $tNGs->displayFieldHint("imei");?> <?php echo $tNGs->displayFieldError("PHONES", "imei", $cnt1); ?> </td>
+            <td class="KT_th"><label for="imei_<?php echo $cnt1; ?>">Imei:</label></td>
+            <td><input type="text" name="imei_<?php echo $cnt1; ?>" id="imei_<?php echo $cnt1; ?>" value="<?php echo KT_escapeAttribute($row_rsWOCKET_STATS['imei']); ?>" size="32" maxlength="100" />
+                <?php echo $tNGs->displayFieldHint("imei");?> <?php echo $tNGs->displayFieldError("WOCKET_STATS", "imei", $cnt1); ?> </td>
           </tr>
           <tr>
-            <td class="KT_th"><label for="model_<?php echo $cnt1; ?>">Model:</label></td>
-            <td><select name="model_<?php echo $cnt1; ?>" id="model_<?php echo $cnt1; ?>">
-              <option value="HTC Diamond Touch" <?php if (!(strcmp("HTC Diamond Touch", KT_escapeAttribute($row_rsPHONES['model'])))) {echo "SELECTED";} ?>>HTC Diamond Touch</option>
-              <option value="HTC Diamond Touch2" <?php if (!(strcmp("HTC Diamond Touch2", KT_escapeAttribute($row_rsPHONES['model'])))) {echo "SELECTED";} ?>>HTC Diamond Touch2</option>
-            </select>
-                <?php echo $tNGs->displayFieldError("PHONES", "model", $cnt1); ?> </td>
+            <td class="KT_th"><label for="server_date_<?php echo $cnt1; ?>">Server_date:</label></td>
+            <td><input type="text" name="server_date_<?php echo $cnt1; ?>" id="server_date_<?php echo $cnt1; ?>" value="<?php echo KT_formatDate($row_rsWOCKET_STATS['server_date']); ?>" size="10" maxlength="22" />
+                <?php echo $tNGs->displayFieldHint("server_date");?> <?php echo $tNGs->displayFieldError("WOCKET_STATS", "server_date", $cnt1); ?> </td>
           </tr>
           <tr>
-            <td class="KT_th"><label for="notes_<?php echo $cnt1; ?>">Notes:</label></td>
-            <td><textarea name="notes_<?php echo $cnt1; ?>" id="notes_<?php echo $cnt1; ?>" cols="50" rows="5"><?php echo KT_escapeAttribute($row_rsPHONES['notes']); ?></textarea>
-                <?php echo $tNGs->displayFieldHint("notes");?> <?php echo $tNGs->displayFieldError("PHONES", "notes", $cnt1); ?> </td>
+            <td class="KT_th"><label for="sender_date_<?php echo $cnt1; ?>">Sender_date:</label></td>
+            <td><input type="text" name="sender_date_<?php echo $cnt1; ?>" id="sender_date_<?php echo $cnt1; ?>" value="<?php echo KT_formatDate($row_rsWOCKET_STATS['sender_date']); ?>" size="10" maxlength="22" />
+                <?php echo $tNGs->displayFieldHint("sender_date");?> <?php echo $tNGs->displayFieldError("WOCKET_STATS", "sender_date", $cnt1); ?> </td>
+          </tr>
+          <tr>
+            <td class="KT_th"><label for="mac_<?php echo $cnt1; ?>">Mac:</label></td>
+            <td><input type="text" name="mac_<?php echo $cnt1; ?>" id="mac_<?php echo $cnt1; ?>" value="<?php echo KT_escapeAttribute($row_rsWOCKET_STATS['mac']); ?>" size="32" maxlength="100" />
+                <?php echo $tNGs->displayFieldHint("mac");?> <?php echo $tNGs->displayFieldError("WOCKET_STATS", "mac", $cnt1); ?> </td>
+          </tr>
+          <tr>
+            <td class="KT_th"><label for="wocket_id_<?php echo $cnt1; ?>">Wocket_id:</label></td>
+            <td><input type="text" name="wocket_id_<?php echo $cnt1; ?>" id="wocket_id_<?php echo $cnt1; ?>" value="<?php echo KT_escapeAttribute($row_rsWOCKET_STATS['wocket_id']); ?>" size="7" />
+                <?php echo $tNGs->displayFieldHint("wocket_id");?> <?php echo $tNGs->displayFieldError("WOCKET_STATS", "wocket_id", $cnt1); ?> </td>
+          </tr>
+          <tr>
+            <td class="KT_th"><label for="activity_count_<?php echo $cnt1; ?>">Activity_count:</label></td>
+            <td><input type="text" name="activity_count_<?php echo $cnt1; ?>" id="activity_count_<?php echo $cnt1; ?>" value="<?php echo KT_escapeAttribute($row_rsWOCKET_STATS['activity_count']); ?>" size="7" />
+                <?php echo $tNGs->displayFieldHint("activity_count");?> <?php echo $tNGs->displayFieldError("WOCKET_STATS", "activity_count", $cnt1); ?> </td>
           </tr>
         </table>
-        <input type="hidden" name="kt_pk_PHONES_<?php echo $cnt1; ?>" class="id_field" value="<?php echo KT_escapeAttribute($row_rsPHONES['kt_pk_PHONES']); ?>" />
-        <?php } while ($row_rsPHONES = mysql_fetch_assoc($rsPHONES)); ?>
+        <input type="hidden" name="kt_pk_WOCKET_STATS_<?php echo $cnt1; ?>" class="id_field" value="<?php echo KT_escapeAttribute($row_rsWOCKET_STATS['kt_pk_WOCKET_STATS']); ?>" />
+        <?php } while ($row_rsWOCKET_STATS = mysql_fetch_assoc($rsWOCKET_STATS)); ?>
       <div class="KT_bottombuttons">
         <div>
           <?php 
