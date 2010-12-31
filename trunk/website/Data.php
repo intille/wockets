@@ -73,17 +73,35 @@ transmitted_bytes2,received_bytes2 FROM PHONE_STATS,PARTICIPANTS_PHONE,PHONES WH
 				if ($current_datetime==	substr($row_Recordset2['sender_date'],0,16))
 				{
 						$activity_count0=$activity_count0. $row_Recordset2['activity_count'];
-						while($current_datetime==substr($row_Recordset2['sender_date'],0,16))
+						$i0=0;
+						while($current_datetime==substr($row_Recordset2['sender_date'],0,16)){
 							$row_Recordset2 = mysql_fetch_assoc($Recordset2);
-				}else
+							if ($i0>0)
+								$last0=$row_Recordset2['activity_count'];
+							else
+								$last0=-1;
+							$i0++;
+						}
+				}else if ($last0!=-1)
+					$activity_count0=$activity_count0. $last0;
+				else
 					$activity_count0=$activity_count0. "0";
 				
 				if ($current_datetime==	substr($row_Recordset3['sender_date'],0,16))
 				{
 						$activity_count1=$activity_count1. $row_Recordset3['activity_count'];
-						while($current_datetime==substr($row_Recordset3['sender_date'],0,16))
+						$i1=1;
+						while($current_datetime==substr($row_Recordset3['sender_date'],0,16)){
 							$row_Recordset3 = mysql_fetch_assoc($Recordset3);
-				}else
+							if ($i1>0)
+								$last1=$row_Recordset3['activity_count'];
+							else
+								$last1=-1;
+							$i1++;
+						}
+				}else if ($last1!=-1)
+					$activity_count1=$activity_count1. $last1;
+				else
 					$activity_count1=$activity_count1. "0";
 			
 				if (!(($hour==23) && ($min==59) && ($sec==59))){
