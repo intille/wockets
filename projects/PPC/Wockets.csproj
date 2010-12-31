@@ -649,8 +649,11 @@
     <Compile Include="..\..\src\Wockets\Utils\Storage.cs">
       <Link>Utils\Storage.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Wockets\Utils\CRC16.cs" >
+    <Compile Include="..\..\src\Wockets\Utils\CRC16.cs">
       <Link>Utils\CRC16.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Wockets\Utils\SynchronizedLogger.cs" >
+      <Link>Utils\SynchronizedLogger.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
