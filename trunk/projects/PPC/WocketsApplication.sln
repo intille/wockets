@@ -46,6 +46,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleApp", "SimpleApp.cspr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CollectDataUser", "CollectDataUser.csproj", "{6978AB6A-121D-466B-BC0B-492055B63FC6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LogUploader", "LogUploader.csproj", "{D73A8A97-7F07-45C6-97AB-058B2979C5DF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -373,6 +375,24 @@ Global
 		{6978AB6A-121D-466B-BC0B-492055B63FC6}.Release|Pocket PC 2003 (ARMV4).ActiveCfg = Release|Any CPU
 		{6978AB6A-121D-466B-BC0B-492055B63FC6}.Release|Win32.ActiveCfg = Release|Any CPU
 		{6978AB6A-121D-466B-BC0B-492055B63FC6}.Release|Windows Mobile 5.0 Pocket PC SDK (ARMV4I).ActiveCfg = Release|Any CPU
+		{D73A8A97-7F07-45C6-97AB-058B2979C5DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D73A8A97-7F07-45C6-97AB-058B2979C5DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D73A8A97-7F07-45C6-97AB-058B2979C5DF}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{D73A8A97-7F07-45C6-97AB-058B2979C5DF}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{D73A8A97-7F07-45C6-97AB-058B2979C5DF}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{D73A8A97-7F07-45C6-97AB-058B2979C5DF}.Debug|Mixed Platforms.Deploy.0 = Debug|Any CPU
+		{D73A8A97-7F07-45C6-97AB-058B2979C5DF}.Debug|Pocket PC 2003 (ARMV4).ActiveCfg = Debug|Any CPU
+		{D73A8A97-7F07-45C6-97AB-058B2979C5DF}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{D73A8A97-7F07-45C6-97AB-058B2979C5DF}.Debug|Windows Mobile 5.0 Pocket PC SDK (ARMV4I).ActiveCfg = Debug|Any CPU
+		{D73A8A97-7F07-45C6-97AB-058B2979C5DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D73A8A97-7F07-45C6-97AB-058B2979C5DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D73A8A97-7F07-45C6-97AB-058B2979C5DF}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{D73A8A97-7F07-45C6-97AB-058B2979C5DF}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{D73A8A97-7F07-45C6-97AB-058B2979C5DF}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{D73A8A97-7F07-45C6-97AB-058B2979C5DF}.Release|Mixed Platforms.Deploy.0 = Release|Any CPU
+		{D73A8A97-7F07-45C6-97AB-058B2979C5DF}.Release|Pocket PC 2003 (ARMV4).ActiveCfg = Release|Any CPU
+		{D73A8A97-7F07-45C6-97AB-058B2979C5DF}.Release|Win32.ActiveCfg = Release|Any CPU
+		{D73A8A97-7F07-45C6-97AB-058B2979C5DF}.Release|Windows Mobile 5.0 Pocket PC SDK (ARMV4I).ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -380,16 +400,16 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{69121565-9FA0-4AE0-90E6-FA4D6B5C3B2D} = {0A35A8AF-6C86-4132-8576-4357B1F56B54}
 		{0A985FCE-B468-4F47-A6F1-B96BC7B0065C} = {0A35A8AF-6C86-4132-8576-4357B1F56B54}
+		{6978AB6A-121D-466B-BC0B-492055B63FC6} = {0A35A8AF-6C86-4132-8576-4357B1F56B54}
 		{A3D094BB-6494-4385-A968-CD37F027C05D} = {9A3D79FB-4929-442D-A149-3B15FF4D873C}
 		{53A0D2D6-F4E2-4CE1-A665-DA02457FF4B5} = {9A3D79FB-4929-442D-A149-3B15FF4D873C}
 		{34F77491-3D6F-45AC-B87F-64C5B349765B} = {9A3D79FB-4929-442D-A149-3B15FF4D873C}
-		{6978AB6A-121D-466B-BC0B-492055B63FC6} = {0A35A8AF-6C86-4132-8576-4357B1F56B54}
 		{DEF78C4F-8240-497A-ABEB-6552D502DD61} = {E84C4FDF-3EE6-40DF-847C-4EA3E9310844}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		BuildVersion_BuildVersioningStyle = None.Increment.None.DayStamp
-		BuildVersion_UpdateFileVersion = False
-		BuildVersion_StartDate = 2010/9/21
 		BuildVersion_UpdateAssemblyVersion = False
+		BuildVersion_StartDate = 2010/9/21
+		BuildVersion_UpdateFileVersion = False
+		BuildVersion_BuildVersioningStyle = None.Increment.None.DayStamp
 	EndGlobalSection
 EndGlobal
