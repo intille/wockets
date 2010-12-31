@@ -740,13 +740,13 @@ namespace Wockets
 
         public void Dispose()
         {
-
+#if (PocketPC)
             if (dataCollectionThread != null)
                 dataCollectionThread.Abort();
 
             if (interfaceActivityThread != null)
                 interfaceActivityThread.Abort();
-
+#endif
             if (aPollingThread != null)            
                 aPollingThread.Abort();            
 

@@ -3806,7 +3806,7 @@ namespace DataMerger
                         "Wocket" + sensor_id.ToString("00") + "_RM_SIZE," + "Wocket" + sensor_id.ToString("00") + "_VMAG";
                 }
 
-                wc.Dispose();
+               // wc.Dispose();
 
                 /* Correct the wockets timestamps */
 

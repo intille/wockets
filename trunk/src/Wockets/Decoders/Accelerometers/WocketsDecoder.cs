@@ -653,8 +653,7 @@ namespace Wockets.Decoders.Accelerometers
                             datum.RawBytes[i] = this.packet[i];
 
                         datum.UnixTimeStamp = lastUnixTime;
-                        if (lastUnixTime >= 13680828203000)
-                            Console.Write("x");
+                   
 
                         if ( (packetType == SensorDataType.UNCOMPRESSED_DATA_PDU)||(packetType == SensorDataType.COMPRESSED_DATA_PDU))
                         {
