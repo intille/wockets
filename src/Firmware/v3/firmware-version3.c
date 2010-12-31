@@ -217,9 +217,9 @@ int main()
 			y=_atmega_a2dConvert10bit(ADC1);
 
 			z=_atmega_a2dConvert10bit(ADC2);
-			x=y=z=cc++;
-			if (cc>=1024)
-				cc=0;
+			//x=y=z=cc++;
+			//if (cc>=1024)
+			//	cc=0;
 
 				vmag+=Filter(x,0)+Filter(y,1)+Filter(z,2);
 			

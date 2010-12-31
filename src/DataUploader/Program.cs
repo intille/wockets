@@ -121,7 +121,7 @@ namespace DataUploader
                     //Check file on server
                     //relative_path = "IMEI-" + CurrentPhone._IMEI + "/" + relative_path;
                     getData.Add("relative_path", relative_path);
-                    getData.Add("sender_date", filename.Substring(filename.LastIndexOf("\\") + 1));
+                    getData.Add("filename", filename.Substring(filename.LastIndexOf("\\") + 1));
                     getData.Add("imei", CurrentPhone._IMEI);
 
                     startTime = DateTime.Now;
