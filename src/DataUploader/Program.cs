@@ -165,8 +165,8 @@ namespace DataUploader
                             DateTime senderTime = DateTime.Parse(tokens[3]);
                             if ((tokens[0] == "true") && (localmd5 == tokens[1]))
                             {
-                                if ((DateTime.Now.Subtract(serverTime).TotalDays >= 2) &&
-                                    (DateTime.Now.Subtract(senderTime).TotalDays >= 2))
+                                if ((DateTime.Now.Subtract(serverTime).TotalDays >= 1) &&
+                                    (DateTime.Now.Subtract(senderTime).TotalDays >= 1))
                                 {
                                     try
                                     {
