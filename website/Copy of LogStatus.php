@@ -50,51 +50,18 @@ if ((isset($_GET['imei'])) && (isset($_GET['phone_battery']))){
 
 
 if ($phone_status==1){
-
-	$asender_date=explode(",",$sender_date);
-	$aphone_battery=explode(",",$phone_battery);
-	$amainmemory=explode(",",$mainmemory);
-	$asdmemory=explode(",",$sdmemory);
-	$abattery1=explode(",",$battery1);
-	$atransmitted_bytes1=explode(",",$transmitted_bytes1);
-	$areceived_bytes1=explode(",",$received_bytes1);
-	$abattery2=explode(",",$battery2);
-	$atransmitted_bytes2=explode(",",$transmitted_bytes2);
-	$areceived_bytes2=explode(",",$received_bytes2);
-	$size=count($asender_date);
-	$changed=0;
-	
-	for($i=0; $i<($size-1); $i++) {
 // Do the SQL Insert:
-	$insertQuery = "INSERT INTO `wockets`.`PHONE_STATS`(`imei`,`server_date`,`sender_date`,`phone_battery`,`mainmemory`,`sdmemory`,`battery1`,`transmitted_bytes1`,`received_bytes1`,`battery2`,`transmitted_bytes2`,`received_bytes2`) VALUES ('$imei','$server_date','".$asender_date[$i]."','".$aphone_battery[$i]."','".$amainmemory[$i]."','".$asdmemory[$i]."','".$abattery1[$i]."','".$atransmitted_bytes1[$i]."','".$areceived_bytes1[$i]."','".$abattery2[$i]."','".$atransmitted_bytes2[$i]."','".$areceived_bytes2[$i]."')";
+	$insertQuery = "INSERT INTO `wockets`.`PHONE_STATS`(`imei`,`server_date`,`sender_date`,`phone_battery`,`mainmemory`,`sdmemory`,`battery1`,`transmitted_bytes1`,`received_bytes1`,`battery2`,`transmitted_bytes2`,`received_bytes2`) VALUES ('$imei','$server_date','$sender_date','$phone_battery','$mainmemory','$sdmemory','$battery1','$transmitted_bytes1','$received_bytes1','$battery2','$transmitted_bytes2','$received_bytes2')";
 	mysql_query($insertQuery) or die(mysql_error());
 	if (mysql_affected_rows()==1)
-		$changed++;
-	}
-
-//	if (mysql_affected_rows()==1)
-	if ($changed==($size-1))
 		echo "success";
 	else
 		echo "failed";
 }else if ($wocket_status==1){
-
-
-	$sender_date=explode(",",$sender_date);
-	$wocket_id=explode(",",$wocket_id);
-	$mac_address=explode(",",$mac_address);
-	$activity_count=explode(",",$activity_count);
-	$size=count($sender_date);
-	$changed=0;
-	for($i=0; $i<($size-1); $i++) {
 // Do the SQL Insert:
-		$insertQuery = "INSERT INTO `wockets`.`WOCKET_STATS`(`imei`,`server_date`,`sender_date`,`mac`,`wocket_id`,`activity_count`) VALUES ('$imei','$server_date','".$sender_date[$i]."','".$mac_address[$i]."','".$wocket_id[$i]."','".$activity_count[$i]."')";
+	$insertQuery = "INSERT INTO `wockets`.`WOCKET_STATS`(`imei`,`server_date`,`sender_date`,`mac`,`wocket_id`,`activity_count`) VALUES ('$imei','$server_date','$sender_date','$mac_address','$wocket_id','$activity_count')";
 	mysql_query($insertQuery) or die(mysql_error());
 	if (mysql_affected_rows()==1)
-		$changed++;
-	}
-	//if (mysql_affected_rows()==1)
-	if ($changed==($size-1))
 		echo "success";
 	else
 		echo "failed";
