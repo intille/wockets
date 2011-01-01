@@ -21,7 +21,7 @@ namespace LogUploader
             SynchronizedLogger.Load();
             ArrayList toRemove = new ArrayList();
             
-            /*
+            
             int count = 0;
             while (count < SynchronizedLogger._Lines.Count)
             {
@@ -76,7 +76,7 @@ namespace LogUploader
 
 
                     count++;
-                    if (count > SynchronizedLogger._Lines.Count)
+                    if (count >= SynchronizedLogger._Lines.Count)
                         break;
                 }
 
@@ -166,7 +166,7 @@ namespace LogUploader
                     toRemove.AddRange(removeBatch2);
             }
 
-            */
+            /*
 
             foreach (String line in SynchronizedLogger._Lines)
             {
@@ -267,7 +267,8 @@ namespace LogUploader
 
             }
 
-            SynchronizedLogger.Remove(toRemove);            
+            SynchronizedLogger.Remove(toRemove);        
+             */
         }
     }
 }
