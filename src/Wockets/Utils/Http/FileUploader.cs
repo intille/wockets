@@ -172,6 +172,8 @@ namespace Wockets.Utils.Http
         {
             //load successful and not uploaded files
             //Load();
+            //Delete any empty directories
+            DeleteEmptyDirectory(_Path);
 
             Dictionary<string, DateTime> _scanned = Scan(_Path, from, until);
             foreach (string filename in _scanned.Keys)
@@ -193,8 +195,23 @@ namespace Wockets.Utils.Http
             }*/
             return _NotUploaded;
         }
-        public static Dictionary<string, DateTime> Scan(string path, DateTime from, DateTime until)
+
+
+        public static void DeleteEmptyDirectory(string startLocation)
         {
+            foreach (var directory in Directory.GetDirectories(startLocation))
+            {
+                DeleteEmptyDirectory(directory);
+                if (Directory.GetFiles(directory).Length == 0 && Directory.GetDirectories(directory).Length == 0)
+                {
+                    Directory.Delete(directory, false);
+                }
+            }
+        }
+
+        public static Dictionary<string, DateTime> Scan(string path, DateTime from, DateTime until)
+        {            
+                
             string[] scannedfiles = Directory.GetFiles(path);
             Dictionary<string, DateTime> files = new Dictionary<string, DateTime>();
 
@@ -207,17 +224,23 @@ namespace Wockets.Utils.Http
                 DateTime creationTime = File.GetCreationTime(scannedfiles[i]);
                 FileInfo f = new FileInfo(scannedfiles[i]);
 
-                if ((scannedfiles[i].IndexOf("files.toupload.wockets") >= 0) || (scannedfiles[i].IndexOf("files.uploaded.wockets") >= 0))
-                    continue;
+                
+               // if ((scannedfiles[i].IndexOf("files.toupload.wockets") >= 0) || (scannedfiles[i].IndexOf("files.uploaded.wockets") >= 0))
+                 //   continue;
 
                 if ((f.Length > 0) && (((creationTime.Day != DateTime.Now.Day) || (creationTime.Hour != DateTime.Now.Hour) || (creationTime.Month != DateTime.Now.Month) ||
                     (creationTime.Year != DateTime.Now.Year)) && (DateTime.Compare(creationTime, from) >= 0) &&
-                    (DateTime.Now.Subtract(creationTime).Hours >= 2)))
+                    (DateTime.Now.Subtract(creationTime).Hours >= 3)))
                     files.Add(scannedfiles[i], creationTime);
+                else if ((f.Length == 0) && (((creationTime.Day != DateTime.Now.Day) || (creationTime.Hour != DateTime.Now.Hour) || (creationTime.Month != DateTime.Now.Month) ||
+                    (creationTime.Year != DateTime.Now.Year)) && (DateTime.Compare(creationTime, from) >= 0) &&
+                    (DateTime.Now.Subtract(creationTime).Hours >= 3)))
+                    f.Delete();
             }
             if (Directory.Exists(path))
             {
                 string[] scanneddirectories = Directory.GetDirectories(path);
+
                 for (int j = 0; (j < scanneddirectories.Length); j++)
                 {
                     DateTime dCreationTime = Directory.GetCreationTime(scanneddirectories[j]);
