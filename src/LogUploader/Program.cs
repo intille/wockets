@@ -166,7 +166,9 @@ namespace LogUploader
                     toRemove.AddRange(removeBatch2);
             }
 
-            /*
+            SynchronizedLogger.Remove(toRemove);  
+
+            /* m,,
 
             foreach (String line in SynchronizedLogger._Lines)
             {
