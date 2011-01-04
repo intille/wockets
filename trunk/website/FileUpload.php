@@ -82,7 +82,7 @@ function Trigger_FileUpload(&$tNG) {
   $uploadObj->setDbFieldName("filename");
   $uploadObj->setFolder("WocketsData\\{relative_path}\\");
   $uploadObj->setMaxSize(5000);
-  $uploadObj->setAllowedExtensions("txt, xml, PLFormat, csv");
+  $uploadObj->setAllowedExtensions("txt, xml, PLFormat, csv, wockets");
 //  $uploadObj->setRename("auto");
   return $uploadObj->Execute();
 }
