@@ -65,11 +65,18 @@ if ($phone_status==1){
 	$changed=0;
 	
 	for($i=0; $i<($size-1); $i++) {
-// Do the SQL Insert:
-	$insertQuery = "INSERT INTO `wockets`.`PHONE_STATS`(`imei`,`server_date`,`sender_date`,`phone_battery`,`mainmemory`,`sdmemory`,`battery1`,`transmitted_bytes1`,`received_bytes1`,`battery2`,`transmitted_bytes2`,`received_bytes2`) VALUES ('$imei','$server_date','".$asender_date[$i]."','".$aphone_battery[$i]."','".$amainmemory[$i]."','".$asdmemory[$i]."','".$abattery1[$i]."','".$atransmitted_bytes1[$i]."','".$areceived_bytes1[$i]."','".$abattery2[$i]."','".$atransmitted_bytes2[$i]."','".$areceived_bytes2[$i]."')";
-	mysql_query($insertQuery) or die(mysql_error());
-	if (mysql_affected_rows()==1)
-		$changed++;
+	
+		//check if it exists
+		$selectQuery="SELECT * from `wockets`.`PHONE_STATS` where imei='$imei' AND sender_date='".$asender_date[$i]."'";
+		mysql_query($selectQuery) or die(mysql_error());
+		if (mysql_affected_rows()==0){
+			// Do the SQL Insert:
+			$insertQuery = "INSERT INTO `wockets`.`PHONE_STATS`(`imei`,`server_date`,`sender_date`,`phone_battery`,`mainmemory`,`sdmemory`,`battery1`,`transmitted_bytes1`,`received_bytes1`,`battery2`,`transmitted_bytes2`,`received_bytes2`) VALUES ('$imei','$server_date','".$asender_date[$i]."','".$aphone_battery[$i]."','".$amainmemory[$i]."','".$asdmemory[$i]."','".$abattery1[$i]."','".$atransmitted_bytes1[$i]."','".$areceived_bytes1[$i]."','".$abattery2[$i]."','".$atransmitted_bytes2[$i]."','".$areceived_bytes2[$i]."')";
+			mysql_query($insertQuery) or die(mysql_error());
+			if (mysql_affected_rows()==1)
+				$changed++;
+		}else
+			$changed++;
 	}
 
 //	if (mysql_affected_rows()==1)
@@ -87,11 +94,18 @@ if ($phone_status==1){
 	$size=count($sender_date);
 	$changed=0;
 	for($i=0; $i<($size-1); $i++) {
-// Do the SQL Insert:
-		$insertQuery = "INSERT INTO `wockets`.`WOCKET_STATS`(`imei`,`server_date`,`sender_date`,`mac`,`wocket_id`,`activity_count`) VALUES ('$imei','$server_date','".$sender_date[$i]."','".$mac_address[$i]."','".$wocket_id[$i]."','".$activity_count[$i]."')";
-	mysql_query($insertQuery) or die(mysql_error());
-	if (mysql_affected_rows()==1)
-		$changed++;
+		
+		//check if it exists
+		$selectQuery="SELECT * from `wockets`.`WOCKET_STATS` where mac='".$mac_address[$i]."' AND sender_date='".$sender_date[$i]."'";
+		mysql_query($selectQuery) or die(mysql_error());                                             
+		if (mysql_affected_rows()==0){
+			// Do the SQL Insert:             
+			$insertQuery = "INSERT INTO `wockets`.`WOCKET_STATS`(`imei`,`server_date`,`sender_date`,`mac`,`wocket_id`,`activity_count`) VALUES ('$imei','$server_date','".$sender_date[$i]."','".$mac_address[$i]."','".$wocket_id[$i]."','".$activity_count[$i]."')";
+		mysql_query($insertQuery) or die(mysql_error());
+		if (mysql_affected_rows()==1)
+			$changed++;
+		}else
+			$changed++;
 	}
 	//if (mysql_affected_rows()==1)
 	if ($changed==($size-1))
