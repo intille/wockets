@@ -44,6 +44,7 @@
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.textBox_sensors_status = new System.Windows.Forms.TextBox();
             this.textBox_sensor_set_ID = new System.Windows.Forms.TextBox();
+            this.button_reboot_phone = new System.Windows.Forms.Button();
             this.SensorStatusPanel = new System.Windows.Forms.Panel();
             this.textBox_spanel_ac_full_1 = new System.Windows.Forms.TextBox();
             this.textBox19 = new System.Windows.Forms.TextBox();
@@ -153,7 +154,7 @@
             this.SwapPanel.Controls.Add(this.textBox1);
             this.SwapPanel.Controls.Add(this.textBox_sensors_status);
             this.SwapPanel.Controls.Add(this.textBox_sensor_set_ID);
-            this.SwapPanel.Location = new System.Drawing.Point(2, 49);
+            this.SwapPanel.Location = new System.Drawing.Point(0, 50);
             this.SwapPanel.Name = "SwapPanel";
             this.SwapPanel.Size = new System.Drawing.Size(230, 304);
             // 
@@ -241,7 +242,7 @@
             this.textBox1.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox1.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold);
             this.textBox1.ForeColor = System.Drawing.Color.DimGray;
-            this.textBox1.Location = new System.Drawing.Point(7, 34);
+            this.textBox1.Location = new System.Drawing.Point(7, 31);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
             this.textBox1.ReadOnly = true;
@@ -255,11 +256,11 @@
             this.textBox_sensors_status.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox_sensors_status.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold);
             this.textBox_sensors_status.ForeColor = System.Drawing.Color.Tomato;
-            this.textBox_sensors_status.Location = new System.Drawing.Point(75, 34);
+            this.textBox_sensors_status.Location = new System.Drawing.Point(75, 31);
             this.textBox_sensors_status.Multiline = true;
             this.textBox_sensors_status.Name = "textBox_sensors_status";
             this.textBox_sensors_status.ReadOnly = true;
-            this.textBox_sensors_status.Size = new System.Drawing.Size(152, 23);
+            this.textBox_sensors_status.Size = new System.Drawing.Size(150, 23);
             this.textBox_sensors_status.TabIndex = 0;
             this.textBox_sensors_status.Text = "Disconnected";
             // 
@@ -269,14 +270,24 @@
             this.textBox_sensor_set_ID.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox_sensor_set_ID.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold);
             this.textBox_sensor_set_ID.ForeColor = System.Drawing.Color.White;
-            this.textBox_sensor_set_ID.Location = new System.Drawing.Point(-2, 3);
+            this.textBox_sensor_set_ID.Location = new System.Drawing.Point(1, 1);
             this.textBox_sensor_set_ID.Multiline = true;
             this.textBox_sensor_set_ID.Name = "textBox_sensor_set_ID";
             this.textBox_sensor_set_ID.ReadOnly = true;
-            this.textBox_sensor_set_ID.Size = new System.Drawing.Size(240, 27);
+            this.textBox_sensor_set_ID.Size = new System.Drawing.Size(228, 27);
             this.textBox_sensor_set_ID.TabIndex = 1;
             this.textBox_sensor_set_ID.Text = "RED SET";
             this.textBox_sensor_set_ID.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // button_reboot_phone
+            // 
+            this.button_reboot_phone.BackColor = System.Drawing.Color.LightSlateGray;
+            this.button_reboot_phone.ForeColor = System.Drawing.Color.White;
+            this.button_reboot_phone.Location = new System.Drawing.Point(45, 243);
+            this.button_reboot_phone.Name = "button_reboot_phone";
+            this.button_reboot_phone.Size = new System.Drawing.Size(137, 52);
+            this.button_reboot_phone.TabIndex = 9;
+            this.button_reboot_phone.Text = "Reboot Phone";
             // 
             // SensorStatusPanel
             // 
@@ -304,7 +315,7 @@
             this.SensorStatusPanel.Controls.Add(this.textBox_spanel_sensors_location_0);
             this.SensorStatusPanel.Controls.Add(this.textBox_spanel_sensors_status);
             this.SensorStatusPanel.Controls.Add(this.textBox_spanel_sensors_ID);
-            this.SensorStatusPanel.Location = new System.Drawing.Point(0, 49);
+            this.SensorStatusPanel.Location = new System.Drawing.Point(0, 50);
             this.SensorStatusPanel.Name = "SensorStatusPanel";
             this.SensorStatusPanel.Size = new System.Drawing.Size(230, 304);
             // 
@@ -632,11 +643,11 @@
             this.textBox_spanel_sensors_status.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox_spanel_sensors_status.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold);
             this.textBox_spanel_sensors_status.ForeColor = System.Drawing.Color.Tomato;
-            this.textBox_spanel_sensors_status.Location = new System.Drawing.Point(0, 32);
+            this.textBox_spanel_sensors_status.Location = new System.Drawing.Point(1, 31);
             this.textBox_spanel_sensors_status.Multiline = true;
             this.textBox_spanel_sensors_status.Name = "textBox_spanel_sensors_status";
             this.textBox_spanel_sensors_status.ReadOnly = true;
-            this.textBox_spanel_sensors_status.Size = new System.Drawing.Size(240, 23);
+            this.textBox_spanel_sensors_status.Size = new System.Drawing.Size(228, 23);
             this.textBox_spanel_sensors_status.TabIndex = 0;
             this.textBox_spanel_sensors_status.Text = "Disconnected";
             this.textBox_spanel_sensors_status.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -647,11 +658,11 @@
             this.textBox_spanel_sensors_ID.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox_spanel_sensors_ID.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold);
             this.textBox_spanel_sensors_ID.ForeColor = System.Drawing.Color.White;
-            this.textBox_spanel_sensors_ID.Location = new System.Drawing.Point(0, 3);
+            this.textBox_spanel_sensors_ID.Location = new System.Drawing.Point(1, 1);
             this.textBox_spanel_sensors_ID.Multiline = true;
             this.textBox_spanel_sensors_ID.Name = "textBox_spanel_sensors_ID";
             this.textBox_spanel_sensors_ID.ReadOnly = true;
-            this.textBox_spanel_sensors_ID.Size = new System.Drawing.Size(240, 27);
+            this.textBox_spanel_sensors_ID.Size = new System.Drawing.Size(228, 27);
             this.textBox_spanel_sensors_ID.TabIndex = 1;
             this.textBox_spanel_sensors_ID.Text = "RED SET";
             this.textBox_spanel_sensors_ID.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -659,7 +670,7 @@
             // ConnectPanel
             // 
             this.ConnectPanel.Controls.Add(this.label_kernel_status);
-            this.ConnectPanel.Location = new System.Drawing.Point(3, 50);
+            this.ConnectPanel.Location = new System.Drawing.Point(0, 50);
             this.ConnectPanel.Name = "ConnectPanel";
             this.ConnectPanel.Size = new System.Drawing.Size(230, 304);
             // 
@@ -687,7 +698,7 @@
             this.UploadDataPanel.Controls.Add(this.textBox2);
             this.UploadDataPanel.Controls.Add(this.UploadButton);
             this.UploadDataPanel.Controls.Add(this.label_upload_data_status);
-            this.UploadDataPanel.Location = new System.Drawing.Point(2, 51);
+            this.UploadDataPanel.Location = new System.Drawing.Point(0, 50);
             this.UploadDataPanel.Name = "UploadDataPanel";
             this.UploadDataPanel.Size = new System.Drawing.Size(230, 304);
             // 
@@ -881,9 +892,9 @@
             this.ElapsedTimePanel.Controls.Add(this.label_phone_IMEI);
             this.ElapsedTimePanel.Controls.Add(this.label_software_version);
             this.ElapsedTimePanel.Controls.Add(this.textBox_elapsed_time);
-            this.ElapsedTimePanel.Location = new System.Drawing.Point(3, 3);
+            this.ElapsedTimePanel.Location = new System.Drawing.Point(0, 3);
             this.ElapsedTimePanel.Name = "ElapsedTimePanel";
-            this.ElapsedTimePanel.Size = new System.Drawing.Size(233, 46);
+            this.ElapsedTimePanel.Size = new System.Drawing.Size(230, 46);
             // 
             // label_phone_IMEI
             // 
@@ -901,7 +912,7 @@
             this.MainActionsPanel.Controls.Add(this.SensorsStatusButton);
             this.MainActionsPanel.Controls.Add(this.UploadDataActionButton);
             this.MainActionsPanel.Controls.Add(this.SelectSensorsButton);
-            this.MainActionsPanel.Location = new System.Drawing.Point(0, 51);
+            this.MainActionsPanel.Location = new System.Drawing.Point(0, 50);
             this.MainActionsPanel.Name = "MainActionsPanel";
             this.MainActionsPanel.Size = new System.Drawing.Size(230, 304);
             // 
@@ -911,11 +922,11 @@
             this.textBox_main_sensor_set_ID.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox_main_sensor_set_ID.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold);
             this.textBox_main_sensor_set_ID.ForeColor = System.Drawing.Color.White;
-            this.textBox_main_sensor_set_ID.Location = new System.Drawing.Point(0, 1);
+            this.textBox_main_sensor_set_ID.Location = new System.Drawing.Point(1, 1);
             this.textBox_main_sensor_set_ID.Multiline = true;
             this.textBox_main_sensor_set_ID.Name = "textBox_main_sensor_set_ID";
             this.textBox_main_sensor_set_ID.ReadOnly = true;
-            this.textBox_main_sensor_set_ID.Size = new System.Drawing.Size(240, 27);
+            this.textBox_main_sensor_set_ID.Size = new System.Drawing.Size(228, 27);
             this.textBox_main_sensor_set_ID.TabIndex = 4;
             this.textBox_main_sensor_set_ID.Text = "RED SET";
             this.textBox_main_sensor_set_ID.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -926,11 +937,11 @@
             this.textBox_main_sensor_status.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox_main_sensor_status.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold);
             this.textBox_main_sensor_status.ForeColor = System.Drawing.Color.Tomato;
-            this.textBox_main_sensor_status.Location = new System.Drawing.Point(0, 31);
+            this.textBox_main_sensor_status.Location = new System.Drawing.Point(1, 31);
             this.textBox_main_sensor_status.Multiline = true;
             this.textBox_main_sensor_status.Name = "textBox_main_sensor_status";
             this.textBox_main_sensor_status.ReadOnly = true;
-            this.textBox_main_sensor_status.Size = new System.Drawing.Size(240, 23);
+            this.textBox_main_sensor_status.Size = new System.Drawing.Size(228, 23);
             this.textBox_main_sensor_status.TabIndex = 3;
             this.textBox_main_sensor_status.Text = "Disconnected";
             this.textBox_main_sensor_status.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -986,7 +997,12 @@
             this.Name = "WocketsMainForm";
             this.Text = "Wockets";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
+<<<<<<< .mine
+            this.Closed += new System.EventHandler(this.WocketsMainForm_Closed);
             this.Closing += new System.ComponentModel.CancelEventHandler(this.WocketsMainForm_Closing);
+=======
+            this.Closing += new System.ComponentModel.CancelEventHandler(this.WocketsMainForm_Closing);
+>>>>>>> .r575
             this.SwapPanel.ResumeLayout(false);
             this.SensorStatusPanel.ResumeLayout(false);
             this.ConnectPanel.ResumeLayout(false);

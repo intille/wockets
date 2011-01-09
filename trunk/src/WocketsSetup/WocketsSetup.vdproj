@@ -769,7 +769,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:Wockets, Version=1.0.3993.23832, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:Wockets, Version=1.0.4022.22940, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
                     "_507BFE52A70500D748998F5D9933B7C1"
@@ -1215,7 +1215,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:WocketsWeka, Version=1.0.3993.23831, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:WocketsWeka, Version=1.0.4022.22939, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
                     "_E1C51CE30114BA7F5B96576CCF0A5F05"
@@ -1462,14 +1462,14 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Wockets Tools"
-        "ProductCode" = "8:{50A12C4F-685C-4F9D-8B00-A94D9CA3439F}"
-        "PackageCode" = "8:{CEB64DAE-54B0-44B3-9889-6C3CE330B218}"
+        "ProductCode" = "8:{0CC73AE7-FF11-4D49-A17A-B2778A5DE35E}"
+        "PackageCode" = "8:{1FA3D109-AA2C-4B8E-8CFA-C2218CF8FAE5}"
         "UpgradeCode" = "8:{D097F9C0-FFBB-4A72-AD46-E41785AD6375}"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:1.41"
+        "ProductVersion" = "8:1.47"
         "Manufacturer" = "8:MIT"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
@@ -2067,7 +2067,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_2531C4A818C543D79373C9EF4D41076F"
             {
-            "SourcePath" = "8:..\\PC\\obj\\Debug\\DataMerger.exe"
+            "SourcePath" = "8:..\\..\\projects\\PC\\obj\\Debug\\DataMerger.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_C7A60E0B6349409EA376B13C6C40994C"
@@ -2095,7 +2095,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_4F27FEE71AE54439A3DF2CC4770AF741"
             {
-            "SourcePath" = "8:..\\PC\\obj\\Debug\\DataViewer.exe"
+            "SourcePath" = "8:..\\..\\projects\\PC\\obj\\Debug\\DataViewer.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_C7A60E0B6349409EA376B13C6C40994C"
@@ -2123,7 +2123,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_5EFC1F3780054C5D8C80E6D906580743"
             {
-            "SourcePath" = "8:..\\PC\\obj\\Debug\\AudioAnnotation.exe"
+            "SourcePath" = "8:..\\..\\projects\\PC\\obj\\Debug\\AudioAnnotation.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_C7A60E0B6349409EA376B13C6C40994C"
@@ -2151,7 +2151,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_8B7D2100DE7C4357865D5BF1EA83761C"
             {
-            "SourcePath" = "8:..\\PC\\obj\\Debug\\TimeSync_PC.exe"
+            "SourcePath" = "8:..\\..\\projects\\PC\\obj\\Debug\\TimeSync_PC.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_C7A60E0B6349409EA376B13C6C40994C"
@@ -2179,7 +2179,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_F9496215E89A4DBDBE85D3EBDB242FF6"
             {
-            "SourcePath" = "8:..\\PC\\obj\\Debug\\WocketsProgrammer.exe"
+            "SourcePath" = "8:..\\..\\projects\\PC\\obj\\Debug\\WocketsProgrammer.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_C7A60E0B6349409EA376B13C6C40994C"

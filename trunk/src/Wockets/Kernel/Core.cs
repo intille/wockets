@@ -360,15 +360,22 @@ namespace Wockets.Kernel
         /// </summary>
         /// <returns>True on successful spawning, otherwise false</returns>
         public static bool Start()
-        {          
+        {
+
+            Logger.Debug("Entering to kernel.start()");
+
+
+
+
             if (!Core._KernalStarted)
             {
+
                 try
                 {
                     //System.Diagnostics.Process po = new System.Diagnostics.Process();
                     ProcessStartInfo startInfo = new ProcessStartInfo();
                     
-                    //startInfo.
+                    //startInfo
                     startInfo.WorkingDirectory = KERNEL_PATH;
                     startInfo.FileName = KERNEL_PATH + KERNEL_EXECUTABLE;
                     //startInfo.FileName = startInfo.FileName;
@@ -390,6 +397,7 @@ namespace Wockets.Kernel
                 }
                 catch (Exception e)
                 {
+                    
                     return false;
                 }
             }
@@ -425,8 +433,16 @@ namespace Wockets.Kernel
 
             Thread.Sleep(2000);
             //If termination failed try killing the process
-            if (Core._KernalStarted)
-            {
+
+            //--------Commented-------------
+            //===if (Core._KernalStarted)
+            //==={
+            //------------------------------
+
+            // Core._KernelStarted Flag is unreliable, 
+            // make sure that kernel is not running
+            // otherwise, force to quit
+
                 try
                 {
                     ProcessInfo[] processes = ProcessCE.GetProcesses();
@@ -439,13 +455,15 @@ namespace Wockets.Kernel
                                 processes[i].Kill();
                                 break;
                             }
-                        }
-
-                        // registry is corrupt fix it
-                        RegistryKey rk1 = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_WOCKETS_PATH + "\\Kernel");
-                        rk1.SetValue("Status", 0, RegistryValueKind.DWord);
-                        rk1.Close();
+                        }  
                     }
+
+                    //ensure that the registry is not corrupt, fix it
+                    RegistryKey rk1 = Registry.LocalMachine.CreateSubKey(Core.REGISTRY_WOCKETS_PATH + "\\Kernel");
+                    rk1.SetValue("Status", 0, RegistryValueKind.DWord);
+                    rk1.Close();
+
+                    Thread.Sleep(2000);
                 }
                 catch
                 {
@@ -453,7 +471,13 @@ namespace Wockets.Kernel
                         return false;
 
                 }
-            }
+
+
+            //--------------------
+            //===}
+            //--------------------
+
+
             return true;
         }
 
