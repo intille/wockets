@@ -58,7 +58,7 @@ namespace CollectDataUser
 
         //General Status Variables
         private String sensor_set = "";
-        private String app_status = "";
+        //private String app_status = ""; //commented for now until determine if it is necessary to keep this state
         private String software_version = "";
         private bool is_rebooting = false;
 
@@ -296,36 +296,39 @@ namespace CollectDataUser
             #region Read the last sensor set, kernel status, and master list files
 
 
-            #region Read last status
+            #region Read last status (commented for now, not necessary to keep the status)
 
-            try
-            {
-                if (File.Exists(Core.KERNEL_PATH + "\\updater_last_status.txt"))
-                {
-                    StreamReader tr_status = new StreamReader(Core.KERNEL_PATH + "\\updater_last_status.txt");
+            //try
+            //{
+            //    if (File.Exists(Core.KERNEL_PATH + "\\updater_last_status.txt"))
+            //    {
+            //        StreamReader tr_status = new StreamReader(Core.KERNEL_PATH + "\\updater_last_status.txt");
                     
-                    app_status = tr_status.ReadLine();
-                    string vibrate_mode = tr_status.ReadLine();
-                    string mute_mode    = tr_status.ReadLine();
-                    string volume_mode = tr_status.ReadLine();
-                    #region commented
-                    //string vibrate_mode = tr_status.ReadLine();
-                    //string mute_mode = tr_status.ReadLine();
-                    //string volume_mode = tr_status.ReadLine();
-                    #endregion 
+            //        app_status = tr_status.ReadLine();
+            //        string vibrate_mode = tr_status.ReadLine();
+            //        string mute_mode    = tr_status.ReadLine();
+            //        string volume_mode = tr_status.ReadLine();
+            //        #region commented
+            //        //string vibrate_mode = tr_status.ReadLine();
+            //        //string mute_mode = tr_status.ReadLine();
+            //        //string volume_mode = tr_status.ReadLine();
+            //        #endregion 
 
-                    tr_status.Close();
+            //        tr_status.Close();
 
 
-                    if (this.app_status.CompareTo("") == 0)
-                    { this.app_status = "normal_start"; }
-                }
+            //        if (this.app_status.CompareTo("") == 0)
+            //        {  //this.app_status = "normal_start"; 
+            //            this.app_status = "running";
+            //        }
+            //    }
 
-            }
-            catch
-            {
-                this.app_status = "normal_start";
-            }
+            //}
+            //catch
+            //{
+            //    //this.app_status = "normal_start";
+            //    this.app_status = "running";
+            //}
 
             #endregion
 
@@ -496,43 +499,46 @@ namespace CollectDataUser
 
             #endregion
 
+            #region normal_start option commented
+            //if (app_status.CompareTo("normal_start") == 0)
+            //{
 
-            if (app_status.CompareTo("normal_start") == 0)
-            {
-
-                //Setup the main menu commands
-                menuMainAppActions.Text = "Main Menu";
+            //    //Setup the main menu commands
+            //    menuMainAppActions.Text = "Main Menu";
                 
-                //menuQuitApp.Text = "Connect";
-                menuQuitApp.Text = "Quit";
+            //    //menuQuitApp.Text = "Connect";
+            //    menuQuitApp.Text = "Quit";
 
-                #region Hide the connect panel (commented)
-                //ConnectPanel.Enabled = false;
-                //ConnectPanel.Visible = false;
+            //    #region Hide the connect panel (commented)
+            //    //ConnectPanel.Enabled = false;
+            //    //ConnectPanel.Visible = false;
 
-                ////Hide the Main Actions Buttons Panel
-                //MainActionsPanel.Visible = false;
-                //MainActionsPanel.Enabled = false;
+            //    ////Hide the Main Actions Buttons Panel
+            //    //MainActionsPanel.Visible = false;
+            //    //MainActionsPanel.Enabled = false;
 
-                ////Hide the Sensor Status Panel
-                //SensorStatusPanel.Visible = false;
-                //SensorStatusPanel.Enabled = false;
+            //    ////Hide the Sensor Status Panel
+            //    //SensorStatusPanel.Visible = false;
+            //    //SensorStatusPanel.Enabled = false;
                 
-                ////Show the swap panel
-                //SwapPanel.BringToFront();
-                //SwapPanel.Enabled = true;
-                //SwapPanel.Visible = true;
-                #endregion
+            //    ////Show the swap panel
+            //    //SwapPanel.BringToFront();
+            //    //SwapPanel.Enabled = true;
+            //    //SwapPanel.Visible = true;
+            //    #endregion
 
-                TurnOnPanel(PanelID.SWAP);
+            //    TurnOnPanel(PanelID.SWAP);
 
-                //update the sensor set/swap panel
-                Show_Swap_Panel("Disconnected", sensor_set, CurrentWockets._Controller);
-                Logger.Debug("Connecting to Kernel in Normal Mode");
+            //    //update the sensor set/swap panel
+            //    Show_Swap_Panel("Disconnected", sensor_set, CurrentWockets._Controller);
+            //    Logger.Debug("Connecting to Kernel in Normal Mode");
 
-            }
-            else
-            {
+            //}
+            //else
+            //{
+            #endregion  
+             
+            
                 #region Hide the swap panel
                 //SwapPanel.Enabled = false;
                 //SwapPanel.Visible = false;
@@ -551,14 +557,14 @@ namespace CollectDataUser
                 //ConnectPanel.Visible = true;
                 #endregion
 
-                TurnOnPanel(PanelID.CONNECTION);
-                label_kernel_status.Text = "";
+            TurnOnPanel(PanelID.CONNECTION);
+            label_kernel_status.Text = "Loading Application";
 
                 //Start the kernel connection sequence
-                StartLoadingWocketsToKernel();
-                Logger.Debug("Connecting to Kernel in Silent Mode");
+            StartLoadingWocketsToKernel();
+            Logger.Debug("Connecting to Kernel in Silent Mode");
 
-            }
+            //}
 
             #endregion
 
@@ -627,7 +633,7 @@ namespace CollectDataUser
                             UploadDataPanel.Visible = false;
                             UploadDataPanel.Enabled = false;
 
-                            //Stop Upload Update Thread
+                            //Stop Update Thread For Data Upload
                             StopUpdateUploadThread();
                             textBox_elapsed_time.Visible = false;
                             break;
@@ -667,6 +673,10 @@ namespace CollectDataUser
                     break;
 
                 case PanelID.UPLOAD:
+                    //Launch the update thread for the data upload
+                    textBox_elapsed_time.Visible = true;
+                    StartUpdateUploadThread();
+                    
                     MainActionsPanel.BringToFront();
                     UploadDataPanel.Visible = true;
                     UploadDataPanel.Enabled = true;
@@ -711,28 +721,30 @@ namespace CollectDataUser
                 //sensors status
                 if (status.CompareTo("Connected") == 0)
                 {
-                    textBox_sensors_status.Text = "Kernel Connected";
+                    string msg = "Kernel Running";
+                    textBox_sensors_status.Text = msg;
                     textBox_sensors_status.ForeColor = Color.Green;
 
                     //update the sensor status panel
-                    textBox_spanel_sensors_status.Text = "Kernel Connected";
+                    textBox_spanel_sensors_status.Text = msg;
                     textBox_spanel_sensors_status.ForeColor = Color.Green;
 
                     //update fields in main app actions panel
-                    textBox_main_sensor_status.Text = "Kernel Connected";
+                    textBox_main_sensor_status.Text = msg;
                     textBox_main_sensor_status.ForeColor = Color.Green;
                 }
                 else
                 {
-                    textBox_sensors_status.Text = "Kernel Disconnected";
+                    string msg = "Kernel Not Running";
+                    textBox_sensors_status.Text = msg;
                     textBox_sensors_status.ForeColor = Color.DimGray;
 
                     //update the sensor status panel
-                    textBox_spanel_sensors_status.Text = "Kernel Disconnected";
+                    textBox_spanel_sensors_status.Text = msg;
                     textBox_spanel_sensors_status.ForeColor = Color.DimGray;
 
                     //update fields in main app actions panel
-                    textBox_main_sensor_status.Text = "Kernel Disconnected";
+                    textBox_main_sensor_status.Text = msg;
                     textBox_main_sensor_status.ForeColor = Color.DimGray;
                 }
 
@@ -818,76 +830,83 @@ namespace CollectDataUser
 
             try
             {
-                if (app_status.CompareTo("running") == 0)
-                {
-                    //TODO: monitor the time that takes to receive the disconnect response
-                    //      to avoid the operation hangs.
+                #region commented
+                //if (app_status.CompareTo("running") == 0)
+                //{
+                #endregion
+
+                //TODO: monitor the time that takes to receive the disconnect response
+                //      to avoid the operation hangs.
 
                     //Disconnect current sensors set from kernel
                     Core.Disconnect();
                     UpdateMsg("Disconnecting Wockets");
                     Logger.Debug("Sending Disconnect Command to Kernel");
-                }
-                else
-                {
-                    UpdateMsg("Swapping Wockets");
-                    Logger.Debug("Start Swapping Sensors in Normal Mode. Kernel Not Connected.");
 
-                    //TODO: Stop the elapsep time thread
+                #region select the sensors according the status is commented for now
+                //}
+                //else
+                //{
+                //    UpdateMsg("Swapping Wockets");
+                //    Logger.Debug("Start Swapping Sensors in Normal Mode. Kernel Not Connected.");
 
-                    //Dispose the old wockets controller
-                    wockets_controller.Dispose();
-                    wockets_controller = new Wockets.WocketsController("", "", "");
+                //    //TODO: Stop the elapsep time thread
 
-
-                    //Determine which set will be used & load the corresponding Xml File
-                    if (this.sensor_set.CompareTo("red") == 0)
-                    {
-                        sensor_set = "green";
-                        wockets_controller.FromXML(Core.KERNEL_PATH + "\\SensorData2.xml");
-                    }
-                    else
-                    {
-                        sensor_set = "red";
-                        wockets_controller.FromXML(Core.KERNEL_PATH + "\\SensorData1.xml");
-                    }
+                //    //Dispose the old wockets controller
+                //    wockets_controller.Dispose();
+                //    wockets_controller = new Wockets.WocketsController("", "", "");
 
 
-                    //point the kernel to the wockets controller
-                    CurrentWockets._Controller = wockets_controller;
+                //    //Determine which set will be used & load the corresponding Xml File
+                //    if (this.sensor_set.CompareTo("red") == 0)
+                //    {
+                //        sensor_set = "green";
+                //        wockets_controller.FromXML(Core.KERNEL_PATH + "\\SensorData2.xml");
+                //    }
+                //    else
+                //    {
+                //        sensor_set = "red";
+                //        wockets_controller.FromXML(Core.KERNEL_PATH + "\\SensorData1.xml");
+                //    }
 
 
-                    //TODO: Check if macs against the master list file
+                //    //point the kernel to the wockets controller
+                //    CurrentWockets._Controller = wockets_controller;
 
 
-                    //Add the sensors macs to the sensor list
-                    sensors_list.Clear();
-                    for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
-                        sensors_list.Add(((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address);
+                //    //TODO: Check if macs against the master list file
 
 
-                    Thread.Sleep(1000);
+                //    //Add the sensors macs to the sensor list
+                //    sensors_list.Clear();
+                //    for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+                //        sensors_list.Add(((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address);
 
-                    #region Hide the connect status panel
-                    //ConnectPanel.Visible = false;
-                    //ConnectPanel.Enabled = false;
 
-                    ////Show the swap panel
-                    //SwapPanel.BringToFront();
-                    //SwapPanel.Visible = true;
-                    //SwapPanel.Enabled = true;
-                    #endregion
+                //    Thread.Sleep(1000);
 
-                    TurnOnPanel(PanelID.SWAP);
+                //    #region Hide the connect status panel
+                //    //ConnectPanel.Visible = false;
+                //    //ConnectPanel.Enabled = false;
 
-                    //Update the swap interface
-                    Show_Swap_Panel("Disconnected", sensor_set, wockets_controller);
+                //    ////Show the swap panel
+                //    //SwapPanel.BringToFront();
+                //    //SwapPanel.Visible = true;
+                //    //SwapPanel.Enabled = true;
+                //    #endregion
 
-                }
+                //    TurnOnPanel(PanelID.SWAP);
+
+                //    //Update the swap interface
+                //    Show_Swap_Panel("Disconnected", sensor_set, wockets_controller);
+
+                //}
+                #endregion
+
             }
-            catch
+            catch(Exception ex)
             {
-                Logger.Debug("An exception ocurred when the swap button was clicked.");
+                Logger.Debug("An exception ocurred when trying to disconnect from kernel, after the swap button was clicked. Ex: " + ex);
             }
 
         }
@@ -1215,247 +1234,280 @@ namespace CollectDataUser
                         switch (rsp)
                         {
                             case KernelResponse.PING_RESPONSE:
-                                Logger.Debug("Ping responsed received");
-                                UpdateMsg("Register App");
-                                Core.Register();
+                                try
+                                {
+                                    Logger.Debug("Ping responsed received");
+                                    UpdateMsg("Ping Received");
+                                    Core.Register();
+                                }
+                                catch(Exception ex)
+                                {
+                                    Logger.Debug("An exception occurred in trying to register app in the kernel. Ex: " + ex); 
+                                }
+                                
                                 break;
+
                             case KernelResponse.STARTED:
-                                Logger.Debug("Registered started response received");
-                                UpdateMsg("Register App");
-                                Core.Register();
+                                //Logger.Debug("Registered started response received");
+                                //UpdateMsg("Register Application");
+                                //Core.Register();
                                 break;
                             case KernelResponse.REGISTERED:
-                                Logger.Debug("Registered finished response received");
-                                UpdateMsg("Verify Wockets");
-                                Core.SetSensors(this.sensors_list);
-                                UpdateMsg("Sensors Set");
+                                try
+                                {
+                                    Logger.Debug("Registered finished response received");
+                                    UpdateMsg("Verify Wockets");
+                                    Core.SetSensors(this.sensors_list);
+                                }
+                                catch(Exception ex)
+                                {
+                                    Logger.Debug("An exception occurred in trying to set sensors in the kernel. Ex: " + ex); 
+                                }
                                 break;
                             case KernelResponse.SENSORS_UPDATED:
-                                Logger.Debug("Sensors updated response received");
-                                UpdateMsg("Connect Wockets");
-                                Core.Connect(TransmissionMode.Bursty60);
-                                
+                                try
+                                {
+                                    Logger.Debug("Sensors updated response received");
+                                    UpdateMsg("Connect Wockets");
+                                    Core.Connect(TransmissionMode.Bursty60);
+                                }
+                                catch (Exception ex)
+                                {
+                                    Logger.Debug("An exception occurred in trying to connect the sensors to the kernel. Ex: " + ex);
+                                }
                                 break;
                             case KernelResponse.CONNECTED:
 
-                                Logger.Debug("connected response received");
-
-                                //Wait for the system to stabilize (already included in start kernel thread)
-                                //Thread.Sleep(4000);
-
-                                #region Connect Sequence
-
-                                //Write the connection status to panel screen
-                                UpdateMsg("Wockets Connected");
-
-                                //Wait for the system to stabilize
-                                //Thread.Sleep(1000);
-
-
-                                // Update Status Files
-                               try
+                                try
                                 {
-                                    Logger.Debug("start saving app status to files");
+                                    Logger.Debug("connected response received");
 
-                                    //Set ID file
-                                    //updates the sensor set used by kernel
-                                    StreamWriter wr_sensors = new StreamWriter(Core.KERNEL_PATH + "\\updater_last_set.txt");
-                                    wr_sensors.WriteLine(sensor_set);
-                                    wr_sensors.Flush();
-                                    wr_sensors.Close();
+                                    //Wait for the system to stabilize (already included in start kernel thread)
+                                    //Thread.Sleep(4000);
 
-                                    //indicates that the kernel is running
-                                    app_status = "running";
-                                    
-                                   //Indicate that application was terminated by the user
-                                    StreamWriter wr_status = new StreamWriter(Core.KERNEL_PATH + "\\updater_last_status.txt");
-                                    wr_status.WriteLine("running");
-                                    wr_status.Flush();
-                                    wr_status.Close();
+                                    #region Connect Sequence
+
+                                    //Write the connection status to panel screen
+                                    UpdateMsg("Wockets Connected");
+
+                                    //Wait for the system to stabilize
+                                    //Thread.Sleep(1000);
+
+
+                                    // Update Status Files
+                                    try
+                                    {
+                                        Logger.Debug("start saving app status to files");
+
+                                        //Set ID file
+                                        //updates the sensor set used by kernel
+                                        StreamWriter wr_sensors = new StreamWriter(Core.KERNEL_PATH + "\\updater_last_set.txt");
+                                        wr_sensors.WriteLine(sensor_set);
+                                        wr_sensors.Flush();
+                                        wr_sensors.Close();
+
+                                        #region indicates that the kernel is running
+
+                                        //app_status = "running";
+
+                                        ////Indicate that application was terminated by the user
+                                        //StreamWriter wr_status = new StreamWriter(Core.KERNEL_PATH + "\\updater_last_status.txt");
+                                        //wr_status.WriteLine("running");
+                                        //wr_status.Flush();
+                                        //wr_status.Close();
+
+                                        #endregion
+
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        Logger.Debug("An exception occurred when trying to save set status to file, after receiving kernel connected response. Ex: " + e);
+                                    }
+
+
+                                    //Update the sensors status variable on the swap panel screen
+                                    Show_Swap_Panel("Connected", sensor_set, wockets_controller);
+
+                                    #region Hide the connect panel (commented)
+                                    //ConnectPanel.Enabled = false;
+                                    //ConnectPanel.Visible = false;
+
+                                    ////Show the swap panel
+                                    //SwapPanel.BringToFront();
+                                    //SwapPanel.Enabled = true;
+                                    //SwapPanel.Visible = true;
+                                    #endregion
+
+                                    TurnOnPanel(PanelID.SWAP);
+
+                                    //Update the main application menu options
+                                    menuMainAppActions.Text = "Main Menu";
+
+                                    //Wait to stabilize system
+                                    //Thread.Sleep(1000);
+
+                                    //Start the connection status thread 
+                                    if (!ACsUpdateTimer.Enabled)
+                                        StartACsUpdater();
+
+                                    //Initialize the connection status timer
+                                    for (int np = 0; np < wockets_controller._Receivers.Count; np++)
+                                        LastPkgTime[np] = DateTime.Now;
+
+
+                                    #endregion
+
+                                    Logger.Debug("Connection to wockets procedure finished");
                                 }
-                               catch 
-                               { 
-                                   Logger.Debug("An exception occurred when trying to save app status to files"); 
-                               }
-
-
-                               //Update the sensors status variable on the swap panel screen
-                               Show_Swap_Panel("Connected", sensor_set, wockets_controller);
-                               
-                               #region Hide the connect panel (commented)
-                               //ConnectPanel.Enabled = false;
-                               //ConnectPanel.Visible = false;
-                               
-                               ////Show the swap panel
-                               //SwapPanel.BringToFront();
-                               //SwapPanel.Enabled = true;
-                               //SwapPanel.Visible = true;
-                                #endregion
-
-                               TurnOnPanel(PanelID.SWAP);
-
-                               //Update the main application menu options
-                               menuMainAppActions.Text = "Main Menu";
-
-                               //Wait to stabilize system
-                               //Thread.Sleep(1000);
-
-                              //Start the connection status thread 
-                              if( !ACsUpdateTimer.Enabled )
-                                StartACsUpdater();
-
-                              //Initialize the connection status timer
-                              for (int np = 0; np < wockets_controller._Receivers.Count; np++)
-                                  LastPkgTime[np] = DateTime.Now;
-
-                             
-                              #endregion
-
-                              Logger.Debug("Connection to wockets procedure finished");
+                                catch (Exception ex)
+                                {
+                                    Logger.Debug("An exception occurred while executing the kernel connect sequence. Ex: " + ex);
+                                }
 
                               break;
 
 
                             case KernelResponse.DISCONNECTED:
+                                  Logger.Debug("Disconnect from wockets response received");
 
-                              Logger.Debug("Disconnect from wockets response received");
+                                  #region commented
+                                  ////Stop the connection status thread 
+                                  //if (ACsUpdateTimer.Enabled)
+                                  //    StopACsUpdater();
 
-                              #region commented
-                              ////Stop the connection status thread 
-                                //if (ACsUpdateTimer.Enabled)
-                                //    StopACsUpdater();
-                                
-                                //Thread.Sleep(1000);
+                                  //Thread.Sleep(1000);
 
-                                ////Stop Kernel
-                                //if (TerminateKernel())
-                                //    UpdateMsg("Stopping Kernel");
+                                  ////Stop Kernel
+                                  //if (TerminateKernel())
+                                  //    UpdateMsg("Stopping Kernel");
 
-                                ////Wait to stabilize system (2 secs)
-                              //Thread.Sleep(1000);
-                              #endregion 
+                                  ////Wait to stabilize system (2 secs)
+                                  //Thread.Sleep(1000);
+                                  #endregion
 
-                              #region Start The Swap Sequence (commented)
+                                  #region Start The Swap Sequence (commented)
 
-                              #region commented
-                              //if disconnected, swap sensors if the app is running
-                                //if (app_status.CompareTo("running") == 0){}
-                                #endregion
+                                      #region commented
+                                      //if disconnected, swap sensors if the app is running
+                                      //if (app_status.CompareTo("running") == 0){}
+                                      #endregion
 
+                                  #region commented because the now booting when swaping
+                                  //try
+                                  //{
+                                  //    //TODO: Register/Log the swap wockets event
+                                  //    UpdateMsg("Swap Wockets");
+                                  //    Logger.Debug("Starting to swap wockets, Current Set: " + sensor_set);
 
-                                //try
-                                //{
-                                //    //TODO: Register/Log the swap wockets event
-                                //    UpdateMsg("Swap Wockets");
-                                //    Logger.Debug("Starting to swap wockets, Current Set: " + sensor_set);
+                                  //    //Dispose the old wockets controller
+                                  //    wockets_controller.Dispose();
+                                  //    Thread.Sleep(1000);
+                                  //    Logger.Debug("Wockets controller disposed");
 
-                                //    //Dispose the old wockets controller
-                                //    wockets_controller.Dispose();
-                                //    Thread.Sleep(1000);
-                                //    Logger.Debug("Wockets controller disposed");
+                                  //    //Create new wockets controller
+                                  //    wockets_controller = new Wockets.WocketsController("", "", "");
 
-                                //    //Create new wockets controller
-                                //    wockets_controller = new Wockets.WocketsController("", "", "");
-
-                                //    //Determine which set will be used & load the corresponding Xml File
-                                //    if (this.sensor_set.CompareTo("red") == 0)
-                                //    {
-                                //        sensor_set = "green";
-                                //        wockets_controller.FromXML(Core.KERNEL_PATH + "\\updater_SensorData2.xml");
-                                //    }
-                                //    else
-                                //    {
-                                //        sensor_set = "red";
-                                //        wockets_controller.FromXML(Core.KERNEL_PATH + "\\updater_SensorData1.xml");
-                                //    }
-
-
-                                //    //TODO: Check if macs against the master list file
-                                //    //point kernel to new wockets controller
-                                //    CurrentWockets._Controller = wockets_controller;
-
-                                //    //Add the sensors macs to the sensor list
-                                //    sensors_list.Clear();
-                                //    for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
-                                //        sensors_list.Add(((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address);
-                                    
-                                //    //Update status message
-                                //    UpdateMsg("Wockets Swapped");
-                                //    Thread.Sleep(1000);
-                                //    Logger.Debug("Finish loading new set from Xml, new set: " + sensor_set);
+                                  //    //Determine which set will be used & load the corresponding Xml File
+                                  //    if (this.sensor_set.CompareTo("red") == 0)
+                                  //    {
+                                  //        sensor_set = "green";
+                                  //        wockets_controller.FromXML(Core.KERNEL_PATH + "\\updater_SensorData2.xml");
+                                  //    }
+                                  //    else
+                                  //    {
+                                  //        sensor_set = "red";
+                                  //        wockets_controller.FromXML(Core.KERNEL_PATH + "\\updater_SensorData1.xml");
+                                  //    }
 
 
-                                //    //--- Initialize Kernel  ---
-                                //    ResetUploaderCounters();
-                                //    ResetACsCounters(wockets_controller);
-                                //    for (int i = 0; i < wockets_controller._Receivers.Count; i++)
-                                //    {
-                                //        PrevFullPkg[i] = 0;
-                                //        PrevPartialPkg[i] = 0;
-                                //        PrevEmptyPkg[i] = 0;
-                                //    }
-                                   
+                                  //    //TODO: Check if macs against the master list file
+                                  //    //point kernel to new wockets controller
+                                  //    CurrentWockets._Controller = wockets_controller;
 
-                                //    //== Restart kernel == (commented for now)
-                                //    //SuscribeToKernelEvents();
-                                //    //Start the kernel connection sequence
-                                //    //StartLoadingWocketsToKernel();
-                                //    //Update status message
-                                //    //UpdateMsg("Kernel Started");
-                                //    //Thread.Sleep(1000);
+                                  //    //Add the sensors macs to the sensor list
+                                  //    sensors_list.Clear();
+                                  //    for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+                                  //        sensors_list.Add(((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address);
 
-                                //    UpdateMsg("Verify Wockets");
-                                //    Core.SetSensors(this.sensors_list);
-                                //    Thread.Sleep(2000);
-                                //    Logger.Debug("Set Sensors Command Sent");
-
-                                //}
-                                //catch
-                                //{
-                                //    Logger.Debug("Swap sequence after wockets disconnected failed.");
-                                //}
+                                  //    //Update status message
+                                  //    UpdateMsg("Wockets Swapped");
+                                  //    Thread.Sleep(1000);
+                                  //    Logger.Debug("Finish loading new set from Xml, new set: " + sensor_set);
 
 
-                                #endregion
+                                  //    //--- Initialize Kernel  ---
+                                  //    ResetUploaderCounters();
+                                  //    ResetACsCounters(wockets_controller);
+                                  //    for (int i = 0; i < wockets_controller._Receivers.Count; i++)
+                                  //    {
+                                  //        PrevFullPkg[i] = 0;
+                                  //        PrevPartialPkg[i] = 0;
+                                  //        PrevEmptyPkg[i] = 0;
+                                  //    }
 
-                              UpdateMsg("Stopping Kernel");
 
-                                //Indicate the swap sequence in the status files
-                                try
-                                {
-                                    //Save set ID to file
-                                    StreamWriter wr_sensors = new StreamWriter(Core.KERNEL_PATH + "\\updater_last_set.txt");
-                                    
-                                    //Determine which set will be used 
-                                    if (this.sensor_set.CompareTo("red") == 0)
+                                  //    //== Restart kernel == (commented for now)
+                                  //    //SuscribeToKernelEvents();
+                                  //    //Start the kernel connection sequence
+                                  //    //StartLoadingWocketsToKernel();
+                                  //    //Update status message
+                                  //    //UpdateMsg("Kernel Started");
+                                  //    //Thread.Sleep(1000);
+
+                                  //    UpdateMsg("Verify Wockets");
+                                  //    Core.SetSensors(this.sensors_list);
+                                  //    Thread.Sleep(2000);
+                                  //    Logger.Debug("Set Sensors Command Sent");
+
+                                  //}
+                                  //catch
+                                  //{
+                                  //    Logger.Debug("Swap sequence after wockets disconnected failed.");
+                                  //}
+
+
+                                  #endregion
+
+                                  #endregion
+                                  
+
+                                  try
+                                  {
+                                      UpdateMsg("Stopping Kernel");
+
+                                      //Indicate the swap sequence in the status files
+                                      StreamWriter wr_sensors = new StreamWriter(Core.KERNEL_PATH + "\\updater_last_set.txt");
+
+                                      //Determine which set will be used 
+                                      if (this.sensor_set.CompareTo("red") == 0)
                                           sensor_set = "green";
-                                    else
+                                      else
                                           sensor_set = "red";
-                                    
-                                    wr_sensors.WriteLine(sensor_set);
-                                    wr_sensors.Flush();
-                                    wr_sensors.Close();
-                                }
-                                catch
-                                {
-                                    Logger.Debug("An exception occurred after disconnected from kernel. When trying to save set id to file in the swapping process."); 
-                                }
 
+                                      wr_sensors.WriteLine(sensor_set);
+                                      wr_sensors.Flush();
+                                      wr_sensors.Close();
+                                  }
+                                  catch(Exception ex)
+                                  {
+                                      Logger.Debug("An exception occurred after disconnected from kernel, before rebooting. When trying to save set id to file in the swapping process. Ex: " + ex);
+                                  }
 
-                                //close application & reboot
-                                is_rebooting = true;
-                                this.Close();
-                                break;
+                             
+                              //close application & reboot
+                              is_rebooting = true;
+                              this.Close();
+                              
+                            break;
 
                             default:
                                 break;
                         }
-
                     }
                 }
-                catch
+                catch(Exception e)
                 {
-                   Logger.Debug("exception in the kernel event listener");
+                   Logger.Debug("exception in the main kernel event listener. Ex; " + e);
                 }
             }
 
@@ -1508,28 +1560,30 @@ namespace CollectDataUser
  
                     if (status_msg.CompareTo("Connected") == 0)
                     {
-                        textBox_sensors_status.Text = "Kernel Connected";
+                        string msg = "Kernel Running";
+                        textBox_sensors_status.Text = msg;
                         textBox_sensors_status.ForeColor = Color.Green;
 
                         //update the sensor status panel
-                        textBox_spanel_sensors_status.Text = "Kernel Connected";
+                        textBox_spanel_sensors_status.Text = msg;
                         textBox_spanel_sensors_status.ForeColor = Color.Green;
 
                         //update fields in main app actions panel
-                        textBox_main_sensor_status.Text = "Kernel Connected";
+                        textBox_main_sensor_status.Text = msg;
                         textBox_main_sensor_status.ForeColor = Color.Green;
                     }
                     else if (status_msg.CompareTo("Disconnected") == 0)
                     {
-                        textBox_sensors_status.Text = "Kernel Disconnected";
+                        string msg = "Kernel Not Running";
+                        textBox_sensors_status.Text = msg;
                         textBox_sensors_status.ForeColor = Color.DimGray;
 
                         //update the sensor status panel
-                        textBox_spanel_sensors_status.Text = "Kernel Disconnected";
+                        textBox_spanel_sensors_status.Text = msg;
                         textBox_spanel_sensors_status.ForeColor = Color.DimGray;
 
                         //update fields in main app actions panel
-                        textBox_main_sensor_status.Text = "Kernel Disconnected";
+                        textBox_main_sensor_status.Text = msg;
                         textBox_main_sensor_status.ForeColor = Color.DimGray;
                     }
                     else
@@ -2050,12 +2104,17 @@ namespace CollectDataUser
 
                     Logger.Debug("user confirmed to quit the application");
 
-                    try
-                    {
-                        //Indicate that application was terminated by the user
-                        StreamWriter wr_status = new StreamWriter(Core.KERNEL_PATH + "\\updater_last_status.txt");
-                        wr_status.WriteLine("running");
-                        Logger.Debug("Application terminated by the user. Quit Button Pressed.");
+                    //try
+                    //{
+                        //TODO: check if this part will be necessary in the future
+                        #region temporarely commented (not necessary to keep the status for now)
+                        ////Indicate that application was terminated by the user
+                        //StreamWriter wr_status = new StreamWriter(Core.KERNEL_PATH + "\\updater_last_status.txt");
+                        //wr_status.WriteLine("running");
+                        //Logger.Debug("Application terminated by the user. Quit Button Pressed.");
+                        //wr_status.Flush();
+                        //wr_status.Close();
+                        #endregion
 
                         //wr_status.WriteLine("normal_start");
                         #region commented
@@ -2082,13 +2141,12 @@ namespace CollectDataUser
                         //    wr_status.WriteLine("no_muted");
                         #endregion 
 
-                        wr_status.Flush();
-                        wr_status.Close();
-                    }
-                    catch
-                    {
-                        Logger.Debug("An exception occurred when saving app status to file.");
-                    }
+                       
+                    //}
+                    //catch
+                    //{
+                    //    Logger.Debug("An exception occurred when saving app status to file.");
+                    //}
 
                     TerminateApp();
 
@@ -2098,9 +2156,11 @@ namespace CollectDataUser
                 }
                 else
                 {
-                        //Hide the connect panel
+                    #region commented
+                    //Hide the connect panel
                         //ConnectPanel.Visible = false;
-                        //ConnectPanel.Enabled = false;
+                    //ConnectPanel.Enabled = false;
+                    #endregion
                     #region Show the panel that was originally open (commented)
 
                     //switch (panel_open)
@@ -2288,7 +2348,7 @@ namespace CollectDataUser
             }
             catch(Exception e)
             {
-                Logger.Debug("An exception occurred when trying to kill the kernel process.");
+                Logger.Debug("An exception occurred when trying to kill the kernel process. Ex: " + e);
             }
         }
 
@@ -2313,7 +2373,7 @@ namespace CollectDataUser
             }
             catch(Exception  e)
             {
-                Logger.Debug("An exception occurred when trying to terminate the log uploader.");
+                Logger.Debug("An exception occurred when trying to terminate the log uploader. Ex: " + e);
             }
         }
 
@@ -2578,12 +2638,6 @@ namespace CollectDataUser
             //Update Main App Actions Menu
             menuMainAppActions.Text = "Main Menu";
             TurnOnPanel(PanelID.UPLOAD);
-
-            //Show elapsed time timer label
-            textBox_elapsed_time.Visible = true;
-
-            //Launch the update upload and timer thread
-            StartUpdateUploadThread();
             UploadDataActionButton.Enabled = true;
 
         }
@@ -2758,7 +2812,7 @@ namespace CollectDataUser
             }
             catch (Exception e)
             {
-                Logger.Debug("An exception occureed when inquiring if the uploader is running.");
+                Logger.Debug("An exception occureed when inquiring if the uploader is running. Ex: " + e);
                 return false;
             }
         }
@@ -2842,7 +2896,7 @@ namespace CollectDataUser
             }
             catch (Exception ex)
             {
-                Logger.Debug("An exception occureed when trying to launch the logUploader.exe program");
+                Logger.Debug("An exception occureed when trying to launch the logUploader.exe program. Ex: " + ex);
                 return false;
             }
         }
@@ -2886,7 +2940,7 @@ namespace CollectDataUser
             }
             catch (Exception e)
             {
-                Logger.Debug("An exception occureed when inquiring if the log uploader is running.");
+                Logger.Debug("An exception occureed when inquiring if the log uploader is running. Ex: " + e);
                 return false;
             }
         }
@@ -2973,7 +3027,7 @@ namespace CollectDataUser
 
 
                   UpdateFilesUploaded();
-                  Thread.Sleep(500);
+                  Thread.Sleep(1000);
               }
           }
           catch
@@ -3007,7 +3061,7 @@ namespace CollectDataUser
 
                   counter++;
 
-                  if (counter == 6) //enter every 3 secs
+                  if (counter == 6) //enter every 6 secs
                   {
 
                       #region Update the Raw Data Uploaded Status 
