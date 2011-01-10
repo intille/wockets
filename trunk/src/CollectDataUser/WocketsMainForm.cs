@@ -2340,7 +2340,7 @@ namespace CollectDataUser
                 {
                     if (kernel_process != null)
                     {
-                        kernel_process.Close();
+                        //kernel_process.Close();
                         //uploader_process.Dispose();
                         kernel_process.Kill();
                     }
@@ -2408,6 +2408,9 @@ namespace CollectDataUser
             {
                 Logger.Debug("Starting to quit application");
 
+                //Stop Update Upload Thread if running
+                StopUpdateUploadThread();
+
                 //Stop status monitoring thread
                 StopACsUpdater();
                
@@ -2426,8 +2429,6 @@ namespace CollectDataUser
                 if ( !TerminateKernel()) //=== if (!Core._KernalStarted)
                    Logger.Debug("Failed to terminate kernel, exection when forcing to quit");
 
-                //Terminate hidden window 
-                this.messageWindow.Dispose();
 
                 //Terminate app
                 Application.Exit();
@@ -2469,29 +2470,31 @@ namespace CollectDataUser
             //    }
             #endregion
 
+           
         }
         
 
         private void WocketsMainForm_Closed(object sender, EventArgs e)
         {
 
-            try
-            {
                 if (!is_rebooting)
                 {
-                    Logger.Debug("The application quit successfully.");
+                    Logger.Debug("The application has quit successfully.");
+                    
+                    //Terminate hidden window 
+                    this.messageWindow.Dispose();
+                    KillKernel();
                     System.Diagnostics.Process.GetCurrentProcess().Kill();
                 }
                 else
                 {
                     Logger.Debug("The phone is rebooting.");
+                    
+                    //Terminate hidden window 
+                    this.messageWindow.Dispose();
+
                     rebootDevice();
                 }
-            }
-            catch
-            {
-                Logger.Debug("An exception occurred when executing the kill process command.");
-            }
         }
 
 
@@ -3005,6 +3008,7 @@ namespace CollectDataUser
       {
           if (uploadThread != null)
           { uploadThread.Abort();
+            uploadThread = null;
             Logger.Debug("upload monitor thread stopped");
           }
       }
@@ -3638,7 +3642,8 @@ namespace CollectDataUser
             //filter the Terminate Message
             if (m.Msg == TERMINATE_MESSAGE)
             {
-                referedForm.TerminateApp();
+                //referedForm.TerminateApp();
+                referedForm.Close();
             }
 
             //make sure to pass along all messages
