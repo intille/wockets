@@ -130,49 +130,52 @@ namespace CollectDataUser
         #endregion 
 
 
-        private static IntPtr handle_blt = IntPtr.Zero;
+      #region Phone Power DLL commented
+        //private static IntPtr handle_blt = IntPtr.Zero;
 
-        public enum CEDEVICE_POWER_STATE
-        {
-            PwrDeviceUnspecified = -1,
-            D0 = 0,  // on
-            D1,      // low power
-            D2,      // standby, system cannot wakeup the system
-            D3,      // sleep, device can wakeup the system
-            D4,      // off
-            PwrDeviceMaximum
-        }
+        //public enum CEDEVICE_POWER_STATE
+        //{
+        //    PwrDeviceUnspecified = -1,
+        //    D0 = 0,  // on
+        //    D1,      // low power
+        //    D2,      // standby, system cannot wakeup the system
+        //    D3,      // sleep, device can wakeup the system
+        //    D4,      // off
+        //    PwrDeviceMaximum
+        //}
 
-        public enum PowerStateRequirement
-        {
-            POWER_NAME = 0x00000001,         // default
-            POWER_FORCE = 0x00001000,
-            POWER_DUMPDW = 0x00002000        // Calling CaptureDumpFileOnDevice() before entering this state.
-        }
-
-
-        public enum PowerState
-        {
-            POWER_STATE_ON = 0x00010000,         // power state in P3600
-            POWER_STATE_OFF = 0x00020000,
-            POWER_STATE_CRITICAL = 0x00040000,
-            POWER_STATE_BOOT = 0x00080000,
-            POWER_STATE_IDLE = 0x00100000,         //---> screen off,  touch disabled
-            POWER_STATE_SUSPEND = 0x00200000,
-            POWER_STATE_UNATTENDED = 0x00400000,
-            POWER_STATE_RESET = 0x00800000,
-            POWER_STATE_USERIDLE = 0x01000000,     //---> user idle, screen off, but touch enabled
-            POWER_STATE_PASSWORD = 0x10000000,     //---> resuming
-            POWER_STATE_BACKLIGHTOFF = 0x10010000, //---> bkl-off
-            POWER_STATE_POWERON = 0x12010000       // power state in P3300
-        }
+        //public enum PowerStateRequirement
+        //{
+        //    POWER_NAME = 0x00000001,         // default
+        //    POWER_FORCE = 0x00001000,
+        //    POWER_DUMPDW = 0x00002000        // Calling CaptureDumpFileOnDevice() before entering this state.
+        //}
 
 
-        [DllImport("coredll.dll", SetLastError = true)]
-        extern private static int SetDevicePower(string psDevice, PowerStateRequirement dflags, CEDEVICE_POWER_STATE device_state);
+        //public enum PowerState
+        //{
+        //    POWER_STATE_ON = 0x00010000,         // power state in P3600
+        //    POWER_STATE_OFF = 0x00020000,
+        //    POWER_STATE_CRITICAL = 0x00040000,
+        //    POWER_STATE_BOOT = 0x00080000,
+        //    POWER_STATE_IDLE = 0x00100000,         //---> screen off,  touch disabled
+        //    POWER_STATE_SUSPEND = 0x00200000,
+        //    POWER_STATE_UNATTENDED = 0x00400000,
+        //    POWER_STATE_RESET = 0x00800000,
+        //    POWER_STATE_USERIDLE = 0x01000000,     //---> user idle, screen off, but touch enabled
+        //    POWER_STATE_PASSWORD = 0x10000000,     //---> resuming
+        //    POWER_STATE_BACKLIGHTOFF = 0x10010000, //---> bkl-off
+        //    POWER_STATE_POWERON = 0x12010000       // power state in P3300
+        //}
 
-        [DllImport("coredll.dll", SetLastError = true)]
-        extern private static int SetSystemPowerState(string psState, PowerState stateflags, int options);
+
+        //[DllImport("coredll.dll", SetLastError = true)]
+        //extern private static int SetDevicePower(string psDevice, PowerStateRequirement dflags, CEDEVICE_POWER_STATE device_state);
+
+        //[DllImport("coredll.dll", SetLastError = true)]
+        //extern private static int SetSystemPowerState(string psState, PowerState stateflags, int options);
+
+        #endregion
 
 
       #region Initialize Form
@@ -293,15 +296,7 @@ namespace CollectDataUser
             #region Read the last sensor set, kernel status, and master list files
 
 
-
-            #region Read the last kernel status
-
-
-            try
-            {
-                if (File.Exists(Core.KERNEL_PATH + "\\updater_last_status.txt"))
-                {
-                    StreamReader tr_status = new StreamReader(Core.KERNEL_PATH + "\\updater_last_status.txt");
+            #region Read last status
 
             try
             {
@@ -332,50 +327,7 @@ namespace CollectDataUser
                 this.app_status = "normal_start";
             }
 
-
-                    tr_status.Close();
-
-
-                    if (this.app_status.CompareTo("") == 0)
-                    { this.app_status = "normal_start"; }
-
-
-                    //if (vibrate_mode != null && vibrate_mode.CompareTo("vibrate") == 0)
-                    //    SetProfileVibrate();
-                    //else if ( mute_mode!= null && mute_mode.CompareTo("muted") == 0)
-                    //    SetProfileMuted();
-                    //else
-
-                    //waveOutSetVolume(IntPtr.Zero, (int)Volumes.MEDIUM);
-
-                    //SetProfileNormal(SND_EVENT.RingLine1);
-                    //SetProfileNormal(SND_EVENT.KnownCallerLine1);
-
-                    //if (this.app_status.CompareTo("normal_start") != 0)
-                    //{
-                        //DisplayPower.PowerOff();
-                        //SetDevicePower("BKL1:", PowerStateRequirement.POWER_NAME, CEDEVICE_POWER_STATE.D4);
-                        SetSystemPowerState(null, PowerState.POWER_STATE_USERIDLE, 0);
-                    //}
-                }
-                else
-                {
-                    //set the app to start from beginning
-                    this.app_status = "normal_start";
-
-                    //set audio settings to normal
-                    //SetProfileNormal(SND_EVENT.All);
-                    //waveOutSetVolume(IntPtr.Zero, (int)Volumes.MEDIUM);
-
-                }
-            }
-            catch
-            {
-                this.app_status = "normal_start";
-            }
-
             #endregion
-
 
             #region Read the last sensor set
 
@@ -447,11 +399,8 @@ namespace CollectDataUser
 
 
             #endregion
-
+           
             
-            #region Check updates from master list
-
-
             #region Check MAC addresses updates from master list
 
 
@@ -480,7 +429,7 @@ namespace CollectDataUser
 
             SuscribeToKernelEvents();
 
-
+            #endregion
 
 
             #region Initialize thread that tracks the connection status
@@ -533,6 +482,7 @@ namespace CollectDataUser
 
             //Hide the timer label
             textBox_elapsed_time.Visible = false;
+            textBox_elapsed_time.Enabled = false;
             textBox_elapsed_time.Text = "00h:00m:00s";
 
             #endregion
@@ -625,7 +575,9 @@ namespace CollectDataUser
         }
 
 
-        #endregion
+      #endregion
+
+
 
 
       #region Set Panels ON/OFF
@@ -652,6 +604,7 @@ namespace CollectDataUser
 
         }
 
+
         private void TurnOnPanel(PanelID ID)
         { 
 
@@ -673,6 +626,10 @@ namespace CollectDataUser
                 case PanelID.UPLOAD:
                             UploadDataPanel.Visible = false;
                             UploadDataPanel.Enabled = false;
+
+                            //Stop Upload Update Thread
+                            StopUpdateUploadThread();
+                            textBox_elapsed_time.Visible = false;
                             break;
             
                 case PanelID.STATUS:
@@ -1603,109 +1560,109 @@ namespace CollectDataUser
      #endregion
 
 
-      #region Audio Control Functions
+      #region Audio Control Functions commented
 
-          //Structures
-           public enum SND_SOUNDTYPE
-            {
-                On,
-                File,
-                Vibrate,
-                None
-            }
+          ////Structures
+          // public enum SND_SOUNDTYPE
+          //  {
+          //      On,
+          //      File,
+          //      Vibrate,
+          //      None
+          //  }
 
-           private enum SND_EVENT
-            {
-                All,
-                RingLine1,
-                RingLine2,
-                KnownCallerLine1,
-                RoamingLine1,
-                RingVoip
-            }
+          // private enum SND_EVENT
+          //  {
+          //      All,
+          //      RingLine1,
+          //      RingLine2,
+          //      KnownCallerLine1,
+          //      RoamingLine1,
+          //      RingVoip
+          //  }
 
-           [StructLayout(LayoutKind.Sequential)]
-           private struct SNDFILEINFO
-            {
-                [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
-                public string szPathName;
-                [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
-                public string szDisplayName;
-                public SND_SOUNDTYPE sstType;
-            }
+          // [StructLayout(LayoutKind.Sequential)]
+          // private struct SNDFILEINFO
+          //  {
+          //      [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
+          //      public string szPathName;
+          //      [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
+          //      public string szDisplayName;
+          //      public SND_SOUNDTYPE sstType;
+          //  }
 
-           public enum Volumes : int
-           {
-               OFF = 0,
+          // public enum Volumes : int
+          // {
+          //     OFF = 0,
 
-               LOW = 858993459,
+          //     LOW = 858993459,
 
-               NORMAL = 1717986918,
+          //     NORMAL = 1717986918,
 
-               MEDIUM = -1717986919,
+          //     MEDIUM = -1717986919,
 
-               HIGH = -858993460,
+          //     HIGH = -858993460,
 
-               VERY_HIGH = -1
-           }
-
-
-           //PInvokes
-           [DllImport("coredll.dll")]
-           public static extern void AudioUpdateFromRegistry();
-
-           [DllImport("aygshell.dll", SetLastError = true)]
-           private static extern uint SndSetSound(SND_EVENT seSoundEvent, ref SNDFILEINFO pSoundFileInfo, bool fSuppressUI);
-
-           [DllImport("aygshell.dll", SetLastError = true)]
-           private static extern uint SndGetSound(SND_EVENT seSoundEvent, ref SNDFILEINFO pSoundFileInfo);
+          //     VERY_HIGH = -1
+          // }
 
 
-           [DllImport("coredll.dll", SetLastError = true)]
-           internal static extern int waveOutSetVolume(IntPtr device, int volume);
+          // //PInvokes
+          // [DllImport("coredll.dll")]
+          // public static extern void AudioUpdateFromRegistry();
 
-           [DllImport("coredll.dll", SetLastError = true)]
-           internal static extern int waveOutGetVolume(IntPtr device, ref int volume);
+          // [DllImport("aygshell.dll", SetLastError = true)]
+          // private static extern uint SndSetSound(SND_EVENT seSoundEvent, ref SNDFILEINFO pSoundFileInfo, bool fSuppressUI);
+
+          // [DllImport("aygshell.dll", SetLastError = true)]
+          // private static extern uint SndGetSound(SND_EVENT seSoundEvent, ref SNDFILEINFO pSoundFileInfo);
+
+
+          // [DllImport("coredll.dll", SetLastError = true)]
+          // internal static extern int waveOutSetVolume(IntPtr device, int volume);
+
+          // [DllImport("coredll.dll", SetLastError = true)]
+          // internal static extern int waveOutGetVolume(IntPtr device, ref int volume);
            
-           //Audio Functions
-           private static void SetProfileNormal(SND_EVENT mysnd)
-           {
-               SNDFILEINFO soundFileInfo = new SNDFILEINFO();
-               soundFileInfo.sstType = SND_SOUNDTYPE.On;
-               uint num = SndSetSound(mysnd, ref soundFileInfo, true);
-               AudioUpdateFromRegistry();
+          // //Audio Functions
+          // private static void SetProfileNormal(SND_EVENT mysnd)
+          // {
+          //     SNDFILEINFO soundFileInfo = new SNDFILEINFO();
+          //     soundFileInfo.sstType = SND_SOUNDTYPE.On;
+          //     uint num = SndSetSound(mysnd, ref soundFileInfo, true);
+          //     AudioUpdateFromRegistry();
 
-           }
+          // }
 
-           private static void SetProfileVibrate()
-           {
-               SNDFILEINFO soundFileInfo = new SNDFILEINFO();
-               soundFileInfo.sstType = SND_SOUNDTYPE.Vibrate;
-               uint num = SndSetSound(SND_EVENT.All, ref soundFileInfo, true);
-               AudioUpdateFromRegistry();
-           }
+          // private static void SetProfileVibrate()
+          // {
+          //     SNDFILEINFO soundFileInfo = new SNDFILEINFO();
+          //     soundFileInfo.sstType = SND_SOUNDTYPE.Vibrate;
+          //     uint num = SndSetSound(SND_EVENT.All, ref soundFileInfo, true);
+          //     AudioUpdateFromRegistry();
+          // }
 
-           private static void SetProfileMuted()
-           {
-               SNDFILEINFO soundFileInfo = new SNDFILEINFO();
-               soundFileInfo.sstType = SND_SOUNDTYPE.None;
-               uint num = SndSetSound(SND_EVENT.All, ref soundFileInfo, true);
-               AudioUpdateFromRegistry();
-           }
+          // private static void SetProfileMuted()
+          // {
+          //     SNDFILEINFO soundFileInfo = new SNDFILEINFO();
+          //     soundFileInfo.sstType = SND_SOUNDTYPE.None;
+          //     uint num = SndSetSound(SND_EVENT.All, ref soundFileInfo, true);
+          //     AudioUpdateFromRegistry();
+          // }
 
-           private bool IsInVibrateMode()
-           {
-               SNDFILEINFO info = new SNDFILEINFO();
-               SndGetSound(SND_EVENT.All, ref info);
-               return (info.sstType == SND_SOUNDTYPE.Vibrate);
-           }
+          // private bool IsInVibrateMode()
+          // {
+          //     SNDFILEINFO info = new SNDFILEINFO();
+          //     SndGetSound(SND_EVENT.All, ref info);
+          //     return (info.sstType == SND_SOUNDTYPE.Vibrate);
+          // }
 
-           private bool IsMuted()
-           {
-               SNDFILEINFO info = new SNDFILEINFO();
-               SndGetSound(SND_EVENT.All, ref info);
-               return (info.sstType == SND_SOUNDTYPE.None);
-           }
+          // private bool IsMuted()
+          // {
+          //     SNDFILEINFO info = new SNDFILEINFO();
+          //     SndGetSound(SND_EVENT.All, ref info);
+          //     return (info.sstType == SND_SOUNDTYPE.None);
+          // }
 
       
      #endregion
@@ -1826,221 +1783,202 @@ namespace CollectDataUser
         #endregion
 
 
-      #endregion
+        #region restart silently old code commented
+
+       //public enum SND_SOUNDTYPE
+       // {
+       //     On,
+       //     File,
+       //     Vibrate,
+       //     None
+       // }
+
+       //private enum SND_EVENT
+       // {
+       //     All,
+       //     RingLine1,
+       //     RingLine2,
+       //     KnownCallerLine1,
+       //     RoamingLine1,
+       //     RingVoip
+       // }
+
+       //[StructLayout(LayoutKind.Sequential)]
+       //private struct SNDFILEINFO
+       // {
+       //     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
+       //     public string szPathName;
+       //     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
+       //     public string szDisplayName;
+       //     public SND_SOUNDTYPE sstType;
+       // }
+
+       //[DllImport("coredll.dll")]
+       //public static extern void AudioUpdateFromRegistry();
+
+       //[DllImport("aygshell.dll", SetLastError = true)]
+       //private static extern uint SndSetSound(SND_EVENT seSoundEvent, ref SNDFILEINFO pSoundFileInfo, bool fSuppressUI);
+
+       //[DllImport("aygshell.dll", SetLastError = true)]
+       //private static extern uint SndGetSound(SND_EVENT seSoundEvent, ref SNDFILEINFO pSoundFileInfo);
 
 
-      #region Reboot Phone
+       //static void SetProfileNormal(SND_EVENT mysnd)
+       //{
+       //    SNDFILEINFO soundFileInfo = new SNDFILEINFO();
+       //    soundFileInfo.sstType = SND_SOUNDTYPE.On;
+       //    uint num = SndSetSound(mysnd, ref soundFileInfo, true);
+       //    AudioUpdateFromRegistry();
+
+       //}
+
+       //static void SetProfileVibrate()
+       //{
+       //    SNDFILEINFO soundFileInfo = new SNDFILEINFO();
+       //    soundFileInfo.sstType = SND_SOUNDTYPE.Vibrate;
+       //    uint num = SndSetSound(SND_EVENT.All, ref soundFileInfo, true);
+       //    AudioUpdateFromRegistry();
+       //}
+
+       //static void SetProfileMuted()
+       //{
+       //    SNDFILEINFO soundFileInfo = new SNDFILEINFO();
+       //    soundFileInfo.sstType = SND_SOUNDTYPE.None;
+       //    uint num = SndSetSound(SND_EVENT.All, ref soundFileInfo, true);
+       //    AudioUpdateFromRegistry();
+       //}
+
+       //private bool IsInVibrateMode()
+       //{
+       //    SNDFILEINFO info = new SNDFILEINFO();
+       //    SndGetSound(SND_EVENT.All, ref info);
+       //    return (info.sstType == SND_SOUNDTYPE.Vibrate);
+       //}
+
+       //private bool IsMuted()
+       //{
+       //    SNDFILEINFO info = new SNDFILEINFO();
+       //    SndGetSound(SND_EVENT.All, ref info);
+       //    return (info.sstType == SND_SOUNDTYPE.None);
+       //}
 
 
-#region restart silently
+       //public enum Volumes : int
+       //{
+       //    OFF = 0,
 
-       public enum SND_SOUNDTYPE
-        {
-            On,
-            File,
-            Vibrate,
-            None
-        }
+       //    LOW = 858993459,
 
-       private enum SND_EVENT
-        {
-            All,
-            RingLine1,
-            RingLine2,
-            KnownCallerLine1,
-            RoamingLine1,
-            RingVoip
-        }
+       //    NORMAL = 1717986918,
 
-       [StructLayout(LayoutKind.Sequential)]
-       private struct SNDFILEINFO
-        {
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
-            public string szPathName;
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
-            public string szDisplayName;
-            public SND_SOUNDTYPE sstType;
-        }
+       //    MEDIUM = -1717986919,
 
-       [DllImport("coredll.dll")]
-       public static extern void AudioUpdateFromRegistry();
+       //    HIGH = -858993460,
 
-       [DllImport("aygshell.dll", SetLastError = true)]
-       private static extern uint SndSetSound(SND_EVENT seSoundEvent, ref SNDFILEINFO pSoundFileInfo, bool fSuppressUI);
-
-       [DllImport("aygshell.dll", SetLastError = true)]
-       private static extern uint SndGetSound(SND_EVENT seSoundEvent, ref SNDFILEINFO pSoundFileInfo);
+       //    VERY_HIGH = -1
+       //}
 
 
-       static void SetProfileNormal(SND_EVENT mysnd)
-       {
-           SNDFILEINFO soundFileInfo = new SNDFILEINFO();
-           soundFileInfo.sstType = SND_SOUNDTYPE.On;
-           uint num = SndSetSound(mysnd, ref soundFileInfo, true);
-           AudioUpdateFromRegistry();
+       //[DllImport("coredll.dll", SetLastError = true)]
+       // internal static extern int waveOutSetVolume(IntPtr device, int volume);
 
-       }
-
-       static void SetProfileVibrate()
-       {
-           SNDFILEINFO soundFileInfo = new SNDFILEINFO();
-           soundFileInfo.sstType = SND_SOUNDTYPE.Vibrate;
-           uint num = SndSetSound(SND_EVENT.All, ref soundFileInfo, true);
-           AudioUpdateFromRegistry();
-       }
-
-       static void SetProfileMuted()
-       {
-           SNDFILEINFO soundFileInfo = new SNDFILEINFO();
-           soundFileInfo.sstType = SND_SOUNDTYPE.None;
-           uint num = SndSetSound(SND_EVENT.All, ref soundFileInfo, true);
-           AudioUpdateFromRegistry();
-       }
-
-       private bool IsInVibrateMode()
-       {
-           SNDFILEINFO info = new SNDFILEINFO();
-           SndGetSound(SND_EVENT.All, ref info);
-           return (info.sstType == SND_SOUNDTYPE.Vibrate);
-       }
-
-       private bool IsMuted()
-       {
-           SNDFILEINFO info = new SNDFILEINFO();
-           SndGetSound(SND_EVENT.All, ref info);
-           return (info.sstType == SND_SOUNDTYPE.None);
-       }
-
-
-       public enum Volumes : int
-       {
-           OFF = 0,
-
-           LOW = 858993459,
-
-           NORMAL = 1717986918,
-
-           MEDIUM = -1717986919,
-
-           HIGH = -858993460,
-
-           VERY_HIGH = -1
-       }
-
-
-       [DllImport("coredll.dll", SetLastError = true)]
-        internal static extern int waveOutSetVolume(IntPtr device, int volume);
-
-       [DllImport("coredll.dll", SetLastError = true)]
-        internal static extern int waveOutGetVolume(IntPtr device, ref int volume);
+       //[DllImport("coredll.dll", SetLastError = true)]
+       // internal static extern int waveOutGetVolume(IntPtr device, ref int volume);
        
 
-
-#endregion
-
-
-        [DllImport("aygshell.dll")]
-        private static extern bool ExitWindowsEx(uint uFlags, int dwReserved);
-         
-        enum ExitWindowsAction : uint
-        {
-            EWX_LOGOFF = 0,
-            EWX_SHUTDOWN = 1,
-            EWX_REBOOT = 2,
-            EWX_FORCE = 4,
-            EWX_POWEROFF = 8
-        }
-
-
-        void rebootDevice()
-        {
+       #region old reboot code commented out
+       //void rebootDevice()
+        //{
            
-            Logger.Debug("save the device status to file, before rebooting");
+        //    Logger.Debug("save the device status to file, before rebooting");
 
-            try
-            {
+        //    try
+        //    {
                
-                //Indicate that application was terminated in reboot mode
-                StreamWriter wr_status = new StreamWriter(Core.KERNEL_PATH + "\\updater_last_status.txt");
-                wr_status.WriteLine("running");
+        //        //Indicate that application was terminated in reboot mode
+        //        StreamWriter wr_status = new StreamWriter(Core.KERNEL_PATH + "\\updater_last_status.txt");
+        //        wr_status.WriteLine("running");
 
 
-                if (IsInVibrateMode())
-                    wr_status.WriteLine("vibrate");
-                else
-                    wr_status.WriteLine("no_vibrate");
+        //        if (IsInVibrateMode())
+        //            wr_status.WriteLine("vibrate");
+        //        else
+        //            wr_status.WriteLine("no_vibrate");
 
-                if (IsMuted())
-                    wr_status.WriteLine("muted");
-                else
-                    wr_status.WriteLine("no_muted");
+        //        if (IsMuted())
+        //            wr_status.WriteLine("muted");
+        //        else
+        //            wr_status.WriteLine("no_muted");
 
 
-                int volume = (int)0;
-                waveOutGetVolume(IntPtr.Zero, ref volume);
-                wr_status.WriteLine(volume.ToString());
+        //        int volume = (int)0;
+        //        waveOutGetVolume(IntPtr.Zero, ref volume);
+        //        wr_status.WriteLine(volume.ToString());
 
-                wr_status.Flush();
-                wr_status.Close();
-            }
-            catch
-            {
-                Logger.Debug("An exception occurred when saving the reboot status to file.");
-            }
+        //        wr_status.Flush();
+        //        wr_status.Close();
+        //    }
+        //    catch
+        //    {
+        //        Logger.Debug("An exception occurred when saving the reboot status to file.");
+        //    }
 
-            //Mute Phone
-           // waveOutSetVolume(IntPtr.Zero, (int)Volumes.OFF);
+        //    //Mute Phone
+        //   // waveOutSetVolume(IntPtr.Zero, (int)Volumes.OFF);
 
-            //SetProfileMuted();
-            Thread.Sleep(1000);
-            //Application.DoEvents();
+        //    //SetProfileMuted();
+        //    Thread.Sleep(1000);
+        //    //Application.DoEvents();
 
-            //if (this.app_status.CompareTo("normal_start") != 0)
-            //{
-                //DisplayPower.PowerOff();
-            SetDevicePower("BKL1:", PowerStateRequirement.POWER_NAME, CEDEVICE_POWER_STATE.D0);
-            SetSystemPowerState(null, PowerState.POWER_STATE_USERIDLE, 0);
-            //}
+        //    //if (this.app_status.CompareTo("normal_start") != 0)
+        //    //{
+        //        //DisplayPower.PowerOff();
+        //    SetDevicePower("BKL1:", PowerStateRequirement.POWER_NAME, CEDEVICE_POWER_STATE.D0);
+        //    SetSystemPowerState(null, PowerState.POWER_STATE_USERIDLE, 0);
+        //    //}
             
-            //Reboot
-            ExitWindowsEx((uint)ExitWindowsAction.EWX_REBOOT, 0);
-        }
+        //    //Reboot
+        //    ExitWindowsEx((uint)ExitWindowsAction.EWX_REBOOT, 0);
+        //}
+
+        //private void button_reboot_phone_Click(object sender, EventArgs e)
+        //{
+        //    try
+        //    {
+        //        Logger.Debug("Starting to reboot the phone");
+
+        //        //Stop status monitoring thread
+        //        StopACsUpdater();
+
+        //        //Wait for the system to stabilize and check that threads have finished
+        //        Thread.Sleep(2000);
+
+        //        //Terminate the kernel
+        //        if (TerminateKernel()) 
+        //        {
+        //            this.messageWindow.Dispose();
+        //            Application.Exit();
+        //            rebootDevice();
+        //        }
+        //    }
+        //    catch
+        //    {
+        //        Logger.Debug("An exception occurred when trying to reboot the device");
+        //    }   
+       //}
+       #endregion
 
 
-        private void button_reboot_phone_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                Logger.Debug("Starting to reboot the phone");
+       #endregion
 
-                //Stop status monitoring thread
-                StopACsUpdater();
 
-                //Wait for the system to stabilize and check that threads have finished
-                Thread.Sleep(2000);
-
-                //Terminate the kernel
-                if (TerminateKernel()) 
-                {
-                    this.messageWindow.Dispose();
-                    Application.Exit();
-                    rebootDevice();
-                }
-            }
-            catch
-            {
-                Logger.Debug("An exception occurred when trying to reboot the device");
-            }   
-        }
-
-      
       #endregion
 
 
-      #region Exit/Connect Button (From Main Menu Bar)
+       #region Exit/Connect Button (From Main Menu Bar)
 
 
-        private void menuQuitApp_Click(object sender, EventArgs e)
+       private void menuQuitApp_Click(object sender, EventArgs e)
         {
 
             if (menuQuitApp.Text.CompareTo("Quit") == 0)
@@ -2116,9 +2054,10 @@ namespace CollectDataUser
                     {
                         //Indicate that application was terminated by the user
                         StreamWriter wr_status = new StreamWriter(Core.KERNEL_PATH + "\\updater_last_status.txt");
-                        //wr_status.WriteLine("normal_start");
                         wr_status.WriteLine("running");
+                        Logger.Debug("Application terminated by the user. Quit Button Pressed.");
 
+                        //wr_status.WriteLine("normal_start");
                         #region commented
                         //if (IsInVibrateMode())
                         //    wr_status.WriteLine("vibrate");
@@ -2131,16 +2070,17 @@ namespace CollectDataUser
                         //    wr_status.WriteLine("no_muted");
                         #endregion 
 
+                        #region commented
+                        //if (IsInVibrateMode())
+                        //    wr_status.WriteLine("vibrate");
+                        //else
+                        //    wr_status.WriteLine("no_vibrate");
 
-                        if (IsInVibrateMode())
-                            wr_status.WriteLine("vibrate");
-                        else
-                            wr_status.WriteLine("no_vibrate");
-
-                        if (IsMuted())
-                            wr_status.WriteLine("muted");
-                        else
-                            wr_status.WriteLine("no_muted");
+                        //if (IsMuted())
+                        //    wr_status.WriteLine("muted");
+                        //else
+                        //    wr_status.WriteLine("no_muted");
+                        #endregion 
 
                         wr_status.Flush();
                         wr_status.Close();
@@ -2998,7 +2938,7 @@ namespace CollectDataUser
      #endregion
 
 
-    #region Elapsed Time Counter & Upload Thread
+      #region Elapsed Time Counter & Upload Thread
       
       public void StartUpdateUploadThread()
       {
@@ -3042,10 +2982,10 @@ namespace CollectDataUser
           }
       }
 
-    #endregion
+     #endregion
 
 
-    #region File Upload Update Callback
+      #region File Upload Update Callback
 
       delegate void UpdateTimeCallback();
       public void UpdateFilesUploaded()
@@ -3228,8 +3168,7 @@ namespace CollectDataUser
 
 
 
-    #region Read ACs for Sensor Status
-
+    #region Reset ACs Registries
 
      private void ResetUploaderCounters()
       {
@@ -3264,7 +3203,10 @@ namespace CollectDataUser
           }
       }
 
+    #endregion
 
+
+    #region Thread tracking the sensor connection status
 
      double WAIT_INTERVAL_LOG_UPLOADER = 60.0; //in minutes
      double WAIT_INTERVAL_DATA_UPLOADER_HRS = 1.0; //in hours
