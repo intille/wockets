@@ -1554,17 +1554,9 @@ namespace DataMerger
      //Check how I can make it more general
      private static void SaveLabelsColorsToFile(string aDataDirectory, int number_of_categories, ConcurrentActivityLists list_of_activities)
      {
-
-           
-            //Category
-            if (File.Exists(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\ActivityLabelsColors_1.csv"))
-            { File.Delete(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\ActivityLabelsColors_1.csv"); }
-            TextWriter labels_colors_csv_1 = new StreamWriter(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\ActivityLabelsColors_1.csv");
-
-
-            //Write headers
-            labels_colors_csv_1.WriteLine("Category,Label,Color,ARGB");
-
+            TextWriter labels_colors_csv;
+            
+            
             string label = "";
             string csv = "";
             string color = "";
@@ -1576,81 +1568,124 @@ namespace DataMerger
             for (int i = 0; i < number_of_categories; i++)
             {
 
-               
-                    if (list_of_activities[i].Count > 0)
-                        category_name = list_of_activities[i][0]._Category;
+                #region create a csv file for each category
 
+                if (i == 0)
+                {
+                    //Category 1
+                    if (File.Exists(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\ActivityLabelsColors_1.csv"))
+                    { File.Delete(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\ActivityLabelsColors_1.csv"); }
+                    labels_colors_csv = new StreamWriter(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\ActivityLabelsColors_1.csv");
+
+                    //Write headers
+                    labels_colors_csv.WriteLine("Category,Label,Color,ARGB");
+                }
+                else 
+                {
+                    //Category 2
+                    if (File.Exists(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\ActivityLabelsColors_2.csv"))
+                    { File.Delete(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\ActivityLabelsColors_2.csv"); }
+                    labels_colors_csv = new StreamWriter(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\ActivityLabelsColors_2.csv");
+
+                    //Write headers
+                    labels_colors_csv.WriteLine("Category,Label,Color,ARGB");
+                }
+
+                #endregion
+
+
+                #region assign color to each label
+
+                if (list_of_activities.Count > i)
+                {
+                    category_name = list_of_activities[i]._Name;
 
                     //load labels for each category
                     for (int j = 0; j < list_of_activities[i].Count; j++)
                     {
 
                         label = list_of_activities[i][j]._Name;
-
                         csv = "";
                         color = "";
                         argb = "";
+
+
+                        Color[,] labelcolors; int[,] labelrgb;
+                        AssignLabelColors(out labelcolors, out labelrgb);
 
 
                         if (label.Trim().CompareTo("") != 0)
                         {
                             csv = category_name + "," + label + ",";
 
-                            if (i == 0)
+                           
+                            if (label.CompareTo("unknown") == 0)
                             {
-                                if (label.CompareTo("unknown") == 0)
-                                {
-                                    color = Color.Gainsboro.Name;
-                                    argb = Color.Gainsboro.ToArgb().ToString();
+                                color = Color.Gainsboro.Name;
+                                argb = Color.Gainsboro.ToArgb().ToString();
 
-                                }
-                                else if (label.CompareTo("sync") == 0)
-                                {
-                                    color = Color.Plum.Name;
-                                    argb = Color.Plum.ToArgb().ToString();
+                            }
+                           else
+                            {
+                                int color_id = 0;
+                                Math.DivRem(j, NumberColorCategories, out color_id);
+                                color = labelcolors[i, color_id].Name;
+                                argb = labelrgb[i, color_id].ToString();
 
-                                }
-                                else if (label.CompareTo("flap") == 0)
-                                {
-                                    color = Color.Green.Name;
-                                    argb = Color.FromArgb(150, Color.Green).ToArgb().ToString();
-
-                                }
-                                else if (label.CompareTo("rock") == 0)
-                                {
-                                    color = Color.Orange.Name;
-                                    argb = Color.FromArgb(200, Color.Orange).ToArgb().ToString();
-
-                                }
-                                else if (label.CompareTo("flap-rock") == 0)
-                                {
-                                    color = Color.DeepSkyBlue.Name;
-                                    argb = Color.FromArgb(200, Color.DeepSkyBlue).ToArgb().ToString();
-
-                                }
-
-
-                                labels_colors_csv_1.WriteLine(csv + color + "," + argb);
                             }
 
-
-
+                            //save to file 
+                            labels_colors_csv.WriteLine(csv + color + "," + argb);
 
                         }//ends if
                     }//ends for
-               
+                }
+                #endregion 
 
+
+                #region close csv files
+                    labels_colors_csv.Flush();
+                    labels_colors_csv.Close();
+                #endregion
 
             } //ends if for overlapping activity lists
 
 
-            //Close files
-            labels_colors_csv_1.Flush();
-            labels_colors_csv_1.Close();
-
+            
         }
 
 
+     private static int NumberColorCategories = 10;
+     private static void AssignLabelColors(out Color[,] labelcolors, out int[,] labelrgb)
+     {
+         labelcolors = new Color[2, NumberColorCategories];
+         labelrgb = new int[2, NumberColorCategories];
+
+       //Default Colors for First Category
+        labelcolors[0,0] = Color.Plum;          labelrgb[0,0] = -2252579;
+        labelcolors[0,1] = Color.Green;         labelrgb[0,1] = -424804561;
+        labelcolors[0,2] = Color.Orange;        labelrgb[0,2] = -256;
+        labelcolors[0,3] = Color.DeepSkyBlue;   labelrgb[0,3] = Color.FromArgb(200, Color.DeepSkyBlue).ToArgb();
+        labelcolors[0,4] = Color.Blue;          labelrgb[0,4] =  1677721855;
+        labelcolors[0,5] = Color.YellowGreen;   labelrgb[0,5] =-1264923342;
+        labelcolors[0,6] = Color.Violet;        labelrgb[0,6] =-1146130;
+        labelcolors[0,7] = Color.Turquoise;     labelrgb[0,7] =-12525360;
+        labelcolors[0,8] = Color.Tomato;        labelrgb[0,8] =-419495936;
+        labelcolors[0,9] = Color.Violet;        labelrgb[0,9] =-923893010;
+        
+        //Default Colors for First Category
+        labelcolors[1, 0] = Color.Plum;         labelrgb[1, 0] = -2252579;
+        labelcolors[1, 1] = Color.LightBlue;    labelrgb[1, 1] = 838861055;
+        labelcolors[1, 2] = Color.Blue;         labelrgb[1, 2] = 1677721855;
+        labelcolors[1, 3] = Color.YellowGreen;  labelrgb[1, 3] = -1264923342;
+        labelcolors[1, 4] = Color.Violet;       labelrgb[1, 4] = -1146130;
+        labelcolors[1, 5] = Color.Turquoise;    labelrgb[1, 5] = -12525360;
+        labelcolors[1, 6] = Color.Tomato;       labelrgb[1, 6] = -419495936;
+        labelcolors[1, 7] = Color.Orange;       labelrgb[1, 7] = -256;
+        labelcolors[1, 8] = Color.Green;        labelrgb[1, 8] = -424804561;
+        labelcolors[1, 9] = Color.Violet;       labelrgb[1, 9] = -923893010;
+        
+     }
 
 
 #endregion

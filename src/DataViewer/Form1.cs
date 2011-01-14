@@ -2300,7 +2300,7 @@ namespace NESPDataViewer
                                     loc = "LW";
                                     break;
                                 default:
-                                    loc = "lOC";
+                                    //loc = "lOC";
                                     break;
                             }
 
