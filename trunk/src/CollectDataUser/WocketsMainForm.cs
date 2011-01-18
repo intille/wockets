@@ -130,54 +130,6 @@ namespace CollectDataUser
         #endregion 
 
 
-      #region Phone Power DLL commented
-        //private static IntPtr handle_blt = IntPtr.Zero;
-
-        //public enum CEDEVICE_POWER_STATE
-        //{
-        //    PwrDeviceUnspecified = -1,
-        //    D0 = 0,  // on
-        //    D1,      // low power
-        //    D2,      // standby, system cannot wakeup the system
-        //    D3,      // sleep, device can wakeup the system
-        //    D4,      // off
-        //    PwrDeviceMaximum
-        //}
-
-        //public enum PowerStateRequirement
-        //{
-        //    POWER_NAME = 0x00000001,         // default
-        //    POWER_FORCE = 0x00001000,
-        //    POWER_DUMPDW = 0x00002000        // Calling CaptureDumpFileOnDevice() before entering this state.
-        //}
-
-
-        //public enum PowerState
-        //{
-        //    POWER_STATE_ON = 0x00010000,         // power state in P3600
-        //    POWER_STATE_OFF = 0x00020000,
-        //    POWER_STATE_CRITICAL = 0x00040000,
-        //    POWER_STATE_BOOT = 0x00080000,
-        //    POWER_STATE_IDLE = 0x00100000,         //---> screen off,  touch disabled
-        //    POWER_STATE_SUSPEND = 0x00200000,
-        //    POWER_STATE_UNATTENDED = 0x00400000,
-        //    POWER_STATE_RESET = 0x00800000,
-        //    POWER_STATE_USERIDLE = 0x01000000,     //---> user idle, screen off, but touch enabled
-        //    POWER_STATE_PASSWORD = 0x10000000,     //---> resuming
-        //    POWER_STATE_BACKLIGHTOFF = 0x10010000, //---> bkl-off
-        //    POWER_STATE_POWERON = 0x12010000       // power state in P3300
-        //}
-
-
-        //[DllImport("coredll.dll", SetLastError = true)]
-        //extern private static int SetDevicePower(string psDevice, PowerStateRequirement dflags, CEDEVICE_POWER_STATE device_state);
-
-        //[DllImport("coredll.dll", SetLastError = true)]
-        //extern private static int SetSystemPowerState(string psState, PowerState stateflags, int options);
-
-        #endregion
-
-
       #region Initialize Form
 
 
@@ -185,7 +137,6 @@ namespace CollectDataUser
         {
 
             is_rebooting = false;
-
             InitializeComponent();
 
 
@@ -232,8 +183,7 @@ namespace CollectDataUser
             #endregion  Initialize Internal Message Window
         
 
-
-            #region Read the Sowftware Version
+            #region Read the Software Version
 
             System.Reflection.Assembly a = System.Reflection.Assembly.GetExecutingAssembly();
             System.Reflection.AssemblyName an = a.GetName();
@@ -411,7 +361,7 @@ namespace CollectDataUser
 
             LoadSensorsFromMasterList(wockets_controller, sensor_data, this.sensor_set);
 
-            // point kernel to wockets controller
+            //point kernel to the wockets controller
             CurrentWockets._Controller = wockets_controller;
 
             //Load sensors addresses to array list
@@ -424,7 +374,6 @@ namespace CollectDataUser
 
 
             #endregion
-
 
 
             #region Suscribe to Kernel Events
@@ -496,75 +445,15 @@ namespace CollectDataUser
             #region Initialize GUI Panels
 
             InitializePanels();
-
-            #endregion
-
-            #region normal_start option commented
-            //if (app_status.CompareTo("normal_start") == 0)
-            //{
-
-            //    //Setup the main menu commands
-            //    menuMainAppActions.Text = "Main Menu";
-                
-            //    //menuQuitApp.Text = "Connect";
-            //    menuQuitApp.Text = "Quit";
-
-            //    #region Hide the connect panel (commented)
-            //    //ConnectPanel.Enabled = false;
-            //    //ConnectPanel.Visible = false;
-
-            //    ////Hide the Main Actions Buttons Panel
-            //    //MainActionsPanel.Visible = false;
-            //    //MainActionsPanel.Enabled = false;
-
-            //    ////Hide the Sensor Status Panel
-            //    //SensorStatusPanel.Visible = false;
-            //    //SensorStatusPanel.Enabled = false;
-                
-            //    ////Show the swap panel
-            //    //SwapPanel.BringToFront();
-            //    //SwapPanel.Enabled = true;
-            //    //SwapPanel.Visible = true;
-            //    #endregion
-
-            //    TurnOnPanel(PanelID.SWAP);
-
-            //    //update the sensor set/swap panel
-            //    Show_Swap_Panel("Disconnected", sensor_set, CurrentWockets._Controller);
-            //    Logger.Debug("Connecting to Kernel in Normal Mode");
-
-            //}
-            //else
-            //{
-            #endregion  
-             
-            
-                #region Hide the swap panel
-                //SwapPanel.Enabled = false;
-                //SwapPanel.Visible = false;
-
-                ////Hide the Main Actions Buttons Panel
-                //MainActionsPanel.Visible = false;
-                //MainActionsPanel.Enabled = false;
-
-                ////Hide the Sensor Status Panel
-                //SensorStatusPanel.Visible = false;
-                //SensorStatusPanel.Enabled = false;
-
-                ////Show the connect panel
-                //ConnectPanel.BringToFront();
-                //ConnectPanel.Enabled = true;
-                //ConnectPanel.Visible = true;
-                #endregion
-
             TurnOnPanel(PanelID.CONNECTION);
             label_kernel_status.Text = "Loading Application";
+            
+            #endregion
 
-                //Start the kernel connection sequence
+            //Start the kernel connection sequence
             StartLoadingWocketsToKernel();
             Logger.Debug("Connecting to Kernel in Silent Mode");
 
-            //}
 
             #endregion
 
@@ -572,7 +461,6 @@ namespace CollectDataUser
             #region Reset Uploader and Received Data Pkgs Counters
 
             ResetUploaderCounters();
-
             ResetACsCounters(wockets_controller);
 
             #endregion
@@ -582,8 +470,6 @@ namespace CollectDataUser
 
 
       #endregion
-
-
 
 
       #region Set Panels ON/OFF
@@ -609,7 +495,6 @@ namespace CollectDataUser
             ConnectPanel.Enabled = false;
 
         }
-
 
         private void TurnOnPanel(PanelID ID)
         { 
@@ -704,8 +589,7 @@ namespace CollectDataUser
         
         }
 
-
-        #endregion
+      #endregion
 
 
       #region Swap Sensors
@@ -910,7 +794,6 @@ namespace CollectDataUser
             }
 
         }
-
 
         private void LoadSensorsFromMasterList(WocketsController wc, string[] loaded_sensor_data, string sensor_set_id)
         {
@@ -1215,6 +1098,8 @@ namespace CollectDataUser
         #region Kernel Response CallBacks and Event Listener
 
             delegate void UpdateFormCallback(KernelResponse response);
+            
+        
             /// Handles kernel response events
             private void EventListener(KernelResponse rsp)
             {
@@ -1243,15 +1128,9 @@ namespace CollectDataUser
                                 catch(Exception ex)
                                 {
                                     Logger.Debug("An exception occurred in trying to register app in the kernel. Ex: " + ex); 
-                                }
-                                
-                                break;
+                                } 
+                            break;
 
-                            case KernelResponse.STARTED:
-                                //Logger.Debug("Registered started response received");
-                                //UpdateMsg("Register Application");
-                                //Core.Register();
-                                break;
                             case KernelResponse.REGISTERED:
                                 try
                                 {
@@ -1263,7 +1142,8 @@ namespace CollectDataUser
                                 {
                                     Logger.Debug("An exception occurred in trying to set sensors in the kernel. Ex: " + ex); 
                                 }
-                                break;
+                            break;
+
                             case KernelResponse.SENSORS_UPDATED:
                                 try
                                 {
@@ -1275,49 +1155,22 @@ namespace CollectDataUser
                                 {
                                     Logger.Debug("An exception occurred in trying to connect the sensors to the kernel. Ex: " + ex);
                                 }
-                                break;
-                            case KernelResponse.CONNECTED:
+                            break;
 
+                            case KernelResponse.CONNECTED:
                                 try
                                 {
                                     Logger.Debug("connected response received");
-
-                                    //Wait for the system to stabilize (already included in start kernel thread)
-                                    //Thread.Sleep(4000);
-
-                                    #region Connect Sequence
-
-                                    //Write the connection status to panel screen
                                     UpdateMsg("Wockets Connected");
 
-                                    //Wait for the system to stabilize
-                                    //Thread.Sleep(1000);
-
-
-                                    // Update Status Files
+                                    //updates the sensor set used by kernel
                                     try
                                     {
                                         Logger.Debug("start saving app status to files");
-
-                                        //Set ID file
-                                        //updates the sensor set used by kernel
                                         StreamWriter wr_sensors = new StreamWriter(Core.KERNEL_PATH + "\\updater_last_set.txt");
                                         wr_sensors.WriteLine(sensor_set);
                                         wr_sensors.Flush();
-                                        wr_sensors.Close();
-
-                                        #region indicates that the kernel is running
-
-                                        //app_status = "running";
-
-                                        ////Indicate that application was terminated by the user
-                                        //StreamWriter wr_status = new StreamWriter(Core.KERNEL_PATH + "\\updater_last_status.txt");
-                                        //wr_status.WriteLine("running");
-                                        //wr_status.Flush();
-                                        //wr_status.Close();
-
-                                        #endregion
-
+                                        wr_sensors.Close();  
                                     }
                                     catch (Exception e)
                                     {
@@ -1327,24 +1180,10 @@ namespace CollectDataUser
 
                                     //Update the sensors status variable on the swap panel screen
                                     Show_Swap_Panel("Connected", sensor_set, wockets_controller);
-
-                                    #region Hide the connect panel (commented)
-                                    //ConnectPanel.Enabled = false;
-                                    //ConnectPanel.Visible = false;
-
-                                    ////Show the swap panel
-                                    //SwapPanel.BringToFront();
-                                    //SwapPanel.Enabled = true;
-                                    //SwapPanel.Visible = true;
-                                    #endregion
-
                                     TurnOnPanel(PanelID.SWAP);
 
                                     //Update the main application menu options
                                     menuMainAppActions.Text = "Main Menu";
-
-                                    //Wait to stabilize system
-                                    //Thread.Sleep(1000);
 
                                     //Start the connection status thread 
                                     if (!ACsUpdateTimer.Enabled)
@@ -1354,125 +1193,19 @@ namespace CollectDataUser
                                     for (int np = 0; np < wockets_controller._Receivers.Count; np++)
                                         LastPkgTime[np] = DateTime.Now;
 
-
-                                    #endregion
-
                                     Logger.Debug("Connection to wockets procedure finished");
                                 }
                                 catch (Exception ex)
                                 {
                                     Logger.Debug("An exception occurred while executing the kernel connect sequence. Ex: " + ex);
                                 }
-
-                              break;
+                            break;
 
 
                             case KernelResponse.DISCONNECTED:
-                                  Logger.Debug("Disconnect from wockets response received");
-
-                                  #region commented
-                                  ////Stop the connection status thread 
-                                  //if (ACsUpdateTimer.Enabled)
-                                  //    StopACsUpdater();
-
-                                  //Thread.Sleep(1000);
-
-                                  ////Stop Kernel
-                                  //if (TerminateKernel())
-                                  //    UpdateMsg("Stopping Kernel");
-
-                                  ////Wait to stabilize system (2 secs)
-                                  //Thread.Sleep(1000);
-                                  #endregion
-
-                                  #region Start The Swap Sequence (commented)
-
-                                      #region commented
-                                      //if disconnected, swap sensors if the app is running
-                                      //if (app_status.CompareTo("running") == 0){}
-                                      #endregion
-
-                                  #region commented because the now booting when swaping
-                                  //try
-                                  //{
-                                  //    //TODO: Register/Log the swap wockets event
-                                  //    UpdateMsg("Swap Wockets");
-                                  //    Logger.Debug("Starting to swap wockets, Current Set: " + sensor_set);
-
-                                  //    //Dispose the old wockets controller
-                                  //    wockets_controller.Dispose();
-                                  //    Thread.Sleep(1000);
-                                  //    Logger.Debug("Wockets controller disposed");
-
-                                  //    //Create new wockets controller
-                                  //    wockets_controller = new Wockets.WocketsController("", "", "");
-
-                                  //    //Determine which set will be used & load the corresponding Xml File
-                                  //    if (this.sensor_set.CompareTo("red") == 0)
-                                  //    {
-                                  //        sensor_set = "green";
-                                  //        wockets_controller.FromXML(Core.KERNEL_PATH + "\\updater_SensorData2.xml");
-                                  //    }
-                                  //    else
-                                  //    {
-                                  //        sensor_set = "red";
-                                  //        wockets_controller.FromXML(Core.KERNEL_PATH + "\\updater_SensorData1.xml");
-                                  //    }
-
-
-                                  //    //TODO: Check if macs against the master list file
-                                  //    //point kernel to new wockets controller
-                                  //    CurrentWockets._Controller = wockets_controller;
-
-                                  //    //Add the sensors macs to the sensor list
-                                  //    sensors_list.Clear();
-                                  //    for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
-                                  //        sensors_list.Add(((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address);
-
-                                  //    //Update status message
-                                  //    UpdateMsg("Wockets Swapped");
-                                  //    Thread.Sleep(1000);
-                                  //    Logger.Debug("Finish loading new set from Xml, new set: " + sensor_set);
-
-
-                                  //    //--- Initialize Kernel  ---
-                                  //    ResetUploaderCounters();
-                                  //    ResetACsCounters(wockets_controller);
-                                  //    for (int i = 0; i < wockets_controller._Receivers.Count; i++)
-                                  //    {
-                                  //        PrevFullPkg[i] = 0;
-                                  //        PrevPartialPkg[i] = 0;
-                                  //        PrevEmptyPkg[i] = 0;
-                                  //    }
-
-
-                                  //    //== Restart kernel == (commented for now)
-                                  //    //SuscribeToKernelEvents();
-                                  //    //Start the kernel connection sequence
-                                  //    //StartLoadingWocketsToKernel();
-                                  //    //Update status message
-                                  //    //UpdateMsg("Kernel Started");
-                                  //    //Thread.Sleep(1000);
-
-                                  //    UpdateMsg("Verify Wockets");
-                                  //    Core.SetSensors(this.sensors_list);
-                                  //    Thread.Sleep(2000);
-                                  //    Logger.Debug("Set Sensors Command Sent");
-
-                                  //}
-                                  //catch
-                                  //{
-                                  //    Logger.Debug("Swap sequence after wockets disconnected failed.");
-                                  //}
-
-
-                                  #endregion
-
-                                  #endregion
-                                  
-
                                   try
                                   {
+                                      Logger.Debug("Disconnect from wockets response received");    
                                       UpdateMsg("Stopping Kernel");
 
                                       //Indicate the swap sequence in the status files
@@ -1493,15 +1226,15 @@ namespace CollectDataUser
                                       Logger.Debug("An exception occurred after disconnected from kernel, before rebooting. When trying to save set id to file in the swapping process. Ex: " + ex);
                                   }
 
-                             
-                              //close application & reboot
-                              is_rebooting = true;
-                              this.Close();
-                              
+                                //close application & reboot
+                                is_rebooting = true;
+                                this.Close();
+
                             break;
 
                             default:
-                                break;
+                            break;
+
                         }
                     }
                 }
@@ -1515,220 +1248,110 @@ namespace CollectDataUser
 
 
         #region Kernel Message Callback
-
-        delegate void UpdateMsgCallback(string msg);
-        private void UpdateMsg(string msg)
-            {
-            try
-            {
-                // InvokeRequired required compares the thread ID of the
-                // calling thread to the thread ID of the creating thread.
-                // If these threads are different, it returns true.
-                if (this.InvokeRequired || this.InvokeRequired)
+            delegate void UpdateMsgCallback(string msg);
+            private void UpdateMsg(string msg)
                 {
-                    UpdateMsgCallback d = new UpdateMsgCallback(UpdateMsg);
-                    this.Invoke(d, new object[] { msg });
-                }
-                else
-                {   label_kernel_status.Text = msg;
-                    Application.DoEvents();
-                }
-
-            }
-            catch
-            {
-            }
-        }
-
-
-        //TODO: check how often this function is used
-        delegate void UpdateSensorStatusCallback(string status_msg);
-        private void UpdateSensorStatus(string status_msg)
-        {
-            try
-            {
-                // InvokeRequired required compares the thread ID of the
-                // calling thread to the thread ID of the creating thread.
-                // If these threads are different, it returns true.
-                if (this.InvokeRequired || this.InvokeRequired)
+                try
                 {
-                    UpdateSensorStatusCallback d = new UpdateSensorStatusCallback(UpdateSensorStatus);
-                    this.Invoke(d, new object[] { status_msg });
-                }
-                else
-                {
- 
-                    if (status_msg.CompareTo("Connected") == 0)
+                    // InvokeRequired required compares the thread ID of the
+                    // calling thread to the thread ID of the creating thread.
+                    // If these threads are different, it returns true.
+                    if (this.InvokeRequired || this.InvokeRequired)
                     {
-                        string msg = "Kernel Running";
-                        textBox_sensors_status.Text = msg;
-                        textBox_sensors_status.ForeColor = Color.Green;
-
-                        //update the sensor status panel
-                        textBox_spanel_sensors_status.Text = msg;
-                        textBox_spanel_sensors_status.ForeColor = Color.Green;
-
-                        //update fields in main app actions panel
-                        textBox_main_sensor_status.Text = msg;
-                        textBox_main_sensor_status.ForeColor = Color.Green;
-                    }
-                    else if (status_msg.CompareTo("Disconnected") == 0)
-                    {
-                        string msg = "Kernel Not Running";
-                        textBox_sensors_status.Text = msg;
-                        textBox_sensors_status.ForeColor = Color.DimGray;
-
-                        //update the sensor status panel
-                        textBox_spanel_sensors_status.Text = msg;
-                        textBox_spanel_sensors_status.ForeColor = Color.DimGray;
-
-                        //update fields in main app actions panel
-                        textBox_main_sensor_status.Text = msg;
-                        textBox_main_sensor_status.ForeColor = Color.DimGray;
+                        UpdateMsgCallback d = new UpdateMsgCallback(UpdateMsg);
+                        this.Invoke(d, new object[] { msg });
                     }
                     else
-                    {
-                        textBox_sensors_status.Text = status_msg;
-                        textBox_sensors_status.ForeColor = Color.DimGray;
-
-                        //update the sensor status panel
-                        textBox_spanel_sensors_status.Text = status_msg;
-                        textBox_spanel_sensors_status.ForeColor = Color.DimGray;
-
-                        //update fields in main app actions panel
-                        textBox_main_sensor_status.Text = status_msg;
-                        textBox_main_sensor_status.ForeColor = Color.DimGray;
+                    {   label_kernel_status.Text = msg;
+                        Application.DoEvents();
                     }
 
-                    Application.DoEvents();
                 }
-            }
-            catch
-            { 
-                //Fail updating the sensors connection status
-            }
-        }
+                catch
+                {
+                }
+                }
 
-      #endregion 
+            #region this function is obsolete (commented)
+        //delegate void UpdateSensorStatusCallback(string status_msg);
+        //private void UpdateSensorStatus(string status_msg)
+        //{
+        //    try
+        //    {
+        //        // InvokeRequired required compares the thread ID of the
+        //        // calling thread to the thread ID of the creating thread.
+        //        // If these threads are different, it returns true.
+        //        if (this.InvokeRequired || this.InvokeRequired)
+        //        {
+        //            UpdateSensorStatusCallback d = new UpdateSensorStatusCallback(UpdateSensorStatus);
+        //            this.Invoke(d, new object[] { status_msg });
+        //        }
+        //        else
+        //        {
+ 
+        //            if (status_msg.CompareTo("Connected") == 0)
+        //            {
+        //                string msg = "Kernel Running";
+        //                textBox_sensors_status.Text = msg;
+        //                textBox_sensors_status.ForeColor = Color.Green;
 
-     #endregion
+        //                //update the sensor status panel
+        //                textBox_spanel_sensors_status.Text = msg;
+        //                textBox_spanel_sensors_status.ForeColor = Color.Green;
+
+        //                //update fields in main app actions panel
+        //                textBox_main_sensor_status.Text = msg;
+        //                textBox_main_sensor_status.ForeColor = Color.Green;
+        //            }
+        //            else if (status_msg.CompareTo("Disconnected") == 0)
+        //            {
+        //                string msg = "Kernel Not Running";
+        //                textBox_sensors_status.Text = msg;
+        //                textBox_sensors_status.ForeColor = Color.DimGray;
+
+        //                //update the sensor status panel
+        //                textBox_spanel_sensors_status.Text = msg;
+        //                textBox_spanel_sensors_status.ForeColor = Color.DimGray;
+
+        //                //update fields in main app actions panel
+        //                textBox_main_sensor_status.Text = msg;
+        //                textBox_main_sensor_status.ForeColor = Color.DimGray;
+        //            }
+        //            else
+        //            {
+        //                textBox_sensors_status.Text = status_msg;
+        //                textBox_sensors_status.ForeColor = Color.DimGray;
+
+        //                //update the sensor status panel
+        //                textBox_spanel_sensors_status.Text = status_msg;
+        //                textBox_spanel_sensors_status.ForeColor = Color.DimGray;
+
+        //                //update fields in main app actions panel
+        //                textBox_main_sensor_status.Text = status_msg;
+        //                textBox_main_sensor_status.ForeColor = Color.DimGray;
+        //            }
+
+        //            Application.DoEvents();
+        //        }
+        //    }
+        //    catch
+        //    { 
+        //        //Fail updating the sensors connection status
+        //    }
+        //}
+        #endregion
+        #endregion
 
 
-      #region Audio Control Functions commented
+      #endregion
 
-          ////Structures
-          // public enum SND_SOUNDTYPE
-          //  {
-          //      On,
-          //      File,
-          //      Vibrate,
-          //      None
-          //  }
-
-          // private enum SND_EVENT
-          //  {
-          //      All,
-          //      RingLine1,
-          //      RingLine2,
-          //      KnownCallerLine1,
-          //      RoamingLine1,
-          //      RingVoip
-          //  }
-
-          // [StructLayout(LayoutKind.Sequential)]
-          // private struct SNDFILEINFO
-          //  {
-          //      [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
-          //      public string szPathName;
-          //      [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
-          //      public string szDisplayName;
-          //      public SND_SOUNDTYPE sstType;
-          //  }
-
-          // public enum Volumes : int
-          // {
-          //     OFF = 0,
-
-          //     LOW = 858993459,
-
-          //     NORMAL = 1717986918,
-
-          //     MEDIUM = -1717986919,
-
-          //     HIGH = -858993460,
-
-          //     VERY_HIGH = -1
-          // }
-
-
-          // //PInvokes
-          // [DllImport("coredll.dll")]
-          // public static extern void AudioUpdateFromRegistry();
-
-          // [DllImport("aygshell.dll", SetLastError = true)]
-          // private static extern uint SndSetSound(SND_EVENT seSoundEvent, ref SNDFILEINFO pSoundFileInfo, bool fSuppressUI);
-
-          // [DllImport("aygshell.dll", SetLastError = true)]
-          // private static extern uint SndGetSound(SND_EVENT seSoundEvent, ref SNDFILEINFO pSoundFileInfo);
-
-
-          // [DllImport("coredll.dll", SetLastError = true)]
-          // internal static extern int waveOutSetVolume(IntPtr device, int volume);
-
-          // [DllImport("coredll.dll", SetLastError = true)]
-          // internal static extern int waveOutGetVolume(IntPtr device, ref int volume);
-           
-          // //Audio Functions
-          // private static void SetProfileNormal(SND_EVENT mysnd)
-          // {
-          //     SNDFILEINFO soundFileInfo = new SNDFILEINFO();
-          //     soundFileInfo.sstType = SND_SOUNDTYPE.On;
-          //     uint num = SndSetSound(mysnd, ref soundFileInfo, true);
-          //     AudioUpdateFromRegistry();
-
-          // }
-
-          // private static void SetProfileVibrate()
-          // {
-          //     SNDFILEINFO soundFileInfo = new SNDFILEINFO();
-          //     soundFileInfo.sstType = SND_SOUNDTYPE.Vibrate;
-          //     uint num = SndSetSound(SND_EVENT.All, ref soundFileInfo, true);
-          //     AudioUpdateFromRegistry();
-          // }
-
-          // private static void SetProfileMuted()
-          // {
-          //     SNDFILEINFO soundFileInfo = new SNDFILEINFO();
-          //     soundFileInfo.sstType = SND_SOUNDTYPE.None;
-          //     uint num = SndSetSound(SND_EVENT.All, ref soundFileInfo, true);
-          //     AudioUpdateFromRegistry();
-          // }
-
-          // private bool IsInVibrateMode()
-          // {
-          //     SNDFILEINFO info = new SNDFILEINFO();
-          //     SndGetSound(SND_EVENT.All, ref info);
-          //     return (info.sstType == SND_SOUNDTYPE.Vibrate);
-          // }
-
-          // private bool IsMuted()
-          // {
-          //     SNDFILEINFO info = new SNDFILEINFO();
-          //     SndGetSound(SND_EVENT.All, ref info);
-          //     return (info.sstType == SND_SOUNDTYPE.None);
-          // }
 
       
-     #endregion
 
-
-
-      #region Reboot Phone
-        
+     #region Reboot Phone
         [DllImport("aygshell.dll")]
         private static extern bool ExitWindowsEx(uint uFlags, int dwReserved);
-       
-  
+
         enum ExitWindowsAction : uint
         {
             EWX_LOGOFF = 0,
@@ -1737,109 +1360,14 @@ namespace CollectDataUser
             EWX_FORCE = 4,
             EWX_POWEROFF = 8
         }
-
-
         void rebootDevice()
         {
-           
             Logger.Debug("Rebooting");
-
-            #region commented 1
-
-            //try
-            //{
-            //    //Indicate that application was terminated in reboot mode
-            //    StreamWriter wr_status = new StreamWriter(Core.KERNEL_PATH + "\\updater_last_status.txt");
-            //    wr_status.WriteLine("running");
-
-
-            //    if (IsInVibrateMode())
-            //        wr_status.WriteLine("vibrate");
-            //    else
-            //        wr_status.WriteLine("no_vibrate");
-
-            //    if (IsMuted())
-            //        wr_status.WriteLine("muted");
-            //    else
-            //        wr_status.WriteLine("no_muted");
-
-
-            //    int volume = (int)0;
-            //    waveOutGetVolume(IntPtr.Zero, ref volume);
-            //    wr_status.WriteLine(volume.ToString());
-
-            //    wr_status.Flush();
-            //    wr_status.Close();
-            //}
-            //catch
-            //{
-            //    Logger.Debug("An exception occurred when saving the reboot status to file.");
-            //}
-
-            #endregion 
-
-
-            #region commented 2
-
-            //Mute Phone
-            // waveOutSetVolume(IntPtr.Zero, (int)Volumes.OFF);
-
-            //SetProfileMuted();
-            //Thread.Sleep(1000);
-            //Application.DoEvents();
-
-            //if (this.app_status.CompareTo("normal_start") != 0)
-            //{
-            //DisplayPower.PowerOff();
-            //SetDevicePower("BKL1:", PowerStateRequirement.POWER_NAME, CEDEVICE_POWER_STATE.D0);
-            //SetSystemPowerState(null, PowerState.POWER_STATE_USERIDLE, 0);
-            //}
-
-            #endregion
-
-
-            //Reboot
             ExitWindowsEx((uint)ExitWindowsAction.EWX_REBOOT, 0);
         }
 
-        #region commented
-        //private void button_reboot_phone_Click(object sender, EventArgs e)
-        //{
-        //    //try
-        //    //{
-        //    //    Logger.Debug("Starting to reboot the phone");
-
-        //    //    //Stop status monitoring thread
-        //    //    StopACsUpdater();
-
-        //    //    //Wait for the system to stabilize and check that threads have finished
-        //    //    Thread.Sleep(2000);
-
-        //    //    //Terminate the kernel
-        //    //    if (TerminateKernel()) 
-        //    //    {
-        //    //        this.messageWindow.Dispose();
-        //    //        Application.Exit();
-        //    //        rebootDevice();
-        //    //    }
-        //    //}
-        //    //catch
-        //    //{
-        //    //    Logger.Debug("An exception occurred when trying to reboot the device");
-        //    //}   
-
-
-        //    //terminate uploader
-        //    TerminateDataUploader();
-        //    TerminateLogUploader();
-
-        //}
-        #endregion
-
-
-        #region restart silently old code commented
-
-       //public enum SND_SOUNDTYPE
+        #region restart silently code commented
+            //public enum SND_SOUNDTYPE
        // {
        //     On,
        //     File,
@@ -1938,331 +1466,71 @@ namespace CollectDataUser
 
        //[DllImport("coredll.dll", SetLastError = true)]
        // internal static extern int waveOutGetVolume(IntPtr device, ref int volume);
-       
+        #endregion
 
-       #region old reboot code commented out
-       //void rebootDevice()
-        //{
-           
-        //    Logger.Debug("save the device status to file, before rebooting");
-
-        //    try
-        //    {
-               
-        //        //Indicate that application was terminated in reboot mode
-        //        StreamWriter wr_status = new StreamWriter(Core.KERNEL_PATH + "\\updater_last_status.txt");
-        //        wr_status.WriteLine("running");
+     #endregion
 
 
-        //        if (IsInVibrateMode())
-        //            wr_status.WriteLine("vibrate");
-        //        else
-        //            wr_status.WriteLine("no_vibrate");
 
-        //        if (IsMuted())
-        //            wr_status.WriteLine("muted");
-        //        else
-        //            wr_status.WriteLine("no_muted");
-
-
-        //        int volume = (int)0;
-        //        waveOutGetVolume(IntPtr.Zero, ref volume);
-        //        wr_status.WriteLine(volume.ToString());
-
-        //        wr_status.Flush();
-        //        wr_status.Close();
-        //    }
-        //    catch
-        //    {
-        //        Logger.Debug("An exception occurred when saving the reboot status to file.");
-        //    }
-
-        //    //Mute Phone
-        //   // waveOutSetVolume(IntPtr.Zero, (int)Volumes.OFF);
-
-        //    //SetProfileMuted();
-        //    Thread.Sleep(1000);
-        //    //Application.DoEvents();
-
-        //    //if (this.app_status.CompareTo("normal_start") != 0)
-        //    //{
-        //        //DisplayPower.PowerOff();
-        //    SetDevicePower("BKL1:", PowerStateRequirement.POWER_NAME, CEDEVICE_POWER_STATE.D0);
-        //    SetSystemPowerState(null, PowerState.POWER_STATE_USERIDLE, 0);
-        //    //}
-            
-        //    //Reboot
-        //    ExitWindowsEx((uint)ExitWindowsAction.EWX_REBOOT, 0);
-        //}
-
-        //private void button_reboot_phone_Click(object sender, EventArgs e)
-        //{
-        //    try
-        //    {
-        //        Logger.Debug("Starting to reboot the phone");
-
-        //        //Stop status monitoring thread
-        //        StopACsUpdater();
-
-        //        //Wait for the system to stabilize and check that threads have finished
-        //        Thread.Sleep(2000);
-
-        //        //Terminate the kernel
-        //        if (TerminateKernel()) 
-        //        {
-        //            this.messageWindow.Dispose();
-        //            Application.Exit();
-        //            rebootDevice();
-        //        }
-        //    }
-        //    catch
-        //    {
-        //        Logger.Debug("An exception occurred when trying to reboot the device");
-        //    }   
-       //}
-       #endregion
-
-
-       #endregion
-
-
-      #endregion
-
-
-       #region Exit/Connect Button (From Main Menu Bar)
-
+      #region Exit/terminate application functions
 
        private void menuQuitApp_Click(object sender, EventArgs e)
         {
+            menuQuitApp.Enabled = false;
+            menuMainAppActions.Enabled = false;
+            Logger.Debug("Quit Button Clicked");
 
-            if (menuQuitApp.Text.CompareTo("Quit") == 0)
+            #region Exit Application
+
+            //Show the connect status panel
+            label_kernel_status.Text = "...";
+            TurnOnPanel(PanelID.CONNECTION);
+            Application.DoEvents();
+
+
+            if (MessageBox.Show("Are you sure you want to exit?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
             {
-                menuQuitApp.Enabled = false;
-                menuMainAppActions.Enabled = false;
-                Logger.Debug("Quit Button Clicked");
 
-                #region Exit Application
+                #region user confirmed to exit application
 
-                #region Check which panel is open (commented)
-
-                    //string panel_open = "";
-
-                    ////Hide the swap panel
-                    //if (SwapPanel.Visible)
-                    //{
-                    //    SwapPanel.Visible = false;
-                    //    SwapPanel.Enabled = false;
-                    //    panel_open = "Swap";
-                    //}
-                    ////Hide the main actions panel
-                    //if (MainActionsPanel.Visible)
-                    //{
-                    //    MainActionsPanel.Visible = false;
-                    //    MainActionsPanel.Enabled = false;
-                    //    panel_open = "Main";
-                    //}
-                    ////Hide the upload panel
-                    //if (UploadDataPanel.Visible)
-                    //{
-                    //    UploadDataPanel.Visible = false;
-                    //    UploadDataPanel.Enabled = false;
-                    //    panel_open = "Upload";
-                    //}
-                    ////Hide the sensors status panel
-                    //if (SensorStatusPanel.Visible)
-                    //{
-                    //    SensorStatusPanel.Visible = false;
-                    //    SensorStatusPanel.Enabled = false;
-                    //    panel_open = "Status";
-                    //}
-
-                #endregion
-
-
-                //Show the connect status panel
-                label_kernel_status.Text = "...";
-
-                TurnOnPanel(PanelID.CONNECTION);
-
-                #region commented
-                //ConnectPanel.BringToFront();
-                //ConnectPanel.Visible = true;
-                //ConnectPanel.Enabled = true;
-                #endregion
-
-
+                label_kernel_status.Text = "Exiting Application";
+                Logger.Debug("user confirmed to quit the application");
                 Application.DoEvents();
-
-
-                if (MessageBox.Show("Are you sure you want to exit?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
-                {
-
-                    #region user confirmed to exit app
-
-                    label_kernel_status.Text = "Exiting Application";
-                    Application.DoEvents();
-
-                    Logger.Debug("user confirmed to quit the application");
-
-                    //try
-                    //{
-                        //TODO: check if this part will be necessary in the future
-                        #region temporarely commented (not necessary to keep the status for now)
-                        ////Indicate that application was terminated by the user
-                        //StreamWriter wr_status = new StreamWriter(Core.KERNEL_PATH + "\\updater_last_status.txt");
-                        //wr_status.WriteLine("running");
-                        //Logger.Debug("Application terminated by the user. Quit Button Pressed.");
-                        //wr_status.Flush();
-                        //wr_status.Close();
-                        #endregion
-
-                        //wr_status.WriteLine("normal_start");
-                        #region commented
-                        //if (IsInVibrateMode())
-                        //    wr_status.WriteLine("vibrate");
-                        //else
-                        //    wr_status.WriteLine("no_vibrate");
-
-                        //if (IsMuted())
-                        //    wr_status.WriteLine("muted");
-                        //else
-                        //    wr_status.WriteLine("no_muted");
-                        #endregion 
-
-                        #region commented
-                        //if (IsInVibrateMode())
-                        //    wr_status.WriteLine("vibrate");
-                        //else
-                        //    wr_status.WriteLine("no_vibrate");
-
-                        //if (IsMuted())
-                        //    wr_status.WriteLine("muted");
-                        //else
-                        //    wr_status.WriteLine("no_muted");
-                        #endregion 
-
-                       
-                    //}
-                    //catch
-                    //{
-                    //    Logger.Debug("An exception occurred when saving app status to file.");
-                    //}
-
-                    TerminateApp();
-
-
-                    #endregion
-
-                }
-                else
-                {
-                    #region commented
-                    //Hide the connect panel
-                        //ConnectPanel.Visible = false;
-                    //ConnectPanel.Enabled = false;
-                    #endregion
-                    #region Show the panel that was originally open (commented)
-
-                    //switch (panel_open)
-                    //{
-                    //    case "Swap":
-                    //        SwapPanel.BringToFront();
-                    //        SwapPanel.Visible = true;
-                    //        SwapPanel.Enabled = true;
-                    //        break;
-                    //    case "Main":
-                    //        MainActionsPanel.BringToFront();
-                    //        MainActionsPanel.Visible = true;
-                    //        MainActionsPanel.Enabled = true;
-                    //        break;
-                    //    case "Upload":
-                    //        UploadDataPanel.BringToFront();
-                    //        UploadDataPanel.Visible = true;
-                    //        UploadDataPanel.Enabled = true;
-                    //        break;
-                    //    case "Status":
-                    //        SensorStatusPanel.BringToFront();
-                    //        SensorStatusPanel.Visible = true;
-                    //        SensorStatusPanel.Enabled = true;
-                    //        break;
-
-                    //    default:
-                    //        break;
-                    //}
-
-                    #endregion
-
-
-                    TurnOnPanel(LastPanel);
-                    Logger.Debug("User decided no to quit the application");
-                }
-
+                TerminateApp();
 
                 #endregion
 
-                menuQuitApp.Enabled = true;
-                menuMainAppActions.Enabled = true;
             }
-            else if (menuQuitApp.Text.CompareTo("Connect") == 0)
+            else
             {
-                menuQuitApp.Enabled = false;
-                menuQuitApp.Text = "";
-                Logger.Debug("User clicked the Connect button to start kernel in normal mode");
-
-                #region Connect Application
-
-                #region commented
-                ////Hide the swap panel
-                //SwapPanel.Enabled = false;
-                //SwapPanel.Visible = false;
-
-                //Show the connect panel
-               
-                //ConnectPanel.BringToFront();
-                //ConnectPanel.Enabled = true;
-                //ConnectPanel.Visible = true;
-                #endregion
-
-
-                label_kernel_status.Text = "Load Wockets";
-                TurnOnPanel(PanelID.CONNECTION);
-
-                //Start the kernel connection sequence
-                StartLoadingWocketsToKernel();
-                
-                Logger.Debug("Start loading wockets to kernel thread started");
-
-                #endregion
-
-                menuQuitApp.Text = "Quit";
-                menuQuitApp.Enabled = true;
-
+                TurnOnPanel(LastPanel);
+                Logger.Debug("User decided no to quit the application");
             }
+
+            #endregion
+
+            menuQuitApp.Enabled = true;
+            menuMainAppActions.Enabled = true;
         }
 
-
-
-        private bool TerminateKernel()
+       private bool TerminateKernel()
         {
             try
             {
                 Logger.Debug("Initiating the kernel termination");
                 Core.Unregister();
-
                 return Core.Terminate();
             }
             catch(Exception e)
             {
-                Logger.Debug("An exception occurred when trying to terminate kernel. ex:" + e);
                 //TODO: Here try more agressive methods to stop the kernel
+                Logger.Debug("An exception occurred when trying to terminate kernel. ex:" + e);
                 return false;
             }
         }
 
-
-
-        private bool Is_Kernel_Running()
-        {
+       private bool Is_Kernel_Running()
+       {
             try
             {
                 bool found = false;
@@ -2276,30 +1544,25 @@ namespace CollectDataUser
                             found = true;
                             break;
                         }
-                    }   
+                    }
                 }
-
                 return found;
             }
             catch
-            {   
-                return false;
-            }
+            { return false; }     
         }
 
 
-        private bool Is_Kernel_Running(out System.Diagnostics.Process kprocess)
+       private bool Is_Kernel_Running(out System.Diagnostics.Process kprocess)
         {
             kprocess = null;
 
             try
             {
                 ProcessInfo[] processes = ProcessCE.GetProcesses();
-
                 if (processes != null)
                 {
                     bool found = false;
-
                     for (int i = 0; (i < processes.Length); i++)
                     {
                         if (processes[i].FullPath.IndexOf("Kernel.exe") >= 0)
@@ -2311,7 +1574,6 @@ namespace CollectDataUser
                             break;
                         }
                     }
-
                     return found;
                 }
                 else
@@ -2319,7 +1581,6 @@ namespace CollectDataUser
                     Logger.Debug("The kernel process was NOT found.");
                     return false; 
                 }
-
             }
             catch (Exception ex)
             {
@@ -2331,7 +1592,6 @@ namespace CollectDataUser
     
         private void KillKernel()
         {
-            //Terminate kernel if running
             try
             {
                 System.Diagnostics.Process kernel_process = null;
@@ -2339,11 +1599,7 @@ namespace CollectDataUser
                 if (Is_Kernel_Running(out kernel_process))
                 {
                     if (kernel_process != null)
-                    {
-                        //kernel_process.Close();
-                        //uploader_process.Dispose();
-                        kernel_process.Kill();
-                    }
+                       kernel_process.Kill();
                 }
             }
             catch(Exception e)
@@ -2355,7 +1611,6 @@ namespace CollectDataUser
 
         private void TerminateLogUploader()
         {
-            //Termine uploader if running
             try
             {
                 System.Diagnostics.Process uploader_process = null;
@@ -2363,24 +1618,18 @@ namespace CollectDataUser
                 {
                     if (uploader_process != null)
                     {
-                        //uploader_process.Close();
-                        //uploader_process.Dispose();
                         uploader_process.Kill();
                         Thread.Sleep(500);
-                        
                     }
                 }
             }
             catch(Exception  e)
-            {
-                Logger.Debug("An exception occurred when trying to terminate the log uploader. Ex: " + e);
-            }
+            { Logger.Debug("An exception occurred when trying to terminate the log uploader. Ex: " + e); }
         }
 
 
         private void TerminateDataUploader()
         {
-            //Termine uploader if running
             try
             {
                 System.Diagnostics.Process uploader_process = null;
@@ -2388,17 +1637,13 @@ namespace CollectDataUser
                 {
                     if (uploader_process != null)
                     {
-                        //uploader_process.Close();
-                        //uploader_process.Dispose();
                         uploader_process.Kill();
                         Thread.Sleep(500);
                     }
                 }
             }
             catch
-            {
-                Logger.Debug("An exception occurred when trying to terminate the data uploader.");
-            }
+            { Logger.Debug("An exception occurred when trying to terminate the data uploader."); }  
         }
 
 
@@ -2413,7 +1658,7 @@ namespace CollectDataUser
 
                 //Stop status monitoring thread
                 StopACsUpdater();
-               
+
                 //Wait for the system to stabilize and check that threads have finished
                 Thread.Sleep(1000);
 
@@ -2421,78 +1666,38 @@ namespace CollectDataUser
                 TerminateDataUploader();
                 TerminateLogUploader();
 
-                //Wait to stabilize system (2 secs)
-                //Thread.Sleep(1000);
+                //Terminate the kernel, if running
+                if (!TerminateKernel()) //=== if (!Core._KernalStarted)
+                    Logger.Debug("Failed to terminate kernel, exection when forcing to quit");
 
-                //Terminate the kernel
+                //Close the hidden window 
+                this.messageWindow.Dispose();
 
-                if ( !TerminateKernel()) //=== if (!Core._KernalStarted)
-                   Logger.Debug("Failed to terminate kernel, exection when forcing to quit");
-
-
-                //Terminate app
                 Application.Exit();
-             
             }
             catch
-            {
-                Logger.Debug("An exception occurred when trying to quit the application");
-            }
+            { Logger.Debug("An exception occurred when trying to quit the application"); }
+            
         }
 
 
-       
-       
         private void WocketsMainForm_Closing(object sender, CancelEventArgs e)
         {
-            TerminateApp();
-
-            #region commented
-            
-        //    if (!is_rebooting)
-        //      TerminateApp();
-        //    else
-        //    {
-        //        try
-        //        {
-        //            //Termine uploader if running
-        //            TerminateUploader();
-
-        //            //Wait to stabilize system (2 secs)
-        //            Thread.Sleep(1000);
-
-        //            this.messageWindow.Dispose();
-        //            Application.Exit();
-        //        }
-        //        catch
-        //        {   Logger.Debug("An exception occurred when trying to quit the application for rebooting.");
-        //        }
-            //    }
-            #endregion
-
-           
+            TerminateApp();   
         }
         
 
         private void WocketsMainForm_Closed(object sender, EventArgs e)
         {
-
                 if (!is_rebooting)
                 {
                     Logger.Debug("The application has quit successfully.");
-                    
-                    //Terminate hidden window 
-                    this.messageWindow.Dispose();
                     KillKernel();
                     System.Diagnostics.Process.GetCurrentProcess().Kill();
                 }
                 else
                 {
                     Logger.Debug("The phone is rebooting.");
-                    
-                    //Terminate hidden window 
-                    this.messageWindow.Dispose();
-
                     rebootDevice();
                 }
         }
@@ -2501,15 +1706,12 @@ namespace CollectDataUser
       #endregion
 
 
-
-      #region Minimize/Main Menu Button Actions
+      #region Minimize/Main Menu Button 
 
         private void menuMainAppActions_Click(object sender, EventArgs e)
         {
-
             try
             {
-               
                 if (menuMainAppActions.Text.CompareTo("Minimize") == 0)
                 {
                     Minimize_Main_Window();
@@ -2518,49 +1720,12 @@ namespace CollectDataUser
                 else if (menuMainAppActions.Text.CompareTo("Main Menu") == 0)
                 {
                     menuMainAppActions.Text = "Minimize";
-                   
-
-                    #region Check which panel is open (commented)
-
-                    ////Hide the swap panel
-                    //if (SwapPanel.Visible)
-                    //{
-                    //    SwapPanel.Visible = false;
-                    //    SwapPanel.Enabled = false;
-                    //}
-                    //else if (UploadDataPanel.Visible)
-                    //{
-                    //    UploadDataPanel.Visible = false;
-                    //    UploadDataPanel.Enabled = false;
-                    //    StopUpdateUploadThread();
-
-                    //   //Hide the elapsed time label
-                    //   textBox_elapsed_time.Visible = false;
-                    //}
-                    //else if (SensorStatusPanel.Visible)
-                    //{
-                    //    SensorStatusPanel.Visible = false;
-                    //    SensorStatusPanel.Enabled = false;
-                    //}
-
-                    
-
-                    //Show Main Actions Panel
-                    //MainActionsPanel.Visible = true;
-                    //MainActionsPanel.BringToFront();
-                    //MainActionsPanel.Enabled = true;
-
-                    #endregion
-
                     TurnOnPanel(PanelID.MAIN);
                     Logger.Debug("Go to the main menu panel");
-                    
                 }
             }
             catch(Exception ex) 
-            {
-                Logger.Debug("An exception occurred when minimizing/main menu button clicked. ex: " + ex);      
-            }
+            {   Logger.Debug("An exception occurred when minimizing/main menu button clicked. ex: " + ex);   }   
         }
 
         private void Minimize_Main_Window()
@@ -2571,7 +1736,6 @@ namespace CollectDataUser
     #endregion 
 
       
-    
       #region Main Actions Panel Buttons
 
         //Swap Button Panel
@@ -3015,10 +2179,10 @@ namespace CollectDataUser
 
       private void RunUploadThread()
       {
-          Logger.Debug("upload monitor thread started");
-
           try
           {
+              Logger.Debug("upload monitor thread started");
+
               while (true)
               {
                   //TODO: Compute Elapsed Time
@@ -3045,8 +2209,8 @@ namespace CollectDataUser
 
       #region File Upload Update Callback
 
-      delegate void UpdateTimeCallback();
-      public void UpdateFilesUploaded()
+        delegate void UpdateTimeCallback();
+        public void UpdateFilesUploaded()
       {
           if (!disposed)
           {
@@ -3062,159 +2226,37 @@ namespace CollectDataUser
               {
                   //TODO: Duration Label
                   textBox_elapsed_time.Text = ElapsedTime;
-
                   counter++;
 
                   if (counter == 6) //enter every 6 secs
                   {
+                     #region Determine if the uploader program is still running
 
-                      #region Update the Raw Data Uploaded Status 
-
-                      //Update the upload files fields
-                      Core.READ_LAST_UPLOAD_DURATION();
-                      Core.READ_LAST_UPLOAD_FAILEDFILES();
-                      Core.READ_LAST_UPLOAD_NEWFILES();
-                      Core.READ_LAST_UPLOAD_SUCCESSFILES();
-                      Core.READ_LAST_UPLOAD_TIME();
-
-
-                      //update new files label
-                      textBox_uploader_new_files.Text = CurrentWockets._UploadNewFiles.ToString();
-
-
-                      #region Compute elapsed time since last upload
-                      
-
-                      if (CurrentWockets._UploadLastTime.Year != 1961)
-                      {
-                          TimeSpan duration = DateTime.Now.Subtract(CurrentWockets._UploadLastTime);
-
-                          //update the status of the last file upload
-                          if (duration.TotalDays >= 2)
-                              this.textBox_updater_last_update.Text = ((int)duration.TotalDays).ToString() + " days ago";
-                          else if (duration.TotalHours > 2)
-                              this.textBox_updater_last_update.Text = ((int)duration.TotalHours) + " hours ago";
-                          else
-                              this.textBox_updater_last_update.Text = ((int)duration.TotalMinutes) + " mins ago";
-                      }
-                      else
-                      {
-                          //update the status fields of the data time duration
-                          this.textBox_updater_last_update.Text = "never";
-                      }
-
-
-                      #endregion
-
-
-                      //update the upload status indicators
-                      textBox_uploader_duration.Text = CurrentWockets._UploadDuration;
-                      textBox_uploader_successful_files.Text = CurrentWockets._UploadSuccessFiles.ToString();
-                      textBox_uploader_failed_files.Text = CurrentWockets._UploadFailedFiles.ToString();
-
-
-                      #region commented
-                      //If finished uploading, reset counter
-                      //if ((prevSuccessful != CurrentWockets._UploadSuccessFiles) ||
-                      //    (prevFailed != CurrentWockets._UploadFailedFiles))
-                      //    uploadCounter = 0;
-                      #endregion 
-
-
-                      //update counters
-                      prevSuccessful = CurrentWockets._UploadSuccessFiles;
-                      prevFailed = CurrentWockets._UploadFailedFiles;
-
-                      #endregion
-
-
-                      
-                      #region Determine if the uploader program is still running
-
-
-                      #region commented
-
-                      //try
-                      //{
-                      //    ProcessInfo[] processes = ProcessCE.GetProcesses();
-
-                      //    if (processes != null)
-                      //    {
-                      //        bool found = false;
-                      //        for (int i = 0; (i < processes.Length); i++)
-                      //        {
-                      //            if (processes[i].FullPath.IndexOf("DataUploader.exe") >= 0)
-                      //            {
-                      //                found = true;
-                      //                break;
-                      //            }
-                      //        }
-
-                      //        //update status
-                      //        if (found)
-                      //        {
-                      //            label_upload_data_status.Text = "Uploading Raw Data";
-                      //            label_upload_data_status.ForeColor = Color.Green;
-                      //            this.UploadButton.Enabled = false;
-                      //        }
-                      //        else
-                      //        {
-                      //            label_upload_data_status.Text = "...";
-                      //            label_upload_data_status.ForeColor = Color.DimGray;
-                      //            this.UploadButton.Enabled = true;
-                      //        }    
-
-                      //    }
-                      //}
-                      //catch (Exception e){ }
-
-                      #endregion 
-
-                      if ( Is_DataUploader_Running())
-                      {
-                          label_upload_data_status.Text = "Uploading Raw Data";
-                          label_upload_data_status.ForeColor = Color.Green;
-                          this.UploadButton.Enabled = false;
-                      }
-                      else
-                      {
-                          if (Is_LogUploader_Running())
+                          if ( Is_DataUploader_Running())
                           {
-                              label_upload_data_status.Text = "Uploading Data Logs";
+                              label_upload_data_status.Text = "Uploading Raw Data";
                               label_upload_data_status.ForeColor = Color.Green;
-                              this.UploadButton.Enabled = true;
+                              this.UploadButton.Enabled = false;
                           }
                           else
                           {
-                              label_upload_data_status.Text = "...";
-                              label_upload_data_status.ForeColor = Color.DimGray;
-                              this.UploadButton.Enabled = true;
+                              if (Is_LogUploader_Running())
+                              {
+                                  label_upload_data_status.Text = "Uploading Data Logs";
+                                  label_upload_data_status.ForeColor = Color.Green;
+                                  this.UploadButton.Enabled = true;
+                              }
+                              else
+                              {
+                                  label_upload_data_status.Text = "...";
+                                  label_upload_data_status.ForeColor = Color.DimGray;
+                                  this.UploadButton.Enabled = true;
+                              }
                           }
-                      
-                      }
 
-                      #endregion
+                     #endregion
 
-
-                      #region commented
-                      //if (_UploaderProcess == null )
-                      //{
-                      //    label_upload_data_status.Text = "...";
-                      //    label_upload_data_status.ForeColor = Color.DimGray;
-                      //    this.UploadButton.Enabled = true;
-                      //}
-                      //else if ((!this.UploadButton.Enabled) && ((_UploaderProcess != null) && (_UploaderProcess.HasExited)))
-                      //{
-                      //    label_upload_data_status.Text = "...";
-                      //    label_upload_data_status.ForeColor = Color.DimGray;
-                      //    this.UploadButton.Enabled = true;
-                      //}
-                      #endregion
-
-
-
-                      counter = 0;
-
+                     counter = 0;
                   }
 
                   this.Invalidate();
@@ -3222,52 +2264,51 @@ namespace CollectDataUser
           }
       }
 
-    #endregion
+      #endregion
 
 
+      #region Reset ACs Registries
 
-    #region Reset ACs Registries
-
-     private void ResetUploaderCounters()
-      {
-          try
-          {
-              Core.WRITE_LAST_UPLOAD_FAILEDFILES(0);
-              Core.WRITE_LAST_UPLOAD_SUCCESSFILES(0);
-              Core.WRITE_LAST_UPLOAD_NEWFILES(0);
-          }
-          catch
-          {
-              Logger.Debug("An exception occurred when trying to reset Uploader counters");
-          }
-      }
-
-     private void ResetACsCounters(WocketsController wc)
-     {
-          try
-          {
-              for (int i = 0; (i < wc._Receivers.Count); i++)
+         private void ResetUploaderCounters()
+         {
+              try
               {
-                  Core.WRITE_FULL_RECEIVED_COUNT(i, 0);
-                  Core.WRITE_PARTIAL_RECEIVED_COUNT(i, 0);
-                  Core.WRITE_EMPTY_RECEIVED_COUNT(i, 0);
-                  Core.WRITE_RECEIVED_ACs(i, -1);
-                  Core.WRITE_SAVED_ACs(i, -1);
+                  Core.WRITE_LAST_UPLOAD_FAILEDFILES(0);
+                  Core.WRITE_LAST_UPLOAD_SUCCESSFILES(0);
+                  Core.WRITE_LAST_UPLOAD_NEWFILES(0);
+              }
+              catch
+              {
+                  Logger.Debug("An exception occurred when trying to reset Uploader counters");
+              }
+         }
+
+         private void ResetACsCounters(WocketsController wc)
+         {
+              try
+              {
+                  for (int i = 0; (i < wc._Receivers.Count); i++)
+                  {
+                      Core.WRITE_FULL_RECEIVED_COUNT(i, 0);
+                      Core.WRITE_PARTIAL_RECEIVED_COUNT(i, 0);
+                      Core.WRITE_EMPTY_RECEIVED_COUNT(i, 0);
+                      Core.WRITE_RECEIVED_ACs(i, -1);
+                      Core.WRITE_SAVED_ACs(i, -1);
+                  }
+              }
+              catch
+              {
+                  Logger.Debug("An exception occurred when trying to reset ACs counters");
               }
           }
-          catch
-          {
-              Logger.Debug("An exception occurred when trying to reset ACs counters");
-          }
-      }
 
-    #endregion
+       #endregion
 
 
-    #region Thread tracking the sensor connection status
+      #region Thread tracking the sensor connection status
 
-     double WAIT_INTERVAL_LOG_UPLOADER = 60.0; //in minutes
-     double WAIT_INTERVAL_DATA_UPLOADER_HRS = 1.0; //in hours
+        double WAIT_INTERVAL_LOG_UPLOADER = 60.0; //in minutes
+        double WAIT_INTERVAL_DATA_UPLOADER_HRS = 1.0; //in hours
 
 
      private void ACsUpdateTimer_Tick(object sender, EventArgs e)
@@ -3275,132 +2316,169 @@ namespace CollectDataUser
          bool received_count_read = false;
 
          #region Update Sensors Connection Status
-         
-         
-         try
-         {
-             if (CurrentWockets._Controller._Sensors != null)
+          
+             try
              {
-                 if (CurrentWockets._Controller._Sensors.Count > 0)
+                 if (CurrentWockets._Controller._Sensors != null)
                  {
-                     for (int i = 0; i < CurrentWockets._Controller._Sensors.Count; i++)
+                     if (CurrentWockets._Controller._Sensors.Count > 0)
                      {
-
-                         //== Compute the elapsed time since the last connection
-                         ElapsedConnectionTime[i] = DateTime.Now.Subtract(LastPkgTime[i]);
-
-                         //if et>1min check pkg status
-                         if (ElapsedConnectionTime[i].TotalMinutes > 1.0)
+                         for (int i = 0; i < CurrentWockets._Controller._Sensors.Count; i++)
                          {
+                             //== Compute the elapsed time since the last connection
+                             ElapsedConnectionTime[i] = DateTime.Now.Subtract(LastPkgTime[i]);
 
-                             #region IF ELAPSED TIME > 1MIN
-
-
-                             #region Load the AC Counts to Kernel
-
-                             if (!received_count_read)
+                             //if et>1min check pkg status
+                             if (ElapsedConnectionTime[i].TotalMinutes > 1.0)
                              {
-                                 Core.READ_EMPTY_RECEIVED_COUNT();
-                                 Core.READ_FULL_RECEIVED_COUNT();
-                                 Core.READ_PARTIAL_RECEIVED_COUNT();
-                                 Core.READ_RECEIVED_ACs();
-                                 Core.READ_SAVED_ACs();
-
-                                 received_count_read = true;
-                             }
-
-                             #endregion
+                                 #region IF ELAPSED TIME > 1MIN
 
 
-                             #region Update the ACs on the Screen
+                                 #region Load the AC Counts to Kernel
 
-                             if (i == 0)
-                             {
-                                 this.textBox_spanel_ac_full_0.Text = CurrentWockets._Controller._Sensors[_ID]._Full.ToString();
-                                 this.textBox_spanel_ac_partial_0.Text = CurrentWockets._Controller._Sensors[i]._Partial.ToString();
-                                 this.textBox_spanel_ac_empty_0.Text = CurrentWockets._Controller._Sensors[i]._Empty.ToString();
-
-                                 this.textBox_spanel_ac_new_0.Text = CurrentWockets._Controller._Sensors[i]._SavedACs + " - " + CurrentWockets._Controller._Sensors[i]._TotalSavedACs;
-                                 this.textBox_spanel_ac_last_0.Text = CurrentWockets._Controller._Sensors[i]._ReceivedACs + " - " + CurrentWockets._Controller._Sensors[i]._TotalReceivedACs;
-                             }
-                             else
-                             {
-                                 this.textBox_spanel_ac_full_1.Text = CurrentWockets._Controller._Sensors[i]._Full.ToString();
-                                 this.textBox_spanel_ac_partial_1.Text = CurrentWockets._Controller._Sensors[i]._Partial.ToString();
-                                 this.textBox_spanel_ac_empty_1.Text = CurrentWockets._Controller._Sensors[i]._Empty.ToString();
-
-                                 this.textBox_spanel_ac_new_1.Text = CurrentWockets._Controller._Sensors[i]._SavedACs + " - " + CurrentWockets._Controller._Sensors[i]._TotalSavedACs;
-                                 this.textBox_spanel_ac_last_1.Text = CurrentWockets._Controller._Sensors[i]._ReceivedACs + " - " + CurrentWockets._Controller._Sensors[i]._TotalReceivedACs;
-                             }
-
-                             #endregion
-
-
-
-                             //If Full/Partial Packages Changed
-                             if (CurrentWockets._Controller._Sensors[i]._Full > PrevFullPkg[i] ||
-                                  CurrentWockets._Controller._Sensors[i]._Partial > PrevPartialPkg[i])
-                             {
-
-                                 #region Update Fields
-
-                                 PrevFullPkg[i] = CurrentWockets._Controller._Sensors[i]._Full;
-                                 PrevPartialPkg[i] = CurrentWockets._Controller._Sensors[i]._Partial;
-
-                                 if (i == 0)
+                                 if (!received_count_read)
                                  {
-                                     textBox_sensors_status_0.Text = "Saving Data";
-                                     textBox_sensors_status_0.ForeColor = Color.Orange;
-                                 }
-                                 else
-                                 {
-                                     textBox_sensors_status_1.Text = "Saving Data";
-                                     textBox_sensors_status_1.ForeColor = Color.Orange;
-                                 }
+                                     Core.READ_EMPTY_RECEIVED_COUNT();
+                                     Core.READ_FULL_RECEIVED_COUNT();
+                                     Core.READ_PARTIAL_RECEIVED_COUNT();
+                                     Core.READ_RECEIVED_ACs();
+                                     Core.READ_SAVED_ACs();
 
-                                 LastPkgTime[i] = DateTime.Now;
-
-                                 #endregion
-
-                             }
-                             //If Empty Packages Changed
-                             else if (CurrentWockets._Controller._Sensors[i]._Empty > PrevEmptyPkg[i])
-                             {
-
-                                 #region Update Fields
-
-                                 PrevEmptyPkg[i] = CurrentWockets._Controller._Sensors[i]._Empty;
-
-                                 if (i == 0)
-                                 {
-                                     textBox_sensors_status_0.Text = "Data Lost";
-                                     textBox_sensors_status_0.ForeColor = Color.Tomato;
-                                 }
-                                 else
-                                 {
-                                     textBox_sensors_status_1.Text = "Data Lost";
-                                     textBox_sensors_status_1.ForeColor = Color.Tomato;
+                                     received_count_read = true;
                                  }
 
                                  #endregion
 
+
+                                 #region Update the ACs on the Screen
+
+                                 if (i == 0)
+                                 {
+                                     this.textBox_spanel_ac_full_0.Text = CurrentWockets._Controller._Sensors[_ID]._Full.ToString();
+                                     this.textBox_spanel_ac_partial_0.Text = CurrentWockets._Controller._Sensors[i]._Partial.ToString();
+                                     this.textBox_spanel_ac_empty_0.Text = CurrentWockets._Controller._Sensors[i]._Empty.ToString();
+
+                                     this.textBox_spanel_ac_new_0.Text = CurrentWockets._Controller._Sensors[i]._SavedACs + " - " + CurrentWockets._Controller._Sensors[i]._TotalSavedACs;
+                                     this.textBox_spanel_ac_last_0.Text = CurrentWockets._Controller._Sensors[i]._ReceivedACs + " - " + CurrentWockets._Controller._Sensors[i]._TotalReceivedACs;
+                                 }
+                                 else
+                                 {
+                                     this.textBox_spanel_ac_full_1.Text = CurrentWockets._Controller._Sensors[i]._Full.ToString();
+                                     this.textBox_spanel_ac_partial_1.Text = CurrentWockets._Controller._Sensors[i]._Partial.ToString();
+                                     this.textBox_spanel_ac_empty_1.Text = CurrentWockets._Controller._Sensors[i]._Empty.ToString();
+
+                                     this.textBox_spanel_ac_new_1.Text = CurrentWockets._Controller._Sensors[i]._SavedACs + " - " + CurrentWockets._Controller._Sensors[i]._TotalSavedACs;
+                                     this.textBox_spanel_ac_last_1.Text = CurrentWockets._Controller._Sensors[i]._ReceivedACs + " - " + CurrentWockets._Controller._Sensors[i]._TotalReceivedACs;
+                                 }
+
+                                 #endregion
+
+
+
+                                 //If Full/Partial Packages Changed
+                                 if (CurrentWockets._Controller._Sensors[i]._Full > PrevFullPkg[i] ||
+                                      CurrentWockets._Controller._Sensors[i]._Partial > PrevPartialPkg[i])
+                                 {
+
+                                     #region Update Fields
+
+                                     PrevFullPkg[i] = CurrentWockets._Controller._Sensors[i]._Full;
+                                     PrevPartialPkg[i] = CurrentWockets._Controller._Sensors[i]._Partial;
+
+                                     if (i == 0)
+                                     {
+                                         textBox_sensors_status_0.Text = "Saving Data";
+                                         textBox_sensors_status_0.ForeColor = Color.Orange;
+                                     }
+                                     else
+                                     {
+                                         textBox_sensors_status_1.Text = "Saving Data";
+                                         textBox_sensors_status_1.ForeColor = Color.Orange;
+                                     }
+
+                                     LastPkgTime[i] = DateTime.Now;
+
+                                     #endregion
+
+                                 }
+                                 //If Empty Packages Changed
+                                 else if (CurrentWockets._Controller._Sensors[i]._Empty > PrevEmptyPkg[i])
+                                 {
+
+                                     #region Update Fields
+
+                                     PrevEmptyPkg[i] = CurrentWockets._Controller._Sensors[i]._Empty;
+
+                                     if (i == 0)
+                                     {
+                                         textBox_sensors_status_0.Text = "Data Lost";
+                                         textBox_sensors_status_0.ForeColor = Color.Tomato;
+                                     }
+                                     else
+                                     {
+                                         textBox_sensors_status_1.Text = "Data Lost";
+                                         textBox_sensors_status_1.ForeColor = Color.Tomato;
+                                     }
+
+                                     #endregion
+
+                                 }
+                                 //If the # of packages didn't changed
+                                 else
+                                 {
+
+                                     #region Update Fields
+
+                                     if (ElapsedConnectionTime[i].TotalMinutes <= 5.0)
+                                     {
+                                         if (i == 0)
+                                         {
+                                             textBox_sensors_status_0.Text = "Waiting For Data";
+                                             textBox_sensors_status_0.ForeColor = Color.DimGray;
+                                         }
+                                         else
+                                         {
+                                             textBox_sensors_status_1.Text = "Waiting For Data";
+                                             textBox_sensors_status_1.ForeColor = Color.DimGray;
+                                         }
+                                     }
+                                     else
+                                     {
+                                         if (i == 0)
+                                         {
+                                             textBox_sensors_status_0.Text = "No Data Received";
+                                             textBox_sensors_status_0.ForeColor = Color.Red;
+                                         }
+                                         else
+                                         {
+                                             textBox_sensors_status_1.Text = "No Data Received";
+                                             textBox_sensors_status_1.ForeColor = Color.Red;
+                                         }
+                                     }
+
+                                     #endregion
+
+                                 }
+
+
+                                 #endregion
                              }
-                             //If the # of packages didn't changed
                              else
                              {
+                                 #region IF ELAPSED TIME < 1min
 
-                                 #region Update Fields
-
-                                 if (ElapsedConnectionTime[i].TotalMinutes <= 5.0)
+                                 //If Full/Partial Packages == 0 never received data                     
+                                 if (CurrentWockets._Controller._Sensors[i]._Full == 0 &
+                                     CurrentWockets._Controller._Sensors[i]._Partial == 0)
                                  {
                                      if (i == 0)
                                      {
-                                         textBox_sensors_status_0.Text = "Waiting For Data";
+                                         textBox_sensors_status_0.Text = "---";
                                          textBox_sensors_status_0.ForeColor = Color.DimGray;
                                      }
                                      else
                                      {
-                                         textBox_sensors_status_1.Text = "Waiting For Data";
+                                         textBox_sensors_status_1.Text = "---";
                                          textBox_sensors_status_1.ForeColor = Color.DimGray;
                                      }
                                  }
@@ -3408,79 +2486,34 @@ namespace CollectDataUser
                                  {
                                      if (i == 0)
                                      {
-                                         textBox_sensors_status_0.Text = "No Data Received";
-                                         textBox_sensors_status_0.ForeColor = Color.Red;
+                                         textBox_sensors_status_0.Text = "Data Received";
+                                         textBox_sensors_status_0.ForeColor = Color.Green;
                                      }
                                      else
                                      {
-                                         textBox_sensors_status_1.Text = "No Data Received";
-                                         textBox_sensors_status_1.ForeColor = Color.Red;
+                                         textBox_sensors_status_1.Text = "Data Received";
+                                         textBox_sensors_status_1.ForeColor = Color.Green;
                                      }
                                  }
 
                                  #endregion
-
                              }
-
-
-                             #endregion
-
-                         }
-                         else
-                         {
-
-                             #region IF ELAPSED TIME < 1min
-
-                             //If Full/Partial Packages == 0 never received data                     
-                             if (CurrentWockets._Controller._Sensors[i]._Full == 0 &
-                                 CurrentWockets._Controller._Sensors[i]._Partial == 0)
-                             {
-                                 if (i == 0)
-                                 {
-                                     textBox_sensors_status_0.Text = "---";
-                                     textBox_sensors_status_0.ForeColor = Color.DimGray;
-                                 }
-                                 else
-                                 {
-                                     textBox_sensors_status_1.Text = "---";
-                                     textBox_sensors_status_1.ForeColor = Color.DimGray;
-                                 }
-                             }
-                             else
-                             {
-                                 if (i == 0)
-                                 {
-                                     textBox_sensors_status_0.Text = "Data Received";
-                                     textBox_sensors_status_0.ForeColor = Color.Green;
-                                 }
-                                 else
-                                 {
-                                     textBox_sensors_status_1.Text = "Data Received";
-                                     textBox_sensors_status_1.ForeColor = Color.Green;
-                                 }
-                             }
-
-                             #endregion
-
-                         }
-
-                     }//ends for loop
-
-                 }//if sensors count >0
-             }//if sensors list != null
-         }
-         catch
-         {
-             Logger.Debug("An exeption occurred when updating/monitoring the Acs counts for connection status");
-         }
+                         }//ends for loop
+                     }//if sensors count >0
+                 }//if sensors list != null
+             }
+             catch
+             {
+                 Logger.Debug("An exeption occurred when updating/monitoring the Acs counts for connection status");
+             }
 
         #endregion
+
 
          #region Determine if the log/data uploader needs to be launched
 
          try 
          {  
-
             //Launch the data uploader at midnight once a day
             DateTime current_time = DateTime.Now;
 
@@ -3545,69 +2578,7 @@ namespace CollectDataUser
         }
 
        
-
-
-     #region Update ACs Event Listener (commented)
-
-        //delegate void UpdateACsCallback();
-        //private void UpdateACsEventListener()
-        //{
-        //    try
-        //    {
-        //        Core.READ_EMPTY_RECEIVED_COUNT();
-        //        Core.READ_FULL_RECEIVED_COUNT();
-        //        Core.READ_PARTIAL_RECEIVED_COUNT();
-        //        Core.READ_RECEIVED_ACs();
-        //        Core.READ_SAVED_ACs();
-
-
-        //        // InvokeRequired required compares the thread ID of the
-        //        // calling thread to the thread ID of the creating thread.
-        //        // If these threads are different, it returns true.
-        //        if (this.InvokeRequired || this.InvokeRequired)
-        //        {
-        //            UpdateACsCallback d = new UpdateACsCallback(UpdateACsEventListener);
-        //            this.Invoke(d, new object[] { });
-        //        }
-        //        else
-        //        {
-
-
-        //            //Update the ACs For Sensor ID=0 on the Screen
-        //            _ID = 0;
-        //            this.textBox_spanel_ac_full_0.Text = CurrentWockets._Controller._Sensors[_ID]._Full.ToString();
-        //            this.textBox_spanel_ac_partial_0.Text = CurrentWockets._Controller._Sensors[_ID]._Partial.ToString();
-        //            this.textBox_spanel_ac_empty_0.Text = CurrentWockets._Controller._Sensors[_ID]._Empty.ToString();
-
-        //            this.textBox_spanel_ac_new_0.Text = CurrentWockets._Controller._Sensors[_ID]._SavedACs + " - " + CurrentWockets._Controller._Sensors[_ID]._TotalSavedACs;
-        //            this.textBox_spanel_ac_last_0.Text = CurrentWockets._Controller._Sensors[_ID]._ReceivedACs + " - " + CurrentWockets._Controller._Sensors[_ID]._TotalReceivedACs;
-
-
-        //            //Update the ACs For Sensor ID=1 on the Screen
-        //            _ID = 1;
-        //            this.textBox_spanel_ac_full_1.Text = CurrentWockets._Controller._Sensors[_ID]._Full.ToString();
-        //            this.textBox_spanel_ac_partial_1.Text = CurrentWockets._Controller._Sensors[_ID]._Partial.ToString();
-        //            this.textBox_spanel_ac_empty_1.Text = CurrentWockets._Controller._Sensors[_ID]._Empty.ToString();
-
-        //            this.textBox_spanel_ac_new_1.Text = CurrentWockets._Controller._Sensors[_ID]._SavedACs + " - " + CurrentWockets._Controller._Sensors[_ID]._TotalSavedACs;
-        //            this.textBox_spanel_ac_last_1.Text = CurrentWockets._Controller._Sensors[_ID]._ReceivedACs + " - " + CurrentWockets._Controller._Sensors[_ID]._TotalReceivedACs;
-
-
-
-        //            this.Invalidate();
-
-        //        }
-        //    }
-        //    catch (Exception e)
-        //    {
-        //    }
-
-        //}
-
      #endregion
-
-
-      #endregion
 
 
 
