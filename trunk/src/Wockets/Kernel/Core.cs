@@ -361,48 +361,53 @@ namespace Wockets.Kernel
         /// <returns>True on successful spawning, otherwise false</returns>
         public static bool Start()
         {
-
             Logger.Debug("Entering to kernel.start()");
-
-
-
 
             if (!Core._KernalStarted)
             {
-
                 try
                 {
+                    Logger.Debug("Detected Kernel not started.");
+
                     //System.Diagnostics.Process po = new System.Diagnostics.Process();
                     ProcessStartInfo startInfo = new ProcessStartInfo();
-                    
+
                     //startInfo
                     startInfo.WorkingDirectory = KERNEL_PATH;
                     startInfo.FileName = KERNEL_PATH + KERNEL_EXECUTABLE;
                     //startInfo.FileName = startInfo.FileName;
                     startInfo.UseShellExecute = false;
-                    
+
                     //System.Diagnostics.Process.Start(
                     //po.StartInfo = startInfo;
 
 
-                    if ( (_KernelProcess = System.Diagnostics.Process.Start(startInfo.FileName, "")) != null)
-                     Core._KernalStarted = true;  
-                    else
-                     Core._KernalStarted = false; 
+                    if ((_KernelProcess = System.Diagnostics.Process.Start(startInfo.FileName, "")) != null)
+                        Core._KernalStarted = true;
+                    //else
+                    //    Core._KernalStarted = false;
 
                     return Core._KernalStarted;
                     //return (Core._KernalStarted = ((_KernelProcess = System.Diagnostics.Process.Start(startInfo.FileName, "")) != null));
-                    
-                
+
+
                 }
                 catch (Exception e)
                 {
-                    
+                    Logger.Debug("Exceptiom occurred when tried to start kernel. Ex: " + e);
                     return false;
                 }
             }
-            return false;
+            else
+            {
+                Logger.Debug("Detected Kernel is already started.");
+            }
+
+            //return false;
+            return Core._KernalStarted;
         }
+
+
 
         /// <summary>
         /// Terminates the kernel process
