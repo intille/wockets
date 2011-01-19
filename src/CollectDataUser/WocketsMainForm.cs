@@ -1017,7 +1017,6 @@ namespace CollectDataUser
        {
            try
            {
-
                if (!Is_Kernel_Running())
                    Logger.Debug("Kernel is not running");
                else
@@ -1086,7 +1085,6 @@ namespace CollectDataUser
                    is_rebooting = false;
                    this.Close();
                }
- 
            }
            catch
            {    
