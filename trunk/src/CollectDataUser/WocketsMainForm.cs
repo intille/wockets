@@ -1017,14 +1017,16 @@ namespace CollectDataUser
        {
            try
            {
-               if (!Is_Kernel_Running())
-                   Logger.Debug("Kernel is not running");
-               else
-                   Logger.Debug("Kernel is running");
-                  //TODO: if kernel running kill it 
 
-               bool is_kernel_started = false;
+            #region TODO: this code is for testing 
+                   if (!Is_Kernel_Running())
+                       Logger.Debug("Kernel is not running");
+                   else
+                       Logger.Debug("Kernel is running");
+            #endregion
 
+
+            bool is_kernel_started = false;
 
                if (!Core._KernalStarted)
                {
@@ -1034,7 +1036,6 @@ namespace CollectDataUser
                    {
                        MessageBox.Show("failed to start kernel, restart app");
                        Logger.Debug("failed to start kernel: msg 1");
-                       //KillKernel();
                        Core.Terminate();   
                    }
                    else
