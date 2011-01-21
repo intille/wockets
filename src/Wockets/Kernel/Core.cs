@@ -367,30 +367,18 @@ namespace Wockets.Kernel
             {
                 try
                 {
-                    Logger.Debug("Detected Kernel not started.");
+                    Logger.Debug                                     ("Detected Kernel not started. Try to start it.");
 
-                    //System.Diagnostics.Process po = new System.Diagnostics.Process();
                     ProcessStartInfo startInfo = new ProcessStartInfo();
-
-                    //startInfo
                     startInfo.WorkingDirectory = KERNEL_PATH;
                     startInfo.FileName = KERNEL_PATH + KERNEL_EXECUTABLE;
-                    //startInfo.FileName = startInfo.FileName;
                     startInfo.UseShellExecute = false;
-
-                    //System.Diagnostics.Process.Start(
-                    //po.StartInfo = startInfo;
-
 
                     if ((_KernelProcess = System.Diagnostics.Process.Start(startInfo.FileName, "")) != null)
                         Core._KernalStarted = true;
-                    //else
-                    //    Core._KernalStarted = false;
-
+                    
                     return Core._KernalStarted;
-                    //return (Core._KernalStarted = ((_KernelProcess = System.Diagnostics.Process.Start(startInfo.FileName, "")) != null));
-
-
+                    
                 }
                 catch (Exception e)
                 {
@@ -403,7 +391,6 @@ namespace Wockets.Kernel
                 Logger.Debug("Detected Kernel is already started.");
             }
 
-            //return false;
             return Core._KernalStarted;
         }
 
