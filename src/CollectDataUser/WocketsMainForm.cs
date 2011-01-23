@@ -42,10 +42,14 @@ namespace CollectDataUser
         Set1_ForceUpdate,   //yes, no
         Set1_MAC_Acc0,      //mac sensor 0
         Set1_MAC_Acc1,      //mac sensor 1
+        Set1_MAC_Acc2,      //mac sensor 1
         Set2_ID,
         Set2_ForceUpdate,
         Set2_MAC_Acc0,
-        Set2_MAC_Acc1      
+        Set2_MAC_Acc1,
+        Set2_MAC_Acc2,
+        UploadRawData,          //Specifies if raw data needs to be uploaded
+        Length
     }
 
 
@@ -61,6 +65,7 @@ namespace CollectDataUser
         //private String app_status = ""; //commented for now until determine if it is necessary to keep this state
         private String software_version = "";
         private bool is_rebooting = false;
+        private bool upload_raw_data = true;
 
         //Wockets Controller
         private WocketsController wockets_controller = null; 
@@ -322,7 +327,7 @@ namespace CollectDataUser
                     while( rline != null & is_IMEI_found== false)
                     {
                         sensor_data = rline.Split(',');
-                        if (sensor_data != null & sensor_data.Length == 9)
+                        if (sensor_data != null & sensor_data.Length == ((int)MasterListParam.Length) )
                         {
                             if (sensor_data[0].CompareTo(CurrentPhone._IMEI) == 0)
                                 is_IMEI_found = true;
@@ -367,11 +372,11 @@ namespace CollectDataUser
             //Load sensors addresses to array list
             sensors_list = new ArrayList();
             for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+            {
                 sensors_list.Add(((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address);
-
-            Logger.Debug("Sensor Info Loaded From Xml, Sensor Set: " + sensor_set + "," + "MACS:" +
-                          sensors_list[0] + "," + sensors_list[1]);
-
+                Logger.Debug("Sensor Info Loaded From Xml, Sensor Set: " + sensor_set + "," +
+                             "MAC " + i.ToString() + ":"+ sensors_list[i]);
+            }
 
             #endregion
 
@@ -397,26 +402,57 @@ namespace CollectDataUser
             #region Initialization of Connection Status Variables
 
             PrevFullPkg = new int[wockets_controller._Receivers.Count];
-            for (int np = 0; np < wockets_controller._Receivers.Count; np++)
-                PrevFullPkg[np] = 0;
-
             PrevPartialPkg = new int[wockets_controller._Receivers.Count];
-            for (int np = 0; np < wockets_controller._Receivers.Count; np++)
-                PrevPartialPkg[np] = 0;
-
-
             PrevEmptyPkg = new int[wockets_controller._Receivers.Count];
-            for (int np = 0; np < wockets_controller._Receivers.Count; np++)
-                PrevEmptyPkg[np] = 0;
-
-
             LastPkgTime = new DateTime[wockets_controller._Receivers.Count];
-            for (int np = 0; np < wockets_controller._Receivers.Count; np++)
-                LastPkgTime[np] = DateTime.Now;
-
             ElapsedConnectionTime = new TimeSpan[wockets_controller._Receivers.Count];
-            for (int np = 0; np < wockets_controller._Receivers.Count; np++)
-                ElapsedConnectionTime[np] = TimeSpan.Zero;
+
+            #region Initialize the sensor connection status text labels
+                textBox_sensors_status_0.Visible = false;
+                textBox_sensors_status_0.Enabled = false;
+                textBox_sensor_location_0.Visible = false;
+                textBox_sensor_location_0.Enabled = false;
+                textBox_sensors_status_1.Visible = false;
+                textBox_sensors_status_1.Enabled = false;
+                textBox_sensor_location_1.Visible = false;
+                textBox_sensor_location_1.Enabled = false;
+                textBox_sensors_status_2.Visible = false;
+                textBox_sensors_status_2.Enabled = false;
+                textBox_sensor_location_2.Visible = false;
+                textBox_sensor_location_2.Enabled = false;
+
+                for (int np = 0; np < wockets_controller._Receivers.Count; np++)
+                {
+                    PrevFullPkg[np] = 0;
+                    PrevPartialPkg[np] = 0;
+                    PrevEmptyPkg[np] = 0;
+                    LastPkgTime[np] = DateTime.Now;
+                    ElapsedConnectionTime[np] = TimeSpan.Zero;
+
+                    switch (np)
+                    {   case 0:
+                            textBox_sensors_status_0.Visible = true;
+                            textBox_sensors_status_0.Enabled = true;
+                            textBox_sensor_location_0.Visible = true;
+                            textBox_sensor_location_0.Enabled = true;
+                            break;
+                        case 1:
+                            textBox_sensors_status_1.Visible = true;
+                            textBox_sensors_status_1.Enabled = true;
+                            textBox_sensor_location_1.Visible = true;
+                            textBox_sensor_location_1.Enabled = true;
+                            break;
+                        case 2:
+                            textBox_sensors_status_2.Visible = true;
+                            textBox_sensors_status_2.Enabled = true;
+                            textBox_sensor_location_2.Visible = true;
+                            textBox_sensor_location_2.Enabled = true;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            #endregion 
 
 
             ElapsedTime_LogUpload = TimeSpan.Zero;
@@ -426,10 +462,9 @@ namespace CollectDataUser
 
             #endregion
 
-
             #endregion
 
-           
+
             #region Initialize Elapsed Time Counter On File Upload Screen
 
             //Hide the timer label
@@ -665,24 +700,51 @@ namespace CollectDataUser
                 //sensors locations
                 if (wc != null)
                 {
-                    if (wc._Receivers.Count > 0)
+                    for (int i = 0; i < wc._Receivers.Count; i++)
                     {
-                        textBox_spanel_sensors_location_0.Text = textBox_sensor_location_0.Text = ((RFCOMMReceiver)wc._Receivers[0])._Address.Substring(7);
-
-                        if (wc._Sensors[0]._Location != null)
-                            textBox_spanel_sensors_location_0.Text = textBox_sensor_location_0.Text = textBox_sensor_location_0.Text + " At " + wc._Sensors[0]._Location.Substring(9) + ":";
-
-
-
-                        if (CurrentWockets._Controller._Receivers.Count > 1)
-                        {
-                            textBox_spanel_sensors_location_1.Text = textBox_sensor_location_1.Text = ((RFCOMMReceiver)wc._Receivers[1])._Address.Substring(7);
-
-                            if (wc._Sensors[1]._Location != null)
-                                textBox_spanel_sensors_location_1.Text = textBox_sensor_location_1.Text = textBox_sensor_location_1.Text + " At " + wc._Sensors[1]._Location.Substring(9) + ":";
-
+                        switch (i)
+                        { 
+                           case 0:
+                                textBox_spanel_sensors_location_0.Text = textBox_sensor_location_0.Text = ((RFCOMMReceiver)wc._Receivers[i])._Address.Substring(7);
+                                if (wc._Sensors[i]._Location != null)
+                                  textBox_spanel_sensors_location_0.Text = textBox_sensor_location_0.Text = textBox_sensor_location_0.Text + " At " + wc._Sensors[i]._Location.Substring(9) + ":";
+                               break;
+                           case 1:
+                               textBox_spanel_sensors_location_1.Text = textBox_sensor_location_1.Text = ((RFCOMMReceiver)wc._Receivers[i])._Address.Substring(7);
+                               if (wc._Sensors[i]._Location != null)
+                                    textBox_spanel_sensors_location_1.Text = textBox_sensor_location_1.Text = textBox_sensor_location_1.Text + " At " + wc._Sensors[i]._Location.Substring(9) + ":";
+                               break;
+                           case 2:
+                               textBox_sensor_location_2.Text = ((RFCOMMReceiver)wc._Receivers[i])._Address.Substring(7);
+                               if (wc._Sensors[i]._Location != null)
+                                   textBox_sensor_location_2.Text = textBox_sensor_location_2.Text + " At " + wc._Sensors[i]._Location.Substring(9) + ":";
+                                break;
+                           default: 
+                               break;
                         }
                     }
+
+
+                    #region commented
+                    //if (wc._Receivers.Count > 0)
+                    //{
+                    //    textBox_spanel_sensors_location_0.Text = textBox_sensor_location_0.Text = ((RFCOMMReceiver)wc._Receivers[0])._Address.Substring(7);
+
+                    //    if (wc._Sensors[0]._Location != null)
+                    //        textBox_spanel_sensors_location_0.Text = textBox_sensor_location_0.Text = textBox_sensor_location_0.Text + " At " + wc._Sensors[0]._Location.Substring(9) + ":";
+
+
+
+                    //    if (CurrentWockets._Controller._Receivers.Count > 1)
+                    //    {
+                    //        textBox_spanel_sensors_location_1.Text = textBox_sensor_location_1.Text = ((RFCOMMReceiver)wc._Receivers[1])._Address.Substring(7);
+
+                    //        if (wc._Sensors[1]._Location != null)
+                    //            textBox_spanel_sensors_location_1.Text = textBox_sensor_location_1.Text = textBox_sensor_location_1.Text + " At " + wc._Sensors[1]._Location.Substring(9) + ":";
+
+                    //    }
+                    //}
+                    #endregion
                 }
             }
             catch 
@@ -790,7 +852,7 @@ namespace CollectDataUser
             }
             catch(Exception ex)
             {
-                Logger.Debug("An exception ocurred when trying to disconnect from kernel, after the swap button was clicked. Ex: " + ex);
+                Logger.Debug("An exception ocurred when trying to disconnect from kernel, after the swap button was clicked. Ex: " + ex.ToString());
             }
 
         }
@@ -800,8 +862,8 @@ namespace CollectDataUser
           
             if (loaded_sensor_data != null )
             {
+                
                 #region Determine the sensor set to be loaded & load it to the wockets receivers
-
                
                 if (sensor_set_id.CompareTo(loaded_sensor_data[(int)MasterListParam.Set1_ID]) == 0)
                 {
@@ -820,31 +882,44 @@ namespace CollectDataUser
 
 
                         #region If the sensors are different from the ones in the master list, update the wockets controller settings
+                       
                         try
                         {
                             bool is_mac_changed = false;
+                            int  mac_offset = ((int)MasterListParam.Set1_ID) + 2;
 
-                            if ((((RFCOMMReceiver)wc._Receivers[0])._Address.CompareTo(loaded_sensor_data[(int)MasterListParam.Set1_MAC_Acc0]) != 0))
+                            for ( int i = 0; i < wc._Receivers.Count; i++ )
                             {
-                                //replace the mac address 
-                                ((RFCOMMReceiver)wc._Receivers[0])._Address = loaded_sensor_data[(int)MasterListParam.Set1_MAC_Acc0];
-                                is_mac_changed = true;
+                                if (   ( ((RFCOMMReceiver)wc._Receivers[i])._Address.CompareTo(loaded_sensor_data[mac_offset + i]) != 0) &
+                                       ( loaded_sensor_data[mac_offset + i].CompareTo("0") != 0) )
+                                {
+                                    //replace the mac address 
+                                    ((RFCOMMReceiver)wc._Receivers[i])._Address = loaded_sensor_data[mac_offset + i];
+                                    is_mac_changed = true;
+                                    
+                                    //TODO: send commands to get the sensor calibration values & effective sampling rate
+                                }
 
-                                //TODO: send commands to get the sensor calibration values & effective sampling rate
+                                #region commented
+                                //if ((((RFCOMMReceiver)wc._Receivers[0])._Address.CompareTo(loaded_sensor_data[(int)MasterListParam.Set1_MAC_Acc0]) != 0))
+                                //{
+                                //    //replace the mac address 
+                                //    ((RFCOMMReceiver)wc._Receivers[0])._Address = loaded_sensor_data[(int)MasterListParam.Set1_MAC_Acc0];
+                                //    is_mac_changed = true;
+                                //    //TODO: send commands to get the sensor calibration values & effective sampling rate
+                                //}
+
+                                //if ((((RFCOMMReceiver)wc._Receivers[1])._Address.CompareTo(loaded_sensor_data[(int)MasterListParam.Set1_MAC_Acc1]) != 0))
+                                //{
+                                //    //replace the mac address
+                                //    ((RFCOMMReceiver)wc._Receivers[1])._Address = loaded_sensor_data[(int)MasterListParam.Set1_MAC_Acc1];
+                                //    is_mac_changed = true;
+                                //    //TODO:send commands to get the sensor calibration values & effective sampling rate
+                                //}
+                                #endregion 
                             }
 
-
-                            if ((((RFCOMMReceiver)wc._Receivers[1])._Address.CompareTo(loaded_sensor_data[(int)MasterListParam.Set1_MAC_Acc1]) != 0))
-                            {
-                                //replace the mac address
-                                ((RFCOMMReceiver)wc._Receivers[1])._Address = loaded_sensor_data[(int)MasterListParam.Set1_MAC_Acc1];
-                                is_mac_changed = true;
-
-                                //TODO:send commands to get the sensor calibration values & effective sampling rate
-                            }
-
-
-                            //Save the new sensor parameters to the Xml file
+                            //if macs are different, save the new sensor parameters to the Xml file
                             if (is_mac_changed)
                             {
                                 StreamWriter sensors_data_xml = new StreamWriter(Core.KERNEL_PATH + "\\updater_SensorData1.xml");
@@ -854,7 +929,7 @@ namespace CollectDataUser
                         }
                         catch(Exception e)
                         { 
-                            Logger.Debug("An exeption occurred when trying to update macs with master list, set1. Ex: " + e); 
+                            Logger.Debug("An exeption occurred when trying to update macs with master list, set1. Ex: " + e.ToString() ); 
                         }
 
                     #endregion
@@ -884,22 +959,40 @@ namespace CollectDataUser
                         try
                         {
                             bool is_mac_changed = false;
+                            int mac_offset = ((int)MasterListParam.Set2_ID) + 2;
 
-                            if ((((RFCOMMReceiver)wc._Receivers[0])._Address.CompareTo(loaded_sensor_data[(int)MasterListParam.Set2_MAC_Acc0]) != 0))
+
+                            for (int i = 0; i < wc._Receivers.Count; i++)
                             {
-                                //replace the mac address 
-                                ((RFCOMMReceiver)wc._Receivers[0])._Address = loaded_sensor_data[(int)MasterListParam.Set2_MAC_Acc0];
-                                is_mac_changed = true;
-                                //TODO: send commands to get the sensor calibration values & effective sampling rate
-                            }
+                                if (  (((RFCOMMReceiver)wc._Receivers[i])._Address.CompareTo(loaded_sensor_data[mac_offset + i]) != 0) &
+                                      (loaded_sensor_data[mac_offset + i].CompareTo("0") != 0) )
+                                {
+                                    //replace the mac address 
+                                    ((RFCOMMReceiver)wc._Receivers[i])._Address = loaded_sensor_data[mac_offset + i];
+                                    is_mac_changed = true;
+
+                                    //TODO: send commands to get the sensor calibration values & effective sampling rate
+                                }
+
+                                #region
+                                //if ((((RFCOMMReceiver)wc._Receivers[0])._Address.CompareTo(loaded_sensor_data[(int)MasterListParam.Set2_MAC_Acc0]) != 0))
+                                //{
+                                //    //replace the mac address 
+                                //    ((RFCOMMReceiver)wc._Receivers[0])._Address = loaded_sensor_data[(int)MasterListParam.Set2_MAC_Acc0];
+                                //    is_mac_changed = true;
+                                //    //TODO: send commands to get the sensor calibration values & effective sampling rate
+                                //}
 
 
-                            if ((((RFCOMMReceiver)wc._Receivers[1])._Address.CompareTo(loaded_sensor_data[(int)MasterListParam.Set2_MAC_Acc1]) != 0))
-                            {
-                                //replace the mac address
-                                ((RFCOMMReceiver)wc._Receivers[1])._Address = loaded_sensor_data[(int)MasterListParam.Set2_MAC_Acc1];
-                                is_mac_changed = true;
-                                //send commands to get the sensor calibration values & effective sampling rate
+                                //if ((((RFCOMMReceiver)wc._Receivers[1])._Address.CompareTo(loaded_sensor_data[(int)MasterListParam.Set2_MAC_Acc1]) != 0))
+                                //{
+                                //    //replace the mac address
+                                //    ((RFCOMMReceiver)wc._Receivers[1])._Address = loaded_sensor_data[(int)MasterListParam.Set2_MAC_Acc1];
+                                //    is_mac_changed = true;
+                                //    //send commands to get the sensor calibration values & effective sampling rate
+                                //}
+                                #endregion
+
                             }
 
 
@@ -914,19 +1007,18 @@ namespace CollectDataUser
                         }
                         catch(Exception e)
                         {
-                            Logger.Debug("An exeption occurred when trying to update macs with master list, set2. Ex: " + e); 
+                            Logger.Debug("An exeption occurred when trying to update macs with master list, set2. Ex: " + e.ToString()); 
                         }
 
-
                         #endregion
-
-
                     #endregion
                 }
 
-
-
                 #endregion
+
+                //Load flag that specifies if data needs to be uploaded to the server automatically
+                if (sensor_data[(int)MasterListParam.UploadRawData].CompareTo("no") == 0)
+                    upload_raw_data = false;
             }
             else
             {
@@ -975,7 +1067,9 @@ namespace CollectDataUser
                 #endregion 
             }
 
-            //TODO:Check that MACs are valid, otherwise, notify user/researcher
+
+            //TODO: notify user/researcher if MACs are valid.
+
         }
 
      #endregion Swap Sensors
@@ -1013,84 +1107,113 @@ namespace CollectDataUser
             startupThread.Start();
         }
 
-        private void LoadWocketsToKernel()
+
+       //bool is_kernel_started = false;
+       bool is_kernel_pinged  = false;
+
+       private void LoadWocketsToKernel()
        {
            try
            {
 
-            #region TODO: this code is for testing 
+                #region TODO: this code is for testing 
                    if (!Is_Kernel_Running())
                        Logger.Debug("Kernel is not running");
                    else
                        Logger.Debug("Kernel is running");
-            #endregion
+               #endregion
+
+          
+                int trials =0;
+                int wait4response =0;
+
+                //is_kernel_started = false;
+                is_kernel_pinged  = false;
 
 
-            bool is_kernel_started = false;
+                while( !Core._KernalStarted &  trials < 5)
+                {
+                       Logger.Debug( "_KernelStarted variable is false");
 
-               if (!Core._KernalStarted)
-               {
-                   Logger.Debug("_KernelStarted variable is false ");
-
-                   if (!Core.Start())
-                   {
-                       MessageBox.Show("failed to start kernel, restart app");
-                       Logger.Debug("failed to start kernel: msg 1");
-                       Core.Terminate();   
-                   }
-                   else
-                   {
-                       Thread.Sleep(5000);
-
-                       Logger.Debug("Kernel started successfully: msg1");
-                       is_kernel_started = true;
-
-                       Thread.Sleep(5000);
-                       Core.Ping();
-                       Logger.Debug("Ping Kernel");
-                   }
-               }
-               else
-               {
-                   //Make sure no kernels are running
-                   if (Core.Terminate())
-                   {
                        if (!Core.Start())
                        {
-                           MessageBox.Show("Failed to start kernel");
-                           Logger.Debug("Failed to start the kernel: msg2");
+                           //MessageBox.Show("failed to start kernel, restart app");
+                           Logger.Debug("failed to start kernel: first attempt");
+                           //Core.Terminate(); 
+                           Thread.Sleep(1000);
                        }
                        else
                        {
-                           Thread.Sleep(5000);
-                           Logger.Debug("Kernel started successfully: msg2");
-                           is_kernel_started = true;
-
+                           Logger.Debug("_KernelStarted variable returned with true value: first attempt");
                            Thread.Sleep(5000);
                            Core.Ping();
                            Logger.Debug("Ping Kernel");
+                           
+                           //wait to receive ping
+                           wait4response =0;
+                           while(!is_kernel_pinged  &  wait4response < 20)
+                           { 
+                               Thread.Sleep(500);
+                               wait4response++; 
+                           }  
                        }
+
+                      trials++;
                    }
+
+
+                   if (is_kernel_pinged)
+                       Logger.Debug("Kernel started successfully: first attempt");
                    else
                    {
-                       MessageBox.Show("Failed to shutdown kernel");
-                       Logger.Debug("Failed to shutdown the kernel");
+                       //Make sure that no more than one kernel process is running
+                       if (Core.Terminate())
+                       {
+                           if (!Core.Start())
+                           {
+                               Logger.Debug("Failed to start the kernel: second attempt");
+                           }
+                           else
+                           {
+                               Logger.Debug("_KernelStarted variable returned with true value: second attempt");
+                               Thread.Sleep(5000);
+                               Core.Ping();
+                               Logger.Debug("Ping Kernel");
+
+                               //wait to receive ping
+                               wait4response = 0;
+                               while (!is_kernel_pinged & wait4response < 20)
+                               {
+                                   Thread.Sleep(500);
+                                   wait4response++;
+                               }
+
+                               if (is_kernel_pinged)
+                                   Logger.Debug("Kernel started successfully: second attempt");
+                           }
+                       }
+                       else
+                            Logger.Debug("Failed to terminate the kernel.");
                    }
-               }
 
 
-               if (!is_kernel_started)
-               {
-                   Logger.Debug("Failed to shutdown the kernel");
-                   //Restart App
-                   is_rebooting = false;
-                   this.Close();
-               }
+                   if (!is_kernel_pinged)
+                   {
+                       Logger.Debug("Failed to start the kernel in second attempt. The application will be closed.");
+                       UpdateMsg("The kernel couldn't be launched. Please restart application.");
+                       Thread.Sleep(1000);
+                       is_rebooting = false;
+                       this.Close();
+                   }
+
            }
-           catch
+           catch(Exception e)
            {    
-               Logger.Debug("An exception occurred when trying to start kernel."); 
+               Logger.Debug("An exception occurred when trying to start kernel. Ex: " + e.ToString());
+               Logger.Debug("Try to kill kernel. Ex: " + e.ToString());
+               KillKernel();
            }
+
         }
 
 
@@ -1122,11 +1245,12 @@ namespace CollectDataUser
                                 {
                                     Logger.Debug("Ping responsed received");
                                     UpdateMsg("Ping Received");
+                                    is_kernel_pinged = true;
                                     Core.Register();
                                 }
                                 catch(Exception ex)
                                 {
-                                    Logger.Debug("An exception occurred in trying to register app in the kernel. Ex: " + ex); 
+                                    Logger.Debug("An exception occurred in trying to register app in the kernel. Ex: " + ex.ToString()); 
                                 } 
                             break;
 
@@ -1139,7 +1263,7 @@ namespace CollectDataUser
                                 }
                                 catch(Exception ex)
                                 {
-                                    Logger.Debug("An exception occurred in trying to set sensors in the kernel. Ex: " + ex); 
+                                    Logger.Debug("An exception occurred in trying to set sensors in the kernel. Ex: " + ex.ToString()); 
                                 }
                             break;
 
@@ -1152,7 +1276,7 @@ namespace CollectDataUser
                                 }
                                 catch (Exception ex)
                                 {
-                                    Logger.Debug("An exception occurred in trying to connect the sensors to the kernel. Ex: " + ex);
+                                    Logger.Debug("An exception occurred in trying to connect the sensors to the kernel. Ex: " + ex.ToString());
                                 }
                             break;
 
@@ -1173,7 +1297,7 @@ namespace CollectDataUser
                                     }
                                     catch (Exception e)
                                     {
-                                        Logger.Debug("An exception occurred when trying to save set status to file, after receiving kernel connected response. Ex: " + e);
+                                        Logger.Debug("An exception occurred when trying to save set status to file, after receiving kernel connected response. Ex: " + e.ToString());
                                     }
 
 
@@ -1196,7 +1320,7 @@ namespace CollectDataUser
                                 }
                                 catch (Exception ex)
                                 {
-                                    Logger.Debug("An exception occurred while executing the kernel connect sequence. Ex: " + ex);
+                                    Logger.Debug("An exception occurred while executing the kernel connect sequence. Ex: " + ex.ToString());
                                 }
                             break;
 
@@ -1222,7 +1346,7 @@ namespace CollectDataUser
                                   }
                                   catch(Exception ex)
                                   {
-                                      Logger.Debug("An exception occurred after disconnected from kernel, before rebooting. When trying to save set id to file in the swapping process. Ex: " + ex);
+                                      Logger.Debug("An exception occurred after disconnected from kernel, before rebooting. When trying to save set id to file in the swapping process. Ex: " + ex.ToString());
                                   }
 
                                 //close application & reboot
@@ -1239,7 +1363,7 @@ namespace CollectDataUser
                 }
                 catch(Exception e)
                 {
-                   Logger.Debug("exception in the main kernel event listener. Ex; " + e);
+                   Logger.Debug("exception in the main kernel event listener. Ex: " + e.ToString());
                 }
             }
 
@@ -1249,27 +1373,28 @@ namespace CollectDataUser
         #region Kernel Message Callback
             delegate void UpdateMsgCallback(string msg);
             private void UpdateMsg(string msg)
-                {
-                try
-                {
-                    // InvokeRequired required compares the thread ID of the
-                    // calling thread to the thread ID of the creating thread.
-                    // If these threads are different, it returns true.
-                    if (this.InvokeRequired || this.InvokeRequired)
-                    {
-                        UpdateMsgCallback d = new UpdateMsgCallback(UpdateMsg);
-                        this.Invoke(d, new object[] { msg });
-                    }
-                    else
-                    {   label_kernel_status.Text = msg;
-                        Application.DoEvents();
-                    }
+            {
+                        try
+                        {
+                            // InvokeRequired required compares the thread ID of the
+                            // calling thread to the thread ID of the creating thread.
+                            // If these threads are different, it returns true.
+                            if (this.InvokeRequired || this.InvokeRequired)
+                            {
+                                UpdateMsgCallback d = new UpdateMsgCallback(UpdateMsg);
+                                this.Invoke(d, new object[] { msg });
+                            }
+                            else
+                            {   label_kernel_status.Text = msg;
+                                Application.DoEvents();
+                            }
 
-                }
-                catch
-                {
-                }
-                }
+                        }
+                        catch(Exception e)
+                        {
+                            Logger.Debug("Exception in the Update Msg function, kernel callback. Ex: " + e.ToString());
+                        }
+             }
 
             #region this function is obsolete (commented)
         //delegate void UpdateSensorStatusCallback(string status_msg);
@@ -1344,8 +1469,6 @@ namespace CollectDataUser
 
       #endregion
 
-
-      
 
      #region Reboot Phone
         [DllImport("aygshell.dll")]
@@ -1523,7 +1646,7 @@ namespace CollectDataUser
             catch(Exception e)
             {
                 //TODO: Here try more agressive methods to stop the kernel
-                Logger.Debug("An exception occurred when trying to terminate kernel. ex:" + e);
+                Logger.Debug("An exception occurred when trying to terminate kernel. ex:" + e.ToString());
                 return false;
             }
         }
@@ -1547,8 +1670,12 @@ namespace CollectDataUser
                 }
                 return found;
             }
-            catch
-            { return false; }     
+            catch(Exception e)
+            {
+                Logger.Debug("Application: IsKernelRunning(). Ex: " + e.ToString());
+                return false; 
+            }
+     
         }
 
 
@@ -1583,7 +1710,7 @@ namespace CollectDataUser
             }
             catch (Exception ex)
             {
-                Logger.Debug("An exception occureed when trying to find the kernel." + ex);
+                Logger.Debug("Application: IsKernelRunning(process). Ex:" + ex.ToString());
                 return false;
             }
         }
@@ -1623,7 +1750,7 @@ namespace CollectDataUser
                 }
             }
             catch(Exception  e)
-            { Logger.Debug("An exception occurred when trying to terminate the log uploader. Ex: " + e); }
+            { Logger.Debug("An exception occurred when trying to terminate the log uploader. Ex: " + e.ToString()); }
         }
 
 
@@ -1641,8 +1768,8 @@ namespace CollectDataUser
                     }
                 }
             }
-            catch
-            { Logger.Debug("An exception occurred when trying to terminate the data uploader."); }  
+            catch(Exception e)
+            { Logger.Debug("An exception occurred when trying to terminate the data uploader. Ex: " + e.ToString()); }  
         }
 
 
@@ -1674,8 +1801,8 @@ namespace CollectDataUser
 
                 Application.Exit();
             }
-            catch
-            { Logger.Debug("An exception occurred when trying to quit the application"); }
+            catch(Exception e)
+            { Logger.Debug("An exception occurred when trying to quit the application. Ex: " + e.ToString() ); }
             
         }
 
@@ -2210,58 +2337,58 @@ namespace CollectDataUser
 
         delegate void UpdateTimeCallback();
         public void UpdateFilesUploaded()
-      {
-          if (!disposed)
           {
-              if (textBox_elapsed_time.InvokeRequired)
-              // InvokeRequired required compares the thread ID of the
-              // calling thread to the thread ID of the creating thread.
-              // If these threads are different, it returns true.
+              if (!disposed)
               {
-                  UpdateTimeCallback d = new UpdateTimeCallback(UpdateFilesUploaded);
-                  this.Invoke(d, new object[] { });
-              }
-              else
-              {
-                  //TODO: Duration Label
-                  textBox_elapsed_time.Text = ElapsedTime;
-                  counter++;
-
-                  if (counter == 6) //enter every 6 secs
+                  if (textBox_elapsed_time.InvokeRequired)
+                  // InvokeRequired required compares the thread ID of the
+                  // calling thread to the thread ID of the creating thread.
+                  // If these threads are different, it returns true.
                   {
-                     #region Determine if the uploader program is still running
+                      UpdateTimeCallback d = new UpdateTimeCallback(UpdateFilesUploaded);
+                      this.Invoke(d, new object[] { });
+                  }
+                  else
+                  {
+                      //TODO: Duration Label
+                      textBox_elapsed_time.Text = ElapsedTime;
+                      counter++;
 
-                          if ( Is_DataUploader_Running())
-                          {
-                              label_upload_data_status.Text = "Uploading Raw Data";
-                              label_upload_data_status.ForeColor = Color.Green;
-                              this.UploadButton.Enabled = false;
-                          }
-                          else
-                          {
-                              if (Is_LogUploader_Running())
+                      if (counter == 6) //enter every 6 secs
+                      {
+                         #region Determine if the uploader program is still running
+
+                              if ( Is_DataUploader_Running())
                               {
-                                  label_upload_data_status.Text = "Uploading Data Logs";
+                                  label_upload_data_status.Text = "Uploading Raw Data";
                                   label_upload_data_status.ForeColor = Color.Green;
-                                  this.UploadButton.Enabled = true;
+                                  this.UploadButton.Enabled = false;
                               }
                               else
                               {
-                                  label_upload_data_status.Text = "...";
-                                  label_upload_data_status.ForeColor = Color.DimGray;
-                                  this.UploadButton.Enabled = true;
+                                  if (Is_LogUploader_Running())
+                                  {
+                                      label_upload_data_status.Text = "Uploading Data Logs";
+                                      label_upload_data_status.ForeColor = Color.Green;
+                                      this.UploadButton.Enabled = true;
+                                  }
+                                  else
+                                  {
+                                      label_upload_data_status.Text = "...";
+                                      label_upload_data_status.ForeColor = Color.DimGray;
+                                      this.UploadButton.Enabled = true;
+                                  }
                               }
-                          }
 
-                     #endregion
+                         #endregion
 
-                     counter = 0;
+                         counter = 0;
+                      }
+
+                      this.Invalidate();
                   }
-
-                  this.Invalidate();
               }
           }
-      }
 
       #endregion
 
@@ -2306,7 +2433,7 @@ namespace CollectDataUser
 
       #region Thread tracking the sensor connection status
 
-        double WAIT_INTERVAL_LOG_UPLOADER = 60.0; //in minutes
+        double WAIT_INTERVAL_LOG_UPLOADER = 1.0; //in hours
         double WAIT_INTERVAL_DATA_UPLOADER_HRS = 1.0; //in hours
 
 
@@ -2327,7 +2454,7 @@ namespace CollectDataUser
                              //== Compute the elapsed time since the last connection
                              ElapsedConnectionTime[i] = DateTime.Now.Subtract(LastPkgTime[i]);
 
-                             //if et>1min check pkg status
+                             //if elapsed time > 1min check pkg status
                              if (ElapsedConnectionTime[i].TotalMinutes > 1.0)
                              {
                                  #region IF ELAPSED TIME > 1MIN
@@ -2349,7 +2476,7 @@ namespace CollectDataUser
                                  #endregion
 
 
-                                 #region Update the ACs on the Screen
+                                 #region Update the ACs on Screen
 
                                  if (i == 0)
                                  {
@@ -2360,7 +2487,7 @@ namespace CollectDataUser
                                      this.textBox_spanel_ac_new_0.Text = CurrentWockets._Controller._Sensors[i]._SavedACs + " - " + CurrentWockets._Controller._Sensors[i]._TotalSavedACs;
                                      this.textBox_spanel_ac_last_0.Text = CurrentWockets._Controller._Sensors[i]._ReceivedACs + " - " + CurrentWockets._Controller._Sensors[i]._TotalReceivedACs;
                                  }
-                                 else
+                                 else if (i == 1)
                                  {
                                      this.textBox_spanel_ac_full_1.Text = CurrentWockets._Controller._Sensors[i]._Full.ToString();
                                      this.textBox_spanel_ac_partial_1.Text = CurrentWockets._Controller._Sensors[i]._Partial.ToString();
@@ -2389,11 +2516,17 @@ namespace CollectDataUser
                                          textBox_sensors_status_0.Text = "Saving Data";
                                          textBox_sensors_status_0.ForeColor = Color.Orange;
                                      }
-                                     else
+                                     else if (i == 1)
                                      {
                                          textBox_sensors_status_1.Text = "Saving Data";
                                          textBox_sensors_status_1.ForeColor = Color.Orange;
                                      }
+                                     else
+                                     {
+                                         textBox_sensors_status_2.Text = "Saving Data";
+                                         textBox_sensors_status_2.ForeColor = Color.Orange;
+                                     }
+
 
                                      LastPkgTime[i] = DateTime.Now;
 
@@ -2413,10 +2546,15 @@ namespace CollectDataUser
                                          textBox_sensors_status_0.Text = "Data Lost";
                                          textBox_sensors_status_0.ForeColor = Color.Tomato;
                                      }
-                                     else
+                                     else if (i == 1)
                                      {
                                          textBox_sensors_status_1.Text = "Data Lost";
                                          textBox_sensors_status_1.ForeColor = Color.Tomato;
+                                     }
+                                     else 
+                                     {
+                                         textBox_sensors_status_2.Text = "Data Lost";
+                                         textBox_sensors_status_2.ForeColor = Color.Tomato;
                                      }
 
                                      #endregion
@@ -2435,11 +2573,17 @@ namespace CollectDataUser
                                              textBox_sensors_status_0.Text = "Waiting For Data";
                                              textBox_sensors_status_0.ForeColor = Color.DimGray;
                                          }
-                                         else
+                                         else if (i == 1)
                                          {
                                              textBox_sensors_status_1.Text = "Waiting For Data";
                                              textBox_sensors_status_1.ForeColor = Color.DimGray;
                                          }
+                                         else
+                                         {
+                                             textBox_sensors_status_2.Text = "Waiting For Data";
+                                             textBox_sensors_status_2.ForeColor = Color.DimGray;
+                                         }
+
                                      }
                                      else
                                      {
@@ -2448,11 +2592,18 @@ namespace CollectDataUser
                                              textBox_sensors_status_0.Text = "No Data Received";
                                              textBox_sensors_status_0.ForeColor = Color.Red;
                                          }
-                                         else
+                                         else if(i == 1)
                                          {
                                              textBox_sensors_status_1.Text = "No Data Received";
                                              textBox_sensors_status_1.ForeColor = Color.Red;
                                          }
+                                         else 
+                                         {
+                                             textBox_sensors_status_2.Text = "No Data Received";
+                                             textBox_sensors_status_2.ForeColor = Color.Red;
+                                         }
+
+
                                      }
 
                                      #endregion
@@ -2475,11 +2626,17 @@ namespace CollectDataUser
                                          textBox_sensors_status_0.Text = "---";
                                          textBox_sensors_status_0.ForeColor = Color.DimGray;
                                      }
-                                     else
+                                     else if( i== 1)
                                      {
                                          textBox_sensors_status_1.Text = "---";
                                          textBox_sensors_status_1.ForeColor = Color.DimGray;
                                      }
+                                     else 
+                                     {
+                                         textBox_sensors_status_2.Text = "---";
+                                         textBox_sensors_status_2.ForeColor = Color.DimGray;
+                                     }
+
                                  }
                                  else
                                  {
@@ -2488,10 +2645,15 @@ namespace CollectDataUser
                                          textBox_sensors_status_0.Text = "Data Received";
                                          textBox_sensors_status_0.ForeColor = Color.Green;
                                      }
-                                     else
+                                     else if(i == 1)
                                      {
                                          textBox_sensors_status_1.Text = "Data Received";
                                          textBox_sensors_status_1.ForeColor = Color.Green;
+                                     }
+                                     else 
+                                     {
+                                         textBox_sensors_status_2.Text = "Data Received";
+                                         textBox_sensors_status_2.ForeColor = Color.Green;
                                      }
                                  }
 
@@ -2501,9 +2663,9 @@ namespace CollectDataUser
                      }//if sensors count >0
                  }//if sensors list != null
              }
-             catch
+             catch(Exception ex)
              {
-                 Logger.Debug("An exeption occurred when updating/monitoring the Acs counts for connection status");
+                 Logger.Debug("An exeption occurred when updating/monitoring the Acs counts for connection status. Ex: " + ex.ToString());
              }
 
         #endregion
@@ -2519,14 +2681,13 @@ namespace CollectDataUser
             //Launch log uploader every hour
             ElapsedTime_LogUpload = current_time.Subtract(LastLogUploadInvoke);
 
-            if (ElapsedTime_LogUpload.TotalMinutes > WAIT_INTERVAL_LOG_UPLOADER)
+            if (ElapsedTime_LogUpload.TotalHours > WAIT_INTERVAL_LOG_UPLOADER)
             {
-
-                if (!Is_DataUploader_Running())
+                if (!Is_DataUploader_Running() )
                 {
                     bool launch_log_uploader = true;
 
-                    if (current_time.Hour >= 1 && current_time.Hour <= 5)
+                    if (current_time.Hour >= 10 && current_time.Hour <= 5 & upload_raw_data)
                     {
                         Core.READ_LAST_UPLOAD_TIME();
                         ElapsedTime_DataUpload = current_time.Subtract(CurrentWockets._UploadLastTime);
@@ -2556,9 +2717,9 @@ namespace CollectDataUser
                 LastLogUploadInvoke = current_time;
             }
          }
-         catch 
+         catch(Exception ex) 
          {   
-             Logger.Debug("An exeption occurred when invoking the log uploader.");
+             Logger.Debug("An exeption occurred when invoking the log uploader. Ex: " + ex.ToString());
          }
 
         #endregion
