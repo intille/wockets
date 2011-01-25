@@ -37,9 +37,11 @@ using Wockets.Data.Features;
 using Wockets.Utils.feedback;
 using Wockets.Data.Configuration;
 using WocketsApplication.Controls.Utils;
+
 #if (PocketPC)
-using Wockets.Utils.IPC.MMF;
+    using Wockets.Utils.IPC.MMF;
 #endif
+
 
 namespace WocketsApplication
 {
@@ -50,8 +52,11 @@ namespace WocketsApplication
         None
     }
 
+
     public partial class Form1 : Form
     {
+
+        #region Variables
 
         //private const int NUMBER_BUTTONS=9;
 
@@ -192,94 +197,640 @@ namespace WocketsApplication
         private TextWriter structureTW = null;
         private Thread mlThread = null;
         private string arffFileName = "";
-        private void InitializeML()
+
+
+        #endregion
+
+
+        #region Form Related functions
+
+            public Form1()
         {
 
-            //FullFeatureExtractor.Initialize(selectedWockets.Count, 90, CurrentWockets._Configuration, this.annotatedSession.OverlappingActivityLists[0]);
-            //FullFeatureExtractor.Initialize3(selectedWockets.Count, 90, CurrentWockets._Configuration, this.annotatedSession.OverlappingActivityLists[0]);
-            fv = new SimpleFeatureVector(selectedWockets.Count, 128, 90);
-            if (trainingTW == null)
+            RegistryKey rk = Registry.LocalMachine.OpenSubKey("Software\\MIT\\Wockets", true);
+            if (rk == null)
             {
-                arffFileName = Core._StoragePath + "\\output" + DateTime.Now.ToString().Replace('/', '_').Replace(':', '_').Replace(' ', '_') + ".arff";
-                trainingTW = new StreamWriter(arffFileName);
-                trainingTW.WriteLine("@RELATION wockets");
-                string arffHeader = fv.GetHeader(); 
-                arffHeader += "\n@ATTRIBUTE activity {";
-                int i = 0;
-                for (i = 0; (i < ((this.annotatedSession.OverlappingActivityLists[0]).Count - 1)); i++)
-                    arffHeader += this.annotatedSession.OverlappingActivityLists[0][i]._Name.Replace(' ', '_') + ",";
-                arffHeader += this.annotatedSession.OverlappingActivityLists[0][i]._Name.Replace(' ', '_') + "}\n";
-                arffHeader += "\n@DATA\n\n";
-
-                trainingTW.WriteLine(arffHeader);
-                string structureArffFile = Core._StoragePath + "\\structure.arff";
-                structureTW = new StreamWriter(structureArffFile);
-                structureTW.WriteLine("@RELATION wockets");
-                structureTW.WriteLine(arffHeader);
-                mlThread = new Thread(new ThreadStart(MLThread));
-                mlThread.Start();
+                if (MessageBox.Show("Thanks for installing the wockets\nThe setup will continue. Are you ready?", "",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.No)
+                    Application.Exit();
             }
 
+
+
+
+            ScreenUtils.ShowTaskBar(false);
+            ScreenUtils.ShowTrayBar(false);
+            InitializeComponent();
+            InitializeInterface();
+
+            //all commands should be sent after initializing interface
+            wocketsList._Status = "Refresh wockets...";
+            _alphaManager = new AlphaContainer(this);
+            this.Refresh();
         }
 
-        private void CleanupML()
+            void Form1_Activated(object sender, EventArgs e)
         {
-            if (mlThread != null)
-            {
-                mlThread.Abort();
-                mlThread = null;
-            }
+            ScreenUtils.ShowTaskBar(false);
+            ScreenUtils.ShowTrayBar(false);
+        }
 
-            if (classificationThread != null)
-            {
-                classificationThread.Abort();
-                classificationThread = null;
-            }
+            void Form1_Deactivate(object sender, EventArgs e)
+        {
+            ScreenUtils.ShowTaskBar(true);
+        }
 
-            if (trainingTW != null)
-            {
-                trainingTW.Flush();
-                trainingTW.Close();
-                trainingTW = null;
-            }
+        #endregion 
 
-            if (structureTW != null)
-            {
-                structureTW.Flush();
-                structureTW.Close();
-                structureTW = null;
-            }
-            if (fv!=null)
-              fv.Cleanup();
-            
 
-            //Save any existing arff files
-            if ((this._SaveFeatures) && (arffFileName != ""))
-            {
+        #region Declare Variables Interface
+            //private Color[] colors = new Color[ControlID.NUMBER_PANELS] { Color.White, Color.Black, Color.Red, Color.Green, Color.FromArgb(245, 219, 186), Color.FromArgb(245, 219, 186) };
+            //private BluetoothPanel pp;
 
-                Keyboard.KeyboardOpen = true;
-                Thread.Sleep(2000);
-                string title = Microsoft.VisualBasic.Interaction.InputBox("Please type a name for this session", "Session Name", "", 50, 300);
-                if (title != "")
+            private AnnotationProtocolList models;
+            private Bitmap[] _backBuffers = new Bitmap[ControlID.NUMBER_PANELS];
+            private Transitions currentTransition;
+            public void AddButton(int panelID, int buttonID, string pressedFilename, string unpressedFilename, int x, int y, int size, string unpressedText, ButtonType type)
+            {
+                this.panels[panelID]._UnpressedButtonControls[buttonID] = new AlphaPictureBox();
+                this.panels[panelID]._UnpressedButtonControls[buttonID].Name = buttonID.ToString();
+                this.panels[panelID]._UnpressedButtonControls[buttonID].Size = new Size(size, size);
+                this.panels[panelID]._UnpressedButtonControls[buttonID].Image = AlphaImage.CreateFromFile(Constants.PATH + unpressedFilename);
+                this.panels[panelID]._UnpressedButtonControls[buttonID].Visible = true;
+
+                this.panels[panelID]._UnpressedButtonControls[buttonID].Location = new Point(x, y);
+                this.panels[panelID]._UnpressedButtonControls[buttonID].Click += new EventHandler(clickHandler);
+                if (unpressedText != null)
                 {
-                    models = new AnnotationProtocolList();
-                    if (File.Exists(Constants.PATH + "models.xml"))
-                        models.FromXML(Constants.PATH + "models.xml");
-                    AnnotationProtocol protocol = new AnnotationProtocol();
-                    protocol._Name = title;
-                    protocol._FileName = arffFileName;
-                    protocol._Description = "";
-                    models.Add(protocol);
+                    this.panels[panelID]._ButtonText[buttonID] = new AlphaLabel();
 
-                    TextWriter tw = new StreamWriter(Constants.PATH + "models.xml");
-                    tw.WriteLine(models.ToXML());
-                    tw.Close();
-                    arffFileName = "";
+                    this.panels[panelID]._ButtonText[buttonID].Text = unpressedText;
+                    this.panels[panelID]._ButtonText[buttonID].ForeColor = Color.FromArgb(205, 183, 158);
+                    this.panels[panelID]._ButtonText[buttonID].Allign = System.Drawing.StringAlignment.Center;
+                    this.panels[panelID]._ButtonText[buttonID].Visible = true;
+                    if (size == 128)
+                    {
+                        this.panels[panelID]._ButtonText[buttonID].Font = new Font(FontFamily.GenericSerif, 9.0f, System.Drawing.FontStyle.Regular);
+                        this.panels[panelID]._ButtonText[buttonID].Size = new Size(128, 40);
+                        this.panels[panelID]._ButtonText[buttonID].Allign = System.Drawing.StringAlignment.Center;
+                        this.panels[panelID]._ButtonText[buttonID].Location = new Point(x, y + size + 2);
+                    }
+                    else if (size == 200)
+                    {
+                        this.panels[panelID]._ButtonText[buttonID].Font = new Font(FontFamily.GenericSerif, 14.0f, System.Drawing.FontStyle.Regular);
+                        this.panels[panelID]._ButtonText[buttonID].Size = new Size(500, 100);
+                        this.panels[panelID]._ButtonText[buttonID].Allign = System.Drawing.StringAlignment.Center;
+                        this.panels[panelID]._ButtonText[buttonID].Location = new Point((Screen.PrimaryScreen.WorkingArea.Width - 500) / 2, y + size + 2);
+                    }
+                }
+
+
+                this.panels[panelID]._PressedButtonControls[buttonID] = new AlphaPictureBox();
+                this.panels[panelID]._PressedButtonControls[buttonID].Name = buttonID.ToString();
+                this.panels[panelID]._PressedButtonControls[buttonID].Size = new Size(128, 30);
+                this.panels[panelID]._PressedButtonControls[buttonID].Image = AlphaImage.CreateFromFile(Constants.PATH + pressedFilename);
+                this.panels[panelID]._PressedButtonControls[buttonID].Visible = false;
+                this.panels[panelID]._PressedButtonControls[buttonID].Location = new Point(x, y);
+                this.panels[panelID]._PressedButtonControls[buttonID].Click += new EventHandler(clickHandler);
+                this.panels[panelID]._ButtonType[buttonID] = type;
+                this.panels[panelID]._ButtonSize[buttonID] = size;
+                if (type == ButtonType.Alternating)
+                {
+                    this.panels[panelID]._PressedButtonControls[buttonID].Enabled = false;
                 }
             }
+
+
+            WocketSlidingList wocketsList = null;
+            private Panel bluetoothPanel;
+            private Label bluetoothName;
+            ArrayList selectedWockets = new ArrayList();
+            WocketsScalablePlotter plotter = null;
+            private Panel plotterPanel;
+
+
+            private System.Windows.Forms.ListView annotationProtocolsList;
+            private AnnotationProtocolList aProtocols;
+            private Button startAnnnotationButton;
+            private Label annotationLabel;
+            private AlphaLabel statusLabel;
+            //private string currentStatus = "";
+
+
+            private System.Windows.Forms.ListView modelsList;
+            private AnnotationProtocolList aModels;
+            private Button startMeasuringButton;
+            private Label modelLabel;
+
+
+            private CheckBox saveFeatures;
+
+
+            private AlphaLabel chooseActivityLabel;
+            private Button doneAnnotation;
+            private Label examplesLabel;
+
+            private AlphaLabel bestGuessLabel;
+            private Button doneClassifying;
+
+            #region EE Panel
+            private Chart pieChart;
+            private IntPtr token;
+            private GdiplusStartupInput input = new GdiplusStartupInput();
+            private GdiplusStartupOutput output;
+            private Button doneEE;
+            #endregion EE Panel
+
+
+            const int SW_MINIMIZED = 6;
+            private const int ACTIVITY_TIMER = 1;
+            private ATimer activityTimer;
+
+            [DllImport("coredll.dll")]
+            static extern int ShowWindow(IntPtr hWnd, int nCmdShow);
+
+            #endregion
+
+
+        #region Interface Related Functions
+
+            public void InitializeInterface()
+            {
+                //GdiplusStartupInput input = new GdiplusStartupInput();
+                //GdiplusStartupOutput output;
+                //GpStatusPlus stat = NativeMethods.GdiplusStartup(out token, input, out output);
+
+                currentTransition = Transitions.LEFT_TO_RIGHT;
+
+                Constants.PATH = System.IO.Path.GetDirectoryName(
+                   System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase) + "\\NeededFiles\\";
+
+
+                disconnectedAlert = new Sound(Constants.PATH + "sounds\\Disconnected.wav");
+                connectedAlert = new Sound(Constants.PATH + "sounds\\Connected.wav");
+
+                this.AutoScroll = false;
+                this.numberButtons[ControlID.HOME_PANEL] = ControlID.HOME_PANEL_BUTTON_COUNT;
+                this.numberButtons[ControlID.ABOUT_PANEL] = ControlID.ABOUT_PANEL_BUTTON_COUNT;
+                this.numberButtons[ControlID.SETTINGS_PANEL] = ControlID.SETTINGS_PANEL_BUTTON_COUNT;
+                this.numberButtons[ControlID.WOCKETS_PANEL] = ControlID.WOCKETS_PANEL_BUTTON_COUNT;
+                this.numberButtons[ControlID.WOCKETS_CONFIGURATION_PANEL] = ControlID.WOCKETS_CONFIGURATION_PANEL_BUTTON_COUNT;
+                this.numberButtons[ControlID.PLOTTER_PANEL] = ControlID.PLOTTER_PANEL_BUTTON_COUNT;
+                this.numberButtons[ControlID.ANNOTATION_PROTCOLS_PANEL] = ControlID.ANNOTATION_PROTOCOLS_PANEL_BUTTON_COUNT;
+                this.numberButtons[ControlID.ANNOTATION_BUTTON_PANEL] = ControlID.ANNOTATION_BUTTON_PANEL_BUTTON_COUNT;
+                this.numberButtons[ControlID.ACTIVITY_PANEL] = ControlID.ACTIVITY_PANEL_BUTTON_COUNT;
+                this.numberButtons[ControlID.MODELS_PANEL] = ControlID.MODELS_PANEL_BUTTON_COUNT;
+                this.numberButtons[ControlID.CLASSIFICATION_PANEL] = ControlID.CLASSIFICATION_PANEL_BUTTON_COUNT;
+                this.numberButtons[ControlID.EE_PANEL] = ControlID.EE_PANEL_BUTTON_COUNT;
+
+
+                for (int i = 0; (i < ControlID.NUMBER_PANELS); i++)
+                {
+
+                    this.panels[i] = new ClickableAlphaPanel(this.numberButtons[i]);
+                    this.panels[i].Size = new Size(SCREEN_RESOLUTION_X, SCREEN_RESOLUTION_Y);
+                    this.panels[i].MouseDown += new MouseEventHandler(owner_MouseDown);
+                    this.panels[i].MouseUp += new MouseEventHandler(owner_MouseUp);
+                    //this.panels[i].BackColor=colors[i];
+                    this.panels[i].Dock = DockStyle.Fill;
+                    this.panels[i]._Backbuffer = new Bitmap(SCREEN_RESOLUTION_X, SCREEN_RESOLUTION_Y, PixelFormat.Format16bppRgb555);
+                    this.Controls.Add(this.panels[i]);
+                }
+
+
+                //setup backgrounds
+                this.panels[ControlID.HOME_PANEL]._Background = new Bitmap(Constants.PATH + "Backgrounds\\DottedBlack.png");
+                this.panels[ControlID.HOME_PANEL]._BackgroundFile = Constants.PATH + "Backgrounds\\DottedBlack.png";
+                this.panels[ControlID.ABOUT_PANEL]._Background = (Bitmap)this.panels[ControlID.HOME_PANEL]._Background.Clone();
+                this.panels[ControlID.ABOUT_PANEL]._BackgroundFile = Constants.PATH + "Backgrounds\\DottedBlack.png";
+                this.panels[ControlID.SETTINGS_PANEL]._Background = (Bitmap)this.panels[ControlID.HOME_PANEL]._Background.Clone();
+                this.panels[ControlID.SETTINGS_PANEL]._BackgroundFile = Constants.PATH + "Backgrounds\\DottedBlack.png";
+                this.panels[ControlID.ACTIVITY_PANEL]._Background = (Bitmap)this.panels[ControlID.HOME_PANEL]._Background.Clone();
+                this.panels[ControlID.ACTIVITY_PANEL]._BackgroundFile = Constants.PATH + "Backgrounds\\DottedBlack.png";
+
+                this.panels[ControlID.MODELS_PANEL].BackColor = Color.FromArgb(250, 237, 221);
+                this.panels[ControlID.MODELS_PANEL]._ClearCanvas = true;
+                this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL].BackColor = Color.FromArgb(250, 237, 221);
+                this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL]._ClearCanvas = true;
+                this.panels[ControlID.ANNOTATION_BUTTON_PANEL].BackColor = Color.FromArgb(250, 237, 221);
+                this.panels[ControlID.ANNOTATION_BUTTON_PANEL]._ClearCanvas = true;
+                this.panels[ControlID.CLASSIFICATION_PANEL].BackColor = Color.FromArgb(250, 237, 221);
+                this.panels[ControlID.CLASSIFICATION_PANEL]._ClearCanvas = true;
+                this.panels[ControlID.EE_PANEL].BackColor = Color.FromArgb(250, 237, 221);
+                this.panels[ControlID.EE_PANEL]._ClearCanvas = true;
+
+
+
+
+                #region Activity Panel
+                AddButton(ControlID.ACTIVITY_PANEL, ControlID.MEASURE_ACTIVITY_BUTTON, "Buttons\\MeasureActivityPressed-200.png", "Buttons\\MeasureActivityUnpressed-200.png", (Screen.PrimaryScreen.WorkingArea.Width - 200) / 2, 100, 200, "Measure Activity", ButtonType.Fixed);
+                AddButton(ControlID.ACTIVITY_PANEL, ControlID.ANNOTATE_ACTIVITY_BUTTON, "Buttons\\AnnotatePressed-200.png", "Buttons\\AnnotateUnpressed-200.png", (Screen.PrimaryScreen.WorkingArea.Width - 200) / 2, 400, 200, "Annotate Activity", ButtonType.Fixed);
+                AddButton(ControlID.ACTIVITY_PANEL, ControlID.HOME_ACTIVITY_BUTTON, "Buttons\\HomePressed-128.png", "Buttons\\HomeUnpressed-128.png", 0, this.Height - 130, 128, null, ButtonType.Fixed);
+                #endregion Activity Panel
+
+                #region Annotation Protocols Panel
+                //Setup the annotation protcols list
+                annotationProtocolsList = new ListView();
+                annotationProtocolsList.Location = new System.Drawing.Point(72, 44);
+                annotationProtocolsList.BackColor = Color.White;
+                annotationProtocolsList.ForeColor = Color.Black;
+                annotationProtocolsList.View = View.List;
+                annotationProtocolsList.Name = "annotationProtocolsList";
+                annotationProtocolsList.Size = new System.Drawing.Size(100, 100);
+                annotationProtocolsList.TabIndex = 0;
+                annotationProtocolsList.SelectedIndexChanged += new EventHandler(annotationProtocolsList_SelectedIndexChanged);
+                //adjust top label size and location
+                annotationLabel = new Label();
+                annotationLabel.Width = (int)(Screen.PrimaryScreen.WorkingArea.Width * 0.90);
+                annotationLabel.Height = (int)(Screen.PrimaryScreen.WorkingArea.Width * 0.15);
+                annotationLabel.Location = new Point(2, 2);
+                //Load the activity protocols from the master directory
+                this.aProtocols = new AnnotationProtocolList();
+                this.aProtocols.FromXML(Constants.PATH + "Master\\ActivityProtocols.xml");
+                string longest_label = "";
+                for (int i = 0; (i < this.aProtocols.Count); i++)
+                {
+                    annotationProtocolsList.Items.Add(new ListViewItem(this.aProtocols[i]._Name));
+                    if (longest_label.Length < this.aProtocols[i]._Name.Length)
+                        longest_label = this.aProtocols[i]._Name;
+                }
+
+                //Listbox dynamic placement
+                annotationProtocolsList.Width = (int)(Screen.PrimaryScreen.WorkingArea.Width * 0.90);
+                annotationProtocolsList.Height = (int)(Screen.PrimaryScreen.WorkingArea.Height * 0.60);
+                annotationProtocolsList.Font = new Font(GUIHelper.FONT_FAMILY, 14F, this.Font.Style);
+                annotationProtocolsList.Location = new Point((int)(Screen.PrimaryScreen.WorkingArea.Width * 0.05), (int)annotationLabel.Location.Y + annotationLabel.Height + 2);
+                this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL].Controls.Add(annotationProtocolsList);
+
+                //add save features checkbox
+                saveFeatures = new CheckBox();
+                saveFeatures.Size = new Size(600, 50);
+                saveFeatures.Text = "Learn and Annotate";
+                saveFeatures.BackColor = Color.FromArgb(250, 237, 221);
+                saveFeatures.ForeColor = Color.Black;
+                saveFeatures.Font = new Font(FontFamily.GenericSerif, 14.0f, System.Drawing.FontStyle.Bold);
+                saveFeatures.Visible = true;
+                saveFeatures.Location = new Point(10, annotationProtocolsList.Location.Y + annotationProtocolsList.Height + 10);
+                saveFeatures.CheckState = CheckState.Checked;
+                saveFeatures.CheckStateChanged += new EventHandler(saveFeatures_CheckStateChanged);
+                this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL].Controls.Add(saveFeatures);
+
+                //add annotation label
+                annotationLabel.Size = new Size(Screen.PrimaryScreen.WorkingArea.Width, 50);
+                annotationLabel.Text = "Choose a protocol";
+                annotationLabel.BackColor = Color.FromArgb(250, 237, 221);
+                annotationLabel.Font = new Font(FontFamily.GenericSerif, 14.0f, System.Drawing.FontStyle.Bold);
+                annotationLabel.Visible = true;
+                annotationLabel.Location = new Point((int)(Screen.PrimaryScreen.WorkingArea.Width * 0.05), 10);
+                this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL].Controls.Add(annotationLabel);
+
+                //add a button to start
+                startAnnnotationButton = new Button();
+                startAnnnotationButton.Size = new Size(400, 80);
+                startAnnnotationButton.Text = "Begin Annotation";
+                startAnnnotationButton.BackColor = Color.LightGray;
+                startAnnnotationButton.ForeColor = Color.Black;
+                startAnnnotationButton.Font = new Font(FontFamily.GenericSerif, 14.0f, System.Drawing.FontStyle.Bold);
+                startAnnnotationButton.Enabled = false;
+                startAnnnotationButton.Visible = true;
+                startAnnnotationButton.Click += new EventHandler(startAnnnotationButton_Click);
+                startAnnnotationButton.Location = new Point(Screen.PrimaryScreen.WorkingArea.Width / 2 - 200, saveFeatures.Location.Y + saveFeatures.Height + 10);
+                this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL].Controls.Add(startAnnnotationButton);
+
+                AddButton(ControlID.ANNOTATION_PROTCOLS_PANEL, ControlID.HOME_ANNOTATION_PROTOCOL_BUTTON, "Buttons\\HomePressed-128.png", "Buttons\\HomeUnpressed-128.png", 0, this.Height - 130, 128, null, ButtonType.Fixed);
+                #endregion Annotation Protocols Panel
+
+                #region Models Panel
+                //Setup the annotation protcols list
+                modelsList = new ListView();
+                modelsList.Location = new System.Drawing.Point(72, 44);
+                modelsList.View = View.List;
+                modelsList.Name = "modelsList";
+                modelsList.BackColor = Color.White;
+                modelsList.ForeColor = Color.Black;
+                modelsList.Size = new System.Drawing.Size(100, 100);
+                modelsList.TabIndex = 0;
+                modelsList.SelectedIndexChanged += new EventHandler(modelsList_SelectedIndexChanged);
+                //adjust top label size and location
+                modelLabel = new Label();
+                modelLabel.Width = (int)(Screen.PrimaryScreen.WorkingArea.Width * 0.90);
+                modelLabel.Height = (int)(Screen.PrimaryScreen.WorkingArea.Width * 0.15);
+                modelLabel.Location = new Point(2, 2);
+
+
+                //Listbox dynamic placement
+                modelsList.Width = (int)(Screen.PrimaryScreen.WorkingArea.Width * 0.90);
+                modelsList.Height = (int)(Screen.PrimaryScreen.WorkingArea.Height * 0.60);
+                modelsList.Font = new Font(GUIHelper.FONT_FAMILY, 14F, this.Font.Style);
+                modelsList.Location = new Point((int)(Screen.PrimaryScreen.WorkingArea.Width * 0.05), (int)modelLabel.Location.Y + modelLabel.Height + 2);
+                this.panels[ControlID.MODELS_PANEL].Controls.Add(modelsList);
+
+
+                //add annotation label
+                modelLabel.Size = new Size(Screen.PrimaryScreen.WorkingArea.Width, 50);
+                modelLabel.Text = "Select a learning profile";
+                modelLabel.BackColor = Color.FromArgb(250, 237, 221);
+                modelLabel.Font = new Font(FontFamily.GenericSerif, 14.0f, System.Drawing.FontStyle.Bold);
+                modelLabel.Visible = true;
+                modelLabel.Location = new Point((int)(Screen.PrimaryScreen.WorkingArea.Width * 0.05), 10);
+                this.panels[ControlID.MODELS_PANEL].Controls.Add(modelLabel);
+
+                //add a button to start
+                startMeasuringButton = new Button();
+                startMeasuringButton.Size = new Size(400, 80);
+                startMeasuringButton.Text = "Begin Measuring";
+                startMeasuringButton.BackColor = Color.LightGray;
+                startMeasuringButton.ForeColor = Color.Black;
+                startMeasuringButton.Font = new Font(FontFamily.GenericSerif, 14.0f, System.Drawing.FontStyle.Bold);
+                startMeasuringButton.Enabled = false;
+                startMeasuringButton.Visible = true;
+                startMeasuringButton.Click += new EventHandler(startMeasuringButton_Click);
+                startMeasuringButton.Location = new Point(Screen.PrimaryScreen.WorkingArea.Width / 2 - 200, modelsList.Location.Y + modelsList.Height + 10);
+                this.panels[ControlID.MODELS_PANEL].Controls.Add(startMeasuringButton);
+
+                AddButton(ControlID.MODELS_PANEL, ControlID.HOME_MODELS_BUTTON, "Buttons\\HomePressed-128.png", "Buttons\\HomeUnpressed-128.png", 0, this.Height - 130, 128, null, ButtonType.Fixed);
+                #endregion Models Panel
+
+                #region Annotation Buttons Panel
+                this.panels[ControlID.ANNOTATION_BUTTON_PANEL].AutoScroll = true;
+                this.chooseActivityLabel = new AlphaLabel();
+                this.chooseActivityLabel.Size = new Size(500, 40);
+                this.chooseActivityLabel.Text = "Choose your activity";
+                this.chooseActivityLabel.ForeColor = Color.Black;
+                this.chooseActivityLabel.Font = new Font(FontFamily.GenericSerif, 10.0f, System.Drawing.FontStyle.Bold);
+                this.chooseActivityLabel.Visible = true;
+                this.chooseActivityLabel.Location = new Point(1, 1);
+                this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Controls.Add(this.chooseActivityLabel);
+
+                this.examplesLabel = new Label();
+                this.examplesLabel.Size = new Size(100, 30);
+                this.examplesLabel.Text = "00:00";
+                this.examplesLabel.ForeColor = Color.Black;
+                this.examplesLabel.Font = new Font(FontFamily.GenericSerif, 10.0f, System.Drawing.FontStyle.Bold);
+                this.examplesLabel.Visible = true;
+                this.examplesLabel.Location = new Point(130, this.Height - 100);
+                this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Controls.Add(this.examplesLabel);
+
+                doneAnnotation = new Button();
+                MakeButtonMultiline(doneAnnotation);
+                doneAnnotation.Size = new Size(200, 80);
+                doneAnnotation.Text = "Stop\nLearning";
+                doneAnnotation.Font = new Font(FontFamily.GenericSerif, 10.0f, System.Drawing.FontStyle.Bold);
+                doneAnnotation.Enabled = true;
+                doneAnnotation.Visible = true;
+                doneAnnotation.Click += new EventHandler(doneAnnotation_Click);
+                doneAnnotation.Location = new Point(250, this.Height - 110);
+                this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Controls.Add(doneAnnotation);
+
+                AddButton(ControlID.ANNOTATION_BUTTON_PANEL, ControlID.HOME_ANNOTATION_BUTTON_BUTTON, "Buttons\\HomePressed-128.png", "Buttons\\HomeUnpressed-128.png", 0, this.Height - 130, 128, null, ButtonType.Fixed);
+                //AddButton(ControlID.ANNOTATION_BUTTON_PANEL, ControlID.FINISH_ANNOTATION_BUTTON_BUTTON, "Buttons\\StopPressed-128.png", "Buttons\\StopUnpressed-128.png", 300, this.Height - 130, 128, null, ButtonType.Fixed);
+                #endregion Annotation Buttons Panel
+
+
+
+
+
+                #region Classification Panel
+                this.bestGuessLabel = new AlphaLabel();
+                this.bestGuessLabel.Size = new Size(500, 60);
+                this.bestGuessLabel.Text = "Activity Classification";
+                this.bestGuessLabel.ForeColor = Color.Black;
+                this.bestGuessLabel.Font = new Font(FontFamily.GenericSerif, 14.0f, System.Drawing.FontStyle.Bold);
+                this.bestGuessLabel.Visible = true;
+                this.bestGuessLabel.Location = new Point(1, 1);
+                this.panels[ControlID.CLASSIFICATION_PANEL].Controls.Add(this.bestGuessLabel);
+                doneClassifying = new Button();
+                doneClassifying.Size = new Size(300, 80);
+                doneClassifying.Text = "Stop Measuring";
+                doneClassifying.Font = new Font(FontFamily.GenericSerif, 12.0f, System.Drawing.FontStyle.Bold);
+                doneClassifying.Enabled = true;
+                doneClassifying.Visible = true;
+                doneClassifying.Click += new EventHandler(doneClassifying_Click);
+                doneClassifying.Location = new Point(150, this.Height - 100);
+                this.panels[ControlID.CLASSIFICATION_PANEL].Controls.Add(doneClassifying);
+                AddButton(ControlID.CLASSIFICATION_PANEL, ControlID.HOME_CLASSIFICATION_BUTTON, "Buttons\\HomePressed-128.png", "Buttons\\HomeUnpressed-128.png", 0, this.Height - 130, 128, null, ButtonType.Fixed);
+                #endregion Classification Panel
+
+
+
+                #region EE Panel
+
+
+                /*  GpStatusPlus stat = NativeMethods.GdiplusStartup(out token, input, out output);
+            pieChart = new Charts.twodimensional.PieChart();
+            pieChart.Location = new Point(0, 0);
+            pieChart.Size = new Size(200, 200);
+            pieChart.IsStretch = true;
+            //pieChart.SetCalories(10, 5);
+            pieChart.SetActivity("No Activity");
+            Hashtable activities = new Hashtable();
+            activities.Add("Biceps Curls", 10);
+            activities.Add("Jumping Jacks", 10);
+            activities.Add("Walking", 10);
+            activities.Add("Running", 10);
+            activities.Add("Empty", 60 );
+
+            pieChart.Data = activities;
+            pieChart.Invalidate();
+            
+
+            this.panels[ControlID.EE_PANEL].Controls.Add(pieChart);
+            */
+                this.activityTimer = new ATimer();
+                doneEE = new Button();
+                doneEE.Size = new Size(300, 80);
+                doneEE.Text = "Done";
+                doneEE.Font = new Font(FontFamily.GenericSerif, 12.0f, System.Drawing.FontStyle.Bold);
+                doneEE.Enabled = true;
+                doneEE.Visible = true;
+                doneEE.Click += new EventHandler(doneEE_Click);
+                doneEE.Location = new Point(150, this.Height - 100);
+                this.panels[ControlID.EE_PANEL].Controls.Add(doneEE);
+                AddButton(ControlID.EE_PANEL, ControlID.HOME_EE_BUTTON, "Buttons\\HomePressed-128.png", "Buttons\\HomeUnpressed-128.png", 0, this.Height - 130, 128, null, ButtonType.Fixed);
+                #endregion EE Panel
+
+                //Main Page
+                //Home Screen Bottom  Buttons
+                //Line 1
+                AddButton(ControlID.HOME_PANEL, ControlID.SETTINGS_BUTTON, "Buttons\\SettingsPressed.png", "Buttons\\SettingsUnpressed.png", 0, this.Height - 130, 128, null, ButtonType.Fixed);
+                AddButton(ControlID.HOME_PANEL, ControlID.MINIMIZE_BUTTON, "Buttons\\MinimizePressed.png", "Buttons\\MinimizeUnpressed.png", 160, this.Height - 130, 128, null, ButtonType.Fixed);
+                AddButton(ControlID.HOME_PANEL, ControlID.RESET_BUTTON, "Buttons\\TurnOffPressed.png", "Buttons\\TurnOffUnpressed.png", 310, this.Height - 130, 128, null, ButtonType.Fixed);
+
+
+
+                //Home Screen Buttons
+                //Line 1
+                AddButton(ControlID.HOME_PANEL, ControlID.LINE_CHART_BUTTON, "Buttons\\LineChartPressed.png", "Buttons\\LineChartUnpressed.png", 0, 50, 128, "Plot", ButtonType.Fixed);
+                AddButton(ControlID.HOME_PANEL, ControlID.ACTIVITY_BUTTON, "Buttons\\ActivityPressed-128.png", "Buttons\\ActivityUnpressed-128.png", 160, 50, 128, "Activity", ButtonType.Fixed);
+
+                //Line 2            
+                AddButton(ControlID.HOME_PANEL, ControlID.CONNECT_BUTTON, "Buttons\\DisconnectUnpressed-128.png", "Buttons\\ConnectUnpressed-128.png", 310, 50, 128, "Connect", ButtonType.Alternating);
+                AddButton(ControlID.HOME_PANEL, ControlID.KERNEL_BUTTON, "Buttons\\StopKernelUnpressed-128.png", "Buttons\\StartKernelUnpressed-128.png", 0, 210, 128, "Start Kernel", ButtonType.Alternating);
+
+
+                //Add top status bar information
+                statusLabel = new AlphaLabel();
+                statusLabel.Size = new Size(300, 35);
+                statusLabel.Text = "Kernel Stopped";
+                statusLabel.ForeColor = Color.FromArgb(250, 237, 221);
+                statusLabel.Font = new Font(FontFamily.GenericSerif, 8.0f, System.Drawing.FontStyle.Bold);
+                statusLabel.Visible = true;
+                statusLabel.Location = new Point(1, 1);
+                this.panels[ControlID.HOME_PANEL].Controls.Add(statusLabel);
+
+                //Settings Bottom  Buttons
+                AddButton(ControlID.SETTINGS_PANEL, ControlID.BACK_BUTTON, "Buttons\\BackPressed.png", "Buttons\\BackUnpressed.png", 310, this.Height - 130, 128, null, ButtonType.Fixed);
+
+                //Settings Buttons
+                AddButton(ControlID.SETTINGS_PANEL, ControlID.BLUETOOTH_BUTTON, "Buttons\\BluetoothPressed.png", "Buttons\\BluetoothUnpressed.png", 0, 50, 128, "Wockets", ButtonType.Fixed);
+                AddButton(ControlID.SETTINGS_PANEL, ControlID.SOUND_BUTTON, "Buttons\\SoundPressed.png", "Buttons\\SoundUnpressed.png", 160, 50, 128, "Sound", ButtonType.Fixed);
+
+                //Wockets Screen
+
+                AddButton(ControlID.WOCKETS_PANEL, ControlID.WOCKETS_BACK_BUTTON, "Buttons\\Back48Pressed.png", "Buttons\\Back48Unpressed.png", 400, this.Height - 48, 48, null, ButtonType.Fixed);
+                AddButton(ControlID.WOCKETS_PANEL, ControlID.WOCKETS_UP_BUTTON, "Buttons\\Up48Pressed.png", "Buttons\\Up48Unpressed.png", 250, this.Height - 48, 48, null, ButtonType.Fixed);
+                AddButton(ControlID.WOCKETS_PANEL, ControlID.WOCKETS_DOWN_BUTTON, "Buttons\\Down48Pressed.png", "Buttons\\Down48Unpressed.png", 180, this.Height - 48, 48, null, ButtonType.Fixed);
+                AddButton(ControlID.WOCKETS_PANEL, ControlID.WOCKETS_RELOAD_BUTTON, "Buttons\\BluetoothReloadPressed-48.png", "Buttons\\BluetoothReloadUnpressed-48.png", 20, this.Height - 48, 48, null, ButtonType.Fixed);
+
+
+                wocketsList = new WocketSlidingList();
+                wocketsList.Size = new Size(Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height);
+                wocketsList.Location = new Point(0, 0);
+                this.panels[ControlID.WOCKETS_PANEL].Controls.Add(wocketsList);
+                wocketsList.BringToFront();
+
+
+                //Wockets Configuration Panel
+
+                //AddButton(ControlID.WOCKETS_CONFIGURATION_PANEL, ControlID.WOCKETS_CONFIGURATIONS_BLUETOOTH_BUTTON, "Buttons\\BluetoothUnpressed-64.png", "Buttons\\BluetoothPressed-64.png", 0, this.Height - 64, 64, null, ButtonType.Fixed);
+                //AddButton(ControlID.WOCKETS_CONFIGURATION_PANEL, ControlID.WOCKETS_CONFIGURATIONS_COMMAND_BUTTON, "Buttons\\CommandPressed-64.png", "Buttons\\CommandUnpressed-64.png", 80, this.Height - 64, 64, null, ButtonType.Fixed);
+                //AddButton(ControlID.WOCKETS_CONFIGURATION_PANEL, ControlID.WOCKETS_CONFIGURATIONS_TIMERS_BUTTON, "Buttons\\TimerPressed-64.png", "Buttons\\TimerUnpressed-64.png", 160, this.Height - 64, 64, null, ButtonType.Fixed);
+                //AddButton(ControlID.WOCKETS_CONFIGURATION_PANEL, ControlID.WOCKETS_CONFIGURATIONS_STATUS_BUTTON, "Buttons\\StatusPressed-64.png", "Buttons\\StatusUnpressed-64.png", 240, this.Height - 64, 64, null, ButtonType.Fixed);
+                //AddButton(ControlID.WOCKETS_CONFIGURATION_PANEL, ControlID.WOCKETS_CONFIGURATIONS_INFORMATION_BUTTON, "Buttons\\InformationPressed-64.png", "Buttons\\InformationUnpressed-64.png", 320, this.Height - 64, 64, null, ButtonType.Fixed);
+                //AddButton(ControlID.WOCKETS_CONFIGURATION_PANEL, ControlID.WOCKETS_CONFIGURATIONS_BACK_BUTTON, "Buttons\\Back64Pressed.png", "Buttons\\Back64Unpressed.png", 400, this.Height - 64, 64, null,  ButtonType.Fixed);
+
+                bluetoothPanel = new Panel();
+                bluetoothPanel.Size = new Size(Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height);
+                bluetoothPanel.Visible = true;
+                bluetoothPanel.BackColor = Color.FromArgb(245, 219, 186);
+                bluetoothName = new Label();
+                bluetoothName.Location = new Point(10, 10);
+                bluetoothName.Size = new Size(250, 40);
+                bluetoothName.Font = new Font(FontFamily.GenericSansSerif, 14.0f, System.Drawing.FontStyle.Underline | System.Drawing.FontStyle.Bold);
+                bluetoothPanel.Controls.Add(bluetoothName);
+                this.panels[ControlID.WOCKETS_CONFIGURATION_PANEL].Controls.Add(bluetoothPanel);
+
+                //Plotter Panel
+                AddButton(ControlID.PLOTTER_PANEL, ControlID.WOCKETS_BACK_BUTTON, "Buttons\\Back48Pressed.png", "Buttons\\Back48Unpressed.png", 400, this.Height - 48, 48, null, ButtonType.Fixed);
+                plotterPanel = new Panel();
+                plotterPanel.Size = new Size(Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height);
+                plotterPanel.Visible = true;
+                plotterPanel.BackColor = Color.FromArgb(250, 237, 221);//Color.FromArgb(245, 219, 186);
+                plotterPanel.Paint += new PaintEventHandler(plotterPanel_Paint);
+                plotterTimer = new System.Windows.Forms.Timer();
+                plotterTimer.Interval = 50;
+                plotterTimer.Tick += new EventHandler(plotterTimer_Tick);
+
+                this.panels[ControlID.PLOTTER_PANEL].Controls.Add(plotterPanel);
+
+
+                for (int i = 0; (i < ControlID.NUMBER_PANELS); i++)
+                {
+                    //cache panels with drawn backgrounds
+                    //this._backBuffers[i] = new Bitmap(480, 640, PixelFormat.Format32bppRgb);
+                    if (this.panels[i]._Background != null)
+                    {
+                        Graphics offscreen = Graphics.FromImage(this.panels[i]._Backbuffer);
+                        offscreen.DrawImage(this.panels[i]._Background, 0, 0);
+                    }
+                    this.panels[i].Initialize();
+                }
+
+                this.panels[currentPanel].Location = new Point(0, 0);
+                this.panels[currentPanel].Update();
+                this.panels[currentPanel].Visible = true;
+
+                this.Deactivate += new EventHandler(Form1_Deactivate);
+                this.Activated += new EventHandler(Form1_Activated);
+
+
+
+            }
+
+            void doneEE_Click(object sender, EventArgs e)
+            {
+                if (MessageBox.Show("Are you done measuring?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
+                {
+                    this.activityStatus = ActivityStatus.None;
+                    this.panels[ControlID.HOME_PANEL].Visible = true;
+                    //this.panels[ControlID.EE_PANEL].Visible = false;
+                    this.panels[ControlID.CLASSIFICATION_PANEL].Visible = false;
+                    this.currentPanel = ControlID.HOME_PANEL;
+                }
+            }
+
+            void doneClassifying_Click(object sender, EventArgs e)
+            {
+                if (MessageBox.Show("Are you done measuring?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
+                {
+                    this.activityStatus = ActivityStatus.None;
+
+                    for (int i = 0; i < activityButtons.Count; i++)
+                    {
+                        System.Windows.Forms.Button[] activityList = (System.Windows.Forms.Button[])activityButtons[i];
+                        for (int j = 0; j < activityList.Length; j++)
+                            this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Controls.Remove(activityList[j]);
+                    }
+                    foreach (Label l in classifiedLabels.Values)
+                        this.panels[ControlID.CLASSIFICATION_PANEL].Controls.Remove(l);
+
+                    activityButtons.Clear();
+                    this.panels[ControlID.HOME_PANEL].Visible = true;
+                    this.panels[ControlID.CLASSIFICATION_PANEL].Visible = false;
+                    this.currentPanel = ControlID.HOME_PANEL;
+                    //if (this.saveFeatures.Checked)
+                    CleanupML();
+                    //remove all existing labels
+
+
+                }
+            }
+
+       #endregion 
+
+
+        #region Wockets Kernel Functions
+
+
+        private void LoadWockets()
+        {
+
+            if (!Core._KernalStarted)
+            {
+                if (!Core.Start())
+                    MessageBox.Show("Failed to start kernel");
+                else
+                    Thread.Sleep(5000);
+            }
+            else
+            {
+                //Make sure no kernels are running
+                if (Core.Terminate())
+                {
+                    if (!Core.Start())
+                        MessageBox.Show("Failed to start kernel");
+                    else
+                        Thread.Sleep(5000);
+                }
+                else
+                    MessageBox.Show("Failed to shutdown kernel");
+
+            }
+
+            Thread.Sleep(5000);
+            Core.Ping();
         }
-
-
 
 
         delegate void UpdateFormCallback(KernelResponse response);
@@ -320,10 +871,14 @@ namespace WocketsApplication
                             UpdatewWocketsList(); 
                             break; 
                         case KernelResponse.CONNECTED:
-                            this.statusLabel.Text = "Connected";            
+
+                            this.statusLabel.Text = "Connected";
+
+                            #region commented
                             //UpdatePlotter();
                             //this.currentStatus = "Connected";
                             //UpdateStatus();
+                            #endregion 
 
                             if (plotter != null)
                             {
@@ -350,6 +905,9 @@ namespace WocketsApplication
                                         InitializeML();
                                 }
                             }
+
+
+                            //Initialize the sound notifications
                             soundThread = new Thread(new ThreadStart(SoundThread));
                             soundThread.Start();            
                             break;
@@ -358,8 +916,11 @@ namespace WocketsApplication
                             Core._Connected = false;
                             this.selectedActivityProtocol = -1;
                             this.statusLabel.Text = "Disconnected";
+
+                            #region commented
                             //this.currentStatus = "Ready to connect";
                             //UpdateStatus();
+                            #endregion
 
                             //if you disconnect stop and cleanup the ML and save any existing arff file
                             CleanupML();
@@ -370,6 +931,7 @@ namespace WocketsApplication
                                 soundThread = null;
                             }
                             break;
+
                         default:
                             break;
                     }
@@ -383,8 +945,226 @@ namespace WocketsApplication
             }
         }
 
-        private AnnotationProtocolList models;
 
+
+        #endregion 
+
+
+        #region Algorithm Related Functions
+
+        delegate void UpdateExamplesCallback();
+        public void UpdateExamples()
+        {
+            if (!disposed)
+            {
+                // InvokeRequired required compares the thread ID of the
+                // calling thread to the thread ID of the creating thread.
+                // If these threads are different, it returns true.
+                if (this.examplesLabel.InvokeRequired)
+                {
+                    UpdateExamplesCallback d = new UpdateExamplesCallback(UpdateExamples);
+                    this.Invoke(d, new object[] { });
+                }
+                else
+                {
+
+                    this.examplesLabel.Text = this.trainingExamples.ToString();
+                }
+            }
+        }
+
+        private void InitializeML()
+        {
+
+            //FullFeatureExtractor.Initialize(selectedWockets.Count, 90, CurrentWockets._Configuration, this.annotatedSession.OverlappingActivityLists[0]);
+            //FullFeatureExtractor.Initialize3(selectedWockets.Count, 90, CurrentWockets._Configuration, this.annotatedSession.OverlappingActivityLists[0]);
+
+            //Create the feature vector structure
+            fv = new SimpleFeatureVector(selectedWockets.Count, 128, 90);
+
+
+            if (trainingTW == null)
+            {
+                //Initialize the arff file (where the features are storaged)
+                arffFileName = Core._StoragePath + "\\output" + DateTime.Now.ToString().Replace('/', '_').Replace(':', '_').Replace(' ', '_') + ".arff";
+                trainingTW = new StreamWriter(arffFileName);
+
+                //Add the arff headers
+                trainingTW.WriteLine("@RELATION wockets");
+                string arffHeader = fv.GetHeader();
+                arffHeader += "\n@ATTRIBUTE activity {";
+                int i = 0;
+                for (i = 0; (i < ((this.annotatedSession.OverlappingActivityLists[0]).Count - 1)); i++)
+                    arffHeader += this.annotatedSession.OverlappingActivityLists[0][i]._Name.Replace(' ', '_') + ",";
+                arffHeader += this.annotatedSession.OverlappingActivityLists[0][i]._Name.Replace(' ', '_') + "}\n";
+                arffHeader += "\n@DATA\n\n";
+                trainingTW.WriteLine(arffHeader);
+
+
+                string structureArffFile = Core._StoragePath + "\\structure.arff";
+                structureTW = new StreamWriter(structureArffFile);
+                structureTW.WriteLine("@RELATION wockets");
+                structureTW.WriteLine(arffHeader);
+
+                //Initialize the activity recognition thread
+                mlThread = new Thread(new ThreadStart(MLThread));
+                mlThread.Start();
+
+
+            }
+
+        }
+
+        private void CleanupML()
+        {
+            if (mlThread != null)
+            {
+                mlThread.Abort();
+                mlThread = null;
+            }
+
+            if (classificationThread != null)
+            {
+                classificationThread.Abort();
+                classificationThread = null;
+            }
+
+            if (trainingTW != null)
+            {
+                trainingTW.Flush();
+                trainingTW.Close();
+                trainingTW = null;
+            }
+
+            if (structureTW != null)
+            {
+                structureTW.Flush();
+                structureTW.Close();
+                structureTW = null;
+            }
+
+
+            if (fv != null)
+                fv.Cleanup();
+
+
+            //Save any existing arff files
+            if ((this._SaveFeatures) && (arffFileName != ""))
+            {
+                Keyboard.KeyboardOpen = true;
+                Thread.Sleep(2000);
+                string title = Microsoft.VisualBasic.Interaction.InputBox("Please type a name for this session", "Session Name", "", 50, 300);
+
+
+                if (title != "")
+                {
+                    models = new AnnotationProtocolList();
+                    if (File.Exists(Constants.PATH + "models.xml"))
+                        models.FromXML(Constants.PATH + "models.xml");
+
+
+                    AnnotationProtocol protocol = new AnnotationProtocol();
+                    protocol._Name = title;
+                    protocol._FileName = arffFileName;
+                    protocol._Description = "";
+                    models.Add(protocol);
+
+                    TextWriter tw = new StreamWriter(Constants.PATH + "models.xml");
+                    tw.WriteLine(models.ToXML());
+                    tw.Close();
+                    arffFileName = "";
+                }
+            }
+        }
+
+        
+        int trainingExamples = 0;
+        double windowLength = 0;
+        long[] lastTotalSamples;
+        int[] last_extracted;
+        int[] no_fv_iterations;
+
+        private void MLThread()
+        {
+
+            int structureFileExamples = 0;
+            string prev_activity = "";
+            lastTotalSamples = new long[CurrentWockets._Controller._Decoders.Count];
+            last_extracted = new int[CurrentWockets._Controller._Decoders.Count];
+            no_fv_iterations = new int[CurrentWockets._Controller._Decoders.Count];
+            bool extracted = false;
+            while (true)
+            {
+                string current_activity = "unknown";
+                lock (annotationLock)
+                {
+                    if (this.currentRecord != null)
+                        current_activity = this.currentRecord.Activities._CurrentActivity;
+                }
+
+                //Check if each decoder decoded the desired number of samples
+                bool readyFV = true;
+                for (int i = 0; (i < CurrentWockets._Controller._Decoders.Count); i++)
+                {
+                    long numNewSamples = CurrentWockets._Controller._Decoders[i].TotalSamples - lastTotalSamples[i];
+                    if (numNewSamples == 0)
+                    {
+                        readyFV = false;
+                    }
+                    else if (numNewSamples < fv._Length)
+                    {
+                        if (no_fv_iterations[i] > 7) // a disconnection occurred, so reset the window you are looking at
+                        {
+                            //reinitialize all
+                            for (int j = 0; (j < CurrentWockets._Controller._Decoders.Count); j++)
+                                no_fv_iterations[j] = 0;
+                        }
+                        readyFV = false;
+                        no_fv_iterations[i] = no_fv_iterations[i] + 1;
+                        break;
+                    }
+                }
+
+                if (!readyFV)
+                {
+                    Thread.Sleep(1000);
+                    continue;
+                }
+
+                extracted = fv.Extract();
+
+                for (int i = 0; (i < CurrentWockets._Controller._Decoders.Count); i++)
+                    lastTotalSamples[i] = CurrentWockets._Controller._Decoders[i].TotalSamples;
+
+                if (current_activity != "unknown")
+                {
+                    //skip boundary don't use it
+                    if ((prev_activity == current_activity) && (extracted))
+                    {
+                        string arffSample = fv.toString() + "," + current_activity;
+                        trainingTW.WriteLine(arffSample);
+                        if (structureFileExamples < 10)
+                        {
+                            structureTW.WriteLine(arffSample);
+                            structureFileExamples++;
+                        }
+                        trainingExamples++;
+                        UpdateExamples();
+                    }
+                    if (prev_activity != current_activity)
+                        trainingExamples = 0;
+                    prev_activity = current_activity;
+
+                }
+                Thread.Sleep(1000);
+            }
+        }
+
+
+        #endregion
+
+
+        #region commented
         /*delegate void UpdateStatusCallback();
         public void UpdateStatus()
         {
@@ -443,583 +1223,10 @@ namespace WocketsApplication
             }
 
         }*/
+        #endregion commented
 
-        public Form1()
-        {                    
-            
-            RegistryKey rk = Registry.LocalMachine.OpenSubKey("Software\\MIT\\Wockets", true);
-            if (rk == null)
-            {
-                if (MessageBox.Show("Thanks for installing the wockets\nThe setup will continue. Are you ready?", "",
-                        MessageBoxButtons.YesNo,
-                        MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.No)
-                    Application.Exit();                
-            }
 
-  
-
-
-            ScreenUtils.ShowTaskBar(false);
-            ScreenUtils.ShowTrayBar(false);
-            InitializeComponent();
-            InitializeInterface();
-
-            //all commands should be sent after initializing interface
-
-            wocketsList._Status = "Refresh wockets...";
-            _alphaManager = new AlphaContainer(this);
-             this.Refresh();    
-        }
-
-
-
-
-
-
-        //private Color[] colors = new Color[ControlID.NUMBER_PANELS] { Color.White, Color.Black, Color.Red, Color.Green, Color.FromArgb(245, 219, 186), Color.FromArgb(245, 219, 186) };
-        private Bitmap[] _backBuffers = new Bitmap[ControlID.NUMBER_PANELS];
-
-        //private BluetoothPanel pp;
-        private Transitions currentTransition;
-
-        public void AddButton(int panelID, int buttonID, string pressedFilename,string unpressedFilename, int x, int y,int size, string unpressedText,ButtonType type)
-        {            
-            this.panels[panelID]._UnpressedButtonControls[buttonID] = new AlphaPictureBox();
-            this.panels[panelID]._UnpressedButtonControls[buttonID].Name = buttonID.ToString();
-            this.panels[panelID]._UnpressedButtonControls[buttonID].Size = new Size(size, size);
-            this.panels[panelID]._UnpressedButtonControls[buttonID].Image = AlphaImage.CreateFromFile(Constants.PATH + unpressedFilename);
-            this.panels[panelID]._UnpressedButtonControls[buttonID].Visible = true;
-
-            this.panels[panelID]._UnpressedButtonControls[buttonID].Location = new Point(x, y);
-            this.panels[panelID]._UnpressedButtonControls[buttonID].Click += new EventHandler(clickHandler);
-            if (unpressedText != null)
-            {
-                this.panels[panelID]._ButtonText[buttonID] = new AlphaLabel();
-                
-                this.panels[panelID]._ButtonText[buttonID].Text = unpressedText;
-                this.panels[panelID]._ButtonText[buttonID].ForeColor = Color.FromArgb(205, 183, 158);
-                this.panels[panelID]._ButtonText[buttonID].Allign = System.Drawing.StringAlignment.Center;
-                this.panels[panelID]._ButtonText[buttonID].Visible = true;
-                if (size == 128)
-                {
-                    this.panels[panelID]._ButtonText[buttonID].Font = new Font(FontFamily.GenericSerif, 9.0f, System.Drawing.FontStyle.Regular);
-                    this.panels[panelID]._ButtonText[buttonID].Size = new Size(128, 40);
-                    this.panels[panelID]._ButtonText[buttonID].Allign = System.Drawing.StringAlignment.Center;
-                    this.panels[panelID]._ButtonText[buttonID].Location = new Point(x, y + size + 2);
-                }
-                else if (size == 200)
-                {
-                    this.panels[panelID]._ButtonText[buttonID].Font = new Font(FontFamily.GenericSerif, 14.0f, System.Drawing.FontStyle.Regular);
-                    this.panels[panelID]._ButtonText[buttonID].Size = new Size(500, 100);
-                    this.panels[panelID]._ButtonText[buttonID].Allign = System.Drawing.StringAlignment.Center;
-                    this.panels[panelID]._ButtonText[buttonID].Location = new Point((Screen.PrimaryScreen.WorkingArea.Width-500)/2, y + size + 2);
-                }
-            }
-            
-
-            this.panels[panelID]._PressedButtonControls[buttonID] = new AlphaPictureBox();
-            this.panels[panelID]._PressedButtonControls[buttonID].Name = buttonID.ToString();
-            this.panels[panelID]._PressedButtonControls[buttonID].Size = new Size(128, 30);
-            this.panels[panelID]._PressedButtonControls[buttonID].Image = AlphaImage.CreateFromFile(Constants.PATH + pressedFilename);
-            this.panels[panelID]._PressedButtonControls[buttonID].Visible = false;
-            this.panels[panelID]._PressedButtonControls[buttonID].Location = new Point(x, y);      
-            this.panels[panelID]._PressedButtonControls[buttonID].Click += new EventHandler(clickHandler);  
-            this.panels[panelID]._ButtonType[buttonID] = type;
-            this.panels[panelID]._ButtonSize[buttonID] = size;
-            if (type == ButtonType.Alternating)
-            {
-                this.panels[panelID]._PressedButtonControls[buttonID].Enabled=false;
-            }
-        } 
-
-
-        WocketSlidingList wocketsList = null;
-        private Panel bluetoothPanel;
-        private Label bluetoothName;
-        ArrayList selectedWockets = new ArrayList();
-        WocketsScalablePlotter plotter=null;
-        private Panel plotterPanel;
-
-
-
-
-        private System.Windows.Forms.ListView annotationProtocolsList;
-        private AnnotationProtocolList aProtocols;
-        private Button startAnnnotationButton;
-        private Label annotationLabel;
-        private AlphaLabel statusLabel;
-        //private string currentStatus = "";
-
-
-        private System.Windows.Forms.ListView modelsList;
-        private AnnotationProtocolList aModels;
-        private Button startMeasuringButton;
-        private Label modelLabel;
-
-
-        private CheckBox saveFeatures;
-
-
-        private AlphaLabel chooseActivityLabel;
-        private Button doneAnnotation;
-        private Label examplesLabel;
-
-        private AlphaLabel bestGuessLabel;
-        private Button doneClassifying;
-
-        #region EE Panel
-        private Chart pieChart;
-        private IntPtr token;
-        private GdiplusStartupInput input = new GdiplusStartupInput();
-        private GdiplusStartupOutput output;
-        private Button doneEE;
-        #endregion EE Panel
-
-        [DllImport("coredll.dll")]
-        static extern int ShowWindow(IntPtr hWnd, int nCmdShow);
-        const int SW_MINIMIZED = 6;
-        private const int ACTIVITY_TIMER = 1;
-        private ATimer activityTimer;
-
-        public void InitializeInterface()
-        {
-            //GdiplusStartupInput input = new GdiplusStartupInput();
-            //GdiplusStartupOutput output;
-            //GpStatusPlus stat = NativeMethods.GdiplusStartup(out token, input, out output);
-
-            currentTransition = Transitions.LEFT_TO_RIGHT;
-
-            Constants.PATH = System.IO.Path.GetDirectoryName(
-               System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase)+"\\NeededFiles\\";
-
-                   
-            disconnectedAlert = new Sound(Constants.PATH+ "sounds\\Disconnected.wav");
-            connectedAlert = new Sound(Constants.PATH + "sounds\\Connected.wav");
-         
-            this.AutoScroll = false;
-            this.numberButtons[ControlID.HOME_PANEL] = ControlID.HOME_PANEL_BUTTON_COUNT;
-            this.numberButtons[ControlID.ABOUT_PANEL] = ControlID.ABOUT_PANEL_BUTTON_COUNT;
-            this.numberButtons[ControlID.SETTINGS_PANEL] = ControlID.SETTINGS_PANEL_BUTTON_COUNT;
-            this.numberButtons[ControlID.WOCKETS_PANEL] = ControlID.WOCKETS_PANEL_BUTTON_COUNT;
-            this.numberButtons[ControlID.WOCKETS_CONFIGURATION_PANEL] = ControlID.WOCKETS_CONFIGURATION_PANEL_BUTTON_COUNT;
-            this.numberButtons[ControlID.PLOTTER_PANEL] = ControlID.PLOTTER_PANEL_BUTTON_COUNT;
-            this.numberButtons[ControlID.ANNOTATION_PROTCOLS_PANEL] = ControlID.ANNOTATION_PROTOCOLS_PANEL_BUTTON_COUNT;
-            this.numberButtons[ControlID.ANNOTATION_BUTTON_PANEL] = ControlID.ANNOTATION_BUTTON_PANEL_BUTTON_COUNT;
-            this.numberButtons[ControlID.ACTIVITY_PANEL] = ControlID.ACTIVITY_PANEL_BUTTON_COUNT;
-            this.numberButtons[ControlID.MODELS_PANEL] = ControlID.MODELS_PANEL_BUTTON_COUNT;
-            this.numberButtons[ControlID.CLASSIFICATION_PANEL] = ControlID.CLASSIFICATION_PANEL_BUTTON_COUNT;
-            this.numberButtons[ControlID.EE_PANEL] = ControlID.EE_PANEL_BUTTON_COUNT;
-            for (int i = 0; (i < ControlID.NUMBER_PANELS); i++)
-           {
-
-               this.panels[i] = new ClickableAlphaPanel(this.numberButtons[i]);
-               this.panels[i].Size = new Size(SCREEN_RESOLUTION_X, SCREEN_RESOLUTION_Y);
-                this.panels[i].MouseDown += new MouseEventHandler(owner_MouseDown);
-                this.panels[i].MouseUp += new MouseEventHandler(owner_MouseUp);                
-                //this.panels[i].BackColor=colors[i];
-                this.panels[i].Dock = DockStyle.Fill;
-                this.panels[i]._Backbuffer = new Bitmap(SCREEN_RESOLUTION_X, SCREEN_RESOLUTION_Y, PixelFormat.Format16bppRgb555);
-                this.Controls.Add(this.panels[i]);
-            }
-
-            //setup backgrounds
-
-            this.panels[ControlID.HOME_PANEL]._Background = new Bitmap(Constants.PATH + "Backgrounds\\DottedBlack.png");
-            this.panels[ControlID.HOME_PANEL]._BackgroundFile = Constants.PATH + "Backgrounds\\DottedBlack.png";
-            this.panels[ControlID.ABOUT_PANEL]._Background = (Bitmap)this.panels[ControlID.HOME_PANEL]._Background.Clone();
-            this.panels[ControlID.ABOUT_PANEL]._BackgroundFile = Constants.PATH + "Backgrounds\\DottedBlack.png";
-            this.panels[ControlID.SETTINGS_PANEL]._Background = (Bitmap)this.panels[ControlID.HOME_PANEL]._Background.Clone();
-            this.panels[ControlID.SETTINGS_PANEL]._BackgroundFile = Constants.PATH + "Backgrounds\\DottedBlack.png";
-            this.panels[ControlID.ACTIVITY_PANEL]._Background = (Bitmap)this.panels[ControlID.HOME_PANEL]._Background.Clone();
-            this.panels[ControlID.ACTIVITY_PANEL]._BackgroundFile = Constants.PATH + "Backgrounds\\DottedBlack.png";
-
-            this.panels[ControlID.MODELS_PANEL].BackColor = Color.FromArgb(250, 237, 221);
-            this.panels[ControlID.MODELS_PANEL]._ClearCanvas = true;
-            this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL].BackColor = Color.FromArgb(250, 237, 221);
-            this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL]._ClearCanvas = true;
-            this.panels[ControlID.ANNOTATION_BUTTON_PANEL].BackColor = Color.FromArgb(250, 237, 221);
-            this.panels[ControlID.ANNOTATION_BUTTON_PANEL]._ClearCanvas = true;
-            this.panels[ControlID.CLASSIFICATION_PANEL].BackColor = Color.FromArgb(250, 237, 221);
-            this.panels[ControlID.CLASSIFICATION_PANEL]._ClearCanvas = true;
-            this.panels[ControlID.EE_PANEL].BackColor = Color.FromArgb(250, 237, 221);
-            this.panels[ControlID.EE_PANEL]._ClearCanvas = true;
-
-
-
-
-            #region Activity Panel
-            AddButton(ControlID.ACTIVITY_PANEL, ControlID.MEASURE_ACTIVITY_BUTTON, "Buttons\\MeasureActivityPressed-200.png", "Buttons\\MeasureActivityUnpressed-200.png", (Screen.PrimaryScreen.WorkingArea.Width-200)/2, 100 , 200, "Measure Activity", ButtonType.Fixed);
-            AddButton(ControlID.ACTIVITY_PANEL, ControlID.ANNOTATE_ACTIVITY_BUTTON, "Buttons\\AnnotatePressed-200.png", "Buttons\\AnnotateUnpressed-200.png", (Screen.PrimaryScreen.WorkingArea.Width - 200) / 2, 400, 200, "Annotate Activity", ButtonType.Fixed);
-            AddButton(ControlID.ACTIVITY_PANEL, ControlID.HOME_ACTIVITY_BUTTON, "Buttons\\HomePressed-128.png", "Buttons\\HomeUnpressed-128.png", 0, this.Height - 130, 128, null, ButtonType.Fixed);
-            #endregion Activity Panel
-
-            #region Annotation Protocols Panel
-            //Setup the annotation protcols list
-            annotationProtocolsList = new ListView();
-            annotationProtocolsList.Location = new System.Drawing.Point(72, 44);
-            annotationProtocolsList.BackColor = Color.White;
-            annotationProtocolsList.ForeColor = Color.Black;
-            annotationProtocolsList.View = View.List;
-            annotationProtocolsList.Name = "annotationProtocolsList";
-            annotationProtocolsList.Size = new System.Drawing.Size(100, 100);
-            annotationProtocolsList.TabIndex = 0;
-            annotationProtocolsList.SelectedIndexChanged += new EventHandler(annotationProtocolsList_SelectedIndexChanged);
-            //adjust top label size and location
-            annotationLabel = new Label();
-            annotationLabel.Width = (int)(Screen.PrimaryScreen.WorkingArea.Width * 0.90);
-            annotationLabel.Height = (int)(Screen.PrimaryScreen.WorkingArea.Width * 0.15);
-            annotationLabel.Location = new Point(2, 2);
-            //Load the activity protocols from the master directory
-            this.aProtocols = new AnnotationProtocolList();
-            this.aProtocols.FromXML(Constants.PATH + "Master\\ActivityProtocols.xml");
-            string longest_label = "";
-            for (int i = 0; (i < this.aProtocols.Count); i++)
-            {
-                annotationProtocolsList.Items.Add(new ListViewItem(this.aProtocols[i]._Name));
-                if (longest_label.Length < this.aProtocols[i]._Name.Length)
-                    longest_label = this.aProtocols[i]._Name;
-            }
-
-            //Listbox dynamic placement
-            annotationProtocolsList.Width = (int)(Screen.PrimaryScreen.WorkingArea.Width * 0.90);
-            annotationProtocolsList.Height = (int)(Screen.PrimaryScreen.WorkingArea.Height * 0.60);
-            annotationProtocolsList.Font = new Font(GUIHelper.FONT_FAMILY, 14F, this.Font.Style);
-            annotationProtocolsList.Location = new Point((int)(Screen.PrimaryScreen.WorkingArea.Width * 0.05), (int)annotationLabel.Location.Y + annotationLabel.Height + 2);
-            this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL].Controls.Add(annotationProtocolsList);
-
-            //add save features checkbox
-            saveFeatures = new CheckBox();
-            saveFeatures.Size = new Size(600, 50);
-            saveFeatures.Text = "Learn and Annotate";
-            saveFeatures.BackColor = Color.FromArgb(250, 237, 221); 
-            saveFeatures.ForeColor = Color.Black;
-            saveFeatures.Font = new Font(FontFamily.GenericSerif, 14.0f, System.Drawing.FontStyle.Bold);
-            saveFeatures.Visible = true;
-            saveFeatures.Location = new Point(10, annotationProtocolsList.Location.Y + annotationProtocolsList.Height + 10);
-            saveFeatures.CheckState = CheckState.Checked;
-            saveFeatures.CheckStateChanged += new EventHandler(saveFeatures_CheckStateChanged);
-            this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL].Controls.Add(saveFeatures);
-
-            //add annotation label
-            annotationLabel.Size = new Size(Screen.PrimaryScreen.WorkingArea.Width, 50);
-            annotationLabel.Text = "Choose a protocol";
-            annotationLabel.BackColor = Color.FromArgb(250, 237, 221);
-            annotationLabel.Font = new Font(FontFamily.GenericSerif, 14.0f, System.Drawing.FontStyle.Bold);
-            annotationLabel.Visible = true;
-            annotationLabel.Location = new Point((int)(Screen.PrimaryScreen.WorkingArea.Width * 0.05), 10);
-            this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL].Controls.Add(annotationLabel);
-
-            //add a button to start
-            startAnnnotationButton = new Button();
-            startAnnnotationButton.Size = new Size(400, 80);
-            startAnnnotationButton.Text = "Begin Annotation";
-            startAnnnotationButton.BackColor = Color.LightGray;
-            startAnnnotationButton.ForeColor = Color.Black;
-            startAnnnotationButton.Font = new Font(FontFamily.GenericSerif, 14.0f, System.Drawing.FontStyle.Bold);
-            startAnnnotationButton.Enabled = false;
-            startAnnnotationButton.Visible = true;
-            startAnnnotationButton.Click += new EventHandler(startAnnnotationButton_Click);
-            startAnnnotationButton.Location = new Point(Screen.PrimaryScreen.WorkingArea.Width / 2 - 200, saveFeatures.Location.Y + saveFeatures.Height + 10);
-            this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL].Controls.Add(startAnnnotationButton);
-
-            AddButton(ControlID.ANNOTATION_PROTCOLS_PANEL, ControlID.HOME_ANNOTATION_PROTOCOL_BUTTON, "Buttons\\HomePressed-128.png", "Buttons\\HomeUnpressed-128.png", 0, this.Height - 130, 128, null, ButtonType.Fixed);
-            #endregion Annotation Protocols Panel
-
-            #region Models Panel
-            //Setup the annotation protcols list
-            modelsList = new ListView();
-            modelsList.Location = new System.Drawing.Point(72, 44);
-            modelsList.View = View.List;
-            modelsList.Name = "modelsList";
-            modelsList.BackColor = Color.White;
-            modelsList.ForeColor = Color.Black;
-            modelsList.Size = new System.Drawing.Size(100, 100);
-            modelsList.TabIndex = 0;
-            modelsList.SelectedIndexChanged += new EventHandler(modelsList_SelectedIndexChanged);
-            //adjust top label size and location
-            modelLabel = new Label();
-            modelLabel.Width = (int)(Screen.PrimaryScreen.WorkingArea.Width * 0.90);
-            modelLabel.Height = (int)(Screen.PrimaryScreen.WorkingArea.Width * 0.15);
-            modelLabel.Location = new Point(2, 2);
-   
-
-            //Listbox dynamic placement
-            modelsList.Width = (int)(Screen.PrimaryScreen.WorkingArea.Width * 0.90);
-            modelsList.Height = (int)(Screen.PrimaryScreen.WorkingArea.Height * 0.60);
-            modelsList.Font = new Font(GUIHelper.FONT_FAMILY, 14F, this.Font.Style);
-            modelsList.Location = new Point((int)(Screen.PrimaryScreen.WorkingArea.Width * 0.05), (int)modelLabel.Location.Y + modelLabel.Height + 2);
-            this.panels[ControlID.MODELS_PANEL].Controls.Add(modelsList);
-
-
-            //add annotation label
-            modelLabel.Size = new Size(Screen.PrimaryScreen.WorkingArea.Width, 50);
-            modelLabel.Text = "Select a learning profile";
-            modelLabel.BackColor = Color.FromArgb(250, 237, 221);
-            modelLabel.Font = new Font(FontFamily.GenericSerif, 14.0f, System.Drawing.FontStyle.Bold);
-            modelLabel.Visible = true;
-            modelLabel.Location = new Point((int)(Screen.PrimaryScreen.WorkingArea.Width * 0.05), 10);
-            this.panels[ControlID.MODELS_PANEL].Controls.Add(modelLabel);
-
-            //add a button to start
-            startMeasuringButton = new Button();
-            startMeasuringButton.Size = new Size(400, 80);
-            startMeasuringButton.Text = "Begin Measuring";
-            startMeasuringButton.BackColor = Color.LightGray;
-            startMeasuringButton.ForeColor = Color.Black;
-            startMeasuringButton.Font = new Font(FontFamily.GenericSerif, 14.0f, System.Drawing.FontStyle.Bold);
-            startMeasuringButton.Enabled = false;
-            startMeasuringButton.Visible = true;
-            startMeasuringButton.Click += new EventHandler(startMeasuringButton_Click);
-            startMeasuringButton.Location = new Point(Screen.PrimaryScreen.WorkingArea.Width / 2 - 200, modelsList.Location.Y + modelsList.Height + 10);
-            this.panels[ControlID.MODELS_PANEL].Controls.Add(startMeasuringButton);
-
-            AddButton(ControlID.MODELS_PANEL , ControlID.HOME_MODELS_BUTTON, "Buttons\\HomePressed-128.png", "Buttons\\HomeUnpressed-128.png", 0, this.Height - 130, 128, null, ButtonType.Fixed);
-            #endregion Models Panel
-
-            #region Annotation Buttons Panel
-            this.panels[ControlID.ANNOTATION_BUTTON_PANEL].AutoScroll = true;
-            this.chooseActivityLabel = new AlphaLabel();
-            this.chooseActivityLabel.Size = new Size(500, 40);
-            this.chooseActivityLabel.Text = "Choose your activity";
-            this.chooseActivityLabel.ForeColor = Color.Black;
-            this.chooseActivityLabel.Font = new Font(FontFamily.GenericSerif, 10.0f, System.Drawing.FontStyle.Bold);
-            this.chooseActivityLabel.Visible = true;
-            this.chooseActivityLabel.Location = new Point(1, 1);
-            this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Controls.Add(this.chooseActivityLabel);
-
-            this.examplesLabel = new Label();
-            this.examplesLabel.Size = new Size(100, 30);
-            this.examplesLabel.Text = "00:00";
-            this.examplesLabel.ForeColor = Color.Black;
-            this.examplesLabel.Font = new Font(FontFamily.GenericSerif, 10.0f, System.Drawing.FontStyle.Bold);
-            this.examplesLabel.Visible = true;
-            this.examplesLabel.Location = new Point(130, this.Height - 100);
-            this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Controls.Add(this.examplesLabel);
-
-            doneAnnotation = new Button();
-            MakeButtonMultiline(doneAnnotation);
-            doneAnnotation.Size = new Size(200, 80);
-            doneAnnotation.Text = "Stop\nLearning";
-            doneAnnotation.Font = new Font(FontFamily.GenericSerif, 10.0f, System.Drawing.FontStyle.Bold);
-            doneAnnotation.Enabled = true;
-            doneAnnotation.Visible = true;
-            doneAnnotation.Click += new EventHandler(doneAnnotation_Click);
-            doneAnnotation.Location = new Point(250, this.Height - 110);
-            this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Controls.Add(doneAnnotation);
-            
-            AddButton(ControlID.ANNOTATION_BUTTON_PANEL, ControlID.HOME_ANNOTATION_BUTTON_BUTTON, "Buttons\\HomePressed-128.png", "Buttons\\HomeUnpressed-128.png", 0, this.Height - 130, 128, null, ButtonType.Fixed);
-            //AddButton(ControlID.ANNOTATION_BUTTON_PANEL, ControlID.FINISH_ANNOTATION_BUTTON_BUTTON, "Buttons\\StopPressed-128.png", "Buttons\\StopUnpressed-128.png", 300, this.Height - 130, 128, null, ButtonType.Fixed);
-            #endregion Annotation Buttons Panel
-
-
-
-
-
-            #region Classification Panel
-            this.bestGuessLabel = new AlphaLabel();
-            this.bestGuessLabel.Size = new Size(500, 60);
-            this.bestGuessLabel.Text = "Activity Classification";
-            this.bestGuessLabel.ForeColor = Color.Black;
-            this.bestGuessLabel.Font = new Font(FontFamily.GenericSerif, 14.0f, System.Drawing.FontStyle.Bold);
-            this.bestGuessLabel.Visible = true;
-            this.bestGuessLabel.Location = new Point(1, 1);
-            this.panels[ControlID.CLASSIFICATION_PANEL].Controls.Add(this.bestGuessLabel);
-            doneClassifying = new Button();
-            doneClassifying.Size = new Size(300, 80);
-            doneClassifying.Text = "Stop Measuring";
-            doneClassifying.Font = new Font(FontFamily.GenericSerif, 12.0f, System.Drawing.FontStyle.Bold);
-            doneClassifying.Enabled = true;
-            doneClassifying.Visible = true;
-            doneClassifying.Click += new EventHandler(doneClassifying_Click);
-            doneClassifying.Location = new Point(150, this.Height - 100);
-            this.panels[ControlID.CLASSIFICATION_PANEL].Controls.Add(doneClassifying);
-            AddButton(ControlID.CLASSIFICATION_PANEL, ControlID.HOME_CLASSIFICATION_BUTTON, "Buttons\\HomePressed-128.png", "Buttons\\HomeUnpressed-128.png", 0, this.Height - 130, 128, null, ButtonType.Fixed);            
-            #endregion Classification Panel
-
-
-
-            #region EE Panel
- 
-
-          /*  GpStatusPlus stat = NativeMethods.GdiplusStartup(out token, input, out output);
-            pieChart = new Charts.twodimensional.PieChart();
-            pieChart.Location = new Point(0, 0);
-            pieChart.Size = new Size(200, 200);
-            pieChart.IsStretch = true;
-            //pieChart.SetCalories(10, 5);
-            pieChart.SetActivity("No Activity");
-            Hashtable activities = new Hashtable();
-            activities.Add("Biceps Curls", 10);
-            activities.Add("Jumping Jacks", 10);
-            activities.Add("Walking", 10);
-            activities.Add("Running", 10);
-            activities.Add("Empty", 60 );
-
-            pieChart.Data = activities;
-            pieChart.Invalidate();
-            
-
-            this.panels[ControlID.EE_PANEL].Controls.Add(pieChart);
-            */
-            this.activityTimer = new ATimer();           
-            doneEE = new Button();
-            doneEE.Size = new Size(300, 80);
-            doneEE.Text = "Done";
-            doneEE.Font = new Font(FontFamily.GenericSerif, 12.0f, System.Drawing.FontStyle.Bold);
-            doneEE.Enabled = true;
-            doneEE.Visible = true;
-            doneEE.Click += new EventHandler(doneEE_Click);
-            doneEE.Location = new Point(150, this.Height - 100);
-            this.panels[ControlID.EE_PANEL].Controls.Add(doneEE);
-            AddButton(ControlID.EE_PANEL, ControlID.HOME_EE_BUTTON, "Buttons\\HomePressed-128.png", "Buttons\\HomeUnpressed-128.png", 0, this.Height - 130, 128, null, ButtonType.Fixed);
-            #endregion EE Panel
-
-            //Main Page
-            //Home Screen Bottom  Buttons
-            //Line 1
-            AddButton(ControlID.HOME_PANEL, ControlID.SETTINGS_BUTTON, "Buttons\\SettingsPressed.png", "Buttons\\SettingsUnpressed.png", 0, this.Height - 130, 128, null,ButtonType.Fixed);
-            AddButton(ControlID.HOME_PANEL, ControlID.MINIMIZE_BUTTON, "Buttons\\MinimizePressed.png", "Buttons\\MinimizeUnpressed.png", 160, this.Height - 130, 128,  null, ButtonType.Fixed);
-            AddButton(ControlID.HOME_PANEL, ControlID.RESET_BUTTON, "Buttons\\TurnOffPressed.png", "Buttons\\TurnOffUnpressed.png", 310, this.Height - 130, 128,  null, ButtonType.Fixed);
-            
-            
-
-            //Home Screen Buttons
-            //Line 1
-            AddButton(ControlID.HOME_PANEL, ControlID.LINE_CHART_BUTTON, "Buttons\\LineChartPressed.png", "Buttons\\LineChartUnpressed.png", 0, 50, 128, "Plot", ButtonType.Fixed);
-            AddButton(ControlID.HOME_PANEL, ControlID.ACTIVITY_BUTTON, "Buttons\\ActivityPressed-128.png", "Buttons\\ActivityUnpressed-128.png", 160, 50, 128, "Activity", ButtonType.Fixed);
-
-            //Line 2            
-            AddButton(ControlID.HOME_PANEL, ControlID.CONNECT_BUTTON, "Buttons\\DisconnectUnpressed-128.png", "Buttons\\ConnectUnpressed-128.png", 310, 50, 128, "Connect", ButtonType.Alternating);
-            AddButton(ControlID.HOME_PANEL, ControlID.KERNEL_BUTTON, "Buttons\\StopKernelUnpressed-128.png", "Buttons\\StartKernelUnpressed-128.png", 0, 210, 128, "Start Kernel", ButtonType.Alternating);
-
-
-            //Add top status bar information
-            statusLabel = new AlphaLabel();
-            statusLabel.Size = new Size(300, 35);
-            statusLabel.Text = "Kernel Stopped";
-            statusLabel.ForeColor = Color.FromArgb(250, 237, 221);
-            statusLabel.Font = new Font(FontFamily.GenericSerif, 8.0f, System.Drawing.FontStyle.Bold);
-            statusLabel.Visible = true;
-            statusLabel.Location = new Point(1, 1);
-            this.panels[ControlID.HOME_PANEL].Controls.Add(statusLabel);
-
-            //Settings Bottom  Buttons
-            AddButton(ControlID.SETTINGS_PANEL, ControlID.BACK_BUTTON, "Buttons\\BackPressed.png", "Buttons\\BackUnpressed.png", 310, this.Height - 130, 128, null, ButtonType.Fixed);
-
-            //Settings Buttons
-            AddButton(ControlID.SETTINGS_PANEL, ControlID.BLUETOOTH_BUTTON, "Buttons\\BluetoothPressed.png", "Buttons\\BluetoothUnpressed.png", 0, 50, 128,  "Wockets", ButtonType.Fixed);
-            AddButton(ControlID.SETTINGS_PANEL, ControlID.SOUND_BUTTON, "Buttons\\SoundPressed.png", "Buttons\\SoundUnpressed.png", 160, 50, 128, "Sound",  ButtonType.Fixed);
-
-            //Wockets Screen
-
-            AddButton(ControlID.WOCKETS_PANEL, ControlID.WOCKETS_BACK_BUTTON, "Buttons\\Back48Pressed.png", "Buttons\\Back48Unpressed.png", 400, this.Height - 48, 48, null, ButtonType.Fixed);
-            AddButton(ControlID.WOCKETS_PANEL, ControlID.WOCKETS_UP_BUTTON, "Buttons\\Up48Pressed.png", "Buttons\\Up48Unpressed.png", 250, this.Height - 48, 48,  null, ButtonType.Fixed);
-            AddButton(ControlID.WOCKETS_PANEL, ControlID.WOCKETS_DOWN_BUTTON, "Buttons\\Down48Pressed.png", "Buttons\\Down48Unpressed.png", 180, this.Height - 48, 48, null, ButtonType.Fixed);
-            AddButton(ControlID.WOCKETS_PANEL, ControlID.WOCKETS_RELOAD_BUTTON, "Buttons\\BluetoothReloadPressed-48.png", "Buttons\\BluetoothReloadUnpressed-48.png", 20, this.Height - 48, 48, null,  ButtonType.Fixed);
-            
-
-            wocketsList = new WocketSlidingList();                                         
-            wocketsList.Size = new Size(Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height);            
-            wocketsList.Location = new Point(0, 0);        
-            this.panels[ControlID.WOCKETS_PANEL].Controls.Add(wocketsList);
-            wocketsList.BringToFront();                     
-
-
-            //Wockets Configuration Panel
-
-//            AddButton(ControlID.WOCKETS_CONFIGURATION_PANEL, ControlID.WOCKETS_CONFIGURATIONS_BLUETOOTH_BUTTON, "Buttons\\BluetoothUnpressed-64.png", "Buttons\\BluetoothPressed-64.png", 0, this.Height - 64, 64, null, ButtonType.Fixed);
- //           AddButton(ControlID.WOCKETS_CONFIGURATION_PANEL, ControlID.WOCKETS_CONFIGURATIONS_COMMAND_BUTTON, "Buttons\\CommandPressed-64.png", "Buttons\\CommandUnpressed-64.png", 80, this.Height - 64, 64, null, ButtonType.Fixed);
-   //         AddButton(ControlID.WOCKETS_CONFIGURATION_PANEL, ControlID.WOCKETS_CONFIGURATIONS_TIMERS_BUTTON, "Buttons\\TimerPressed-64.png", "Buttons\\TimerUnpressed-64.png", 160, this.Height - 64, 64, null, ButtonType.Fixed);
-     //       AddButton(ControlID.WOCKETS_CONFIGURATION_PANEL, ControlID.WOCKETS_CONFIGURATIONS_STATUS_BUTTON, "Buttons\\StatusPressed-64.png", "Buttons\\StatusUnpressed-64.png", 240, this.Height - 64, 64, null, ButtonType.Fixed);
-       //     AddButton(ControlID.WOCKETS_CONFIGURATION_PANEL, ControlID.WOCKETS_CONFIGURATIONS_INFORMATION_BUTTON, "Buttons\\InformationPressed-64.png", "Buttons\\InformationUnpressed-64.png", 320, this.Height - 64, 64, null, ButtonType.Fixed);
-         //   AddButton(ControlID.WOCKETS_CONFIGURATION_PANEL, ControlID.WOCKETS_CONFIGURATIONS_BACK_BUTTON, "Buttons\\Back64Pressed.png", "Buttons\\Back64Unpressed.png", 400, this.Height - 64, 64, null,  ButtonType.Fixed);
-            bluetoothPanel = new Panel();
-            bluetoothPanel.Size = new Size(Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height);
-            bluetoothPanel.Visible = true;
-            bluetoothPanel.BackColor = Color.FromArgb(245, 219, 186);
-            bluetoothName = new Label();
-            bluetoothName.Location = new Point(10, 10);
-            bluetoothName.Size = new Size(250, 40);
-            bluetoothName.Font = new Font(FontFamily.GenericSansSerif, 14.0f, System.Drawing.FontStyle.Underline | System.Drawing.FontStyle.Bold);
-            bluetoothPanel.Controls.Add(bluetoothName);
-            this.panels[ControlID.WOCKETS_CONFIGURATION_PANEL].Controls.Add(bluetoothPanel);            
-
-            //Plotter Panel
-            AddButton(ControlID.PLOTTER_PANEL, ControlID.WOCKETS_BACK_BUTTON, "Buttons\\Back48Pressed.png", "Buttons\\Back48Unpressed.png", 400, this.Height - 48, 48, null, ButtonType.Fixed);
-            plotterPanel = new Panel();
-            plotterPanel.Size = new Size(Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height);
-            plotterPanel.Visible = true;
-            plotterPanel.BackColor = Color.FromArgb(250, 237, 221);//Color.FromArgb(245, 219, 186);
-            plotterPanel.Paint += new PaintEventHandler(plotterPanel_Paint);
-            plotterTimer = new System.Windows.Forms.Timer();
-            plotterTimer.Interval = 50;
-            plotterTimer.Tick += new EventHandler(plotterTimer_Tick);
-           
-            this.panels[ControlID.PLOTTER_PANEL].Controls.Add(plotterPanel);            
-
-
-            for (int i = 0; (i < ControlID.NUMBER_PANELS); i++)
-            {
-                //cache panels with drawn backgrounds
-                //this._backBuffers[i] = new Bitmap(480, 640, PixelFormat.Format32bppRgb);
-                if (this.panels[i]._Background != null)
-                {
-                    Graphics offscreen = Graphics.FromImage(this.panels[i]._Backbuffer);
-                    offscreen.DrawImage(this.panels[i]._Background, 0, 0);
-                }
-                this.panels[i].Initialize();
-            }
-                                 
-            this.panels[currentPanel].Location = new Point(0, 0);
-            this.panels[currentPanel].Update();
-            this.panels[currentPanel].Visible = true;
-
-            this.Deactivate += new EventHandler(Form1_Deactivate);
-            this.Activated += new EventHandler(Form1_Activated);
-
-
-
-        }
-
-        void doneEE_Click(object sender, EventArgs e)
-        {
-            if (MessageBox.Show("Are you done measuring?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
-            {
-                this.activityStatus = ActivityStatus.None;
-                this.panels[ControlID.HOME_PANEL].Visible = true;
-                //this.panels[ControlID.EE_PANEL].Visible = false;
-                this.panels[ControlID.CLASSIFICATION_PANEL].Visible = false;
-                this.currentPanel = ControlID.HOME_PANEL;
-            }
-        }
-
-        void doneClassifying_Click(object sender, EventArgs e)
-        {
-            if (MessageBox.Show("Are you done measuring?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
-            {    
-                this.activityStatus = ActivityStatus.None;
-
-                for (int i = 0; i < activityButtons.Count; i++)
-                {
-                    System.Windows.Forms.Button[] activityList = (System.Windows.Forms.Button[])activityButtons[i];
-                    for (int j = 0; j < activityList.Length; j++)
-                        this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Controls.Remove(activityList[j]);
-                }
-                foreach (Label l in classifiedLabels.Values)
-                    this.panels[ControlID.CLASSIFICATION_PANEL].Controls.Remove(l);  
-
-                activityButtons.Clear();
-                this.panels[ControlID.HOME_PANEL].Visible = true;
-                this.panels[ControlID.CLASSIFICATION_PANEL].Visible = false;
-                this.currentPanel = ControlID.HOME_PANEL;
-                //if (this.saveFeatures.Checked)
-                CleanupML();
-                //remove all existing labels
-                
-                
-            }
-        }
-
+        #region Classification Related Functions
 
         double totalCalories = 0.0;
         double prevHrs;
@@ -1078,6 +1285,8 @@ namespace WocketsApplication
                     
                     ((Label)this.classifiedLabels[activity]).ForeColor = Color.FromArgb((int)(250 * color), (int)(237 * color), (int)(221 * color));
                     ((Label)this.classifiedLabels[activity]).Invalidate();
+
+                    #region commented
                     /*if (prevActivity != activity)
                     {
                         ((AlphaPictureBox)this.activityPictures[activity]).Visible = true;
@@ -1106,6 +1315,9 @@ namespace WocketsApplication
                     //pieChart.SetActivity(activity);                    
                     //pieChart.Invalidate();
                     //this.panels[ControlID.EE_PANEL].Invalidate();
+                    #endregion
+
+
                 }
             }
 
@@ -1129,9 +1341,13 @@ namespace WocketsApplication
             string previousActivity = "";
             int missedExtractions = 0;
             bool extracted = false;
+
+
             lastTotalSamples = new long[CurrentWockets._Controller._Decoders.Count];
             last_extracted = new int[CurrentWockets._Controller._Decoders.Count];
             no_fv_iterations = new int[CurrentWockets._Controller._Decoders.Count];
+
+
             while (true)
             {
 
@@ -1359,6 +1575,12 @@ namespace WocketsApplication
             }
         }
 
+        #endregion
+
+
+
+        #region Activity Prediction Related Functions
+ 
         private string modelDirectory = "";
         private Hashtable classifiedLabels;
         private Hashtable activityPictures;
@@ -1466,6 +1688,10 @@ namespace WocketsApplication
             }
 
             classifiedLabels = new Hashtable();
+
+
+
+            #region commented
             /*
             activityPictures = new Hashtable();
 
@@ -1609,6 +1835,10 @@ namespace WocketsApplication
             classifiedLabels.Add("reps", label);
             this.panels[ControlID.CLASSIFICATION_PANEL].Controls.Add(label);
             */
+            #endregion 
+
+
+
 
             //add the labels to the interface
             int yLocation=40;
@@ -1706,6 +1936,13 @@ namespace WocketsApplication
                 ((CheckBox)sender).Text = "Annotate Only";
             _SaveFeatures = ((CheckBox)sender).Checked;
         }
+
+
+        #endregion
+
+
+        #region Annotation Related Functions
+
         private Session annotatedSession;
         private int selectedActivityProtocol=-1;
         private ActivityStatus activityStatus= ActivityStatus.None;
@@ -1734,6 +1971,8 @@ namespace WocketsApplication
             int newStyle = SetWindowLong(hwnd, GWL_STYLE, currentStyle | BS_MULTILINE);
         }
 
+
+        //truncate text if labels text is too long
         private String truncateText(String text)
         {
 
@@ -1777,6 +2016,7 @@ namespace WocketsApplication
 
             return final;
         }
+
 
         ArrayList selectedButtons = new ArrayList();
         char[] delimiter = { '_' };
@@ -1868,9 +2108,6 @@ namespace WocketsApplication
 
         }
 
-
-     
-       
         void startAnnnotationButton_Click(object sender, EventArgs e)
         {
 
@@ -2059,862 +2296,736 @@ namespace WocketsApplication
             //throw new NotImplementedException();
         }
 
-        void plotterTimer_Tick(object sender, EventArgs e)
-        {
-            if (plotter != null)
+
+        #endregion 
+
+
+        #region Mouse Click Handler
+
+            void owner_MouseUp(object sender, MouseEventArgs e)
             {
-                if (backBuffer == null) // || (isResized))
+                //if ((pushed)&& (clientArea.Contains(e.X, e.Y)))                   
+                //    timeAnimation_Tick();            
+                //this.pushed = false;
+
+                if (this.panels[currentPanel]._UnpressedButtonControls != null)
                 {
-                    backBuffer = new Bitmap(plotterPanel.Width, (int)(plotterPanel.Height));
-                }
-                using (Graphics g = Graphics.FromImage(backBuffer))
-                {
-
-                    plotter.Draw(g);
-                    g.Dispose();
-
-                }
-            }
-        }
-
-        private Bitmap backBuffer = null;
-        private System.Windows.Forms.Timer plotterTimer=null;
-
-        void plotterPanel_Paint(object sender, PaintEventArgs e)
-        {
-            if (plotterPanel.Visible)
-            {
-                if (backBuffer != null)
-                    e.Graphics.DrawImage(backBuffer, 0, 0);
-            }
-        }
-
-        void Form1_Activated(object sender, EventArgs e)
-        {
-            ScreenUtils.ShowTaskBar(false);
-            ScreenUtils.ShowTrayBar(false);
-        }
-
-        void Form1_Deactivate(object sender, EventArgs e)
-        {
-            ScreenUtils.ShowTaskBar(true);        
-        }
-
-
-        void owner_MouseUp(object sender, MouseEventArgs e)
-        {
-
-            //if ((pushed)&& (clientArea.Contains(e.X, e.Y)))                   
-            //    timeAnimation_Tick();            
-            //this.pushed = false;
-      
-            if (this.panels[currentPanel]._UnpressedButtonControls != null)
-            {
-                for (int i = 0; (i < this.panels[currentPanel]._UnpressedButtonControls.Length); i++)
-                {
-                    if ((this.panels[currentPanel]._ButtonType[i]== ButtonType.Fixed) && (this.panels[currentPanel]._ButtonPressed[i]))
+                    for (int i = 0; (i < this.panels[currentPanel]._UnpressedButtonControls.Length); i++)
                     {
-                        this.panels[currentPanel]._UnpressedButtonControls[i].Visible = true;
-                        this.panels[currentPanel]._PressedButtonControls[i].Visible = false;
-                        this.panels[currentPanel]._ButtonPressed[i] = false;
-                    }
-  
-                }
-            }
-        }
-
-
-        void owner_MouseDown(object sender, MouseEventArgs e)
-        {
-            Control p = (Control)sender;
-            if (!p.Enabled)
-                return;
-
-            if ((!pushed)  && (this.slidingPanels.Contains(currentPanel)))
-            {
-                if (e.X < (Screen.PrimaryScreen.WorkingArea.Width / 3))
-                {
-                    this.currentTransition = Transitions.LEFT_TO_RIGHT;
-                    this.pushed = true;
-                    this.clientArea = new Rectangle((Screen.PrimaryScreen.WorkingArea.Width / 2), e.Y - (Screen.PrimaryScreen.WorkingArea.Height / 5), Screen.PrimaryScreen.WorkingArea.Width, (Screen.PrimaryScreen.WorkingArea.Height / 5) * 2);
-                }
-                else if (e.X > (Screen.PrimaryScreen.WorkingArea.Width * (2 / 3)))
-                {
-                    this.currentTransition = Transitions.RIGHT_TO_LEFT;
-                    this.pushed = true;
-                    this.clientArea = new Rectangle(0, e.Y - (Screen.PrimaryScreen.WorkingArea.Height / 5), (Screen.PrimaryScreen.WorkingArea.Width  / 2), (Screen.PrimaryScreen.WorkingArea.Height / 5) * 2);
-                }
-            }
-
-
-            if (this.panels[currentPanel]._UnpressedButtonControls != null)
-            {
-                for (int i = 0; (i < this.panels[currentPanel]._UnpressedButtonControls.Length); i++)
-                {
-
-                    if (this.panels[currentPanel]._UnpressedButtonControls[i].HitTest(e.X, e.Y))
-                    {
-                        if ((this.panels[currentPanel]._ButtonType[i]== ButtonType.Fixed) && (!this.panels[currentPanel]._ButtonPressed[i]))
+                        if ((this.panels[currentPanel]._ButtonType[i] == ButtonType.Fixed) && (this.panels[currentPanel]._ButtonPressed[i]))
                         {
-                            this.panels[currentPanel]._PressedButtonControls[i].Size = new Size(this.panels[currentPanel]._ButtonSize[i], this.panels[currentPanel]._ButtonSize[i]);
+                            this.panels[currentPanel]._UnpressedButtonControls[i].Visible = true;
+                            this.panels[currentPanel]._PressedButtonControls[i].Visible = false;
+                            this.panels[currentPanel]._ButtonPressed[i] = false;
+                        }
+
+                    }
+                }
+            }
+
+            void owner_MouseDown(object sender, MouseEventArgs e)
+            {
+                Control p = (Control)sender;
+                if (!p.Enabled)
+                    return;
+
+                if ((!pushed) && (this.slidingPanels.Contains(currentPanel)))
+                {
+                    if (e.X < (Screen.PrimaryScreen.WorkingArea.Width / 3))
+                    {
+                        this.currentTransition = Transitions.LEFT_TO_RIGHT;
+                        this.pushed = true;
+                        this.clientArea = new Rectangle((Screen.PrimaryScreen.WorkingArea.Width / 2), e.Y - (Screen.PrimaryScreen.WorkingArea.Height / 5), Screen.PrimaryScreen.WorkingArea.Width, (Screen.PrimaryScreen.WorkingArea.Height / 5) * 2);
+                    }
+                    else if (e.X > (Screen.PrimaryScreen.WorkingArea.Width * (2 / 3)))
+                    {
+                        this.currentTransition = Transitions.RIGHT_TO_LEFT;
+                        this.pushed = true;
+                        this.clientArea = new Rectangle(0, e.Y - (Screen.PrimaryScreen.WorkingArea.Height / 5), (Screen.PrimaryScreen.WorkingArea.Width / 2), (Screen.PrimaryScreen.WorkingArea.Height / 5) * 2);
+                    }
+                }
+
+
+                if (this.panels[currentPanel]._UnpressedButtonControls != null)
+                {
+                    for (int i = 0; (i < this.panels[currentPanel]._UnpressedButtonControls.Length); i++)
+                    {
+
+                        if (this.panels[currentPanel]._UnpressedButtonControls[i].HitTest(e.X, e.Y))
+                        {
+                            if ((this.panels[currentPanel]._ButtonType[i] == ButtonType.Fixed) && (!this.panels[currentPanel]._ButtonPressed[i]))
+                            {
+                                this.panels[currentPanel]._PressedButtonControls[i].Size = new Size(this.panels[currentPanel]._ButtonSize[i], this.panels[currentPanel]._ButtonSize[i]);
                                 this.panels[currentPanel]._PressedButtonControls[i].Visible = true;
                                 this.panels[currentPanel]._UnpressedButtonControls[i].Visible = false;
                                 this.panels[currentPanel]._ButtonPressed[i] = true;
                                 this.panels[currentPanel]._PressedButtonControls[i].Refresh();
+                            }
+                        }
+                        else if ((this.panels[currentPanel]._ButtonType[i] == ButtonType.Fixed) && (this.panels[currentPanel]._ButtonPressed[i]))
+                        {
+                            this.panels[currentPanel]._UnpressedButtonControls[i].Size = new Size(this.panels[currentPanel]._ButtonSize[i], this.panels[currentPanel]._ButtonSize[i]);
+                            this.panels[currentPanel]._UnpressedButtonControls[i].Visible = true;
+                            this.panels[currentPanel]._PressedButtonControls[i].Visible = false;
+                            this.panels[currentPanel]._ButtonPressed[i] = false;
+                            this.panels[currentPanel]._UnpressedButtonControls[i].Refresh();
+
                         }
                     }
-                    else if ((this.panels[currentPanel]._ButtonType[i]== ButtonType.Fixed) && (this.panels[currentPanel]._ButtonPressed[i]))
-                    {
-                        this.panels[currentPanel]._UnpressedButtonControls[i].Size = new Size(this.panels[currentPanel]._ButtonSize[i], this.panels[currentPanel]._ButtonSize[i]);
-                        this.panels[currentPanel]._UnpressedButtonControls[i].Visible = true;
-                        this.panels[currentPanel]._PressedButtonControls[i].Visible = false;                       
-                        this.panels[currentPanel]._ButtonPressed[i] = false;
-                        this.panels[currentPanel]._UnpressedButtonControls[i].Refresh();
-
-                    }
                 }
+                this.Refresh();
+
             }
-            this.Refresh();
+
+            private void wocketClickHandler(object sender, EventArgs e)
+            {
+                WocketListItem wi = (WocketListItem)sender;
+                int name = Convert.ToInt32(wi.Name);
+                if ((wi.AddHitTest(wi.LastX, wi.LastY)) && !selectedWockets.Contains(wi))
+                {
+                    selectedWockets.Add(wi);
+                    wi.BackColor = Color.FromArgb(205, 183, 158);
+                }
+                else if (wi.RemoveHitTest(wi.LastX, wi.LastY) && selectedWockets.Contains(wi))
+                {
+                    selectedWockets.Remove(wi);
+                    wi.BackColor = Color.FromArgb(245, 219, 186);
+                }
+                selectedWockets.Sort();
+                /* else                        
+                 {
+                     bluetoothName.Text = wi._Name;                
+                     this.panels[ControlID.WOCKETS_CONFIGURATION_PANEL].Visible = true;
+                     this.panels[ControlID.WOCKETS_PANEL].Visible = false;
+                     currentPanel = ControlID.WOCKETS_CONFIGURATION_PANEL;
+                 }*/
+            }
             
-        }
+            public delegate void ClickHandler(object sender, EventArgs e);
 
 
-        private void wocketClickHandler(object sender, EventArgs e)
-        {
-            WocketListItem wi = (WocketListItem)sender;
-            int name = Convert.ToInt32(wi.Name);
-            if ( (wi.AddHitTest(wi.LastX, wi.LastY)) && !selectedWockets.Contains(wi))
-            {
-                selectedWockets.Add(wi);
-                wi.BackColor = Color.FromArgb(205,183,158);
-            }
-            else if (wi.RemoveHitTest(wi.LastX, wi.LastY) && selectedWockets.Contains(wi))
-            {
-                selectedWockets.Remove(wi);
-                wi.BackColor = Color.FromArgb(245, 219, 186);
-            }
-            selectedWockets.Sort();
-           /* else                        
-            {
-                bluetoothName.Text = wi._Name;                
-                this.panels[ControlID.WOCKETS_CONFIGURATION_PANEL].Visible = true;
-                this.panels[ControlID.WOCKETS_PANEL].Visible = false;
-                currentPanel = ControlID.WOCKETS_CONFIGURATION_PANEL;
-            }*/
-        }
-        public delegate void ClickHandler(object sender, EventArgs e);
-        private double clickTime = 0;
-        private Thread startupThread;
 
-        private void LoadWockets()
-        {
+            private double clickTime = 0;
+            private Thread startupThread;
 
-            if (!Core._KernalStarted)
+            private void clickHandler(object sender, EventArgs e)
             {
-                if (!Core.Start())
-                    MessageBox.Show("Failed to start kernel");
-                else
-                    Thread.Sleep(5000);
-            }
-            else
-            {
-                //Make sure no kernels are running
-                if (Core.Terminate())
+                AlphaPictureBox p = (AlphaPictureBox)sender;
+
+
+
+                int name = Convert.ToInt32(p.Name);
+                #region Activity Panel
+                if (currentPanel == ControlID.ACTIVITY_PANEL)
                 {
-                    if (!Core.Start())
-                        MessageBox.Show("Failed to start kernel");
-                    else
-                        Thread.Sleep(5000);
-                }
-                else
-                    MessageBox.Show("Failed to shutdown kernel");
-
-            }
-
-            Thread.Sleep(5000);
-            Core.Ping();
-        }
-        private void clickHandler(object sender, EventArgs e)
-        {
-            AlphaPictureBox p = (AlphaPictureBox)sender;
-
-
-
-            int name = Convert.ToInt32(p.Name);
-            #region Activity Panel
-            if (currentPanel == ControlID.ACTIVITY_PANEL)
-            {
-                if (name == ControlID.HOME_ACTIVITY_BUTTON)
-                {
-
-                    this.panels[ControlID.HOME_PANEL].Visible = true;
-                    this.panels[currentPanel].Visible = false;
-                    this.currentPanel = ControlID.HOME_PANEL;
-
-                }
-                else if (name == ControlID.MEASURE_ACTIVITY_BUTTON)
-                {
-                    this.panels[currentPanel].Visible = false;
-                    this.panels[ControlID.MODELS_PANEL].Location = new Point(0, 0);
-                    this.panels[ControlID.MODELS_PANEL].BringToFront();
-                    this.panels[ControlID.MODELS_PANEL].Visible = true;
-                    this.panels[ControlID.MODELS_PANEL].Dock = DockStyle.None;
-
-                    //Load the most recent models list before showing the models panel
-                    modelsList.Clear();
-                    this.aModels = new AnnotationProtocolList();                    
-                    if (File.Exists(Constants.PATH + "models.xml"))
+                    if (name == ControlID.HOME_ACTIVITY_BUTTON)
                     {
-                        this.aModels.FromXML(Constants.PATH + "models.xml");   
-                        for (int i = 0; (i < this.aModels.Count); i++)                        
-                            modelsList.Items.Add(new ListViewItem(this.aModels[i]._Name));                        
+
+                        this.panels[ControlID.HOME_PANEL].Visible = true;
+                        this.panels[currentPanel].Visible = false;
+                        this.currentPanel = ControlID.HOME_PANEL;
+
                     }
-
-                    this.currentPanel = ControlID.MODELS_PANEL;
-                }
-                else if (name == ControlID.ANNOTATE_ACTIVITY_BUTTON)
-                {
-                    this.panels[currentPanel].Visible = false;
-                    this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL].Location = new Point(0, 0);
-                    this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL].BringToFront();
-                    this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL].Visible = true;
-                    this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL].Dock = DockStyle.None;
-                    this.currentPanel = ControlID.ANNOTATION_PROTCOLS_PANEL;
-                }
-            }
-            #endregion Activity Panel
-
-            #region Annotation Protocols Panel
-            else if (currentPanel == ControlID.MODELS_PANEL)
-            {
-                if (name == ControlID.HOME_ANNOTATION_PROTOCOL_BUTTON)
-                {
-                    this.panels[ControlID.HOME_PANEL].Visible = true;
-                    this.panels[currentPanel].Visible = false;
-                    this.currentPanel = ControlID.HOME_PANEL;
-                }
-            }
-            #endregion Annotation Protocols Panel
-
-            #region Annotation Protocols Panel
-            else if (currentPanel == ControlID.ANNOTATION_PROTCOLS_PANEL)
-            {
-                if (name == ControlID.HOME_ANNOTATION_PROTOCOL_BUTTON)
-                {
-                    this.panels[ControlID.HOME_PANEL].Visible = true;
-                    this.panels[currentPanel].Visible = false;
-                    this.currentPanel = ControlID.HOME_PANEL;
-                }
-            }
-            #endregion Annotation Protocols Panel
-
-            #region Annotation Button Panel
-            else if (currentPanel == ControlID.ANNOTATION_BUTTON_PANEL)
-            {
-                if (name == ControlID.HOME_ANNOTATION_BUTTON_BUTTON)
-                {
-                    this.panels[ControlID.HOME_PANEL].Visible = true;
-                    this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Visible = false;
-                    this.currentPanel = ControlID.HOME_PANEL;
-                }
-            }
-            #endregion Annotation Button Panel
-
-            #region Classification Panel
-            else if (currentPanel == ControlID.CLASSIFICATION_PANEL)
-            {
-                if (name == ControlID.HOME_CLASSIFICATION_BUTTON)
-                {
-                    this.panels[ControlID.HOME_PANEL].Visible = true;
-                    this.panels[ControlID.CLASSIFICATION_PANEL].Visible = false;
-                    this.currentPanel = ControlID.HOME_PANEL;
-                }
-            }
-            #endregion Classification Panel
-            #region EE Panel
-            else if (currentPanel == ControlID.EE_PANEL)
-            {
-                if (name == ControlID.HOME_EE_BUTTON)
-                {
-                    this.panels[ControlID.HOME_PANEL].Visible = true;
-                    this.panels[ControlID.EE_PANEL].Visible = false;
-                    this.currentPanel = ControlID.HOME_PANEL;
-                }
-            }
-            #endregion EE Panel
-            else if (currentPanel == ControlID.WOCKETS_PANEL)
-            {
-                if (name == ControlID.WOCKETS_BACK_BUTTON)
-                {                    
-                    //this.panels[ControlID.SETTINGS_PANEL].Visible = true;
-                    this.panels[ControlID.HOME_PANEL].Visible = true;
-                    this.panels[ControlID.WOCKETS_PANEL].Visible = false;
-                    currentPanel = ControlID.HOME_PANEL;
-                    ArrayList s = new ArrayList();
-                    for (int i = 0; (i < selectedWockets.Count); i++)
+                    else if (name == ControlID.MEASURE_ACTIVITY_BUTTON)
                     {
-                        s.Add(((WocketListItem)selectedWockets[i])._MacAddress);
-                    }
-                    Core.SetSensors(s);
-                    //Core.SetSensorsAsync(s);
-                }
-                else if (name == ControlID.WOCKETS_UP_BUTTON)
-                    wocketsList.MoveDown();
-                else if (name == ControlID.WOCKETS_DOWN_BUTTON)
-                    wocketsList.MoveUp();
-                else if (name == ControlID.WOCKETS_RELOAD_BUTTON)
-                {
-                    wocketsList._Location = 0;
-                    wocketsList.Controls.Clear();     
-                    wocketsList._Status = "Searching for Wockets...";
-                    wocketsList.Refresh();
-                    Core.Discover();
-                }
-  
-            }
-            else if (currentPanel == ControlID.WOCKETS_CONFIGURATION_PANEL)
-            {
-                if (name == ControlID.WOCKETS_CONFIGURATIONS_BACK_BUTTON)
-                {
+                        this.panels[currentPanel].Visible = false;
+                        this.panels[ControlID.MODELS_PANEL].Location = new Point(0, 0);
+                        this.panels[ControlID.MODELS_PANEL].BringToFront();
+                        this.panels[ControlID.MODELS_PANEL].Visible = true;
+                        this.panels[ControlID.MODELS_PANEL].Dock = DockStyle.None;
 
-                    this.panels[ControlID.WOCKETS_PANEL].Visible = true;
-                    this.panels[ControlID.WOCKETS_CONFIGURATION_PANEL].Visible = false;
-                    this.currentPanel = ControlID.WOCKETS_PANEL;
-                }
-
-            }
-
-            else if (currentPanel == ControlID.HOME_PANEL)
-            {
-                if (name == ControlID.MINIMIZE_BUTTON)
-                {
-                    ShowWindow(this.Handle, SW_MINIMIZED);
-                }
-                else if (name == ControlID.KERNEL_BUTTON)
-                {
-                    if (!this.panels[currentPanel]._ButtonPressed[ControlID.KERNEL_BUTTON])
-                    {
-
-
-                        statusLabel.Text = "Kernel Starting...";
-                        this.panels[currentPanel]._UnpressedButtonControls[ControlID.KERNEL_BUTTON].Enabled = false;
-                        this.panels[currentPanel]._PressedButtonControls[ControlID.KERNEL_BUTTON].Size = new Size(128, 128);
-                        this.panels[currentPanel]._PressedButtonControls[ControlID.KERNEL_BUTTON].Visible = true;
-                        this.panels[currentPanel]._UnpressedButtonControls[ControlID.KERNEL_BUTTON].Visible = false;
-                        this.panels[currentPanel]._ButtonText[ControlID.KERNEL_BUTTON].Text = "Stop Kernel";
-                        this.panels[currentPanel]._ButtonPressed[ControlID.KERNEL_BUTTON] = true;
-                        this.Refresh();
-
-
-
-                        Core.SubscribeEvent(KernelResponse.STARTED, EventListener);
-                        Core.SubscribeEvent(KernelResponse.REGISTERED, EventListener);
-                        Core.SubscribeEvent(KernelResponse.UNREGISTERED, EventListener);
-                        Core.SubscribeEvent(KernelResponse.STOPPED, EventListener);
-                        Core.SubscribeEvent(KernelResponse.DISCOVERED, EventListener);
-                        Core.SubscribeEvent(KernelResponse.CONNECTED, EventListener);
-                        Core.SubscribeEvent(KernelResponse.DISCONNECTED, EventListener);
-                        Core.SubscribeEvent(KernelResponse.SENSORS_UPDATED, EventListener);
-                        Core.SubscribeEvent(KernelResponse.PING_RESPONSE, EventListener);
-                        startupThread = new Thread(new ThreadStart(LoadWockets));
-                        startupThread.Start();
-                        
-                    }
-                    else
-                    {
-
-                        if ((WocketsTimer.GetUnixTime() - clickTime) < 3000)
-                            return;
-                        if (MessageBox.Show("Are you sure you want to stop wockets kernel?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
+                        //Load the most recent models list before showing the models panel
+                        modelsList.Clear();
+                        this.aModels = new AnnotationProtocolList();                    
+                        if (File.Exists(Constants.PATH + "models.xml"))
                         {
-                            this.panels[currentPanel]._PressedButtonControls[ControlID.KERNEL_BUTTON].Enabled = false;
-                            this.panels[currentPanel]._UnpressedButtonControls[ControlID.KERNEL_BUTTON].Size = new Size(128, 128);
-                            this.panels[currentPanel]._UnpressedButtonControls[ControlID.KERNEL_BUTTON].Visible = true;
-                            //this.panels[currentPanel]._UnpressedButtonControls[ControlID.KERNEL_BUTTON].BringToFront();
-                            this.panels[currentPanel]._PressedButtonControls[ControlID.KERNEL_BUTTON].Visible = false;
-                            this.panels[currentPanel]._ButtonText[ControlID.KERNEL_BUTTON].Text = "Start Kernel";
-                            this.panels[currentPanel]._ButtonPressed[ControlID.KERNEL_BUTTON] = false;
+                            this.aModels.FromXML(Constants.PATH + "models.xml");   
+                            for (int i = 0; (i < this.aModels.Count); i++)                        
+                                modelsList.Items.Add(new ListViewItem(this.aModels[i]._Name));                        
+                        }
+
+                        this.currentPanel = ControlID.MODELS_PANEL;
+                    }
+                    else if (name == ControlID.ANNOTATE_ACTIVITY_BUTTON)
+                    {
+                        this.panels[currentPanel].Visible = false;
+                        this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL].Location = new Point(0, 0);
+                        this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL].BringToFront();
+                        this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL].Visible = true;
+                        this.panels[ControlID.ANNOTATION_PROTCOLS_PANEL].Dock = DockStyle.None;
+                        this.currentPanel = ControlID.ANNOTATION_PROTCOLS_PANEL;
+                    }
+                }
+                #endregion Activity Panel
+
+                #region Annotation Protocols Panel
+                else if (currentPanel == ControlID.MODELS_PANEL)
+                {
+                    if (name == ControlID.HOME_ANNOTATION_PROTOCOL_BUTTON)
+                    {
+                        this.panels[ControlID.HOME_PANEL].Visible = true;
+                        this.panels[currentPanel].Visible = false;
+                        this.currentPanel = ControlID.HOME_PANEL;
+                    }
+                }
+                #endregion Annotation Protocols Panel
+
+                #region Annotation Protocols Panel
+                else if (currentPanel == ControlID.ANNOTATION_PROTCOLS_PANEL)
+                {
+                    if (name == ControlID.HOME_ANNOTATION_PROTOCOL_BUTTON)
+                    {
+                        this.panels[ControlID.HOME_PANEL].Visible = true;
+                        this.panels[currentPanel].Visible = false;
+                        this.currentPanel = ControlID.HOME_PANEL;
+                    }
+                }
+                #endregion Annotation Protocols Panel
+
+                #region Annotation Button Panel
+                else if (currentPanel == ControlID.ANNOTATION_BUTTON_PANEL)
+                {
+                    if (name == ControlID.HOME_ANNOTATION_BUTTON_BUTTON)
+                    {
+                        this.panels[ControlID.HOME_PANEL].Visible = true;
+                        this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Visible = false;
+                        this.currentPanel = ControlID.HOME_PANEL;
+                    }
+                }
+                #endregion Annotation Button Panel
+
+                #region Classification Panel
+                else if (currentPanel == ControlID.CLASSIFICATION_PANEL)
+                {
+                    if (name == ControlID.HOME_CLASSIFICATION_BUTTON)
+                    {
+                        this.panels[ControlID.HOME_PANEL].Visible = true;
+                        this.panels[ControlID.CLASSIFICATION_PANEL].Visible = false;
+                        this.currentPanel = ControlID.HOME_PANEL;
+                    }
+                }
+                #endregion Classification Panel
+                #region EE Panel
+                else if (currentPanel == ControlID.EE_PANEL)
+                {
+                    if (name == ControlID.HOME_EE_BUTTON)
+                    {
+                        this.panels[ControlID.HOME_PANEL].Visible = true;
+                        this.panels[ControlID.EE_PANEL].Visible = false;
+                        this.currentPanel = ControlID.HOME_PANEL;
+                    }
+                }
+                #endregion EE Panel
+                else if (currentPanel == ControlID.WOCKETS_PANEL)
+                {
+                    if (name == ControlID.WOCKETS_BACK_BUTTON)
+                    {                    
+                        //this.panels[ControlID.SETTINGS_PANEL].Visible = true;
+                        this.panels[ControlID.HOME_PANEL].Visible = true;
+                        this.panels[ControlID.WOCKETS_PANEL].Visible = false;
+                        currentPanel = ControlID.HOME_PANEL;
+                        ArrayList s = new ArrayList();
+                        for (int i = 0; (i < selectedWockets.Count); i++)
+                        {
+                            s.Add(((WocketListItem)selectedWockets[i])._MacAddress);
+                        }
+                        Core.SetSensors(s);
+                        //Core.SetSensorsAsync(s);
+                    }
+                    else if (name == ControlID.WOCKETS_UP_BUTTON)
+                        wocketsList.MoveDown();
+                    else if (name == ControlID.WOCKETS_DOWN_BUTTON)
+                        wocketsList.MoveUp();
+                    else if (name == ControlID.WOCKETS_RELOAD_BUTTON)
+                    {
+                        wocketsList._Location = 0;
+                        wocketsList.Controls.Clear();     
+                        wocketsList._Status = "Searching for Wockets...";
+                        wocketsList.Refresh();
+                        Core.Discover();
+                    }
+      
+                }
+                else if (currentPanel == ControlID.WOCKETS_CONFIGURATION_PANEL)
+                {
+                    if (name == ControlID.WOCKETS_CONFIGURATIONS_BACK_BUTTON)
+                    {
+
+                        this.panels[ControlID.WOCKETS_PANEL].Visible = true;
+                        this.panels[ControlID.WOCKETS_CONFIGURATION_PANEL].Visible = false;
+                        this.currentPanel = ControlID.WOCKETS_PANEL;
+                    }
+
+                }
+
+                else if (currentPanel == ControlID.HOME_PANEL)
+                {
+                    if (name == ControlID.MINIMIZE_BUTTON)
+                    {
+                        ShowWindow(this.Handle, SW_MINIMIZED);
+                    }
+                    else if (name == ControlID.KERNEL_BUTTON)
+                    {
+                        if (!this.panels[currentPanel]._ButtonPressed[ControlID.KERNEL_BUTTON])
+                        {
 
 
-                            if (Core._KernalStarted)
+                            statusLabel.Text = "Kernel Starting...";
+                            this.panels[currentPanel]._UnpressedButtonControls[ControlID.KERNEL_BUTTON].Enabled = false;
+                            this.panels[currentPanel]._PressedButtonControls[ControlID.KERNEL_BUTTON].Size = new Size(128, 128);
+                            this.panels[currentPanel]._PressedButtonControls[ControlID.KERNEL_BUTTON].Visible = true;
+                            this.panels[currentPanel]._UnpressedButtonControls[ControlID.KERNEL_BUTTON].Visible = false;
+                            this.panels[currentPanel]._ButtonText[ControlID.KERNEL_BUTTON].Text = "Stop Kernel";
+                            this.panels[currentPanel]._ButtonPressed[ControlID.KERNEL_BUTTON] = true;
+                            this.Refresh();
+
+
+
+                            Core.SubscribeEvent(KernelResponse.STARTED, EventListener);
+                            Core.SubscribeEvent(KernelResponse.REGISTERED, EventListener);
+                            Core.SubscribeEvent(KernelResponse.UNREGISTERED, EventListener);
+                            Core.SubscribeEvent(KernelResponse.STOPPED, EventListener);
+                            Core.SubscribeEvent(KernelResponse.DISCOVERED, EventListener);
+                            Core.SubscribeEvent(KernelResponse.CONNECTED, EventListener);
+                            Core.SubscribeEvent(KernelResponse.DISCONNECTED, EventListener);
+                            Core.SubscribeEvent(KernelResponse.SENSORS_UPDATED, EventListener);
+                            Core.SubscribeEvent(KernelResponse.PING_RESPONSE, EventListener);
+                            startupThread = new Thread(new ThreadStart(LoadWockets));
+                            startupThread.Start();
+                            
+                        }
+                        else
+                        {
+
+                            if ((WocketsTimer.GetUnixTime() - clickTime) < 3000)
+                                return;
+                            if (MessageBox.Show("Are you sure you want to stop wockets kernel?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
                             {
-
-                                if (soundThread != null)
-                                {
-                                    soundThread.Abort();
-                                    soundThread = null;
-                                }
-                                
-                                Core.Disconnect();
-                                Core._Connected = false;
-                                Core._Registered = false;
-                                selectedWockets.Clear();                              
-                                Core.Terminate();
-
-                                plotter = null;
-                                this.selectedActivityProtocol = -1;
-                                this.annotatedSession = null;
-                                this.activityStatus = ActivityStatus.None;
-                                for (int i = 0; i < activityButtons.Count; i++)
-                                {
-                                    System.Windows.Forms.Button[] activityList = (System.Windows.Forms.Button[])activityButtons[i];
-                                    for (int j = 0; j < activityList.Length; j++)
-                                        this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Controls.Remove(activityList[j]);
-                                }
-                                activityButtons.Clear();                 
-                                CleanupML();
+                                this.panels[currentPanel]._PressedButtonControls[ControlID.KERNEL_BUTTON].Enabled = false;
+                                this.panels[currentPanel]._UnpressedButtonControls[ControlID.KERNEL_BUTTON].Size = new Size(128, 128);
                                 this.panels[currentPanel]._UnpressedButtonControls[ControlID.KERNEL_BUTTON].Visible = true;
+                                //this.panels[currentPanel]._UnpressedButtonControls[ControlID.KERNEL_BUTTON].BringToFront();
                                 this.panels[currentPanel]._PressedButtonControls[ControlID.KERNEL_BUTTON].Visible = false;
                                 this.panels[currentPanel]._ButtonText[ControlID.KERNEL_BUTTON].Text = "Start Kernel";
                                 this.panels[currentPanel]._ButtonPressed[ControlID.KERNEL_BUTTON] = false;
 
-                                this.panels[currentPanel]._PressedButtonControls[ControlID.CONNECT_BUTTON].Enabled = false;
-                                this.panels[currentPanel]._UnpressedButtonControls[ControlID.CONNECT_BUTTON].Size = new Size(128, 128);
-                                this.panels[currentPanel]._UnpressedButtonControls[ControlID.CONNECT_BUTTON].Visible = true;
-                                this.panels[currentPanel]._PressedButtonControls[ControlID.CONNECT_BUTTON].Visible = false;
-                                this.panels[currentPanel]._ButtonText[ControlID.CONNECT_BUTTON].Text = "Connect";
-                                this.panels[currentPanel]._ButtonPressed[ControlID.CONNECT_BUTTON] = false;
-                                this.panels[currentPanel]._UnpressedButtonControls[ControlID.CONNECT_BUTTON].Enabled = true;
 
+                                if (Core._KernalStarted)
+                                {
+
+                                    if (soundThread != null)
+                                    {
+                                        soundThread.Abort();
+                                        soundThread = null;
+                                    }
+                                    
+                                    Core.Disconnect();
+                                    Core._Connected = false;
+                                    Core._Registered = false;
+                                    selectedWockets.Clear();                              
+                                    Core.Terminate();
+
+                                    plotter = null;
+                                    this.selectedActivityProtocol = -1;
+                                    this.annotatedSession = null;
+                                    this.activityStatus = ActivityStatus.None;
+                                    for (int i = 0; i < activityButtons.Count; i++)
+                                    {
+                                        System.Windows.Forms.Button[] activityList = (System.Windows.Forms.Button[])activityButtons[i];
+                                        for (int j = 0; j < activityList.Length; j++)
+                                            this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Controls.Remove(activityList[j]);
+                                    }
+                                    activityButtons.Clear();                 
+                                    CleanupML();
+                                    this.panels[currentPanel]._UnpressedButtonControls[ControlID.KERNEL_BUTTON].Visible = true;
+                                    this.panels[currentPanel]._PressedButtonControls[ControlID.KERNEL_BUTTON].Visible = false;
+                                    this.panels[currentPanel]._ButtonText[ControlID.KERNEL_BUTTON].Text = "Start Kernel";
+                                    this.panels[currentPanel]._ButtonPressed[ControlID.KERNEL_BUTTON] = false;
+
+                                    this.panels[currentPanel]._PressedButtonControls[ControlID.CONNECT_BUTTON].Enabled = false;
+                                    this.panels[currentPanel]._UnpressedButtonControls[ControlID.CONNECT_BUTTON].Size = new Size(128, 128);
+                                    this.panels[currentPanel]._UnpressedButtonControls[ControlID.CONNECT_BUTTON].Visible = true;
+                                    this.panels[currentPanel]._PressedButtonControls[ControlID.CONNECT_BUTTON].Visible = false;
+                                    this.panels[currentPanel]._ButtonText[ControlID.CONNECT_BUTTON].Text = "Connect";
+                                    this.panels[currentPanel]._ButtonPressed[ControlID.CONNECT_BUTTON] = false;
+                                    this.panels[currentPanel]._UnpressedButtonControls[ControlID.CONNECT_BUTTON].Enabled = true;
+
+                                }
+                                this.panels[currentPanel]._UnpressedButtonControls[ControlID.KERNEL_BUTTON].Enabled = true;
+                                statusLabel.Text = "Kernel Stopped";                  
                             }
-                            this.panels[currentPanel]._UnpressedButtonControls[ControlID.KERNEL_BUTTON].Enabled = true;
-                            statusLabel.Text = "Kernel Stopped";                  
                         }
+
                     }
-
-                }
-  
-                else if (name == ControlID.ACTIVITY_BUTTON)
-                {
-                    if (Core._Connected)
-                    {
-                        if (this.activityStatus == ActivityStatus.Annotating)
-                        {
-                            this.panels[currentPanel].Visible = false;
-                            this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Location = new Point(0, 0);
-                            this.panels[ControlID.ANNOTATION_BUTTON_PANEL].BringToFront();
-                            this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Visible = true;
-                            this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Dock = DockStyle.None;
-                            this.currentPanel = ControlID.ANNOTATION_BUTTON_PANEL;
-                        }
-                        else if (this.activityStatus == ActivityStatus.Measuring)
-                        {
-                            this.panels[currentPanel].Visible = false;
-                            this.panels[ControlID.CLASSIFICATION_PANEL].Location = new Point(0, 0);
-                            this.panels[ControlID.CLASSIFICATION_PANEL].BringToFront();
-                            this.panels[ControlID.CLASSIFICATION_PANEL].Visible = true;
-                            this.panels[ControlID.CLASSIFICATION_PANEL].Dock = DockStyle.None;
-                            this.currentPanel = ControlID.CLASSIFICATION_PANEL;
-
-                        }
-                        else
-                        {
-                            this.panels[currentPanel].Visible = false;
-                            this.panels[ControlID.ACTIVITY_PANEL].Location = new Point(0, 0);
-                            this.panels[ControlID.ACTIVITY_PANEL].BringToFront();
-                            this.panels[ControlID.ACTIVITY_PANEL].Visible = true;
-                            this.panels[ControlID.ACTIVITY_PANEL].Dock = DockStyle.None;
-                            this.currentPanel = ControlID.ACTIVITY_PANEL;
-                        }
-                    }
-                    else
-                        MessageBox.Show("Please connect to wockets!");
-
-                }
-                else if (name == ControlID.RESET_BUTTON)
-                {
-                    if (MessageBox.Show("Are you sure you want to exit?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
-                    {
-                        
-                        Core.Unregister();
-                        ScreenUtils.ShowTaskBar(true);
-
-
-                        this.selectedActivityProtocol = -1;
-                        this.annotatedSession = null;
-
-                        this.activityStatus = ActivityStatus.None;
-                        //cleanup any annotation buttons
-                        for (int i = 0; i < activityButtons.Count; i++)
-                        {
-                            System.Windows.Forms.Button[] activityList = (System.Windows.Forms.Button[])activityButtons[i];
-                            for (int j = 0; j < activityList.Length; j++)
-                                this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Controls.Remove(activityList[j]);
-                        }
-                        activityButtons.Clear();
-                        
-                        //Cleanup the machine learning buffers if needed
-                        CleanupML();
-                        Core.Terminate();
-                        Application.Exit();
-                        System.Diagnostics.Process.GetCurrentProcess().Kill();
-                    }
-                }
-                else if (name == ControlID.SETTINGS_BUTTON)
-                {
-
-
-                    if (!Core._KernalStarted)
-                        MessageBox.Show("Please start the kernel before changing the settings", "Confirm", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
-                    else
+      
+                    else if (name == ControlID.ACTIVITY_BUTTON)
                     {
                         if (Core._Connected)
-                            MessageBox.Show("Cannot change the settings while connected", "Confirm", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
-                        else
                         {
-
-                            this.panels[ControlID.HOME_PANEL].Visible = false;
-                            this.panels[ControlID.WOCKETS_PANEL].Location = new Point(0, 0);                           
-                            this.panels[ControlID.WOCKETS_PANEL].Visible = true;
-                            this.panels[ControlID.WOCKETS_PANEL].Dock = DockStyle.None;
-                            this.currentPanel = ControlID.WOCKETS_PANEL;
-                            selectedWockets.Clear();
-                            UpdatewWocketsList();
-                        }
-                    }
-
-                }
-                else if (name == ControlID.CONNECT_BUTTON)
-                {
-                    if (Core._KernalStarted)
-                    {
-                        if (Core._Registered)
-                        {
-                            if (selectedWockets.Count != 0)
+                            if (this.activityStatus == ActivityStatus.Annotating)
                             {
+                                this.panels[currentPanel].Visible = false;
+                                this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Location = new Point(0, 0);
+                                this.panels[ControlID.ANNOTATION_BUTTON_PANEL].BringToFront();
+                                this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Visible = true;
+                                this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Dock = DockStyle.None;
+                                this.currentPanel = ControlID.ANNOTATION_BUTTON_PANEL;
+                            }
+                            else if (this.activityStatus == ActivityStatus.Measuring)
+                            {
+                                this.panels[currentPanel].Visible = false;
+                                this.panels[ControlID.CLASSIFICATION_PANEL].Location = new Point(0, 0);
+                                this.panels[ControlID.CLASSIFICATION_PANEL].BringToFront();
+                                this.panels[ControlID.CLASSIFICATION_PANEL].Visible = true;
+                                this.panels[ControlID.CLASSIFICATION_PANEL].Dock = DockStyle.None;
+                                this.currentPanel = ControlID.CLASSIFICATION_PANEL;
 
-                                if (!this.panels[currentPanel]._ButtonPressed[ControlID.CONNECT_BUTTON])
-                                {
-                                    Core.Connect();
-                                    statusLabel.Text = "Connecting...";
-
-                                    this.panels[currentPanel]._UnpressedButtonControls[ControlID.CONNECT_BUTTON].Enabled = false;
-                                    this.panels[currentPanel]._PressedButtonControls[ControlID.CONNECT_BUTTON].Size = new Size(128, 128);
-                                    this.panels[currentPanel]._PressedButtonControls[ControlID.CONNECT_BUTTON].Visible = true;
-                                    this.panels[currentPanel]._UnpressedButtonControls[ControlID.CONNECT_BUTTON].Visible = false;
-                                    this.panels[currentPanel]._ButtonText[ControlID.CONNECT_BUTTON].Text = "Disconnect";
-                                    this.panels[currentPanel]._ButtonPressed[ControlID.CONNECT_BUTTON] = true;
-                                    this.Refresh();
-                                    this.panels[currentPanel]._PressedButtonControls[ControlID.CONNECT_BUTTON].Enabled = true;
-                                    clickTime = WocketsTimer.GetUnixTime();
-                                }
-                                else
-                                {
-                                    if ((WocketsTimer.GetUnixTime() - clickTime) < 3000)
-                                        return;
-                                    if (MessageBox.Show("Are you sure you want to disconnect?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
-                                    {
-                                        if (Core._Connected)
-                                        {
-
-                                            if (soundThread != null)
-                                            {
-                                                soundThread.Abort();
-                                                soundThread = null;
-                                            }
-                                            statusLabel.Text = "Disconnecting...";
-                                            Core._Connected = false;
-                                            selectedWockets.Clear();
-                                            this.selectedActivityProtocol = -1;
-                                            
-                                            this.activityStatus = ActivityStatus.None;
-                                            
-                                            //cleanup any activity buttons
-                                            for (int i = 0; i < activityButtons.Count; i++)
-                                            {
-                                                System.Windows.Forms.Button[] activityList = (System.Windows.Forms.Button[])activityButtons[i];
-                                                for (int j = 0; j < activityList.Length; j++)
-                                                    this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Controls.Remove(activityList[j]);
-                                            }
-                                            activityButtons.Clear();
-
-                                            Core.Disconnect();
-                                            plotter = null;
-                                      
-                                            this.panels[currentPanel]._PressedButtonControls[ControlID.CONNECT_BUTTON].Enabled = false;
-                                            this.panels[currentPanel]._UnpressedButtonControls[ControlID.CONNECT_BUTTON].Size = new Size(128, 128);
-                                            this.panels[currentPanel]._UnpressedButtonControls[ControlID.CONNECT_BUTTON].Visible = true;
-                                            this.panels[currentPanel]._PressedButtonControls[ControlID.CONNECT_BUTTON].Visible = false;
-                                            this.panels[currentPanel]._ButtonText[ControlID.CONNECT_BUTTON].Text = "Connect";
-                                            this.panels[currentPanel]._ButtonPressed[ControlID.CONNECT_BUTTON] = false;
-                                            this.panels[currentPanel]._UnpressedButtonControls[ControlID.CONNECT_BUTTON].Enabled = true;
-                                            statusLabel.Text = "Ready to connect";
-                                        }
-                                                                  
-                                    }
-                                }
                             }
                             else
-                                MessageBox.Show("Please select wockets before connecting", "Confirm", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2);
+                            {
+                                this.panels[currentPanel].Visible = false;
+                                this.panels[ControlID.ACTIVITY_PANEL].Location = new Point(0, 0);
+                                this.panels[ControlID.ACTIVITY_PANEL].BringToFront();
+                                this.panels[ControlID.ACTIVITY_PANEL].Visible = true;
+                                this.panels[ControlID.ACTIVITY_PANEL].Dock = DockStyle.None;
+                                this.currentPanel = ControlID.ACTIVITY_PANEL;
+                            }
                         }
                         else
-                            MessageBox.Show("Application not registered with the kernel", "Confirm", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2);
+                            MessageBox.Show("Please connect to wockets!");
+
                     }
-                    else
-                        MessageBox.Show("Please start the kernel before connecting to the wockets", "Confirm", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2);
-                }
-                else if (name == ControlID.LINE_CHART_BUTTON)
-                {
-                    if (Core._Connected)
+                    else if (name == ControlID.RESET_BUTTON)
                     {
-                        //plotterTimer.Enabled = true;
-                        this.panels[currentPanel].Visible = false;
-                        this.panels[ControlID.PLOTTER_PANEL].Location = new Point(0, 0);
-                        this.panels[ControlID.PLOTTER_PANEL].BringToFront();
-                        this.panels[ControlID.PLOTTER_PANEL].Visible = true;
-                        this.panels[ControlID.PLOTTER_PANEL].Dock = DockStyle.None;
-                        this.currentPanel = ControlID.PLOTTER_PANEL;
-                        //UpdatePlotter();
-                        if (plotter != null)
+                        if (MessageBox.Show("Are you sure you want to exit?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
                         {
-                            plotterTimer.Enabled = false;
-                            plotter.Dispose();
+                            
+                            Core.Unregister();
+                            ScreenUtils.ShowTaskBar(true);
+
+
+                            this.selectedActivityProtocol = -1;
+                            this.annotatedSession = null;
+
+                            this.activityStatus = ActivityStatus.None;
+                            //cleanup any annotation buttons
+                            for (int i = 0; i < activityButtons.Count; i++)
+                            {
+                                System.Windows.Forms.Button[] activityList = (System.Windows.Forms.Button[])activityButtons[i];
+                                for (int j = 0; j < activityList.Length; j++)
+                                    this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Controls.Remove(activityList[j]);
+                            }
+                            activityButtons.Clear();
+                            
+                            //Cleanup the machine learning buffers if needed
+                            CleanupML();
+                            Core.Terminate();
+                            Application.Exit();
+                            System.Diagnostics.Process.GetCurrentProcess().Kill();
                         }
-                        plotterPanel.Size = new Size(Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height);
-                        plotter = new WocketsScalablePlotter(plotterPanel);
-                        plotterPanel.Visible = true;
-                        plotterTimer.Enabled = true;
-                    
+                    }
+                    else if (name == ControlID.SETTINGS_BUTTON)
+                    {
+
+
+                        if (!Core._KernalStarted)
+                            MessageBox.Show("Please start the kernel before changing the settings", "Confirm", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
+                        else
+                        {
+                            if (Core._Connected)
+                                MessageBox.Show("Cannot change the settings while connected", "Confirm", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
+                            else
+                            {
+
+                                this.panels[ControlID.HOME_PANEL].Visible = false;
+                                this.panels[ControlID.WOCKETS_PANEL].Location = new Point(0, 0);                           
+                                this.panels[ControlID.WOCKETS_PANEL].Visible = true;
+                                this.panels[ControlID.WOCKETS_PANEL].Dock = DockStyle.None;
+                                this.currentPanel = ControlID.WOCKETS_PANEL;
+                                selectedWockets.Clear();
+                                UpdatewWocketsList();
+                            }
+                        }
 
                     }
-                    else
-                        MessageBox.Show("Cannot plot without connecting wockets!");
+                    else if (name == ControlID.CONNECT_BUTTON)
+                    {
+                        if (Core._KernalStarted)
+                        {
+                            if (Core._Registered)
+                            {
+                                if (selectedWockets.Count != 0)
+                                {
 
-                }
-                else if (name == ControlID.ACTIVITY_BUTTON)
-                {
-                }
+                                    if (!this.panels[currentPanel]._ButtonPressed[ControlID.CONNECT_BUTTON])
+                                    {
+                                        Core.Connect();
+                                        statusLabel.Text = "Connecting...";
 
-            }
-            else if (currentPanel == ControlID.SETTINGS_PANEL)
-            {
-                if (name == ControlID.BACK_BUTTON)
-                {
-                    this.panels[ControlID.HOME_PANEL].Visible = true;
-                    this.panels[ControlID.SETTINGS_PANEL].Visible = false;
-                    this.currentPanel = ControlID.HOME_PANEL;
-                }
-                else if (name == ControlID.BLUETOOTH_BUTTON)
-                {
-                    if (!Core._KernalStarted)
-                        MessageBox.Show("Please start the kernel before selecting wockets", "Confirm", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
-                    else
+                                        this.panels[currentPanel]._UnpressedButtonControls[ControlID.CONNECT_BUTTON].Enabled = false;
+                                        this.panels[currentPanel]._PressedButtonControls[ControlID.CONNECT_BUTTON].Size = new Size(128, 128);
+                                        this.panels[currentPanel]._PressedButtonControls[ControlID.CONNECT_BUTTON].Visible = true;
+                                        this.panels[currentPanel]._UnpressedButtonControls[ControlID.CONNECT_BUTTON].Visible = false;
+                                        this.panels[currentPanel]._ButtonText[ControlID.CONNECT_BUTTON].Text = "Disconnect";
+                                        this.panels[currentPanel]._ButtonPressed[ControlID.CONNECT_BUTTON] = true;
+                                        this.Refresh();
+                                        this.panels[currentPanel]._PressedButtonControls[ControlID.CONNECT_BUTTON].Enabled = true;
+                                        clickTime = WocketsTimer.GetUnixTime();
+                                    }
+                                    else
+                                    {
+                                        if ((WocketsTimer.GetUnixTime() - clickTime) < 3000)
+                                            return;
+                                        if (MessageBox.Show("Are you sure you want to disconnect?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
+                                        {
+                                            if (Core._Connected)
+                                            {
+
+                                                if (soundThread != null)
+                                                {
+                                                    soundThread.Abort();
+                                                    soundThread = null;
+                                                }
+                                                statusLabel.Text = "Disconnecting...";
+                                                Core._Connected = false;
+                                                selectedWockets.Clear();
+                                                this.selectedActivityProtocol = -1;
+                                                
+                                                this.activityStatus = ActivityStatus.None;
+                                                
+                                                //cleanup any activity buttons
+                                                for (int i = 0; i < activityButtons.Count; i++)
+                                                {
+                                                    System.Windows.Forms.Button[] activityList = (System.Windows.Forms.Button[])activityButtons[i];
+                                                    for (int j = 0; j < activityList.Length; j++)
+                                                        this.panels[ControlID.ANNOTATION_BUTTON_PANEL].Controls.Remove(activityList[j]);
+                                                }
+                                                activityButtons.Clear();
+
+                                                Core.Disconnect();
+                                                plotter = null;
+                                          
+                                                this.panels[currentPanel]._PressedButtonControls[ControlID.CONNECT_BUTTON].Enabled = false;
+                                                this.panels[currentPanel]._UnpressedButtonControls[ControlID.CONNECT_BUTTON].Size = new Size(128, 128);
+                                                this.panels[currentPanel]._UnpressedButtonControls[ControlID.CONNECT_BUTTON].Visible = true;
+                                                this.panels[currentPanel]._PressedButtonControls[ControlID.CONNECT_BUTTON].Visible = false;
+                                                this.panels[currentPanel]._ButtonText[ControlID.CONNECT_BUTTON].Text = "Connect";
+                                                this.panels[currentPanel]._ButtonPressed[ControlID.CONNECT_BUTTON] = false;
+                                                this.panels[currentPanel]._UnpressedButtonControls[ControlID.CONNECT_BUTTON].Enabled = true;
+                                                statusLabel.Text = "Ready to connect";
+                                            }
+                                                                      
+                                        }
+                                    }
+                                }
+                                else
+                                    MessageBox.Show("Please select wockets before connecting", "Confirm", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2);
+                            }
+                            else
+                                MessageBox.Show("Application not registered with the kernel", "Confirm", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2);
+                        }
+                        else
+                            MessageBox.Show("Please start the kernel before connecting to the wockets", "Confirm", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2);
+                    }
+                    else if (name == ControlID.LINE_CHART_BUTTON)
                     {
                         if (Core._Connected)
-                            MessageBox.Show("Cannot change the wockets while connected", "Confirm", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
+                        {
+                            //plotterTimer.Enabled = true;
+                            this.panels[currentPanel].Visible = false;
+                            this.panels[ControlID.PLOTTER_PANEL].Location = new Point(0, 0);
+                            this.panels[ControlID.PLOTTER_PANEL].BringToFront();
+                            this.panels[ControlID.PLOTTER_PANEL].Visible = true;
+                            this.panels[ControlID.PLOTTER_PANEL].Dock = DockStyle.None;
+                            this.currentPanel = ControlID.PLOTTER_PANEL;
+                            //UpdatePlotter();
+                            if (plotter != null)
+                            {
+                                plotterTimer.Enabled = false;
+                                plotter.Dispose();
+                            }
+                            plotterPanel.Size = new Size(Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height);
+                            plotter = new WocketsScalablePlotter(plotterPanel);
+                            plotterPanel.Visible = true;
+                            plotterTimer.Enabled = true;
+                        
+
+                        }
+                        else
+                            MessageBox.Show("Cannot plot without connecting wockets!");
+
+                    }
+                    else if (name == ControlID.ACTIVITY_BUTTON)
+                    {
+                    }
+
+                }
+                else if (currentPanel == ControlID.SETTINGS_PANEL)
+                {
+                    if (name == ControlID.BACK_BUTTON)
+                    {
+                        this.panels[ControlID.HOME_PANEL].Visible = true;
+                        this.panels[ControlID.SETTINGS_PANEL].Visible = false;
+                        this.currentPanel = ControlID.HOME_PANEL;
+                    }
+                    else if (name == ControlID.BLUETOOTH_BUTTON)
+                    {
+                        if (!Core._KernalStarted)
+                            MessageBox.Show("Please start the kernel before selecting wockets", "Confirm", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
                         else
                         {
+                            if (Core._Connected)
+                                MessageBox.Show("Cannot change the wockets while connected", "Confirm", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
+                            else
+                            {
 
-                            this.panels[ControlID.SETTINGS_PANEL].Visible = false;
-                            this.panels[ControlID.WOCKETS_PANEL].Location = new Point(0, 0);
-                            //this.panels[ControlID.WOCKETS_PANEL].BringToFront();                   
-                            this.panels[ControlID.WOCKETS_PANEL].Visible = true;
-                            this.panels[ControlID.WOCKETS_PANEL].Dock = DockStyle.None;
-                            this.currentPanel = ControlID.WOCKETS_PANEL;
-                            selectedWockets.Clear();
-                            UpdatewWocketsList();
+                                this.panels[ControlID.SETTINGS_PANEL].Visible = false;
+                                this.panels[ControlID.WOCKETS_PANEL].Location = new Point(0, 0);
+                                //this.panels[ControlID.WOCKETS_PANEL].BringToFront();                   
+                                this.panels[ControlID.WOCKETS_PANEL].Visible = true;
+                                this.panels[ControlID.WOCKETS_PANEL].Dock = DockStyle.None;
+                                this.currentPanel = ControlID.WOCKETS_PANEL;
+                                selectedWockets.Clear();
+                                UpdatewWocketsList();
+                            }
                         }
                     }
                 }
-            }
-            else if (currentPanel == ControlID.PLOTTER_PANEL)
-            {
-                if (name == ControlID.PLOTTER_BACK_BUTTON)
+                else if (currentPanel == ControlID.PLOTTER_PANEL)
                 {
-                    this.panels[ControlID.HOME_PANEL].Visible = true;
-                    this.panels[ControlID.PLOTTER_PANEL].Visible = false;
-                    this.currentPanel = ControlID.HOME_PANEL;
-                    plotterTimer.Enabled = false;
-                    plotterPanel.Visible = false;
+                    if (name == ControlID.PLOTTER_BACK_BUTTON)
+                    {
+                        this.panels[ControlID.HOME_PANEL].Visible = true;
+                        this.panels[ControlID.PLOTTER_PANEL].Visible = false;
+                        this.currentPanel = ControlID.HOME_PANEL;
+                        plotterTimer.Enabled = false;
+                        plotterPanel.Visible = false;
 
-                    //Core.SetSniff(wocketsKernelGuid, SleepModes.Sleep1Second);
+                        //Core.SetSniff(wocketsKernelGuid, SleepModes.Sleep1Second);
+                    }
                 }
-            }
-      
           
-            this.Refresh();
-        }
-
-
-        delegate void UpdateExamplesCallback();
-        public void UpdateExamples()
-        {
-            if (!disposed)
-            {
-                // InvokeRequired required compares the thread ID of the
-                // calling thread to the thread ID of the creating thread.
-                // If these threads are different, it returns true.
-                if (this.examplesLabel.InvokeRequired)
-                {
-                    UpdateExamplesCallback d = new UpdateExamplesCallback(UpdateExamples);
-                    this.Invoke(d, new object[] { });
-                }
-                else
-                {
-
-                    this.examplesLabel.Text = this.trainingExamples.ToString();
-                }
+              
+                this.Refresh();
             }
 
-        }
 
-        int trainingExamples = 0;
-        double windowLength = 0;
-        long[] lastTotalSamples;
-        int[] last_extracted;
-        int[] no_fv_iterations;
-        private void MLThread()
-        {
+        #endregion 
 
-            int structureFileExamples = 0;
-            string prev_activity = "";          
-            lastTotalSamples = new long[CurrentWockets._Controller._Decoders.Count];
-            last_extracted = new int[CurrentWockets._Controller._Decoders.Count];
-            no_fv_iterations = new int[CurrentWockets._Controller._Decoders.Count];
-            bool extracted = false;
-            while (true)
+
+        #region Plot/Visualization Related functions
+
+            private Bitmap backBuffer = null;
+            private System.Windows.Forms.Timer plotterTimer = null;
+
+            void plotterTimer_Tick(object sender, EventArgs e)
             {
-                string current_activity = "unknown";
-                lock (annotationLock)
+                if (plotter != null)
                 {
-                    if (this.currentRecord != null)
-                        current_activity = this.currentRecord.Activities._CurrentActivity;
-                }
-
-                //Check if each decoder decoded the desired number of samples
-                bool readyFV = true;
-                for (int i = 0; (i < CurrentWockets._Controller._Decoders.Count); i++)
-                {
-                    long numNewSamples = CurrentWockets._Controller._Decoders[i].TotalSamples - lastTotalSamples[i];
-                    if (numNewSamples == 0)
+                    if (backBuffer == null) // || (isResized))
                     {
-                        readyFV = false;
+                        backBuffer = new Bitmap(plotterPanel.Width, (int)(plotterPanel.Height));
                     }
-                    else if (numNewSamples < fv._Length)
+                    using (Graphics g = Graphics.FromImage(backBuffer))
                     {
-                        if (no_fv_iterations[i] > 7) // a disconnection occurred, so reset the window you are looking at
-                        {
-                            //reinitialize all
-                            for (int j = 0; (j < CurrentWockets._Controller._Decoders.Count); j++)
-                                no_fv_iterations[j] = 0;
-                        }
-                        readyFV = false;
-                        no_fv_iterations[i] = no_fv_iterations[i] + 1;
-                        break;
+
+                        plotter.Draw(g);
+                        g.Dispose();
+
                     }
                 }
+            }
 
-                if (!readyFV)
+            void plotterPanel_Paint(object sender, PaintEventArgs e)
+            {
+                if (plotterPanel.Visible)
                 {
-                    Thread.Sleep(1000);
-                    continue;
+                    if (backBuffer != null)
+                        e.Graphics.DrawImage(backBuffer, 0, 0);
                 }
+            }
 
-                extracted = fv.Extract();
 
-                for (int i = 0; (i < CurrentWockets._Controller._Decoders.Count); i++)
-                    lastTotalSamples[i] = CurrentWockets._Controller._Decoders[i].TotalSamples;
+            public override void Refresh()
+            {
+                if (this.panels[currentPanel]._Background != null)
+                {
+                    // AlphaContainer._backBuffer
+                    Graphics offscreen = Graphics.FromImage(this.panels[currentPanel]._Backbuffer);
+                    offscreen.DrawImage(this.panels[currentPanel]._Background, 0, 0);
+                }
+                base.Refresh();
+            }
 
-                if (current_activity != "unknown")
-                {                    
-                    //skip boundary don't use it
-                    if ((prev_activity==current_activity) && (extracted))
+            int m = 0;
+            private void timeAnimation_Tick()
+            {
+                int prevPanelIndex = currentPanelIndex;
+                int prevPanel = slidingPanels[currentPanelIndex];
+                currentPanelIndex++;
+                currentPanelIndex = currentPanelIndex % slidingPanels.Length;
+                currentPanel = slidingPanels[currentPanelIndex];
+                if (this.currentTransition == Transitions.LEFT_TO_RIGHT)
+                {
+                    this.panels[currentPanel].Location = new Point(0 - this.panels[currentPanel].Width, 0);
+                    this.panels[currentPanel].BringToFront();
+                    this.panels[currentPanel].Visible = true;
+
+                    this.panels[currentPanel].Dock = DockStyle.None;
+                    m = 0;
+
+                    for (int x = -480; (x <= 0); x += 100)
+                    // for (int x = Screen.PrimaryScreen.WorkingArea.Width; (x >=0 ); x -= 100)
                     {
-                        string arffSample = fv.toString() + "," + current_activity;
-                        trainingTW.WriteLine(arffSample);
-                        if (structureFileExamples < 10)
-                        {
-                            structureTW.WriteLine(arffSample);
-                            structureFileExamples++;
-                        }
-                        trainingExamples++;
-                        UpdateExamples();        
+                        this.panels[currentPanel].Location = new Point(x, this.panels[currentPanel].Location.Y);
+                        //this.panels[currentPanel]._Backbuffer = this._backBuffers[currentPanel];
+                        this.panels[currentPanel].Update();
                     }
-                    if (prev_activity != current_activity)
-                        trainingExamples = 0;
-                    prev_activity = current_activity;
-           
+
+                    this.panels[currentPanel].Location = new Point(0, this.panels[currentPanel].Location.Y);
+                    this.panels[prevPanel].Visible = false;
                 }
-                Thread.Sleep(1000);
-            }
-        }
-        public override void Refresh()
-        {
-            if (this.panels[currentPanel]._Background != null)
-            {
-               // AlphaContainer._backBuffer
-                Graphics offscreen = Graphics.FromImage(this.panels[currentPanel]._Backbuffer);
-                offscreen.DrawImage(this.panels[currentPanel]._Background, 0, 0);
-            }
-            base.Refresh();
-        }
-        int m = 0;
-
-
-
-
-
-        private void timeAnimation_Tick()
-        {
-            int prevPanelIndex = currentPanelIndex;
-            int prevPanel = slidingPanels[currentPanelIndex];
-            currentPanelIndex++;
-            currentPanelIndex = currentPanelIndex % slidingPanels.Length;
-            currentPanel = slidingPanels[currentPanelIndex];
-            if (this.currentTransition == Transitions.LEFT_TO_RIGHT)
-            {
-                this.panels[currentPanel].Location = new Point(0 - this.panels[currentPanel].Width, 0);
-                this.panels[currentPanel].BringToFront();
-                this.panels[currentPanel].Visible = true;
-
-                this.panels[currentPanel].Dock = DockStyle.None;
-                m = 0;
-
-                for (int x = -480; (x <= 0); x += 100)
-               // for (int x = Screen.PrimaryScreen.WorkingArea.Width; (x >=0 ); x -= 100)
+                else if (this.currentTransition == Transitions.RIGHT_TO_LEFT)
                 {
-                    this.panels[currentPanel].Location = new Point(x, this.panels[currentPanel].Location.Y);
-                    //this.panels[currentPanel]._Backbuffer = this._backBuffers[currentPanel];
-                    this.panels[currentPanel].Update();
+                    this.panels[currentPanel].Location = new Point(0 - this.panels[currentPanel].Width, 0);
+                    this.panels[currentPanel].BringToFront();
+                    this.panels[currentPanel].Visible = true;
+
+                    this.panels[currentPanel].Dock = DockStyle.None;
+                    m = 0;
+
+                    //for (int x = -480; (x <= 0); x += 100)
+                    for (int x = Screen.PrimaryScreen.WorkingArea.Width; (x >= 0); x -= 100)
+                    {
+                        this.panels[currentPanel].Location = new Point(x, this.panels[currentPanel].Location.Y);
+                        //this.panels[currentPanel]._Backbuffer = this._backBuffers[currentPanel];
+                        this.panels[currentPanel].Update();
+                    }
+
+                    this.panels[currentPanel].Location = new Point(0, this.panels[currentPanel].Location.Y);
+                    this.panels[prevPanel].Visible = false;
                 }
-
-                this.panels[currentPanel].Location = new Point(0, this.panels[currentPanel].Location.Y);
-                this.panels[prevPanel].Visible = false;
             }
-            else if (this.currentTransition == Transitions.RIGHT_TO_LEFT)
-            {
-                this.panels[currentPanel].Location = new Point(0 - this.panels[currentPanel].Width, 0);
-                this.panels[currentPanel].BringToFront();
-                this.panels[currentPanel].Visible = true;
 
-                this.panels[currentPanel].Dock = DockStyle.None;
-                m = 0;
 
-                //for (int x = -480; (x <= 0); x += 100)
-                for (int x = Screen.PrimaryScreen.WorkingArea.Width; (x >=0 ); x -= 100)
+            #region commented
+                /* protected override void OnPaintBackground(PaintEventArgs e)
                 {
-                    this.panels[currentPanel].Location = new Point(x, this.panels[currentPanel].Location.Y);
-                    //this.panels[currentPanel]._Backbuffer = this._backBuffers[currentPanel];
-                    this.panels[currentPanel].Update();
-                }
+                // Prevent flicker, we will take care of the background in OnPaint()
+                }*/
+            #endregion
 
-                this.panels[currentPanel].Location = new Point(0, this.panels[currentPanel].Location.Y);
-                this.panels[prevPanel].Visible = false;
+            protected override void OnPaint(PaintEventArgs e)
+            {
+                // this.Invalidate();
+                //SHFullScreen(this.Handle, SHFS_HIDETASKBAR | SHFS_HIDESIPBUTTON | SHFS_HIDESTARTICON);
+                _alphaManager.OnPaint(e);
+
             }
-        }
+
+       #endregion 
 
 
-       /* protected override void OnPaintBackground(PaintEventArgs e)
-        {
-            // Prevent flicker, we will take care of the background in OnPaint()
-        }*/
 
-        protected override void OnPaint(PaintEventArgs e)
-        {          
-           // this.Invalidate();
-            //SHFullScreen(this.Handle, SHFS_HIDETASKBAR | SHFS_HIDESIPBUTTON | SHFS_HIDESTARTICON);
-            _alphaManager.OnPaint(e);
-         
-        }
     }
 }
