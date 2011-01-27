@@ -607,11 +607,13 @@ namespace Wockets
                             this._Polling = false;
 
                             //shutting down BT here causes a strange delay on wakeup.
+                            int btshutdown_counter = 0;
                             while (true)
                             {
+                                btshutdown_counter++;
                                 try
                                 {
-                                    if (Wockets.Utils.network.NetworkStacks._BluetoothStack.Dispose())
+                                    if ((Wockets.Utils.network.NetworkStacks._BluetoothStack.Dispose()) || (btshutdown_counter>5))
                                         break;
                                 }
                                 catch
