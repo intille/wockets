@@ -91,6 +91,8 @@
             this.SensorsStatusButton = new System.Windows.Forms.Button();
             this.UploadDataActionButton = new System.Windows.Forms.Button();
             this.SelectSensorsButton = new System.Windows.Forms.Button();
+            this.textBox_sensors_status_2 = new System.Windows.Forms.TextBox();
+            this.textBox_sensor_location_2 = new System.Windows.Forms.TextBox();
             this.SwapPanel.SuspendLayout();
             this.SensorStatusPanel.SuspendLayout();
             this.ConnectPanel.SuspendLayout();
@@ -143,6 +145,8 @@
             // 
             // SwapPanel
             // 
+            this.SwapPanel.Controls.Add(this.textBox_sensors_status_2);
+            this.SwapPanel.Controls.Add(this.textBox_sensor_location_2);
             this.SwapPanel.Controls.Add(this.textBox_sensors_status_1);
             this.SwapPanel.Controls.Add(this.textBox_sensors_status_0);
             this.SwapPanel.Controls.Add(this.textBox_sensor_location_1);
@@ -159,7 +163,7 @@
             this.textBox_sensors_status_1.BackColor = System.Drawing.Color.White;
             this.textBox_sensors_status_1.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox_sensors_status_1.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold);
-            this.textBox_sensors_status_1.Location = new System.Drawing.Point(107, 109);
+            this.textBox_sensors_status_1.Location = new System.Drawing.Point(105, 71);
             this.textBox_sensors_status_1.Multiline = true;
             this.textBox_sensors_status_1.Name = "textBox_sensors_status_1";
             this.textBox_sensors_status_1.ReadOnly = true;
@@ -173,7 +177,7 @@
             this.textBox_sensors_status_0.BackColor = System.Drawing.Color.White;
             this.textBox_sensors_status_0.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox_sensors_status_0.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold);
-            this.textBox_sensors_status_0.Location = new System.Drawing.Point(107, 84);
+            this.textBox_sensors_status_0.Location = new System.Drawing.Point(105, 53);
             this.textBox_sensors_status_0.Multiline = true;
             this.textBox_sensors_status_0.Name = "textBox_sensors_status_0";
             this.textBox_sensors_status_0.ReadOnly = true;
@@ -188,7 +192,7 @@
             this.textBox_sensor_location_1.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox_sensor_location_1.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold);
             this.textBox_sensor_location_1.ForeColor = System.Drawing.Color.DimGray;
-            this.textBox_sensor_location_1.Location = new System.Drawing.Point(5, 109);
+            this.textBox_sensor_location_1.Location = new System.Drawing.Point(3, 71);
             this.textBox_sensor_location_1.Multiline = true;
             this.textBox_sensor_location_1.Name = "textBox_sensor_location_1";
             this.textBox_sensor_location_1.ReadOnly = true;
@@ -202,7 +206,7 @@
             this.textBox_sensor_location_0.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox_sensor_location_0.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold);
             this.textBox_sensor_location_0.ForeColor = System.Drawing.Color.DimGray;
-            this.textBox_sensor_location_0.Location = new System.Drawing.Point(5, 84);
+            this.textBox_sensor_location_0.Location = new System.Drawing.Point(3, 53);
             this.textBox_sensor_location_0.Multiline = true;
             this.textBox_sensor_location_0.Name = "textBox_sensor_location_0";
             this.textBox_sensor_location_0.ReadOnly = true;
@@ -941,6 +945,34 @@
             this.SelectSensorsButton.Text = "Swap Wockets";
             this.SelectSensorsButton.Click += new System.EventHandler(this.SelectSensorsButton_Click);
             // 
+            // textBox_sensors_status_2
+            // 
+            this.textBox_sensors_status_2.BackColor = System.Drawing.Color.White;
+            this.textBox_sensors_status_2.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textBox_sensors_status_2.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold);
+            this.textBox_sensors_status_2.Location = new System.Drawing.Point(105, 94);
+            this.textBox_sensors_status_2.Multiline = true;
+            this.textBox_sensors_status_2.Name = "textBox_sensors_status_2";
+            this.textBox_sensors_status_2.ReadOnly = true;
+            this.textBox_sensors_status_2.Size = new System.Drawing.Size(118, 21);
+            this.textBox_sensors_status_2.TabIndex = 10;
+            this.textBox_sensors_status_2.Text = "---";
+            this.textBox_sensors_status_2.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // textBox_sensor_location_2
+            // 
+            this.textBox_sensor_location_2.BackColor = System.Drawing.Color.White;
+            this.textBox_sensor_location_2.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textBox_sensor_location_2.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold);
+            this.textBox_sensor_location_2.ForeColor = System.Drawing.Color.DimGray;
+            this.textBox_sensor_location_2.Location = new System.Drawing.Point(3, 94);
+            this.textBox_sensor_location_2.Multiline = true;
+            this.textBox_sensor_location_2.Name = "textBox_sensor_location_2";
+            this.textBox_sensor_location_2.ReadOnly = true;
+            this.textBox_sensor_location_2.Size = new System.Drawing.Size(105, 21);
+            this.textBox_sensor_location_2.TabIndex = 9;
+            this.textBox_sensor_location_2.Text = "2FFFF At Ankle";
+            // 
             // WocketsMainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
@@ -1034,6 +1066,8 @@
         private System.Windows.Forms.Label label_phone_IMEI;
         private System.Windows.Forms.TextBox textBox_sensors_status_1;
         private System.Windows.Forms.TextBox textBox_sensors_status_0;
+        private System.Windows.Forms.TextBox textBox_sensors_status_2;
+        private System.Windows.Forms.TextBox textBox_sensor_location_2;
     }
 }
 
