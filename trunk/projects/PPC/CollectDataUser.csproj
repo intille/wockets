@@ -61,7 +61,7 @@
     <Compile Include="..\..\src\CollectDataUser\WocketsMainForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="..\..\..\..\..\..\Documents and Settings\HouseN\Desktop\WocketsMainForm.Designer.cs">
+    <Compile Include="..\..\src\WocketsMainForm.Designer.cs">
       <DependentUpon>WocketsMainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="..\..\src\CollectDataUser\Program.cs" />
