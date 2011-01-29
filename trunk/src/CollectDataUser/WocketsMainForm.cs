@@ -1146,8 +1146,9 @@ namespace CollectDataUser
                        {
                            Logger.Debug("_KernelStarted variable returned with true value: first attempt");
                            Thread.Sleep(5000);
-                           Core.Ping();
-                           Logger.Debug("Ping Kernel");
+                           //Core.Ping();
+                           Core.Register();
+                           Logger.Debug("Application Registered Kernel");
                            
                            //wait to receive ping
                            wait4response =0;
@@ -1177,8 +1178,9 @@ namespace CollectDataUser
                            {
                                Logger.Debug("_KernelStarted variable returned with true value: second attempt");
                                Thread.Sleep(5000);
-                               Core.Ping();
-                               Logger.Debug("Ping Kernel");
+                               //Core.Ping();
+                               Core.Register();
+                               Logger.Debug("Application Registered Kernel");
 
                                //wait to receive ping
                                wait4response = 0;
@@ -1245,8 +1247,9 @@ namespace CollectDataUser
                                 {
                                     Logger.Debug("Ping responsed received");
                                     UpdateMsg("Ping Received");
-                                    is_kernel_pinged = true;
-                                    Core.Register();
+                                    //is_kernel_pinged = true;
+                                    //Core.Register();
+                                    Core.SetSensors(this.sensors_list);
                                 }
                                 catch(Exception ex)
                                 {
@@ -1258,8 +1261,10 @@ namespace CollectDataUser
                                 try
                                 {
                                     Logger.Debug("Registered finished response received");
-                                    UpdateMsg("Verify Wockets");
-                                    Core.SetSensors(this.sensors_list);
+                                    UpdateMsg("App Registered");
+                                    //Core.SetSensors(this.sensors_list);
+                                    is_kernel_pinged = true;
+                                    Core.Ping();
                                 }
                                 catch(Exception ex)
                                 {
