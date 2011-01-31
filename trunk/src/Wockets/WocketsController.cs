@@ -92,6 +92,8 @@ namespace Wockets
         public string _StorageDirectory;
         private Session annotatedSession;        
         public double StartTime = 0;
+
+
         /// <summary>
         /// Stores the current record that is being annotated
         /// </summary>
@@ -197,8 +199,6 @@ namespace Wockets
             this._Sensors = new SensorList();
                      
         }
-
-
         public void Deinitialize()
         {
             if (aPollingThread!=null)
@@ -368,6 +368,9 @@ namespace Wockets
             }
                         
         }
+        
+        
+        
         public class CE_NOTIFICATION_TRIGGER
         {
 
@@ -457,6 +460,8 @@ namespace Wockets
         bool connecting = false;
         public int[] LastACIndex;
         public int[] LastSeqNum;
+
+
         void InterfaceActivityTracker()
         {
 
@@ -496,6 +501,8 @@ namespace Wockets
                 if (connecting)
                 {
                     SystemIdleTimerReset();
+                    
+                    
                     if ((this != null) && (this._Sensors.Count > 0))
                     {
                         //Check 2 things, num of connection failures
@@ -625,8 +632,9 @@ namespace Wockets
 
                             SynchronizedLogger.Write(upload_log);
                             //TextWriter tw = new StreamWriter(this._StorageDirectory + "\\data\\log\\" + hourlyPath + "\\stats.csv", true);
-                            Logger.Log(log_line);
                             //tw.Close();
+                            Logger.Log(log_line);
+                            
 
                             SystemIdleTimerReset();
                             for (int i = 0; (i < this._Sensors.Count); i++)
@@ -715,12 +723,17 @@ namespace Wockets
             }
         }
 
+
+        #region commented
         /*private void TerminateWockets()
         {
             NamedEvents namedEvent = new NamedEvents();
             namedEvent.Receive("TerminateWockets");
             System.Diagnostics.Process.GetCurrentProcess().Kill();
         }*/
+        #endregion
+
+
 
         private DateTime lastActivity = DateTime.Now;
         DateTime reminderDateTime;
@@ -847,8 +860,6 @@ namespace Wockets
             }
         }
 
-
-
         public Instances _instances
         {
             get
@@ -872,7 +883,6 @@ namespace Wockets
                 this.classifier = value;
             }
         }
-
 
 
         private void Train()
@@ -1342,6 +1352,8 @@ namespace Wockets
             #endregion Poll All Wockets and MITes and Decode Data
         }
 
+
+
         #region Serialization Methods
         public string ToXML()
         {
@@ -1383,5 +1395,7 @@ namespace Wockets
             }
         }
         #endregion Serialization Methods
+    
+    
     }
 }
