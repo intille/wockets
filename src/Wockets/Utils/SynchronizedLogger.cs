@@ -14,14 +14,18 @@ namespace Wockets.Utils
         /// <summary>
         /// A system-wide semaphore that serializes writes to the registry
         /// </summary>
-        private static Semaphore writeLock;
-        public static string SL_LOCK = "WocketsSLLock";
+       
         private static String path = "";
-        public static ArrayList _Lines;
+        private static String uploadpath = "";
+        public static ArrayList _Lines = null;
+        private const String UPLOAD_FILE="upload_file_";
+        private static String lastFile = "";
+        private static ArrayList _NewLines = null;
+        private static string[] files;
+        
 
         static SynchronizedLogger()
-        {
-            writeLock = new Semaphore(1, 1, SL_LOCK);
+        {            
             string firstCard = "";
             System.IO.DirectoryInfo di = new System.IO.DirectoryInfo("\\");
             System.IO.FileSystemInfo[] fsi = di.GetFileSystemInfos();
@@ -51,6 +55,10 @@ namespace Wockets.Utils
             }
 
             path += "\\statslog\\";
+            
+            //uploadpath += "\\statslog\\upload\\";
+            uploadpath = path + "upload\\";
+
 
             try
             {   
@@ -61,89 +69,152 @@ namespace Wockets.Utils
             {
             }
 
-            path += "log.csv";
-            _Lines = new ArrayList();
-
-        }
-
-        public static void Remove(ArrayList toRemove)
-        {
-            writeLock.WaitOne();
             try
             {
-                TextReader tr = new StreamReader(path);
-                String line = "";
-                _Lines.Clear();
-                while ((line = tr.ReadLine()) != null)
-                {
-                    if(!toRemove.Contains(line))
-                        _Lines.Add(line);
-                }
-                tr.Close();
-
-                TextWriter tw = new StreamWriter(path);
-                for (int i = 0; (i < _Lines.Count); i++)
-                    tw.WriteLine(_Lines[i]);
-                tw.Flush();
-                tw.Close();
-
+                if (!Directory.Exists(uploadpath))
+                    Directory.CreateDirectory(uploadpath);
             }
             catch
             {
             }
-            writeLock.Release();
+
+
+            //path += "log.csv";
+            _Lines = new ArrayList();
+
         }
+
+
+        public static void Remove(ArrayList toRemove)
+        {
+
+            try
+            {
+                    //if (_NewLines != null){if (_NewLines.Count > 0){
+
+                        DateTime now = DateTime.Now;
+                        String filename = UPLOAD_FILE + now.ToString("yyyy-MM-dd") + "_" + now.Hour + ".csv";
+                        TextWriter tw = new StreamWriter(uploadpath + filename);
+                        
+                        for (int i = 0; (i < _NewLines.Count); i++)
+                            tw.WriteLine(_NewLines[i]);
+                        tw.Flush();
+                        tw.Close();
+
+                    //}}
+            }
+            catch
+            {
+                return;
+            }
+
+            for (int i = 0; (i < files.Length); i++)
+                File.Delete(files[i]);                        
+        }
+
 
         public static void Load()
         {
-            writeLock.WaitOne();
-            try{
-                TextReader tr=new StreamReader(path);
-                String line="";
-                _Lines.Clear();
-                while((line=tr.ReadLine())!=null){
-                    _Lines.Add(line);
-                }
-                tr.Close();
 
-            }catch
+            files = Directory.GetFiles(uploadpath);
+            _Lines.Clear();
+
+
+            for (int i = 0; (i < files.Length); i++)
             {
+                try
+                {
+                    TextReader tr = new StreamReader(files[i]);
+                    String line = "";                    
+                    while ((line = tr.ReadLine()) != null)
+                    {
+                        _Lines.Add(line);
+                    }
+                    tr.Close();
+                }
+                catch
+                {
+                }
             }
-            writeLock.Release();
+            
         }
 
         public static void Write(String log)
         {
 
-            writeLock.WaitOne();
+            
             try
             {
-                TextWriter tw = new StreamWriter(path, true);
+                DateTime now = DateTime.Now;
+                //String filename= uploadpath+UPLOAD_FILE+now.Day+"-"+now.Hour+".csv";
+
+                String filename = path + UPLOAD_FILE + now.ToString("yyyy-MM-dd") + "_" + now.Hour + ".csv";
+                if (!File.Exists(filename))
+                {
+                    if (lastFile != "")
+                        File.Move(path + lastFile, uploadpath + lastFile);
+                    File.Create(filename);
+                    lastFile = UPLOAD_FILE + now.ToString("yyyy-MM-dd") + "_" + now.Hour + ".csv";
+                }
+                
+                TextWriter tw = new StreamWriter(filename, true);
                 tw.WriteLine(log);
                 tw.Flush();
                 tw.Close();
+                
             }
             catch
             {
             }
-            writeLock.Release();
+            
+        }
+
+        public static void Dispose()
+        {
+             DateTime now = DateTime.Now;
+             //String filename= uploadpath+UPLOAD_FILE+now.Day+"-"+now.Hour+".csv";            
+             String filename = path + UPLOAD_FILE + now.ToString("yyyy-MM-dd") + "_" + now.Hour + ".csv";    
+             
+             now=now.Subtract(new TimeSpan(1,0,0));
+             //String prevhourfilename= uploadpath+UPLOAD_FILE+now.Day+"-"+now.Hour-1 +".csv";  
+             String prevhourfilename = path + UPLOAD_FILE + now.ToString("yyyy-MM-dd") + "_" + (now.Hour - 1) + ".csv"; 
+
+            if (File.Exists(filename))             
+                 File.Move(path + filename, uploadpath + filename);
+
+             if (File.Exists(prevhourfilename))
+                 File.Move(path + prevhourfilename, uploadpath + prevhourfilename);             
+                
         }
 
         public static void Flush()
         {
-            writeLock.WaitOne();
+            
             try
             {
-                TextWriter tw = new StreamWriter(path, true);
+                //TextWriter tw = new StreamWriter(path, true);
+                
+                DateTime now = DateTime.Now;
+                //String filename= uploadpath+UPLOAD_FILE+now.Day+"-"+now.Hour+".csv";
+                String filename = path + UPLOAD_FILE + now.ToString("yyyy-MM-dd") + "_" + now.Hour + ".csv";
+                if (!File.Exists(filename))
+                {
+                    if (lastFile != "")
+                        File.Move(path + lastFile, uploadpath + lastFile);
+                    File.Create(filename);
+                    lastFile = UPLOAD_FILE + now.ToString("yyyy-MM-dd") + "_" + now.Hour + ".csv";
+                }
+
+                TextWriter tw = new StreamWriter(filename, true);
                 for (int i = 0; (i < _Lines.Count); i++)
                     tw.WriteLine(_Lines[i]);
+
                 tw.Flush();
                 tw.Close();
             }
             catch
             {
-            }
-            writeLock.Release();
+            }            
 
         }
     }
