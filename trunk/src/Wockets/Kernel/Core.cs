@@ -354,20 +354,23 @@ namespace Wockets.Kernel
 
        }
 
-       private static System.Diagnostics.Process _KernelProcess=null;
+
+
+        private static System.Diagnostics.Process _KernelProcess=null;
         /// <summary>
         /// Spawns the kernel process if it is not started
         /// </summary>
         /// <returns>True on successful spawning, otherwise false</returns>
         public static bool Start()
         {
-            Logger.Debug("Entering to kernel.start()");
+
+            Logger.Debug("Entering to kernel.start() function.");
 
             if (!Core._KernalStarted)
             {
                 try
                 {
-                    Logger.Debug                                     ("Detected Kernel not started. Try to start it.");
+                    Logger.Debug("kernel.start(): Detected Kernel not started. Try to start it.");
 
                     ProcessStartInfo startInfo = new ProcessStartInfo();
                     startInfo.WorkingDirectory = KERNEL_PATH;
@@ -382,13 +385,13 @@ namespace Wockets.Kernel
                 }
                 catch (Exception e)
                 {
-                    Logger.Debug("Exceptiom occurred when tried to start kernel. Ex: " + e);
+                    Logger.Debug("kernel.start(): Exception occurred when tried to start kernel. Ex: " + e.ToString());
                     return false;
                 }
             }
             else
             {
-                Logger.Debug("Detected Kernel is already started.");
+                Logger.Debug("kernel.start(): Detected that kernel is already started.");
             }
 
             return Core._KernalStarted;
@@ -403,9 +406,8 @@ namespace Wockets.Kernel
         public static bool Terminate()
         {
             storagePath = "";     
-            
-          
-           // kernelLock.WaitOne();
+            //kernelLock.WaitOne();
+
             try
             {
                 NamedEvents namedEvent = new NamedEvents();
@@ -417,24 +419,20 @@ namespace Wockets.Kernel
                 namedEvent.Send("TerminateKernel");
             }
             catch (Exception e)
-            {
-                Logger.Error("Core.cs:Terminate:" + e.ToString());
+            {   Logger.Debug("Core.cs:Exception in Terminate() function:" + e.ToString());
             }
+            
+
             //kernelLock.Release();
-       
-
             Thread.Sleep(2000);
+
+
             //If termination failed try killing the process
-
-            //--------Commented-------------
-            //===if (Core._KernalStarted)
-            //==={
-            //------------------------------
-
-            // Core._KernelStarted Flag is unreliable, 
-            // make sure that kernel is not running
-            // otherwise, force to quit
-
+            if (Core._KernalStarted)
+            {
+                //== Core._KernelStarted Flag is unreliable, 
+                //== make sure that kernel is not running
+                //== otherwise, force to quit
                 try
                 {
                     ProcessInfo[] processes = ProcessCE.GetProcesses();
@@ -457,16 +455,15 @@ namespace Wockets.Kernel
 
                     Thread.Sleep(2000);
                 }
-                catch
+                catch(Exception e)
                 {
+                    Logger.Debug("Core.cs: kernel.terminate(): exception occurred when trying to terminate kernel. Ex: " + e.ToString());
+                    //False means that the kernel was not terminated successfully
                     if (Core._KernalStarted)
                         return false;
-
                 }
-
-
             //--------------------
-            //===}
+            }
             //--------------------
 
 
