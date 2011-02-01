@@ -168,6 +168,8 @@ namespace LogUploader
 
             SynchronizedLogger.Remove(toRemove);  
 
+
+#region commented
             /* m,,
 
             foreach (String line in SynchronizedLogger._Lines)
@@ -271,6 +273,9 @@ namespace LogUploader
 
             SynchronizedLogger.Remove(toRemove);        
              */
+#endregion commented
+
+
         }
     }
 }

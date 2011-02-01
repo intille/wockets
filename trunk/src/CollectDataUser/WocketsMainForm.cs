@@ -242,7 +242,7 @@ namespace CollectDataUser
 
 
             #region Initialize the Logger
-            Logger.InitLogger(firstCard + "\\applog\\");
+            Logger.InitLogger(firstCard + "\\Wockets\\applog\\");
             Logger.Debug("Starting Application");
 
             #endregion
@@ -1017,7 +1017,7 @@ namespace CollectDataUser
                 #endregion
 
                 //Load flag that specifies if data needs to be uploaded to the server automatically
-                if (sensor_data[(int)MasterListParam.UploadRawData].CompareTo("no") == 0)
+                if (sensor_data[(int)MasterListParam.UploadRawData].ToLower().CompareTo("no") == 0)
                     upload_raw_data = false;
             }
             else
@@ -1115,8 +1115,7 @@ namespace CollectDataUser
        {
            try
            {
-
-                #region TODO: this code is for testing 
+               #region TODO: this code is for testing 
                    if (!Is_Kernel_Running())
                        Logger.Debug("Kernel is not running");
                    else
@@ -2438,8 +2437,8 @@ namespace CollectDataUser
 
       #region Thread tracking the sensor connection status
 
-        double WAIT_INTERVAL_LOG_UPLOADER = 1.0; //in hours
-        double WAIT_INTERVAL_DATA_UPLOADER_HRS = 1.0; //in hours
+        double WAIT_INTERVAL_LOG_UPLOADER = 60.0; //in minutes
+        double WAIT_INTERVAL_DATA_UPLOADER= 120.0; //in minutes
 
 
      private void ACsUpdateTimer_Tick(object sender, EventArgs e)
@@ -2683,21 +2682,22 @@ namespace CollectDataUser
             //Launch the data uploader at midnight once a day
             DateTime current_time = DateTime.Now;
 
-            //Launch log uploader every hour
+            //Launch log uploader within a time interval
             ElapsedTime_LogUpload = current_time.Subtract(LastLogUploadInvoke);
 
-            if (ElapsedTime_LogUpload.TotalHours > WAIT_INTERVAL_LOG_UPLOADER)
+            if (ElapsedTime_LogUpload.TotalMinutes > WAIT_INTERVAL_LOG_UPLOADER)
             {
                 if (!Is_DataUploader_Running() )
                 {
                     bool launch_log_uploader = true;
 
-                    if (current_time.Hour >= 10 && current_time.Hour <= 5 & upload_raw_data)
+                    //upload raw data between 8pm and 5am
+                    if (current_time.Hour >= 1 && current_time.Hour <= 5 & upload_raw_data)
                     {
                         Core.READ_LAST_UPLOAD_TIME();
                         ElapsedTime_DataUpload = current_time.Subtract(CurrentWockets._UploadLastTime);
 
-                        if (ElapsedTime_DataUpload.TotalHours > WAIT_INTERVAL_DATA_UPLOADER_HRS)
+                        if (ElapsedTime_DataUpload.TotalMinutes > WAIT_INTERVAL_DATA_UPLOADER)
                         {
                             if (Is_LogUploader_Running())
                             {
@@ -2713,7 +2713,7 @@ namespace CollectDataUser
 
                     if (launch_log_uploader)
                     {
-                        // if uploader is NOT running, launch it 
+                        // if log uploader is NOT running, launch it 
                         if (!Is_LogUploader_Running())
                             LaunchLogUploader();
                     }
