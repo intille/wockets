@@ -533,6 +533,8 @@ namespace WocketConfigurationApp
             }
 
             Application.Exit();
+
+            
         }
 
         private void button_quit_Click(object sender, EventArgs e)
