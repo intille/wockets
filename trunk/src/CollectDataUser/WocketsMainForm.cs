@@ -1109,113 +1109,147 @@ namespace CollectDataUser
 
 
        //bool is_kernel_started = false;
-       bool is_kernel_pinged  = false;
+       //bool is_kernel_pinged  = false;
+
+
+
+       #region commented 
+       //private void LoadWocketsToKernel()
+       //{
+       //    try
+       //    {
+       //        #region TODO: this code is for testing 
+       //            if (!Is_Kernel_Running())
+       //                Logger.Debug("Kernel is not running");
+       //            else
+       //                Logger.Debug("Kernel is running");
+       //        #endregion
+
+          
+       //         int trials =0;
+       //         int wait4response =0;
+
+       //         //is_kernel_started = false;
+       //         is_kernel_pinged  = false;
+
+
+       //         while( !Core._KernalStarted &  trials < 5)
+       //         {
+       //                Logger.Debug( "_KernelStarted variable is false");
+
+       //                if (!Core.Start())
+       //                {
+       //                    //MessageBox.Show("failed to start kernel, restart app");
+       //                    Logger.Debug("failed to start kernel: first attempt");
+       //                    //Core.Terminate(); 
+       //                    Thread.Sleep(1000);
+       //                }
+       //                else
+       //                {
+       //                    Logger.Debug("_KernelStarted variable returned with true value: first attempt");
+       //                    Thread.Sleep(5000);
+       //                    Core.Ping();
+       //                    //Core.Register();
+       //                    Logger.Debug("Application Registered Kernel");
+                           
+       //                    //wait to receive ping
+       //                    wait4response =0;
+       //                    while(!is_kernel_pinged  &  wait4response < 20)
+       //                    { 
+       //                        Thread.Sleep(500);
+       //                        wait4response++; 
+       //                    }  
+       //                }
+
+       //               trials++;
+       //            }
+
+
+       //            if (is_kernel_pinged)
+       //                Logger.Debug("Kernel started successfully: first attempt");
+       //            else
+       //            {
+       //                //Make sure that no more than one kernel process is running
+       //                if (Core.Terminate())
+       //                {
+       //                    if (!Core.Start())
+       //                    {
+       //                        Logger.Debug("Failed to start the kernel: second attempt");
+       //                    }
+       //                    else
+       //                    {
+       //                        Logger.Debug("_KernelStarted variable returned with true value: second attempt");
+       //                        Thread.Sleep(5000);
+       //                        Core.Ping();
+       //                        //Core.Register();
+       //                        Logger.Debug("Application Registered Kernel");
+
+       //                        //wait to receive ping
+       //                        wait4response = 0;
+       //                        while (!is_kernel_pinged & wait4response < 20)
+       //                        {
+       //                            Thread.Sleep(500);
+       //                            wait4response++;
+       //                        }
+
+       //                        if (is_kernel_pinged)
+       //                            Logger.Debug("Kernel started successfully: second attempt");
+       //                    }
+       //                }
+       //                else
+       //                     Logger.Debug("Failed to terminate the kernel.");
+       //            }
+
+
+       //            if (!is_kernel_pinged)
+       //            {
+       //                Logger.Debug("Failed to start the kernel in second attempt. The application will be closed.");
+       //                UpdateMsg("The kernel couldn't be launched. Please restart application.");
+       //                Thread.Sleep(1000);
+       //                is_rebooting = false;
+       //                this.Close();
+       //            }
+
+       //    }
+       //    catch(Exception e)
+       //    {    
+       //        Logger.Debug("An exception occurred when trying to start kernel. Ex: " + e.ToString());
+       //        Logger.Debug("Try to kill kernel. Ex: " + e.ToString());
+       //        KillKernel();
+       //    }
+
+       // }
+       #endregion commented
+
 
        private void LoadWocketsToKernel()
        {
-           try
+
+           if (!Core._KernalStarted)
            {
-               #region TODO: this code is for testing 
-                   if (!Is_Kernel_Running())
-                       Logger.Debug("Kernel is not running");
+               if (!Core.Start())
+                   MessageBox.Show("Failed to start kernel");
+               else
+                   Thread.Sleep(30000);
+           }
+           else
+           {
+               //Make sure no kernels are running
+               if (Core.Terminate())
+               {
+                   if (!Core.Start())
+                       MessageBox.Show("Failed to start kernel");
                    else
-                       Logger.Debug("Kernel is running");
-               #endregion
-
-          
-                int trials =0;
-                int wait4response =0;
-
-                //is_kernel_started = false;
-                is_kernel_pinged  = false;
-
-
-                while( !Core._KernalStarted &  trials < 5)
-                {
-                       Logger.Debug( "_KernelStarted variable is false");
-
-                       if (!Core.Start())
-                       {
-                           //MessageBox.Show("failed to start kernel, restart app");
-                           Logger.Debug("failed to start kernel: first attempt");
-                           //Core.Terminate(); 
-                           Thread.Sleep(1000);
-                       }
-                       else
-                       {
-                           Logger.Debug("_KernelStarted variable returned with true value: first attempt");
-                           Thread.Sleep(5000);
-                           //Core.Ping();
-                           Core.Register();
-                           Logger.Debug("Application Registered Kernel");
-                           
-                           //wait to receive ping
-                           wait4response =0;
-                           while(!is_kernel_pinged  &  wait4response < 20)
-                           { 
-                               Thread.Sleep(500);
-                               wait4response++; 
-                           }  
-                       }
-
-                      trials++;
-                   }
-
-
-                   if (is_kernel_pinged)
-                       Logger.Debug("Kernel started successfully: first attempt");
-                   else
-                   {
-                       //Make sure that no more than one kernel process is running
-                       if (Core.Terminate())
-                       {
-                           if (!Core.Start())
-                           {
-                               Logger.Debug("Failed to start the kernel: second attempt");
-                           }
-                           else
-                           {
-                               Logger.Debug("_KernelStarted variable returned with true value: second attempt");
-                               Thread.Sleep(5000);
-                               //Core.Ping();
-                               Core.Register();
-                               Logger.Debug("Application Registered Kernel");
-
-                               //wait to receive ping
-                               wait4response = 0;
-                               while (!is_kernel_pinged & wait4response < 20)
-                               {
-                                   Thread.Sleep(500);
-                                   wait4response++;
-                               }
-
-                               if (is_kernel_pinged)
-                                   Logger.Debug("Kernel started successfully: second attempt");
-                           }
-                       }
-                       else
-                            Logger.Debug("Failed to terminate the kernel.");
-                   }
-
-
-                   if (!is_kernel_pinged)
-                   {
-                       Logger.Debug("Failed to start the kernel in second attempt. The application will be closed.");
-                       UpdateMsg("The kernel couldn't be launched. Please restart application.");
-                       Thread.Sleep(1000);
-                       is_rebooting = false;
-                       this.Close();
-                   }
+                       Thread.Sleep(30000);
+               }
+               else
+                   MessageBox.Show("Failed to shutdown kernel");
 
            }
-           catch(Exception e)
-           {    
-               Logger.Debug("An exception occurred when trying to start kernel. Ex: " + e.ToString());
-               Logger.Debug("Try to kill kernel. Ex: " + e.ToString());
-               KillKernel();
-           }
 
-        }
+           //Thread.Sleep(5000);
+           Core.Ping();
+       }
 
 
         #region Kernel Response CallBacks and Event Listener
@@ -1247,8 +1281,8 @@ namespace CollectDataUser
                                     Logger.Debug("Ping responsed received");
                                     UpdateMsg("Ping Received");
                                     //is_kernel_pinged = true;
-                                    //Core.Register();
-                                    Core.SetSensors(this.sensors_list);
+                                    Core.Register();
+                                    //Core.SetSensors(this.sensors_list);
                                 }
                                 catch(Exception ex)
                                 {
@@ -1261,9 +1295,9 @@ namespace CollectDataUser
                                 {
                                     Logger.Debug("Registered finished response received");
                                     UpdateMsg("App Registered");
-                                    //Core.SetSensors(this.sensors_list);
-                                    is_kernel_pinged = true;
-                                    Core.Ping();
+                                    Core.SetSensors(this.sensors_list);
+                                    //is_kernel_pinged = true;
+                                    //Core.Ping();
                                 }
                                 catch(Exception ex)
                                 {
@@ -2439,6 +2473,7 @@ namespace CollectDataUser
 
         double WAIT_INTERVAL_LOG_UPLOADER = 60.0; //in minutes
         double WAIT_INTERVAL_DATA_UPLOADER= 120.0; //in minutes
+        //double WAIT_INTERVAL_SWAP_STRESS_TEST = 30.0; //in minutes
 
 
      private void ACsUpdateTimer_Tick(object sender, EventArgs e)
@@ -2691,7 +2726,7 @@ namespace CollectDataUser
                 {
                     bool launch_log_uploader = true;
 
-                    //upload raw data between 8pm and 5am
+                    //upload raw data between 1am and 5am
                     if (current_time.Hour >= 1 && current_time.Hour <= 5 & upload_raw_data)
                     {
                         Core.READ_LAST_UPLOAD_TIME();
