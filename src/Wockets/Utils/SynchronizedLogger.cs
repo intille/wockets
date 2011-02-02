@@ -19,6 +19,7 @@ namespace Wockets.Utils
         private static String uploadpath = "";
         public static ArrayList _Lines = null;
         private const String UPLOAD_FILE="upload_file_";
+        private const String RETRY_FILE = "retry.csv";
         private static String lastFile = "";
         private static ArrayList _NewLines = null;
         private static string[] files;
@@ -90,16 +91,20 @@ namespace Wockets.Utils
 
             try
             {
+                ArrayList failedLines=new ArrayList();
+                for (int i = 0; (i < _Lines.Count); i++)
+                {
+                    if (!toRemove.Contains(_Lines[i]))
+                        failedLines.Add(_Lines[i]);
+                }
                     //if (_NewLines != null){if (_NewLines.Count > 0){
-
-                        DateTime now = DateTime.Now;
-                        String filename = UPLOAD_FILE + now.ToString("yyyy-MM-dd") + "_" + now.Hour + ".csv";
-                        TextWriter tw = new StreamWriter(uploadpath + filename);
-                        
-                        for (int i = 0; (i < _NewLines.Count); i++)
-                            tw.WriteLine(_NewLines[i]);
-                        tw.Flush();
-                        tw.Close();
+                    //DateTime now = DateTime.Now;
+                    //String filename = UPLOAD_FILE + now.ToString("yyyy-MM-dd") + "_" + now.Hour + ".csv";
+                 TextWriter tw = new StreamWriter(uploadpath+RETRY_FILE);                        
+                  for (int i = 0; (i <failedLines.Count); i++)
+                       tw.WriteLine(failedLines[i]);
+                  tw.Flush();
+                  tw.Close();
 
                     //}}
             }
@@ -107,9 +112,9 @@ namespace Wockets.Utils
             {
                 return;
             }
-
             for (int i = 0; (i < files.Length); i++)
-                File.Delete(files[i]);                        
+                if (!files[i].Equals(uploadpath+RETRY_FILE))
+                    File.Delete(files[i]);                        
         }
 
 

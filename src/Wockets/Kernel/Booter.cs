@@ -407,598 +407,341 @@ namespace Wockets.Kernel
         public static void ApplicationHandler()
         {
 
-            int tid = Thread.CurrentThread.ManagedThreadId;
-            string commandPath = Core.REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + (string)applicationPaths[tid] + "}";
-            NamedEvents namedEvent = new NamedEvents();
-            string applicationGuid = ((string)applicationPaths[tid]);
-            string channel = applicationGuid + "-kernel";
-            //WocketsController lwcontroller = null;
-
-
-
-            while (true)
+            try
             {
-                //ensures prior synchronization
-                namedEvent.Receive(channel.ToString());
+                int tid = Thread.CurrentThread.ManagedThreadId;
+                string commandPath = Core.REGISTRY_REGISTERED_APPLICATIONS_PATH + "\\{" + (string)applicationPaths[tid] + "}";
+                NamedEvents namedEvent = new NamedEvents();
+                string applicationGuid = ((string)applicationPaths[tid]);
+                string channel = applicationGuid + "-kernel";
+                //WocketsController lwcontroller = null;
 
-                lock (terminationLock)
+
+
+                while (true)
                 {
-                    kernelLock.WaitOne();
+                    //ensures prior synchronization
+                    namedEvent.Receive(channel.ToString());
 
-                    RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
-                    string msg = (string)rk.GetValue("Message");
-                    string param = (string)rk.GetValue("Param");
-                    rk.Close();
-
-
-                    //lock the kernel to avoid changing wockets controller at the
-                    //same time from multiple applications
-
-
-                    #region DISCOVER
-                    if (msg == KernelCommand.DISCOVER.ToString())
+                    lock (terminationLock)
                     {
-                        Thread discovery = new Thread(new ThreadStart(Discover));
-                        discovery.Start();
-                    }
-                    #endregion DISCOVER
+                        kernelLock.WaitOne();
 
-                    #region CONNECT
-                    else if (msg == KernelCommand.CONNECT.ToString())
-                    {
-                        try
+                        RegistryKey rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
+                        string msg = (string)rk.GetValue("Message");
+                        string param = (string)rk.GetValue("Param");
+                        rk.Close();
+
+
+                        //lock the kernel to avoid changing wockets controller at the
+                        //same time from multiple applications
+
+
+                        #region DISCOVER
+                        if (msg == KernelCommand.DISCOVER.ToString())
                         {
-                            if (!_WocketsRunning)
+                            Thread discovery = new Thread(new ThreadStart(Discover));
+                            discovery.Start();
+                        }
+                        #endregion DISCOVER
+
+                        #region CONNECT
+                        else if (msg == KernelCommand.CONNECT.ToString())
+                        {
+                            try
                             {
-
-                                //load local wockets controller
-                                CurrentWockets._Controller = new WocketsController("", "", "");
-                                CurrentWockets._Controller._StorageDirectory = Storage.GenerateStoragePath();
-                                CurrentWockets._Controller.FromXML(path + "//NeededFiles//Master//SensorData.xml");
-
-                                CurrentWockets._Controller._Mode = MemoryMode.BluetoothToShared;
-
-                                rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
-                                string tmodevalue = (string)rk.GetValue("TMode");
-                                rk.Close();
-
-                                TransmissionMode tmode = (TransmissionMode)Enum.Parse(typeof(TransmissionMode), tmodevalue, true);
-                                CurrentWockets._Controller._TMode = tmode;
-
-                                
-                                try
+                                if (!_WocketsRunning)
                                 {
-                                    File.Copy(path + "//NeededFiles//Master//Configuration.xml", CurrentWockets._Controller._StorageDirectory + "\\Configuration.xml");
-                                }
-                                catch (Exception e)
-                                {
-                                }
 
-                                CurrentWockets._Configuration = new Wockets.Data.Configuration.WocketsConfiguration();
-                                CurrentWockets._Configuration.FromXML(CurrentWockets._Controller._StorageDirectory + "\\Configuration.xml");
-                                CurrentWockets._Configuration._MemoryMode = Wockets.Data.Configuration.MemoryConfiguration.SHARED;
+                                    //load local wockets controller
+                                    CurrentWockets._Controller = new WocketsController("", "", "");
+                                    CurrentWockets._Controller._StorageDirectory = Storage.GenerateStoragePath();
+                                    CurrentWockets._Controller.FromXML(path + "//NeededFiles//Master//SensorData.xml");
 
+                                    CurrentWockets._Controller._Mode = MemoryMode.BluetoothToShared;
 
-                                int index = 0;
-                                for (int i = 0; (i < Booter.wcontroller._Sensors.Count); i++)
-                                {
-                                    if (Booter.wcontroller._Sensors[i]._Loaded)
-                                    {
-                                        CurrentWockets._Controller._Receivers[index]._ID = index;
-                                        ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[index])._Address = ((RFCOMMReceiver)Booter.wcontroller._Receivers[i])._Address;
-                                        CurrentWockets._Controller._Decoders[index]._ID = index;
-                                        CurrentWockets._Controller._Sensors[index]._ID = index;
-                                        CurrentWockets._Controller._Sensors[index]._Receiver = CurrentWockets._Controller._Receivers[index];
-                                        CurrentWockets._Controller._Sensors[index]._Decoder = CurrentWockets._Controller._Decoders[index];
-                                        CurrentWockets._Controller._Sensors[index]._Loaded = true;
-                                        index++;
-                                    }
-                                }
-
-                                for (int i = CurrentWockets._Controller._Sensors.Count - 1; (i >= 0); i--)
-                                {
-                                    if (!CurrentWockets._Controller._Sensors[i]._Loaded)
-                                    {
-                                        CurrentWockets._Controller._Receivers.RemoveAt(i);
-                                        CurrentWockets._Controller._Sensors.RemoveAt(i);
-                                        CurrentWockets._Controller._Decoders.RemoveAt(i);
-                                    }
-                                    else
-                                        CurrentWockets._Controller._Sensors[i]._RootStorageDirectory = CurrentWockets._Controller._StorageDirectory + "\\data\\raw\\PLFormat\\";
-                                }
-
-                                //CurrentWockets._Controller._Receivers.SortByAddress();
-                                for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
-                                    ((Wocket)CurrentWockets._Controller._Sensors[i])._Receiver = CurrentWockets._Controller._Receivers[i];
-
-                                if (CurrentWockets._Controller._Sensors.Count > 0)
-                                {
-                                    rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_KERNEL_PATH, true);
-                                    rk.SetValue("Storage", CurrentWockets._Controller._StorageDirectory);
+                                    rk = Registry.LocalMachine.OpenSubKey(commandPath, true);
+                                    string tmodevalue = (string)rk.GetValue("TMode");
                                     rk.Close();
 
-                                    TextWriter tw = new StreamWriter(CurrentWockets._Controller._StorageDirectory + "\\SensorData.xml");
-                                    tw.WriteLine(CurrentWockets._Controller.ToXML());
-                                    tw.Close();
+                                    TransmissionMode tmode = (TransmissionMode)Enum.Parse(typeof(TransmissionMode), tmodevalue, true);
+                                    CurrentWockets._Controller._TMode = tmode;
 
-                                    _WocketsRunning = true;
-                                    CurrentWockets._Controller.Initialize();
 
-                                    //Subscribe to all callback events
-                                    foreach (Decoder d in CurrentWockets._Controller._Decoders)
+                                    try
                                     {
-                                        d.Subscribe(ResponseTypes.BL_RSP, new Decoder.ResponseHandler(DecoderCallback));
-                                        d.Subscribe(ResponseTypes.BP_RSP, new Decoder.ResponseHandler(DecoderCallback));
-                                        d.Subscribe(ResponseTypes.PC_RSP, new Decoder.ResponseHandler(DecoderCallback));
-                                        d.Subscribe(ResponseTypes.SENS_RSP, new Decoder.ResponseHandler(DecoderCallback));
-                                        d.Subscribe(ResponseTypes.CAL_RSP, new Decoder.ResponseHandler(DecoderCallback));
-                                        d.Subscribe(ResponseTypes.SR_RSP, new Decoder.ResponseHandler(DecoderCallback));
-                                        d.Subscribe(ResponseTypes.TM_RSP, new Decoder.ResponseHandler(DecoderCallback));
-                                        d.Subscribe(ResponseTypes.AC_RSP, new Decoder.ResponseHandler(DecoderCallback));
-                                        d.Subscribe(ResponseTypes.TCT_RSP, new Decoder.ResponseHandler(DecoderCallback));
+                                        File.Copy(path + "//NeededFiles//Master//Configuration.xml", CurrentWockets._Controller._StorageDirectory + "\\Configuration.xml");
+                                    }
+                                    catch (Exception e)
+                                    {
                                     }
 
+                                    CurrentWockets._Configuration = new Wockets.Data.Configuration.WocketsConfiguration();
+                                    CurrentWockets._Configuration.FromXML(CurrentWockets._Controller._StorageDirectory + "\\Configuration.xml");
+                                    CurrentWockets._Configuration._MemoryMode = Wockets.Data.Configuration.MemoryConfiguration.SHARED;
+
+
+                                    int index = 0;
+                                    for (int i = 0; (i < Booter.wcontroller._Sensors.Count); i++)
+                                    {
+                                        if (Booter.wcontroller._Sensors[i]._Loaded)
+                                        {
+                                            CurrentWockets._Controller._Receivers[index]._ID = index;
+                                            ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[index])._Address = ((RFCOMMReceiver)Booter.wcontroller._Receivers[i])._Address;
+                                            CurrentWockets._Controller._Decoders[index]._ID = index;
+                                            CurrentWockets._Controller._Sensors[index]._ID = index;
+                                            CurrentWockets._Controller._Sensors[index]._Receiver = CurrentWockets._Controller._Receivers[index];
+                                            CurrentWockets._Controller._Sensors[index]._Decoder = CurrentWockets._Controller._Decoders[index];
+                                            CurrentWockets._Controller._Sensors[index]._Loaded = true;
+                                            index++;
+                                        }
+                                    }
+
+                                    for (int i = CurrentWockets._Controller._Sensors.Count - 1; (i >= 0); i--)
+                                    {
+                                        if (!CurrentWockets._Controller._Sensors[i]._Loaded)
+                                        {
+                                            CurrentWockets._Controller._Receivers.RemoveAt(i);
+                                            CurrentWockets._Controller._Sensors.RemoveAt(i);
+                                            CurrentWockets._Controller._Decoders.RemoveAt(i);
+                                        }
+                                        else
+                                            CurrentWockets._Controller._Sensors[i]._RootStorageDirectory = CurrentWockets._Controller._StorageDirectory + "\\data\\raw\\PLFormat\\";
+                                    }
+
+                                    //CurrentWockets._Controller._Receivers.SortByAddress();
+                                    for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
+                                        ((Wocket)CurrentWockets._Controller._Sensors[i])._Receiver = CurrentWockets._Controller._Receivers[i];
+
+                                    if (CurrentWockets._Controller._Sensors.Count > 0)
+                                    {
+                                        rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_KERNEL_PATH, true);
+                                        rk.SetValue("Storage", CurrentWockets._Controller._StorageDirectory);
+                                        rk.Close();
+
+                                        TextWriter tw = new StreamWriter(CurrentWockets._Controller._StorageDirectory + "\\SensorData.xml");
+                                        tw.WriteLine(CurrentWockets._Controller.ToXML());
+                                        tw.Close();
+
+                                        _WocketsRunning = true;
+                                        CurrentWockets._Controller.Initialize();
+
+                                        //Subscribe to all callback events
+                                        foreach (Decoder d in CurrentWockets._Controller._Decoders)
+                                        {
+                                            d.Subscribe(ResponseTypes.BL_RSP, new Decoder.ResponseHandler(DecoderCallback));
+                                            d.Subscribe(ResponseTypes.BP_RSP, new Decoder.ResponseHandler(DecoderCallback));
+                                            d.Subscribe(ResponseTypes.PC_RSP, new Decoder.ResponseHandler(DecoderCallback));
+                                            d.Subscribe(ResponseTypes.SENS_RSP, new Decoder.ResponseHandler(DecoderCallback));
+                                            d.Subscribe(ResponseTypes.CAL_RSP, new Decoder.ResponseHandler(DecoderCallback));
+                                            d.Subscribe(ResponseTypes.SR_RSP, new Decoder.ResponseHandler(DecoderCallback));
+                                            d.Subscribe(ResponseTypes.TM_RSP, new Decoder.ResponseHandler(DecoderCallback));
+                                            d.Subscribe(ResponseTypes.AC_RSP, new Decoder.ResponseHandler(DecoderCallback));
+                                            d.Subscribe(ResponseTypes.TCT_RSP, new Decoder.ResponseHandler(DecoderCallback));
+                                        }
+
+                                    }
+
+                                    foreach (string guid in applicationPaths.Values)
+                                        Send(KernelResponse.CONNECTED, guid);
                                 }
 
+                            }
+                            catch (Exception e)
+                            {
                                 foreach (string guid in applicationPaths.Values)
-                                    Send(KernelResponse.CONNECTED, guid);
+                                    Send(KernelResponse.CONNECT_FAILED, guid);
+                                Logger.Error("Booter.cs:ApplicationHandler: CONNECT:" + e.ToString());
                             }
-
                         }
-                        catch (Exception e)
-                        {
-                            foreach (string guid in applicationPaths.Values)
-                                Send(KernelResponse.CONNECT_FAILED, guid);
-                            Logger.Error("Booter.cs:ApplicationHandler: CONNECT:" + e.ToString());
-                        }
-                    }
-                    #endregion CONNECT
+                        #endregion CONNECT
 
-                    #region DISCONNECT
-                    else if (msg == KernelCommand.DISCONNECT.ToString())
-                    {
-                        try
+                        #region DISCONNECT
+                        else if (msg == KernelCommand.DISCONNECT.ToString())
                         {
-                            if (_WocketsRunning)
+                            try
                             {
-                                CurrentWockets._Controller.Dispose();
-                                _WocketsRunning = false;
-                                CurrentWockets._Controller = null;
-                            }
-                            foreach (string guid in applicationPaths.Values)
-                                Send(KernelResponse.DISCONNECTED, guid);
-
-                        }
-                        catch (Exception e)
-                        {
-                            foreach (string guid in applicationPaths.Values)
-                                Send(KernelResponse.DISCONNECT_FAILED, guid);
-                            Logger.Error("Booter.cs:ApplicationHandler: DISCONNECT:" + e.ToString());
-                        }
-                    }
-                    #endregion DISCONNECT
-
-                    #region SET_WOCKETS
-                    else if (msg == KernelCommand.SET_WOCKETS.ToString())
-                    {
-                        try
-                        {
-                            if (!_WocketsRunning)
-                            {
-                                int index = 0;
-                                for (int i = 0; (i < 5); i++)
+                                if (_WocketsRunning)
                                 {
-                                    rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + i.ToString("0"));
-                                    int status = (int)rk.GetValue("Status");
-                                    if (status == 1)
-                                    {
-                                        string mac = (string)rk.GetValue("MacAddress");
-
-                                        ((RFCOMMReceiver)Booter.wcontroller._Receivers[index])._Address = mac;
-                                        Booter.wcontroller._Sensors[index++]._Loaded = true;
-
-                                    }
-                                    rk.Close();
+                                    CurrentWockets._Controller.Dispose();
+                                    _WocketsRunning = false;
+                                    CurrentWockets._Controller = null;
                                 }
                                 foreach (string guid in applicationPaths.Values)
-                                    Send(KernelResponse.SENSORS_UPDATED, guid);
+                                    Send(KernelResponse.DISCONNECTED, guid);
+
                             }
-                            else
+                            catch (Exception e)
+                            {
+                                foreach (string guid in applicationPaths.Values)
+                                    Send(KernelResponse.DISCONNECT_FAILED, guid);
+                                Logger.Error("Booter.cs:ApplicationHandler: DISCONNECT:" + e.ToString());
+                            }
+                        }
+                        #endregion DISCONNECT
+
+                        #region SET_WOCKETS
+                        else if (msg == KernelCommand.SET_WOCKETS.ToString())
+                        {
+                            try
+                            {
+                                if (!_WocketsRunning)
+                                {
+                                    int index = 0;
+                                    for (int i = 0; (i < 5); i++)
+                                    {
+                                        rk = Registry.LocalMachine.OpenSubKey(Core.REGISTRY_SENSORS_PATH + "\\" + i.ToString("0"));
+                                        int status = (int)rk.GetValue("Status");
+                                        if (status == 1)
+                                        {
+                                            string mac = (string)rk.GetValue("MacAddress");
+
+                                            ((RFCOMMReceiver)Booter.wcontroller._Receivers[index])._Address = mac;
+                                            Booter.wcontroller._Sensors[index++]._Loaded = true;
+
+                                        }
+                                        rk.Close();
+                                    }
+                                    foreach (string guid in applicationPaths.Values)
+                                        Send(KernelResponse.SENSORS_UPDATED, guid);
+                                }
+                                else
+                                {
+                                    foreach (string guid in applicationPaths.Values)
+                                        Send(KernelResponse.SENSORS_UPDATED_FAILED, guid);
+                                }
+                            }
+                            catch (Exception e)
                             {
                                 foreach (string guid in applicationPaths.Values)
                                     Send(KernelResponse.SENSORS_UPDATED_FAILED, guid);
+                                Logger.Error("Booter.cs:ApplicationHandler: SET_WOCKETS:" + e.ToString());
                             }
                         }
-                        catch (Exception e)
-                        {
-                            foreach (string guid in applicationPaths.Values)
-                                Send(KernelResponse.SENSORS_UPDATED_FAILED, guid);
-                            Logger.Error("Booter.cs:ApplicationHandler: SET_WOCKETS:" + e.ToString());
-                        }
-                    }
-                    #endregion SET_WOCKETS
+                        #endregion SET_WOCKETS
 
-                    #region GET_BATTERY_LEVEL
-                    else if (msg == KernelCommand.GET_BATTERY_LEVEL.ToString())
-                    {
-                        if (_WocketsRunning)
+                        #region GET_BATTERY_LEVEL
+                        else if (msg == KernelCommand.GET_BATTERY_LEVEL.ToString())
                         {
-                            try
+                            if (_WocketsRunning)
                             {
-                                Command command = new GET_BT();
-                                for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+                                try
                                 {
-                                    if (param == "all")
-                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
-                                    else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == param)
+                                    Command command = new GET_BT();
+                                    for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
                                     {
-                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
-                                        break;
+                                        if (param == "all")
+                                            ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                        else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == param)
+                                        {
+                                            ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                            break;
+                                        }
                                     }
                                 }
-                            }
-                            catch (Exception e)
-                            {
-                                Logger.Error("Booter.cs:ApplicationHandler: GET_BATTERY_LEVEL:" + e.ToString());
-                            }
-                        }
-                    }
-                    #endregion GET_BATTERY_LEVEL
-
-                    #region GET_BATTERY_PERCENT
-                    else if (msg == KernelCommand.GET_BATTERY_PERCENT.ToString())
-                    {
-                        if (_WocketsRunning)
-                        {
-                            try
-                            {
-                                Command command = new GET_BP();
-                                for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+                                catch (Exception e)
                                 {
-                                    if (param == "all")
-                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
-                                    else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == param)
-                                    {
-                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
-                                        break;
-                                    }
-                                }
-
-                            }
-                            catch (Exception e)
-                            {
-                                Logger.Error("Booter.cs:ApplicationHandler: SET_BATTERY_PERCENT:" + e.ToString());
-                            }
-                        }
-                    }
-                    #endregion GET_BATTERY_PERCENT
-
-                    #region GET_PDU_COUNT
-                    else if (msg == KernelCommand.GET_PDU_COUNT.ToString())
-                    {
-                        if (_WocketsRunning)
-                        {
-                            try
-                            {
-                                Command command = new GET_PC();
-                                for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
-                                {
-                                    if (param == "all")
-                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
-                                    else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == param)
-                                    {
-                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
-                                        break;
-                                    }
+                                    Logger.Error("Booter.cs:ApplicationHandler: GET_BATTERY_LEVEL:" + e.ToString());
                                 }
                             }
-                            catch (Exception e)
-                            {
-                                Logger.Error("Booter.cs:ApplicationHandler: GET_PDU_COUNT:" + e.ToString());
-                            }
                         }
-                    }
-                    #endregion GET_PDU_COUNT
+                        #endregion GET_BATTERY_LEVEL
 
-                    #region GET_WOCKET_SENSITIVITY
-                    else if (msg == KernelCommand.GET_WOCKET_SENSITIVITY.ToString())
-                    {
-                        if (_WocketsRunning)
+                        #region GET_BATTERY_PERCENT
+                        else if (msg == KernelCommand.GET_BATTERY_PERCENT.ToString())
                         {
-                            try
+                            if (_WocketsRunning)
                             {
-                                Command command = new GET_SEN();
-                                for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+                                try
                                 {
-                                    if (param == "all")
-                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
-                                    else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == param)
+                                    Command command = new GET_BP();
+                                    for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
                                     {
-                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
-                                        break;
+                                        if (param == "all")
+                                            ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                        else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == param)
+                                        {
+                                            ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                            break;
+                                        }
                                     }
+
+                                }
+                                catch (Exception e)
+                                {
+                                    Logger.Error("Booter.cs:ApplicationHandler: SET_BATTERY_PERCENT:" + e.ToString());
                                 }
                             }
-                            catch (Exception e)
-                            {
-                                Logger.Error("Booter.cs:ApplicationHandler: GET_WOCKET_SENSITIVITY:" + e.ToString());
-                            }
                         }
-                    }
+                        #endregion GET_BATTERY_PERCENT
 
-                    #endregion GET_WOCKET_SENSITIVITY
-
-                    #region SET_WOCKET_SENSITIVITY
-                    else if (msg == KernelCommand.SET_WOCKET_SENSITIVITY.ToString())
-                    {
-                        if (_WocketsRunning)
+                        #region GET_PDU_COUNT
+                        else if (msg == KernelCommand.GET_PDU_COUNT.ToString())
                         {
-
-                            try
+                            if (_WocketsRunning)
                             {
-                                string[] tokens = param.Split(new char[] { ':' });
-                                Sensitivity sensitivity = (Sensitivity)Enum.Parse(typeof(Sensitivity),
-                                   tokens[1], true);
-                                Command command = new SET_SEN(sensitivity);
-                                for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+                                try
                                 {
-                                    if (tokens[0] == "all")
-                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
-                                    else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == tokens[0])
+                                    Command command = new GET_PC();
+                                    for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
                                     {
-                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
-                                        break;
+                                        if (param == "all")
+                                            ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                        else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == param)
+                                        {
+                                            ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                            break;
+                                        }
                                     }
                                 }
-                            }
-                            catch (Exception e)
-                            {
-                                Logger.Error("Booter.cs:ApplicationHandler: SET_WOCKET_SENSITIVITY:" + e.ToString());
-                            }
-                        }
-                    }
-                    #endregion SET_WOCKET_SENSITIVITY
-
-                    #region GET_WOCKET_CALIBRATION
-                    else if (msg == KernelCommand.GET_WOCKET_CALIBRATION.ToString())
-                    {
-                        if (_WocketsRunning)
-                        {
-                            try
-                            {
-                                Command command = new GET_CAL();
-                                for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+                                catch (Exception e)
                                 {
-                                    if (param == "all")
-                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
-                                    else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == param)
-                                    {
-                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
-                                        break;
-                                    }
+                                    Logger.Error("Booter.cs:ApplicationHandler: GET_PDU_COUNT:" + e.ToString());
                                 }
                             }
-                            catch (Exception e)
-                            {
-                                Logger.Error("Booter.cs:ApplicationHandler: GET_WOCKET_CALIBRATION:" + e.ToString());
-                            }
                         }
-                    }
+                        #endregion GET_PDU_COUNT
 
-                    #endregion GET_WOCKET_CALIBRATION
-
-                    #region SET_WOCKET_CALIBRATION
-                    else if (msg == KernelCommand.SET_WOCKET_CALIBRATION.ToString())
-                    {
-                        if (_WocketsRunning)
+                        #region GET_WOCKET_SENSITIVITY
+                        else if (msg == KernelCommand.GET_WOCKET_SENSITIVITY.ToString())
                         {
-
-                            try
+                            if (_WocketsRunning)
                             {
-                                string[] tokens = param.Split(new char[] { ':' });
-                                string mac = tokens[0];
-                                Calibration calibration = new Calibration();
-                                calibration._X1G = (ushort)Convert.ToUInt32(tokens[1]);
-                                calibration._XN1G = (ushort)Convert.ToUInt32(tokens[2]);
-                                calibration._Y1G = (ushort)Convert.ToUInt32(tokens[3]);
-                                calibration._YN1G = (ushort)Convert.ToUInt32(tokens[4]);
-                                calibration._Z1G = (ushort)Convert.ToUInt32(tokens[5]);
-                                calibration._ZN1G = (ushort)Convert.ToUInt32(tokens[6]);
-                                Command command = new SET_CAL(calibration);
-                                for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+                                try
                                 {
-                                    if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == mac)
+                                    Command command = new GET_SEN();
+                                    for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
                                     {
-                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
-                                        break;
+                                        if (param == "all")
+                                            ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                        else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == param)
+                                        {
+                                            ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                            break;
+                                        }
                                     }
                                 }
-                            }
-                            catch (Exception e)
-                            {
-                                Logger.Error("Booter.cs:ApplicationHandler: SET_WOCKET_CALIBRATION:" + e.ToString());
-                            }
-                        }
-                    }
-                    #endregion SET_WOCKET_CALIBRATION
-
-                    #region GET_WOCKET_SAMPLING_RATE
-                    else if (msg == KernelCommand.GET_WOCKET_SAMPLING_RATE.ToString())
-                    {
-                        if (_WocketsRunning)
-                        {
-                            try
-                            {
-                                Command command = new GET_SR();
-                                for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+                                catch (Exception e)
                                 {
-                                    if (param == "all")
-                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
-                                    else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == param)
-                                    {
-                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
-                                        break;
-                                    }
+                                    Logger.Error("Booter.cs:ApplicationHandler: GET_WOCKET_SENSITIVITY:" + e.ToString());
                                 }
                             }
-                            catch (Exception e)
-                            {
-                                Logger.Error("Booter.cs:ApplicationHandler: GET_WOCKET_SAMPLING_RATE:" + e.ToString());
-                            }
                         }
-                    }
 
-                    #endregion GET_WOCKET_SAMPLING_RATE
+                        #endregion GET_WOCKET_SENSITIVITY
 
-                    #region SET_WOCKET_SAMPLING_RATE
-                    else if (msg == KernelCommand.SET_WOCKET_SAMPLING_RATE.ToString())
-                    {
-                        if (_WocketsRunning)
+                        #region SET_WOCKET_SENSITIVITY
+                        else if (msg == KernelCommand.SET_WOCKET_SENSITIVITY.ToString())
                         {
-
-                            try
+                            if (_WocketsRunning)
                             {
-                                string[] tokens = param.Split(new char[] { ':' });
-                                Command command = new SET_SR(Convert.ToInt32(tokens[1]));
-                                for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+
+                                try
                                 {
-                                    if (tokens[0] == "all")
-                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
-                                    else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == tokens[0])
-                                    {
-                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
-                                        break;
-                                    }
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                Logger.Error("Booter.cs:ApplicationHandler: SET_WOCKET_SAMPLING_RATE:" + e.ToString());
-                            }
-                        }
-                    }
-                    #endregion SET_WOCKET_SAMPLING_RATE
-
-                    #region GET_WOCKET_POWERDOWN_TIMEOUT
-                    else if (msg == KernelCommand.GET_WOCKET_POWERDOWN_TIMEOUT.ToString())
-                    {
-                        if (_WocketsRunning)
-                        {
-                            try
-                            {
-                                Command command = new GET_PDT();
-                                for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
-                                {
-                                    if (param == "all")
-                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
-                                    else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == param)
-                                    {
-                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
-                                        break;
-                                    }
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                Logger.Error("Booter.cs:ApplicationHandler: GET_WOCKET_SAMPLING_RATE:" + e.ToString());
-                            }
-                        }
-                    }
-
-                    #endregion GET_WOCKET_POWERDOWN_TIMEOUT
-
-                    #region SET_WOCKET_POWERDOWN_TIMEOUT
-                    else if (msg == KernelCommand.SET_WOCKET_POWERDOWN_TIMEOUT.ToString())
-                    {
-                        if (_WocketsRunning)
-                        {
-
-                            try
-                            {
-                                string[] tokens = param.Split(new char[] { ':' });
-                                Command command = new SET_PDT(Convert.ToInt32(tokens[1]));
-                                for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
-                                {
-                                    if (tokens[0] == "all")
-                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
-                                    else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == tokens[0])
-                                    {
-                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
-                                        break;
-                                    }
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                Logger.Error("Booter.cs:ApplicationHandler: SET_WOCKET_SAMPLING_RATE:" + e.ToString());
-                            }
-                        }
-                    }
-                    #endregion SET_WOCKET_POWERDOWN_TIMEOUT
-
-                    #region GET_TRANSMISSION_MODE
-                    else if (msg == KernelCommand.GET_TRANSMISSION_MODE.ToString())
-                    {
-                        if (_WocketsRunning)
-                        {
-                            try
-                            {
-                                Command command = new GET_TM();
-                                for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
-                                {
-                                    if (param == "all")
-                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
-                                    else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == param)
-                                    {
-                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
-                                        break;
-                                    }
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                Logger.Error("Booter.cs:ApplicationHandler: GET_TRANSMISSION_MODE:" + e.ToString());
-                            }
-                        }
-                    }
-
-                    #endregion GET_TRANSMISSION_MODE
-
-                    #region SET_TRANSMISSION_MODE
-                    else if (msg == KernelCommand.SET_TRANSMISSION_MODE.ToString())
-                    {
-                        if (_WocketsRunning)
-                        {
-
-                            try
-                            {
-                                string[] tokens = param.Split(new char[] { ':' });
-
-                                TransmissionMode mode = (TransmissionMode)Enum.Parse(typeof(TransmissionMode),
-                                    tokens[1], true);
-
-
-                                //If the mode changed only
-                                //if (CurrentWockets._Controller._TMode != mode)
-                                // {
-
-
-                                // to switch from bursty mode, update the receiver mode and on next connection
-                                // the mode will be set up
-                                for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
-                                {
-                                    if (tokens[0] == "all")
-                                        ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._TMode = mode;
-                                    else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == tokens[0])
-                                    {
-                                        ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._TMode = mode;
-                                        break;
-                                    }
-                                }
-
-                                if (CurrentWockets._Controller._TMode == TransmissionMode.Continuous)
-                                {
-                                    Command command = new SET_VTM(mode);
+                                    string[] tokens = param.Split(new char[] { ':' });
+                                    Sensitivity sensitivity = (Sensitivity)Enum.Parse(typeof(Sensitivity),
+                                       tokens[1], true);
+                                    Command command = new SET_SEN(sensitivity);
                                     for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
                                     {
                                         if (tokens[0] == "all")
@@ -1010,147 +753,413 @@ namespace Wockets.Kernel
                                         }
                                     }
                                 }
-
-                                CurrentWockets._Controller.Deinitialize();
-                                Thread.Sleep(10000);
-
-
-
-
-
-                                CurrentWockets._Controller._StorageDirectory = Storage.GenerateStoragePath();
-
-                                for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
+                                catch (Exception e)
                                 {
-                                    CurrentWockets._Controller._Sensors[i]._Loaded = true;
-                                    CurrentWockets._Controller._Sensors[i]._Flush = true;
-                                    CurrentWockets._Controller._Sensors[i]._RootStorageDirectory = CurrentWockets._Controller._StorageDirectory + "\\data\\raw\\PLFormat\\";
+                                    Logger.Error("Booter.cs:ApplicationHandler: SET_WOCKET_SENSITIVITY:" + e.ToString());
                                 }
+                            }
+                        }
+                        #endregion SET_WOCKET_SENSITIVITY
+
+                        #region GET_WOCKET_CALIBRATION
+                        else if (msg == KernelCommand.GET_WOCKET_CALIBRATION.ToString())
+                        {
+                            if (_WocketsRunning)
+                            {
                                 try
                                 {
-                                    File.Copy(path + "//NeededFiles//Master//Configuration.xml", CurrentWockets._Controller._StorageDirectory + "\\Configuration.xml");
+                                    Command command = new GET_CAL();
+                                    for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+                                    {
+                                        if (param == "all")
+                                            ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                        else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == param)
+                                        {
+                                            ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                            break;
+                                        }
+                                    }
                                 }
-                                catch
+                                catch (Exception e)
                                 {
+                                    Logger.Error("Booter.cs:ApplicationHandler: GET_WOCKET_CALIBRATION:" + e.ToString());
                                 }
+                            }
+                        }
+
+                        #endregion GET_WOCKET_CALIBRATION
+
+                        #region SET_WOCKET_CALIBRATION
+                        else if (msg == KernelCommand.SET_WOCKET_CALIBRATION.ToString())
+                        {
+                            if (_WocketsRunning)
+                            {
+
                                 try
                                 {
-                                    TextWriter tw = new StreamWriter(CurrentWockets._Controller._StorageDirectory + "\\SensorData.xml");
-                                    tw.WriteLine(CurrentWockets._Controller.ToXML());
-                                    tw.Close();
-                                }
-                                catch
-                                {
-                                }
-                                CurrentWockets._Controller._TMode = mode;
-                                CurrentWockets._Controller.Initialize();
-                            }
-                            catch (Exception e)
-                            {
-                                Logger.Error("Booter.cs:ApplicationHandler: SET_TRANSMISSION_MODE:" + e.ToString());
-                            }
-                        }
-                    }
-                    #endregion SET_TRANSMISSION_MODE
-
-                    #region GET_MEMORY_MODE
-                    else if (msg == KernelCommand.GET_MEMORY_MODE.ToString())
-                    {
-                        if (_WocketsRunning)
-                        {
-                            try
-                            {
-                            }
-                            catch (Exception e)
-                            {
-                                Logger.Error("Booter.cs:ApplicationHandler: GET_TRANSMISSION_MODE:" + e.ToString());
-                            }
-                        }
-                    }
-
-                    #endregion GET_MEMORY_MODE
-
-                    #region SET_MEMORY_MODE
-                    else if (msg == KernelCommand.SET_MEMORY_MODE.ToString())
-                    {
-                        if (_WocketsRunning)
-                        {
-
-                            try
-                            {
-                                MemoryMode mode = (MemoryMode)Enum.Parse(typeof(MemoryMode),
-                                    param.Split(new char[] { ':' })[1], true);
-                                CurrentWockets._Controller._Mode = mode;
-                            }
-                            catch (Exception e)
-                            {
-                                Logger.Error("Booter.cs:ApplicationHandler: SET_MEMORY_MODE:" + e.ToString());
-                            }
-                        }
-                    }
-                    #endregion SET_MEMORY_MODE
-
-
-                    #region GET_WOCKET_TCT
-                    else if (msg == KernelCommand.GET_TCT.ToString())
-                    {
-                        if (_WocketsRunning)
-                        {
-                            try
-                            {
-                                Command command = new GET_TCT();
-                                for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
-                                {
-                                    if (param == "all")
-                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
-                                    else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == param)
+                                    string[] tokens = param.Split(new char[] { ':' });
+                                    string mac = tokens[0];
+                                    Calibration calibration = new Calibration();
+                                    calibration._X1G = (ushort)Convert.ToUInt32(tokens[1]);
+                                    calibration._XN1G = (ushort)Convert.ToUInt32(tokens[2]);
+                                    calibration._Y1G = (ushort)Convert.ToUInt32(tokens[3]);
+                                    calibration._YN1G = (ushort)Convert.ToUInt32(tokens[4]);
+                                    calibration._Z1G = (ushort)Convert.ToUInt32(tokens[5]);
+                                    calibration._ZN1G = (ushort)Convert.ToUInt32(tokens[6]);
+                                    Command command = new SET_CAL(calibration);
+                                    for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
                                     {
-                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
-                                        break;
+                                        if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == mac)
+                                        {
+                                            ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                            break;
+                                        }
                                     }
                                 }
-                            }
-                            catch (Exception e)
-                            {
-                                Logger.Error("Booter.cs:ApplicationHandler: GET_TCT:" + e.ToString());
-                            }
-                        }
-                    }
-
-                    #endregion GET_TCT
-
-                    #region SET_TCT
-                    else if (msg == KernelCommand.SET_TCT.ToString())
-                    {
-                        if (_WocketsRunning)
-                        {
-
-                            try
-                            {
-                                string[] tokens = param.Split(new char[] { ':' });
-                                Command command = new SET_TCT(Convert.ToInt32(tokens[1]), Convert.ToInt32(tokens[2]), Convert.ToInt32(tokens[3]));
-                                for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+                                catch (Exception e)
                                 {
-                                    if (tokens[0] == "all")
-                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
-                                    else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == tokens[0])
-                                    {
-                                        ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
-                                        break;
-                                    }
+                                    Logger.Error("Booter.cs:ApplicationHandler: SET_WOCKET_CALIBRATION:" + e.ToString());
                                 }
                             }
-                            catch (Exception e)
+                        }
+                        #endregion SET_WOCKET_CALIBRATION
+
+                        #region GET_WOCKET_SAMPLING_RATE
+                        else if (msg == KernelCommand.GET_WOCKET_SAMPLING_RATE.ToString())
+                        {
+                            if (_WocketsRunning)
                             {
-                                Logger.Error("Booter.cs:ApplicationHandler: SET_TCT:" + e.ToString());
+                                try
+                                {
+                                    Command command = new GET_SR();
+                                    for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+                                    {
+                                        if (param == "all")
+                                            ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                        else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == param)
+                                        {
+                                            ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                            break;
+                                        }
+                                    }
+                                }
+                                catch (Exception e)
+                                {
+                                    Logger.Error("Booter.cs:ApplicationHandler: GET_WOCKET_SAMPLING_RATE:" + e.ToString());
+                                }
                             }
                         }
-                    }
-                    #endregion SET_TCT
 
-                    kernelLock.Release();
+                        #endregion GET_WOCKET_SAMPLING_RATE
+
+                        #region SET_WOCKET_SAMPLING_RATE
+                        else if (msg == KernelCommand.SET_WOCKET_SAMPLING_RATE.ToString())
+                        {
+                            if (_WocketsRunning)
+                            {
+
+                                try
+                                {
+                                    string[] tokens = param.Split(new char[] { ':' });
+                                    Command command = new SET_SR(Convert.ToInt32(tokens[1]));
+                                    for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+                                    {
+                                        if (tokens[0] == "all")
+                                            ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                        else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == tokens[0])
+                                        {
+                                            ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                            break;
+                                        }
+                                    }
+                                }
+                                catch (Exception e)
+                                {
+                                    Logger.Error("Booter.cs:ApplicationHandler: SET_WOCKET_SAMPLING_RATE:" + e.ToString());
+                                }
+                            }
+                        }
+                        #endregion SET_WOCKET_SAMPLING_RATE
+
+                        #region GET_WOCKET_POWERDOWN_TIMEOUT
+                        else if (msg == KernelCommand.GET_WOCKET_POWERDOWN_TIMEOUT.ToString())
+                        {
+                            if (_WocketsRunning)
+                            {
+                                try
+                                {
+                                    Command command = new GET_PDT();
+                                    for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+                                    {
+                                        if (param == "all")
+                                            ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                        else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == param)
+                                        {
+                                            ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                            break;
+                                        }
+                                    }
+                                }
+                                catch (Exception e)
+                                {
+                                    Logger.Error("Booter.cs:ApplicationHandler: GET_WOCKET_SAMPLING_RATE:" + e.ToString());
+                                }
+                            }
+                        }
+
+                        #endregion GET_WOCKET_POWERDOWN_TIMEOUT
+
+                        #region SET_WOCKET_POWERDOWN_TIMEOUT
+                        else if (msg == KernelCommand.SET_WOCKET_POWERDOWN_TIMEOUT.ToString())
+                        {
+                            if (_WocketsRunning)
+                            {
+
+                                try
+                                {
+                                    string[] tokens = param.Split(new char[] { ':' });
+                                    Command command = new SET_PDT(Convert.ToInt32(tokens[1]));
+                                    for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+                                    {
+                                        if (tokens[0] == "all")
+                                            ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                        else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == tokens[0])
+                                        {
+                                            ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                            break;
+                                        }
+                                    }
+                                }
+                                catch (Exception e)
+                                {
+                                    Logger.Error("Booter.cs:ApplicationHandler: SET_WOCKET_SAMPLING_RATE:" + e.ToString());
+                                }
+                            }
+                        }
+                        #endregion SET_WOCKET_POWERDOWN_TIMEOUT
+
+                        #region GET_TRANSMISSION_MODE
+                        else if (msg == KernelCommand.GET_TRANSMISSION_MODE.ToString())
+                        {
+                            if (_WocketsRunning)
+                            {
+                                try
+                                {
+                                    Command command = new GET_TM();
+                                    for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+                                    {
+                                        if (param == "all")
+                                            ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                        else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == param)
+                                        {
+                                            ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                            break;
+                                        }
+                                    }
+                                }
+                                catch (Exception e)
+                                {
+                                    Logger.Error("Booter.cs:ApplicationHandler: GET_TRANSMISSION_MODE:" + e.ToString());
+                                }
+                            }
+                        }
+
+                        #endregion GET_TRANSMISSION_MODE
+
+                        #region SET_TRANSMISSION_MODE
+                        else if (msg == KernelCommand.SET_TRANSMISSION_MODE.ToString())
+                        {
+                            if (_WocketsRunning)
+                            {
+
+                                try
+                                {
+                                    string[] tokens = param.Split(new char[] { ':' });
+
+                                    TransmissionMode mode = (TransmissionMode)Enum.Parse(typeof(TransmissionMode),
+                                        tokens[1], true);
+
+
+                                    //If the mode changed only
+                                    //if (CurrentWockets._Controller._TMode != mode)
+                                    // {
+
+
+                                    // to switch from bursty mode, update the receiver mode and on next connection
+                                    // the mode will be set up
+                                    for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+                                    {
+                                        if (tokens[0] == "all")
+                                            ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._TMode = mode;
+                                        else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == tokens[0])
+                                        {
+                                            ((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._TMode = mode;
+                                            break;
+                                        }
+                                    }
+
+                                    if (CurrentWockets._Controller._TMode == TransmissionMode.Continuous)
+                                    {
+                                        Command command = new SET_VTM(mode);
+                                        for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+                                        {
+                                            if (tokens[0] == "all")
+                                                ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                            else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == tokens[0])
+                                            {
+                                                ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                                break;
+                                            }
+                                        }
+                                    }
+
+                                    CurrentWockets._Controller.Deinitialize();
+                                    Thread.Sleep(10000);
+
+
+
+
+
+                                    CurrentWockets._Controller._StorageDirectory = Storage.GenerateStoragePath();
+
+                                    for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
+                                    {
+                                        CurrentWockets._Controller._Sensors[i]._Loaded = true;
+                                        CurrentWockets._Controller._Sensors[i]._Flush = true;
+                                        CurrentWockets._Controller._Sensors[i]._RootStorageDirectory = CurrentWockets._Controller._StorageDirectory + "\\data\\raw\\PLFormat\\";
+                                    }
+                                    try
+                                    {
+                                        File.Copy(path + "//NeededFiles//Master//Configuration.xml", CurrentWockets._Controller._StorageDirectory + "\\Configuration.xml");
+                                    }
+                                    catch
+                                    {
+                                    }
+                                    try
+                                    {
+                                        TextWriter tw = new StreamWriter(CurrentWockets._Controller._StorageDirectory + "\\SensorData.xml");
+                                        tw.WriteLine(CurrentWockets._Controller.ToXML());
+                                        tw.Close();
+                                    }
+                                    catch
+                                    {
+                                    }
+                                    CurrentWockets._Controller._TMode = mode;
+                                    CurrentWockets._Controller.Initialize();
+                                }
+                                catch (Exception e)
+                                {
+                                    Logger.Error("Booter.cs:ApplicationHandler: SET_TRANSMISSION_MODE:" + e.ToString());
+                                }
+                            }
+                        }
+                        #endregion SET_TRANSMISSION_MODE
+
+                        #region GET_MEMORY_MODE
+                        else if (msg == KernelCommand.GET_MEMORY_MODE.ToString())
+                        {
+                            if (_WocketsRunning)
+                            {
+                                try
+                                {
+                                }
+                                catch (Exception e)
+                                {
+                                    Logger.Error("Booter.cs:ApplicationHandler: GET_TRANSMISSION_MODE:" + e.ToString());
+                                }
+                            }
+                        }
+
+                        #endregion GET_MEMORY_MODE
+
+                        #region SET_MEMORY_MODE
+                        else if (msg == KernelCommand.SET_MEMORY_MODE.ToString())
+                        {
+                            if (_WocketsRunning)
+                            {
+
+                                try
+                                {
+                                    MemoryMode mode = (MemoryMode)Enum.Parse(typeof(MemoryMode),
+                                        param.Split(new char[] { ':' })[1], true);
+                                    CurrentWockets._Controller._Mode = mode;
+                                }
+                                catch (Exception e)
+                                {
+                                    Logger.Error("Booter.cs:ApplicationHandler: SET_MEMORY_MODE:" + e.ToString());
+                                }
+                            }
+                        }
+                        #endregion SET_MEMORY_MODE
+
+
+                        #region GET_WOCKET_TCT
+                        else if (msg == KernelCommand.GET_TCT.ToString())
+                        {
+                            if (_WocketsRunning)
+                            {
+                                try
+                                {
+                                    Command command = new GET_TCT();
+                                    for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+                                    {
+                                        if (param == "all")
+                                            ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                        else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == param)
+                                        {
+                                            ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                            break;
+                                        }
+                                    }
+                                }
+                                catch (Exception e)
+                                {
+                                    Logger.Error("Booter.cs:ApplicationHandler: GET_TCT:" + e.ToString());
+                                }
+                            }
+                        }
+
+                        #endregion GET_TCT
+
+                        #region SET_TCT
+                        else if (msg == KernelCommand.SET_TCT.ToString())
+                        {
+                            if (_WocketsRunning)
+                            {
+
+                                try
+                                {
+                                    string[] tokens = param.Split(new char[] { ':' });
+                                    Command command = new SET_TCT(Convert.ToInt32(tokens[1]), Convert.ToInt32(tokens[2]), Convert.ToInt32(tokens[3]));
+                                    for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
+                                    {
+                                        if (tokens[0] == "all")
+                                            ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                        else if (((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address == tokens[0])
+                                        {
+                                            ((SerialReceiver)CurrentWockets._Controller._Receivers[i]).Write(command._Bytes);
+                                            break;
+                                        }
+                                    }
+                                }
+                                catch (Exception e)
+                                {
+                                    Logger.Error("Booter.cs:ApplicationHandler: SET_TCT:" + e.ToString());
+                                }
+                            }
+                        }
+                        #endregion SET_TCT
+
+                        kernelLock.Release();
+                    }
+                    namedEvent.Reset();
                 }
-                namedEvent.Reset();
+
+
+            }
+            catch(Exception e) 
+            {
+                Logger.Error("Booter.cs:an exception occurred in the ApplicationHandler" + e.ToString());
             }
         }
 

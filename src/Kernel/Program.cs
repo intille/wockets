@@ -11,6 +11,7 @@ namespace Kernel
     {
         static void Main(string[] args)
         {
+            //Thread.Sleep(30000);
             Booter.Boot();
         }
     }
