@@ -43,8 +43,7 @@ public partial class FormTestWocket : Form
         private WocketsController wc;
 
 
-        //This delegate enables asynchronous calls for setting
-        // the text property on a Panel.
+        //This delegate enables asynchronous calls for setting the text property on a Panel.
         delegate void DelegateUpdateSRPanel(double my_sr, int my_tct, int my_trials, string msg);
         delegate void DelegateUpdatePictureBox(string result);
         

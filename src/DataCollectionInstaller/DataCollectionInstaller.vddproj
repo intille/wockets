@@ -5251,9 +5251,14 @@
             "{E4F2F62A-3940-4BF5-A031-F7FA98CAAFFA}:_F46DA3CC81C8E6CDBC12A2C1D16DD465"
             {
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:Wockets, Version=1.0.4049.36591, Culture=neutral"
+            "AssemblyAsmDisplayName" = "8:Wockets, Version=1.0.4049.38616, Culture=neutral"
                 "ScatterAssemblies"
                 {
+                    "_F46DA3CC81C8E6CDBC12A2C1D16DD465"
+                    {
+                    "Name" = "8:Wockets.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:Wockets.dll"
             "TargetName" = "8:"
@@ -5923,6 +5928,16 @@
         }
         "Shortcut"
         {
+            "{971D45E9-E38C-49AC-B36E-4C5BEA533350}:_031363046C4F4FD18E74572C25EFAAC8"
+            {
+            "Name" = "8:Kernel"
+            "Arguments" = "8:"
+            "Description" = "8:"
+            "ShowCmd" = "3:1"
+            "Target" = "8:_C62A9B4FEDB74175A764FF81154BDC42"
+            "Folder" = "8:_13151380924B40799CA348E8F68FF08D"
+            "WorkingFolder" = "8:_54788E84946941F7A7359D2238C58802"
+            }
             "{971D45E9-E38C-49AC-B36E-4C5BEA533350}:_36C2D58AE71E43E48BAF3AF16AB8C341"
             {
             "Name" = "8:Detect Activity"
