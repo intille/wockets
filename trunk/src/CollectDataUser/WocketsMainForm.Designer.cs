@@ -35,6 +35,8 @@
             this.textBox_elapsed_time = new System.Windows.Forms.TextBox();
             this.label_software_version = new System.Windows.Forms.Label();
             this.SwapPanel = new System.Windows.Forms.Panel();
+            this.textBox_sensors_status_2 = new System.Windows.Forms.TextBox();
+            this.textBox_sensor_location_2 = new System.Windows.Forms.TextBox();
             this.textBox_sensors_status_1 = new System.Windows.Forms.TextBox();
             this.textBox_sensors_status_0 = new System.Windows.Forms.TextBox();
             this.textBox_sensor_location_1 = new System.Windows.Forms.TextBox();
@@ -42,7 +44,7 @@
             this.SwapSensorsButton = new System.Windows.Forms.Button();
             this.textBox_sensors_status = new System.Windows.Forms.TextBox();
             this.textBox_sensor_set_ID = new System.Windows.Forms.TextBox();
-            this.SensorStatusPanel = new System.Windows.Forms.Panel();
+            this.SensorPacketsPanel = new System.Windows.Forms.Panel();
             this.textBox_spanel_ac_full_1 = new System.Windows.Forms.TextBox();
             this.textBox19 = new System.Windows.Forms.TextBox();
             this.textBox_spanel_ac_last_1 = new System.Windows.Forms.TextBox();
@@ -65,8 +67,8 @@
             this.textBox17 = new System.Windows.Forms.TextBox();
             this.textBox_spanel_sensors_location_1 = new System.Windows.Forms.TextBox();
             this.textBox_spanel_sensors_location_0 = new System.Windows.Forms.TextBox();
-            this.textBox_spanel_sensors_status = new System.Windows.Forms.TextBox();
             this.textBox_spanel_sensors_ID = new System.Windows.Forms.TextBox();
+            this.textBox_spanel_sensors_status = new System.Windows.Forms.TextBox();
             this.ConnectPanel = new System.Windows.Forms.Panel();
             this.label_kernel_status = new System.Windows.Forms.Label();
             this.UploadDataPanel = new System.Windows.Forms.Panel();
@@ -85,20 +87,22 @@
             this.label_upload_data_status = new System.Windows.Forms.Label();
             this.ElapsedTimePanel = new System.Windows.Forms.Panel();
             this.label_phone_IMEI = new System.Windows.Forms.Label();
-            this.MainActionsPanel = new System.Windows.Forms.Panel();
+            this.SettingsPanel = new System.Windows.Forms.Panel();
             this.textBox_main_sensor_set_ID = new System.Windows.Forms.TextBox();
             this.textBox_main_sensor_status = new System.Windows.Forms.TextBox();
             this.SensorsStatusButton = new System.Windows.Forms.Button();
             this.UploadDataActionButton = new System.Windows.Forms.Button();
             this.SelectSensorsButton = new System.Windows.Forms.Button();
-            this.textBox_sensors_status_2 = new System.Windows.Forms.TextBox();
-            this.textBox_sensor_location_2 = new System.Windows.Forms.TextBox();
+            this.panel_blank = new System.Windows.Forms.Panel();
+            this.LocationPanel = new System.Windows.Forms.Panel();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.SwapPanel.SuspendLayout();
-            this.SensorStatusPanel.SuspendLayout();
+            this.SensorPacketsPanel.SuspendLayout();
             this.ConnectPanel.SuspendLayout();
             this.UploadDataPanel.SuspendLayout();
             this.ElapsedTimePanel.SuspendLayout();
-            this.MainActionsPanel.SuspendLayout();
+            this.SettingsPanel.SuspendLayout();
+            this.LocationPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // mainMenu1
@@ -113,7 +117,7 @@
             // 
             // menuQuitApp
             // 
-            this.menuQuitApp.Text = "Quit";
+            this.menuQuitApp.Text = "Settings";
             this.menuQuitApp.Click += new System.EventHandler(this.menuQuitApp_Click);
             // 
             // textBox_elapsed_time
@@ -158,12 +162,40 @@
             this.SwapPanel.Name = "SwapPanel";
             this.SwapPanel.Size = new System.Drawing.Size(240, 304);
             // 
+            // textBox_sensors_status_2
+            // 
+            this.textBox_sensors_status_2.BackColor = System.Drawing.Color.White;
+            this.textBox_sensors_status_2.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textBox_sensors_status_2.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold);
+            this.textBox_sensors_status_2.Location = new System.Drawing.Point(105, 95);
+            this.textBox_sensors_status_2.Multiline = true;
+            this.textBox_sensors_status_2.Name = "textBox_sensors_status_2";
+            this.textBox_sensors_status_2.ReadOnly = true;
+            this.textBox_sensors_status_2.Size = new System.Drawing.Size(118, 21);
+            this.textBox_sensors_status_2.TabIndex = 10;
+            this.textBox_sensors_status_2.Text = "---";
+            this.textBox_sensors_status_2.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // textBox_sensor_location_2
+            // 
+            this.textBox_sensor_location_2.BackColor = System.Drawing.Color.White;
+            this.textBox_sensor_location_2.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textBox_sensor_location_2.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold);
+            this.textBox_sensor_location_2.ForeColor = System.Drawing.Color.DimGray;
+            this.textBox_sensor_location_2.Location = new System.Drawing.Point(3, 95);
+            this.textBox_sensor_location_2.Multiline = true;
+            this.textBox_sensor_location_2.Name = "textBox_sensor_location_2";
+            this.textBox_sensor_location_2.ReadOnly = true;
+            this.textBox_sensor_location_2.Size = new System.Drawing.Size(105, 21);
+            this.textBox_sensor_location_2.TabIndex = 9;
+            this.textBox_sensor_location_2.Text = "2FFFF At Ankle";
+            // 
             // textBox_sensors_status_1
             // 
             this.textBox_sensors_status_1.BackColor = System.Drawing.Color.White;
             this.textBox_sensors_status_1.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox_sensors_status_1.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold);
-            this.textBox_sensors_status_1.Location = new System.Drawing.Point(105, 71);
+            this.textBox_sensors_status_1.Location = new System.Drawing.Point(105, 74);
             this.textBox_sensors_status_1.Multiline = true;
             this.textBox_sensors_status_1.Name = "textBox_sensors_status_1";
             this.textBox_sensors_status_1.ReadOnly = true;
@@ -192,7 +224,7 @@
             this.textBox_sensor_location_1.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox_sensor_location_1.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold);
             this.textBox_sensor_location_1.ForeColor = System.Drawing.Color.DimGray;
-            this.textBox_sensor_location_1.Location = new System.Drawing.Point(3, 71);
+            this.textBox_sensor_location_1.Location = new System.Drawing.Point(3, 74);
             this.textBox_sensor_location_1.Multiline = true;
             this.textBox_sensor_location_1.Name = "textBox_sensor_location_1";
             this.textBox_sensor_location_1.ReadOnly = true;
@@ -255,35 +287,35 @@
             this.textBox_sensor_set_ID.Text = "RED SET";
             this.textBox_sensor_set_ID.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
-            // SensorStatusPanel
+            // SensorPacketsPanel
             // 
-            this.SensorStatusPanel.Controls.Add(this.textBox_spanel_ac_full_1);
-            this.SensorStatusPanel.Controls.Add(this.textBox19);
-            this.SensorStatusPanel.Controls.Add(this.textBox_spanel_ac_last_1);
-            this.SensorStatusPanel.Controls.Add(this.textBox21);
-            this.SensorStatusPanel.Controls.Add(this.textBox_spanel_ac_new_1);
-            this.SensorStatusPanel.Controls.Add(this.textBox23);
-            this.SensorStatusPanel.Controls.Add(this.textBox_spanel_ac_empty_1);
-            this.SensorStatusPanel.Controls.Add(this.textBox25);
-            this.SensorStatusPanel.Controls.Add(this.textBox_spanel_ac_partial_1);
-            this.SensorStatusPanel.Controls.Add(this.textBox27);
-            this.SensorStatusPanel.Controls.Add(this.textBox_spanel_ac_full_0);
-            this.SensorStatusPanel.Controls.Add(this.textBox8);
-            this.SensorStatusPanel.Controls.Add(this.textBox_spanel_ac_last_0);
-            this.SensorStatusPanel.Controls.Add(this.textBox11);
-            this.SensorStatusPanel.Controls.Add(this.textBox_spanel_ac_new_0);
-            this.SensorStatusPanel.Controls.Add(this.textBox13);
-            this.SensorStatusPanel.Controls.Add(this.textBox_spanel_ac_empty_0);
-            this.SensorStatusPanel.Controls.Add(this.textBox15);
-            this.SensorStatusPanel.Controls.Add(this.textBox_spanel_ac_partial_0);
-            this.SensorStatusPanel.Controls.Add(this.textBox17);
-            this.SensorStatusPanel.Controls.Add(this.textBox_spanel_sensors_location_1);
-            this.SensorStatusPanel.Controls.Add(this.textBox_spanel_sensors_location_0);
-            this.SensorStatusPanel.Controls.Add(this.textBox_spanel_sensors_status);
-            this.SensorStatusPanel.Controls.Add(this.textBox_spanel_sensors_ID);
-            this.SensorStatusPanel.Location = new System.Drawing.Point(0, 50);
-            this.SensorStatusPanel.Name = "SensorStatusPanel";
-            this.SensorStatusPanel.Size = new System.Drawing.Size(240, 304);
+            this.SensorPacketsPanel.Controls.Add(this.textBox_spanel_ac_full_1);
+            this.SensorPacketsPanel.Controls.Add(this.textBox19);
+            this.SensorPacketsPanel.Controls.Add(this.textBox_spanel_ac_last_1);
+            this.SensorPacketsPanel.Controls.Add(this.textBox21);
+            this.SensorPacketsPanel.Controls.Add(this.textBox_spanel_ac_new_1);
+            this.SensorPacketsPanel.Controls.Add(this.textBox23);
+            this.SensorPacketsPanel.Controls.Add(this.textBox_spanel_ac_empty_1);
+            this.SensorPacketsPanel.Controls.Add(this.textBox25);
+            this.SensorPacketsPanel.Controls.Add(this.textBox_spanel_ac_partial_1);
+            this.SensorPacketsPanel.Controls.Add(this.textBox27);
+            this.SensorPacketsPanel.Controls.Add(this.textBox_spanel_ac_full_0);
+            this.SensorPacketsPanel.Controls.Add(this.textBox8);
+            this.SensorPacketsPanel.Controls.Add(this.textBox_spanel_ac_last_0);
+            this.SensorPacketsPanel.Controls.Add(this.textBox11);
+            this.SensorPacketsPanel.Controls.Add(this.textBox_spanel_ac_new_0);
+            this.SensorPacketsPanel.Controls.Add(this.textBox13);
+            this.SensorPacketsPanel.Controls.Add(this.textBox_spanel_ac_empty_0);
+            this.SensorPacketsPanel.Controls.Add(this.textBox15);
+            this.SensorPacketsPanel.Controls.Add(this.textBox_spanel_ac_partial_0);
+            this.SensorPacketsPanel.Controls.Add(this.textBox17);
+            this.SensorPacketsPanel.Controls.Add(this.textBox_spanel_sensors_location_1);
+            this.SensorPacketsPanel.Controls.Add(this.textBox_spanel_sensors_location_0);
+            this.SensorPacketsPanel.Controls.Add(this.textBox_spanel_sensors_ID);
+            this.SensorPacketsPanel.Controls.Add(this.textBox_spanel_sensors_status);
+            this.SensorPacketsPanel.Location = new System.Drawing.Point(0, 50);
+            this.SensorPacketsPanel.Name = "SensorPacketsPanel";
+            this.SensorPacketsPanel.Size = new System.Drawing.Size(240, 304);
             // 
             // textBox_spanel_ac_full_1
             // 
@@ -603,21 +635,6 @@
             this.textBox_spanel_sensors_location_0.Text = "Sensor 2FF34 At Wrist";
             this.textBox_spanel_sensors_location_0.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
-            // textBox_spanel_sensors_status
-            // 
-            this.textBox_spanel_sensors_status.BackColor = System.Drawing.Color.White;
-            this.textBox_spanel_sensors_status.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBox_spanel_sensors_status.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold);
-            this.textBox_spanel_sensors_status.ForeColor = System.Drawing.Color.Tomato;
-            this.textBox_spanel_sensors_status.Location = new System.Drawing.Point(0, 32);
-            this.textBox_spanel_sensors_status.Multiline = true;
-            this.textBox_spanel_sensors_status.Name = "textBox_spanel_sensors_status";
-            this.textBox_spanel_sensors_status.ReadOnly = true;
-            this.textBox_spanel_sensors_status.Size = new System.Drawing.Size(240, 23);
-            this.textBox_spanel_sensors_status.TabIndex = 0;
-            this.textBox_spanel_sensors_status.Text = "Disconnected";
-            this.textBox_spanel_sensors_status.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
             // textBox_spanel_sensors_ID
             // 
             this.textBox_spanel_sensors_ID.BackColor = System.Drawing.Color.Tomato;
@@ -632,6 +649,21 @@
             this.textBox_spanel_sensors_ID.TabIndex = 1;
             this.textBox_spanel_sensors_ID.Text = "RED SET";
             this.textBox_spanel_sensors_ID.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // textBox_spanel_sensors_status
+            // 
+            this.textBox_spanel_sensors_status.BackColor = System.Drawing.Color.White;
+            this.textBox_spanel_sensors_status.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textBox_spanel_sensors_status.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold);
+            this.textBox_spanel_sensors_status.ForeColor = System.Drawing.Color.Tomato;
+            this.textBox_spanel_sensors_status.Location = new System.Drawing.Point(0, 32);
+            this.textBox_spanel_sensors_status.Multiline = true;
+            this.textBox_spanel_sensors_status.Name = "textBox_spanel_sensors_status";
+            this.textBox_spanel_sensors_status.ReadOnly = true;
+            this.textBox_spanel_sensors_status.Size = new System.Drawing.Size(240, 23);
+            this.textBox_spanel_sensors_status.TabIndex = 0;
+            this.textBox_spanel_sensors_status.Text = "Disconnected";
+            this.textBox_spanel_sensors_status.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // ConnectPanel
             // 
@@ -871,16 +903,16 @@
             this.label_phone_IMEI.Size = new System.Drawing.Size(118, 15);
             this.label_phone_IMEI.Text = "IMEI:";
             // 
-            // MainActionsPanel
+            // SettingsPanel
             // 
-            this.MainActionsPanel.Controls.Add(this.textBox_main_sensor_set_ID);
-            this.MainActionsPanel.Controls.Add(this.textBox_main_sensor_status);
-            this.MainActionsPanel.Controls.Add(this.SensorsStatusButton);
-            this.MainActionsPanel.Controls.Add(this.UploadDataActionButton);
-            this.MainActionsPanel.Controls.Add(this.SelectSensorsButton);
-            this.MainActionsPanel.Location = new System.Drawing.Point(0, 50);
-            this.MainActionsPanel.Name = "MainActionsPanel";
-            this.MainActionsPanel.Size = new System.Drawing.Size(240, 304);
+            this.SettingsPanel.Controls.Add(this.textBox_main_sensor_set_ID);
+            this.SettingsPanel.Controls.Add(this.textBox_main_sensor_status);
+            this.SettingsPanel.Controls.Add(this.SensorsStatusButton);
+            this.SettingsPanel.Controls.Add(this.UploadDataActionButton);
+            this.SettingsPanel.Controls.Add(this.SelectSensorsButton);
+            this.SettingsPanel.Location = new System.Drawing.Point(0, 50);
+            this.SettingsPanel.Name = "SettingsPanel";
+            this.SettingsPanel.Size = new System.Drawing.Size(240, 304);
             // 
             // textBox_main_sensor_set_ID
             // 
@@ -921,7 +953,7 @@
             this.SensorsStatusButton.Size = new System.Drawing.Size(120, 43);
             this.SensorsStatusButton.TabIndex = 2;
             this.SensorsStatusButton.Text = "Wockets Status";
-            this.SensorsStatusButton.Click += new System.EventHandler(this.SensorsStatusButton_Click);
+            this.SensorsStatusButton.Click += new System.EventHandler(this.SensorsDetailStatusButton_Click);
             // 
             // UploadDataActionButton
             // 
@@ -945,33 +977,27 @@
             this.SelectSensorsButton.Text = "Swap Wockets";
             this.SelectSensorsButton.Click += new System.EventHandler(this.SelectSensorsButton_Click);
             // 
-            // textBox_sensors_status_2
+            // panel_blank
             // 
-            this.textBox_sensors_status_2.BackColor = System.Drawing.Color.White;
-            this.textBox_sensors_status_2.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBox_sensors_status_2.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold);
-            this.textBox_sensors_status_2.Location = new System.Drawing.Point(105, 94);
-            this.textBox_sensors_status_2.Multiline = true;
-            this.textBox_sensors_status_2.Name = "textBox_sensors_status_2";
-            this.textBox_sensors_status_2.ReadOnly = true;
-            this.textBox_sensors_status_2.Size = new System.Drawing.Size(118, 21);
-            this.textBox_sensors_status_2.TabIndex = 10;
-            this.textBox_sensors_status_2.Text = "---";
-            this.textBox_sensors_status_2.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.panel_blank.BackColor = System.Drawing.Color.White;
+            this.panel_blank.Location = new System.Drawing.Point(0, 50);
+            this.panel_blank.Name = "panel_blank";
+            this.panel_blank.Size = new System.Drawing.Size(240, 304);
             // 
-            // textBox_sensor_location_2
+            // LocationPanel
             // 
-            this.textBox_sensor_location_2.BackColor = System.Drawing.Color.White;
-            this.textBox_sensor_location_2.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBox_sensor_location_2.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold);
-            this.textBox_sensor_location_2.ForeColor = System.Drawing.Color.DimGray;
-            this.textBox_sensor_location_2.Location = new System.Drawing.Point(3, 94);
-            this.textBox_sensor_location_2.Multiline = true;
-            this.textBox_sensor_location_2.Name = "textBox_sensor_location_2";
-            this.textBox_sensor_location_2.ReadOnly = true;
-            this.textBox_sensor_location_2.Size = new System.Drawing.Size(105, 21);
-            this.textBox_sensor_location_2.TabIndex = 9;
-            this.textBox_sensor_location_2.Text = "2FFFF At Ankle";
+            this.LocationPanel.BackColor = System.Drawing.Color.White;
+            this.LocationPanel.Controls.Add(this.pictureBox1);
+            this.LocationPanel.Location = new System.Drawing.Point(0, 50);
+            this.LocationPanel.Name = "LocationPanel";
+            this.LocationPanel.Size = new System.Drawing.Size(240, 304);
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.BackColor = System.Drawing.Color.Gray;
+            this.pictureBox1.Location = new System.Drawing.Point(1, 2);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(238, 300);
             // 
             // WocketsMainForm
             // 
@@ -980,11 +1006,13 @@
             this.AutoScroll = true;
             this.ClientSize = new System.Drawing.Size(240, 294);
             this.Controls.Add(this.ElapsedTimePanel);
+            this.Controls.Add(this.LocationPanel);
             this.Controls.Add(this.SwapPanel);
             this.Controls.Add(this.ConnectPanel);
             this.Controls.Add(this.UploadDataPanel);
-            this.Controls.Add(this.MainActionsPanel);
-            this.Controls.Add(this.SensorStatusPanel);
+            this.Controls.Add(this.SettingsPanel);
+            this.Controls.Add(this.SensorPacketsPanel);
+            this.Controls.Add(this.panel_blank);
             this.Location = new System.Drawing.Point(0, 0);
             this.Menu = this.mainMenu1;
             this.MinimizeBox = false;
@@ -994,11 +1022,12 @@
             this.Closed += new System.EventHandler(this.WocketsMainForm_Closed);
             this.Closing += new System.ComponentModel.CancelEventHandler(this.WocketsMainForm_Closing);
             this.SwapPanel.ResumeLayout(false);
-            this.SensorStatusPanel.ResumeLayout(false);
+            this.SensorPacketsPanel.ResumeLayout(false);
             this.ConnectPanel.ResumeLayout(false);
             this.UploadDataPanel.ResumeLayout(false);
             this.ElapsedTimePanel.ResumeLayout(false);
-            this.MainActionsPanel.ResumeLayout(false);
+            this.SettingsPanel.ResumeLayout(false);
+            this.LocationPanel.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -1018,7 +1047,7 @@
         private System.Windows.Forms.Panel ConnectPanel;
         private System.Windows.Forms.Panel ElapsedTimePanel;
         private System.Windows.Forms.Label label_kernel_status;
-        private System.Windows.Forms.Panel MainActionsPanel;
+        private System.Windows.Forms.Panel SettingsPanel;
         private System.Windows.Forms.Button SensorsStatusButton;
         private System.Windows.Forms.Button UploadDataActionButton;
         private System.Windows.Forms.Button SelectSensorsButton;
@@ -1038,7 +1067,7 @@
         private System.Windows.Forms.TextBox textBox3;
         private System.Windows.Forms.TextBox textBox_updater_last_update;
         private System.Windows.Forms.TextBox textBox6;
-        private System.Windows.Forms.Panel SensorStatusPanel;
+        private System.Windows.Forms.Panel SensorPacketsPanel;
         private System.Windows.Forms.TextBox textBox_spanel_sensors_location_1;
         private System.Windows.Forms.TextBox textBox_spanel_sensors_location_0;
         private System.Windows.Forms.TextBox textBox_spanel_sensors_status;
@@ -1068,6 +1097,11 @@
         private System.Windows.Forms.TextBox textBox_sensors_status_0;
         private System.Windows.Forms.TextBox textBox_sensors_status_2;
         private System.Windows.Forms.TextBox textBox_sensor_location_2;
+
+        private System.Windows.Forms.Panel panel_blank;
+        private System.Windows.Forms.Panel LocationPanel;
+        private System.Windows.Forms.PictureBox pictureBox1;
+
     }
 }
 
