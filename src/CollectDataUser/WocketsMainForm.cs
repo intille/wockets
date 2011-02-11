@@ -28,11 +28,14 @@ namespace CollectDataUser
 
     enum PanelID 
     {
-        MAIN,
+        SETTINGS,
         SWAP,
         UPLOAD,
         STATUS,
-        CONNECTION
+        PACKETS,
+        CONNECTION,
+        LOCATION,
+        BLANK
     }
 
     enum MasterListParam
@@ -514,8 +517,8 @@ namespace CollectDataUser
 
         private void InitializePanels()
         {
-            MainActionsPanel.Visible = false;
-            MainActionsPanel.Enabled = false;
+            SettingsPanel.Visible = false;
+            SettingsPanel.Enabled = false;
 
             SwapPanel.Visible = false;
             SwapPanel.Enabled = false;
@@ -523,11 +526,14 @@ namespace CollectDataUser
             UploadDataPanel.Visible = false;
             UploadDataPanel.Enabled = false;
 
-            SensorStatusPanel.Visible = false;
-            SensorStatusPanel.Enabled = false;
+            SensorPacketsPanel.Visible = false;
+            SensorPacketsPanel.Enabled = false;
 
             ConnectPanel.Visible = false;
             ConnectPanel.Enabled = false;
+
+            panel_blank.Visible = false;
+            panel_blank.Enabled = false;
 
         }
 
@@ -537,16 +543,16 @@ namespace CollectDataUser
             #region TurnOff CurrentPanel & Update LastPanelSet variable
 
            
-            switch( CurrentPanel)
+            switch(CurrentPanel)
             {
-                   case PanelID.SWAP:
+               case PanelID.SWAP:
                             SwapPanel.Visible = false;
                             SwapPanel.Enabled = false;
                             break;
 
-                case PanelID.MAIN:
-                            MainActionsPanel.Visible = false;
-                            MainActionsPanel.Enabled = false;
+                case PanelID.SETTINGS:
+                            SettingsPanel.Visible = false;
+                            SettingsPanel.Enabled = false;
                             break;
             
                 case PanelID.UPLOAD:
@@ -558,9 +564,9 @@ namespace CollectDataUser
                             textBox_elapsed_time.Visible = false;
                             break;
             
-                case PanelID.STATUS:
-                            SensorStatusPanel.Visible = false;
-                            SensorStatusPanel.Enabled = false;
+                case PanelID.PACKETS:
+                            SensorPacketsPanel.Visible = false;
+                            SensorPacketsPanel.Enabled = false;
                             break;
 
                 case PanelID.CONNECTION:
@@ -576,6 +582,13 @@ namespace CollectDataUser
             #endregion
 
 
+            panel_blank.BringToFront();
+            panel_blank.Visible = true;
+            Application.DoEvents();
+            Thread.Sleep(50);
+            panel_blank.Visible = false;
+
+
             #region TurnOn Requested Panel & Update CurrentPanelSet variable
 
             switch (ID)
@@ -586,26 +599,26 @@ namespace CollectDataUser
                     SwapPanel.Enabled = true;
                     break;
 
-                case PanelID.MAIN:
-                    MainActionsPanel.BringToFront();
-                    MainActionsPanel.Visible = true;
-                    MainActionsPanel.Enabled = true;
+                case PanelID.SETTINGS:
+                    SettingsPanel.BringToFront();
+                    SettingsPanel.Visible = true;
+                    SettingsPanel.Enabled = true;
                     break;
 
                 case PanelID.UPLOAD:
                     //Launch the update thread for the data upload
                     textBox_elapsed_time.Visible = true;
                     StartUpdateUploadThread();
-                    
-                    MainActionsPanel.BringToFront();
+
+                    UploadDataPanel.BringToFront();
                     UploadDataPanel.Visible = true;
                     UploadDataPanel.Enabled = true;
                     break;
 
-                case PanelID.STATUS:
-                    SensorStatusPanel.BringToFront();
-                    SensorStatusPanel.Visible = true;
-                    SensorStatusPanel.Enabled = true;
+                case PanelID.PACKETS:
+                    SensorPacketsPanel.BringToFront();
+                    SensorPacketsPanel.Visible = true;
+                    SensorPacketsPanel.Enabled = true;
                     break;
 
                 case PanelID.CONNECTION:
@@ -621,7 +634,6 @@ namespace CollectDataUser
 
             #endregion
 
-        
         }
 
       #endregion
@@ -1111,8 +1123,6 @@ namespace CollectDataUser
        //bool is_kernel_started = false;
        //bool is_kernel_pinged  = false;
 
-
-
        #region commented 
        //private void LoadWocketsToKernel()
        //{
@@ -1341,7 +1351,7 @@ namespace CollectDataUser
 
                                     //Update the sensors status variable on the swap panel screen
                                     Show_Swap_Panel("Connected", sensor_set, wockets_controller);
-                                    TurnOnPanel(PanelID.SWAP);
+                                    TurnOnPanel(PanelID.LOCATION);
 
                                     //Update the main application menu options
                                     menuMainAppActions.Text = "Main Menu";
@@ -1508,7 +1518,7 @@ namespace CollectDataUser
       #endregion
 
 
-     #region Reboot Phone
+      #region Reboot Phone
         [DllImport("aygshell.dll")]
         private static extern bool ExitWindowsEx(uint uFlags, int dwReserved);
 
@@ -1634,44 +1644,60 @@ namespace CollectDataUser
 
       #region Exit/terminate application functions
 
+
        private void menuQuitApp_Click(object sender, EventArgs e)
         {
             menuQuitApp.Enabled = false;
             menuMainAppActions.Enabled = false;
-            Logger.Debug("Quit Button Clicked");
-
-            #region Exit Application
-
-            //Show the connect status panel
-            label_kernel_status.Text = "...";
-            TurnOnPanel(PanelID.CONNECTION);
-            Application.DoEvents();
+            Logger.Debug("Settings-Quit Button Clicked");
 
 
-            if (MessageBox.Show("Are you sure you want to exit?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
+            if ( menuQuitApp.Text.CompareTo("Quit") == 0 )
             {
+                //menuQuitApp.Text = "Settings";
 
-                #region user confirmed to exit application
 
-                label_kernel_status.Text = "Exiting Application";
-                Logger.Debug("user confirmed to quit the application");
+                #region Exit Application
+
+                //Show the connect status panel
+                label_kernel_status.Text = "...";
+                TurnOnPanel(PanelID.CONNECTION);
                 Application.DoEvents();
-                TerminateApp();
+
+
+                if (MessageBox.Show("Are you sure you want to exit?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
+                {
+
+                    #region user confirmed to exit application
+
+                    label_kernel_status.Text = "Exiting Application";
+                    Logger.Debug("user confirmed to quit the application");
+                    Application.DoEvents();
+                    TerminateApp();
+
+                    #endregion
+
+                }
+                else 
+                {
+                    TurnOnPanel(LastPanel);
+                    Logger.Debug("User decided no to quit application");
+                }
 
                 #endregion
 
             }
-            else
+            else //if menu == settings
             {
-                TurnOnPanel(LastPanel);
-                Logger.Debug("User decided no to quit the application");
+                menuQuitApp.Text = "Quit";
+                menuMainAppActions.Text = "Main Menu";
+                TurnOnPanel(PanelID.SETTINGS);
             }
-
-            #endregion
 
             menuQuitApp.Enabled = true;
             menuMainAppActions.Enabled = true;
         }
+
 
        private bool TerminateKernel()
         {
@@ -1884,8 +1910,16 @@ namespace CollectDataUser
                 else if (menuMainAppActions.Text.CompareTo("Main Menu") == 0)
                 {
                     menuMainAppActions.Text = "Minimize";
-                    TurnOnPanel(PanelID.MAIN);
-                    Logger.Debug("Go to the main menu panel");
+                    menuQuitApp.Text = "Settings";
+                    TurnOnPanel(PanelID.SWAP);
+                    Logger.Debug("Go to the main sensor status panel");
+                }
+                else if (menuMainAppActions.Text.CompareTo("Back") == 0)
+                {
+                    menuMainAppActions.Text = "Main Menu";
+                    menuQuitApp.Text = "Quit";
+                    TurnOnPanel(PanelID.SETTINGS);
+                    Logger.Debug("Go to the sensor settings panel");
                 }
             }
             catch(Exception ex) 
@@ -1897,7 +1931,7 @@ namespace CollectDataUser
             ShowWindow(this.Handle, SW_MINIMIZED);
         }
 
-    #endregion 
+      #endregion 
 
       
       #region Main Actions Panel Buttons
@@ -1932,7 +1966,7 @@ namespace CollectDataUser
             #endregion
 
             ////Update Main App Actions Menu
-            menuMainAppActions.Text = "Main Menu";
+            menuMainAppActions.Text = "Back";
             TurnOnPanel(PanelID.SWAP);
             SelectSensorsButton.Enabled = true;
         }
@@ -1967,7 +2001,7 @@ namespace CollectDataUser
             #endregion
 
             //Update Main App Actions Menu
-            menuMainAppActions.Text = "Main Menu";
+            menuMainAppActions.Text = "Back";
             TurnOnPanel(PanelID.UPLOAD);
             UploadDataActionButton.Enabled = true;
 
@@ -1975,7 +2009,7 @@ namespace CollectDataUser
 
 
         //Detail Status Button
-        private void SensorsStatusButton_Click(object sender, EventArgs e)
+        private void SensorsDetailStatusButton_Click(object sender, EventArgs e)
         {
             SensorsStatusButton.Enabled = false;
             Logger.Debug("Go to the sensor status panel");
@@ -2014,8 +2048,8 @@ namespace CollectDataUser
 
 
             //Update Main App Actions Menu
-            menuMainAppActions.Text = "Main Menu";
-            TurnOnPanel(PanelID.STATUS);
+            menuMainAppActions.Text = "Back";
+            TurnOnPanel(PanelID.PACKETS);
 
             SensorsStatusButton.Enabled = true;
 
@@ -2779,8 +2813,6 @@ namespace CollectDataUser
 
        
      #endregion
-
-
 
     }
 
