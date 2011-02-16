@@ -27,6 +27,8 @@ namespace DataCollectionApp
         static bool connecting = false;
         static WocketsController wc;
         static bool[] countSeconds = null;
+        static int[] LastACIndex;
+        static int[] LastSeqNum;
         static SMSManager smsMgr;
         
         static String gatewayNumber = "6173012490";
@@ -89,7 +91,7 @@ namespace DataCollectionApp
             CurrentWockets._Configuration = configuration;            
             wc = new WocketsController("", "", "");
             CurrentWockets._Controller = wc;
-            wc._storageDirectory = storageDirectory;
+            wc._StorageDirectory = storageDirectory;
             wc.FromXML("\\Program Files\\wockets\\NeededFiles\\SensorConfigurations\\SensorDataFahd.xml");
             try
             {
@@ -133,14 +135,18 @@ namespace DataCollectionApp
             }
 
             countSeconds = new bool[wc._Sensors.Count];
+            LastACIndex = new int[wc._Sensors.Count];
+            LastSeqNum = new int[wc._Sensors.Count];
             for (int i = 0; (i < wc._Sensors.Count); i++)
             {                
                 wc._Sensors[i]._Loaded = true;
                 wc._Sensors[i]._Flush = true;
                 wc._Sensors[i]._RootStorageDirectory = storageDirectory + "\\data\\raw\\PLFormat\\";
                 countSeconds[i] = false;
+                LastACIndex[i] = -1;
+                LastSeqNum[i] = -1;
             }
-            wc._Bursty = true;
+            
             wc._TMode = TransmissionMode.Bursty60;
             wc.Initialize();
             reminderDateTime = DateTime.Now.AddSeconds(60);
@@ -267,12 +273,26 @@ namespace DataCollectionApp
                                 log_line += "," + wc._Sensors[i]._ReceivedPackets + "," + ((WocketsDecoder)wc._Decoders[i])._ExpectedBatchCount + "," + ((RFCOMMReceiver)wc._Receivers[i])._SuccessfulConnections + "," + ((RFCOMMReceiver)wc._Receivers[i])._Reconnections + "," + ((RFCOMMReceiver)wc._Receivers[i])._ConnectionTime;
                                 dataSavedSeconds[i] = 0;
                                 countSeconds[i] = false;
-                                ((WocketsDecoder)wc._Decoders[i])._ExpectedBatchCount = 0;
+                                ((WocketsDecoder)wc._Decoders[i])._ExpectedBatchCount = -1;
 
                                 TextWriter tw2 = new StreamWriter("testsummary" + i + ".csv", true);
-                                for (int j = 0; (j < ((WocketsDecoder)wc._Decoders[i])._ActivityCountIndex); j++)
-                                    tw2.WriteLine(k + "," + currentTime + ","+((WocketsDecoder)wc._Decoders[i])._ActivityCounts[j]);                                
-                                ((WocketsDecoder)wc._Decoders[i])._ActivityCountIndex = 0;
+                                int nextACIndex = LastACIndex[i] + 1;
+                                if (nextACIndex == 960)
+                                    nextACIndex = 0;                              
+                                for (int j = nextACIndex; (j != ((WocketsDecoder)wc._Decoders[i])._ActivityCountIndex);)
+                                {                                    
+                                    DateTime ac_dt = new DateTime();
+                                    WocketsTimer.GetDateTime((long)((WocketsDecoder)wc._Decoders[i])._ActivityCounts[j]._TimeStamp,out ac_dt);
+                                    string ac_currentTime = ac_dt.ToString("yyyy-MM-dd HH:mm:ss");
+                                    tw2.WriteLine(((WocketsDecoder)wc._Decoders[i])._ActivityCounts[j]._SeqNum + "," + ac_currentTime + "," + ((WocketsDecoder)wc._Decoders[i])._ActivityCounts[j]._TimeStamp + "," + ((WocketsDecoder)wc._Decoders[i])._ActivityCounts[j]._Count);                         
+                                    LastSeqNum[i] = ((WocketsDecoder)wc._Decoders[i])._ActivityCounts[j]._SeqNum;
+                                    LastACIndex[i] = j; 
+
+                                    j++;
+                                    if (j == 960)
+                                        j = 0;
+                                }
+                                
                                 tw2.Close();
                             }
                            
@@ -305,7 +325,7 @@ namespace DataCollectionApp
                                 Thread.Sleep(1000);
                             }
 
-                            TextWriter tw = new StreamWriter("test.csv", true);
+                            TextWriter tw = new StreamWriter("test1.csv", true);
                             tw.WriteLine(log_line);
                             tw.Close();
 
@@ -326,8 +346,8 @@ namespace DataCollectionApp
 
 
                             Thread.Sleep(1000);
-                           if (DateTime.Now.Subtract(lastActivity).TotalSeconds > 30)
-                               SetSystemPowerState(null, POWER_STATE_SUSPEND, POWER_FORCE);
+                           //if (DateTime.Now.Subtract(lastActivity).TotalSeconds > 30)
+                               //SetSystemPowerState(null, POWER_STATE_SUSPEND, POWER_FORCE);
                          
                         }
 
