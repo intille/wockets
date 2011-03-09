@@ -30,7 +30,7 @@ namespace DataMerger
         
         
         ProgressForm progressForm;
-        private static Form2 f;
+        private static Form2 other_sensors_form = null;
 
         public Form1()
         {
@@ -46,6 +46,8 @@ namespace DataMerger
         #region Initialize and Check If the Sensors Files Exist
 
 
+
+        
         private void button2_Click(object sender, EventArgs e)
         {
             DialogResult result = this.folderBrowserDialog1.ShowDialog();
@@ -59,92 +61,143 @@ namespace DataMerger
                 //Check if all the files that we are looking for exist
                 try
                 {
+                    string[] file;
 
-                    #region File Status Window
+                    #region Delete Older Files
 
-                    //Older Stuff
-                    this.progressForm.AppendLog("Older Merged MITes CSVs .....................Deleting\r\n");
-                    string[] file = Directory.GetFileSystemEntries(this.textBox1.Text +"\\"+MERGED_SUBDIRECTORY, "*MITes*.csv");
-                    foreach (string filename in file)
-                        File.Delete(filename);
+                    if (Directory.Exists(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY))
+                    {
+                        this.progressForm.AppendLog("Older Merged MITes CSVs .....................Deleting\r\n");
+                        file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*MITes*.csv");
+                        foreach (string filename in file)
+                            File.Delete(filename);
 
-                    this.progressForm.AppendLog("Older Merged Wockets CSVs .....................Deleting\r\n");
-                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*Wocket*.csv");
-                    foreach (string filename in file)
-                        File.Delete(filename);
+                        this.progressForm.AppendLog("Older Merged Wockets CSVs .....................Deleting\r\n");
+                        file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*Wocket*.csv");
+                        foreach (string filename in file)
+                            File.Delete(filename);
 
-                    this.progressForm.AppendLog("Older Merged Actigraph CSVs .....................Deleting\r\n");
-                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*Actigraph*.csv");
-                    foreach (string filename in file)
-                        File.Delete(filename);
-
-
-                    this.progressForm.AppendLog("Older Merged Sensewear CSVs .....................Deleting\r\n");
-                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*Sensewear*.csv");
-                    foreach (string filename in file)
-                        File.Delete(filename);
-
-                    this.progressForm.AppendLog("Older Merged Zephyr CSVs .....................Deleting\r\n");
-                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*Zephyr*.csv");
-                    foreach (string filename in file)
-                        File.Delete(filename);
-
-                    this.progressForm.AppendLog("Older Merged Oxycon CSVs .....................Deleting\r\n");
-                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*Oxycon*.csv");
-                    foreach (string filename in file)
-                        File.Delete(filename);
-
-                    this.progressForm.AppendLog("Older Merged Omron CSVs .....................Deleting\r\n");
-                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*Omron*.csv");
-                    foreach (string filename in file)
-                        File.Delete(filename);
-
-                    this.progressForm.AppendLog("Older Merged Columbia CSVs .....................Deleting\r\n");
-                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*columbia*.csv");
-                    foreach (string filename in file)
-                        File.Delete(filename);
-
-                    this.progressForm.AppendLog("Older Merged GPS CSVs .....................Deleting\r\n");
-                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*gps*.csv");
-                    foreach (string filename in file)
-                        File.Delete(filename);
-
-                    this.progressForm.AppendLog("Older Merged RTI CSVs .....................Deleting\r\n");
-                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*rti*.csv");
-                    foreach (string filename in file)
-                        File.Delete(filename);
+                        this.progressForm.AppendLog("Older Merged Actigraph CSVs .....................Deleting\r\n");
+                        file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*Actigraph*.csv");
+                        foreach (string filename in file)
+                            File.Delete(filename);
 
 
-                    //annotation files  (Audio) 
+                        this.progressForm.AppendLog("Older Merged Sensewear CSVs .....................Deleting\r\n");
+                        file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*Sensewear*.csv");
+                        foreach (string filename in file)
+                            File.Delete(filename);
+
+                        this.progressForm.AppendLog("Older Merged Zephyr CSVs .....................Deleting\r\n");
+                        file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*Zephyr*.csv");
+                        foreach (string filename in file)
+                            File.Delete(filename);
+
+                        this.progressForm.AppendLog("Older Merged Oxycon CSVs .....................Deleting\r\n");
+                        file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*Oxycon*.csv");
+                        foreach (string filename in file)
+                            File.Delete(filename);
+
+                        this.progressForm.AppendLog("Older Merged Omron CSVs .....................Deleting\r\n");
+                        file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*Omron*.csv");
+                        foreach (string filename in file)
+                            File.Delete(filename);
+
+                        this.progressForm.AppendLog("Older Merged Columbia CSVs .....................Deleting\r\n");
+                        file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*columbia*.csv");
+                        foreach (string filename in file)
+                            File.Delete(filename);
+
+                        this.progressForm.AppendLog("Older Merged GPS CSVs .....................Deleting\r\n");
+                        file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*gps*.csv");
+                        foreach (string filename in file)
+                            File.Delete(filename);
+
+                        this.progressForm.AppendLog("Older Merged RTI CSVs .....................Deleting\r\n");
+                        file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*rti*.csv");
+                        foreach (string filename in file)
+                            File.Delete(filename);
+
+                    }
+                    #endregion
+
+
+                    #region Search for annotation files
+
+                  
                     if (File.Exists(this.textBox1.Text + "\\" + ANNOTATION_SUBDIRECTORY + "\\audioannotation" + "\\AnnotationIntervals.xml"))
                     {
                         this.progressForm.AppendLog("Annotation File in Audio Folder................Found\r\n");
-                        ANNOTATION_SUBDIRECTORY = ANNOTATION_SUBDIRECTORY + "\\audioannotation";
+                        ANNOTATION_SUBDIRECTORY = ANNOTATION_DIRECTORY + "\\audioannotation";
+                        annotation_subdirectory_list.Add(ANNOTATION_SUBDIRECTORY);
+                        annotation_intervals_file_list.Add("AnnotationIntervals.xml");
                     }
-                    else if (File.Exists(this.textBox1.Text + "\\" + ANNOTATION_SUBDIRECTORY + "\\PhoneAnnotation" + "\\AnnotationIntervals.xml"))
+                    else 
                     {
-                        this.progressForm.AppendLog("Annotation File in Phone Folder.....................Found\r\n");
-                        ANNOTATION_SUBDIRECTORY = ANNOTATION_SUBDIRECTORY + "\\PhoneAnnotation";
+                       bool annotation_file_exist = false;
+
+                       if (File.Exists(this.textBox1.Text + "\\" + ANNOTATION_DIRECTORY + "\\PhoneAnnotation" + "\\" + ANNOTATION_INTERVALS_FILE))
+                       {
+                           this.progressForm.AppendLog("Annotation File in Phone Folder.....................Found\r\n");
+                           ANNOTATION_SUBDIRECTORY = ANNOTATION_DIRECTORY + "\\PhoneAnnotation";
+                           annotation_subdirectory_list.Add(ANNOTATION_SUBDIRECTORY);
+                           annotation_intervals_file_list.Add("AnnotationIntervals.xml");
+                           annotation_file_exist = true;
+                       }
+
+                       if (Directory.Exists(this.textBox1.Text + "\\" + ANNOTATION_DIRECTORY + "\\videoannotation"))
+                       {
+                          string dpath = this.textBox1.Text + "\\" + ANNOTATION_DIRECTORY + "\\videoannotation" + "\\";
+                          file = Directory.GetFileSystemEntries( dpath, "*"+ ANNOTATION_INTERVALS_FILE);
+
+                          if (file.Length > 0)
+                          {
+                              this.progressForm.AppendLog("Annotation File in Video Folder.....................Found\r\n");
+                              ANNOTATION_SUBDIRECTORY = ANNOTATION_DIRECTORY + "\\videoannotation";
+                              
+
+                              for (int i = 0; i < file.Length; i++)
+                              {
+                                  annotation_subdirectory_list.Add(ANNOTATION_SUBDIRECTORY);
+                                  annotation_intervals_file_list.Add(file[i].Substring(dpath.Length)); 
+                              }
+
+                              annotation_file_exist = true;
+                          }
+                       }
+
+
+                       if ( annotation_subdirectory_list.Count >0 )
+                            this.progressForm.AppendLog("Annotation File ..................... Not Found\r\n");
+
                     }
-                    else
-                        this.progressForm.AppendLog("Annotation File ..................... Not Found\r\n");
 
-
-                    #region commented
-                    //if (File.Exists(this.textBox1.Text+"\\"+ ANNOTATION_SUBDIRECTORY + "\\AnnotationIntervals.xml"))
-                    //    this.progressForm.AppendLog("Annotation File .....................Found\r\n");
-                    //else
-                    //    this.progressForm.AppendLog("Annotation File ..................... Not Found\r\n");
                     #endregion 
 
+
+                    #region Load Wockets-MITES Files
 
                     //activity labels for annotations (Wockets)
                     if (File.Exists(this.textBox1.Text + "\\" + WOCKETS_SUBDIRECTORY + "\\ActivityLabelsRealtime.xml"))
                         this.progressForm.AppendLog("Activity Labels File .....................Found\r\n");
                     else
                         this.progressForm.AppendLog("Activity Labels File .....................Not Found\r\n");
-           
 
+
+                    try
+                    {
+                        if (File.Exists("Configuration.xml"))
+                            File.Copy("Configuration.xml", this.textBox1.Text + "\\" + WOCKETS_SUBDIRECTORY + "\\Configuration.xml", true);
+                    }
+                    catch
+                    {
+                        this.progressForm.AppendLog("Wockets Configuration File .....................Not Found\r\n");
+                    }
+
+                    #endregion 
+
+
+                    #region Load Other Sensor Files
 
                     //Sensewear
                     file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-sensewear*.csv");
@@ -344,24 +397,22 @@ namespace DataMerger
                         }
                     }
 
-
-
-                    #endregion 
-
-
-                    try
-                    {
-                        if (File.Exists("Configuration.xml"))
-                            File.Copy("Configuration.xml", this.textBox1.Text + "\\" + WOCKETS_SUBDIRECTORY + "\\Configuration.xml", true);
-                    }
-                    catch
-                    {
-                    }
+                    
+                    #endregion
 
 
 
-                    f= new Form2(this.textBox1.Text);
-                    f.Show();
+                    #region Search for other sensors files
+                  
+                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY + "\\" );
+                   
+                     if (file.Length > 1)
+                     {
+                           other_sensors_form = new Form2(this.textBox1.Text);
+                           other_sensors_form.Show();
+                     }
+               
+                  #endregion 
 
 
                 }
@@ -398,15 +449,98 @@ namespace DataMerger
 
             try
             {
-                toCSV(this.textBox1.Text, "..\\NeededFiles\\Master\\", 3, filter);
+
+                string session_directory = this.textBox1.Text;
+
+                //delete previous results files
+                if (File.Exists(session_directory + "\\result.html"))
+                    File.Delete(session_directory + "\\result.html");
+
+                if( annotation_subdirectory_list.Count >0 )
+                {
+
+                   
+                    //scan trough annotation folders
+                    for (int i = 0; i < annotation_subdirectory_list.Count; i++)
+                    { 
+                        ANNOTATION_SUBDIRECTORY = annotation_subdirectory_list[i];
+                        ANNOTATION_INTERVALS_FILE = annotation_intervals_file_list[i];
 
 
-                try
-                {  toQualityHTML(this.textBox1.Text, "..\\NeededFiles\\Master\\", 3, filter);
+                        string annotation_header = "RESULTS: " +
+                                                   ANNOTATION_SUBDIRECTORY.Substring((ANNOTATION_DIRECTORY + "\\").Length) +
+                                                   ", Coder: ";
+
+
+                        if (ANNOTATION_SUBDIRECTORY.Contains("video"))
+                        {
+                            MERGED_SUBDIRECTORY = "merged_" + "video_" + ANNOTATION_INTERVALS_FILE.Split('.')[0];
+                            annotation_header += ANNOTATION_INTERVALS_FILE.Split('.')[0];
+                        }
+                        else if (ANNOTATION_SUBDIRECTORY.Contains("Phone"))
+                        {
+                            MERGED_SUBDIRECTORY = "merged";
+                            annotation_header += "phone";
+                        }
+                        else
+                        {
+                            MERGED_SUBDIRECTORY = "merged";
+                            annotation_header += "audio";
+                        }
+                        
+
+                        if (!Directory.Exists(session_directory + "\\" + MERGED_SUBDIRECTORY))
+                            Directory.CreateDirectory(session_directory + "\\" + MERGED_SUBDIRECTORY);
+                        else
+                        {
+                            string[] mfiles = Directory.GetFileSystemEntries(session_directory + "\\" + MERGED_SUBDIRECTORY);
+                            
+                            for (int j = 0; j < mfiles.Length; j++)
+                                File.Delete(mfiles[i]);
+                        }
+
+
+
+                        
+                        TextWriter tw = new StreamWriter(session_directory + "\\result.html", true);
+                        tw.WriteLine("\n<p>&nbsp;</p>\n");
+                        tw.WriteLine("<HTML><hr></hr><h2><Font Color=#5FB404>" + annotation_header + "</Font></h2></HTML>");
+                        tw.WriteLine("\n<p>&nbsp;</p>\n");
+                        tw.Flush();
+                        tw.Close();
+
+                        try
+                        {
+                            toCSV(this.textBox1.Text, "..\\NeededFiles\\Master\\", 3, filter);
+
+                            try
+                            { toQualityHTML(this.textBox1.Text, "..\\NeededFiles\\Master\\", 3, filter); }
+                            catch (Exception ee)
+                            {
+                                MessageBox.Show("Error: Generating the quality report " + ee.StackTrace);
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            MessageBox.Show("Error: Generating the CSV file for " + ANNOTATION_INTERVALS_FILE + ". Trace: " + e.StackTrace);
+                        }   
+                    }
                 }
-                catch (Exception ee)
-                {}
+                else
+                {
+                    
+                    toCSV(this.textBox1.Text, "..\\NeededFiles\\Master\\", 3, filter);
 
+
+                    try
+                    {  
+                        toQualityHTML(this.textBox1.Text, "..\\NeededFiles\\Master\\", 3, filter);
+                    }
+                    catch (Exception ee)
+                    {
+                        MessageBox.Show("Error: Format error in the result file " + ee.StackTrace);
+                    }
+                }
 
             }
             catch (Exception e)
@@ -414,6 +548,8 @@ namespace DataMerger
                 MessageBox.Show("Error: Format error in the CSV files " + e.StackTrace);
                 Environment.Exit(0);
             }
+
+
             converted = true;
 
         }
@@ -475,8 +611,8 @@ namespace DataMerger
 
 
 
-        public static void toQualityHTML(string aDataDirectory, string masterDirectory, int maxControllers, string[] filter)
- {
+      public static void toQualityHTML(string aDataDirectory, string masterDirectory, int maxControllers, string[] filter)
+      {
             
             int ACCELEROMETER_STATISTICS_LENGTH=16;
             //int WOCKETS_SR = 92;
@@ -526,8 +662,7 @@ namespace DataMerger
             #region ============== Load Annotation Intervals =======================================
 
             Session session = new Session();
-            session.FromXML(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\AnnotationIntervals.xml");
-
+            session.FromXML(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\" + ANNOTATION_INTERVALS_FILE); 
             int numPostures = 0;
             Hashtable postures = new Hashtable();
             int k = 0;
@@ -1192,7 +1327,7 @@ namespace DataMerger
             #region Write Results to HTML
 
 
-            string summary = "<h2>MITes and Wockets Data Loss, Disconnections and Maxing out Statistics </h2><TABLE border=\"1\">\n";
+            string summary = "<h3><Font Color=#585858>MITes and Wockets Data Loss, Disconnections and Maxing out Statistics </Font></h3><TABLE border=\"1\">\n";
             int numRows = wc._Sensors.Count - 1 + mitesCount;
             string[] rows = new string[numRows];
             string header="<TR>\n";
@@ -1295,7 +1430,7 @@ namespace DataMerger
 
 
             summary = "<HTML><HEAD></HEAD><BODY>" + summary + "</BODY></HTML>";
-            TextWriter tw = new StreamWriter(aDataDirectory + "\\result.html");
+            TextWriter tw = new StreamWriter(aDataDirectory + "\\result.html", true);
             tw.WriteLine(summary);
             tw.WriteLine("\n<p>&nbsp;</p>\n");
 
@@ -1308,7 +1443,7 @@ namespace DataMerger
             #region Statistics per Activity Table
 
 
-            summary = "<h2>Wockets Data Loss by Posture and Activity Statistics</h2><TABLE border=\"1\">\n";
+            summary = "<h3><Font Color=#585858>Wockets Data Loss by Posture and Activity Statistics</Font></h3><TABLE border=\"1\">\n";
             numRows =numPostures;
             rows = new string[numRows];
             header = "<TR>\n<td><div align=\"center\"><strong>Activity</strong></div></td><td><div align=\"center\"><strong>Posture</strong></div></td><td><strong>Total Seconds Annotated</strong></td>\n";
@@ -1375,19 +1510,24 @@ namespace DataMerger
 
             #region Other Sensors Statistics Table
 
-            summary = "<h2>Other Sensors Statistics</h2><TABLE border=\"1\">\n";
+            string[] ofiles = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY + "\\");
+
+            if (ofiles.Length > 1)
+            {
+
+                summary = "<h3><Font Color=#585858>Other Sensors Statistics</Font></h3><TABLE border=\"1\">\n";
                 header = "<TR>\n<td><div align=\"center\"><strong>Sensor Type</strong></div></td><td><div align=\"center\"><strong>Start Time</strong></div></td><td><strong>Data Present</strong></td><td><strong>Num Samples</strong></td><td><strong>Percent Loss</strong></td></TR>\n";
                 header += "</TR>\n";
                 summary += header;
 
-                int expectedOxyconRecords=totalSeconds/5;
-                double oxyconLoss=0;            
-                if (oxyconRecords<expectedOxyconRecords)
+                int expectedOxyconRecords = totalSeconds / 5;
+                double oxyconLoss = 0;
+                if (oxyconRecords < expectedOxyconRecords)
                     oxyconLoss = 100 - (((double)oxyconRecords / expectedOxyconRecords) * 100.0);
 
-                summary += "<TR>\n<td><div align=\"center\"><strong>Oxycon</strong></div></td><td>"+(oxyconStart==null?"&nbsp;":oxyconStart)+"</td><td>" + (hasOxycon ? "Yes" : "No") + "</td><td>" + oxyconRecords + "</td><td>" + oxyconLoss.ToString("0") + "%</td></TR>\n";
+                summary += "<TR>\n<td><div align=\"center\"><strong>Oxycon</strong></div></td><td>" + (oxyconStart == null ? "&nbsp;" : oxyconStart) + "</td><td>" + (hasOxycon ? "Yes" : "No") + "</td><td>" + oxyconRecords + "</td><td>" + oxyconLoss.ToString("0") + "%</td></TR>\n";
 
-                
+
                 double sensewearLoss = 0;
                 if (sensewearRecords < totalSeconds)
                     sensewearLoss = 100 - (((double)sensewearRecords / totalSeconds) * 100.0);
@@ -1406,12 +1546,12 @@ namespace DataMerger
                 }
                 summary += "</td><td>";
 
-                for (int r = 0; (r < actigraphData.Length); r++)                        
+                for (int r = 0; (r < actigraphData.Length); r++)
                 {
                     double actigraphLoss = 0;
                     if (actigraphData[r].Count < totalSeconds)
                         actigraphLoss = 100 - (((double)actigraphData[r].Count / totalSeconds) * 100.0);
-                    summary += actigraphLoss.ToString("0")+" %";
+                    summary += actigraphLoss.ToString("0") + " %";
                     if (r != (actigraphData.Length - 1))
                         summary += " | ";
                 }
@@ -1428,7 +1568,7 @@ namespace DataMerger
                 summary += "<TR>\n<td><div align=\"center\"><strong>RTI</strong></div></td><td>" + (rtiStart == null ? "&nbsp;" : rtiStart) + "</td><td>" + (hasRTI ? "Yes" : "No") + "</td><td>" + rtiRecords + "</td><td>" + rtiLoss.ToString("0") + "%</td></TR>\n";
 
                 double columbiaLoss = 0;
-                if (columbiaRecords <  totalSeconds)
+                if (columbiaRecords < totalSeconds)
                     columbiaLoss = 100 - (((double)columbiaRecords / totalSeconds) * 100.0);
                 summary += "<TR>\n<td><div align=\"center\"><strong>Columbia</strong></div></td><td>" + (columbiaStart == null ? "&nbsp;" : columbiaStart) + "</td><td>" + (hasColumbia ? "Yes" : "No") + "</td><td>" + columbiaRecords + "</td><td>" + columbiaLoss.ToString("0") + "%</td></TR>\n";
 
@@ -1438,7 +1578,16 @@ namespace DataMerger
                 summary += "<TR>\n<td><div align=\"center\"><strong>GPS</strong></div></td><td>" + (gpsStart == null ? "&nbsp;" : gpsStart) + "</td><td>" + (hasGPS ? "Yes" : "No") + "</td><td>" + gpsRecords + "</td><td>" + gpsLoss.ToString("0") + "%</td></TR>\n";
 
 
+                tw.WriteLine(summary + "</TABLE>\n");
+            }
+
             #endregion
+
+
+
+            tw.WriteLine("</HTML>");
+            tw.Flush();
+            tw.Close();
 
 
             #endregion
@@ -1447,83 +1596,136 @@ namespace DataMerger
 
             #region Add the Annotations Summary
 
-                summary += "</TABLE>\n";
-                summary += "<h2>Annotation Summary</h2>\n";
+
+            tw = new StreamWriter(aDataDirectory + "\\result.html", true);
+            
+                summary = "";
+                summary += "<h3><Font Color=#585858>Annotation Summary</Font></h3>\n";
 
 
                 //If the annotation summary file exists, add it to current summary
                 //If it doesn't exist, add the HTML to summary 
                 if (File.Exists(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\AnnotationSummary.html"))
                 {
-                    TextReader ttr = new StreamReader(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\AnnotationSummary.html");
-                    summary += ttr.ReadToEnd();
-                    ttr.Close();
+                    try
+                    {
+                        TextReader ttr = new StreamReader(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\AnnotationSummary.html");
+                        summary += ttr.ReadToEnd();
+                        ttr.Close();
+                    }
+                    catch (Exception ee)
+                    { 
+                    }
                 }
                 else
                 {
-
+                    
                     #region Create HTML content with stats for Autism Data
 
-                    //Create Table & Headers
-                    summary += "<table border=\"1\">\n";
-
-                    TimeSpan ttime = new TimeSpan(0, 0, totalSeconds);
-                    //Session total time
-                    summary += "<tr> <td><div align=\"center\"><strong>Session Total Time (hh:mm:ss.ms)</strong></div></td>" +
-                                    "<td>" + String.Format("{0:HH mm ss ff}", ttime) + "</td>" +
-                               "</tr>";
-
-
-                    //Headers for annotation metrics
-                    summary += "<tr>" + "<td><div align=\"center\"><strong> Label </strong></div></td>" +
-                                        "<td><div align=\"center\"><strong> Duration in Seconds </strong></div></td>" +
-                                        "<td><div align=\"center\"><strong> %Occurrence </strong></div></td>" +
-                                        "<td><div align=\"center\"><strong> Frequency </strong></div></td>" +
-                                        "<td><div align=\"center\"><strong> Mean (sec) </strong></div></td>" +
-                                        "<td><div align=\"center\"><strong> STD (sec) </strong></div></td>" +
-                                        "<td><div align=\"center\"><strong> Min (sec) </strong></div></td>" +
-                                        "<td><div align=\"center\"><strong> Max (sec) </strong></div></td>" +
-                               "</tr>";
-
-
-                    //Scan through labels
-                    int total_secs_activity = 0;
-                    double percent_duration = 0.0;
-
-
-
-                    
-                    for (int j = 0; j < session.OverlappingActivityLists[0].Count; j++)
+                    try
                     {
+                        //Create Table & Headers
+                        summary += "<table border=\"1\">\n";
 
-                        name = session.OverlappingActivityLists[0][j]._Name;
-                        total_secs_activity = (int)annotatedPostures[name];
-                        percent_duration = ((double)total_secs_activity / totalSeconds) * 100.0;
-
-                        summary += "<tr>\n" +
-                                   "<td><div align=\"center\"><strong>" + name + "</strong></div></td>" +
-                                   "<td>" + total_secs_activity.ToString() + "</td>" +
-                                   "<td>" + String.Format("{0:0.0}%", percent_duration) + "</td>" +
-                                   "<td>" + String.Format("{0:0}", freq_per_class[name]) + "</td>" +
-                                   "<td>" + String.Format("{0:0.00}", means_per_class[name]) + "</td>" +
-                                   "<td>" + String.Format("{0:0.00}", std_per_class[name]) + "</td>" +
-                                   "<td>" + String.Format("{0:0.00}", min_per_class[name]) + "</td>" +
-                                   "<td>" + String.Format("{0:0.00}", max_per_class[name]) + "</td>" +
+                        TimeSpan ttime = new TimeSpan(0, 0, totalSeconds);
+                        //Session total time
+                        summary += "<tr> <td><div align=\"center\"><strong>Session Total Time (hh:mm:ss.ms)</strong></div></td>" +
+                                        "<td>" + String.Format("{0:HH mm ss ff}", ttime) + "</td>" +
                                    "</tr>";
+
+
+                        //Headers for annotation metrics
+                        summary += "<tr>" + "<td><div align=\"center\"><strong> Label </strong></div></td>" +
+                                            "<td><div align=\"center\"><strong> Duration in Seconds </strong></div></td>" +
+                                            "<td><div align=\"center\"><strong> %Occurrence </strong></div></td>" +
+                                            "<td><div align=\"center\"><strong> Frequency </strong></div></td>" +
+                                            "<td><div align=\"center\"><strong> Mean (sec) </strong></div></td>" +
+                                            "<td><div align=\"center\"><strong> STD (sec) </strong></div></td>" +
+                                            "<td><div align=\"center\"><strong> Min (sec) </strong></div></td>" +
+                                            "<td><div align=\"center\"><strong> Max (sec) </strong></div></td>" +
+                                   "</tr>";
+
+
+                        //Scan through labels
+                        int total_secs_activity = 0;
+                        double percent_duration = 0.0;
+
+
+
+
+                        for (int j = 0; j < session.OverlappingActivityLists[0].Count; j++)
+                        {
+
+                            name = session.OverlappingActivityLists[0][j]._Name;
+
+                            if (annotatedPostures.ContainsKey(name))
+                            {
+                                total_secs_activity = (int)annotatedPostures[name];
+                                percent_duration = ((double)total_secs_activity / totalSeconds) * 100.0;
+
+                                summary += "<tr>\n" +
+                                       "<td><div align=\"center\"><strong>" + name + "</strong></div></td>" +
+                                       "<td>" + total_secs_activity.ToString() + "</td>" +
+                                       "<td>" + String.Format("{0:0.0}%", percent_duration) + "</td>" +
+                                       "<td>" + String.Format("{0:0}", freq_per_class[name]) + "</td>" +
+                                       "<td>" + String.Format("{0:0.00}", means_per_class[name]) + "</td>" +
+                                       "<td>" + String.Format("{0:0.00}", std_per_class[name]) + "</td>" +
+                                       "<td>" + String.Format("{0:0.00}", min_per_class[name]) + "</td>" +
+                                       "<td>" + String.Format("{0:0.00}", max_per_class[name]) + "</td>" +
+                                       "</tr>";
+                            }
+                            else
+                            {
+                                
+                                summary += "<tr>\n" +
+                                       "<td><div align=\"center\"><strong>" + name + "</strong></div></td>" +
+                                       "<td>" + String.Format("{0:0}", 0)    + "</td>" +
+                                       "<td>" + String.Format("{0:0.0}%", 0) + "</td>" +
+                                       "<td>" + String.Format("{0:0}", 0)    + "</td>" +
+                                       "<td>" + String.Format("{0:0.00}", 0) + "</td>" +
+                                       "<td>" + String.Format("{0:0.00}", 0) + "</td>" +
+                                       "<td>" + String.Format("{0:0.00}", 0) + "</td>" +
+                                       "<td>" + String.Format("{0:0.00}", 0) + "</td>" +
+                                       "</tr>";
+                            
+                            }
+
+
+
+                        }
+
+
+
+                        //Close table
+                        summary += "</table>";
+
+                        //Generate the colors code for Autistic Labels
+                        SaveLabelsColorsToFile(aDataDirectory, session.OverlappingActivityLists.Count, session.OverlappingActivityLists);
+
                     }
-                    
+                    catch(Exception ee)
+                    {
+                        summary += "</HTML>";
 
+                        try
+                        {
+                            if (tw != null)
+                            {
+                                tw.WriteLine(summary);
+                                tw.Close();
+                            }
+                        }
+                        catch(Exception ex)
+                        {
+                            //cannot write to file
+                        }
 
-                    //Close table
-                    summary += "</table>";
+                    }
 
-                    //Generate the colors code for Autistic Labels
-                    SaveLabelsColorsToFile(aDataDirectory, session.OverlappingActivityLists.Count, session.OverlappingActivityLists);
 
 
                     #endregion
-
-
+                    
                 }
 
 
@@ -1693,14 +1895,18 @@ namespace DataMerger
 
 
 
-         #region Declare Variables
+       #region Declare Variables
 
- public static string MITES_SUBDIRECTORY = "mites";
+        public static string MITES_SUBDIRECTORY = "mites";
         public static string WOCKETS_SUBDIRECTORY = "wockets";
         public static string OTHER_SUBDIRECTORY = "othersensors";
         public static string MERGED_SUBDIRECTORY = "merged";
         public static string ANNOTATION_SUBDIRECTORY = "annotation";
-
+        public static string ANNOTATION_DIRECTORY = "annotation";
+        public static string ANNOTATION_INTERVALS_FILE = "AnnotationIntervals.xml";
+        private List<string> annotation_intervals_file_list = new List<string>();
+        private List<string> annotation_subdirectory_list = new List<string>();
+       
         public static string CSVProgress = "";
         public static bool hasActigraph = false;
         public static bool hasOxycon = false;
@@ -1756,9 +1962,15 @@ namespace DataMerger
         public static void toCSV(string aDataDirectory, string masterDirectory, int maxControllers, string[] filter)
         {
 
+
+
             #region Declare Variables
 
             double previousUnixTime = -1;
+
+
+            //------ Annotation Variables ------//
+
 
             /**** MITes,wockets Variables ****/
 
@@ -1833,7 +2045,7 @@ namespace DataMerger
 
 
             TextWriter masterCSV;      //Master CSV
-            TextWriter hrCSV;       //HR CSV
+            TextWriter hrCSV = null;       //HR CSV
 
 
             //Zephyr
@@ -1983,17 +2195,20 @@ namespace DataMerger
             double gpsOffset = 0;
 
 
-            actigraphOffset = f._ActigraphSeconds;
-            sensewearOffset = f._SensewearSeconds;
-            zephyrOffset = f._ZephyrSeconds;
-            columbiaOffset = f._ColumbiaSeconds;
-            rtiOffset = f._RTISeconds;
-            oxyconOffset = f._OxyconSeconds;
+            if (other_sensors_form != null)
+            {
+                actigraphOffset = other_sensors_form._ActigraphSeconds;
+                sensewearOffset = other_sensors_form._SensewearSeconds;
+                zephyrOffset = other_sensors_form._ZephyrSeconds;
+                columbiaOffset = other_sensors_form._ColumbiaSeconds;
+                rtiOffset = other_sensors_form._RTISeconds;
+                oxyconOffset = other_sensors_form._OxyconSeconds;
 
-            annotationsOffset = f._AnnotationsSeconds;
-            mitesOffset = f._MitesSeconds;
-            gpsOffset = f._GpsSeconds;
+                annotationsOffset = other_sensors_form._AnnotationsSeconds;
+                mitesOffset = other_sensors_form._MitesSeconds;
+                gpsOffset = other_sensors_form._GpsSeconds;
 
+            }
 
 
             #endregion
@@ -3424,7 +3639,7 @@ namespace DataMerger
             AXML.Annotation aannotation = null;
             try
             {
-                if (File.Exists(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\AnnotationIntervals.xml"))
+                if (File.Exists(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\" + ANNOTATION_INTERVALS_FILE )) 
                 {
                     //AXML.Reader reader = new AXML.Reader(masterDirectory, aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY, "AnnotationIntervals.xml");
                     //aannotation = reader.parse();
@@ -3437,7 +3652,7 @@ namespace DataMerger
                     // If there is an offset add it 
                     //---------------------------------------------------------------------
                     Session xmlSession = new Session();
-                    xmlSession.FromXML(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\AnnotationIntervals.xml");
+                    xmlSession.FromXML(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\" + ANNOTATION_INTERVALS_FILE); 
 
                     AnnotationList ann_list = xmlSession.Annotations;
 
@@ -3492,7 +3707,8 @@ namespace DataMerger
 
                     // Annotation Intervals Files
                     if (File.Exists(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "AnnotationIntervals.xml"))
-                    { File.Delete(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "AnnotationIntervals.xml"); }
+                    { File.Delete(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "AnnotationIntervals.xml"); 
+                    }
 
                     if (File.Exists(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "AnnotationIntervals.csv"))
                     { File.Delete(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "AnnotationIntervals.csv"); }
@@ -3704,18 +3920,16 @@ namespace DataMerger
             AXML.AnnotatedRecord annotatedRecord = null;
             if (aannotation != null)
             {
+                    
+                    annotatedRecord = ((AXML.AnnotatedRecord)aannotation.Data[activityIndex]);
 
-                annotatedRecord = ((AXML.AnnotatedRecord)aannotation.Data[activityIndex]);
-
-                for (int j = 0; (j < annotatedRecord.Labels.Count); j++)
-                {
-                    if (j == annotatedRecord.Labels.Count - 1)
-                        current_activity += "";
-                    else
-                        current_activity += ",";
-                }
-
-
+                    for (int j = 0; (j < annotatedRecord.Labels.Count); j++)
+                    {
+                        if (j == annotatedRecord.Labels.Count - 1)
+                            current_activity += "";
+                        else
+                            current_activity += ",";
+                    }   
             }
 
             #endregion
@@ -3779,9 +3993,10 @@ namespace DataMerger
                 wc.FromXML(aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY + "\\SensorData.xml");
                 for (int r = 0; (r < wc._Decoders.Count); r++)
                     wc._Decoders[r].Initialize();
+
+
                 int[] wocketsSR = new int[wcontroller._Sensors.Count];
                 
-
                 for (int i = 0; (i < wcontroller._Sensors.Count); i++)
                 {
                     int sensor_id = wcontroller._Sensors[i]._ID;
@@ -3791,10 +4006,29 @@ namespace DataMerger
                     wc._Sensors[i]._RootStorageDirectory = aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY + "\\data\\raw\\PLFormat\\";
                     if (CSVProgress == "")
                         CSVProgress = "Generating Raw Data File for Wocket " + sensor_id.ToString("00");
-                    //Write out raw data
-                    TextWriter tw = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "Wocket_" + sensor_id.ToString("00") + "_RawData_" + wcontroller._Sensors[i]._Location.Replace(' ', '-') + ".csv");
-                    int lastDecodedPacket = 0;
-                    
+
+                    //try
+                    //{
+                        //TODO: check this line: Write out raw data
+                        //TextWriter tw = null;
+
+                        //try
+                        //{
+                        TextWriter tw = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "Wocket_" + sensor_id.ToString("00") + "_RawData_" + wcontroller._Sensors[i]._Location.Replace(' ', '-') + ".csv");
+                        //}
+                        //catch
+                        //{
+                            //if (tw != null)
+                           // {
+                           //     tw.Flush();
+                           //     tw.Close();
+                            //}
+                           // tw = null;
+                        //}
+                        
+                        
+                        int lastDecodedPacket = 0;
+
                         while (wc._Sensors[i].Load())
                         {
                             if (wc._Sensors[i]._Decoder._Head == 0)
@@ -3803,21 +4037,32 @@ namespace DataMerger
                                 lastDecodedPacket = wc._Sensors[i]._Decoder._Head - 1;
 
                             Wockets.Data.Accelerometers.AccelerationData data = (Wockets.Data.Accelerometers.AccelerationData)wc._Sensors[i]._Decoder._Data[lastDecodedPacket];
-                            tw.WriteLine(data.UnixTimeStamp + "," + data._X + "," + data._Y + "," + data._Z);
+                            
+                            //added by selene
+                            //if( tw != null)
+                                tw.WriteLine(data.UnixTimeStamp + "," + data._X + "," + data._Y + "," + data._Z);
 
-                            long currentTS=(long)(data.UnixTimeStamp/1000.0);
+                            long currentTS = (long)(data.UnixTimeStamp / 1000.0);
                             if ((currentTS - prevWocketTS) < 1)
-                                wocketSR++;                            
-                            if ((prevWocketTS>0) & (currentTS - prevWocketTS)>=1)
+                                wocketSR++;
+                            if ((prevWocketTS > 0) & (currentTS - prevWocketTS) >= 1)
                                 totalseconds += (int)(currentTS - prevWocketTS);
                             prevWocketTS = currentTS;
                         }
-                        wocketsSR[i] = (int) Math.Round((double)wocketSR/(double)totalseconds);
-                    tw.Flush();
-                    tw.Close();
+                        wocketsSR[i] = (int)Math.Round((double)wocketSR / (double)totalseconds);
 
+                        //added by selene
+                        //if (tw != null)
+                        //{
+                            tw.Flush();
+                            tw.Close();
+                        //}
+
+                    //}
+                    //catch(Exception e)
+                    //{ }
            
-
+                    //--------------------------------------------------------------
 
                     string location = wcontroller._Sensors[i]._Location.Replace(' ', '-');
                     lastDecodedIndex[i] = 0;
@@ -5542,7 +5787,10 @@ namespace DataMerger
                         vmagCSVs[sensor_id].Close();
                     }
                 }
+            }
 
+            if (hrCSV != null)
+            {
                 hrCSV.Flush();
                 hrCSV.Close();
             }
@@ -5598,12 +5846,11 @@ namespace DataMerger
                 rtiCSV.Close();
             #endregion Close all files
 
-
-
-
         }
 
 
+
+      
         #endregion
 
 
