@@ -2554,14 +2554,14 @@ namespace NESPDataViewer
 
 
 
-
-
             #endregion
 
             hScrollBar1.Value = 0;            
             SetTimes();
             RefreshMasterPaneLayout();
         }
+
+
 
         /// <summary>
         /// Determines whether there is at least one file matching one of the supplied filename patterns
