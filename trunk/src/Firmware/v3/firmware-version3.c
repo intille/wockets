@@ -598,6 +598,60 @@ int main()
 						seconds_passed++;
 						_receive_data();
 
+						if (sampleFlag)
+							{
+								sampleFlag=0;
+
+								x=_atmega_a2dConvert10bit(ADC0);
+		
+								y=_atmega_a2dConvert10bit(ADC1);
+
+								z=_atmega_a2dConvert10bit(ADC2);
+
+
+								vmag+=Filter(x,0)+Filter(y,1)+Filter(z,2);
+			
+
+								if (_wPC>40){	//Skip the first samples						
+									if (summary_count==0)
+									{
+										vmag=vmag/24;
+										if (vmag>65535)
+											acount[ci]=65535;
+										else
+											acount[ci]=(unsigned short) vmag;
+			 							vmag=0;
+										++ci;
+										if (ci==AC_BUFFER_SIZE)
+											ci=0;
+										cseq++;
+	
+										if (ci==si)
+										{
+											si++;
+											if (si==AC_BUFFER_SIZE)
+												si=0;
+											sseq++;
+										}
+										acount[ci]=0;
+										summary_count=AC_NUMS;
+									}else
+										summary_count--;
+								}
+								else if (_wPC==40)
+									vmag=0;
+
+			
+
+		
+			 					m_SET_X(data[dataIndex],x,dataSubindex);
+			 					m_SET_Y(data[dataIndex],y,dataSubindex);
+			 					m_SET_Z(data[dataIndex],z,dataSubindex);
+
+			 					dataSubindex++;
+			 					if (dataSubindex>=4)
+			 					dataSubindex=0;
+							}						
 					}						
 					//connected=0;
 
