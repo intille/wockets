@@ -465,14 +465,14 @@ void _send_acs()
 {
 	unsigned short count=0;
 	unsigned short seq_num=sseq;
-	//unsigned short num_acs=0;
+	unsigned short num_acs=0;
 	unsigned char counter=0;
 
 
-//	if (ci>si)
-//		num_acs=ci-si;
-//	else
-//		num_acs=ci+(AC_BUFFER_SIZE-si);
+	if (ci>si)
+		num_acs=ci-si;
+	else
+		num_acs=ci+(AC_BUFFER_SIZE-si);
 
 	//if (num_acs>10)
 	//	num_acs=10;
@@ -496,9 +496,11 @@ void _send_acs()
 			i=0;
 		seq_num++;
 
-		counter++;
-		if (counter==10)
-			return;
+		if (num_acs<60){
+			counter++;
+			if (counter==10)
+				return;
+		}
 	}
 }
 
