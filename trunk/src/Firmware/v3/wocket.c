@@ -478,8 +478,8 @@ void _send_acs()
 	//	num_acs=10;
 
 //	_send_ac_count(num_acs);
-	_send_ac_count(cseq);
 	_send_ac_offset(AC_NUMS-summary_count); //send offset of the last activity count
+	_send_ac_count(cseq);	
 	for (int i=si;(i!=ci);)
 	{		
 		count=acount[i];
