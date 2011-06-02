@@ -1939,7 +1939,13 @@ namespace DataMerger
         static TextWriter[] actigraphCSV;
         static Hashtable[] actigraphData;
         static string[] actigraphType;
+        
 
+        //Actigraph Raw Data Constants
+        public static double ACTRANGE = 12;
+        public static double WKTBITS = 10;
+        public static double WKTRANGE = Math.Pow(2, WKTBITS);
+        public static double ACTWKTNORM = ACTRANGE / WKTRANGE;
 
 
         #endregion
@@ -2183,21 +2189,26 @@ namespace DataMerger
 
 
             //Sensor Offsets
-            double actigraphOffset = 0;
+            //double actigraphOffset = 0;
             double sensewearOffset = 0;
             double zephyrOffset = 0;
             double columbiaOffset = 0;
             double rtiOffset = 0;
             double oxyconOffset = 0;
+            //for upto 6 actigraphs
+            double[] actigraphOffset = new double[] { 0, 0, 0, 0, 0, 0 };
+            
 
             double annotationsOffset = 0;
             double mitesOffset = 0;
             double gpsOffset = 0;
 
+            DateTime[] actigraphEndTimes = new DateTime[6];
+            DateTime[] actigraphStartTimes = new DateTime[6];
 
             if (other_sensors_form != null)
             {
-                actigraphOffset = other_sensors_form._ActigraphSeconds;
+                //actigraphOffset = other_sensors_form._ActigraphSeconds;
                 sensewearOffset = other_sensors_form._SensewearSeconds;
                 zephyrOffset = other_sensors_form._ZephyrSeconds;
                 columbiaOffset = other_sensors_form._ColumbiaSeconds;
@@ -2208,6 +2219,15 @@ namespace DataMerger
                 mitesOffset = other_sensors_form._MitesSeconds;
                 gpsOffset = other_sensors_form._GpsSeconds;
 
+                //actigraph offsets - upt0 6 actigraphs
+                int totalActigraphs = other_sensors_form._TotalActigraphs;
+                for (int i = 0; i < totalActigraphs; i++)
+                {
+                    actigraphOffset[i] = other_sensors_form._ActigraphSeconds[i];
+                }
+
+                actigraphEndTimes = new DateTime[totalActigraphs];
+                actigraphStartTimes = new DateTime[totalActigraphs];
             }
 
 
@@ -2613,10 +2633,14 @@ namespace DataMerger
                     string actigraph_line = "";
                     double actigraphUnixTime = 0;
                     DateTime actigraphTime = new DateTime();
+                    DateTime actigraphEndTime = new DateTime();
 
                     actigraphReader = new StreamReader(file[i]);
                     actigraph_line = actigraphReader.ReadLine();//read first line
-
+                    if (actigraph_line.Contains("\""))
+                    {
+                        actigraph_line = actigraph_line.Replace("\"", "");
+                    }
                     if (actigraph_line.Contains("ActiSoft"))
                     {
                         actigraphType[i] = "ActiSoft";
@@ -2624,6 +2648,10 @@ namespace DataMerger
                         do
                         {
                             actigraph_line = actigraphReader.ReadLine();
+                            if (actigraph_line.Contains("\""))
+                            {
+                                actigraph_line = actigraph_line.Replace("\"", "");
+                            }
                             tokens = actigraph_line.Split(',');
                             m = Regex.Match(tokens[0].Trim(), "^[0-9]+/[0-9]+/[0-9]+$");
                         } while (m.Success == false);
@@ -2636,11 +2664,15 @@ namespace DataMerger
                         
                         
                         //if (actigraphOffset > 0)
-                        actigraphTime = actigraphTime.AddSeconds(actigraphOffset);
+                        actigraphTime = actigraphTime.AddSeconds(actigraphOffset[i]);
                         actigraphUnixTime = UnixTime.GetUnixTime(actigraphTime);
 
                         do
                         {
+                            if (actigraph_line.Contains("\""))
+                            {
+                                actigraph_line = actigraph_line.Replace("\"", "");
+                            }
                             tokens = actigraph_line.Split(',');
                             if (tokens[0].Length > 1)
                             {
@@ -2648,7 +2680,7 @@ namespace DataMerger
                                 m2 = Regex.Match(tokens[1], "([0-9]+):([0-9]+):([0-9]+)");
                                 actigraphTime = new DateTime(Convert.ToInt32("20" + m1.Groups[3].Value), Convert.ToInt32(m1.Groups[1].Value), Convert.ToInt32(m1.Groups[2].Value), Convert.ToInt32(m2.Groups[1].Value), Convert.ToInt32(m2.Groups[2].Value), Convert.ToInt32(m2.Groups[3].Value));
                                 //if (actigraphOffset > 0)
-                                    actigraphTime = actigraphTime.AddSeconds(actigraphOffset);
+                                    actigraphTime = actigraphTime.AddSeconds(actigraphOffset[i]);
                                 actigraphUnixTime = UnixTime.GetUnixTime(actigraphTime);
                                 string actigraphKey = actigraphTime.Year + "-" + actigraphTime.Month + "-" + actigraphTime.Day + "-" + actigraphTime.Hour + "-" + actigraphTime.Minute + "-" + actigraphTime.Second;
                                 if (actigraphStart == null)
@@ -2666,6 +2698,10 @@ namespace DataMerger
                         do
                         {
                             actigraph_line = actigraphReader.ReadLine();
+                            if (actigraph_line.Contains("\""))
+                            {
+                                actigraph_line = actigraph_line.Replace("\"", "");
+                            }
                             if (actigraph_line.Contains("Start Time"))
                             {
                                 tokens = actigraph_line.Split(' ');
@@ -2691,11 +2727,15 @@ namespace DataMerger
                         //Match m2 = Regex.Match(tokens[1].Trim(), "([0-9]+):([0-9]+):([0-9]+)");
                         actigraphTime = new DateTime(actiyear, actimonth, actiday, actihour, actiminute, actisecond);//(Convert.ToInt32("20" + m1.Groups[3].Value), Convert.ToInt32(m1.Groups[1].Value), Convert.ToInt32(m1.Groups[2].Value), Convert.ToInt32(m2.Groups[1].Value), Convert.ToInt32(m2.Groups[2].Value), Convert.ToInt32(m2.Groups[3].Value));
                        // if (actigraphOffset > 0)
-                            actigraphTime = actigraphTime.AddSeconds(actigraphOffset);
+                            actigraphTime = actigraphTime.AddSeconds(actigraphOffset[i]);
                         actigraphUnixTime = UnixTime.GetUnixTime(actigraphTime);
 
                         do
                         {
+                            if (actigraph_line.Contains("\""))
+                            {
+                                actigraph_line = actigraph_line.Replace("\"", "");
+                            }
                             tokens = actigraph_line.Split(',');
                             if (tokens.Length == 3)
                             {
@@ -2713,14 +2753,19 @@ namespace DataMerger
                         } while ((actigraph_line = actigraphReader.ReadLine()) != null);
 
                     }
-                    else if (actigraph_line.Contains("GT3X"))
+                    else if (actigraph_line.Contains("GT3X+"))
                     {
-                        actigraphType[i] = "GT3X";
+                        actigraphType[i] = "GT3X+";
                         Match m;
                         int actihour = 0, actiminute = 0, actisecond = 0, actiyear = 0, actiday = 0, actimonth = 0;
+                        int actiEndHour = 0, actiEndMinute = 0, actiEndSecond = 0, actiEndYear = 0, actiEndDay = 0, actiEndMonth = 0;
                         do
                         {
                             actigraph_line = actigraphReader.ReadLine();
+                            if (actigraph_line.Contains("\""))
+                            {
+                                actigraph_line = actigraph_line.Replace("\"", "");
+                            }
                             if (actigraph_line.Contains("Start Time"))
                             {
                                 tokens = actigraph_line.Split(' ');
@@ -2737,20 +2782,105 @@ namespace DataMerger
                                 actiday = Convert.ToInt32(m.Groups[2].Value);
                                 actiyear = Convert.ToInt32(m.Groups[3].Value);
                             }
-                            tokens = actigraph_line.Split(',');  
-                        } while (tokens.Length!=5);
+                            else if (actigraph_line.Contains("Download Time"))
+                            {
+                                tokens = actigraph_line.Split(' ');
+                                m = Regex.Match(tokens[2].Trim(), "([0-9]+):([0-9]+):([0-9]+)");
+                                actiEndHour = Convert.ToInt32(m.Groups[1].Value);
+                                actiEndMinute = Convert.ToInt32(m.Groups[2].Value);
+                                actiEndSecond = Convert.ToInt32(m.Groups[3].Value);
+                            }
+                            else if (actigraph_line.Contains("Download Date"))
+                            {
+                                tokens = actigraph_line.Split(' ');
+                                m = Regex.Match(tokens[2].Trim(), "([0-9]+)/([0-9]+)/([0-9]+)");
+                                actiEndMonth = Convert.ToInt32(m.Groups[1].Value);
+                                actiEndDay = Convert.ToInt32(m.Groups[2].Value);
+                                actiEndYear = Convert.ToInt32(m.Groups[3].Value);
+                            }
+                            tokens = actigraph_line.Split(',');
+                        } while (tokens.Length != 5);
 
 
                         tokens = actigraph_line.Split(',');
                         //Match m1 = Regex.Match(tokens[0].Trim(), "([0-9]+)/([0-9]+)/([0-9]+)");
                         //Match m2 = Regex.Match(tokens[1].Trim(), "([0-9]+):([0-9]+):([0-9]+)");
                         actigraphTime = new DateTime(actiyear, actimonth, actiday, actihour, actiminute, actisecond);//(Convert.ToInt32("20" + m1.Groups[3].Value), Convert.ToInt32(m1.Groups[1].Value), Convert.ToInt32(m1.Groups[2].Value), Convert.ToInt32(m2.Groups[1].Value), Convert.ToInt32(m2.Groups[2].Value), Convert.ToInt32(m2.Groups[3].Value));
-                       //if (actigraphOffset > 0)
-                            actigraphTime = actigraphTime.AddSeconds(actigraphOffset);
+                        //if (actigraphOffset > 0)
+                        actigraphTime = actigraphTime.AddSeconds(actigraphOffset[i]);
+                        actigraphUnixTime = UnixTime.GetUnixTime(actigraphTime);
+
+                        actigraphEndTime = new DateTime(actiEndYear, actiEndMonth, actiEndDay, actiEndHour, actiEndMinute, actiEndSecond);
+                        actigraphEndTime = actigraphEndTime.AddSeconds(actigraphOffset[i]);
+
+                        actigraphStartTimes[i] = actigraphTime;
+                        actigraphEndTimes[i] = actigraphEndTime;
+
+                        do
+                        {
+                            if (actigraph_line.Contains("\""))
+                            {
+                                actigraph_line = actigraph_line.Replace("\"", "");
+                            }
+                            tokens = actigraph_line.Split(',');
+                            if (tokens.Length == 5)
+                            {
+                                actigraphUnixTime = UnixTime.GetUnixTime(actigraphTime);
+                                string actigraphKey = actigraphTime.Year + "-" + actigraphTime.Month + "-" + actigraphTime.Day + "-" + actigraphTime.Hour + "-" + actigraphTime.Minute + "-" + actigraphTime.Second;
+                                string actigraphLine = Convert.ToInt32(tokens[0]) + "," + Convert.ToInt32(tokens[1]) + "," + Convert.ToInt32(tokens[2]);
+                                if (actigraphStart == null)
+                                    actigraphStart = actigraphTime.Year + "-" + actigraphTime.Month + "-" + actigraphTime.Day + " " + actigraphTime.Hour + ":" + actigraphTime.Minute + ":" + actigraphTime.Second;
+                                actigraphData[i].Add(actigraphKey, actigraphLine);
+                                actigraphTime = actigraphTime.AddSeconds(1.0);
+                            }
+                        } while ((actigraph_line = actigraphReader.ReadLine()) != null);                    
+                    }
+                    else if (actigraph_line.Contains("GT3X"))
+                    {
+                        actigraphType[i] = "GT3X";
+                        Match m;
+                        int actihour = 0, actiminute = 0, actisecond = 0, actiyear = 0, actiday = 0, actimonth = 0;
+                        do
+                        {
+                            actigraph_line = actigraphReader.ReadLine();
+                            if (actigraph_line.Contains("\""))
+                            {
+                                actigraph_line = actigraph_line.Replace("\"", "");
+                            }
+                            if (actigraph_line.Contains("Start Time"))
+                            {
+                                tokens = actigraph_line.Split(' ');
+                                m = Regex.Match(tokens[2].Trim(), "([0-9]+):([0-9]+):([0-9]+)");
+                                actihour = Convert.ToInt32(m.Groups[1].Value);
+                                actiminute = Convert.ToInt32(m.Groups[2].Value);
+                                actisecond = Convert.ToInt32(m.Groups[3].Value);
+                            }
+                            else if (actigraph_line.Contains("Start Date"))
+                            {
+                                tokens = actigraph_line.Split(' ');
+                                m = Regex.Match(tokens[2].Trim(), "([0-9]+)/([0-9]+)/([0-9]+)");
+                                actimonth = Convert.ToInt32(m.Groups[1].Value);
+                                actiday = Convert.ToInt32(m.Groups[2].Value);
+                                actiyear = Convert.ToInt32(m.Groups[3].Value);
+                            }
+                            tokens = actigraph_line.Split(',');
+                        } while (tokens.Length != 5);
+
+
+                        tokens = actigraph_line.Split(',');
+                        //Match m1 = Regex.Match(tokens[0].Trim(), "([0-9]+)/([0-9]+)/([0-9]+)");
+                        //Match m2 = Regex.Match(tokens[1].Trim(), "([0-9]+):([0-9]+):([0-9]+)");
+                        actigraphTime = new DateTime(actiyear, actimonth, actiday, actihour, actiminute, actisecond);//(Convert.ToInt32("20" + m1.Groups[3].Value), Convert.ToInt32(m1.Groups[1].Value), Convert.ToInt32(m1.Groups[2].Value), Convert.ToInt32(m2.Groups[1].Value), Convert.ToInt32(m2.Groups[2].Value), Convert.ToInt32(m2.Groups[3].Value));
+                        //if (actigraphOffset > 0)
+                        actigraphTime = actigraphTime.AddSeconds(actigraphOffset[i]);
                         actigraphUnixTime = UnixTime.GetUnixTime(actigraphTime);
 
                         do
                         {
+                            if (actigraph_line.Contains("\""))
+                            {
+                                actigraph_line = actigraph_line.Replace("\"", "");
+                            }
                             tokens = actigraph_line.Split(',');
                             if (tokens.Length == 5)
                             {
@@ -4623,31 +4753,31 @@ namespace DataMerger
                     month = Convert.ToInt32(datetokens[1]);
                     day = Convert.ToInt32(datetokens[2]);
 
-                   /* if ((startyear == 0) || (year < startyear))
-                        startyear = year;
-                    if ((endyear == 0) || (year > endyear))
-                        endyear = year;
+                    /* if ((startyear == 0) || (year < startyear))
+                         startyear = year;
+                     if ((endyear == 0) || (year > endyear))
+                         endyear = year;
 
-                    if ((startmonth == 0) || (month < startmonth))
-                        startmonth = month;
-                    if ((endmonth == 0) || (month > endmonth))
-                        endmonth = month;
+                     if ((startmonth == 0) || (month < startmonth))
+                         startmonth = month;
+                     if ((endmonth == 0) || (month > endmonth))
+                         endmonth = month;
 
-                    if ((startday == 0) || (day < startday))
-                        startday = day;
-                    if ((endday == 0) || (day > endday))
-                        endday = day;
-                    */
+                     if ((startday == 0) || (day < startday))
+                         startday = day;
+                     if ((endday == 0) || (day > endday))
+                         endday = day;
+                     */
 
                     for (int i = 0; i < 30; i++)
                     {
                         if (Directory.Exists(subdirectory + "\\" + i))
                         {
                             int hr = i;
-                           /* if (hr < starthr)
-                                starthr = hr;
-                            if (hr > endhr)
-                                endhr = hr;*/
+                            /* if (hr < starthr)
+                                 starthr = hr;
+                             if (hr > endhr)
+                                 endhr = hr;*/
 
                             DateTime d = new DateTime(year, month, day, hr, 0, 0);
                             if (d.Subtract(startDateTime).TotalSeconds < 0)
@@ -4658,6 +4788,14 @@ namespace DataMerger
                         }
 
                     }
+                }
+            }//if wockets data is not present and merging only actigraph data
+            else
+            {
+                if ((actigraphEndTimes[0] != null) && (actigraphStartTimes[0] != null))
+                {
+                    startDateTime = actigraphStartTimes[0];                    
+                    endDateTime = actigraphEndTimes[0];                    
                 }
             }
 
@@ -5762,7 +5900,251 @@ namespace DataMerger
 
             }
 
+            #region Convert Actigraph Raw Data to Wockets Raw Format and CSV
 
+            CSVProgress = "Converting Actigraph Raw Data to Wockets Raw Format and csv";
+            string actRawDirectory = aDataDirectory + "\\othersensors";
+            //file = Directory.GetFileSystemEntries(actRawDirectory, "*ActRawCSV*.csv");
+            file = Directory.GetFileSystemEntries(actRawDirectory, "*RAW*.csv");
+            if (file.Length > 0)
+            {
+                string line;
+                string[] row = { "" };
+                string startDate = "";
+                string startTime = "";
+                string startDT = "";
+                string endDate = "";
+                string endDT = "";
+                string endTime = "";
+
+                DateTime start = DateTime.MinValue;
+                DateTime end = DateTime.MinValue;
+
+                double totalActSeconds = 1;
+                double totalActSamples;
+                double actSR;
+                double nextActTime = 25;
+
+                int headcount = 0;
+                DateTime dateTime = DateTime.MinValue;
+                for (int i = 0; i < file.Length; i++)
+                {
+                    string pth = Path.Combine(actRawDirectory, file[i]);
+                    StreamReader sr = new StreamReader(pth);
+                    headcount = 0;
+
+                    int len = File.ReadAllLines(pth).Length;
+                    len = len - 10;
+                    //TextWriter tw = new StreamWriter(actRawDirectory + "/ActRawData" + (i+1) + ".csv");   
+                    TextWriter tw = new StreamWriter(aDataDirectory + "\\merged" + "\\Actigraph_Raw_Data" + (i + 1) + ".csv");
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        headcount++;
+                        if (headcount == 3)
+                        {
+                            row = line.Split(',');
+                            startTime = row[0];
+                            startTime = startTime.Substring(10);
+                        }
+                        if (headcount == 4)
+                        {
+                            row = line.Split(',');
+                            startDate = row[0];
+                            startDate = startDate.Substring(10);
+                            startDT = startDate + startTime;
+                            dateTime = DateTime.Parse(startDT);
+                            start = DateTime.Parse(startDT);
+                            dateTime = dateTime.AddSeconds(actigraphOffset[i]);
+
+                            TimeSpan t = (dateTime - new DateTime(1970, 1, 1, 0, 0, 0, 0).ToLocalTime());
+                            TimeSpan uts = dateTime.Subtract(new DateTime(1970, 1, 1, 0, 0, 0, 0));
+                            double unixts = uts.TotalMilliseconds;
+                            double ts = t.TotalMilliseconds;
+                        }
+                        if (headcount == 6)
+                        {
+                            row = line.Split(',');
+                            endTime = row[0];
+                            endTime = endTime.Substring(13);
+                        }
+                        if (headcount == 7)
+                        {
+                            row = line.Split(',');
+                            endDate = row[0];
+                            endDate = endDate.Substring(13);
+                            endDT = endDate + endTime;
+                            end = DateTime.Parse(endDT);
+                            TimeSpan tsAct = end - start;
+                            totalActSeconds = tsAct.TotalSeconds;
+                            totalActSamples = len;
+                            actSR = totalActSamples / totalActSeconds;
+                            nextActTime = (1000 / actSR);
+                        }
+
+                        if (headcount > 10)
+                        {
+                            if (line.Contains("\""))
+                            {
+                                line = line.Replace("\"", "");
+                            }
+
+                            row = line.Split(',');
+                            double xval, yval, zval;
+                            diff = dateTime.Subtract(new DateTime(1970, 1, 1, 0, 0, 0, 0));
+                            tw.Write(diff.TotalMilliseconds + ",");
+                            dateTime = dateTime.AddMilliseconds(nextActTime);
+                            //xval = Math.Round((Convert.ToDouble(row[1]) + 6) / 0.01171875);
+                            // Wocket +X -> Actigraph +Axis 2
+                            xval = Math.Round(((ACTRANGE / 2) - Convert.ToDouble(row[1])) / ACTWKTNORM);
+                            xval = Math.Round(((ACTRANGE / 2) + Convert.ToDouble(row[1])) / ACTWKTNORM);
+                            // Wocket +Y -> Actigraph +Axis 1
+                            //yval = Math.Round(((ACTRANGE / 2) - (Convert.ToDouble(row[0]))) / ACTWKTNORM);
+                            yval = Math.Round(((ACTRANGE / 2) + (Convert.ToDouble(row[0]))) / ACTWKTNORM);
+                            //Wocket +Z -> Actigraph -Axis3
+                            //zval = Math.Round((6 - (Convert.ToDouble(row[2]))) / 0.0171875);
+                            zval = Math.Round((Convert.ToDouble(row[2]) + (ACTRANGE / 2)) / ACTWKTNORM);
+                            //zval = Math.Round(((ACTRANGE / 2) - Convert.ToDouble(row[2])) / ACTWKTNORM);
+                            tw.Write(xval + "," + yval + "," + zval + ",");
+                            tw.WriteLine();
+
+                        }
+                    }
+                    //totalActSamples = headcount - 10;
+                    //actSR = totalActSamples / totalActSeconds;
+                    tw.Close();
+                    sr.Close();
+                    //sr = new StreamReader(actRawDirectory + "\\actRawData" + (i+1) + ".csv");
+                    sr = new StreamReader(aDataDirectory + "\\merged" + "\\Actigraph_Raw_Data" + (i + 1) + ".csv");
+                    //i + 1
+                    DateTime dt = DateTime.Parse(startDate + " " + startTime);
+                    string date = dt.Year.ToString() + "-" + dt.Month.ToString() + "-" + dt.Day.ToString();
+                    string dir = actRawDirectory + "\\Actigraph\\data\\raw\\PLFormat";
+                    int hr = dt.Hour;
+                    string dir1 = dir + "\\" + date + "\\" + dt.Hour.ToString();
+                    Directory.CreateDirectory(dir1);
+                    FileStream fs = new FileStream(dir1 + "\\Actigraph" + (i + 1) + ".PLFormat", FileMode.Create);
+                    BinaryWriter bw = new BinaryWriter(fs);
+                    DateTime currentDate = DateTime.MinValue;
+                    int count = 0;
+                    int currentDay;
+                    int currentMonth;
+                    int currentYear;
+                    int currentHour;
+                    int startDay = DateTime.Parse(startDT).Day;
+                    int startMonth = DateTime.Parse(startDT).Month;
+                    int startYear = DateTime.Parse(startDT).Year;
+                    int startHour = DateTime.Parse(startDT).Hour;
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        count++;
+                        row = line.Split(',');
+
+                        if (count == 1)
+                        {
+                            DateTime startDt;
+                            UnixTime.GetDateTime(Convert.ToInt64(row[0]), out startDt);
+                            startDay = startDt.Day;
+                            startMonth = startDt.Month;
+                            startYear = startDt.Year;
+                            startHour = startDt.Hour;
+                        }
+
+                        UnixTime.GetDateTime(Convert.ToInt64(row[0]), out currentDate);
+                        currentDay = currentDate.Day;
+                        currentMonth = currentDate.Month;
+                        currentYear = currentDate.Year;
+                        currentHour = currentDate.Hour;
+
+                        if (currentDay != startDay)
+                        {
+                            bw.Flush();
+                            bw.Close();
+                            fs.Close();
+                            startDay = currentDay;
+                            dir1 = dir + "/" + currentYear + "-" + currentMonth + "-" + currentDay + "/" + currentHour;
+                            Directory.CreateDirectory(dir1);
+                            fs = new FileStream(dir1 + "/Actigraph" + (i + 1) + ".PLFormat", FileMode.Create);
+                            bw = new BinaryWriter(fs);
+                            bw.Write(Convert.ToInt64(row[0]));
+                            bw.Write(Convert.ToInt16(row[1]));
+                            bw.Write(Convert.ToInt16(row[2]));
+                            bw.Write(Convert.ToInt16(row[3]));
+                        }
+                        else if (currentHour != startHour)
+                        {
+                            bw.Flush();
+                            bw.Close();
+                            fs.Close();
+                            startHour = currentHour;
+                            dir1 = dir + "/" + currentYear + "-" + currentMonth + "-" + currentDay + "/" + currentHour;
+                            Directory.CreateDirectory(dir1);
+                            fs = new FileStream(dir1 + "/Actigraph" + (i + 1) + ".PLFormat", FileMode.Create);
+                            bw = new BinaryWriter(fs);
+                            bw.Write(Convert.ToInt64(row[0]));
+                            bw.Write(Convert.ToInt16(row[1]));
+                            bw.Write(Convert.ToInt16(row[2]));
+                            bw.Write(Convert.ToInt16(row[3]));
+                        }
+                        else
+                        {
+                            bw.Write(Convert.ToInt64(row[0]));
+                            bw.Write(Convert.ToInt16(row[1]));
+                            bw.Write(Convert.ToInt16(row[2]));
+                            bw.Write(Convert.ToInt16(row[3]));
+                        }
+
+                    }
+                    tw.Close();
+                    sr.Close();
+                    bw.Close();
+                    fs.Close();
+                }
+            }
+            else
+            {
+                if (Directory.Exists(actRawDirectory + "\\Actigraph\\data\\raw\\PLFormat"))
+                {
+                    string[] actDir = Directory.GetDirectories(actRawDirectory + "\\Actigraph\\data\\raw\\PLFormat");
+                    for (int i = 0; i < actDir.Length; i++)
+                    {
+                        string[] actSubDir = Directory.GetDirectories(actDir[i]);
+
+                        for (int j = 0; j < actSubDir.Length; j++)
+                        {
+                            string[] actfile = Directory.GetFileSystemEntries(actSubDir[j]);
+
+                            for (int k = 0; k < actfile.Length; k++)
+                            {
+                                FileStream fs = new FileStream(actfile[k], FileMode.Open);
+                                BinaryReader br = new BinaryReader(fs);
+                                //FileStream fs1 = new FileStream(actRawDirectory + "\\ActRawData" + (k+1) + ".csv", FileMode.Append);
+                                FileStream fs1 = new FileStream(aDataDirectory + "\\merged" + "\\Actigraph_Raw_Data" + (k + 1) + ".csv", FileMode.Append);
+                                TextWriter tw = new StreamWriter(fs1);
+                                int length = (int)br.BaseStream.Length;
+                                int pos = 0;
+
+                                while (pos < length)
+                                {
+                                    tw.Write(br.ReadInt64());
+                                    tw.Write("," + br.ReadInt16() + "," + br.ReadInt16() + "," + br.ReadInt16() + ",");
+                                    tw.WriteLine();
+                                    pos += 4 * sizeof(Int64);
+
+                                }
+                                tw.Close();
+                                fs1.Close();
+                                br.Close();
+                                fs.Close();
+
+                            }
+
+                        }
+                    }
+                }
+            }
+
+
+            #endregion
 
 
             #region Close all files
