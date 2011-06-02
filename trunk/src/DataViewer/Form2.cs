@@ -849,7 +849,91 @@ namespace NESPDataViewer
             #endregion
             WidenDatesIfNeeded(listCountsX);
         }
+
+        #region ActigraphRawData
+
+        private void createActigraphRawGraph(int paneOrder, string filepath, string channel, string location, string type, string mac)
+        {
+            // Extract only the selected time range
+            double startUnix = Wockets.Utils.WocketsTimer.GetDoubleTime(startX.DateTime);
+            double endUnix = Wockets.Utils.WocketsTimer.GetDoubleTime(endX.DateTime);
+            string[] tokens = null;
+            bool foundTime = false;
+            double currentTime = 0;
+            int start = 0;
+            int end = 0;
+            TextReader tr = new StreamReader(filepath);
+            while (currentTime <= startUnix)
+            {
+                string s = tr.ReadLine();
+                if (s == null)
+                    break;
+                currentTime = Convert.ToDouble(s.Split(',')[0]);
+                start++;
+            }
+            end = start;
+            while (currentTime <= endUnix)
+            {
+                string s = tr.ReadLine();
+                if (s == null)
+                    break;
+                currentTime = Convert.ToDouble(s.Split(',')[0]);
+                end++;
+            }
+            tr.Close();
+            string[] accel = FileReadWrite.ReadLinesFromFile(filepath);
+
+            PointPairList listX = new PointPairList();
+            PointPairList listY = new PointPairList();
+            PointPairList listZ = new PointPairList();
+
+            for (int i = start; i < end; i++)
+            {
+                try
+                {
+                    string[] split = accel[i].Split(',');
+                    if ((split.Length > 3) && (split[1].Length > 0) && (split[2].Length > 0))
+                    {
+                        DateTime dt = new DateTime();//DateTime.Parse(split[1]);
+                        double fulltimestamp = Convert.ToDouble(split[0]);
+                        long time = (long)fulltimestamp;
+                        Wockets.Utils.WocketsTimer.GetDateTime((long)fulltimestamp, out dt);
+                        //dt.Millisecond
+
+                        //double dt = Convert.ToDouble(split[0]);
+
+                        double x = (double)new XDate(dt);
+                        double value = Convert.ToDouble(split[1]);
+                        string label = String.Format("Channel {0}, X-axis, at {1}\n{2} {3}", channel, location, dt.ToString("HH:mm:ss:fff tt"), value);
+
+                        if (_isUsingLabels) listX.Add(x, value, label);
+                        else listX.Add(x, value);
+
+                        value = Convert.ToDouble(split[2]);
+                        label = String.Format("Channel {0}, Y-axis, at {1}\n{2} {3}", channel, location, dt.ToString("HH:mm:ss:fff tt") + ":" + dt.Millisecond, value);
+                        if (_isUsingLabels) listY.Add(x, value, label);
+                        else listY.Add(x, value);
+
+                        value = Convert.ToDouble(split[3]);
+                        label = label = String.Format("Channel {0}, Z-axis, at {1}\n{2} {3}", channel, location, dt.ToString("HH:mm:ss:fff tt") + ":" + dt.Millisecond, value);
+                        if (_isUsingLabels) listZ.Add(x, value, label);
+                        else listZ.Add(x, value);
+                    }
+                }
+                catch { }
+            }
+            AddAccelerationCurve(mac, location, listX, listY, listZ);
+            paneOrders.Add(mac, paneOrder);
+            paneOrder++;
+            WidenDatesIfNeeded(listX);
+        }
+
+
+        #endregion ActigraphRawData
+
         #endregion Actigraph
+
+
 
         #region Zephyr
         private void CreateZephyrGraph(GraphPane gp, string filePath)
@@ -1887,64 +1971,69 @@ namespace NESPDataViewer
 
 
             #region WOCKETS ACCELEROMETER GRAPHS
-            Wockets.WocketsController wc = new Wockets.WocketsController("", "", "");
-            wc.FromXML(path + "\\wockets\\SensorData.xml");
 
-
-            files = Directory.GetFiles(path + "\\merged\\", "Wocket*RawData*");
-            for (int i = 0; i < files.Length; i++)
+            if ((Directory.Exists(path + "\\wockets")) && (File.Exists(path + "\\wockets\\SensorData.xml")))
             {
-                string channel = "", location = "";
-                string[] sensorinfo = Path.GetFileNameWithoutExtension(files[i]).Split('_');
-                string mac = "";
-                if (sensorinfo.Length >= 3)
-                {
-                    channel = sensorinfo[1];
-                    if (wc._Receivers[Convert.ToInt32(channel)] is Wockets.Receivers.RFCOMMReceiver)
-                    {
-                        mac = ((Wockets.Receivers.RFCOMMReceiver)wc._Receivers[Convert.ToInt32(channel)])._Address;
-                        mac = mac.Substring(mac.Length - 2, 2);
-                       // mac = "Wocket " + mac;
-                        string loc = wc._Sensors[Convert.ToInt32(channel)]._Location;
-                        switch (loc)
-                        {
-                            case "Dominant Hip":
-                                loc = "DHP";
-                                break;
-                            case "Dominant Ankle":
-                                loc = "DAK";
-                                break;
-                            case "Dominant Upper Arm":
-                                loc = "DUA";
-                                break;
-                            case "Dominant Wrist":
-                                loc = "DW";
-                                break;
-                            case "Dominant Thigh":
-                                loc = "DT";
-                                break;
-                            case "Torso":
-                                loc = "TR";
-                                break;
-                            case "Right Wrist":
-                                loc = "RW";
-                                break;
-                            case "Left Wrist":
-                                loc = "LW";
-                                break;
-                            default:
-                                //loc = "lOC";
-                                break;
-                        }
 
-                        mac = "WKT-" + loc + "-" + mac;
+                Wockets.WocketsController wc = new Wockets.WocketsController("", "", "");
+                wc.FromXML(path + "\\wockets\\SensorData.xml");
+
+
+                files = Directory.GetFiles(path + "\\merged\\", "Wocket*RawData*");
+                for (int i = 0; i < files.Length; i++)
+                {
+                    string channel = "", location = "";
+                    string[] sensorinfo = Path.GetFileNameWithoutExtension(files[i]).Split('_');
+                    string mac = "";
+                    if (sensorinfo.Length >= 3)
+                    {
+                        channel = sensorinfo[1];
+                        if (wc._Receivers[Convert.ToInt32(channel)] is Wockets.Receivers.RFCOMMReceiver)
+                        {
+                            mac = ((Wockets.Receivers.RFCOMMReceiver)wc._Receivers[Convert.ToInt32(channel)])._Address;
+                            mac = mac.Substring(mac.Length - 2, 2);
+                            // mac = "Wocket " + mac;
+                            string loc = wc._Sensors[Convert.ToInt32(channel)]._Location;
+                            switch (loc)
+                            {
+                                case "Dominant Hip":
+                                    loc = "DHP";
+                                    break;
+                                case "Dominant Ankle":
+                                    loc = "DAK";
+                                    break;
+                                case "Dominant Upper Arm":
+                                    loc = "DUA";
+                                    break;
+                                case "Dominant Wrist":
+                                    loc = "DW";
+                                    break;
+                                case "Dominant Thigh":
+                                    loc = "DT";
+                                    break;
+                                case "Torso":
+                                    loc = "TR";
+                                    break;
+                                case "Right Wrist":
+                                    loc = "RW";
+                                    break;
+                                case "Left Wrist":
+                                    loc = "LW";
+                                    break;
+                                default:
+                                    //loc = "lOC";
+                                    break;
+                            }
+
+                            mac = "WKT-" + loc + "-" + mac;
+                        }
+                        else
+                            mac = "Internal";
+                        location = sensorinfo[3];
                     }
-                    else
-                        mac = "Internal";
-                    location = sensorinfo[3];
+                    CreateAccelerationGraph(paneOrdering, files[i], channel, location, "Wocket", mac);
+                    paneOrdering++;
                 }
-                CreateAccelerationGraph(paneOrdering, files[i], channel, location, "Wocket", mac);
-                paneOrdering++;
             }
             #endregion
 
@@ -2004,7 +2093,7 @@ namespace NESPDataViewer
 
 
             #region Actigraphs
-           /* string[] file = Directory.GetFileSystemEntries(path + "\\merged\\", "Actigraph*.csv");
+            /* string[] file = Directory.GetFileSystemEntries(path + "\\merged\\", "Actigraph*.csv");
 
             if (file.Length > 0)
             {
@@ -2022,10 +2111,26 @@ namespace NESPDataViewer
                 paneOrdering++;
             }*/
 
+            #region ActigraphsRawData
+
+            files = Directory.GetFiles(path + "\\merged\\", "*Actigraph_Raw_Data*");
+            for (int i = 0; i < files.Length; i++)
+            {
+                string channel = "", location = "";
+                string[] sensorinfo = Path.GetFileNameWithoutExtension(files[i]).Split('_');
+                channel = "";
+                location = "";
+                string mac = "Actigraph" + (i + 1).ToString();
+                createActigraphRawGraph(paneOrdering, files[i], channel, location, "Actigraph", mac);
+                string title = "Actigraph" + i;                
+            }
+
+            #endregion ActigraphsRawData
+
             #endregion Actigraphs
 
             #region Sensewear
-         /*   string sensewearFile = Path.Combine(path + "\\merged\\", "Sensewear.csv");
+            /*   string sensewearFile = Path.Combine(path + "\\merged\\", "Sensewear.csv");
             if (File.Exists(sensewearFile))
             {
                 string title = "Sensewear";

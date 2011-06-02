@@ -11,13 +11,15 @@ namespace DataMerger
 {
     public partial class Form2 : Form
     {
+        public int _TotalActigraphs = 6;
+
         public double _SensewearSeconds = 0;
         public double _ZephyrSeconds = 0;
-        public double _ActigraphSeconds = 0;
+        //public double _ActigraphSeconds = 0;
         public double _RTISeconds = 0;
         public double _ColumbiaSeconds = 0;
         public double _OxyconSeconds = 0;
-
+        public double[] _ActigraphSeconds = new double[] { 0, 0, 0, 0, 0, 0 };
 
 
         public double _MitesSeconds = 0;
@@ -36,23 +38,111 @@ namespace DataMerger
             InitializeComponent();
             this.directory = directory + "\\othersensors\\"; ;
 
-           
-           LoadData();
-       }
+
+            LoadData();
+        }
 
 
 
-      
-        private void textBox_actigraph_TextChanged(object sender, EventArgs e)
+
+        //private void textBox_actigraph1_TextChanged(object sender, EventArgs e)
+        //{
+        //    try
+        //    {
+        //        //TextBox[] _textBox_Actigraphs = { this.textBox_actigraph1, this.textBox_actigraph2, this.textBox_actigraph3, this.textBox_actigraph4, this.textBox_actigraph5, this.textBox_actigraph6 };
+        //        //for (int i = 0; i < _TotalActigraphs; i++)
+        //        //{
+        //        //    this._ActigraphSeconds[i] = Convert.ToDouble(_textBox_Actigraphs[i].Text.Trim());
+        //        //}
+        //        this._ActigraphSeconds[0] = Convert.ToDouble(this.textBox_actigraph1.Text.Trim());
+        //        Save();
+        //    }
+        //    catch
+        //    {
+        //        this._ActigraphSeconds[0] = 0;
+        //    }
+        //}
+
+        private void textBox_actigraph1_TextChanged_1(object sender, EventArgs e)
         {
             try
             {
-                this._ActigraphSeconds = Convert.ToDouble(this.textBox_actigraph.Text.Trim());
+                //TextBox[] _textBox_Actigraphs = { this.textBox_actigraph1, this.textBox_actigraph2, this.textBox_actigraph3, this.textBox_actigraph4, this.textBox_actigraph5, this.textBox_actigraph6 };
+                //for (int i = 0; i < _TotalActigraphs; i++)
+                //{
+                //    this._ActigraphSeconds[i] = Convert.ToDouble(_textBox_Actigraphs[i].Text.Trim());
+                //}
+                this._ActigraphSeconds[0] = Convert.ToDouble(this.textBox_actigraph1.Text.Trim());
                 Save();
             }
             catch
             {
-                this._ActigraphSeconds = 0;
+                this._ActigraphSeconds[0] = 0;
+            }
+        }
+
+        private void textBox_actigraph2_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                this._ActigraphSeconds[1] = Convert.ToDouble(this.textBox_actigraph2.Text.Trim());
+                Save();
+            }
+            catch
+            {
+                this._ActigraphSeconds[1] = 0;
+            }
+
+        }
+
+        private void textBox_actigraph3_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                this._ActigraphSeconds[2] = Convert.ToDouble(this.textBox_actigraph3.Text.Trim());
+                Save();
+            }
+            catch
+            {
+                this._ActigraphSeconds[2] = 0;
+            }
+        }
+
+        private void textBox_actigraph4_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                this._ActigraphSeconds[3] = Convert.ToDouble(this.textBox_actigraph4.Text.Trim());
+                Save();
+            }
+            catch
+            {
+                this._ActigraphSeconds[3] = 0;
+            }
+        }
+
+        private void textBox_actigraph5_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                this._ActigraphSeconds[4] = Convert.ToDouble(this.textBox_actigraph5.Text.Trim());
+                Save();
+            }
+            catch
+            {
+                this._ActigraphSeconds[4] = 0;
+            }
+        }
+        private void textBox_actigraph6_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                this._ActigraphSeconds[5] = Convert.ToDouble(this.textBox_actigraph6.Text.Trim());
+                Save();
+            }
+            catch
+            {
+                this._ActigraphSeconds[5] = 0;
             }
         }
 
@@ -161,12 +251,14 @@ namespace DataMerger
                 this._GpsSeconds = 0;
             }
         }
-      
+
 
 
 
         private void LoadData()
         {
+            TextBox[] _textBox_Actigraphs = { this.textBox_actigraph1, this.textBox_actigraph2, this.textBox_actigraph3, this.textBox_actigraph4, this.textBox_actigraph5, this.textBox_actigraph6 };
+
             if (File.Exists(directory + FILENAME))
             {
                 TextReader tr = new StreamReader(directory + FILENAME);
@@ -176,15 +268,20 @@ namespace DataMerger
 
                 try
                 {
-                    line = tr.ReadLine();
-                    this._ActigraphSeconds = Convert.ToDouble(line.Substring(10));
+                    for (int i = 0; i < _TotalActigraphs; i++)
+                    {
+                        line = tr.ReadLine();
+                        this._ActigraphSeconds[i] = Convert.ToDouble(line.Substring(10));
+                    }
+                    //line = tr.ReadLine();
+                    //this._ActigraphSeconds = Convert.ToDouble(line.Substring(10));
                 }
                 catch
                 {
-                    this._ActigraphSeconds = 0;
+                    this._ActigraphSeconds = new double[] { 0, 0, 0, 0, 0, 0 };
                 }
-               
-                
+
+
                 try
                 {
                     line = tr.ReadLine();
@@ -194,9 +291,9 @@ namespace DataMerger
                 {
                     this._SensewearSeconds = 0;
                 }
-                
-                
-                
+
+
+
                 try
                 {
                     line = tr.ReadLine();
@@ -206,9 +303,9 @@ namespace DataMerger
                 {
                     this._ZephyrSeconds = 0;
                 }
-                
-                
-                
+
+
+
                 try
                 {
                     line = tr.ReadLine();
@@ -218,8 +315,8 @@ namespace DataMerger
                 {
                     this._ColumbiaSeconds = 0;
                 }
-                
-                
+
+
                 try
                 {
                     line = tr.ReadLine();
@@ -229,8 +326,8 @@ namespace DataMerger
                 {
                     this._RTISeconds = 0;
                 }
-                
-                
+
+
                 try
                 {
                     line = tr.ReadLine();
@@ -240,9 +337,9 @@ namespace DataMerger
                 {
                     this._OxyconSeconds = 0;
                 }
-                
-                
-                
+
+
+
                 try
                 {
                     line = tr.ReadLine();
@@ -252,9 +349,9 @@ namespace DataMerger
                 {
                     this._AnnotationsSeconds = 0;
                 }
-                
-                
-                
+
+
+
                 try
                 {
                     line = tr.ReadLine();
@@ -264,13 +361,13 @@ namespace DataMerger
                 {
                     this._MitesSeconds = 0;
                 }
-                
-                
-                
+
+
+
                 try
                 {
                     line = tr.ReadLine();
-                    this._GpsSeconds= Convert.ToDouble(line.Substring(4));
+                    this._GpsSeconds = Convert.ToDouble(line.Substring(4));
                 }
                 catch
                 {
@@ -284,8 +381,11 @@ namespace DataMerger
             }
 
 
-
-            this.textBox_actigraph.Text = this._ActigraphSeconds.ToString();
+            for (int i = 0; i < _TotalActigraphs; i++)
+            {
+                _textBox_Actigraphs[i].Text = this._ActigraphSeconds[i].ToString();
+            }
+            //this.textBox_actigraph1.Text = this._ActigraphSeconds.ToString();
             this.textBox_sensewear.Text = this._SensewearSeconds.ToString();
             this.textBox_zephyr.Text = this._ZephyrSeconds.ToString();
             this.textBox_columbia.Text = this._ColumbiaSeconds.ToString();
@@ -305,7 +405,11 @@ namespace DataMerger
         private void Save()
         {
             TextWriter tw = new StreamWriter(directory + "TimeOffsetCorrections.txt");
-            tw.WriteLine("Actigraph:" + this._ActigraphSeconds);
+            for (int i = 0; i < _TotalActigraphs; i++)
+            {
+                tw.WriteLine("Actigraph" + (i + 1) + ":" + this._ActigraphSeconds[i]);
+            }
+            //tw.WriteLine("Actigraph:" + this._ActigraphSeconds);
             tw.WriteLine("Sensewear:" + this._SensewearSeconds);
             tw.WriteLine("Zephyr:" + this._ZephyrSeconds);
             tw.WriteLine("Columbia:" + this._ColumbiaSeconds);
@@ -322,7 +426,11 @@ namespace DataMerger
 
         }
 
-        
+
+
+
+
+
 
 
 
