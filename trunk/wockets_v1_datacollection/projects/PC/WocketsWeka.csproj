@@ -1,0 +1,594 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{E5BB25A9-1913-4C1A-BBCF-51F2554D0C42}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>WocketsWeka</RootNamespace>
+    <AssemblyName>WocketsWeka</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\bin\PC\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\bin\PC\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\src\WocketsWeka\Constants.cs" />
+    <Compile Include="..\..\src\WocketsWeka\core\FFT.cs">
+      <Link>core\FFT.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Properties\AssemblyInfo.cs">
+      <Link>Properties\AssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\BubbleSort.cs">
+      <Link>Utils\BubbleSort.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\BufferedTextReader.cs">
+      <Link>Utils\BufferedTextReader.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\CharBuffer.cs">
+      <Link>Utils\CharBuffer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\BZip2\BZip2.cs">
+      <Link>Utils\compression\ZipLib\BZip2\BZip2.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\BZip2\BZip2Constants.cs">
+      <Link>Utils\compression\ZipLib\BZip2\BZip2Constants.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\BZip2\BZip2Exception.cs">
+      <Link>Utils\compression\ZipLib\BZip2\BZip2Exception.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\BZip2\BZip2InputStream.cs">
+      <Link>Utils\compression\ZipLib\BZip2\BZip2InputStream.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\BZip2\BZip2OutputStream.cs">
+      <Link>Utils\compression\ZipLib\BZip2\BZip2OutputStream.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Checksums\Adler32.cs">
+      <Link>Utils\compression\ZipLib\Checksums\Adler32.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Checksums\CRC32.cs">
+      <Link>Utils\compression\ZipLib\Checksums\CRC32.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Checksums\IChecksum.cs">
+      <Link>Utils\compression\ZipLib\Checksums\IChecksum.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Checksums\StrangeCRC.cs">
+      <Link>Utils\compression\ZipLib\Checksums\StrangeCRC.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Core\FileSystemScanner.cs">
+      <Link>Utils\compression\ZipLib\Core\FileSystemScanner.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Core\INameTransform.cs">
+      <Link>Utils\compression\ZipLib\Core\INameTransform.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Core\IScanFilter.cs">
+      <Link>Utils\compression\ZipLib\Core\IScanFilter.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Core\NameFilter.cs">
+      <Link>Utils\compression\ZipLib\Core\NameFilter.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Core\PathFilter.cs">
+      <Link>Utils\compression\ZipLib\Core\PathFilter.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Core\StreamUtils.cs">
+      <Link>Utils\compression\ZipLib\Core\StreamUtils.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Encryption\PkzipClassic.cs">
+      <Link>Utils\compression\ZipLib\Encryption\PkzipClassic.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\GZip\GZIPConstants.cs">
+      <Link>Utils\compression\ZipLib\GZip\GZIPConstants.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\GZip\GZipException.cs">
+      <Link>Utils\compression\ZipLib\GZip\GZipException.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\GZip\GzipInputStream.cs">
+      <Link>Utils\compression\ZipLib\GZip\GzipInputStream.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\GZip\GzipOutputStream.cs">
+      <Link>Utils\compression\ZipLib\GZip\GzipOutputStream.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\SharpZipBaseException.cs">
+      <Link>Utils\compression\ZipLib\SharpZipBaseException.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Tar\InvalidHeaderException.cs">
+      <Link>Utils\compression\ZipLib\Tar\InvalidHeaderException.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Tar\TarArchive.cs">
+      <Link>Utils\compression\ZipLib\Tar\TarArchive.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Tar\TarBuffer.cs">
+      <Link>Utils\compression\ZipLib\Tar\TarBuffer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Tar\TarEntry.cs">
+      <Link>Utils\compression\ZipLib\Tar\TarEntry.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Tar\TarException.cs">
+      <Link>Utils\compression\ZipLib\Tar\TarException.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Tar\TarHeader.cs">
+      <Link>Utils\compression\ZipLib\Tar\TarHeader.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Tar\TarInputStream.cs">
+      <Link>Utils\compression\ZipLib\Tar\TarInputStream.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Tar\TarOutputStream.cs">
+      <Link>Utils\compression\ZipLib\Tar\TarOutputStream.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Zip\Compression\Deflater.cs">
+      <Link>Utils\compression\ZipLib\Zip\Compression\Deflater.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Zip\Compression\DeflaterConstants.cs">
+      <Link>Utils\compression\ZipLib\Zip\Compression\DeflaterConstants.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Zip\Compression\DeflaterEngine.cs">
+      <Link>Utils\compression\ZipLib\Zip\Compression\DeflaterEngine.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Zip\Compression\DeflaterHuffman.cs">
+      <Link>Utils\compression\ZipLib\Zip\Compression\DeflaterHuffman.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Zip\Compression\DeflaterPending.cs">
+      <Link>Utils\compression\ZipLib\Zip\Compression\DeflaterPending.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Zip\Compression\Inflater.cs">
+      <Link>Utils\compression\ZipLib\Zip\Compression\Inflater.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Zip\Compression\InflaterDynHeader.cs">
+      <Link>Utils\compression\ZipLib\Zip\Compression\InflaterDynHeader.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Zip\Compression\InflaterHuffmanTree.cs">
+      <Link>Utils\compression\ZipLib\Zip\Compression\InflaterHuffmanTree.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Zip\Compression\PendingBuffer.cs">
+      <Link>Utils\compression\ZipLib\Zip\Compression\PendingBuffer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Zip\Compression\Streams\DeflaterOutputStream.cs">
+      <Link>Utils\compression\ZipLib\Zip\Compression\Streams\DeflaterOutputStream.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Zip\Compression\Streams\InflaterInputStream.cs">
+      <Link>Utils\compression\ZipLib\Zip\Compression\Streams\InflaterInputStream.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Zip\Compression\Streams\OutputWindow.cs">
+      <Link>Utils\compression\ZipLib\Zip\Compression\Streams\OutputWindow.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Zip\Compression\Streams\StreamManipulator.cs">
+      <Link>Utils\compression\ZipLib\Zip\Compression\Streams\StreamManipulator.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Zip\FastZip.cs">
+      <Link>Utils\compression\ZipLib\Zip\FastZip.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Zip\IEntryFactory.cs">
+      <Link>Utils\compression\ZipLib\Zip\IEntryFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Zip\ZipConstants.cs">
+      <Link>Utils\compression\ZipLib\Zip\ZipConstants.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Zip\ZipEntry.cs">
+      <Link>Utils\compression\ZipLib\Zip\ZipEntry.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Zip\ZipEntryFactory.cs">
+      <Link>Utils\compression\ZipLib\Zip\ZipEntryFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Zip\ZipException.cs">
+      <Link>Utils\compression\ZipLib\Zip\ZipException.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Zip\ZipExtraData.cs">
+      <Link>Utils\compression\ZipLib\Zip\ZipExtraData.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Zip\ZipFile.cs">
+      <Link>Utils\compression\ZipLib\Zip\ZipFile.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Zip\ZipHelperStream.cs">
+      <Link>Utils\compression\ZipLib\Zip\ZipHelperStream.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Zip\ZipInputStream.cs">
+      <Link>Utils\compression\ZipLib\Zip\ZipInputStream.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Zip\ZipNameTransform.cs">
+      <Link>Utils\compression\ZipLib\Zip\ZipNameTransform.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\compression\ZipLib\Zip\ZipOutputStream.cs">
+      <Link>Utils\compression\ZipLib\Zip\ZipOutputStream.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\CubicSpline.cs">
+      <Link>Utils\CubicSpline.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\DTs\Constants.cs">
+      <Link>Utils\DTs\Constants.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\DTs\FeatureSelector.cs">
+      <Link>Utils\DTs\FeatureSelector.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\DTs\FilterList.cs">
+      <Link>Utils\DTs\FilterList.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\HighResClock.cs">
+      <Link>Utils\HighResClock.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\Logger.cs">
+      <Link>Utils\Logger.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\Opts.cs">
+      <Link>Utils\Opts.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\parser\ArffParser.cs">
+      <Link>Utils\parser\ArffParser.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\parser\ArffStore.cs">
+      <Link>Utils\parser\ArffStore.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\parser\Constants.cs">
+      <Link>Utils\parser\Constants.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\ParseUtil.cs">
+      <Link>Utils\ParseUtil.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\PerformanceTimer.cs">
+      <Link>Utils\PerformanceTimer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\StreamTokenizer.cs">
+      <Link>Utils\StreamTokenizer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\TextNumberFormat.cs">
+      <Link>Utils\TextNumberFormat.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\Token.cs">
+      <Link>Utils\Token.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\Tokenizer.cs">
+      <Link>Utils\Tokenizer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\Utils\VerbosityLevel.cs">
+      <Link>Utils\VerbosityLevel.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\AdditionalMeasureProducer.cs">
+      <Link>weka\AdditionalMeasureProducer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\Attribute.cs">
+      <Link>weka\Attribute.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\AttributeStats.cs">
+      <Link>weka\AttributeStats.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\classifiers\Classifier.cs">
+      <Link>weka\classifiers\Classifier.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\classifiers\CostMatrix.cs">
+      <Link>weka\classifiers\CostMatrix.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\classifiers\Evaluation.cs">
+      <Link>weka\classifiers\Evaluation.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\classifiers\evaluation\ConfusionMatrix.cs">
+      <Link>weka\classifiers\evaluation\ConfusionMatrix.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\classifiers\evaluation\CostCurve.cs">
+      <Link>weka\classifiers\evaluation\CostCurve.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\classifiers\evaluation\EvaluationUtils.cs">
+      <Link>weka\classifiers\evaluation\EvaluationUtils.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\classifiers\evaluation\MarginCurve.cs">
+      <Link>weka\classifiers\evaluation\MarginCurve.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\classifiers\evaluation\NominalPrediction.cs">
+      <Link>weka\classifiers\evaluation\NominalPrediction.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\classifiers\evaluation\NumericPrediction.cs">
+      <Link>weka\classifiers\evaluation\NumericPrediction.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\classifiers\evaluation\Prediction.cs">
+      <Link>weka\classifiers\evaluation\Prediction.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\classifiers\evaluation\ThresholdCurve.cs">
+      <Link>weka\classifiers\evaluation\ThresholdCurve.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\classifiers\evaluation\TwoClassStats.cs">
+      <Link>weka\classifiers\evaluation\TwoClassStats.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\classifiers\functions\Logistic.cs">
+      <Link>weka\classifiers\functions\Logistic.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\classifiers\functions\VotedPerceptron.cs">
+      <Link>weka\classifiers\functions\VotedPerceptron.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\classifiers\IteratedSingleClassifierEnhancer.cs">
+      <Link>weka\classifiers\IteratedSingleClassifierEnhancer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\classifiers\meta\LogitBoost.cs">
+      <Link>weka\classifiers\meta\LogitBoost.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\classifiers\RandomizableIteratedSingleClassifierEnhancer.cs">
+      <Link>weka\classifiers\RandomizableIteratedSingleClassifierEnhancer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\classifiers\rules\ZeroR.cs">
+      <Link>weka\classifiers\rules\ZeroR.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\classifiers\SingleClassifierEnhancer.cs">
+      <Link>weka\classifiers\SingleClassifierEnhancer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\classifiers\Sourcable.cs">
+      <Link>weka\classifiers\Sourcable.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\classifiers\trees\DecisionStump.cs">
+      <Link>weka\classifiers\trees\DecisionStump.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\classifiers\trees\J48.cs">
+      <Link>weka\classifiers\trees\J48.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\classifiers\trees\j48\BinC45ModelSelection.cs">
+      <Link>weka\classifiers\trees\j48\BinC45ModelSelection.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\classifiers\trees\j48\BinC45Split.cs">
+      <Link>weka\classifiers\trees\j48\BinC45Split.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\classifiers\trees\j48\C45ModelSelection.cs">
+      <Link>weka\classifiers\trees\j48\C45ModelSelection.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\classifiers\trees\j48\C45PruneableClassifierTree.cs">
+      <Link>weka\classifiers\trees\j48\C45PruneableClassifierTree.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\classifiers\trees\j48\C45Split.cs">
+      <Link>weka\classifiers\trees\j48\C45Split.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\classifiers\trees\j48\ClassifierSplitModel.cs">
+      <Link>weka\classifiers\trees\j48\ClassifierSplitModel.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\classifiers\trees\j48\ClassifierTree.cs">
+      <Link>weka\classifiers\trees\j48\ClassifierTree.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\classifiers\trees\j48\Distribution.cs">
+      <Link>weka\classifiers\trees\j48\Distribution.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\classifiers\trees\j48\EntropyBasedSplitCrit.cs">
+      <Link>weka\classifiers\trees\j48\EntropyBasedSplitCrit.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\classifiers\trees\j48\EntropySplitCrit.cs">
+      <Link>weka\classifiers\trees\j48\EntropySplitCrit.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\classifiers\trees\j48\GainRatioSplitCrit.cs">
+      <Link>weka\classifiers\trees\j48\GainRatioSplitCrit.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\classifiers\trees\j48\InfoGainSplitCrit.cs">
+      <Link>weka\classifiers\trees\j48\InfoGainSplitCrit.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\classifiers\trees\j48\ModelSelection.cs">
+      <Link>weka\classifiers\trees\j48\ModelSelection.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\classifiers\trees\j48\NoSplit.cs">
+      <Link>weka\classifiers\trees\j48\NoSplit.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\classifiers\trees\j48\PruneableClassifierTree.cs">
+      <Link>weka\classifiers\trees\j48\PruneableClassifierTree.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\classifiers\trees\j48\SplitCriterion.cs">
+      <Link>weka\classifiers\trees\j48\SplitCriterion.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\classifiers\trees\j48\Stats.cs">
+      <Link>weka\classifiers\trees\j48\Stats.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\classifiers\UpdateableClassifier.cs">
+      <Link>weka\classifiers\UpdateableClassifier.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\Copyable.cs">
+      <Link>weka\Copyable.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\core\ContingencyTables.cs">
+      <Link>weka\core\ContingencyTables.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\core\Matrix.cs">
+      <Link>weka\core\Matrix.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\core\matrix\CholeskyDecomposition.cs">
+      <Link>weka\core\matrix\CholeskyDecomposition.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\core\matrix\EigenvalueDecomposition.cs">
+      <Link>weka\core\matrix\EigenvalueDecomposition.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\core\matrix\LinearRegression.cs">
+      <Link>weka\core\matrix\LinearRegression.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\core\matrix\LUDecomposition.cs">
+      <Link>weka\core\matrix\LUDecomposition.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\core\matrix\Maths.cs">
+      <Link>weka\core\matrix\Maths.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\core\matrix\Matrix.cs">
+      <Link>weka\core\matrix\Matrix.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\core\matrix\QRDecomposition.cs">
+      <Link>weka\core\matrix\QRDecomposition.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\core\matrix\SingularValueDecomposition.cs">
+      <Link>weka\core\matrix\SingularValueDecomposition.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\core\Optimization.cs">
+      <Link>weka\core\Optimization.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\core\Queue.cs">
+      <Link>weka\core\Queue.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\core\Randomizable.cs">
+      <Link>weka\core\Randomizable.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\core\Range.cs">
+      <Link>weka\core\Range.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\core\SingleIndex.cs">
+      <Link>weka\core\SingleIndex.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\core\SpecialFunctions.cs">
+      <Link>weka\core\SpecialFunctions.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\Drawable.cs">
+      <Link>weka\Drawable.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\estimators\ConditionalEstimator.cs">
+      <Link>weka\estimators\ConditionalEstimator.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\estimators\DDConditionalEstimator.cs">
+      <Link>weka\estimators\DDConditionalEstimator.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\estimators\DiscreteEstimator.cs">
+      <Link>weka\estimators\DiscreteEstimator.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\estimators\DKConditionalEstimator.cs">
+      <Link>weka\estimators\DKConditionalEstimator.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\estimators\DNConditionalEstimator.cs">
+      <Link>weka\estimators\DNConditionalEstimator.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\estimators\Estimator.cs">
+      <Link>weka\estimators\Estimator.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\estimators\KDConditionalEstimator.cs">
+      <Link>weka\estimators\KDConditionalEstimator.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\estimators\KernelEstimator.cs">
+      <Link>weka\estimators\KernelEstimator.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\estimators\KKConditionalEstimator.cs">
+      <Link>weka\estimators\KKConditionalEstimator.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\estimators\MahalanobisEstimator.cs">
+      <Link>weka\estimators\MahalanobisEstimator.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\estimators\NDConditionalEstimator.cs">
+      <Link>weka\estimators\NDConditionalEstimator.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\estimators\NNConditionalEstimator.cs">
+      <Link>weka\estimators\NNConditionalEstimator.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\estimators\NormalEstimator.cs">
+      <Link>weka\estimators\NormalEstimator.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\estimators\PoissonEstimator.cs">
+      <Link>weka\estimators\PoissonEstimator.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\FastVector.cs">
+      <Link>weka\FastVector.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\FastVectorEnumeration.cs">
+      <Link>weka\FastVectorEnumeration.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\filters\AllFilter.cs">
+      <Link>weka\filters\AllFilter.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\filters\Filter.cs">
+      <Link>weka\filters\Filter.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\filters\NullFilter.cs">
+      <Link>weka\filters\NullFilter.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\filters\StreamableFilter.cs">
+      <Link>weka\filters\StreamableFilter.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\filters\SupervisedFilter.cs">
+      <Link>weka\filters\SupervisedFilter.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\filters\supervised\instance\Resample.cs">
+      <Link>weka\filters\supervised\instance\Resample.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\filters\UnsupervisedFilter.cs">
+      <Link>weka\filters\UnsupervisedFilter.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\filters\unsupervised\attribute\NominalToBinary.cs">
+      <Link>weka\filters\unsupervised\attribute\NominalToBinary.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\filters\unsupervised\attribute\PotentialClassIgnorer.cs">
+      <Link>weka\filters\unsupervised\attribute\PotentialClassIgnorer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\filters\unsupervised\attribute\Remove.cs">
+      <Link>weka\filters\unsupervised\attribute\Remove.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\filters\unsupervised\attribute\RemoveUseless.cs">
+      <Link>weka\filters\unsupervised\attribute\RemoveUseless.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\filters\unsupervised\attribute\ReplaceMissingValues.cs">
+      <Link>weka\filters\unsupervised\attribute\ReplaceMissingValues.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\filters\unsupervised\instance\Randomize.cs">
+      <Link>weka\filters\unsupervised\instance\Randomize.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\filters\unsupervised\instance\RemoveFolds.cs">
+      <Link>weka\filters\unsupervised\instance\RemoveFolds.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\filters\unsupervised\instance\RemovePercentage.cs">
+      <Link>weka\filters\unsupervised\instance\RemovePercentage.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\filters\unsupervised\instance\RemoveRange.cs">
+      <Link>weka\filters\unsupervised\instance\RemoveRange.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\filters\unsupervised\instance\RemoveWithValues.cs">
+      <Link>weka\filters\unsupervised\instance\RemoveWithValues.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\filters\unsupervised\instance\Resample.cs">
+      <Link>weka\filters\unsupervised\instance\Resample.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\Instance.cs">
+      <Link>weka\Instance.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\Instances.cs">
+      <Link>weka\Instances.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\Matchable.cs">
+      <Link>weka\Matchable.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\Option.cs">
+      <Link>weka\Option.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\ProtectedProperties.cs">
+      <Link>weka\ProtectedProperties.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\SparseInstance.cs">
+      <Link>weka\SparseInstance.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\Statistics.cs">
+      <Link>weka\Statistics.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\Summarizable.cs">
+      <Link>weka\Summarizable.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\support\ITree.cs">
+      <Link>weka\support\ITree.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\Utils.cs">
+      <Link>weka\Utils.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\WocketsWeka\weka\WeightedInstancesHandler.cs">
+      <Link>weka\WeightedInstancesHandler.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
