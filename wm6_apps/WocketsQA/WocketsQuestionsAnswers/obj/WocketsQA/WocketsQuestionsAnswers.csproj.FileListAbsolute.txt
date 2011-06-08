@@ -1,0 +1,11 @@
+C:\Users\HouseN\Desktop\WocketsSubversion\prompting\trunk\WocketsQA\WocketsQuestionsAnswers\bin\WocketsQA\WocketsQuestionsAnswers.exe
+C:\Users\HouseN\Desktop\WocketsSubversion\prompting\trunk\WocketsQA\WocketsQuestionsAnswers\bin\WocketsQA\WocketsQuestionsAnswers.pdb
+C:\Users\HouseN\Desktop\WocketsSubversion\prompting\trunk\WocketsQA\WocketsQuestionsAnswers\obj\WocketsQA\ResolveAssemblyReference.cache
+C:\Users\HouseN\Desktop\WocketsSubversion\prompting\trunk\WocketsQA\WocketsQuestionsAnswers\obj\WocketsQA\WocketsQuestionsAnswers.WocketsQAClarification.resources
+C:\Users\HouseN\Desktop\WocketsSubversion\prompting\trunk\WocketsQA\WocketsQuestionsAnswers\obj\WocketsQA\WocketsQuestionsAnswers.WocketsQAWinnow.resources
+C:\Users\HouseN\Desktop\WocketsSubversion\prompting\trunk\WocketsQA\WocketsQuestionsAnswers\obj\WocketsQA\WocketsQuestionsAnswers.WocketsQA.resources
+C:\Users\HouseN\Desktop\WocketsSubversion\prompting\trunk\WocketsQA\WocketsQuestionsAnswers\obj\WocketsQA\WocketsQuestionsAnswers.Properties.Resources.resources
+C:\Users\HouseN\Desktop\WocketsSubversion\prompting\trunk\WocketsQA\WocketsQuestionsAnswers\obj\WocketsQA\WocketsQuestionsAnswers.WocketsQACategories.resources
+C:\Users\HouseN\Desktop\WocketsSubversion\prompting\trunk\WocketsQA\WocketsQuestionsAnswers\obj\WocketsQA\WocketsQuestionsAnswers.csproj.GenerateResource.Cache
+C:\Users\HouseN\Desktop\WocketsSubversion\prompting\trunk\WocketsQA\WocketsQuestionsAnswers\obj\WocketsQA\WocketsQuestionsAnswers.exe
+C:\Users\HouseN\Desktop\WocketsSubversion\prompting\trunk\WocketsQA\WocketsQuestionsAnswers\obj\WocketsQA\WocketsQuestionsAnswers.pdb

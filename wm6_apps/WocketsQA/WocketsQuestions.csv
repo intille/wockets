@@ -1,0 +1,16 @@
+Categories,Clarification,Activities,Followup
+Lying Down,Were you?,Sleeping|Just resting|Reading|Watching TV|Other lying down,
+Sitting,Were you?,Reading|Writing|Using computer|Eating|Watching TV|Talking|Just resting|Other sitting,
+Standing Around,Were you?,Waiting in line|Talking|Working with hands|Puttering around|Other standing,
+Walking,How fast?,Slow walk (1-2 mph)|Mod. walk (2-3mph)|Brisk walk (> 3 mph),On flat|Up stairs/hills|Down stairs/hills
+Running (Jogging),How fast?,Easy jog (5-6 mph)|Slow run (6-7 mph)|Fast run (> 7 mph),On flat|Up stairs/hills|Down stairs/hills
+Personal Care,Were you?,Grooming|Dressing/undressing|Bathing/showering|Eating|Brushing teeth|Other personal care,
+Indoor Home Care,Were you?,Preparing food|Caring for child|Washing dishes|Sweeping|Mopping|Making bed|Other indoor activity,
+Outdoor Home Care,Were you?,Sweeping|Carrying/lifting|Shoveling|Other outdoor task,
+Gardening,Were you?,Trimming/cutting|Raking|Digging/shoveling|Pulling weeds|Other gardening,
+Traveling,Were you?,Driving a car|Riding in car/bus/train|Bicycling|Other traveling,
+Manual Labor,Were you?,Operating light equipment|Carrying/lifting|Painting|Working construction|Making deliveries|Other labor,
+Outdoor Recreation,Were you?,Bicycling|Hiking|Snow skiing|Canoeing/kayaking|Other outdoor pursuit,
+Indoor Recreation,Were you?,Playing instrument|Making art/craft|Playing game|Dancing (slow)|Dancing (fast)|Watching TV|Reading|Other recreation,
+Sports,Which activity?,Golf|Tennis (singles)|Tennis (doubles)|Baseball/softball|Basketball|Soccer|Volleyball|Bicycling|Skiing|Skating|Other sport,
+Physical Conditioning,Which activity?,Aerobics|Aqua aerobics|Calisthenics|Kickboxing|Pilates|Weight lifting|Treadmill|Cycle|Eliptical trainer|Yoga|Tai Chi|Other exercise,
