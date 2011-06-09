@@ -1,4 +1,4 @@
-﻿namespace WocketsQuestionsAnswers
+﻿namespace Wockets
 {
     partial class WocketsQAWinnow
     {

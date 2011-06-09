@@ -65,7 +65,7 @@ namespace Wockets.Utils
 
         private static string getStorageCard()
         {
-            String path = WocketsQuestionsAnswers.Program.MOCK_STORAGE_LOCATION;
+            String path = Wockets.Program.MOCK_STORAGE_LOCATION;
             {
                 string firstCard = "";
                 try
@@ -86,7 +86,7 @@ namespace Wockets.Utils
                             }
                             catch (Exception)
                             {
-                                path = WocketsQuestionsAnswers.Program.MOCK_STORAGE_LOCATION;
+                                path = Wockets.Program.MOCK_STORAGE_LOCATION;
                                 continue;
                             }
                             //if so, return the path

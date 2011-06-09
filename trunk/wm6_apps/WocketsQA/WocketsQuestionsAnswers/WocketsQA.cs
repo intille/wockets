@@ -12,7 +12,7 @@ using System.Threading;
 using System.Diagnostics;
 using Wockets.Utils;
 
-namespace WocketsQuestionsAnswers
+namespace Wockets
 {
     public partial class WocketsQA : Form
     {
