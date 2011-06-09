@@ -1,0 +1,706 @@
+Archive member included because of file (symbol)
+
+c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr51\libgcc.a(_mulsi3.o)
+                              wocket.o (__mulsi3)
+c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr51\libgcc.a(_udivmodhi4.o)
+                              firmware-version3.o (__udivmodhi4)
+c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr51\libgcc.a(_udivmodsi4.o)
+                              firmware-version3.o (__udivmodsi4)
+c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr51\libgcc.a(_divmodsi4.o)
+                              wocket.o (__divmodsi4)
+c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr51\libgcc.a(_exit.o)
+                              c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr51/crtm1284p.o (exit)
+c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr51\libgcc.a(_clear_bss.o)
+                              firmware-version3.o (__do_clear_bss)
+c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr51\libc.a(eerd_byte_atmega1284p.o)
+                              wocket.o (__eerd_byte_m1284p)
+c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr51\libc.a(eerd_word_atmega1284p.o)
+                              wocket.o (__eerd_word_m1284p)
+c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr51\libc.a(eewr_byte_atmega1284p.o)
+                              wocket.o (__eewr_byte_m1284p)
+c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr51\libc.a(eewr_word_atmega1284p.o)
+                              wocket.o (__eewr_word_m1284p)
+c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr51\libc.a(eerd_block_atmega1284p.o)
+                              c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr51\libc.a(eerd_word_atmega1284p.o) (__eerd_blraw_m1284p)
+
+Allocating common symbols
+Common symbol       size              file
+
+_wX1G_CAL           0x2               wocket.o
+acount              0x780             firmware-version3.o
+wocket_status       0x1               firmware-version3.o
+xv                  0xf6              firmware-version3.o
+dataIndex           0x2               firmware-version3.o
+_wXN1G_CAL          0x2               wocket.o
+prevx               0x2               firmware-version3.o
+_wBTCAL20           0x2               wocket.o
+_wYN1G_CAL          0x2               wocket.o
+_wBTCAL100          0x2               wocket.o
+_wZN1G_CAL          0x2               wocket.o
+dataSubindex        0x1               firmware-version3.o
+_wZ1G_CAL           0x2               wocket.o
+val                 0x2               firmware-version3.o
+prevy               0x2               firmware-version3.o
+_wBTCAL40           0x2               wocket.o
+data                0x2bf2            firmware-version3.o
+_wBTCAL60           0x2               wocket.o
+prevz               0x2               firmware-version3.o
+vmags               0x4               firmware-version3.o
+_wPDT               0x1               wocket.o
+opcode              0x1               wocket.o
+blink_counter       0x2               firmware-version3.o
+_wBTCAL10           0x2               wocket.o
+scounter            0x2               firmware-version3.o
+_wBTCAL80           0x2               wocket.o
+atmega_clock_prescalar
+                    0x1               firmware-version3.o
+vmag                0x4               firmware-version3.o
+atmega_status       0x1               firmware-version3.o
+deltasign           0x1               firmware-version3.o
+_wY1G_CAL           0x2               wocket.o
+num_skipped_timer_interrupts
+                    0x1               firmware-version3.o
+rBuffer             0xa               wocket.o
+aBuffer             0xa               wocket.o
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+text             0x00000000         0x00020000         xr
+data             0x00800060         0x0000ffa0         rw !x
+eeprom           0x00810000         0x00010000         rw !x
+fuse             0x00820000         0x00000400         rw !x
+lock             0x00830000         0x00000400         rw !x
+signature        0x00840000         0x00000400         rw !x
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+Address of section .data set to 0x800100
+LOAD c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr51/crtm1284p.o
+LOAD firmware-version3.o
+LOAD wocket.o
+LOAD mcu_atmega.o
+LOAD crc.o
+LOAD c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr51\libgcc.a
+LOAD c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr51\libc.a
+LOAD c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr51\libgcc.a
+
+.hash
+ *(.hash)
+
+.dynsym
+ *(.dynsym)
+
+.dynstr
+ *(.dynstr)
+
+.gnu.version
+ *(.gnu.version)
+
+.gnu.version_d
+ *(.gnu.version_d)
+
+.gnu.version_r
+ *(.gnu.version_r)
+
+.rel.init
+ *(.rel.init)
+
+.rela.init
+ *(.rela.init)
+
+.rel.text
+ *(.rel.text)
+ *(.rel.text.*)
+ *(.rel.gnu.linkonce.t*)
+
+.rela.text
+ *(.rela.text)
+ *(.rela.text.*)
+ *(.rela.gnu.linkonce.t*)
+
+.rel.fini
+ *(.rel.fini)
+
+.rela.fini
+ *(.rela.fini)
+
+.rel.rodata
+ *(.rel.rodata)
+ *(.rel.rodata.*)
+ *(.rel.gnu.linkonce.r*)
+
+.rela.rodata
+ *(.rela.rodata)
+ *(.rela.rodata.*)
+ *(.rela.gnu.linkonce.r*)
+
+.rel.data
+ *(.rel.data)
+ *(.rel.data.*)
+ *(.rel.gnu.linkonce.d*)
+
+.rela.data
+ *(.rela.data)
+ *(.rela.data.*)
+ *(.rela.gnu.linkonce.d*)
+
+.rel.ctors
+ *(.rel.ctors)
+
+.rela.ctors
+ *(.rela.ctors)
+
+.rel.dtors
+ *(.rel.dtors)
+
+.rela.dtors
+ *(.rela.dtors)
+
+.rel.got
+ *(.rel.got)
+
+.rela.got
+ *(.rela.got)
+
+.rel.bss
+ *(.rel.bss)
+
+.rela.bss
+ *(.rela.bss)
+
+.rel.plt
+ *(.rel.plt)
+
+.rela.plt
+ *(.rela.plt)
+
+.text           0x00000000     0x48b0
+ *(.vectors)
+ .vectors       0x00000000       0x8c c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr51/crtm1284p.o
+                0x00000000                __vectors
+                0x00000000                __vector_default
+ *(.vectors)
+ *(.progmem.gcc*)
+ .progmem.gcc_sw_table
+                0x0000008c       0x70 wocket.o
+ *(.progmem*)
+                0x000000fc                . = ALIGN (0x2)
+                0x000000fc                __trampolines_start = .
+ *(.trampolines)
+ .trampolines   0x000000fc        0x0 linker stubs
+ *(.trampolines*)
+                0x000000fc                __trampolines_end = .
+ *(.jumptables)
+ *(.jumptables*)
+ *(.lowtext)
+ *(.lowtext*)
+                0x000000fc                __ctors_start = .
+ *(.ctors)
+                0x000000fc                __ctors_end = .
+                0x000000fc                __dtors_start = .
+ *(.dtors)
+                0x000000fc                __dtors_end = .
+ SORT(*)(.ctors)
+ SORT(*)(.dtors)
+ *(.init0)
+ .init0         0x000000fc        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr51/crtm1284p.o
+                0x000000fc                __init
+ *(.init0)
+ *(.init1)
+ *(.init1)
+ *(.init2)
+ .init2         0x000000fc        0xc c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr51/crtm1284p.o
+ *(.init2)
+ *(.init3)
+ *(.init3)
+ *(.init4)
+ .init4         0x00000108       0x1a c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr51/crtm1284p.o
+                0x00000108                __do_copy_data
+ .init4         0x00000122       0x10 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr51\libgcc.a(_clear_bss.o)
+                0x00000122                __do_clear_bss
+ *(.init4)
+ *(.init5)
+ *(.init5)
+ *(.init6)
+ *(.init6)
+ *(.init7)
+ *(.init7)
+ *(.init8)
+ *(.init8)
+ *(.init9)
+ .init9         0x00000132        0x8 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr51/crtm1284p.o
+ *(.init9)
+ *(.text)
+ .text          0x0000013a        0x4 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr51/crtm1284p.o
+                0x0000013a                __vector_22
+                0x0000013a                __vector_28
+                0x0000013a                __vector_1
+                0x0000013a                __vector_32
+                0x0000013a                __vector_34
+                0x0000013a                __vector_24
+                0x0000013a                __vector_12
+                0x0000013a                __bad_interrupt
+                0x0000013a                __vector_6
+                0x0000013a                __vector_31
+                0x0000013a                __vector_3
+                0x0000013a                __vector_23
+                0x0000013a                __vector_30
+                0x0000013a                __vector_25
+                0x0000013a                __vector_13
+                0x0000013a                __vector_17
+                0x0000013a                __vector_19
+                0x0000013a                __vector_7
+                0x0000013a                __vector_27
+                0x0000013a                __vector_5
+                0x0000013a                __vector_33
+                0x0000013a                __vector_4
+                0x0000013a                __vector_9
+                0x0000013a                __vector_2
+                0x0000013a                __vector_21
+                0x0000013a                __vector_15
+                0x0000013a                __vector_29
+                0x0000013a                __vector_8
+                0x0000013a                __vector_26
+                0x0000013a                __vector_14
+                0x0000013a                __vector_10
+                0x0000013a                __vector_16
+                0x0000013a                __vector_18
+                0x0000013a                __vector_20
+ .text          0x0000013e     0x2664 firmware-version3.o
+                0x000001c6                __vector_11
+                0x0000013e                Filter
+                0x000005ce                main
+ .text          0x000027a2     0x13e4 wocket.o
+                0x00003366                _send_fv
+                0x00003654                _send_data
+                0x00003700                _wocket_initialize
+                0x000027a2                _wocket_initialize_timer2_interrupt
+                0x000036ac                _send_data_bufferred
+                0x000033ee                _send_acs
+                0x000027e6                _wocket_set_flag
+                0x000033b8                _send_ac_count
+                0x00003534                _send_batch_count
+                0x00003346                _send_sr
+                0x00003322                _send_tm
+                0x00002832                _receive_data
+                0x000035c6                _send_uncompressed_pdu
+                0x0000281c                _wocket_is_flag_set
+                0x00003382                _send_ac_offset
+                0x00002800                _wocket_reset_flag
+                0x0000356a                _send_compressed_pdu
+ .text          0x00003b86      0xb38 mcu_atmega.o
+                0x00003d00                _atmega_a2dConvert10bit
+                0x000045ce                _is_accelerometer_on
+                0x000045d8                _greenled_turn_on
+                0x00003d5e                _atmega_initialize_uart1
+                0x00003f3c                _bluetooth_exit_command_mode
+                0x00004364                _bluetooth_get_baud_rate
+                0x00004510                _accelerometer_set_sensitivity
+                0x000044d6                _bluetooth_receive_uart0_byte
+                0x00003e4c                _bluetooth_enter_command_mode
+                0x0000448e                _bluetooth_reset
+                0x00003c2c                _atmega_select_adc
+                0x00003d9a                _atmega_set_timer2_prescalar
+                0x000044f6                _bluetooth_transmit_uart0_byte
+                0x000044ba                _bluetooth_is_discoverable
+                0x00003d36                _atmega_initialize_uart0
+                0x00003fea                _bluetooth_set_baud_rate
+                0x00004538                _atmega_initialize
+                0x00003e16                _atmega_reset
+                0x00004526                _accelerometer_turn_on
+                0x000045b6                _accelerometer_turn_off
+                0x00003d86                _atmega_disable_JTAG
+                0x00004628                _atmega_finalize
+                0x000044b2                _bluetooth_is_connected
+                0x000044c6                _receive_uart0_flush
+                0x00003c14                _atmega_adc_turn_on
+                0x00003e38                _atmega_disable_watchdog
+                0x00004466                _bluetooth_turn_on
+                0x000045e8                _greenled_turn_off
+                0x0000447c                _bluetooth_turn_off
+                0x000045fa                _is_greenled_on
+                0x000046a2                _is_yellowled_on
+                0x00004616                _yellowled_turn_off
+                0x00004606                _yellowled_turn_on
+                0x000044aa                _is_bluetooth_on
+                0x00003e0c                _atmega_disable_timer2
+                0x00003b86                _atmega_set_adc_clock
+                0x00003c20                _atmega_adc_turn_off
+                0x000046b0                _is_docked
+                0x00003df6                _atmega_enable_timer2
+ .text          0x000046be       0xac crc.o
+                0x000046e4                ComputeCRC8
+                0x000046be                ComputeByte
+                0x0000471c                CRC16
+ .text          0x0000476a        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr51\libgcc.a(_mulsi3.o)
+ .text          0x0000476a        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr51\libgcc.a(_udivmodhi4.o)
+ .text          0x0000476a        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr51\libgcc.a(_udivmodsi4.o)
+ .text          0x0000476a        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr51\libgcc.a(_divmodsi4.o)
+ .text          0x0000476a        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr51\libgcc.a(_exit.o)
+ .text          0x0000476a        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr51\libgcc.a(_clear_bss.o)
+ .text          0x0000476a        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr51\libc.a(eerd_byte_atmega1284p.o)
+ .text          0x0000476a        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr51\libc.a(eerd_word_atmega1284p.o)
+ .text          0x0000476a        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr51\libc.a(eewr_byte_atmega1284p.o)
+ .text          0x0000476a        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr51\libc.a(eewr_word_atmega1284p.o)
+ .text          0x0000476a        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr51\libc.a(eerd_block_atmega1284p.o)
+                0x0000476a                . = ALIGN (0x2)
+ *(.text.*)
+ .text.libgcc   0x0000476a       0x3e c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr51\libgcc.a(_mulsi3.o)
+                0x0000476a                __mulsi3
+ .text.libgcc   0x000047a8       0x28 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr51\libgcc.a(_udivmodhi4.o)
+                0x000047a8                __udivmodhi4
+ .text.libgcc   0x000047d0       0x44 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr51\libgcc.a(_udivmodsi4.o)
+                0x000047d0                __udivmodsi4
+ .text.libgcc   0x00004814       0x36 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr51\libgcc.a(_divmodsi4.o)
+                0x00004814                __divmodsi4
+ .text.libgcc   0x0000484a        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr51\libgcc.a(_exit.o)
+ .text.libgcc   0x0000484a        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr51\libgcc.a(_clear_bss.o)
+ .text.avr-libc
+                0x0000484a       0x10 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr51\libc.a(eerd_byte_atmega1284p.o)
+                0x0000484a                __eerd_byte_m1284p
+ .text.avr-libc
+                0x0000485a        0xc c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr51\libc.a(eerd_word_atmega1284p.o)
+                0x0000485a                __eerd_word_m1284p
+ .text.avr-libc
+                0x00004866       0x1c c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr51\libc.a(eewr_byte_atmega1284p.o)
+                0x00004866                __eewr_byte_m1284p
+                0x00004868                __eewr_r18_m1284p
+ .text.avr-libc
+                0x00004882        0xa c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr51\libc.a(eewr_word_atmega1284p.o)
+                0x00004882                __eewr_word_m1284p
+ .text.avr-libc
+                0x0000488c       0x20 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr51\libc.a(eerd_block_atmega1284p.o)
+                0x00004890                __eerd_blraw_m1284p
+                0x0000488c                __eerd_block_m1284p
+                0x000048ac                . = ALIGN (0x2)
+ *(.fini9)
+ .fini9         0x000048ac        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr51\libgcc.a(_exit.o)
+                0x000048ac                exit
+                0x000048ac                _exit
+ *(.fini9)
+ *(.fini8)
+ *(.fini8)
+ *(.fini7)
+ *(.fini7)
+ *(.fini6)
+ *(.fini6)
+ *(.fini5)
+ *(.fini5)
+ *(.fini4)
+ *(.fini4)
+ *(.fini3)
+ *(.fini3)
+ *(.fini2)
+ *(.fini2)
+ *(.fini1)
+ *(.fini1)
+ *(.fini0)
+ .fini0         0x000048ac        0x4 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr51\libgcc.a(_exit.o)
+ *(.fini0)
+                0x000048b0                _etext = .
+
+.data           0x00800100        0xa load address 0x000048b0
+                0x00800100                PROVIDE (__data_start, .)
+ *(.data)
+ .data          0x00800100        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr51/crtm1284p.o
+ .data          0x00800100        0x4 firmware-version3.o
+                0x00800100                summary_count
+                0x00800102                configurationTimer
+ .data          0x00800104        0x5 wocket.o
+                0x00800104                address
+                0x00800106                _SAMPLING_RATE
+                0x00800107                _wTCNT2_reps
+                0x00800108                _wSENS
+ .data          0x00800109        0x0 mcu_atmega.o
+ .data          0x00800109        0x0 crc.o
+ .data          0x00800109        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr51\libgcc.a(_mulsi3.o)
+ .data          0x00800109        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr51\libgcc.a(_udivmodhi4.o)
+ .data          0x00800109        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr51\libgcc.a(_udivmodsi4.o)
+ .data          0x00800109        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr51\libgcc.a(_divmodsi4.o)
+ .data          0x00800109        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr51\libgcc.a(_exit.o)
+ .data          0x00800109        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr51\libgcc.a(_clear_bss.o)
+ .data          0x00800109        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr51\libc.a(eerd_byte_atmega1284p.o)
+ .data          0x00800109        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr51\libc.a(eerd_word_atmega1284p.o)
+ .data          0x00800109        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr51\libc.a(eewr_byte_atmega1284p.o)
+ .data          0x00800109        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr51\libc.a(eewr_word_atmega1284p.o)
+ .data          0x00800109        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr51\libc.a(eerd_block_atmega1284p.o)
+ *(.data*)
+ *(.rodata)
+ *(.rodata*)
+ *(.gnu.linkonce.d*)
+                0x0080010a                . = ALIGN (0x2)
+ *fill*         0x00800109        0x1 00
+                0x0080010a                _edata = .
+                0x0080010a                PROVIDE (__data_end, .)
+
+.bss            0x0080010a     0x350b
+                0x0080010a                PROVIDE (__bss_start, .)
+ *(.bss)
+ .bss           0x0080010a        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr51/crtm1284p.o
+ .bss           0x0080010a       0x2d firmware-version3.o
+                0x00800118                ci
+                0x00800135                cc
+                0x00800131                dockcounter
+                0x0080011c                gotack
+                0x0080011e                sampleFlag
+                0x00800127                skip_interrupt_counter
+                0x0080012f                justconnected
+                0x0080012d                docking_counter
+                0x0080012c                interrupt_reps
+                0x00800123                seconds_passed2
+                0x00800114                kseq
+                0x00800133                pseq
+                0x0080011a                si
+                0x0080010a                wakeup
+                0x00800130                isdocked
+                0x00800128                connected
+                0x0080010c                AC_NUMS
+                0x00800116                dseq
+                0x0080012b                interrupts_passed
+                0x00800125                counter
+                0x00800110                cseq
+                0x0080011f                batch_counter
+                0x0080011d                compress
+                0x00800129                seconds_disconnected
+                0x00800112                sseq
+                0x00800121                seconds_passed
+                0x0080010b                sample
+                0x0080010e                summaryindex
+ .bss           0x00800137       0x2c wocket.o
+                0x00800141                paused
+                0x00800146                x
+                0x00800140                response_length
+                0x0080013c                command_length
+                0x00800150                _wTCNT2
+                0x0080014c                tester
+                0x0080015b                _wShutdownTimer
+                0x0080013d                command_timer
+                0x0080013f                processed_counter
+                0x0080013b                command_counter
+                0x00800153                _wPC
+                0x00800137                crc
+                0x0080014a                z
+                0x00800151                _wTCNT2_last
+                0x00800157                _wLastPC
+                0x00800148                y
+                0x00800142                alive_timer
+                0x0080015f                _DEFAULT_SHUTDOWN
+                0x0080014e                _INITIALIZED
+                0x00800152                _wTM
+                0x0080014f                _STATUS_BYTE
+                0x00800139                rcrc
+                0x00800144                word
+ .bss           0x00800163        0x0 mcu_atmega.o
+ .bss           0x00800163        0x0 crc.o
+ .bss           0x00800163        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr51\libgcc.a(_mulsi3.o)
+ .bss           0x00800163        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr51\libgcc.a(_udivmodhi4.o)
+ .bss           0x00800163        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr51\libgcc.a(_udivmodsi4.o)
+ .bss           0x00800163        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr51\libgcc.a(_divmodsi4.o)
+ .bss           0x00800163        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr51\libgcc.a(_exit.o)
+ .bss           0x00800163        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr51\libgcc.a(_clear_bss.o)
+ .bss           0x00800163        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr51\libc.a(eerd_byte_atmega1284p.o)
+ .bss           0x00800163        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr51\libc.a(eerd_word_atmega1284p.o)
+ .bss           0x00800163        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr51\libc.a(eewr_byte_atmega1284p.o)
+ .bss           0x00800163        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr51\libc.a(eewr_word_atmega1284p.o)
+ .bss           0x00800163        0x0 c:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr51\libc.a(eerd_block_atmega1284p.o)
+ *(.bss*)
+ *(COMMON)
+ COMMON         0x00800163     0x3484 firmware-version3.o
+                0x00800163                acount
+                0x008008e3                wocket_status
+                0x008008e4                xv
+                0x008009da                dataIndex
+                0x008009dc                prevx
+                0x008009de                dataSubindex
+                0x008009df                val
+                0x008009e1                prevy
+                0x008009e3                data
+                0x008035d5                prevz
+                0x008035d7                vmags
+                0x008035db                blink_counter
+                0x008035dd                scounter
+                0x008035df                atmega_clock_prescalar
+                0x008035e0                vmag
+                0x008035e4                atmega_status
+                0x008035e5                deltasign
+                0x008035e6                num_skipped_timer_interrupts
+ COMMON         0x008035e7       0x2e wocket.o
+                0x008035e7                _wX1G_CAL
+                0x008035e9                _wXN1G_CAL
+                0x008035eb                _wBTCAL20
+                0x008035ed                _wYN1G_CAL
+                0x008035ef                _wBTCAL100
+                0x008035f1                _wZN1G_CAL
+                0x008035f3                _wZ1G_CAL
+                0x008035f5                _wBTCAL40
+                0x008035f7                _wBTCAL60
+                0x008035f9                _wPDT
+                0x008035fa                opcode
+                0x008035fb                _wBTCAL10
+                0x008035fd                _wBTCAL80
+                0x008035ff                _wY1G_CAL
+                0x00803601                rBuffer
+                0x0080360b                aBuffer
+                0x00803615                PROVIDE (__bss_end, .)
+                0x000048b0                __data_load_start = LOADADDR (.data)
+                0x000048ba                __data_load_end = (__data_load_start + SIZEOF (.data))
+
+.noinit         0x00803615        0x0
+                0x00803615                PROVIDE (__noinit_start, .)
+ *(.noinit*)
+                0x00803615                PROVIDE (__noinit_end, .)
+                0x00803615                _end = .
+                0x00803615                PROVIDE (__heap_start, .)
+
+.eeprom         0x00810000       0x21
+ *(.eeprom*)
+ .eeprom        0x00810000       0x21 wocket.o
+                0x0081001c                _NV_Z1G_CAL
+                0x00810000                _NV_INITIALIZED
+                0x00810003                _NV_TCT
+                0x00810001                _NV_STATUS_BYTE
+                0x00810006                _NV_TM
+                0x00810002                _NV_SAMPLING_RATE
+                0x00810020                _NV_PDT
+                0x00810014                _NV_X1G_CAL
+                0x0081000a                _NV_BTCAL80
+                0x0081001e                _NV_ZN1G_CAL
+                0x00810018                _NV_Y1G_CAL
+                0x0081001a                _NV_YN1G_CAL
+                0x0081000e                _NV_BTCAL40
+                0x00810012                _NV_BTCAL10
+                0x00810016                _NV_XN1G_CAL
+                0x00810008                _NV_BTCAL100
+                0x00810010                _NV_BTCAL20
+                0x00810005                _NV_TCTLAST
+                0x00810004                _NV_TCTREPS
+                0x00810007                _NV_SENS
+                0x0081000c                _NV_BTCAL60
+                0x00810021                __eeprom_end = .
+
+.fuse
+ *(.fuse)
+ *(.lfuse)
+ *(.hfuse)
+ *(.efuse)
+
+.lock
+ *(.lock*)
+
+.signature
+ *(.signature*)
+
+.stab
+ *(.stab)
+
+.stabstr
+ *(.stabstr)
+
+.stab.excl
+ *(.stab.excl)
+
+.stab.exclstr
+ *(.stab.exclstr)
+
+.stab.index
+ *(.stab.index)
+
+.stab.indexstr
+ *(.stab.indexstr)
+
+.comment
+ *(.comment)
+
+.debug
+ *(.debug)
+
+.line
+ *(.line)
+
+.debug_srcinfo
+ *(.debug_srcinfo)
+
+.debug_sfnames
+ *(.debug_sfnames)
+
+.debug_aranges  0x00000000       0x80
+ *(.debug_aranges)
+ .debug_aranges
+                0x00000000       0x20 firmware-version3.o
+ .debug_aranges
+                0x00000020       0x20 wocket.o
+ .debug_aranges
+                0x00000040       0x20 mcu_atmega.o
+ .debug_aranges
+                0x00000060       0x20 crc.o
+
+.debug_pubnames
+                0x00000000      0xcf8
+ *(.debug_pubnames)
+ .debug_pubnames
+                0x00000000      0x300 firmware-version3.o
+ .debug_pubnames
+                0x00000300      0x585 wocket.o
+ .debug_pubnames
+                0x00000885      0x437 mcu_atmega.o
+ .debug_pubnames
+                0x00000cbc       0x3c crc.o
+
+.debug_info     0x00000000     0x26e1
+ *(.debug_info)
+ .debug_info    0x00000000      0x821 firmware-version3.o
+ .debug_info    0x00000821      0xc8d wocket.o
+ .debug_info    0x000014ae     0x10d7 mcu_atmega.o
+ .debug_info    0x00002585      0x15c crc.o
+ *(.gnu.linkonce.wi.*)
+
+.debug_abbrev   0x00000000      0x7cd
+ *(.debug_abbrev)
+ .debug_abbrev  0x00000000      0x215 firmware-version3.o
+ .debug_abbrev  0x00000215      0x239 wocket.o
+ .debug_abbrev  0x0000044e      0x2c8 mcu_atmega.o
+ .debug_abbrev  0x00000716       0xb7 crc.o
+
+.debug_line     0x00000000     0x2daa
+ *(.debug_line)
+ .debug_line    0x00000000      0xd89 firmware-version3.o
+ .debug_line    0x00000d89      0xdd7 wocket.o
+ .debug_line    0x00001b60     0x1140 mcu_atmega.o
+ .debug_line    0x00002ca0      0x10a crc.o
+
+.debug_frame    0x00000000      0x430
+ *(.debug_frame)
+ .debug_frame   0x00000000       0x50 firmware-version3.o
+ .debug_frame   0x00000050      0x120 wocket.o
+ .debug_frame   0x00000170      0x280 mcu_atmega.o
+ .debug_frame   0x000003f0       0x40 crc.o
+
+.debug_str      0x00000000      0xb82
+ *(.debug_str)
+ .debug_str     0x00000000      0x422 firmware-version3.o
+                                0x47c (size before relaxing)
+ .debug_str     0x00000422      0x374 wocket.o
+                                0x60f (size before relaxing)
+ .debug_str     0x00000796      0x3b8 mcu_atmega.o
+                                0x562 (size before relaxing)
+ .debug_str     0x00000b4e       0x34 crc.o
+                                 0xf2 (size before relaxing)
+
+.debug_loc      0x00000000      0xf96
+ *(.debug_loc)
+ .debug_loc     0x00000000      0x24b firmware-version3.o
+ .debug_loc     0x0000024b      0x63e wocket.o
+ .debug_loc     0x00000889      0x5a1 mcu_atmega.o
+ .debug_loc     0x00000e2a      0x16c crc.o
+
+.debug_macinfo
+ *(.debug_macinfo)
+OUTPUT(Wockets-Version3.elf elf32-avr)
+LOAD linker stubs
+
+.debug_ranges   0x00000000      0x450
+ .debug_ranges  0x00000000       0x60 firmware-version3.o
+ .debug_ranges  0x00000060       0xc0 wocket.o
+ .debug_ranges  0x00000120      0x330 mcu_atmega.o
