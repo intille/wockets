@@ -9,7 +9,7 @@ using System.Windows.Forms;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-namespace WocketsQuestionsAnswers
+namespace Wockets
 {
     public partial class WocketsQAWinnow : Form
     {
