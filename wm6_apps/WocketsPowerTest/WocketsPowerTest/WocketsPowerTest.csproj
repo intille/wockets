@@ -70,6 +70,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DisplayPower.cs" />
+    <Compile Include="SuspendPrevent.cs" />
+    <Compile Include="SuspendPreventer.cs" />
     <Compile Include="WocketsPowerTest.cs">
       <SubType>Form</SubType>
     </Compile>

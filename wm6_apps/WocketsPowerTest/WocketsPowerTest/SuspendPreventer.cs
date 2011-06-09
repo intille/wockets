@@ -4,7 +4,7 @@ using System.Threading; //Timer
 using System.Text; //StringBuilder
 
 
-namespace MobiRnD_RDT.Utilities
+namespace Wockets
 {
     /// <summary>
     /// In PocketPC devices, applications are "suspended" after some period of time, thereby 
@@ -19,7 +19,7 @@ namespace MobiRnD_RDT.Utilities
     {
         private static Timer _timerReset;
         private static int _count = 0;
-        private static TimeSpan _resetInterval = new TimeSpan(0, 0, 45); //frequency of reset
+        private static TimeSpan _resetInterval = new TimeSpan(0, 0, 15); //frequency of reset
         private static bool _doesTurnOffDisplay = true;
 
         #region PROPERTIES
