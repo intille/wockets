@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CONFIGURATION>
+  <SOFTWARE version="1.42" mode="debug" memorymode="non_shared" />	
+  <FEATURES fft_interpolation_power="7" fft_maximum_frequencies="2"  smooth_window_count="5" feature_window_size="1000" feature_window_overlap="0.5" error_window_size="1000" maximum_consecutive_packet_loss="20" maximum_nonconsecutive_packet_loss="0.5" />  
+</CONFIGURATION>

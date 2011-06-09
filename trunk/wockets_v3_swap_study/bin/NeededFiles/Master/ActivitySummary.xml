@@ -1,0 +1,56 @@
+<ACTIVITIES_SUMMARY>
+<ACTIVITY>
+	<NAME name="walking" />
+	<TIME start="0" end="0" />
+	<PERCENT value="1" />
+</ACTIVITY>
+
+<ACTIVITY>
+	<NAME name="fast-walking" />
+	<TIME start="0" end="0" />
+	<PERCENT value="1" />
+</ACTIVITY>
+
+<ACTIVITY>
+	<NAME name="jumping-jacks" />
+	<TIME start="0" end="0" />
+	<PERCENT value="1" />
+</ACTIVITY>
+
+<ACTIVITY>
+	<NAME name="sitting" />
+	<TIME start="0" end="0" />
+	<PERCENT value="1" />
+</ACTIVITY>
+
+<ACTIVITY>
+	<NAME name="standing" />
+	<TIME start="0" end="0" />
+	<PERCENT value="1" />
+</ACTIVITY>
+
+<ACTIVITY>
+	<NAME name="running-in-place" />
+	<TIME start="0" end="0" />
+	<PERCENT value="1" />
+</ACTIVITY>
+
+<ACTIVITY>
+	<NAME name="biceps-curl" />
+	<TIME start="0" end="0" />
+	<PERCENT value="1" />
+</ACTIVITY>
+
+<ACTIVITY>
+	<NAME name="lying-down" />
+	<TIME start="0" end="0" />
+	<PERCENT value="1" />
+</ACTIVITY>
+
+<ACTIVITY>
+	<NAME name="empty2" />
+	<TIME start="0" end="0" />
+	<PERCENT value="92" />
+</ACTIVITY>
+
+</ACTIVITIES_SUMMARY>

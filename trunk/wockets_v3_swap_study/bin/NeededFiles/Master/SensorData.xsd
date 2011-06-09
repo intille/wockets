@@ -1,0 +1,82 @@
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns="urn:mites-schema"
+    elementFormDefault="qualified"
+    targetNamespace="urn:mites-schema">
+    
+    <xsd:element name="SENSORDATA">
+    	<xsd:complexType>
+    	<xsd:sequence>
+    		<xsd:element name="SENSOR" maxOccurs="unbounded">
+	      		<xsd:complexType>
+	        	<xsd:sequence>
+	          		<xsd:element name="ID" maxOccurs="1" minOccurs="1">
+		      			<xsd:complexType>
+		        			<xsd:attribute name="id" type="xsd:string" use="required" />
+		      			</xsd:complexType>
+  		  		</xsd:element>
+  		  
+  		  		<xsd:element name="OBJECT" maxOccurs="1" minOccurs="1">
+		  		      	<xsd:complexType>
+		  		        	<xsd:attribute name="text" type="xsd:string" use="required" />
+		  		      	</xsd:complexType>
+  		  		</xsd:element>  		  
+ 
+ 				<xsd:element name="RECEIVER" maxOccurs="1" minOccurs="1">
+			  		<xsd:complexType>
+		  		        	<xsd:attribute name="id" type="xsd:string" use="required" />
+		  		      	</xsd:complexType>
+  		  		</xsd:element>
+  		  
+  		  		<xsd:element name="LOCATION" maxOccurs="1" minOccurs="1">
+		  		      	<xsd:complexType>
+		  		        	<xsd:attribute name="text" type="xsd:string" use="required" />
+		  		      	</xsd:complexType>
+  		  		</xsd:element>
+  		  
+  		  		<xsd:element name="DESCRIPTION" maxOccurs="1" minOccurs="1">
+		  		      	<xsd:complexType>
+		  		        	<xsd:attribute name="text" type="xsd:string" use="required" />
+		  		      	</xsd:complexType>
+  		  		</xsd:element>
+  		  
+  		  		<xsd:element name="DISPLAY" maxOccurs="1" minOccurs="1">
+		  		      	<xsd:complexType>		  		      		  		      
+		  		      	<xsd:sequence>
+				        	<xsd:element name="COLOR" maxOccurs="unbounded">
+				      			<xsd:complexType>
+				      		   		<xsd:attribute name="on" type="xsd:string" use="required" />
+				      		   		<xsd:attribute name="off" type="xsd:string" use="required" />
+				      		      	</xsd:complexType>
+				   		</xsd:element>				        		  				        		 				        		
+	        			</xsd:sequence>
+		  		      
+		  		        <xsd:attribute name="displaytype" type="xsd:string" use="required" />
+		  		        <xsd:attribute name="x" type="xsd:string" use="required" />
+		  		        <xsd:attribute name="y" type="xsd:string" use="required" />
+		  		      </xsd:complexType>
+  		  		</xsd:element>
+  		  
+  		   		<xsd:element name="CALIBRATION" maxOccurs="1" minOccurs="1">
+		  		  	<xsd:complexType>
+		  		  		<xsd:attribute name="xmean" type="xsd:string" use="required" />
+		  		  		<xsd:attribute name="xstd" type="xsd:string" use="required" />
+		  		  		<xsd:attribute name="ymean" type="xsd:string" use="required" />
+		  		  		<xsd:attribute name="ystd" type="xsd:string" use="required" />
+		  		  		<xsd:attribute name="zmean" type="xsd:string" use="required" />
+		  		  		<xsd:attribute name="zstd" type="xsd:string" use="required" />
+		  		  	</xsd:complexType>
+  		  		</xsd:element>
+  		  
+	        	</xsd:sequence>
+	        	<xsd:attribute name="class" type="xsd:string" use="required" />
+	        	<xsd:attribute name="type" type="xsd:string" use="required" />
+	      		</xsd:complexType>
+	      
+	      
+  		</xsd:element>
+  
+   	</xsd:sequence>
+   	<xsd:attribute name="dataset" type="xsd:string" use="required" />   	
+	</xsd:complexType>
+  </xsd:element>
+</xsd:schema>

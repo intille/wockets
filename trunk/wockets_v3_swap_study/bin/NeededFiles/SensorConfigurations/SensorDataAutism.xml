@@ -1,0 +1,49 @@
+<SENSORDATA dataset="house_n data" xmlns="urn:mites-schema">
+<RECEIVERS>     
+       <RECEIVER id="0" type="RFCOMM" MacAddress="000666024f02" PIN="1234" PortNumber="9" Parity="False" StopBit="True" BaudRate="57600" BufferSize="4096" MaxSR="70" />                               
+       <RECEIVER id="1" type="RFCOMM" MacAddress="000666024f0c" PIN="1234" PortNumber="9" Parity="False" StopBit="True" BaudRate="57600" BufferSize="4096" MaxSR="70" />                               
+       <RECEIVER id="2" type="RFCOMM" MacAddress="000666024f01" PIN="1234" PortNumber="9" Parity="False" StopBit="True" BaudRate="57600" BufferSize="4096" MaxSR="70" />                               
+</RECEIVERS>
+<DECODERS>
+        <DECODER id="0" type="Wockets" />
+        <DECODER id="1" type="Wockets" />
+        <DECODER id="2" type="Wockets" />
+</DECODERS>
+<SENSORS>
+        <SENSOR class="Wockets" type="ACCEL">
+                <ID id="0"></ID>
+                <SR text="91"/>
+                <RANGE min="0" max="1024"/>
+                <OBJECT text=""></OBJECT>
+                <LOCATION text="Right Wrist"></LOCATION>
+                <DESCRIPTION text="acc"></DESCRIPTION>
+                <RECEIVER id="0"></RECEIVER>
+                <DECODER id="0"></DECODER>
+                <CALIBRATION x1g="779.92" xn1g="241.40" y1g="747.20" yn1g="215.72" z1g="832.26" zn1g="293.57" xstd="0.25" ystd="0.26" zstd="0.31"/>
+        </SENSOR>
+        <SENSOR class="Wockets" type="ACCEL">
+	                <ID id="1"></ID>
+	                <SR text="91"/>
+	                <RANGE min="0" max="1024"/>
+	                <OBJECT text=""></OBJECT>
+	                <LOCATION text="Left Wrist"></LOCATION>
+	                <DESCRIPTION text="acc"></DESCRIPTION>
+	                <RECEIVER id="1"></RECEIVER>
+	                <DECODER id="1"></DECODER>
+	                <CALIBRATION x1g="779.92" xn1g="241.40" y1g="747.20" yn1g="215.72" z1g="832.26" zn1g="293.57" xstd="0.25" ystd="0.26" zstd="0.31"/>
+        </SENSOR>
+        <SENSOR class="Wockets" type="ACCEL">
+	                <ID id="2"></ID>
+	                <SR text="91"/>
+	                <RANGE min="0" max="1024"/>
+	                <OBJECT text=""></OBJECT>
+	                <LOCATION text="Torso"></LOCATION>
+	                <DESCRIPTION text="acc"></DESCRIPTION>
+	                <RECEIVER id="2"></RECEIVER>
+	                <DECODER id="2"></DECODER>
+	                <CALIBRATION x1g="779.92" xn1g="241.40" y1g="747.20" yn1g="215.72" z1g="832.26" zn1g="293.57" xstd="0.25" ystd="0.26" zstd="0.31"/>
+        </SENSOR>
+
+
+</SENSORS>
+</SENSORDATA>

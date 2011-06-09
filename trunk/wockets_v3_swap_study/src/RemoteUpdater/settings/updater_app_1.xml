@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appupdater>
+	<application_exe>KernelApp.exe</application_exe>
+	<application_folder>\Program Files\kernelapp</application_folder>
+	<urls>
+		<url>http://wockets-windows.media.mit.edu/wockets/monitor/</url>
+	</urls>
+</appupdater>

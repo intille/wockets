@@ -1,0 +1,95 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{061C7F1B-8A40-4D9C-BED3-F6583F07BFE3}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MITes</RootNamespace>
+    <AssemblyName>MITes</AssemblyName>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>2.0</OldToolsVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\bin\PC\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\bin\PC\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\src\Obselete\MITes\MITesActivityCounter.cs" />
+    <Compile Include="..\..\src\Obselete\MITes\MITesActivityLogger.cs" />
+    <Compile Include="..\..\src\Obselete\MITes\MITesActivityLoggerNew.cs" />
+    <Compile Include="..\..\src\Obselete\MITes\MITesCurrentAnalyzer.cs" />
+    <Compile Include="..\..\src\Obselete\MITes\MITesData.cs" />
+    <Compile Include="..\..\src\Obselete\MITes\MITesDataFilterer.cs" />
+    <Compile Include="..\..\src\Obselete\MITes\MITesDecoder.cs" />
+    <Compile Include="..\..\src\Obselete\MITes\MITesDemoObjectAnalyzer.cs" />
+    <Compile Include="..\..\src\Obselete\MITes\MITesHRAnalyzer.cs" />
+    <Compile Include="..\..\src\Obselete\MITes\MITesLightAnalyzer.cs" />
+    <Compile Include="..\..\src\Obselete\MITes\MITesLoggerNew.cs" />
+    <Compile Include="..\..\src\Obselete\MITes\MITesLoggerReaderMR.cs" />
+    <Compile Include="..\..\src\Obselete\MITes\MITesLoggerReaderNew.cs" />
+    <Compile Include="..\..\src\Obselete\MITes\MITesObjectAnalyzer.cs" />
+    <Compile Include="..\..\src\Obselete\MITes\MITesPerformanceStats.cs" />
+    <Compile Include="..\..\src\Obselete\MITes\MITesRangeAnalyzer.cs" />
+    <Compile Include="..\..\src\Obselete\MITes\MITesRawLogger.cs" />
+    <Compile Include="..\..\src\Obselete\MITes\MITesReceiverController.cs" />
+    <Compile Include="..\..\src\Obselete\MITes\MITesScalablePlotter.cs" />
+    <Compile Include="..\..\src\Obselete\MITes\MITesSensorCalibrator.cs" />
+    <Compile Include="..\..\src\Obselete\MITes\MITesSystemTime.cs" />
+    <Compile Include="..\..\src\Obselete\MITes\MITesTempAnalyzer.cs" />
+    <Compile Include="..\..\src\Obselete\MITes\MITesUVAnalyzer.cs" />
+    <Compile Include="..\..\src\Obselete\MITes\Properties\AssemblyInfo.cs">
+      <Link>Properties\AssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Obselete\MITes\SocketTransmitter.cs" />
+    <Compile Include="..\..\src\Obselete\MITes\UDPServer.cs" />
+    <Compile Include="..\..\src\Obselete\MITes\UnixTime.cs" />
+    <Compile Include="..\..\src\Obselete\MITes\MITesLoggerReader.cs" />
+    <Compile Include="..\..\src\Obselete\MITes\DirectoryStructure.cs" />
+    <Compile Include="..\..\src\Obselete\MITes\MITesLoggerPLFormat.cs" />
+    <Compile Include="..\..\src\Obselete\MITes\GenericAccelerometerData.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="IO.csproj">
+      <Project>{1D75F70F-B268-4262-817A-4A0D39E90F86}</Project>
+      <Name>IO</Name>
+    </ProjectReference>
+    <ProjectReference Include="SerialIO.csproj">
+      <Project>{26831A48-F3A8-4019-8C62-842D3B8D2A6F}</Project>
+      <Name>SerialIO</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

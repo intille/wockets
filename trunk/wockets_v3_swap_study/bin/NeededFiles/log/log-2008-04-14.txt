@@ -1,0 +1,9 @@
+
+Log Entry : 05:51:01 : 
+  :
+  :Exception occurred when copying ..\..\..\..\MITesSRC\AllSensors\NeededFiles\SensorConfigurations\SensorData5.xml to C:\Documents and Settings\Fahd Albinali\Desktop\test\SensorData.xml. System.IO.IOException: The file 'C:\Documents and Settings\Fahd Albinali\Desktop\test\SensorData.xml' already exists.
+   at System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+   at System.IO.File.InternalCopy(String sourceFileName, String destFileName, Boolean overwrite)
+   at System.IO.File.Copy(String sourceFileName, String destFileName)
+   at MITesLogger_PC.Form1.InitializeInterface(String activityProtocolFile, String sensorConfigurationFile, String dataDirectory) in C:\MIT\PC\MITes-PC\MITesSRC\AllSensors\Form1.cs:line 1215
+-------------------------------
