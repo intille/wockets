@@ -333,7 +333,6 @@ namespace Wockets
             if (argument == Program.AUTOSTART_PARAMETER)
             {
                 raisePrompt();
-                SuspendPreventer.PowerOnDisplay();
             }
         }
 
@@ -618,7 +617,6 @@ namespace Wockets
         private void raisePrompt()
         {
             vibrate();
-            SuspendPreventer.PowerOnDisplay();
             playSoundFromResource();
         }
 
