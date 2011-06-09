@@ -164,8 +164,17 @@ namespace DataMerger
 
                               annotation_file_exist = true;
                           }
+                          
                        }
-
+                       
+                       if (File.Exists(this.textBox1.Text + "\\" + ANNOTATION_DIRECTORY + "\\tabletannotation\\" + ANNOTATION_INTERVALS_FILE))
+                       {
+                           this.progressForm.AppendLog("Annotation File in Tablet Folder.....................Found\r\n");
+                           ANNOTATION_SUBDIRECTORY = ANNOTATION_DIRECTORY + "\\tabletannotation";
+                           annotation_subdirectory_list.Add(ANNOTATION_SUBDIRECTORY);
+                           annotation_intervals_file_list.Add("AnnotationIntervals.xml");
+                           annotation_file_exist = true;
+                       } 
 
                        if ( annotation_subdirectory_list.Count >0 )
                             this.progressForm.AppendLog("Annotation File ..................... Not Found\r\n");
@@ -482,6 +491,17 @@ namespace DataMerger
                             MERGED_SUBDIRECTORY = "merged";
                             annotation_header += "phone";
                         }
+                        // for tablet annotations
+                        else if( ANNOTATION_SUBDIRECTORY.Contains("audio"))
+                        {
+                            MERGED_SUBDIRECTORY = "merged";
+                            annotation_header += "audio";
+                        }
+                        else if (ANNOTATION_SUBDIRECTORY.Contains("tablet"))
+                        {
+                            MERGED_SUBDIRECTORY = "merged";
+                            annotation_header += "tablet";
+                        }
                         else
                         {
                             MERGED_SUBDIRECTORY = "merged";
@@ -721,6 +741,22 @@ namespace DataMerger
 
 
             }
+            // TODO if four categories present
+                
+            else if (session.OverlappingActivityLists.Count == 4)
+            {                
+                numPostures = session.OverlappingActivityLists[0].Count * session.OverlappingActivityLists[1].Count + 1;
+
+                //Go through the activity list for the two categories
+                //This list will generate all combinations of postures-activities
+                for (int i = 0; (i < session.OverlappingActivityLists[1].Count); i++)
+                    for (int j = 0; (j < session.OverlappingActivityLists[0].Count); j++)
+                    {
+                        postures.Add(session.OverlappingActivityLists[1][i]._Name + "_" + session.OverlappingActivityLists[0][j]._Name, k);
+                        k++;
+                    }
+            }
+
 
 
             //Check if postures contain the "unknown" label, otherwise add it
@@ -1772,26 +1808,34 @@ namespace DataMerger
 
                 #region create a csv file for each category
 
-                if (i == 0)
-                {
-                    //Category 1
-                    if (File.Exists(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\ActivityLabelsColors_1.csv"))
-                    { File.Delete(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\ActivityLabelsColors_1.csv"); }
-                    labels_colors_csv = new StreamWriter(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\ActivityLabelsColors_1.csv");
+                //if (i == 0)
+                //{
+                //    //Category 1
+                //    if (File.Exists(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\ActivityLabelsColors_1.csv"))
+                //    { File.Delete(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\ActivityLabelsColors_1.csv"); }
+                //    labels_colors_csv = new StreamWriter(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\ActivityLabelsColors_1.csv");
 
-                    //Write headers
-                    labels_colors_csv.WriteLine("Category,Label,Color,ARGB");
-                }
-                else 
-                {
-                    //Category 2
-                    if (File.Exists(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\ActivityLabelsColors_2.csv"))
-                    { File.Delete(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\ActivityLabelsColors_2.csv"); }
-                    labels_colors_csv = new StreamWriter(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\ActivityLabelsColors_2.csv");
+                //    //Write headers
+                //    labels_colors_csv.WriteLine("Category,Label,Color,ARGB");
+                //}
+                //else 
+                //{
+                //    //Category 2
+                //    if (File.Exists(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\ActivityLabelsColors_2.csv"))
+                //    { File.Delete(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\ActivityLabelsColors_2.csv"); }
+                //    labels_colors_csv = new StreamWriter(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\ActivityLabelsColors_2.csv");
 
-                    //Write headers
-                    labels_colors_csv.WriteLine("Category,Label,Color,ARGB");
+                //    //Write headers
+                //    labels_colors_csv.WriteLine("Category,Label,Color,ARGB");
+                //}
+
+                if(File.Exists(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\ActivityLabelsColors_" + (i+1) + ".csv"))
+                {
+                    File.Delete(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\ActivityLabelsColors_" + (i+1) + ".csv");
                 }
+                labels_colors_csv = new StreamWriter(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\ActivityLabelsColors_" + (i+1) + ".csv");
+                //Write Headers
+                labels_colors_csv.WriteLine("Category,Label,Color,ARGB");
 
                 #endregion
 
@@ -1860,44 +1904,76 @@ namespace DataMerger
      private static int NumberColorCategories = 10;
      private static void AssignLabelColors(out Color[,] labelcolors, out int[,] labelrgb)
      {
-         labelcolors = new Color[2, NumberColorCategories];
-         labelrgb = new int[2, NumberColorCategories];
+       //  labelcolors = new Color[2, NumberColorCategories];
+       //  labelrgb = new int[2, NumberColorCategories];
+         labelcolors = new Color[4, NumberColorCategories];
+         labelrgb = new int[4, NumberColorCategories];
 
-       //Default Colors for First Category
-        labelcolors[0,0] = Color.Plum;          labelrgb[0,0] = -2252579;
-        labelcolors[0,1] = Color.Green;         labelrgb[0,1] = -424804561;
-        labelcolors[0,2] = Color.Orange;        labelrgb[0,2] = -256;
-        labelcolors[0,3] = Color.DeepSkyBlue;   labelrgb[0,3] = Color.FromArgb(200, Color.DeepSkyBlue).ToArgb();
-        labelcolors[0,4] = Color.Blue;          labelrgb[0,4] =  1677721855;
-        labelcolors[0,5] = Color.YellowGreen;   labelrgb[0,5] =-1264923342;
-        labelcolors[0,6] = Color.Violet;        labelrgb[0,6] =-1146130;
-        labelcolors[0,7] = Color.Turquoise;     labelrgb[0,7] =-12525360;
-        labelcolors[0,8] = Color.Tomato;        labelrgb[0,8] =-419495936;
-        labelcolors[0,9] = Color.Violet;        labelrgb[0,9] =-923893010;
+       ////Default Colors for First Category
+         labelcolors[0, 0] = Color.Plum; labelrgb[0, 0] = -2252579;
+         labelcolors[0, 1] = Color.Green; labelrgb[0, 1] = -424804561;
+         labelcolors[0, 2] = Color.Orange; labelrgb[0, 2] = -256;
+         labelcolors[0, 3] = Color.DeepSkyBlue; labelrgb[0, 3] = Color.FromArgb(200, Color.DeepSkyBlue).ToArgb();
+         labelcolors[0, 4] = Color.Blue; labelrgb[0, 4] = 1677721855;
+         labelcolors[0, 5] = Color.YellowGreen; labelrgb[0, 5] = -1264923342;
+         labelcolors[0, 6] = Color.Violet; labelrgb[0, 6] = -1146130;
+         labelcolors[0, 7] = Color.Turquoise; labelrgb[0, 7] = -12525360;
+         labelcolors[0, 8] = Color.Tomato; labelrgb[0, 8] = -419495936;
+         labelcolors[0, 9] = Color.Violet; labelrgb[0, 9] = -923893010;
+
+         //Default Colors for Second Category
+         labelcolors[1, 0] = Color.Plum; labelrgb[1, 0] = -2252579;
+         labelcolors[1, 1] = Color.LightBlue; labelrgb[1, 1] = 838861055;
+         labelcolors[1, 2] = Color.Blue; labelrgb[1, 2] = 1677721855;
+         labelcolors[1, 3] = Color.YellowGreen; labelrgb[1, 3] = -1264923342;
+         labelcolors[1, 4] = Color.Violet; labelrgb[1, 4] = -1146130;
+         labelcolors[1, 5] = Color.Turquoise; labelrgb[1, 5] = -12525360;
+         labelcolors[1, 6] = Color.Tomato; labelrgb[1, 6] = -419495936;
+         labelcolors[1, 7] = Color.Orange; labelrgb[1, 7] = -256;
+         labelcolors[1, 8] = Color.Green; labelrgb[1, 8] = -424804561;
+         labelcolors[1, 9] = Color.Violet; labelrgb[1, 9] = -923893010;
+
+         //Default Colors for Third category     
+         labelcolors[2, 0] = Color.Green; labelrgb[2, 0] =-424804561;
+         labelcolors[2, 1] = Color.Plum; labelrgb[2, 1] = -2252579;
+         labelcolors[2, 2] = Color.Violet; labelrgb[2, 2] = -1146130;
+         labelcolors[2, 3] = Color.Violet; labelrgb[2, 3] = -923893010;
+         labelcolors[2, 4] = Color.YellowGreen; labelrgb[2, 4] = -1264923342;
+         labelcolors[2, 5] = Color.Blue; labelrgb[2, 5] = 1677721855; 
+         labelcolors[2, 6] = Color.Orange; labelrgb[2, 6] = -256;
+         labelcolors[2, 7] = Color.Tomato; labelrgb[2, 7] = -419495936;
+         labelcolors[2, 8] = Color.Turquoise; labelrgb[2, 8] = -12525360;
+         labelcolors[2, 9] = Color.DeepSkyBlue; labelrgb[2, 9] = Color.FromArgb(200, Color.DeepSkyBlue).ToArgb(); 
+
+         //Default Colors for Fourth category    
+         labelcolors[3, 0] = Color.Orange; labelrgb[3, 0] = -256;         
+         labelcolors[3, 1] = Color.Turquoise; labelrgb[3, 1] = -12525360;
+         labelcolors[3, 2] = Color.Blue; labelrgb[3, 2] = 1677721855; 
+         labelcolors[3, 3] = Color.Violet; labelrgb[3, 3] = -923893010;
+         labelcolors[3, 4] = Color.Plum; labelrgb[3, 4] = -2252579;
+         labelcolors[3, 5] = Color.Tomato; labelrgb[3, 5] = -419495936;
+         labelcolors[3, 6] = Color.Violet; labelrgb[3, 6] = -1146130;
+         labelcolors[3, 7] = Color.Green; labelrgb[3, 7] = -424804561;
+         labelcolors[3, 8] = Color.DeepSkyBlue; labelrgb[3, 8] = Color.FromArgb(200, Color.DeepSkyBlue).ToArgb();
+         labelcolors[3, 9] = Color.YellowGreen; labelrgb[3, 9] = -1264923342;
+             
+
         
-        //Default Colors for First Category
-        labelcolors[1, 0] = Color.Plum;         labelrgb[1, 0] = -2252579;
-        labelcolors[1, 1] = Color.LightBlue;    labelrgb[1, 1] = 838861055;
-        labelcolors[1, 2] = Color.Blue;         labelrgb[1, 2] = 1677721855;
-        labelcolors[1, 3] = Color.YellowGreen;  labelrgb[1, 3] = -1264923342;
-        labelcolors[1, 4] = Color.Violet;       labelrgb[1, 4] = -1146130;
-        labelcolors[1, 5] = Color.Turquoise;    labelrgb[1, 5] = -12525360;
-        labelcolors[1, 6] = Color.Tomato;       labelrgb[1, 6] = -419495936;
-        labelcolors[1, 7] = Color.Orange;       labelrgb[1, 7] = -256;
-        labelcolors[1, 8] = Color.Green;        labelrgb[1, 8] = -424804561;
-        labelcolors[1, 9] = Color.Violet;       labelrgb[1, 9] = -923893010;
+
+        
+
         
      }
 
 
-#endregion
+        #endregion
 
 
 
 
-       #region Declare Variables
+     #region Declare Variables
 
-        public static string MITES_SUBDIRECTORY = "mites";
+     public static string MITES_SUBDIRECTORY = "mites";
         public static string WOCKETS_SUBDIRECTORY = "wockets";
         public static string OTHER_SUBDIRECTORY = "othersensors";
         public static string MERGED_SUBDIRECTORY = "merged";
@@ -4929,7 +5005,7 @@ namespace DataMerger
 
 
             while (((TimeSpan)endDateTime.Subtract(currentDateTime)).TotalSeconds >= 0)
-            {
+            {                
                 string key = currentDateTime.Year + "-" + currentDateTime.Month + "-" + currentDateTime.Day + "-" + currentDateTime.Hour + "-" + currentDateTime.Minute + "-" + currentDateTime.Second;
                 diff = currentDateTime.Subtract(origin);
                 timestamp = diff.TotalMilliseconds + "," + currentDateTime.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ssK");
