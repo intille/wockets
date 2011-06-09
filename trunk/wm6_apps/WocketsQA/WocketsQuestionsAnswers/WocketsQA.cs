@@ -331,7 +331,10 @@ namespace Wockets
             }
             this.WindowState = FormWindowState.Maximized;
             if (argument == Program.AUTOSTART_PARAMETER)
+            {
                 raisePrompt();
+                SuspendPreventer.PowerOnDisplay();
+            }
         }
 
         #endregion
@@ -615,6 +618,7 @@ namespace Wockets
         private void raisePrompt()
         {
             vibrate();
+            SuspendPreventer.PowerOnDisplay();
             playSoundFromResource();
         }
 

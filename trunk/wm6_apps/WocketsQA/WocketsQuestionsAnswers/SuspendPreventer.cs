@@ -210,7 +210,7 @@ namespace Wockets
             ExtEscapeSet(hdc, SETPOWERMANAGEMENT, size, vpm, 0, IntPtr.Zero);
         }
 
-        private static void PowerOnDisplay()
+        public static void PowerOnDisplay()
         {
             IntPtr hdc = GetDC(IntPtr.Zero);
             uint size = 12;
