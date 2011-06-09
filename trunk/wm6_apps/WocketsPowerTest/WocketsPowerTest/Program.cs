@@ -111,7 +111,7 @@ namespace Wockets
         [MTAThread]
         static void Main(string[] args)
         {
-
+            //SuspendPreventer sp = new SuspendPreventer();
             try
             {
                 if (IsInstanceRunning())
@@ -120,6 +120,7 @@ namespace Wockets
                 }
                 SetSystemPowerState(null, POWER_STATE_ON, POWER_FORCE);
                 PreventWocketsSuspension();
+                SuspendPreventer.Start();
                 postThread = new Thread(new ThreadStart(PostThread));
                 postThread.Start();
 
@@ -134,6 +135,7 @@ namespace Wockets
             }
             catch { }
             PermitWocketsSuspension();
+            SuspendPreventer.Stop();
             System.Diagnostics.Process.GetCurrentProcess().Kill();
         }
 

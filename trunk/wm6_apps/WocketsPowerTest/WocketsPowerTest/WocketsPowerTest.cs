@@ -231,6 +231,7 @@ namespace Wockets
 
         private const string POWER_LOG_PATH = @"\WocketsPowerTest\";
         private const string POWER_LOG_FILE_MASK = "PowerTestTimes-{0}.csv";
+        private const string DATE_FILE_MASK = "yyyy-MM-dd-HH-mm-ss-fff";
         private const string DATETIME_MASK = "yyyy-MM-dd HH:mm:ss.fff";
         private const string DATE_MASK = "yyyy-MM-dd";
         private const int RETRY_FREQUENCY_IN_SECONDS = 5;
@@ -240,6 +241,7 @@ namespace Wockets
         #region PRIVATE MEMBERS
 
         private static int retryTimeCounter = 0;
+        private static string powerLogPath = "";
 
         #endregion
 
@@ -248,6 +250,9 @@ namespace Wockets
         public WocketsPowerTest()
         {
             InitializeComponent();
+            string dateString = DateTime.Now.ToString(DATE_FILE_MASK);
+            powerLogPath = Path.Combine(POWER_LOG_PATH, String.Format(POWER_LOG_FILE_MASK, dateString));
+
             retryTimer.Enabled = true;
         }
 
@@ -257,8 +262,7 @@ namespace Wockets
 
         private static string logPowerTimer()
         {
-            string dateString = DateTime.Today.Date.ToString(DATE_MASK);
-            string powerLogPath = Path.Combine(POWER_LOG_PATH, String.Format(POWER_LOG_FILE_MASK, dateString));
+            string dateString = DateTime.Today.Date.ToString(DATETIME_MASK);
             try
             {
                 if (!Directory.Exists(POWER_LOG_PATH))
@@ -268,7 +272,7 @@ namespace Wockets
                 if (!File.Exists(powerLogPath))
                 {
                     TextWriter twa = new StreamWriter(powerLogPath);
-                    twa.WriteLine("PromptTime");
+                    twa.WriteLine("LogTime");
                     twa.Close();
                     Thread.Sleep(100);
                 }
