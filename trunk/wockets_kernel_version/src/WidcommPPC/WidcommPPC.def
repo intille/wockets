@@ -1,0 +1,6 @@
+; WidcommPPC.def : Declares the module parameters for the DLL.
+
+LIBRARY      "WidcommPPC"
+
+EXPORTS
+    ; Explicit exports can go here

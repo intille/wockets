@@ -1,0 +1,12 @@
+C:\Data\Project\Google Code\googleCodeApril_12\google code latest\wockets_latest_version_with_kernel SVN Jun_8_2011\bin\PC\AudioAnnotation.exe
+C:\Data\Project\Google Code\googleCodeApril_12\google code latest\wockets_latest_version_with_kernel SVN Jun_8_2011\bin\PC\AudioAnnotation.pdb
+C:\Data\Project\Google Code\googleCodeApril_12\google code latest\wockets_latest_version_with_kernel SVN Jun_8_2011\projects\PC\obj\Debug\ResolveAssemblyReference.cache
+C:\Data\Project\Google Code\googleCodeApril_12\google code latest\wockets_latest_version_with_kernel SVN Jun_8_2011\projects\PC\obj\Debug\Interop.WMPLib.dll
+C:\Data\Project\Google Code\googleCodeApril_12\google code latest\wockets_latest_version_with_kernel SVN Jun_8_2011\projects\PC\obj\Debug\AudioAnnotation.csproj.ResolveComReference.cache
+C:\Data\Project\Google Code\googleCodeApril_12\google code latest\wockets_latest_version_with_kernel SVN Jun_8_2011\projects\PC\obj\Debug\AudioAnnotation.FormAnnotation.resources
+C:\Data\Project\Google Code\googleCodeApril_12\google code latest\wockets_latest_version_with_kernel SVN Jun_8_2011\projects\PC\obj\Debug\AudioAnnotation.Resources.resources
+C:\Data\Project\Google Code\googleCodeApril_12\google code latest\wockets_latest_version_with_kernel SVN Jun_8_2011\projects\PC\obj\Debug\AudioAnnotation.PopUp_Message_Window.resources
+C:\Data\Project\Google Code\googleCodeApril_12\google code latest\wockets_latest_version_with_kernel SVN Jun_8_2011\projects\PC\obj\Debug\AudioAnnotation.PopUp_Result_Window.resources
+C:\Data\Project\Google Code\googleCodeApril_12\google code latest\wockets_latest_version_with_kernel SVN Jun_8_2011\projects\PC\obj\Debug\AudioAnnotation.csproj.GenerateResource.Cache
+C:\Data\Project\Google Code\googleCodeApril_12\google code latest\wockets_latest_version_with_kernel SVN Jun_8_2011\projects\PC\obj\Debug\AudioAnnotation.exe
+C:\Data\Project\Google Code\googleCodeApril_12\google code latest\wockets_latest_version_with_kernel SVN Jun_8_2011\projects\PC\obj\Debug\AudioAnnotation.pdb
