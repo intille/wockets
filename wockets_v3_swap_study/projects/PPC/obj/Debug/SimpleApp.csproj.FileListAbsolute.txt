@@ -1,0 +1,16 @@
+C:\Data\Projects\house_N\wockets_svn\bin\PPC\SimpleAppSw\SimpleApp.exe
+C:\Data\Projects\house_N\wockets_svn\bin\PPC\SimpleAppSw\SimpleApp.pdb
+C:\Data\Projects\house_N\wockets_svn\projects\PPC\obj\Debug\ResolveAssemblyReference.cache
+C:\Data\Projects\house_N\wockets_svn\projects\PPC\obj\Debug\KernelApp.Form1.resources
+C:\Data\Projects\house_N\wockets_svn\projects\PPC\obj\Debug\SimpleApp.Resources.resources
+C:\Data\Projects\house_N\wockets_svn\projects\PPC\obj\Debug\SimpleApp.csproj.GenerateResource.Cache
+C:\Data\Projects\house_N\wockets_svn\projects\PPC\obj\Debug\SimpleApp.exe
+C:\Data\Projects\house_N\wockets_svn\projects\PPC\obj\Debug\SimpleApp.pdb
+C:\Data\Project\Google Code\wockets_svn version 5\bin\PPC\SimpleAppSw\SimpleApp.exe
+C:\Data\Project\Google Code\wockets_svn version 5\bin\PPC\SimpleAppSw\SimpleApp.pdb
+C:\Data\Project\Google Code\wockets_svn version 5\projects\PPC\obj\Debug\ResolveAssemblyReference.cache
+C:\Data\Project\Google Code\wockets_svn version 5\projects\PPC\obj\Debug\KernelApp.Form1.resources
+C:\Data\Project\Google Code\wockets_svn version 5\projects\PPC\obj\Debug\SimpleApp.Resources.resources
+C:\Data\Project\Google Code\wockets_svn version 5\projects\PPC\obj\Debug\SimpleApp.csproj.GenerateResource.Cache
+C:\Data\Project\Google Code\wockets_svn version 5\projects\PPC\obj\Debug\SimpleApp.exe
+C:\Data\Project\Google Code\wockets_svn version 5\projects\PPC\obj\Debug\SimpleApp.pdb

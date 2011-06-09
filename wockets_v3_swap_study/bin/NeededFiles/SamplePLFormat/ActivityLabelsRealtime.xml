@@ -1,0 +1,123 @@
+<?xml version='1.0'?>
+<ANNOTATION xmlns="urn:mites-schema">
+<FILEINFO>
+<SUBJECT NAME="" />
+<LOCATION NAME="house_n Lab" />
+<OBSERVER NAME="" />
+<NOTES NAME="Session 2:  Posture, Daily Activities, calisthenics set  (approximate time = 90 minutes)" />
+</FILEINFO>
+<LABELS>
+<CATEGORY NAME="posture" PROPERTY="">
+<LABEL NAME="sitting-in-easy-chair:-slouching" />
+<LABEL NAME="sitting-at-desk_-elbows-on-desk_-head-in-hands" />
+<LABEL NAME="standing-hands-in-pockets" />
+<LABEL NAME="squatting" />
+<LABEL NAME="lying-down-still" />
+<LABEL NAME="none" />
+</CATEGORY>
+<CATEGORY NAME="daily-activities" PROPERTY="">
+<LABEL NAME="treadmill_-3mph_-0%" />
+<LABEL NAME="airdyne_--30-rpm" />
+<LABEL NAME="stacking-groceries.-putting-on-shelves" />
+<LABEL NAME="folding/stacking-laundry" />
+<LABEL NAME="vacuuming_-moving-chairs" />
+<LABEL NAME="washing-windows" />
+<LABEL NAME="sweeping/-mopping" />
+<LABEL NAME="none" />
+</CATEGORY>
+<CATEGORY NAME="calisthenic-circuit-of-mixed-activities" PROPERTY="">
+<LABEL NAME="stretching" />
+<LABEL NAME="touching-toes" />
+<LABEL NAME="swinging-arms" />
+<LABEL NAME="warmup" />
+<LABEL NAME="situps-or-crunches" />
+<LABEL NAME="arm-curls-with-hand-weights-(5-lbs.)" />
+<LABEL NAME="deep-knee-bends/-squats" />
+<LABEL NAME="pushups-from-knees" />
+<LABEL NAME="stepping-on-platform-or-1-stair:-10-each-leg" />
+<LABEL NAME="none" />
+</CATEGORY>
+<CATEGORY NAME="transitions" PROPERTY="">
+<LABEL NAME="kneeling" />
+<LABEL NAME="bending" />
+<LABEL NAME="picking-up" />
+<LABEL NAME="turning/pivoting" />
+<LABEL NAME="standing-up" />
+<LABEL NAME="lying-down" />
+<LABEL NAME="none" />
+</CATEGORY>
+</LABELS>
+<DATA>
+<LABEL STARTDATE="2008-06-17 14:03:42-07:00" ENDDATE="2008-06-17 14:03:56-07:00" STARTTIME="14:3:42" ENDTIME="14:3:56"><VALUE LABEL="sitting-in-easy-chair:-slouching" CATEGORY="posture" />
+<VALUE LABEL="treadmill_-3mph_-0%" CATEGORY="daily-activities" />
+<VALUE LABEL="stretching" CATEGORY="calisthenic-circuit-of-mixed-activities" />
+<VALUE LABEL="kneeling" CATEGORY="transitions" />
+</LABEL>
+<LABEL STARTDATE="2008-06-17 14:05:34-07:00" ENDDATE="2008-06-17 14:08:03-07:00" STARTTIME="14:5:34" ENDTIME="14:8:3"><VALUE LABEL="sitting-at-desk_-elbows-on-desk_-head-in-hands" CATEGORY="posture" />
+<VALUE LABEL="none" CATEGORY="daily-activities" />
+<VALUE LABEL="none" CATEGORY="calisthenic-circuit-of-mixed-activities" />
+<VALUE LABEL="none" CATEGORY="transitions" />
+</LABEL>
+<LABEL STARTDATE="2008-06-17 14:09:23-07:00" ENDDATE="2008-06-17 14:11:26-07:00" STARTTIME="14:9:23" ENDTIME="14:11:26"><VALUE LABEL="sitting-in-easy-chair:-slouching" CATEGORY="posture" />
+<VALUE LABEL="none" CATEGORY="daily-activities" />
+<VALUE LABEL="none" CATEGORY="calisthenic-circuit-of-mixed-activities" />
+<VALUE LABEL="none" CATEGORY="transitions" />
+</LABEL>
+<LABEL STARTDATE="2008-06-17 14:12:05-07:00" ENDDATE="2008-06-17 14:14:47-07:00" STARTTIME="14:12:5" ENDTIME="14:14:47"><VALUE LABEL="sitting-at-desk_-elbows-on-desk_-head-in-hands" CATEGORY="posture" />
+<VALUE LABEL="none" CATEGORY="daily-activities" />
+<VALUE LABEL="none" CATEGORY="calisthenic-circuit-of-mixed-activities" />
+<VALUE LABEL="none" CATEGORY="transitions" />
+</LABEL>
+<LABEL STARTDATE="2008-06-17 14:15:25-07:00" ENDDATE="2008-06-17 14:17:34-07:00" STARTTIME="14:15:25" ENDTIME="14:17:34"><VALUE LABEL="standing-hands-in-pockets" CATEGORY="posture" />
+<VALUE LABEL="none" CATEGORY="daily-activities" />
+<VALUE LABEL="none" CATEGORY="calisthenic-circuit-of-mixed-activities" />
+<VALUE LABEL="none" CATEGORY="transitions" />
+</LABEL>
+<LABEL STARTDATE="2008-06-17 14:19:32-07:00" ENDDATE="2008-06-17 14:25:34-07:00" STARTTIME="14:19:32" ENDTIME="14:25:34"><VALUE LABEL="none" CATEGORY="posture" />
+<VALUE LABEL="treadmill_-3mph_-0%" CATEGORY="daily-activities" />
+<VALUE LABEL="none" CATEGORY="calisthenic-circuit-of-mixed-activities" />
+<VALUE LABEL="none" CATEGORY="transitions" />
+</LABEL>
+<LABEL STARTDATE="2008-06-17 14:27:19-07:00" ENDDATE="2008-06-17 14:33:44-07:00" STARTTIME="14:27:19" ENDTIME="14:33:44"><VALUE LABEL="none" CATEGORY="posture" />
+<VALUE LABEL="airdyne_--30-rpm" CATEGORY="daily-activities" />
+<VALUE LABEL="none" CATEGORY="calisthenic-circuit-of-mixed-activities" />
+<VALUE LABEL="none" CATEGORY="transitions" />
+</LABEL>
+<LABEL STARTDATE="2008-06-17 14:37:36-07:00" ENDDATE="2008-06-17 14:44:00-07:00" STARTTIME="14:37:36" ENDTIME="14:44:0"><VALUE LABEL="none" CATEGORY="posture" />
+<VALUE LABEL="stacking-groceries.-putting-on-shelves" CATEGORY="daily-activities" />
+<VALUE LABEL="none" CATEGORY="calisthenic-circuit-of-mixed-activities" />
+<VALUE LABEL="none" CATEGORY="transitions" />
+</LABEL>
+<LABEL STARTDATE="2008-06-17 14:48:23-07:00" ENDDATE="2008-06-17 14:55:00-07:00" STARTTIME="14:48:23" ENDTIME="14:55:0"><VALUE LABEL="none" CATEGORY="posture" />
+<VALUE LABEL="folding/stacking-laundry" CATEGORY="daily-activities" />
+<VALUE LABEL="none" CATEGORY="calisthenic-circuit-of-mixed-activities" />
+<VALUE LABEL="none" CATEGORY="transitions" />
+</LABEL>
+<LABEL STARTDATE="2008-06-17 14:59:04-07:00" ENDDATE="2008-06-17 15:06:41-07:00" STARTTIME="14:59:4" ENDTIME="15:6:41"><VALUE LABEL="none" CATEGORY="posture" />
+<VALUE LABEL="vacuuming_-moving-chairs" CATEGORY="daily-activities" />
+<VALUE LABEL="none" CATEGORY="calisthenic-circuit-of-mixed-activities" />
+<VALUE LABEL="none" CATEGORY="transitions" />
+</LABEL>
+<LABEL STARTDATE="2008-06-17 15:09:16-07:00" ENDDATE="2008-06-17 15:16:25-07:00" STARTTIME="15:9:16" ENDTIME="15:16:25"><VALUE LABEL="none" CATEGORY="posture" />
+<VALUE LABEL="washing-windows" CATEGORY="daily-activities" />
+<VALUE LABEL="none" CATEGORY="calisthenic-circuit-of-mixed-activities" />
+<VALUE LABEL="none" CATEGORY="transitions" />
+</LABEL>
+<LABEL STARTDATE="2008-06-17 15:17:24-07:00" ENDDATE="2008-06-17 15:25:35-07:00" STARTTIME="15:17:24" ENDTIME="15:25:35"><VALUE LABEL="none" CATEGORY="posture" />
+<VALUE LABEL="sweeping/-mopping" CATEGORY="daily-activities" />
+<VALUE LABEL="none" CATEGORY="calisthenic-circuit-of-mixed-activities" />
+<VALUE LABEL="none" CATEGORY="transitions" />
+</LABEL>
+<LABEL STARTDATE="2008-06-17 15:29:37-07:00" ENDDATE="2008-06-17 15:44:17-07:00" STARTTIME="15:29:37" ENDTIME="15:44:17"><VALUE LABEL="none" CATEGORY="posture" />
+<VALUE LABEL="none" CATEGORY="daily-activities" />
+<VALUE LABEL="touching-toes" CATEGORY="calisthenic-circuit-of-mixed-activities" />
+<VALUE LABEL="none" CATEGORY="transitions" />
+</LABEL>
+<LABEL STARTDATE="2008-06-17 15:45:14-07:00" ENDDATE="2008-06-17 15:49:16-07:00" STARTTIME="15:45:14" ENDTIME="15:49:16"><VALUE LABEL="none" CATEGORY="posture" />
+<VALUE LABEL="none" CATEGORY="daily-activities" />
+<VALUE LABEL="stretching" CATEGORY="calisthenic-circuit-of-mixed-activities" />
+<VALUE LABEL="none" CATEGORY="transitions" />
+</LABEL>
+</DATA>
+</ANNOTATION>
+

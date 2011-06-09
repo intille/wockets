@@ -1,0 +1,37 @@
+<SENSORDATA dataset="house_n data" xmlns="urn:mites-schema">
+<RECEIVERS>     
+	<RECEIVER id="0" type="RFCOMM" MacAddress="000666000000" PIN="1234" PortNumber="9" Parity="False" StopBit="True" BaudRate="38400" BufferSize="16384" MaxSR="40" />                               
+	<RECEIVER id="1" type="RFCOMM" MacAddress="000666000000" PIN="1234" PortNumber="9" Parity="False" StopBit="True" BaudRate="38400" BufferSize="16384" MaxSR="40" />                               
+</RECEIVERS>
+
+<DECODERS>
+	<DECODER id="0" type="Wockets" />
+	<DECODER id="1" type="Wockets" />
+</DECODERS>
+
+<SENSORS>
+ 	<SENSOR class="Wockets" type="ACCEL">
+                <ID id="0"></ID>
+                <SR text="40"/>
+                <RANGE min="0" max="1024"/>
+                <OBJECT text=""></OBJECT>
+                <LOCATION text="Dominant Wrist"></LOCATION>
+                <DESCRIPTION text="acc"></DESCRIPTION>
+                <RECEIVER id="0"></RECEIVER>
+                <DECODER id="0"></DECODER>
+                <CALIBRATION x1g="0.0" xn1g="0.0" y1g="0.0" yn1g="0.0" z1g="0.0" zn1g="0.0" xstd="0.0" ystd="0.0" zstd="0.0"/>
+        </SENSOR>
+
+	<SENSOR class="Wockets" type="ACCEL">
+                <ID id="1"></ID>
+                <SR text="40"/>
+                <RANGE min="0" max="1024"/>
+                <OBJECT text=""></OBJECT>
+                <LOCATION text="Dominant Ankle"></LOCATION>
+                <DESCRIPTION text="acc"></DESCRIPTION>
+                <RECEIVER id="1"></RECEIVER>
+                <DECODER id="1"></DECODER>
+                <CALIBRATION x1g="0.0" xn1g="0.0" y1g="0.0" yn1g="0.0" z1g="0.0" zn1g="0.0" xstd="0.0" ystd="0.0" zstd="0.0"/>
+        </SENSOR>
+</SENSORS>
+</SENSORDATA>

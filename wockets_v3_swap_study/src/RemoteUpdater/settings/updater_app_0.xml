@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appupdater>
+  <application_exe>CollectDataUser.exe</application_exe>
+  <application_folder>\Program Files\wockets</application_folder>
+	<urls>
+		<url>http://wockets-windows.media.mit.edu/wockets/software/</url>
+	</urls>
+</appupdater>

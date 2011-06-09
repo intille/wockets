@@ -1,0 +1,84 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{9D3E5EFE-B3A1-4C95-A1AC-5EA93C72C971}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MITesAnalysisApplication</RootNamespace>
+    <AssemblyName>MITesAnalysisApplication</AssemblyName>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>2.0</OldToolsVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\bin\PC\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\bin\PC\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\src\MITesAnalysisApplication\conf\ConfigurationReader.cs">
+      <Link>conf\ConfigurationReader.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\MITesAnalysisApplication\conf\Constants.cs">
+      <Link>conf\Constants.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\MITesAnalysisApplication\conf\GeneralConfiguration.cs">
+      <Link>conf\GeneralConfiguration.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\MITesAnalysisApplication\Extractor.cs" />
+    <Compile Include="..\..\src\MITesAnalysisApplication\Program.cs" />
+    <Compile Include="..\..\src\MITesAnalysisApplication\Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PC\AXML.csproj">
+      <Project>{997F71C3-8533-4771-96D7-AE1CA66532CF}</Project>
+      <Name>AXML</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PC\MITes.csproj">
+      <Project>{061C7F1B-8A40-4D9C-BED3-F6583F07BFE3}</Project>
+      <Name>MITes</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PC\SXML.csproj">
+      <Project>{FBD9A0CC-6FF0-46E1-833A-ED80FD081241}</Project>
+      <Name>SXML</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PC\Wockets.csproj">
+      <Project>{16986364-6B54-443E-B1F3-A6F17F0523B2}</Project>
+      <Name>Wockets</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PC\WocketsWeka.csproj">
+      <Project>{E5BB25A9-1913-4C1A-BBCF-51F2554D0C42}</Project>
+      <Name>WocketsWeka</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

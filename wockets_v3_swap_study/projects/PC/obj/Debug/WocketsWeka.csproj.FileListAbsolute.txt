@@ -1,0 +1,20 @@
+C:\Data\Projects\house_N\wockets_svn\bin\PC\WocketsWeka.dll
+C:\Data\Projects\house_N\wockets_svn\bin\PC\WocketsWeka.pdb
+C:\Data\Projects\house_N\wockets_svn\projects\PC\obj\Debug\ResolveAssemblyReference.cache
+C:\Data\Projects\house_N\wockets_svn\projects\PC\obj\Debug\WocketsWeka.dll
+C:\Data\Projects\house_N\wockets_svn\projects\PC\obj\Debug\WocketsWeka.pdb
+C:\Data\Project\Google Code\wockets_svn version 5\bin\PC\WocketsWeka.dll
+C:\Data\Project\Google Code\wockets_svn version 5\bin\PC\WocketsWeka.pdb
+C:\Data\Project\Google Code\wockets_svn version 5\projects\PC\obj\Debug\ResolveAssemblyReference.cache
+C:\Data\Project\Google Code\wockets_svn version 5\projects\PC\obj\Debug\WocketsWeka.dll
+C:\Data\Project\Google Code\wockets_svn version 5\projects\PC\obj\Debug\WocketsWeka.pdb
+C:\Data\Projects\house_N\Google Code\google code latest\wockets_svn version 5\bin\PC\WocketsWeka.dll
+C:\Data\Projects\house_N\Google Code\google code latest\wockets_svn version 5\bin\PC\WocketsWeka.pdb
+C:\Data\Projects\house_N\Google Code\google code latest\wockets_svn version 5\projects\PC\obj\Debug\ResolveAssemblyReference.cache
+C:\Data\Projects\house_N\Google Code\google code latest\wockets_svn version 5\projects\PC\obj\Debug\WocketsWeka.dll
+C:\Data\Projects\house_N\Google Code\google code latest\wockets_svn version 5\projects\PC\obj\Debug\WocketsWeka.pdb
+C:\Data\Project\Google Code\googleCodeApril_12\google code latest\wockets_svn version 6\bin\PC\WocketsWeka.dll
+C:\Data\Project\Google Code\googleCodeApril_12\google code latest\wockets_svn version 6\bin\PC\WocketsWeka.pdb
+C:\Data\Project\Google Code\googleCodeApril_12\google code latest\wockets_svn version 6\projects\PC\obj\Debug\ResolveAssemblyReference.cache
+C:\Data\Project\Google Code\googleCodeApril_12\google code latest\wockets_svn version 6\projects\PC\obj\Debug\WocketsWeka.dll
+C:\Data\Project\Google Code\googleCodeApril_12\google code latest\wockets_svn version 6\projects\PC\obj\Debug\WocketsWeka.pdb

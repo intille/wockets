@@ -1,0 +1,10 @@
+<?xml version='1.0'?>
+<CONFIGURATIONS xmlns="urn:mites-schema">
+
+<SENSORSET>
+	<NAME>HTC Diamond + Bluetooth  (MITes 1,4, 8 receiver)</NAME>
+	<DESCRIPTION>Configuration with 1 receiver.</DESCRIPTION>
+	<FILE>SensorData8.xml</FILE>
+</SENSORSET>
+
+</CONFIGURATIONS>
