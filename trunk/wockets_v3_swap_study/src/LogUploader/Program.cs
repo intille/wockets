@@ -2,14 +2,15 @@
 using System.Linq;
 using System.Collections.Generic;
 using System.Text;
-using Wockets.Utils;
 using System.Collections.Specialized;
-using Wockets;
 using System.Net;
-using Wockets.Utils.Http;
 using System.IO;
 using System.Collections;
 using System.Threading;
+
+using Wockets;
+using Wockets.Utils.Http;
+using Wockets.Utils;
 
 
 namespace LogUploader
@@ -19,14 +20,12 @@ namespace LogUploader
     {
 
 
-
-
         static void Main(string[] args)
         {
 
             
             PreventWocketsSuspension();
-
+            SuspendPreventer.Start();
 
             String getUri = "http://wockets.media.mit.edu/LogStatus.php";
             UploadSynchronizedLogger.Load();
@@ -560,6 +559,7 @@ namespace LogUploader
             }
 
 
+            SuspendPreventer.Stop();
             PermitWocketsSuspension();
 
         }
