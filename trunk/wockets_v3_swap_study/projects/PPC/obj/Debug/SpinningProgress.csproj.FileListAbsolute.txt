@@ -1,7 +1,0 @@
-C:\Data\Projects\house_N\wockets_svn\bin\PPC\SpinningProgress.dll
-C:\Data\Projects\house_N\wockets_svn\bin\PPC\SpinningProgress.pdb
-C:\Data\Projects\house_N\wockets_svn\projects\PPC\obj\Debug\ResolveAssemblyReference.cache
-C:\Data\Projects\house_N\wockets_svn\projects\PPC\obj\Debug\CircularProgress.SpinningProgress.SpinningProgress.resources
-C:\Data\Projects\house_N\wockets_svn\projects\PPC\obj\Debug\SpinningProgress.csproj.GenerateResource.Cache
-C:\Data\Projects\house_N\wockets_svn\projects\PPC\obj\Debug\SpinningProgress.dll
-C:\Data\Projects\house_N\wockets_svn\projects\PPC\obj\Debug\SpinningProgress.pdb

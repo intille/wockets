@@ -1,6 +1,0 @@
-C:\Data\Projects\house_N\wockets_svn\projects\PPC\obj\Debug\ResolveAssemblyReference.cache
-C:\Data\Project\Google Code\wockets_svn version 5\bin\PPC\DataCollectionApp.exe
-C:\Data\Project\Google Code\wockets_svn version 5\bin\PPC\DataCollectionApp.pdb
-C:\Data\Project\Google Code\wockets_svn version 5\projects\PPC\obj\Debug\ResolveAssemblyReference.cache
-C:\Data\Project\Google Code\wockets_svn version 5\projects\PPC\obj\Debug\DataCollectionApp.exe
-C:\Data\Project\Google Code\wockets_svn version 5\projects\PPC\obj\Debug\DataCollectionApp.pdb
