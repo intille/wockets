@@ -13,7 +13,7 @@ using System.Collections;
 
 
 #if (PocketPC)
-using Wockets.Kernel;
+//using Wockets.Kernel;
 using Wockets.Utils.IPC.MMF;
 #endif
 
@@ -332,7 +332,7 @@ namespace Wockets.Decoders.Accelerometers
                                         br.RawBytes[i] = this.packet[i];
                                     br._BatteryLevel = (((int)this.packet[1]) << 3) | ((this.packet[2] >> 4) & 0x07);
 #if (PocketPC)
-                                    Core.WRITE_BATTERY_LEVEL(br);
+                                    //Core.WRITE_BATTERY_LEVEL(br);
 #endif
                                     FireEvent(br);
                                     break;                                
@@ -347,7 +347,7 @@ namespace Wockets.Decoders.Accelerometers
                                     cal._Z1G = ((this.packet[6] & 0x03) << 8) | ((this.packet[7] & 0x7f) << 1) | ((this.packet[8] & 0x40) >> 6);
                                     cal._ZN1G = ((this.packet[8] & 0x3f) << 4) | ((this.packet[9] & 0x78) >> 3);
 #if (PocketPC)
-                                    Core.WRITE_CALIBRATION(cal);
+                                    //Core.WRITE_CALIBRATION(cal);
 #endif
 
                                    FireEvent(cal);
@@ -371,7 +371,7 @@ namespace Wockets.Decoders.Accelerometers
                                     sr._SamplingRate= (this.packet[1]&0x7f);                  
                                     this._ExpectedSamplingRate = sr._SamplingRate;
 #if (PocketPC)
-                                    Core.WRITE_SAMPLING_RATE(sr);
+                                    //Core.WRITE_SAMPLING_RATE(sr);
 #endif
                                     FireEvent(sr);
                                     break;
@@ -381,7 +381,7 @@ namespace Wockets.Decoders.Accelerometers
                                         bp.RawBytes[i] = this.packet[i];
                                     bp._Percent= (this.packet[1] & 0x7f);
 #if (PocketPC)
-                                    Core.WRITE_BATTERY_PERCENT(bp);
+                                    //Core.WRITE_BATTERY_PERCENT(bp);
 #endif
                                     FireEvent(bp);
                                     break;
@@ -391,7 +391,7 @@ namespace Wockets.Decoders.Accelerometers
                                         tm.RawBytes[i] = this.packet[i];
                                     tm._TransmissionMode = (TransmissionMode)((this.packet[1]>>4) & 0x07);
 #if (PocketPC)
-                                    Core.WRITE_TRANSMISSION_MODE(tm);
+                                    //Core.WRITE_TRANSMISSION_MODE(tm);
 #endif
                                     FireEvent(tm);
                                     break;
@@ -402,7 +402,7 @@ namespace Wockets.Decoders.Accelerometers
                                         sen.RawBytes[i] = this.packet[i];
                                     sen._Sensitivity = (Sensitivity)((this.packet[1] >> 4) & 0x07);
 #if (PocketPC)
-                                    Core.WRITE_SENSITIVITY(sen);
+                                    //Core.WRITE_SENSITIVITY(sen);
 #endif
                                     FireEvent(sen);
                                     break;
@@ -412,7 +412,7 @@ namespace Wockets.Decoders.Accelerometers
                                         pc.RawBytes[i] = this.packet[i];
                                     pc._Count = ((this.packet[1] & 0x7f) << 25) | ((this.packet[2] & 0x7f) << 18) | ((this.packet[3] & 0x7f) << 11) | ((this.packet[4] & 0x7f) << 4) | ((this.packet[5] & 0x7f) >> 3);
 #if (PocketPC)
-                                    Core.WRITE_PDU_COUNT(pc);                                            
+                                    //Core.WRITE_PDU_COUNT(pc);                                            
 #endif
                                     FireEvent(pc);
                                     break;
@@ -525,7 +525,7 @@ namespace Wockets.Decoders.Accelerometers
                                                 this._ActivityCountIndex = 0;
                                            
 #if (PocketPC)
-                                            Core.WRITE_ACTIVITY_COUNT(ac);
+                                            //Core.WRITE_ACTIVITY_COUNT(ac);
 #endif
                                         }
                                     }
@@ -542,7 +542,7 @@ namespace Wockets.Decoders.Accelerometers
                                     tct._REPS = (((this.packet[2] & 0x3f) << 2) | ((this.packet[3] >> 5) & 0x03));
                                     tct._LAST = (((this.packet[3] & 0x1f) << 3) | ((this.packet[4] >> 4) & 0x07));
 #if (PocketPC)
-                                    Core.WRITE_TCT(tct);
+                                    //Core.WRITE_TCT(tct);
 #endif
                                     FireEvent(tct);
                                     break;
