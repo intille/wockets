@@ -28,7 +28,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\bin\PPC\</OutputPath>
+    <OutputPath>..\..\bin\PPC\output_phone\</OutputPath>
     <DefineConstants>DEBUG;TRACE;$(PlatformFamilyName)</DefineConstants>
     <NoStdLib>true</NoStdLib>
     <NoConfig>true</NoConfig>
@@ -645,6 +645,7 @@
     </Compile>
     <Compile Include="Utils\CustomSynchronizedLogger.cs" />
     <Compile Include="Utils\LocalLogger.cs" />
+    <Compile Include="Utils\SuspendPreventer.cs" />
     <Compile Include="Utils\UploadSynchronizedLogger.cs" />
   </ItemGroup>
   <ItemGroup>
