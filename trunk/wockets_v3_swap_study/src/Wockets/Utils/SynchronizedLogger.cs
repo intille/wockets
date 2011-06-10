@@ -19,6 +19,7 @@ namespace Wockets.Utils
         private static String uploadpath = "";
         private static string[] files;
         private const String UPLOAD_FILE = "uploadfile_wockets_";
+        
         //public static ArrayList _Lines = null;
         //private const String RETRY_FILE = "retry.csv";
         //private static ArrayList _NewLines = null;
@@ -29,41 +30,127 @@ namespace Wockets.Utils
         static SynchronizedLogger()
         {
 
-            #region search for storage card
 
+            #region search for storage card version 2(commented)
+
+            //string firstCard = "";
+            //System.IO.DirectoryInfo di = new System.IO.DirectoryInfo("\\");
+            //System.IO.FileSystemInfo[] fsi = di.GetFileSystemInfos();
+
+
+            ////iterate through them
+            //for (int x = 0; x < fsi.Length; x++)
+            //{
+            //    //check to see if this is a temporary storage card (e.g. SD card)
+            //    if ((fsi[x].Attributes & System.IO.FileAttributes.Temporary) == System.IO.FileAttributes.Temporary)
+            //    {
+            //        path = fsi[x].FullName;
+            //        try
+            //        {
+            //            Directory.CreateDirectory(firstCard + "\\writable");
+            //            Directory.Delete(firstCard + "\\writable");
+            //        }
+            //        catch (Exception)
+            //        {
+            //            path = "";
+            //            continue;
+            //        }
+            //        //if so, return the path
+
+            //        break;
+            //    }
+            //}
+
+
+            #endregion
+
+            #region search for storage card version 1 (commented)
+
+            #region commented
+            //string firstCard = "";
+            //System.IO.DirectoryInfo di = new System.IO.DirectoryInfo("\\");
+            //System.IO.FileSystemInfo[] fsi = di.GetFileSystemInfos();
+
+
+            ////iterate through them
+            //for (int x = 0; x < fsi.Length; x++)
+            //{
+            //    //check to see if this is a temporary storage card (e.g. SD card)
+            //    if ((fsi[x].Attributes & System.IO.FileAttributes.Temporary) == System.IO.FileAttributes.Temporary)
+            //    {
+            //        path = fsi[x].FullName;
+            //        try
+            //        {
+            //            Directory.CreateDirectory(firstCard + "\\writable");
+            //            Directory.Delete(firstCard + "\\writable");
+            //        }
+            //        catch (Exception)
+            //        {
+            //            path = "";
+            //            continue;
+            //        }
+            //        //if so, return the path
+
+            //        break;
+            //    }
+            //}
+            #endregion
+
+            #endregion
+
+
+            #region search for the storage card
+
+            int TIMEOUT_SECONDS = 2;
+            int number_of_trials = -1;
             string firstCard = "";
-            System.IO.DirectoryInfo di = new System.IO.DirectoryInfo("\\");
-            System.IO.FileSystemInfo[] fsi = di.GetFileSystemInfos();
+            bool is_card_found = false;
+            System.IO.DirectoryInfo di;
+            System.IO.FileSystemInfo[] fsi;
 
 
-            //iterate through them
-            for (int x = 0; x < fsi.Length; x++)
+            while (number_of_trials < TIMEOUT_SECONDS && !is_card_found)
             {
-                //check to see if this is a temporary storage card (e.g. SD card)
-                if ((fsi[x].Attributes & System.IO.FileAttributes.Temporary) == System.IO.FileAttributes.Temporary)
-                {
-                    path = fsi[x].FullName;
-                    try
-                    {
-                        Directory.CreateDirectory(firstCard + "\\writable");
-                        Directory.Delete(firstCard + "\\writable");
-                    }
-                    catch (Exception)
-                    {
-                        path = "";
-                        continue;
-                    }
-                    //if so, return the path
 
-                    break;
+                try
+                {
+                    di = new System.IO.DirectoryInfo("\\");
+                    fsi = di.GetFileSystemInfos();
+
+                    //iterate through them
+                    for (int x = 0; x < fsi.Length; x++)
+                    {
+                        //check to see if this is a temporary storage card (e.g. SD card)
+                        if ((fsi[x].Attributes & System.IO.FileAttributes.Temporary) == System.IO.FileAttributes.Temporary)
+                        {
+                            //Verify if is indeed writable
+                            firstCard = fsi[x].FullName;
+                            try
+                            {
+                                Directory.CreateDirectory(firstCard + "\\writable");
+                                Directory.Delete(firstCard + "\\writable");
+                                is_card_found = true;
+                            }
+                            catch (Exception)
+                            {
+                                firstCard = "";
+
+                            }
+                            break;
+                        }
+                    }
                 }
+                catch
+                { }
+
+                number_of_trials++;
             }
 
 
             #endregion
 
 
-            path += "\\statslog\\";
+            path = firstCard + "\\statslog\\";
             uploadpath = path + "upload\\";
 
 
@@ -180,10 +267,11 @@ namespace Wockets.Utils
                         //    File.Move(path + lastFile, uploadpath + lastFile);
                         #endregion
 
+                        
                         //Move all the files corresponding to previous hours
                         files = Directory.GetFiles(path, UPLOAD_FILE + "*");
                         string mfilename = "";
-                        string file_name_ext = "";
+                        string file_name_hr = "";
                         string[] files_sub_folder = null;
 
                         for (int i = 0; (i < files.Length); i++)
@@ -191,18 +279,26 @@ namespace Wockets.Utils
                             try
                             {
                                 mfilename = files[i].Substring(path.Length);
-                                file_name_ext = (mfilename.Split('.'))[0];
-                                files_sub_folder = Directory.GetFiles(uploadpath, file_name_ext + "*");
-                                
+                                file_name_hr = (mfilename.Split('.'))[0];
+                                files_sub_folder = Directory.GetFiles(uploadpath, file_name_hr + "*");
+
                                 if (files_sub_folder.Length > 0)
-                                    File.Move(files[i], uploadpath + file_name_ext + "_" + files_sub_folder.Length.ToString() + ".csv");
+                                { 
+                                    //File.Move(files[i], uploadpath + file_name_hr + "_" + files_sub_folder.Length.ToString() + ".csv"); 
+
+                                    if (!File.Exists(uploadpath + file_name_hr + "_" + files_sub_folder.Length.ToString() + ".csv"))
+                                        File.Move(files[i], uploadpath + file_name_hr + "_" + files_sub_folder.Length.ToString() + ".csv");
+                                    else
+                                        File.Move(files[i], uploadpath + file_name_hr + "_" + (files_sub_folder.Length).ToString() + "_1" + ".csv");
+
+                                }
                                 else
                                     File.Move(files[i], uploadpath + mfilename);
                             }
                             catch
                             {
                                 //TODO: figureout how can I append the lines to the file in the upload folder 
-                                Logger.Error("SynchronizedLogger.cs: Failed to move previous files when invoked in the wc. FileName: " + mfilename );
+                                //Logger.Error("SynchronizedLogger.cs: Failed to move previous files when invoked in the wc. FileName: " + mfilename );
                             }
                         }
 
@@ -219,7 +315,7 @@ namespace Wockets.Utils
                 catch (Exception e)
                 {
 
-                    Logger.Error("SynchronizedLogger.cs: Failed to write summary lines to file when invoked in the wc. FileName: " + filename);
+                    //Logger.Error("SynchronizedLogger.cs: Failed to write summary lines to file when invoked in the wc. FileName: " + filename);
  
                     if (tw != null)
                     {
@@ -318,7 +414,7 @@ namespace Wockets.Utils
         public static void Flush()
         {
             string mfilename = "";
-            string file_name_prefix = "";
+            string file_name_hr = "";
             string[] files_sub_folder = null;
             
 
@@ -342,15 +438,15 @@ namespace Wockets.Utils
                 }
                 else
                 {
-                    file_name_prefix = (mfilename.Split('.'))[0];
-                    files_sub_folder = Directory.GetFiles(uploadpath, file_name_prefix + "*");
+                    file_name_hr = (mfilename.Split('.'))[0];
+                    files_sub_folder = Directory.GetFiles(uploadpath, file_name_hr + "*");
 
                     try
                     {
-                        if (!File.Exists(uploadpath + file_name_prefix + "_" + files_sub_folder.Length.ToString() + ".csv"))
-                            File.Move(files[i], uploadpath + file_name_prefix + "_" + files_sub_folder.Length.ToString() + ".csv");
+                        if (!File.Exists(uploadpath + file_name_hr + "_" + files_sub_folder.Length.ToString() + ".csv"))
+                            File.Move(files[i], uploadpath + file_name_hr + "_" + files_sub_folder.Length.ToString() + ".csv");
                         else
-                            File.Move(files[i], uploadpath + file_name_prefix + "_" + (files_sub_folder.Length + 1).ToString() + ".csv");
+                            File.Move(files[i], uploadpath + file_name_hr + "_" + (files_sub_folder.Length).ToString() + "_1" + ".csv");
                     }
                     catch
                     { //Error("Failed to move previous files when invoked in the wc. FileName: " + mfilename );
