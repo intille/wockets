@@ -74,35 +74,41 @@ namespace Wockets.Utils
             while (number_of_trials < TIMEOUT_SECONDS && !is_card_found)
             {
 
-                di = new System.IO.DirectoryInfo("\\");
-                fsi = di.GetFileSystemInfos();
-
-                //iterate through them
-                for (int x = 0; x < fsi.Length; x++)
+                try
                 {
-                    //check to see if this is a temporary storage card (e.g. SD card)
-                    if ((fsi[x].Attributes & System.IO.FileAttributes.Temporary) == System.IO.FileAttributes.Temporary)
+                    di = new System.IO.DirectoryInfo("\\");
+                    fsi = di.GetFileSystemInfos();
+
+                    //iterate through them
+                    for (int x = 0; x < fsi.Length; x++)
                     {
-                        //Verify if is indeed writable
-                        firstCard = fsi[x].FullName;
-                        try
+                        //check to see if this is a temporary storage card (e.g. SD card)
+                        if ((fsi[x].Attributes & System.IO.FileAttributes.Temporary) == System.IO.FileAttributes.Temporary)
                         {
-                            Directory.CreateDirectory(firstCard + "\\writable");
-                            Directory.Delete(firstCard + "\\writable");
-                            is_card_found = true;
+                            //Verify if is indeed writable
+                            firstCard = fsi[x].FullName;
+                            try
+                            {
+                                Directory.CreateDirectory(firstCard + "\\writable");
+                                Directory.Delete(firstCard + "\\writable");
+                                is_card_found = true;
+                            }
+                            catch (Exception)
+                            {
+                                firstCard = "";
+                                
+                            }
+                            break;
                         }
-                        catch (Exception)
-                        {
-                            firstCard = "";
-                        }
-                        break;
                     }
                 }
+                catch
+                { }
 
                 number_of_trials++;
             }
 
-
+            
             #endregion
 
 
