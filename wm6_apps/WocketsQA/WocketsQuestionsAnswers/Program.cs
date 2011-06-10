@@ -124,7 +124,7 @@ namespace Wockets
                 }
                 SetSystemPowerState(null, POWER_STATE_ON, POWER_FORCE);
                 PreventWocketsSuspension();
-                SuspendPreventer.Start();
+                //SuspendPreventer.Start();
                 postThread = new Thread(new ThreadStart(PostThread));
                 postThread.Start();
 
@@ -163,7 +163,7 @@ namespace Wockets
                 }
             }
             catch { }
-            SuspendPreventer.Stop();
+            //SuspendPreventer.Stop();
             PermitWocketsSuspension();
             System.Diagnostics.Process.GetCurrentProcess().Kill();
         }
