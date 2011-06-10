@@ -219,7 +219,7 @@ namespace CollectDataUser
             //this.label_software_version.Text = software_version.Substring(0, 14);
             #endregion
 
-            software_version = "Version: " + "1.53";
+            software_version = "Version: " + "1.54";
             this.label_software_version.Text = software_version;
 
             #endregion
@@ -351,14 +351,68 @@ namespace CollectDataUser
             if (File.Exists("\\Windows\\Start Menu\\Programs\\" + "Wockets Updater.lnk"))
                 File.Delete("\\Windows\\Start Menu\\Programs\\Wockets Updater.lnk");
 
+            if (File.Exists("\\Windows\\Start Menu\\Programs\\Updater(1).lnk"))
+                File.Delete("\\Windows\\Start Menu\\Programs\\Updater(1).lnk");
+
             if( !File.Exists("\\Windows\\Start Menu\\Programs\\Updater.lnk") )
-                if ( File.Exists(Settings._MainWocketsDirectory + "Updater.lnk") )
+               if ( File.Exists(Settings._MainWocketsDirectory + "Updater.lnk") )
                     File.Copy(Settings._MainWocketsDirectory + "Updater.lnk", "\\Windows\\Start Menu\\Programs\\" + "Updater.lnk");
+
 
 
             #endregion check shortcuts at startup
 
 
+            #region CleanUp Previous Stuff in the statsfolder
+            
+            String UPLOAD_FILE_PREFIX_2 = "upload_file_";
+            String upload_dir_path = Settings._MemoryCardDirectory + "\\statslog\\";
+            String upload_subfolder_path = upload_dir_path + "upload\\";
+            string[] files;
+
+            //Move all the files corresponding to previous hours
+            files = Directory.GetFiles(upload_dir_path, UPLOAD_FILE_PREFIX_2 + "*");
+            string mfilename = "";
+            string file_name_hr = "";
+            string[] files_sub_folder = null;
+
+
+            if (files.Length > 0)
+            {
+
+                for (int i = 0; (i < files.Length); i++)
+                {
+                    try
+                    {
+                        mfilename = files[i].Substring(upload_dir_path.Length);
+                        file_name_hr = (mfilename.Split('.'))[0];
+                        files_sub_folder = Directory.GetFiles(upload_subfolder_path, file_name_hr + "*");
+
+                        if (files_sub_folder.Length > 0)
+                            File.Move(files[i], upload_subfolder_path + file_name_hr + "_" + files_sub_folder.Length.ToString() + ".csv");
+                        else
+                            File.Move(files[i], upload_subfolder_path + mfilename);
+
+
+                        appLogger.Debug("AppUser.Success moving previous file of synchronize logger to the upload folder: FileName: " + mfilename);
+
+                    }
+                    catch
+                    {
+                        //TODO: figureout how can I append the lines to the file in the upload folder 
+                        appLogger.Debug("AppUser.Failed to move previous files of synchronize logger when invoked in the initialization of the user app.");
+                    }
+                }
+            }
+            else
+            {
+                appLogger.Debug("AppUser.No files from previous synchronize logger format were found.");
+
+            }
+            
+            
+
+            #endregion
 
 
             #region Read the last sensor set, master list file and app_status
@@ -908,6 +962,7 @@ namespace CollectDataUser
      #endregion
 
 
+        #region Storage Card Identification 
 
         private string GetStorageCardName(int TIMEOUT_SECONDS)
         {
@@ -953,8 +1008,6 @@ namespace CollectDataUser
 
         }
 
-
-
         private void UpdateDataStorageDirectoryPath()
         {
 
@@ -978,12 +1031,12 @@ namespace CollectDataUser
             appLogger.Debug("Session and log directories created.");
         }
 
-
+        #endregion
 
 
 
         #region Location Buttons
-        
+
         public static string NEEDED_FILES_PATH = ""; 
         public static string LOCATION_IMAGES_DIRECTORY = "";
         private List<CustomImageButton> sensor_location_buttons = new List<CustomImageButton>();
@@ -4503,7 +4556,7 @@ namespace CollectDataUser
 
 
 
-      #region QA Questionnaire
+        #region QA Questionnaire
         
         
         private void LaunchWocketsQuestionarie()
@@ -4638,7 +4691,7 @@ namespace CollectDataUser
      #endregion
 
 
-      #region Elapsed Time Counter & Upload Thread
+        #region Elapsed Time Counter & Upload Thread
 
         public void StartUpdateUploadThread()
         {
@@ -4692,7 +4745,7 @@ namespace CollectDataUser
      #endregion
 
 
-      #region File Upload Update Status
+        #region File Upload Update Status
 
         //delegate void UpdateTimeCallback();
         public void UpdateFilesUploaded()
@@ -4779,7 +4832,7 @@ namespace CollectDataUser
 
 
 
-      #region Reset ACs Registries (COMMENTED)
+        #region Reset ACs Registries (COMMENTED)
 
          //private void ResetUploaderCounters()
          //{
@@ -4818,7 +4871,7 @@ namespace CollectDataUser
 
 
 
-      #region Thread tracking the sensor connection status
+        #region Thread tracking the sensor connection status
 
         double WAIT_INTERVAL_LOG_UPLOADER = 60.0; //in minutes
         private int MAX_NSENSORS_TO_UPLOAD = 3;
@@ -5111,7 +5164,7 @@ namespace CollectDataUser
 
              //write the events to upload file
              UploadLoggerEvents.Write( event_status_log );
-             Thread.Sleep(1000);
+             //Thread.Sleep(1000);
 
              //reset events
              swap_event = restart_event = locationChanged_event = 0;

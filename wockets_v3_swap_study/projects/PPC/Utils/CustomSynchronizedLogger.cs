@@ -186,7 +186,7 @@ namespace Wockets.Utils
                         files = Directory.GetFiles(path, UPLOAD_FILE + "*");
 
                         string mfilename = "";
-                        string file_name_ext = "";
+                        string file_name_hr = "";
                         string[] files_sub_folder = null;
 
                         for (int i = 0; (i < files.Length); i++)
@@ -194,13 +194,21 @@ namespace Wockets.Utils
                             try
                             {
                                mfilename = files[i].Substring(path.Length);
-                               file_name_ext = (mfilename.Split('.'))[0];
-                               files_sub_folder = Directory.GetFiles(uploadpath, file_name_ext + "*");
-                               
-                               if ( files_sub_folder.Length > 0 )
-                                   File.Move(files[i],uploadpath + file_name_ext + "_" + files_sub_folder.Length.ToString() + ".csv");
+                               file_name_hr = (mfilename.Split('.'))[0];
+                               files_sub_folder = Directory.GetFiles(uploadpath, file_name_hr + "*");
+
+                               if (files_sub_folder.Length > 0)
+                               {
+                                   //File.Move(files[i], uploadpath + file_name_hr + "_" + files_sub_folder.Length.ToString() + ".csv");
+
+                                   if (!File.Exists(uploadpath + file_name_hr + "_" + files_sub_folder.Length.ToString() + ".csv"))
+                                       File.Move(files[i], uploadpath + file_name_hr + "_" + files_sub_folder.Length.ToString() + ".csv");
+                                   else
+                                       File.Move(files[i], uploadpath + file_name_hr + "_" + (files_sub_folder.Length).ToString() + "_1" + ".csv");
+
+                               }
                                else
-                                 File.Move( files[i], uploadpath + mfilename);
+                                   File.Move(files[i], uploadpath + mfilename);
                             }
                             catch
                             {
@@ -231,7 +239,7 @@ namespace Wockets.Utils
         public bool Dispose()
         {
             string mfilename = "";
-            string file_name_prefix = "";
+            string file_name_hr = "";
             string[] files_sub_folder = null;
             bool success = false;
 
@@ -260,15 +268,15 @@ namespace Wockets.Utils
                     }
                     else
                     {
-                        file_name_prefix = (mfilename.Split('.'))[0];
-                        files_sub_folder = Directory.GetFiles(uploadpath, file_name_prefix + "*");
+                        file_name_hr = (mfilename.Split('.'))[0];
+                        files_sub_folder = Directory.GetFiles(uploadpath, file_name_hr + "*");
 
                         try
                         {
-                            if (!File.Exists(uploadpath + file_name_prefix + "_" + files_sub_folder.Length.ToString() + ".csv"))
-                                File.Move(files[i], uploadpath + file_name_prefix + "_" + files_sub_folder.Length.ToString() + ".csv");
+                            if (!File.Exists(uploadpath + file_name_hr + "_" + files_sub_folder.Length.ToString() + ".csv"))
+                                File.Move(files[i], uploadpath + file_name_hr + "_" + files_sub_folder.Length.ToString() + ".csv");
                             else
-                                File.Move(files[i], uploadpath + file_name_prefix + "_" + (files_sub_folder.Length + 1).ToString() + ".csv");
+                                File.Move(files[i], uploadpath + file_name_hr + "_" + (files_sub_folder.Length).ToString() + "_1" + ".csv");
 
                             success = true;
                         }
