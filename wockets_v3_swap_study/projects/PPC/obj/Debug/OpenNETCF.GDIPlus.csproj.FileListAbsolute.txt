@@ -1,5 +1,0 @@
-C:\Data\Projects\house_N\wockets_svn\bin\PPC\OpenNETCF.GDIPlus.dll
-C:\Data\Projects\house_N\wockets_svn\bin\PPC\OpenNETCF.GDIPlus.pdb
-C:\Data\Projects\house_N\wockets_svn\projects\PPC\obj\Debug\ResolveAssemblyReference.cache
-C:\Data\Projects\house_N\wockets_svn\projects\PPC\obj\Debug\OpenNETCF.GDIPlus.dll
-C:\Data\Projects\house_N\wockets_svn\projects\PPC\obj\Debug\OpenNETCF.GDIPlus.pdb
