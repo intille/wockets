@@ -72,7 +72,6 @@
     <Compile Include="CustomSynchronizedLogger.cs" />
     <Compile Include="DateTimeParsers.cs" />
     <Compile Include="FileReader.cs" />
-    <Compile Include="SuspendPreventer.cs" />
     <Compile Include="WocketsQAClarification.cs">
       <SubType>Form</SubType>
     </Compile>
