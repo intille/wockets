@@ -219,7 +219,7 @@ namespace CollectDataUser
             //this.label_software_version.Text = software_version.Substring(0, 14);
             #endregion
 
-            software_version = "Version: " + "1.54";
+            software_version = "Version: " + "1.55";
             this.label_software_version.Text = software_version;
 
             #endregion

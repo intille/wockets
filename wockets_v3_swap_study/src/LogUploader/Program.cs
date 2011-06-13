@@ -7,6 +7,7 @@ using System.Net;
 using System.IO;
 using System.Collections;
 using System.Threading;
+using System.Runtime.InteropServices;
 
 using Wockets;
 using Wockets.Utils.Http;
@@ -19,13 +20,41 @@ namespace LogUploader
     class Program
     {
 
+        private static Thread stayUpThread;
+        static DateTime startTime;
+        
+      
+        [DllImport("CoreDll.dll")]
+        public static extern void SystemIdleTimerReset();
+
+
+        private static void StayUp()
+        {
+            while (true)
+            {
+               
+                if (DateTime.Now.Subtract(startTime).TotalSeconds > 45)
+                {
+                    SystemIdleTimerReset();
+                    startTime = DateTime.Now;
+                }
+                
+                Thread.Sleep(1000);
+            }
+        }
+
+
 
         static void Main(string[] args)
         {
 
             
             PreventWocketsSuspension();
-            SuspendPreventer.Start();
+            startTime = DateTime.Now;
+
+            stayUpThread = new Thread(new ThreadStart(StayUp));
+            stayUpThread.Start();
+
 
             String getUri = "http://wockets.media.mit.edu/LogStatus.php";
             UploadSynchronizedLogger.Load();
@@ -33,7 +62,8 @@ namespace LogUploader
 
 
 
-            //Read Phone Identification Tokens
+            #region Read Phone Identification Tokens
+            
             String SubjectID = "0";
             String IMEI = "0";
 
@@ -56,13 +86,20 @@ namespace LogUploader
                 }
             }
 
+            #endregion
+
+
+            #region upload data logs
+
             //Check here that SIM card is always active
-            if( IMEI.CompareTo(CurrentPhone._IMEI) == 0 )
-            {
+            //if( IMEI.CompareTo(CurrentPhone._IMEI) == 0 )
+            //{
 
                 int count = 0;
                 while (count < UploadSynchronizedLogger._Lines.Count)
                 {
+
+                    #region Declare Variables
 
                     //Tokens For Phone Logs
                     String sender_date = "";
@@ -125,9 +162,14 @@ namespace LogUploader
                     bool is_event_data = false;
                     bool is_qa_data = false;
 
+                    #endregion
+
+
                     //Get the first 20 Lines of Information
                     for (int i = 0; (i < 20); i++)
                     {
+
+                        #region get data from tokens
 
                         String line = (String)UploadSynchronizedLogger._Lines[count];
                         string[] tokens = line.Split(new char[] { ',' });
@@ -212,6 +254,9 @@ namespace LogUploader
                         count++;
                         if (count >= UploadSynchronizedLogger._Lines.Count)
                             break;
+
+
+                        #endregion 
 
                     }
 
@@ -437,6 +482,7 @@ namespace LogUploader
                     #endregion
 
 
+
                 }
 
 
@@ -552,20 +598,35 @@ namespace LogUploader
                 #endregion commented
 
 
-            }
-            else
+            //}
+            //else
+            //{
+            //    //IMEI not found, phone disconnected, logs were not uploaded
+            //}
+
+
+            #endregion
+
+
+
+
+            try
             {
-                //IMEI not found, phone disconnected, logs were not uploaded
+                stayUpThread.Abort();
             }
+            catch
+            { }
 
 
-            SuspendPreventer.Stop();
             PermitWocketsSuspension();
+
+
+            System.Diagnostics.Process.GetCurrentProcess().Kill();
 
         }
 
 
-        #region Suspend Prevention
+        #region Prevent Wockets Code To Suspend
 
         const string WOCKETS_SUSPEND_LOCK_FOLDER = @"\Lockets\";
         const string WOCKETS_SUSPEND_LOCK_EXTENSION = @".lckt";
@@ -598,6 +659,7 @@ namespace LogUploader
         }
 
         #endregion
+
 
     }
 }
