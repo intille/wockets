@@ -1387,9 +1387,10 @@ namespace Wockets
                 ALIVE ALIVE_CMD = new ALIVE();
                 int pollCounter = 0;
 
-                System.Reflection.Assembly a = System.Reflection.Assembly.GetExecutingAssembly();
-                System.Reflection.AssemblyName an = a.GetName();
-                Logger.Warn("Version " + an.Version.ToString() +" Date:"+ DateTime.Now.ToString("f"));
+                //System.Reflection.Assembly a = System.Reflection.Assembly.GetExecutingAssembly();
+                //System.Reflection.AssemblyName an = a.GetName();
+                //Logger.Warn("Version " + an.Version.ToString() +" Date:"+ DateTime.Now.ToString("f"));
+                Logger.Warn("Version: 1.58" + " Date: 6/16/2011 1:39:40 AM");
                 this.StartTime = WocketsTimer.GetUnixTime();
 
                 while (true)

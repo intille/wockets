@@ -113,6 +113,9 @@ namespace CollectDataUser
         private DateTime[] LastPkgTime = null;
         private TimeSpan[] ElapsedConnectionTime = null;
 
+        private DateTime LastTime_EventWrite = DateTime.Now;
+        private TimeSpan ElapsedTime_EventWrite = TimeSpan.Zero;
+
         private DateTime LastLogUploadInvoke;
         private TimeSpan ElapsedTime_LogUpload;
 
@@ -219,7 +222,7 @@ namespace CollectDataUser
             //this.label_software_version.Text = software_version.Substring(0, 14);
             #endregion
 
-            software_version = "Version: " + "1.55";
+            software_version = "Version: " + "1.58";
             this.label_software_version.Text = software_version;
 
             #endregion
@@ -640,7 +643,11 @@ namespace CollectDataUser
             sensors_loaded = false;
             is_change_locations_panel_launched = false;
             sensors_setup_in_panel = false;
-                    
+
+            LastTime_EventWrite = DateTime.Now;
+            ElapsedTime_EventWrite = TimeSpan.Zero;
+
+
             if (app_status.CompareTo("swap") == 0)
             {
                 if (InitializeWocketsController())
@@ -959,10 +966,11 @@ namespace CollectDataUser
 
         }
 
-     #endregion
+        #endregion
 
 
         #region Storage Card Identification 
+
 
         private string GetStorageCardName(int TIMEOUT_SECONDS)
         {
@@ -1030,6 +1038,7 @@ namespace CollectDataUser
             Logger.InitLogger(Settings._DataStorageDirectory + "\\log");
             appLogger.Debug("Session and log directories created.");
         }
+
 
         #endregion
 
@@ -2266,6 +2275,7 @@ namespace CollectDataUser
                     PrevFullPkg[i] = 0;
                     PrevPartialPkg[i] = 0;
                     PrevEmptyPkg[i] = 0;
+
                     LastPkgTime[i] = DateTime.Now;
                     ElapsedConnectionTime[i] = TimeSpan.Zero;
                 }
@@ -3151,7 +3161,6 @@ namespace CollectDataUser
         }
 
 
-
         private bool ConnetToWocketsController(string sensor_set_ID)
         {
             bool sucess = false;
@@ -3569,6 +3578,7 @@ namespace CollectDataUser
 
 
 
+
         private bool WocketsConnect(bool wockets_running)
         {
             bool success = false;
@@ -3604,8 +3614,10 @@ namespace CollectDataUser
                         PrevFullPkg[np] = 0;
                         PrevPartialPkg[np] = 0;
                         PrevEmptyPkg[np] = 0;
+
                         LastPkgTime[np] = DateTime.Now;
                         ElapsedConnectionTime[np] = TimeSpan.Zero;
+
                     }
 
 
@@ -3637,6 +3649,8 @@ namespace CollectDataUser
             return success;
 
         }
+
+
 
 
         private void WocketsDisconnect()
@@ -3701,6 +3715,8 @@ namespace CollectDataUser
 
             }
         }
+
+
 
         private bool SaveApplicationStatusToFile(string my_app_status)
         {
@@ -3984,8 +4000,9 @@ namespace CollectDataUser
                 TerminateWocketsQuestionarie();
 
                 //Terminate the upload logger
-                if (!UploadLoggerEvents.Dispose())
-                    appLogger.Debug("Exception ocurred when the event upload logger was disposed.");
+                WriteEventsToUploadFile(DateTime.Now, true);
+                //if (!UploadLoggerEvents.Dispose())
+                //    appLogger.Debug("Exception ocurred when the event upload logger was disposed.");
                 
                 //Terminate Data Collection
                 WocketsDisconnect();
@@ -4878,9 +4895,14 @@ namespace CollectDataUser
         //double WAIT_INTERVAL_DATA_UPLOADER= 60.0; //in minutes
         
 
+
+
      private void ACsUpdateTimer_Tick(object sender, EventArgs e)
      {
-         
+         DateTime now = DateTime.Now;
+
+
+
          #region Update Sensors Connection Status
 
          try
@@ -4893,7 +4915,7 @@ namespace CollectDataUser
                      {
                          
                          //== Compute the elapsed time since the last connection
-                         ElapsedConnectionTime[i] = DateTime.Now.Subtract(LastPkgTime[i]);
+                         ElapsedConnectionTime[i] = now.Subtract(LastPkgTime[i]);
 
                          //if elapsed time > 1min check pkg status
                          if (ElapsedConnectionTime[i].TotalMinutes > 1.0)
@@ -5100,8 +5122,6 @@ namespace CollectDataUser
 
                              #endregion
                          }
-
-
                      }//ends for loop
                  }//if sensors count >0
              }//if sensors list != null
@@ -5113,63 +5133,85 @@ namespace CollectDataUser
 
         #endregion
 
+         
+         WriteEventsToUploadFile(now, false);
 
-         #region Write Event Status To File
-         if (swap_event == 1 | restart_event == 1 | locationChanged_event == 1)
-         {
-             string currentTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-             string event_status_log = currentTime + "," + swap_event.ToString() + "," + restart_event.ToString() + "," +
-                                       locationChanged_event.ToString() + "," + sensor_set;
+         #region Write Events To Upload File (commented)
+
+         //if (swap_event == 1 | restart_event == 1 | locationChanged_event == 1)
+         //{
+             
+         //    #region Add the event log content (commented)
+
+         //    //string currentTime = now.ToString("yyyy-MM-dd HH:mm:ss");             
+         //    //string event_status_log = currentTime + "," + swap_event.ToString() + "," + restart_event.ToString() + "," +
+         //    //                          locationChanged_event.ToString() + "," + sensor_set;
 
 
-             if (CurrentWockets._Controller._Sensors != null)
-             {
+         //    //if (CurrentWockets._Controller._Sensors != null)
+         //    //{
 
-                 event_status_log += "," + CurrentWockets._Controller._Sensors.Count.ToString();
+         //    //    event_status_log += "," + CurrentWockets._Controller._Sensors.Count.ToString();
 
 
-                 for (int w = 0; w < MAX_NSENSORS_TO_UPLOAD; w++)
-                 {
+         //    //    for (int w = 0; w < MAX_NSENSORS_TO_UPLOAD; w++)
+         //    //    {
 
-                     if (w < CurrentWockets._Controller._Sensors.Count)
-                     {
-                         if ((CurrentWockets._Controller._Sensors[w]._Location.CompareTo("null") != 0) &
-                             (CurrentWockets._Controller._Sensors[w]._Location.Trim().CompareTo("") != 0))
-                         {
+         //    //        if (w < CurrentWockets._Controller._Sensors.Count)
+         //    //        {
+         //    //            if ((CurrentWockets._Controller._Sensors[w]._Location.CompareTo("null") != 0) &
+         //    //                (CurrentWockets._Controller._Sensors[w]._Location.Trim().CompareTo("") != 0))
+         //    //            {
 
-                             event_status_log += "," + CurrentWockets._Controller._Sensors[w]._Address + "," +
-                                                 CurrentWockets._Controller._Sensors[w]._Location + ",";
+         //    //                event_status_log += "," + CurrentWockets._Controller._Sensors[w]._Address + "," +
+         //    //                                    CurrentWockets._Controller._Sensors[w]._Location + ",";
 
-                             if (w == 0)
-                                 event_status_log += "W";
-                             else if (w == 1)
-                                 event_status_log += "A";
+         //    //                if (w == 0)
+         //    //                    event_status_log += "W";
+         //    //                else if (w == 1)
+         //    //                    event_status_log += "A";
 
-                         }
-                         else
-                             event_status_log += ",,,";
-                     }
-                     else
-                         event_status_log += ",,,";
+         //    //            }
+         //    //            else
+         //    //                event_status_log += ",,,";
+         //    //        }
+         //    //        else
+         //    //            event_status_log += ",,,";
 
-                 }
-             }
-             else
-             {
-                 event_status_log += ",0" ;
+         //    //    }
+         //    //}
+         //    //else
+         //    //{
+         //    //    event_status_log += ",0";
 
-                 for (int w = 0; w < MAX_NSENSORS_TO_UPLOAD; w++)
-                   event_status_log += ",,,";
-             }
+         //    //    for (int w = 0; w < MAX_NSENSORS_TO_UPLOAD; w++)
+         //    //        event_status_log += ",,,";
+         //    //}
 
-             //write the events to upload file
-             UploadLoggerEvents.Write( event_status_log );
-             //Thread.Sleep(1000);
+         //    #endregion
 
-             //reset events
-             swap_event = restart_event = locationChanged_event = 0;
 
-         }
+         //    //write the events to upload file
+         //    if ( !UploadLoggerEvents.Write(event_status_log))
+         //        appLogger.Debug("WocketsMainForm.cs: ACsUpdateTimer_Tick : problem writing to the event logs to stats upload folder");
+             
+         //    //reset event variables
+         //    swap_event = restart_event = locationChanged_event = 0;
+         //    LastTime_EventWrite = now;
+         //}
+         //else
+         //{ 
+         //    ElapsedTime_EventWrite = now.Subtract(LastTime_EventWrite);
+
+         //    //TODO: if the moving of files fails, try the next hour.
+         //    if (ElapsedTime_EventWrite.Minutes > 3)
+         //        if (UploadLoggerEvents.Move(now))
+         //            LastTime_EventWrite = now;
+         //        else
+         //           appLogger.Debug("WocketsMainForm.cs: ACsUpdateTimer_Tick : problem moving the event logs files to stats upload folder");
+                
+             
+         //}
          #endregion
 
 
@@ -5178,7 +5220,7 @@ namespace CollectDataUser
          try 
          {  
             //Launch the data uploader at midnight once a day
-            DateTime current_time = DateTime.Now;
+            DateTime current_time = now;
 
             //Launch log uploader within a time interval
             ElapsedTime_LogUpload = current_time.Subtract(LastLogUploadInvoke);
@@ -5246,7 +5288,100 @@ namespace CollectDataUser
 
         }
 
-       
+
+        private void WriteEventsToUploadFile(DateTime now, bool dispose)
+        {
+
+
+            if (swap_event == 1 | restart_event == 1 | locationChanged_event == 1)
+            {
+
+
+                #region Add the event log content
+
+                bool have_sensors = false;
+                string currentTime = now.ToString("yyyy-MM-dd HH:mm:ss");
+                string event_status_log = currentTime + "," + swap_event.ToString() + "," + restart_event.ToString() + "," +
+                                          locationChanged_event.ToString() + "," + sensor_set;
+
+                if (CurrentWockets._Controller != null)
+                {
+                    if (CurrentWockets._Controller._Sensors != null)
+                    {
+                        have_sensors = true;
+                        event_status_log += "," + CurrentWockets._Controller._Sensors.Count.ToString();
+
+
+                        for (int w = 0; w < MAX_NSENSORS_TO_UPLOAD; w++)
+                        {
+
+                            if (w < CurrentWockets._Controller._Sensors.Count)
+                            {
+                                if ((CurrentWockets._Controller._Sensors[w]._Location.CompareTo("null") != 0) &
+                                    (CurrentWockets._Controller._Sensors[w]._Location.Trim().CompareTo("") != 0))
+                                {
+
+                                    event_status_log += "," + CurrentWockets._Controller._Sensors[w]._Address + "," +
+                                                        CurrentWockets._Controller._Sensors[w]._Location + ",";
+
+                                    if (w == 0)
+                                        event_status_log += "W";
+                                    else if (w == 1)
+                                        event_status_log += "A";
+
+                                }
+                                else
+                                    event_status_log += ",,,";
+                            }
+                            else
+                                event_status_log += ",,,";
+
+                        }
+                    }
+                }
+
+
+                if (!have_sensors)
+                {
+                    event_status_log += ",0";
+
+                    for (int w = 0; w < MAX_NSENSORS_TO_UPLOAD; w++)
+                        event_status_log += ",,,";
+                }
+
+
+                #endregion
+
+                //write the events to upload file
+                if (UploadLoggerEvents.Write(event_status_log))
+                {
+                    //reset event variables is success writing to uploadfile
+                    swap_event = restart_event = locationChanged_event = 0;
+                    LastTime_EventWrite = now;
+                }
+                else
+                    appLogger.Debug("WocketsMainForm.cs: WriteEventsToUploadFile : problem writing to the event logs to stats upload folder : variables were not reseted");
+            }
+            else if (!dispose)
+            {
+                ElapsedTime_EventWrite = now.Subtract(LastTime_EventWrite);
+
+                //TODO: if the moving of files fails, try the next hour.
+                if (ElapsedTime_EventWrite.Hours > 1)
+                    if (UploadLoggerEvents.Move(now))
+                        LastTime_EventWrite = now;
+                    else
+                        appLogger.Debug("WocketsMainForm.cs: WriteEventsToUploadFile : problem moving the event logs files to stats upload folder");
+            }
+            else
+            {
+                if (!UploadLoggerEvents.Dispose())
+                    appLogger.Debug("WocketsMainForm.cs: WriteEventsToUploadFile : Exception ocurred when the event upload logger was disposed.");
+            }
+
+        }
+
+
      #endregion
 
    
