@@ -19,7 +19,9 @@ namespace LogUploader
 
     class Program
     {
-
+        //TODO: keep tracking the solution that ensures we have network connectivity with wifi, 
+        //      otherwise, re-route, add the logs for this info
+      
         private static Thread stayUpThread;
         static DateTime startTime;
         
@@ -626,7 +628,7 @@ namespace LogUploader
         }
 
 
-        #region Prevent Wockets Code To Suspend
+        #region Prevent To Suspend
 
         const string WOCKETS_SUSPEND_LOCK_FOLDER = @"\Lockets\";
         const string WOCKETS_SUSPEND_LOCK_EXTENSION = @".lckt";
