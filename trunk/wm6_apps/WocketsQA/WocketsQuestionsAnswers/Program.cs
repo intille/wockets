@@ -25,7 +25,7 @@ namespace Wockets
         const int POWER_FORCE = 4096;
         const int POWER_STATE_RESET = 0x00800000;
 
-        [DllImport("CoreDll.dll")]
+        [DllImport("coredll.dll")]
         public static extern void SystemIdleTimerReset();
 
         public const Int32 NATIVE_ERROR_ALREADY_EXISTS = 183;
@@ -38,52 +38,6 @@ namespace Wockets
 
         [DllImport("coredll.dll", EntryPoint = "ReleaseMutex", SetLastError = true)]
         public static extern bool ReleaseMutex(IntPtr hMutex);
-
-
-        /* NOT CURRENTLY USED -- trying to send event to keep system from suspending
-        [DllImport("coredll.dll", SetLastError = true, CallingConvention = CallingConvention.Winapi, CharSet = CharSet.Auto)]
-        public static extern HANDLE CreateEvent(HANDLE lpEventAttributes, [In, MarshalAs(UnmanagedType.Bool)] bool bManualReset, [In, MarshalAs(UnmanagedType.Bool)] bool bIntialState, [In, MarshalAs(UnmanagedType.BStr)] string lpName);
-
-        [DllImport("coredll.dll", SetLastError = true, CallingConvention = CallingConvention.Winapi, CharSet = CharSet.Auto)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool CloseHandle(HANDLE hObject);
-
-        [DllImport("coredll.dll", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool EventModify(HANDLE hEvent, [In, MarshalAs(UnmanagedType.U4)] int dEvent);
-
-        [DllImport("coredll.dll", SetLastError = true)]
-        public static extern Int32 WaitForSingleObject(IntPtr Handle, Int32 Wait);
-
-        private static HANDLE m_userActivityEvent;
-
-        public enum EventFlags
-        {
-            PULSE = 1,
-            RESET = 2,
-            SET = 3
-        }
-
-        private static bool SetEvent(HANDLE hEvent)
-        {
-            return EventModify(hEvent, (int)EventFlags.SET);
-        }
-
-        private static bool ResetEvent(HANDLE hEvent)
-        {
-            return EventModify(hEvent, (int)EventFlags.RESET);
-        }
-        */
-
-        /* NOT CURRENTLY USED -- Send keypress to OS to simuluate user activity and prevent system
-         * from suspending
-        private const byte VK_OFF = 0xDF;
-        private const byte KEYEVENTF_SILENT = 0x0004;
-        private const byte KEYEVENTF_KEYUP = 0x0002;
-
-        [DllImport("coredll.dll")]
-        private static extern void keybd_event(byte bVK, byte bScan, uint dwFlags, uint dwExtraInfo);
-        */
         
         #endregion
 
@@ -115,16 +69,15 @@ namespace Wockets
         [MTAThread]
         static void Main(string[] args)
         {
-
+            //try { SetSystemPowerState(null, POWER_STATE_ON, POWER_FORCE); }
+            //catch { }
             try
             {
                 if (IsInstanceRunning())
                 {
                     return;
                 }
-                SetSystemPowerState(null, POWER_STATE_ON, POWER_FORCE);
                 PreventWocketsSuspension();
-                //SuspendPreventer.Start();
                 postThread = new Thread(new ThreadStart(PostThread));
                 postThread.Start();
 
@@ -157,15 +110,13 @@ namespace Wockets
                         }
                     }
                     else if (args[0].Contains(Program.MINIMIZED_PARAMETER))
-                    {
                         Application.Run(new WocketsQA(Program.MINIMIZED_PARAMETER));
-                    }
                 }
             }
             catch { }
-            //SuspendPreventer.Stop();
             PermitWocketsSuspension();
-            System.Diagnostics.Process.GetCurrentProcess().Kill();
+            try { System.Diagnostics.Process.GetCurrentProcess().Kill(); }
+            catch { }
         }
 
         #endregion
@@ -207,6 +158,15 @@ namespace Wockets
 
         #region THREADING
 
+        //public static bool IsInstanceRunning()
+        //{
+        //    IntPtr hMutex = CreateMutex(IntPtr.Zero, true, "WocketsQA");
+        //    if (hMutex == IntPtr.Zero)
+        //        return true;
+        //    else
+        //        return false;
+        //}
+
         public static bool IsInstanceRunning()
         {
             IntPtr hMutex = CreateMutex(IntPtr.Zero, true, "WocketsQA");
@@ -227,53 +187,20 @@ namespace Wockets
             notdone = false;
         }
 
+        private static DateTime startTime;
+
         private static void StayUp()
         {
             while (true)
             {
-                try
+                if (DateTime.Now.Subtract(startTime).TotalSeconds > 20)
                 {
                     SystemIdleTimerReset();
-                    //KeepAwake();
-                    //keybd_event(135, 0, KEYEVENTF_SILENT, 0);
-                    //keybd_event(VK_OFF, 0, KEYEVENTF_SILENT | KEYEVENTF_KEYUP, 0);
-                }
-                catch { }
+                    startTime = DateTime.Now;
+                }                
                 Thread.Sleep(1000);
             }
         }
-        #endregion
-
-        #region DEPRECATED CODE
-
-        //// Add this to Wockets if statement to check if any other applications are requesting suspension prevention
-        //private static bool getIsSuspendPermitted()
-        //{
-        //    if (System.IO.Directory.Exists(WOCKETS_SUSPEND_LOCK_FOLDER))
-        //    {
-        //        try
-        //        {
-        //            if (System.IO.Directory.GetFiles(WOCKETS_SUSPEND_LOCK_FOLDER, "*" + WOCKETS_SUSPEND_LOCK_EXTENSION).Length >= 1)
-        //                return false;
-        //        }
-        //        catch { }
-        //    }
-        //    return true;
-        //}
-
-        //public static void KeepAwake()
-        //{
-        //    using (RegistryKey key = Registry.LocalMachine.OpenSubKey("System\\GWE"))
-        //    {
-        //        object value = key.GetValue("ActivityEvent");
-        //        key.Close();
-        //        if (value == null) return;
-        //        string activityEventName = (string)value;
-        //        m_userActivityEvent = CreateEvent(HANDLE.Zero, false, true, activityEventName);
-        //    }
-        //    SetEvent(m_userActivityEvent);
-        //}
-
         #endregion
 
     }
