@@ -780,6 +780,12 @@ namespace Wockets
 
         private void menuLeft_Click(object sender, EventArgs e)
         {
+
+            try
+            {
+                WocketsQA.LogResponse(WocketsQA.PRIMARY_ACTIVITY_COLUMN, "X", false);
+            }
+            catch { }
             Program.PermitWocketsSuspension();
             WocketsQA.SaveDataLog();
             Application.Exit();

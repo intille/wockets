@@ -28,6 +28,12 @@ namespace Wockets
 
         private void skipQuestion()
         {
+            try
+            {
+                WocketsQA.LogResponse(WocketsQA.PRIMARY_ACTIVITY_COLUMN, "X", false);
+            }
+            catch { }
+
             WocketsQA.HideAllPages();
             //WocketsQA.ScheduleNextPrompt();
             WocketsQA.SaveDataLog();
