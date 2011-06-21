@@ -82,7 +82,7 @@
             this.versionLabel.Location = new System.Drawing.Point(6, 10);
             this.versionLabel.Name = "versionLabel";
             this.versionLabel.Size = new System.Drawing.Size(228, 27);
-            this.versionLabel.Text = "Version 1.57";
+            this.versionLabel.Text = "Version 1.58";
             // 
             // retryTimer
             // 

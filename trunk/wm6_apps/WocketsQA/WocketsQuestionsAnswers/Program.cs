@@ -69,8 +69,8 @@ namespace Wockets
         [MTAThread]
         static void Main(string[] args)
         {
-            //try { SetSystemPowerState(null, POWER_STATE_ON, POWER_FORCE); }
-            //catch { }
+            try { SetSystemPowerState(null, POWER_STATE_ON, POWER_FORCE); }
+            catch { }
             try
             {
                 if (IsInstanceRunning())

@@ -184,8 +184,6 @@ namespace Wockets
 
         static IntPtr FindApplicationNotification(string application)
         {
-            try
-            {
                 IntPtr[] handles = new IntPtr[100];
                 int trueCount = 0;
                 CeGetUserNotificationHandles(handles, handles.Length, out trueCount);
@@ -197,26 +195,29 @@ namespace Wockets
 
                 for (int i = 0; i < trueCount; i++)
                 {
-                    IntPtr buffer = IntPtr.Zero;
-                    IntPtr handle = handles[i];
-                    int bufferNeeded;
-                    CeGetUserNotification(handle, 0, out bufferNeeded, buffer);
-                    buffer = Marshal.AllocHGlobal(bufferNeeded);
-                    CeGetUserNotification(handle, bufferNeeded, out bufferNeeded, buffer);
+                    try
+                    {
+                        IntPtr buffer = IntPtr.Zero;
+                        IntPtr handle = handles[i];
+                        int bufferNeeded;
+                        CeGetUserNotification(handle, 0, out bufferNeeded, buffer);
+                        buffer = Marshal.AllocHGlobal(bufferNeeded);
+                        CeGetUserNotification(handle, bufferNeeded, out bufferNeeded, buffer);
 
-                    UserNotificationInfoHeader header = new UserNotificationInfoHeader();
-                    //UserNotificationType type = new UserNotificationType();
-                    UserNotificationTrigger trigger = new UserNotificationTrigger();
-                    header = (UserNotificationInfoHeader)Marshal.PtrToStructure(buffer, typeof(UserNotificationInfoHeader));
-                    trigger = (UserNotificationTrigger)Marshal.PtrToStructure(header.pcent, typeof(UserNotificationTrigger));
-                    //type = (UserNotificationType)Marshal.PtrToStructure(header.pceun, typeof(UserNotificationType));
-                    string appName = Marshal.PtrToStringUni(trigger.lpszApplication);
-                    Marshal.FreeHGlobal(buffer);
-                    if (appName != null && appName.ToLower() == application.ToLower())
-                        return handle;
+                        UserNotificationInfoHeader header = new UserNotificationInfoHeader();
+                        //UserNotificationType type = new UserNotificationType();
+                        UserNotificationTrigger trigger = new UserNotificationTrigger();
+                        header = (UserNotificationInfoHeader)Marshal.PtrToStructure(buffer, typeof(UserNotificationInfoHeader));
+                        trigger = (UserNotificationTrigger)Marshal.PtrToStructure(header.pcent, typeof(UserNotificationTrigger));
+                        //type = (UserNotificationType)Marshal.PtrToStructure(header.pceun, typeof(UserNotificationType));
+                        string appName = Marshal.PtrToStringUni(trigger.lpszApplication);
+                        Marshal.FreeHGlobal(buffer);
+                        if (appName != null && appName.ToLower() == application.ToLower())
+                            return handle;
+                    }
+                    catch { }
                 }
-            }
-            catch { }
+            
             return IntPtr.Zero;
         }
 
@@ -273,9 +274,9 @@ namespace Wockets
         public const string MANUAL_HIDE = @"Hide";
         public const string OTHER_ACTIVITY = @"Other";
 
-        public const int EARLIEST_PROMPT_HOUR = 8;
-        public const int LATEST_PROMPT_HOUR = 20;
-        public const int PROMPTS_PER_DAY = 12;
+        public const int EARLIEST_PROMPT_HOUR = 14;
+        public const int LATEST_PROMPT_HOUR = 16;
+        public const int PROMPTS_PER_DAY = 20;
         public const int RETRY_TIMEOUT_IN_SECONDS = 300;
         public const int RETRY_COUNT = 2;
 
@@ -407,7 +408,7 @@ namespace Wockets
                 try
                 {
                     File.Create(RetryCount.ToString() + ".retry");
-                    schedulePrompt(secondsToRetry / 60);
+                    schedulePrompt(secondsToRetry);
                 }
                 catch { }
             }
@@ -419,17 +420,17 @@ namespace Wockets
             try { UnscheduleApplicationLaunch(appName); }
             catch { }
 
-            int prompt = -1;
+            int secondsUntilPrompt = -1;
             for (int i = 0; i < promptTimes.Count - 1; i++)
             {
                 if (promptTimes[i] > DateTime.Now.AddMinutes(1))
                 {
                     TimeSpan ts = promptTimes[i].Subtract(DateTime.Now);
-                    prompt = (int)ts.TotalMinutes;
-                    schedulePrompt(prompt);
+                    secondsUntilPrompt = (int)ts.TotalSeconds;
+                    schedulePrompt(secondsUntilPrompt);
                 }
             }
-            if (prompt < 0)
+            if (secondsUntilPrompt < 0)
             {
                 generatePromptTimes();
                 SchedulePrompts();
@@ -589,11 +590,11 @@ namespace Wockets
             promptTimes.Sort();
         }
 
-        private static void schedulePrompt(int minutesFromNow)
+        private static void schedulePrompt(int secondsFromNow)
         {
             string appName = System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase;
             //string appNameOnly = System.Reflection.Assembly.GetExecutingAssembly().ManifestModule.Name;
-            System.DateTime dt = DateTime.Now.AddMinutes(minutesFromNow);
+            System.DateTime dt = DateTime.Now.AddSeconds(secondsFromNow);
             string args = "AppRunAtTime" + "|" + DateTimeParsers.ConvertToUnixTimestamp(dt).ToString();
             try { string Result = CeSetUserNotificationEx(appName, args, dt, false); }
             catch (Exception e) { MessageBox.Show(e.ToString()); }
@@ -761,13 +762,12 @@ namespace Wockets
 
         private void retryTimer_Tick(object sender, EventArgs e)
         {
-            retryTimer.Interval = 1000;
             RetryTimeCounter += retryTimer.Interval;
-            if (RetryTimeCounter >= (RETRY_TIMEOUT_IN_SECONDS * retryTimer.Interval) - 60000)
+            if (RetryTimeCounter >= (RETRY_TIMEOUT_IN_SECONDS * 1000) - 60000)
             {
                 retryTimer.Enabled = false;
                 RetryCount++;
-                int nextTime = (int)((RETRY_TIMEOUT_IN_SECONDS * retryTimer.Interval - RetryTimeCounter) / retryTimer.Interval);
+                int nextTime = (int)(((RETRY_TIMEOUT_IN_SECONDS * 1000) - RetryTimeCounter) / 1000);
                 ScheduleRetry(nextTime);
                 WocketsQA.SaveDataLog();
                 Application.Exit();
