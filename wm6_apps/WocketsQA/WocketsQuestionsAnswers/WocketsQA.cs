@@ -713,7 +713,6 @@ namespace Wockets
                 //Initialize the upload logger
                 bool success_event_logger = false;
                 CustomSynchronizedLogger UploadQAEvents = new CustomSynchronizedLogger("qa", getStorageCard(), out success_event_logger);
-                
                 //Generate log string
                 for (int i = 0; i < AnswerTable.Rows.Count; i++)
                 {
@@ -724,7 +723,8 @@ namespace Wockets
                         event_status_log += AnswerTable.Rows[i][j];
                         if (j < AnswerTable.Columns.Count - 1) event_status_log += ",";
                     }
-                    UploadQAEvents.Write(event_status_log);
+                    try { UploadQAEvents.Write(event_status_log); }
+                    catch { }
                 }
                 //Thread.Sleep(1000);
 
