@@ -274,9 +274,9 @@ namespace Wockets
         public const string MANUAL_HIDE = @"Hide";
         public const string OTHER_ACTIVITY = @"Other";
 
-        public const int EARLIEST_PROMPT_HOUR = 14;
-        public const int LATEST_PROMPT_HOUR = 16;
-        public const int PROMPTS_PER_DAY = 20;
+        public const int EARLIEST_PROMPT_HOUR = 8;
+        public const int LATEST_PROMPT_HOUR = 20;
+        public const int PROMPTS_PER_DAY = 12;
         public const int RETRY_TIMEOUT_IN_SECONDS = 300;
         public const int RETRY_COUNT = 2;
 
@@ -711,7 +711,9 @@ namespace Wockets
                     tw.Close();
                 }
                 //Initialize the upload logger
-                Wockets.Utils.CustomSynchronizedLogger UploadQAEvents = new CustomSynchronizedLogger("qa");
+                bool success_event_logger = false;
+                CustomSynchronizedLogger UploadQAEvents = new CustomSynchronizedLogger("qa", getStorageCard(), out success_event_logger);
+                
                 //Generate log string
                 for (int i = 0; i < AnswerTable.Rows.Count; i++)
                 {
@@ -725,8 +727,9 @@ namespace Wockets
                     UploadQAEvents.Write(event_status_log);
                 }
                 //Thread.Sleep(1000);
+
                 //Terminate the upload logger
-                UploadQAEvents.Flush();
+                //UploadQAEvents.Flush();
 
                 AnswerTable.Rows.Clear();
             }
