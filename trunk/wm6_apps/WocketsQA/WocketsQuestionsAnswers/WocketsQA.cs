@@ -233,6 +233,8 @@ namespace Wockets
 
         public const string QUESTION_PATH = @"\Program Files\wockets\WocketsQA\";
         public const string QUESTION_FILE = @"WocketsQuestions.csv";
+        public const string SUBJECT_PATH = @"\Program Files\wockets\WocketsQA\";
+        public const string SUBJECT_FILE = @"WocketsParticipants.csv";
         public const string PROMPT_TIME_PATH = @"Wockets\WocketsQA\PromptTimes\";
         public const string PROMPT_TIME_FILE_MASK = "WocketsPromptTimes-{0}.csv";
         public const string ANSWER_PATH = @"Wockets\WocketsQA\";
@@ -276,7 +278,7 @@ namespace Wockets
 
         public const int EARLIEST_PROMPT_HOUR = 8;
         public const int LATEST_PROMPT_HOUR = 20;
-        public const int PROMPTS_PER_DAY = 12;
+        public const int PROMPTS_PER_DAY = 4;
         public const int RETRY_TIMEOUT_IN_SECONDS = 300;
         public const int RETRY_COUNT = 2;
 
@@ -327,7 +329,7 @@ namespace Wockets
                 head2.Text = PROMPTED_INSTRUCTIONS;
                 menuLeft.Text = PROMPTED_HIDE;
                 menuRight.Text = PROMPTED_NEXT;
-                LogResponse(PROMPT_TIME_COLUMN, DateTime.Now.Subtract(new TimeSpan(0, 0, RetryCount * RETRY_TIMEOUT_IN_SECONDS)).ToString(DATETIME_MASK), false);
+                LogResponse(PROMPT_TIME_COLUMN, DateTime.Now.ToString(DATETIME_MASK), false);
                 LogResponse(PROMPT_TYPE_COLUMN, PROMPT_TYPE_AUTOMATIC, false);
             }
             this.WindowState = FormWindowState.Maximized;
@@ -395,6 +397,22 @@ namespace Wockets
         #endregion
 
         #region PUBLIC METHODS
+
+        public static void DismissQuestion()
+        {
+            if (isAutoPrompt)
+            {
+                try
+                {
+                    WocketsQA.LogResponse(WocketsQA.PRIMARY_ACTIVITY_COLUMN, "X", false);
+                }
+                catch { }
+            }
+            WocketsQA.HideAllPages();
+            WocketsQA.SaveDataLog();
+            Program.PermitWocketsSuspension();
+            Application.Exit();
+        }
 
         public static void ScheduleRetry()
         {
@@ -546,7 +564,7 @@ namespace Wockets
                 if (!File.Exists(promptPath))
                 {
                     TextWriter tw = new StreamWriter(promptPath, true);
-                    tw.WriteLine("PromptTime");
+                    tw.WriteLine(PROMPT_TIME_COLUMN);
                     foreach (DateTime dt in promptTimes)
                         tw.WriteLine(dt.ToString(DateTimeParsers.DATETIME_MASK));
                     tw.Close();
@@ -592,12 +610,15 @@ namespace Wockets
 
         private static void schedulePrompt(int secondsFromNow)
         {
-            string appName = System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase;
-            //string appNameOnly = System.Reflection.Assembly.GetExecutingAssembly().ManifestModule.Name;
-            System.DateTime dt = DateTime.Now.AddSeconds(secondsFromNow);
-            string args = "AppRunAtTime" + "|" + DateTimeParsers.ConvertToUnixTimestamp(dt).ToString();
-            try { string Result = CeSetUserNotificationEx(appName, args, dt, false); }
-            catch (Exception e) { MessageBox.Show(e.ToString()); }
+            if (secondsFromNow > 0)
+            {
+                string appName = System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase;
+                //string appNameOnly = System.Reflection.Assembly.GetExecutingAssembly().ManifestModule.Name;
+                System.DateTime dt = DateTime.Now.AddSeconds(secondsFromNow);
+                string args = "AppRunAtTime" + "|" + DateTimeParsers.ConvertToUnixTimestamp(dt).ToString();
+                try { string Result = CeSetUserNotificationEx(appName, args, dt, false); }
+                catch (Exception e) { MessageBox.Show(e.ToString()); }
+            }
         }
 
         private void showPrompt()
@@ -783,15 +804,16 @@ namespace Wockets
 
         private void menuLeft_Click(object sender, EventArgs e)
         {
-
-            try
+            if (menuLeft.Text == WocketsQA.PROMPTED_HIDE)
             {
-                WocketsQA.LogResponse(WocketsQA.PRIMARY_ACTIVITY_COLUMN, "X", false);
+                DismissQuestion();
             }
-            catch { }
-            Program.PermitWocketsSuspension();
-            WocketsQA.SaveDataLog();
-            Application.Exit();
+            else
+            {
+                WocketsQA.SaveDataLog();
+                Program.PermitWocketsSuspension();
+                Application.Exit();
+            }
         }
 
         private void menuRight_Click(object sender, EventArgs e)

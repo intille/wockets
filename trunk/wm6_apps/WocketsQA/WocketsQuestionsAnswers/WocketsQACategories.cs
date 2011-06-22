@@ -26,21 +26,6 @@ namespace Wockets
                 categoryListView.Items.Add(new ListViewItem(dr[WocketsQA.CATEGORIES_COLUMN].ToString()));
         }
 
-        private void skipQuestion()
-        {
-            try
-            {
-                WocketsQA.LogResponse(WocketsQA.PRIMARY_ACTIVITY_COLUMN, "X", false);
-            }
-            catch { }
-
-            WocketsQA.HideAllPages();
-            //WocketsQA.ScheduleNextPrompt();
-            WocketsQA.SaveDataLog();
-            Program.PermitWocketsSuspension();
-            Application.Exit();
-        }
-
         private void showNextForm()
         {
             WocketsQA.LogResponse(WocketsQA.CATEGORIES_COLUMN, "", false);
@@ -60,7 +45,7 @@ namespace Wockets
 
         private void menuLeft_Click(object sender, EventArgs e)
         {
-            skipQuestion();
+            WocketsQA.DismissQuestion();
         }
 
         private void menuRight_Click(object sender, EventArgs e)
