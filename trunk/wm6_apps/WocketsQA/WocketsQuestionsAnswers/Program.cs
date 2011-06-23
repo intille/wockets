@@ -80,7 +80,6 @@ namespace Wockets
                 PreventWocketsSuspension();
                 postThread = new Thread(new ThreadStart(PostThread));
                 postThread.Start();
-
                 while (notdone)
                     Thread.Sleep(1000);
                 try
@@ -158,21 +157,13 @@ namespace Wockets
 
         #region THREADING
 
-        //public static bool IsInstanceRunning()
-        //{
-        //    IntPtr hMutex = CreateMutex(IntPtr.Zero, true, "WocketsQA");
-        //    if (hMutex == IntPtr.Zero)
-        //        return true;
-        //    else
-        //        return false;
-        //}
-
         public static bool IsInstanceRunning()
         {
             IntPtr hMutex = CreateMutex(IntPtr.Zero, true, "WocketsQA");
             if (hMutex == IntPtr.Zero)
                 throw new ApplicationException("Failure creating mutex: "
                     + Marshal.GetLastWin32Error().ToString("X"));
+            Thread.Sleep(200);
             if (Marshal.GetLastWin32Error() == NATIVE_ERROR_ALREADY_EXISTS)
                 return true;
             else
@@ -196,6 +187,8 @@ namespace Wockets
                 if (DateTime.Now.Subtract(startTime).TotalSeconds > 20)
                 {
                     SystemIdleTimerReset();
+                    //try { SetSystemPowerState(null, POWER_STATE_ON, POWER_FORCE); }
+                    //catch { }
                     startTime = DateTime.Now;
                 }                
                 Thread.Sleep(1000);
