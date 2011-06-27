@@ -576,6 +576,9 @@ namespace DataMerger
 
 
 
+
+
+
         private void button1_Click(object sender, EventArgs e)
         {
             if (converted == true)
@@ -2060,6 +2063,7 @@ namespace DataMerger
             int[] averageX = null;
             int[] averageY = null;
             int[] averageZ = null;
+
             int[] averageRawX = null;
             int[] averageRawY = null;
             int[] averageRawZ = null;
@@ -2073,6 +2077,7 @@ namespace DataMerger
             //Variables to store raw data,running mean and areas under curve
             int[, ,] rawData = null; //channel,axis ->data            
             long[,] timeData = null; //channel ->timestamp
+
             int[,] AUC = null;
             double[] VMAG = null;
             int[] head = null; //channel ->pointer to the head (circular)
@@ -4177,6 +4182,7 @@ namespace DataMerger
                     wcontroller._Decoders[r].Initialize();
                 wunixtimestamp = new double[wcontroller._Sensors.Count];
 
+
                 for (int i = 0; (i < wcontroller._Sensors.Count); i++)
                 {
                     wcontroller._Sensors[i]._RootStorageDirectory = aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY + "\\data\\raw\\PLFormat\\";
@@ -4284,6 +4290,9 @@ namespace DataMerger
                     waveragedRaw[sensor_id].WriteLine(csv_line1);
                     wsamplingCSVs[sensor_id] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Wocket_" + sensor_id.ToString("00") + "_SampleRate_" + location + ".csv");
                     wsamplingCSVs[sensor_id].WriteLine(csv_line2);
+                    
+                    
+                    // Add the headers to the "Summary Data" master file
                     master_csv_header += ",Wocket" + sensor_id.ToString("00") + "_SR," + "Wocket" + sensor_id.ToString("00") + "_AVRaw_X," +
                         "Wocket" + sensor_id.ToString("00") + "_AVRaw_Y," + "Wocket" + sensor_id.ToString("00") + "_AVRaw_Z," + "Wocket" + sensor_id.ToString("00") + "_SAD_X," +
                         "Wocket" + sensor_id.ToString("00") + "_SAD_Y," + "Wocket" + sensor_id.ToString("00") + "_SAD_Z," + "Wocket" + sensor_id.ToString("00") + "_AUC_X," +
@@ -4293,6 +4302,12 @@ namespace DataMerger
                 }
 
                // wc.Dispose();
+
+
+
+
+
+
 
                 /* Correct the wockets timestamps */
 
@@ -4673,11 +4688,24 @@ namespace DataMerger
 
             if (summaryData != null)
             {
+                //commented because headers are incorrect
+                //for (int i = 0; (i < summaryData.Length); i++)
+                //{
+                //    master_csv_header += ",WocketSummary" + i.ToString("00") + ",RawWocketSummary" + i.ToString("00");
+                //    summaryCSV[i].WriteLine(summary_csv_header);
+                //}
+
                 for (int i = 0; (i < summaryData.Length); i++)
                 {
-                    master_csv_header += ",WocketSummary" + i.ToString("00") + ",RawWocketSummary" + i.ToString("00");
+                    master_csv_header += ",Wocket_PerMinute_AC_" + i.ToString("00");  
                     summaryCSV[i].WriteLine(summary_csv_header);
                 }
+
+                for (int i = 0; (i < summaryData.Length); i++)
+                {
+                    master_csv_header += ",Wocket_PerMinute_AUC_XYZ_RawData_" + i.ToString("00");
+                }
+
             }
 
             #endregion Wockets Summary Header
@@ -4757,6 +4785,10 @@ namespace DataMerger
             DateTime startDateTime = new DateTime(startyear, startmonth, startday, starthr, startmin, startsec);
             DateTime endDateTime = new DateTime(endyear, endmonth, endday, endhr, endmin, endsec);
 
+
+
+            #region If there is MITES data
+
             //check mites start and end times
             if (aMITesDecoder != null)
             {
@@ -4810,6 +4842,11 @@ namespace DataMerger
                     }
                 }
             }
+            
+            #endregion If there is MITES data
+
+
+            #region If there is Wockets data
 
             //check wockets start and end times
             if (wcontroller != null)
@@ -4874,6 +4911,10 @@ namespace DataMerger
                     endDateTime = actigraphEndTimes[0];                    
                 }
             }
+
+
+            #endregion If there is Wockets data
+
 
 
             //sele check
@@ -4966,7 +5007,9 @@ namespace DataMerger
 
 
 
-            #region Initialize CSV lines
+            #region Cleanup CSV lines
+            
+            
                 string master_csv_line = "";
                 string hr_csv_line = "";
                 
@@ -4990,6 +5033,8 @@ namespace DataMerger
                 string gps_csv_line = "";
                 string rti_csv_line = "";
                 string rt3_csv_line = "";
+
+
             #endregion Initialize CSV lines
 
 
@@ -5101,7 +5146,8 @@ namespace DataMerger
 
 
 
-                #region if there is MITes data
+                #region If MITes Decoder exist
+
                 double mitesTime = 0;
 
                 if (aMITesDecoder != null)
@@ -5429,7 +5475,7 @@ namespace DataMerger
 
 
 
-                #region if there is Wockets data
+                #region If Wockets Decoder exist
 
                 if (wcontroller != null)
                 {
@@ -5470,8 +5516,9 @@ namespace DataMerger
                         if (wheadPtr < 0)
                             wheadPtr = RM_SIZE-1;
 
-                        //compute running means
-
+                        
+                        
+                        #region compute running means
 
                         while ((wtimeData[wcontroller._Sensors[i]._ID, wheadPtr] > 0) && (wheadPtr != whead[wcontroller._Sensors[i]._ID]) && (wnumMeanPts <= (RM_SIZE-1)))
                         {
@@ -5497,11 +5544,15 @@ namespace DataMerger
                         wheadPtr = whead[wcontroller._Sensors[i]._ID] - 1;
                         if (wheadPtr < 0)
                             wheadPtr = (RM_SIZE-1);
+
+
+                        #endregion compute running means
+
+
+
+
+
                         //compute values per second
-
-
-
-
                         while ((wtimeData[wcontroller._Sensors[i]._ID, wheadPtr] > 0) && (wheadPtr != whead[wcontroller._Sensors[i]._ID]))
                         {
                             double ttt=wtimeData[wcontroller._Sensors[i]._ID, wheadPtr] ;
@@ -5568,6 +5619,8 @@ namespace DataMerger
                         wAUC[wcontroller._Sensors[i]._ID, 1] = 0;
                         wAUC[wcontroller._Sensors[i]._ID, 2] = 0;
                         wVMAG[wcontroller._Sensors[i]._ID] = 0;
+                        
+                        
                         for (int k = 0; (k < RM_SIZE); k++)
                         {
                             wAUC[wcontroller._Sensors[i]._ID, 0] = wAUC[wcontroller._Sensors[i]._ID, 0] + (int)Math.Abs((wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr] - wrunningMeanX));
@@ -5578,11 +5631,7 @@ namespace DataMerger
 
 
 
-
-
-
-                        #region Append Wockets Statistics
-
+                        //Inititalize lines to be written to cvs files
                         int sensor_id = wcontroller._Sensors[i]._ID;
                         csv_line1 = timestamp;
                         csv_line2 = timestamp;
@@ -5591,8 +5640,14 @@ namespace DataMerger
                         csv_line5 = timestamp;
                         csv_line6 = timestamp;
 
+
+
                         if (wacCounters[sensor_id] > 0)
                         {
+
+                            #region Append Wockets Statistics
+
+
                             csv_line2 += "," + wacCounters[sensor_id];
 
                             csv_line1 += "," + ((double)(waverageX[sensor_id] / (double)wacCounters[sensor_id])).ToString("00.00") + ",";
@@ -5633,16 +5688,29 @@ namespace DataMerger
                             master_csv_line += ((double)wRMSize[sensor_id]).ToString("00.00") + ",";
                             master_csv_line += ((double)(wVMAG[sensor_id] / (double)wacCounters[sensor_id])).ToString("00.00");
 
+                        #endregion Append Wockets Statistics
+
+
 
                             if (rawCurrentSummary != null)
                             {
-                                rawCurrentSummary[wcontroller._Sensors[i]._ID] += (int)((double)(wAUC[wcontroller._Sensors[i]._ID, 0] + wAUC[wcontroller._Sensors[i]._ID, 1] + wAUC[wcontroller._Sensors[i]._ID, 2]));
+                                //sum the raw ACs for each accelerometer axis (X,Y,Z) per second for each sensor
+                                rawCurrentSummary[wcontroller._Sensors[i]._ID] += (int)((double)(wAUC[wcontroller._Sensors[i]._ID, 0] + 
+                                                                                    wAUC[wcontroller._Sensors[i]._ID, 1] + 
+                                                                                    wAUC[wcontroller._Sensors[i]._ID, 2]));
+
+                                //increase the AC counter for each sensor
                                 rawSummaryCounter[wcontroller._Sensors[i]._ID] = rawSummaryCounter[wcontroller._Sensors[i]._ID] + 1;
+
+
+                                //update the unix counter for the AC per minute calculation 
                                 if (prevUnixTime[wcontroller._Sensors[i]._ID] == -1)
                                 {
                                     prevUnixTime[wcontroller._Sensors[i]._ID] = currentUnixTime;
-                        
                                 }
+
+
+                                //If finished to compute the per minute AC, clean the variables 
                                 if ((currentUnixTime - prevUnixTime[wcontroller._Sensors[i]._ID]) > 60000)
                                 {
                                     rawSummaryData[wcontroller._Sensors[i]._ID].Add(key, rawCurrentSummary[wcontroller._Sensors[i]._ID]);
@@ -5650,7 +5718,11 @@ namespace DataMerger
                                     rawSummaryCounter[wcontroller._Sensors[i]._ID] = 0;
                                     prevUnixTime[wcontroller._Sensors[i]._ID] = currentUnixTime;
                                 }
+
+
                             }
+
+
                         }
                         else
                         {
@@ -5672,7 +5744,7 @@ namespace DataMerger
                         wvmagCSVs[sensor_id].WriteLine(csv_line6);
 
 
-
+                        //Reset Variables
                         waverageX[sensor_id] = 0;
                         waverageY[sensor_id] = 0;
                         waverageZ[sensor_id] = 0;
@@ -5691,22 +5763,21 @@ namespace DataMerger
                         for (int j = 0; (j < 3); j++)
                             wAUC[sensor_id, j] = 0;
 
-                        #endregion Append Wockets Statistics
+                       
                     }
 
                     #endregion Calculate Statistics
 
                 }
 
-            #endregion if there is Wockets data
+            #endregion If Wockets Decoder Exist
 
 
 
-                #region Write the CSV lines for each sensor
+            #region Write the CSV lines for each sensor
 
 
                 #region Write CSV lines for Actigraphs
-
 
                 for (int i = 0; (i < actigraphData.Length); i++)
                 {
@@ -5784,6 +5855,8 @@ namespace DataMerger
                 }
                 #endregion Write CSV lines for Raw Wockets Summary
 
+
+
                 #region Write CSV line for Sensewear
                 if ((sensewearFound) && (sensewearCSV != null))
                 {
@@ -5844,6 +5917,7 @@ namespace DataMerger
                //     master_csv_line = master_csv_line + ",,,,,,,,,,,,,,,,";
                 #endregion Write CSV line for Zephyr
 
+
                 #region Write CSV line for Oxycon
                 if ((oxyconFound) && (oxyconCSV != null))
                 {
@@ -5864,6 +5938,7 @@ namespace DataMerger
              //   else
                //     master_csv_line = master_csv_line + ",,,,,,,,";
                 #endregion Write CSV line for Oxycon
+
 
                 #region Write CSV line for Omron
                 if ((omronFound) && (omronCSV != null))
@@ -5959,12 +6034,12 @@ namespace DataMerger
                     master_csv_line = master_csv_line + ",,,,";
                 #endregion Write CSV line for RT3
 
-                #region Write master CSV line
+
+
                 masterCSV.WriteLine(master_csv_line);
-                #endregion Write master CSV line
-
-
-                #endregion Write the CSV lines for each sensor
+                
+                
+           #endregion Write the CSV lines for each sensor
 
 
 
@@ -5975,6 +6050,8 @@ namespace DataMerger
                 currentDateTime = currentDateTime.AddSeconds(1.0);
 
             }
+
+
 
             #region Convert Actigraph Raw Data to Wockets Raw Format and CSV
 
