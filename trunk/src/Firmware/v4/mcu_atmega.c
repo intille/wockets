@@ -2,9 +2,9 @@
 //
 // File Name    : 'mcu_atmega.c'
 // Title        : MCU Function Definitions 
-// Author       : Fahd Albinali
+// Author       : Fahd Albinali & Selene Mota
 // Created      : 12/10/2008
-// Modified     : 03/18/2010
+// Modified     : 06/27/2011
 // 
 //  Description : This file contains functions that control different aspects and features of the MCU
 //  such as turining on/off ADC or peripherials, using USART, power saving features

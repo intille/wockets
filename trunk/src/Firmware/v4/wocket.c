@@ -110,8 +110,6 @@ uint32_t _DEFAULT_SHUTDOWN=0;
 	Description: This function sets the baud rate for the wocket to one of the following values 9600, 19200, 28800, 38400 and 57600
 	
 */
-
-
 void _wocket_initialize_timer2_interrupt(void)
 {
 	unsigned short ticks=(unsigned short) ((F_CPU/1024)/_SAMPLING_RATE);
@@ -127,6 +125,10 @@ void _wocket_initialize_timer2_interrupt(void)
 		_wTCNT2_last=255;
 	}
 }
+
+
+
+
 /* 
 	Function Name: _wocket_intialize
 	Parameters: None
@@ -457,10 +459,38 @@ void _send_fv()
 {
 
     aBuffer[0]=m_FV_RSP_BYTE0;
-    aBuffer[1]= m_FV_RSP_BYTE1(_VERSION);    
+    aBuffer[1]= m_FV_RSP_BYTE1(_FVERSION);    
 	for (int i=0;(i<2);i++)                                                                                       
        	_bluetooth_transmit_uart0_byte(aBuffer[i]); 
 }
+
+void _send_hv()
+{
+
+    aBuffer[0]= m_HV_RSP_BYTE0;
+    aBuffer[1]= m_HV_RSP_BYTE1(_VERSION);    
+	for (int i=0;(i<2);i++)                                                                                       
+       	_bluetooth_transmit_uart0_byte(aBuffer[i]); 
+}
+
+
+
+
+void _send_bl(unsigned short level)
+{
+
+   aBuffer[0]= m_BL_RSP_BYTE0;
+   aBuffer[1]= m_BL_RSP_BYTE1(level);
+   aBuffer[2]= m_BL_RSP_BYTE2(level);
+   for (int i=0;(i<3);i++)
+       _bluetooth_transmit_uart0_byte(aBuffer[i]);
+
+}
+
+
+
+
+
 void _send_acs()
 {
 	unsigned short count=0;
@@ -760,13 +790,15 @@ void _receive_data(void)
                             processed_counter=command_counter; 
 				
                             break;
+
                     //setup battery buffer
                 case (unsigned char) GET_BT:           
-#ifdef _VERSION==3
+				
+				//#ifdef _VERSION==3
                             word=_atmega_a2dConvert10bit(ADC7);
-#else
-                            word=_atmega_a2dConvert10bit(ADC4);
-#endif				  
+				//#else
+				//          word=_atmega_a2dConvert10bit(ADC4);
+				//#endif				  
 
                             rBuffer[0]=m_BL_RSP_BYTE0;
                             rBuffer[1]=m_BL_RSP_BYTE1(word);
@@ -781,12 +813,12 @@ void _receive_data(void)
                             response_length=2;		                                                                          
                             break;	
                 case (unsigned char) GET_BP:           
-#ifdef _VERSION==3
+				//#ifdef _VERSION==3
                             word=_atmega_a2dConvert10bit(ADC7);
-#else
-                            word=_atmega_a2dConvert10bit(ADC4);
+				//#else
+                //          word=_atmega_a2dConvert10bit(ADC4);
 						
-#endif				  
+				//#endif				  
 							if (word>_wBTCAL100)
 								word=100;
 							else if (word>_wBTCAL80)
@@ -863,11 +895,11 @@ void _receive_data(void)
                             if (eeprom_is_ready())
                             {
                                     //do nothing if battery is low
-#ifdef _VERSION==3
+									//#ifdef _VERSION==3
                                     if (_atmega_a2dConvert10bit(ADC7)<600)
-#else
-                                    if (_atmega_a2dConvert10bit(ADC4)<600)
-#endif
+									//#else
+                                    //if (_atmega_a2dConvert10bit(ADC4)<600)
+									//#endif
                                             break;
                                     else
                                     {   
@@ -934,11 +966,11 @@ void _receive_data(void)
                             if (eeprom_is_ready())
                             {
                                     //do nothing if battery is low
-#ifdef _VERSION==3
+									//#ifdef _VERSION==3
                                     if (_atmega_a2dConvert10bit(ADC7)<600)
-#else
-                                    if (_atmega_a2dConvert10bit(ADC4)<600)
-#endif
+								    //#else
+                                    //if (_atmega_a2dConvert10bit(ADC4)<600)
+									//#endif
                                             break;
                                     else
                                     {   
