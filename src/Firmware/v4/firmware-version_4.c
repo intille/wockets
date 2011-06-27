@@ -1,10 +1,10 @@
 //*****************************************************************************
 //
-// File Name    : 'firmware-version3.c'
+// File Name    : 'firmware-version_4.c'
 // Title        : Interrupt driven code for the wockets
-// Author       : Fahd Albinali
+// Author       : Fahd Albinali & Selene Mota
 // Created      : 12/10/2008
-// Modified     : 03/18/2010
+// Modified     : 06/16/2011
 // 
 //  Description : This file includes the main loop for the code that runs on the wocket and
 //  any interrupt service routines (ISRs). The code supports a variety of configuration modes
@@ -44,7 +44,7 @@ data_unit data7[50];*/
 //unsigned short zs[3000];
 
 data_unit data[750];
-unsigned short acount[AC_BUFFER_SIZE]; //16 hours
+unsigned short acount[AC_BUFFER_SIZE]; //array 960 capacity => If 1 AC per minute = 16h of capacity
 unsigned short AC_NUMS=0;
 unsigned short summaryindex=0;
 unsigned short summary_count=2400;
@@ -62,6 +62,7 @@ unsigned short x;
 unsigned short y;
 unsigned short z;
 
+unsigned short battery; 
 
 unsigned short prevx;
 unsigned short prevy;
@@ -104,6 +105,7 @@ unsigned char isdocked=0;
 unsigned int dockcounter=0;
 unsigned int pseq=0;
 unsigned int cc=0;
+
 
 unsigned short Filter(unsigned short data,int axis)
 {
@@ -169,27 +171,35 @@ static __inline__ void _send_pdu(unsigned short x, unsigned short y, unsigned sh
 
 }
 
+
+
+
+
 int main()
 {
 
 
 
-	if (_is_docked()){
+	if (_is_docked())
+	{
+
 		for(int j=0;(j<10);j++)
 			for(int i=0;(i<200);i++)
 				_delay_ms(5);
 	}
 				
 	scounter=0;
+
 	//Initialized data buffer
 	dataIndex=0;
 	dataSubindex=0;
-	// Blink green for 5 seconds	
 
+	// Blink green for 5 seconds	
 	_wocket_initialize();
 		
 
 	AC_NUMS=_SAMPLING_RATE *60;
+
 	power_adc_disable();
   	power_spi_disable();
   	power_timer0_disable();
@@ -197,43 +207,60 @@ int main()
   	power_twi_disable();
 
 
-	while(1){
+
+	while(1)
+	{
 			
 
-			
-
-		//Sample only in the main loop because of p
-		if(sampleFlag){			
+		//Sample only in the main loop because of p, low power mode
+		if(sampleFlag)
+		{		
+		    //turn on adc and micro controller on board	
 			power_adc_enable();
 			_atmega_adc_turn_on();
+			
 			sampleFlag=0;
-#ifdef _VERSION ==3
 
-
-
-
+			//sample the accelerometer and wocket battery level
+            
+			//--// #ifdef _VERSION ==3
+			
 			x=_atmega_a2dConvert10bit(ADC0);
 		
 			y=_atmega_a2dConvert10bit(ADC1);
 
 			z=_atmega_a2dConvert10bit(ADC2);
+
+
+			//battery =_atmega_a2dConvert10bit(ADC7); 
+
+
+
 			//x=y=z=cc++;
 			//if (cc>=1024)
 			//	cc=0;
 
-				vmag+=Filter(x,0)+Filter(y,1)+Filter(z,2);
-			
 
-				if (_wPC>40){	//Skip the first samples						
-					if (summary_count==0)
-					{
-						vmag=vmag/24;
-						if (vmag>65535)
-							acount[ci]=65535;
-						else
-							acount[ci]=(unsigned short) vmag;
+			//filter the raw accelerometer data and compute the vector of magnitude
+			vmag += Filter(x,0)+Filter(y,1)+Filter(z,2);
+			
+			
+			//Skip the first samples to make sure the buffer is clean	
+			if (_wPC>40)
+			{			
+						
+				if (summary_count==0)
+				{
+					vmag=vmag/24;
+					
+					if (vmag>65535)
+						acount[ci]=65535;
+					else
+						acount[ci]=(unsigned short) vmag;
+
 				 		vmag=0;
 						++ci;
+
 						if (ci==AC_BUFFER_SIZE)
 							ci=0;
 						cseq++;
@@ -247,70 +274,79 @@ int main()
 						}
 						acount[ci]=0;
 						summary_count=AC_NUMS;
-					}else
-						summary_count--;
 				}
-				else if (_wPC==40)
-					vmag=0;
+				else
+						summary_count--;
+			}
+			else if (_wPC==40)
+		  				vmag=0;
 
-			
-#else
-			//x=_atmega_a2dConvert10bit(ADC3);
-			//y=_atmega_a2dConvert10bit(ADC2);
-			//z=_atmega_a2dConvert10bit(ADC1);		
-#endif
+
+			//This was used in the old version of the code (version 2 with micro-usb)
+			//--// #else 
+				//x=_atmega_a2dConvert10bit(ADC3);
+				//y=_atmega_a2dConvert10bit(ADC2);
+				//z=_atmega_a2dConvert10bit(ADC1);		
+			//--// #endif
 		
 
-		
+			//Save the raw data in an optimized manner to the RAM
 			 m_SET_X(data[dataIndex],x,dataSubindex);
 			 m_SET_Y(data[dataIndex],y,dataSubindex);
 			 m_SET_Z(data[dataIndex],z,dataSubindex);
 
 			 dataSubindex++;
+
 			 if (dataSubindex>=4)
 			 	dataSubindex=0;
 		
 
-			 
-			 //Most of the time the data buffer with 750 will not overflow
-			 //and will be enough to transmit the data, data will go from 0 up to a specific
-			 //value
+			// Get the packets of data from buffer according to the current transmission mode
+			//-- Most of the time the data buffer with 750 will not overflow
+			//-- and will be enough to transmit the data, data will go from 0 up to a specific
+			//-- value
 
 			if (_wTM==_TM_Continuous)
 			{
 									
-				switch(dataSubindex){
-				case 1:
-						m_GET_X(x,data[dataIndex].byte1,data[dataIndex].byte2,0);
-						m_GET_Y(y,data[dataIndex].byte2,data[dataIndex].byte3,0);
-						m_GET_Z(z,data[dataIndex].byte3,data[dataIndex].byte4,0);
-						break;
-				case 2:
-						m_GET_X(x,data[dataIndex].byte4,data[dataIndex].byte5,1);
-						m_GET_Y(y,data[dataIndex].byte6,data[dataIndex].byte7,1);
-						m_GET_Z(z,data[dataIndex].byte7,data[dataIndex].byte8,1);
-						break;
-				case 3:
-						m_GET_X(x,data[dataIndex].byte8,data[dataIndex].byte9,2);
-						m_GET_Y(y,data[dataIndex].byte9,data[dataIndex].byte10,2);
-						m_GET_Z(z,data[dataIndex].byte11,data[dataIndex].byte12,2);
-						break;
-				case 0:
-						m_GET_X(x,data[dataIndex].byte12,data[dataIndex].byte13,3);
-						m_GET_Y(y,data[dataIndex].byte13,data[dataIndex].byte14,3);
-						m_GET_Z(z,data[dataIndex].byte14,data[dataIndex].byte15,3);
-						break;
+				switch(dataSubindex)
+				{
+					case 1:
+							m_GET_X(x,data[dataIndex].byte1,data[dataIndex].byte2,0);
+							m_GET_Y(y,data[dataIndex].byte2,data[dataIndex].byte3,0);
+							m_GET_Z(z,data[dataIndex].byte3,data[dataIndex].byte4,0);
+							break;
+					case 2:
+							m_GET_X(x,data[dataIndex].byte4,data[dataIndex].byte5,1);
+							m_GET_Y(y,data[dataIndex].byte6,data[dataIndex].byte7,1);
+							m_GET_Z(z,data[dataIndex].byte7,data[dataIndex].byte8,1);
+							break;
+					case 3:
+							m_GET_X(x,data[dataIndex].byte8,data[dataIndex].byte9,2);
+							m_GET_Y(y,data[dataIndex].byte9,data[dataIndex].byte10,2);
+							m_GET_Z(z,data[dataIndex].byte11,data[dataIndex].byte12,2);
+							break;
+					case 0:
+							m_GET_X(x,data[dataIndex].byte12,data[dataIndex].byte13,3);
+							m_GET_Y(y,data[dataIndex].byte13,data[dataIndex].byte14,3);
+							m_GET_Z(z,data[dataIndex].byte14,data[dataIndex].byte15,3);
+							break;
 				}
 											
 		
+		        // if the wocket was just connected, confirm the transmission mode 
 				if (justconnected==1)
 				{
 					_send_tm();
 					justconnected=2;
 				}		
-				//_send_pdu(x,y,z);
+
+
+				// send all the data without any compression
 				_send_uncompressed_pdu(x, y, z);
 
+
+				//_send_pdu(x,y,z);
 				
 					//Send summary activity count
 				/*	for (int i=0;(i<summaryindex);i++){
@@ -323,11 +359,16 @@ int main()
 					}*/
 
 			}
-			else 
+			else  //if set to any of the bursty modes
 			{
+
+                // increase the batch count
 				if ((dataSubindex==0) && (batch_counter<750))
 					batch_counter++;
-				if (connected){
+
+
+				if (connected)
+				{
 					_greenled_turn_on();
 						
 					gotack=1;
@@ -336,12 +377,15 @@ int main()
 					if (_wTM==_TM_Continuous)
 						continue;
 						
-					for (int ixz=0;(ixz<100);ixz++) {                                                                                      
-       						_bluetooth_transmit_uart0_byte(0xff); 
+
+					for (int ixz=0;(ixz<100);ixz++) 
+					{                                                                                      
+       					
+						_bluetooth_transmit_uart0_byte(0xff); 
 
 							
 						if (sampleFlag)
-							{
+						{
 								sampleFlag=0;
 
 								x=_atmega_a2dConvert10bit(ADC0);
@@ -350,7 +394,7 @@ int main()
 
 								z=_atmega_a2dConvert10bit(ADC2);
 
-
+								
 								vmag+=Filter(x,0)+Filter(y,1)+Filter(z,2);
 			
 
@@ -396,11 +440,24 @@ int main()
 							}						
 					}
 
+					
+					//send wocket information
 					_send_fv();
+					_send_hv();
 					_send_sr();					 
 					_send_tm();
+
+
+					//sample and send the battery level
+					battery =_atmega_a2dConvert10bit(ADC7); 
+					_send_bl(battery);
+
+
+					//send activity counts information
 					_send_batch_count((batch_counter-1)*4);																	
 					_send_acs();
+
+
 					//Send summary activity count
 					/*for (int i=0;(i<summaryindex);i++){
 						_send_summary_count(acount[i]);
@@ -412,6 +469,7 @@ int main()
 					}*/
 
 					
+					//Send raw data
 					if ((batch_counter>0) && (batch_counter<750)) // Go from 0 up to batch_counter
 					{						
 						for (int i=0;(i<(batch_counter-1));i++)
@@ -440,8 +498,9 @@ int main()
 							m_GET_X(x,data[i].byte12,data[i].byte13,3);
 							m_GET_Y(y,data[i].byte13,data[i].byte14,3);
 							m_GET_Z(z,data[i].byte14,data[i].byte15,3);							
-							//_send_uncompressed_pdu(x, y, z);
 							
+							
+							//_send_uncompressed_pdu(x, y, z);
 							_send_pdu(x,y,z);
 
 							_receive_data();
@@ -490,8 +549,7 @@ int main()
 								else if (_wPC==40)
 									vmag=0;
 
-			
-
+		
 		
 			 					m_SET_X(data[dataIndex],x,dataSubindex);
 			 					m_SET_Y(data[dataIndex],y,dataSubindex);
@@ -499,12 +557,13 @@ int main()
 
 			 					dataSubindex++;
 			 					if (dataSubindex>=4)
-			 					dataSubindex=0;
+			 						dataSubindex=0;
 							}
 						}
 
 						
-						if (batch_counter>0){
+						if (batch_counter>0)
+						{
 						//copy end item into start
 						data[0].byte1=data[batch_counter].byte1;
 						data[0].byte2=data[batch_counter].byte2;
@@ -524,12 +583,18 @@ int main()
 						}
 
 
-					}else{
+					}
+					else
+					{
 
 						int current=dataIndex+1;
 						int end =dataIndex;
+
+
 						if (current>=750)
 							current=0;
+
+
 						while(current!=end)
 						{
 							m_GET_X(x,data[current].byte1,data[current].byte2,0);
@@ -561,6 +626,7 @@ int main()
 							_send_pdu(x,y,z);
 
 							current++;
+
 							if (current==750)
 								current=0;
 
@@ -618,8 +684,10 @@ int main()
 			 					m_SET_Z(data[dataIndex],z,dataSubindex);
 
 			 					dataSubindex++;
+
 			 					if (dataSubindex>=4)
 			 					dataSubindex=0;
+
 							}
 							
 						}
@@ -649,6 +717,7 @@ int main()
 					batch_counter=0;
 					dataIndex=0;
 					seconds_passed=0;
+
 					while (seconds_passed<400)
 					{
 						_delay_ms(5);
@@ -724,17 +793,21 @@ int main()
 				
 				}
 			}
+
 			_atmega_adc_turn_off();
 			power_adc_disable();
 
 			if ((dataSubindex==0) && (!connected))
-				dataIndex++;			
+				dataIndex++;
+							
 			if (dataIndex==750)
 				dataIndex=0;
+
 			connected=0;			
 			
 		}	
 		
+		    //Clear interruptions and set the system to sleep mode
 			cli();
 			set_sleep_mode(SLEEP_MODE_IDLE);
 			//set_sleep_mode(SLEEP_MODE_PWR_SAVE);
@@ -897,8 +970,10 @@ ISR(TIMER2_OVF_vect)
 			return;	
 		}
 
+
+
 		//_atmega_initialize_uart0(ATMEGA_BAUD_38400, TX_RX_UART_MODE);
-//		_atmega_initialize_uart1(ATMEGA_BAUD_38400, TX_RX_UART_MODE);
+		//_atmega_initialize_uart1(ATMEGA_BAUD_38400, TX_RX_UART_MODE);
 	
 
 		//reset shutdown timer if connected

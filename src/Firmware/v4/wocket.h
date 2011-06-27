@@ -488,6 +488,8 @@ void _send_data_bufferred(void);
 void _send_tm();
 void _send_sr();
 void _send_fv();
+void _send_hv();
+void _send_bl(unsigned short level);
 
 unsigned char _wocket_get_baudrate(void);
 void _wocket_set_baudrate(unsigned char baudrate);

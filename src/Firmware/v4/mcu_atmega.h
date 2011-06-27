@@ -2,9 +2,9 @@
 //
 // File Name    : 'mcu_atmega.h'
 // Title        : Definitions of ports, pins and function prototypes for all MCU related code
-// Author       : Fahd Albinali
+// Author       : Fahd Albinali & Selene Mota
 // Created      : 12/10/2008
-// Modified     : 03/18/2010
+// Modified     : 06/27/2011
 // 
 //  Description : This file includes all the definitions and constants that are used by the MCU unit such as
 //  the different pins, USART supported baud rates etc.
@@ -18,8 +18,8 @@
 /* Constants and preprocessor directives */
 
 // CPU Frequency 8 MHz
-#define _VERSION 3  //Hardware version
-#define _FVERSION 9	//Firmware version
+#define _VERSION 3    //Hardware version
+#define _FVERSION 10 //Firmware version
 #define F_CPU 8000000L
 
 #define CPU_CLK_PRESCALAR_NONE 0
