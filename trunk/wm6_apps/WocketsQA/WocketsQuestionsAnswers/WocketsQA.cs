@@ -278,7 +278,7 @@ namespace Wockets
 
         public const int EARLIEST_PROMPT_HOUR = 8;
         public const int LATEST_PROMPT_HOUR = 20;
-        public const int PROMPTS_PER_DAY = 12;
+        public const int PROMPTS_PER_DAY = 4;
         public const int RETRY_TIMEOUT_IN_SECONDS = 300;
         public const int RETRY_COUNT = 2;
 
