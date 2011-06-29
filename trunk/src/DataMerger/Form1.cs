@@ -1986,6 +1986,10 @@ namespace DataMerger
         private List<string> annotation_intervals_file_list = new List<string>();
         private List<string> annotation_subdirectory_list = new List<string>();
        
+        //variables for storing prev summary data value for PLOT
+        private static string[] prevRawSummaryDataLine;
+        private static string[] prevSummaryDataLine; 
+
         public static string CSVProgress = "";
         public static bool hasActigraph = false;
         public static bool hasOxycon = false;
@@ -2018,6 +2022,9 @@ namespace DataMerger
         static TextWriter[] actigraphCSV;
         static Hashtable[] actigraphData;
         static string[] actigraphType;
+        public static string[] prevActLine;
+        public static string[] prevActXYZ;
+        public static int prevActAC_XYZ;
         
 
         //Actigraph Raw Data Constants
@@ -2042,6 +2049,7 @@ namespace DataMerger
         private static int[] rawSummaryCounter;
         private static double[] prevUnixTime;
         private static double[] summaryStartUnixTime;
+        
 
 
         public static void toCSV(string aDataDirectory, string masterDirectory, int maxControllers, string[] filter)
@@ -2699,8 +2707,16 @@ namespace DataMerger
             actigraphCSV = new TextWriter[file.Length];
             actigraphData = new Hashtable[file.Length];
             actigraphType = new string[file.Length];
-
-
+            prevActLine = new string[file.Length];
+            for (int i = 0; i < prevActLine.Length; i++)
+            {
+                prevActLine[i] = "0,0,0";
+            }
+            prevActXYZ = new string[3];
+            for (int i = 0; i < prevActXYZ.Length; i++)
+            {
+                prevActXYZ[i] = "0";
+            }
 
             try
             {
@@ -4594,6 +4610,18 @@ namespace DataMerger
                 prevUnixTime = new double[CurrentWockets._Controller._Sensors.Count];
                 summaryStartUnixTime = new double[CurrentWockets._Controller._Sensors.Count];
 
+                // initialiaing previous line array for PLOT Summary Data
+                prevSummaryDataLine = new string[CurrentWockets._Controller._Sensors.Count];
+                for (int i = 0; i < prevSummaryDataLine.Length; i++)
+                {
+                    prevSummaryDataLine[i] = "0";
+                }
+                prevRawSummaryDataLine =  new string[CurrentWockets._Controller._Sensors.Count];
+                for (int i = 0; i < prevRawSummaryDataLine.Length; i++)
+                {
+                    prevRawSummaryDataLine[i] = "0";
+                }
+
                 try
                 {
 
@@ -4664,9 +4692,12 @@ namespace DataMerger
 
             for (int i = 0; (i < actigraphData.Length); i++)
             {
-                if (actigraphType[i] == "GT3X")
+                if (actigraphType[i] == "GT3X" || actigraphType[i] == "GT3X+")
                 {
                     master_csv_header += ",Actigraph" + (i + 1) + "_X,Actigraph" + (i + 1) + "_Y,Actigraph" + (i + 1) + "_Z";
+                    //PLOT values for actigraph activity counts
+                    master_csv_header += ",PLOT_Actigraph" + (i + 1) + "_X,PLOT_Actigraph" + (i + 1) + "_Y,PLOT_Actigraph" + (i + 1) + "_Z" +
+                        ",PLOT_Actigraph" + (i + 1) + "_XYZ";
                     actigraphCSV[i].WriteLine(actigraph_csv_header_gtx);
                 }
                 else if (actigraphType[i] == "GT1M")
@@ -4704,6 +4735,18 @@ namespace DataMerger
                 for (int i = 0; (i < summaryData.Length); i++)
                 {
                     master_csv_header += ",Wocket_PerMinute_AUC_XYZ_RawData_" + i.ToString("00");
+                }
+
+                //Wocket Firmware Activity Counts for Plotting
+                for (int i = 0; (i < summaryData.Length); i++)
+                {
+                    master_csv_header += ",PLOT_Wocket_PerMinute_AC_" + i.ToString("00");
+                }
+
+                //Wocket Raw Data Activity Counts for Plotting
+                for (int i = 0; (i < summaryData.Length); i++)
+                {
+                    master_csv_header += ",PLOT_Wocket_PerMinute_AUC_XYZ_RawData_" + i.ToString("00");
                 }
 
             }
@@ -5779,14 +5822,16 @@ namespace DataMerger
 
                 #region Write CSV lines for Actigraphs
 
+                
                 for (int i = 0; (i < actigraphData.Length); i++)
                 {
                     if (actigraphData[i].ContainsKey(key) == false)
                     {
-                        if (actigraphType[i] == "GT3X")
+                        if (actigraphType[i] == "GT3X" || actigraphType[i] == "GT3X+")
                         {
                             actigraphCSV[i].WriteLine(actigraph_csv_line[i] + ",,,");
                             master_csv_line = master_csv_line + ",,,";
+                            master_csv_line = master_csv_line + "," + prevActLine[i] + "," + prevActAC_XYZ;
                         }
                         else if (actigraphType[i] == "GT1M")
                         {
@@ -5796,7 +5841,7 @@ namespace DataMerger
                         else
                         {
                             actigraphCSV[i].WriteLine(actigraph_csv_line[i] + ",");
-                            master_csv_line = master_csv_line + ",";
+                            master_csv_line = master_csv_line + ",";                            
                         }
               
                     }
@@ -5805,14 +5850,26 @@ namespace DataMerger
 
                         actigraphCSV[i].WriteLine(actigraph_csv_line[i] + "," + actigraphData[i][key]);
                         master_csv_line = master_csv_line + "," + actigraphData[i][key];
+                        //PLOT value                        
+                        prevActLine[i] = actigraphData[i][key].ToString();
+                        try
+                        {
+                            prevActXYZ = prevActLine[i].Split(',');
+                            prevActAC_XYZ = Convert.ToInt32(prevActXYZ[0]) + Convert.ToInt32(prevActXYZ[1]) + Convert.ToInt32(prevActXYZ[2]);                        
+                        }
+                        catch (Exception ex)
+                        {
+                        }
+                        master_csv_line = master_csv_line + "," + actigraphData[i][key] + "," + prevActAC_XYZ;
+                        
                     }
                 }
                 #endregion Write CSV lines for Actigraphs
 
+               
 
                 #region Write CSV lines for Wockets Summary
-                
-                
+
                 if (summaryData != null)
                 {
                     for (int i = 0; (i < summaryData.Length); i++)
@@ -5820,7 +5877,7 @@ namespace DataMerger
                         if (summaryData[i].ContainsKey(key) == false)
                         {
                             summaryCSV[i].WriteLine(summary_csv_line[i] + ",");
-                            master_csv_line = master_csv_line + ",";
+                            master_csv_line = master_csv_line + ",";                            
                         }
                         else
                         {
@@ -5829,7 +5886,8 @@ namespace DataMerger
                             master_csv_line = master_csv_line + "," + summaryData[i][key];
                         }
                     }
-                }
+                }                
+
                 #endregion Write CSV lines for Wockets Summary
 
 
@@ -5843,18 +5901,59 @@ namespace DataMerger
                         if (rawSummaryData[i].ContainsKey(key) == false)
                         {
                             rawSummaryCSV[i].WriteLine(summary_csv_line[i] + ",");
-                            master_csv_line = master_csv_line + ",";
+                            master_csv_line = master_csv_line + ",";                            
                         }
                         else
                         {
                             string myline = summary_csv_line[i] + "," + rawSummaryData[i][key];         
                             rawSummaryCSV[i].WriteLine(summary_csv_line[i] + "," + rawSummaryData[i][key]);
-                            master_csv_line = master_csv_line + "," + rawSummaryData[i][key];                            
+                            master_csv_line = master_csv_line + "," + rawSummaryData[i][key];
+                        }
+                    }
+                }    
+                #endregion Write CSV lines for Raw Wockets Summary
+
+
+                #region Write CSV lines for PLOT Wockets Summary
+                if (summaryData != null)
+                {
+                    for (int i = 0; (i < summaryData.Length); i++)
+                    {
+                        if (summaryData[i].ContainsKey(key) == false)
+                        {
+                            //summaryCSV[i].WriteLine(summary_csv_line[i] + ",");                            
+                            master_csv_line = master_csv_line + "," + prevSummaryDataLine[i] ;
+                        }
+                        else
+                        {
+                            //PLOT value
+                            master_csv_line = master_csv_line + "," + summaryData[i][key];
+                            prevSummaryDataLine[i] = summaryData[i][key].ToString();
                         }
                     }
                 }
-                #endregion Write CSV lines for Raw Wockets Summary
+                #endregion Write CSV lines for PLOT Wockets Summary
 
+                #region Write CSV lines for PLOT Raw Wockets Summary
+                
+                
+                if (rawSummaryData != null)
+                {
+                    for (int i = 0; (i < rawSummaryData.Length); i++)
+                    {
+                        if (rawSummaryData[i].ContainsKey(key) == false)
+                        {                         
+                            master_csv_line = master_csv_line + "," + prevRawSummaryDataLine[i]; 
+                        }
+                        else
+                        {                            
+                            //PLOT value
+                            master_csv_line = master_csv_line + "," + rawSummaryData[i][key];                            
+                            prevRawSummaryDataLine[i] = rawSummaryData[i][key].ToString();
+                        }
+                    }
+                }
+                #endregion Write CSV lines for PLOT Raw Wockets Summary
 
 
                 #region Write CSV line for Sensewear

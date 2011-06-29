@@ -271,7 +271,7 @@ namespace DataMerger
                     for (int i = 0; i < _TotalActigraphs; i++)
                     {
                         line = tr.ReadLine();
-                        this._ActigraphSeconds[i] = Convert.ToDouble(line.Substring(10));
+                        this._ActigraphSeconds[i] = Convert.ToDouble(line.Substring(11));
                     }
                     //line = tr.ReadLine();
                     //this._ActigraphSeconds = Convert.ToDouble(line.Substring(10));
