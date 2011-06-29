@@ -579,6 +579,7 @@ namespace DataMerger
 
 
 
+
         private void button1_Click(object sender, EventArgs e)
         {
             if (converted == true)
@@ -4655,8 +4656,8 @@ namespace DataMerger
                             // [0] time when data is retrieved from the decoder and written to the file
                             // [1] index in the activity count array in the decoder: nextACindex (repeats until Decoders[].ActivityCountIndex)
                             // [2] AC sequence number according to the wocket
-                            // [3] AC time stamp coming from the phone - formatted version of the AC Unixtimestamp
-                            // [4] AC time stamp coming from the phone - formatted as unixtime number
+                            // [3] AC time stamp coming from the phone - human-readable version of the AC UnixTimeStamp
+                            // [4] AC time stamp coming from the phone - UnixTimeStamp value
                             // [5] AC value
 
                             do
@@ -5378,9 +5379,6 @@ namespace DataMerger
                             }
                         }
 
-
-
-
                         csv_line1 = timestamp;
                         csv_line2 = timestamp;
                         csv_line3 = timestamp;
@@ -5738,6 +5736,41 @@ namespace DataMerger
 
                         #endregion Append Wockets Statistics
 
+
+
+                            // JPN - URGENT - Implement to filter values used is AC calculations.
+
+                            //vmag+=Filter(x,0)+Filter(y,1)+Filter(z,2);
+
+
+                            //    if (_wPC>40){   //Skip the first samples
+                            //            if (summary_count==0)
+                            //            {
+                            //                    vmag=vmag/24;
+                            //                    if (vmag>65535)
+                            //                            acount[ci]=65535;
+                            //                    else
+                            //                            acount[ci]=(unsigned short) vmag;
+                            //                    vmag=0;
+                            //                    ++ci;
+                            //                    if (ci==AC_BUFFER_SIZE)
+                            //                            ci=0;
+                            //                    cseq++;
+
+                            //                    if (ci==si)
+                            //                    {
+                            //                            si++;
+                            //                            if (si==AC_BUFFER_SIZE)
+                            //                                    si=0;
+                            //                            sseq++;
+                            //                    }
+                            //                    acount[ci]=0;
+                            //                    summary_count=AC_NUMS;
+                            //            }else
+                            //                    summary_count--;
+                            //    }
+                            //    else if (_wPC==40)
+                            //            vmag=0;
 
 
                             if (rawCurrentSummary != null)
@@ -6485,6 +6518,24 @@ namespace DataMerger
                 rtiCSV.Close();
             #endregion Close all files
 
+        }
+        
+        private int[,] xv = new int[3,41];
+
+        private int Filter(int data, int axis)
+        {
+            int mean = 0;
+            for (int j = 0; (j < 40); j++)
+            {
+                mean+=xv[axis, j];
+                xv[axis, j] = xv[axis, j + 1];
+            }
+            mean=mean/40;
+            xv[axis, j] = data;
+            if (data > mean)
+                return (data-mean);
+            else
+                return (mean-data);
         }
 
 
