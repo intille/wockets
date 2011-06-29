@@ -4651,6 +4651,14 @@ namespace DataMerger
                             summaryReader = new StreamReader(filename);
                             summary_line = summaryReader.ReadLine();//read first line
 
+                            // These are the headers from the log file which will populate the tokens array
+                            // [0] time when data is retrieved from the decoder and written to the file
+                            // [1] index in the activity count array in the decoder: nextACindex (repeats until Decoders[].ActivityCountIndex)
+                            // [2] AC sequence number according to the wocket
+                            // [3] AC time stamp coming from the phone - formatted version of the AC Unixtimestamp
+                            // [4] AC time stamp coming from the phone - formatted as unixtime number
+                            // [5] AC value
+
                             do
                             {
                                 try
@@ -4666,12 +4674,9 @@ namespace DataMerger
                                         string summaryLine = tokens[5];
                                         if (summaryStart == null)
                                             summaryStart = summaryTime.Year + "/" + summaryTime.Month + "/" + summaryTime.Day + " " + summaryTime.Hour + ":" + summaryTime.Minute + ":" + summaryTime.Second;
-
                                         if (summaryStartUnixTime[i]<=0)
                                             summaryStartUnixTime[i] = summaryUnixTime;
-
                                         summaryData[i].Add(summaryKey, summaryLine);
-
                                     }
                                 }
                                 catch (Exception e)
