@@ -172,7 +172,6 @@ namespace Wockets
 
         private static void PostThread()
         {
-            //Here do something
             stayUpThread = new Thread(new ThreadStart(StayUp));
             stayUpThread.Start();
             notdone = false;
