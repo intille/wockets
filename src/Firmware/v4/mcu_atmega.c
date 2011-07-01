@@ -2,7 +2,7 @@
 //
 // File Name    : 'mcu_atmega.c'
 // Title        : MCU Function Definitions 
-// Author       : Fahd Albinali & Selene Mota
+// Author       : Fahd Albinali
 // Created      : 12/10/2008
 // Modified     : 06/27/2011
 // 
