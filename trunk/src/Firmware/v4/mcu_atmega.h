@@ -2,7 +2,7 @@
 //
 // File Name    : 'mcu_atmega.h'
 // Title        : Definitions of ports, pins and function prototypes for all MCU related code
-// Author       : Fahd Albinali & Selene Mota
+// Author       : Fahd Albinali
 // Created      : 12/10/2008
 // Modified     : 06/27/2011
 // 

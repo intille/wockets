@@ -2,7 +2,7 @@
 //
 // File Name    : 'firmware-version_4.c'
 // Title        : Interrupt driven code for the wockets
-// Author       : Fahd Albinali & Selene Mota
+// Author       : Fahd Albinali
 // Created      : 12/10/2008
 // Modified     : 06/16/2011
 // 
