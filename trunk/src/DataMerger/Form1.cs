@@ -2034,6 +2034,7 @@ namespace DataMerger
         public static double WKTRANGE = Math.Pow(2, WKTBITS);
         public static double ACTWKTNORM = ACTRANGE / WKTRANGE;
 
+       
 
         #endregion
 
@@ -2132,6 +2133,9 @@ namespace DataMerger
             int[, ,] wrawData = null; //channel,axis ->data            
             long[,] wtimeData = null; //channel ->timestamp
             int[,] wAUC = null;
+            //JPN
+            int[] wAUCXYZ = null;
+
             double[] wVMAG = null;
             int[] whead = null; //channel ->pointer to the head (circular)
             double[] wRMX = null;
@@ -4176,8 +4180,6 @@ namespace DataMerger
             int RM_DURATION = 1000;
             int RM_SIZE = 0;  
 
-
-
             if ((Directory.Exists(aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY)) && (Directory.GetFiles(aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY).Length>0))
             {
                 wcontroller = new WocketsController("", "", "");
@@ -4550,6 +4552,8 @@ namespace DataMerger
                             wrawData[i,j,k]=-1;
                 wtimeData = new long[wcontroller._Sensors.Count, RM_SIZE];
                 wAUC = new int[wcontroller._Sensors.Count, 3];
+                //JPN
+                wAUCXYZ = new int[wcontroller._Sensors.Count];
                 wVMAG = new double[wcontroller._Sensors.Count];
                 whead = new int[wcontroller._Sensors.Count];
 
@@ -4569,6 +4573,8 @@ namespace DataMerger
                     wVMAG[i] = 0;
                     for (int j = 0; (j < 3); j++)
                         wAUC[i, j] = 0;
+                    //JPN
+                    wAUCXYZ[i] = 0;
                 }
             }
             #endregion Setup Wockets Data
@@ -5190,11 +5196,6 @@ namespace DataMerger
                     #endregion Load Activity Label
                 }
 
-
-                
-
-
-
                 #region If MITes Decoder exist
 
                 double mitesTime = 0;
@@ -5363,6 +5364,7 @@ namespace DataMerger
                                             fb = Math.Abs((rawData[channel, 2, prevHead] - runningMeanZ));
                                             AUC[channel, 2] = AUC[channel, 2] + (int)(((t2 - t1) * ((fa - fb) / 2))*1000);
                                              */
+
                                             AUC[channel, 0] = AUC[channel, 0] + (int)Math.Abs((rawData[channel, 0, headPtr] - runningMeanX));
                                             AUC[channel, 1] = AUC[channel, 1] + (int)Math.Abs((rawData[channel, 1, headPtr] - runningMeanY));
                                             AUC[channel, 2] = AUC[channel, 2] + (int)Math.Abs((rawData[channel, 2, headPtr] - runningMeanZ));
@@ -5519,8 +5521,6 @@ namespace DataMerger
 
             #endregion if there is MITes data
 
-
-
                 #region If Wockets Decoder exist
 
                 if (wcontroller != null)
@@ -5540,14 +5540,10 @@ namespace DataMerger
                             wtimeData[wcontroller._Sensors[i]._ID, whead[wcontroller._Sensors[i]._ID]] = (long)Convert.ToDouble(wocketsTokens[0]);
                             wunixtimestamp[i] = Convert.ToDouble(wocketsTokens[0]);                                           
                             whead[wcontroller._Sensors[i]._ID] = (whead[wcontroller._Sensors[i]._ID] + 1) % RM_SIZE;
-               
                         }
-
                     }
 
                     #endregion Load Wockets data if needed
-
-
 
                     #region Calculate Statistics
 
@@ -5562,8 +5558,7 @@ namespace DataMerger
                         if (wheadPtr < 0)
                             wheadPtr = RM_SIZE-1;
 
-                        
-                        
+
                         #region compute running means
 
                         while ((wtimeData[wcontroller._Sensors[i]._ID, wheadPtr] > 0) && (wheadPtr != whead[wcontroller._Sensors[i]._ID]) && (wnumMeanPts <= (RM_SIZE-1)))
@@ -5624,7 +5619,7 @@ namespace DataMerger
 
                                 int wprevHead = wheadPtr - 1;
                                 if (wprevHead < 0)
-                                    wprevHead = (RM_SIZE-1);
+                                    wprevHead = (RM_SIZE - 1);
 
 
                                 double wt2 = wtimeData[wcontroller._Sensors[i]._ID, wheadPtr];
@@ -5632,13 +5627,19 @@ namespace DataMerger
                                 if ((wt2 > 0) & (wt1 > 0))
                                 {
 
-                                    
+
                                     wAUC[wcontroller._Sensors[i]._ID, 0] = wAUC[wcontroller._Sensors[i]._ID, 0] + (int)Math.Abs((wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr] - wrunningMeanX));
                                     wAUC[wcontroller._Sensors[i]._ID, 1] = wAUC[wcontroller._Sensors[i]._ID, 1] + (int)Math.Abs((wrawData[wcontroller._Sensors[i]._ID, 1, wheadPtr] - wrunningMeanY));
                                     wAUC[wcontroller._Sensors[i]._ID, 2] = wAUC[wcontroller._Sensors[i]._ID, 2] + (int)Math.Abs((wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr] - wrunningMeanZ));
-                                    wVMAG[wcontroller._Sensors[i]._ID] = wVMAG[wcontroller._Sensors[i]._ID] + Math.Sqrt(Math.Pow((double)(wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr] - wrunningMeanX), 2.0) + Math.Pow((double)(wrawData[wcontroller._Sensors[i]._ID, 1, wheadPtr] - wrunningMeanY), 2.0) + Math.Pow((double)(wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr] - wrunningMeanZ), 2.0));
-                                }
 
+                                    //JPN
+                                    //int myRawAC = wAUCXYZ[channel] + wAUC[channel, 0] + wAUC[channel, 1] + wAUC[channel, 2];
+                                    //myRawAC /= 24;
+                                    //wAUCXYZ[channel] = (myRawAC > 65535 ? 65535 : myRawAC);
+
+                                    wVMAG[wcontroller._Sensors[i]._ID] = wVMAG[wcontroller._Sensors[i]._ID] + Math.Sqrt(Math.Pow((double)(wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr] - wrunningMeanX), 2.0) + Math.Pow((double)(wrawData[wcontroller._Sensors[i]._ID, 1, wheadPtr] - wrunningMeanY), 2.0) + Math.Pow((double)(wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr] - wrunningMeanZ), 2.0));
+
+                                }
                             }
 
                             wheadPtr--;
@@ -5664,6 +5665,8 @@ namespace DataMerger
                         wAUC[wcontroller._Sensors[i]._ID, 0] = 0;
                         wAUC[wcontroller._Sensors[i]._ID, 1] = 0;
                         wAUC[wcontroller._Sensors[i]._ID, 2] = 0;
+                        //JPN
+                        wAUCXYZ[wcontroller._Sensors[i]._ID] = 0;
                         wVMAG[wcontroller._Sensors[i]._ID] = 0;
                         
                         
@@ -5672,6 +5675,12 @@ namespace DataMerger
                             wAUC[wcontroller._Sensors[i]._ID, 0] = wAUC[wcontroller._Sensors[i]._ID, 0] + (int)Math.Abs((wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr] - wrunningMeanX));
                             wAUC[wcontroller._Sensors[i]._ID, 1] = wAUC[wcontroller._Sensors[i]._ID, 1] + (int)Math.Abs((wrawData[wcontroller._Sensors[i]._ID, 1, wheadPtr] - wrunningMeanY));
                             wAUC[wcontroller._Sensors[i]._ID, 2] = wAUC[wcontroller._Sensors[i]._ID, 2] + (int)Math.Abs((wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr] - wrunningMeanZ));
+
+                            //JPN
+                            int myRawAC = wAUCXYZ[wcontroller._Sensors[i]._ID] + wAUC[wcontroller._Sensors[i]._ID, 0] + wAUC[wcontroller._Sensors[i]._ID, 1] + wAUC[wcontroller._Sensors[i]._ID, 2];
+                            myRawAC /= 24;
+                            wAUCXYZ[wcontroller._Sensors[i]._ID] = (myRawAC > 65535 ? 65535 : myRawAC);
+
                             wVMAG[wcontroller._Sensors[i]._ID] = wVMAG[wcontroller._Sensors[i]._ID] + Math.Sqrt(Math.Pow((double)(wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr] - wrunningMeanX), 2.0) + Math.Pow((double)(wrawData[wcontroller._Sensors[i]._ID, 1, wheadPtr] - wrunningMeanY), 2.0) + Math.Pow((double)(wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr] - wrunningMeanZ), 2.0));
                         }
 
@@ -5734,64 +5743,22 @@ namespace DataMerger
                             master_csv_line += ((double)wRMSize[sensor_id]).ToString("00.00") + ",";
                             master_csv_line += ((double)(wVMAG[sensor_id] / (double)wacCounters[sensor_id])).ToString("00.00");
 
-                        #endregion Append Wockets Statistics
+                            #endregion Append Wockets Statistics
 
-
-
-                            // JPN - URGENT - Implement to filter values used is AC calculations.
-
-                            //vmag+=Filter(x,0)+Filter(y,1)+Filter(z,2);
-
-
-                            //    if (_wPC>40){   //Skip the first samples
-                            //            if (summary_count==0)
-                            //            {
-                            //                    vmag=vmag/24;
-                            //                    if (vmag>65535)
-                            //                            acount[ci]=65535;
-                            //                    else
-                            //                            acount[ci]=(unsigned short) vmag;
-                            //                    vmag=0;
-                            //                    ++ci;
-                            //                    if (ci==AC_BUFFER_SIZE)
-                            //                            ci=0;
-                            //                    cseq++;
-
-                            //                    if (ci==si)
-                            //                    {
-                            //                            si++;
-                            //                            if (si==AC_BUFFER_SIZE)
-                            //                                    si=0;
-                            //                            sseq++;
-                            //                    }
-                            //                    acount[ci]=0;
-                            //                    summary_count=AC_NUMS;
-                            //            }else
-                            //                    summary_count--;
-                            //    }
-                            //    else if (_wPC==40)
-                            //            vmag=0;
-
-
+                            //JPN
                             if (rawCurrentSummary != null)
                             {
-                                //sum the raw ACs for each accelerometer axis (X,Y,Z) per second for each sensor
-                                rawCurrentSummary[wcontroller._Sensors[i]._ID] += (int)((double)(wAUC[wcontroller._Sensors[i]._ID, 0] + 
-                                                                                    wAUC[wcontroller._Sensors[i]._ID, 1] + 
-                                                                                    wAUC[wcontroller._Sensors[i]._ID, 2]));
-
-                                //increase the AC counter for each sensor
-                                rawSummaryCounter[wcontroller._Sensors[i]._ID] = rawSummaryCounter[wcontroller._Sensors[i]._ID] + 1;
-
-
-                                //update the unix counter for the AC per minute calculation 
+                                //JPN: sum the raw ACs for each accelerometer axis (X,Y,Z) per second for each sensor
+                                rawCurrentSummary[wcontroller._Sensors[i]._ID] += wAUCXYZ[wcontroller._Sensors[i]._ID];
+                                
+                                //JPN: increase the AC counter for each sensor
+                                rawSummaryCounter[wcontroller._Sensors[i]._ID]++;
+                               
+                                //JPN: update the unix counter for the AC per minute calculation 
                                 if (prevUnixTime[wcontroller._Sensors[i]._ID] == -1)
-                                {
                                     prevUnixTime[wcontroller._Sensors[i]._ID] = currentUnixTime;
-                                }
-
-
-                                //If finished to compute the per minute AC, clean the variables 
+                               
+                                //JPN: If finished, compute the per minute AC, clean the variables 
                                 if ((currentUnixTime - prevUnixTime[wcontroller._Sensors[i]._ID]) > 60000)
                                 {
                                     rawSummaryData[wcontroller._Sensors[i]._ID].Add(key, rawCurrentSummary[wcontroller._Sensors[i]._ID]);
@@ -5799,11 +5766,7 @@ namespace DataMerger
                                     rawSummaryCounter[wcontroller._Sensors[i]._ID] = 0;
                                     prevUnixTime[wcontroller._Sensors[i]._ID] = currentUnixTime;
                                 }
-
-
                             }
-
-
                         }
                         else
                         {
@@ -5843,7 +5806,8 @@ namespace DataMerger
                         wVMAG[sensor_id] = 0;
                         for (int j = 0; (j < 3); j++)
                             wAUC[sensor_id, j] = 0;
-
+                        //JPN
+                        wAUCXYZ[sensor_id] = 0;
                        
                     }
 
@@ -6520,12 +6484,13 @@ namespace DataMerger
 
         }
         
-        private int[,] xv = new int[3,41];
+        private static int[,] xv = new int[3,41];
 
-        private int Filter(int data, int axis)
+        private static int Filter(int data, int axis)
         {
             int mean = 0;
-            for (int j = 0; (j < 40); j++)
+            int j = 0;
+            for (; (j < 40); j++)
             {
                 mean+=xv[axis, j];
                 xv[axis, j] = xv[axis, j + 1];
