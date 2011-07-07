@@ -1574,8 +1574,6 @@ namespace DataMerger
 
                 summary += "<TR>\n<td><div align=\"center\"><strong>Sensewear</strong></div></td><td>" + (sensewearStart == null ? "&nbsp;" : sensewearStart) + "</td><td>" + (hasSensewear ? "Yes" : "No") + "</td><td>" + sensewearRecords + "</td><td>" + sensewearLoss.ToString("0") + "%</td></TR>\n";
 
-
-
                 summary += "<TR>\n<td><div align=\"center\"><strong>Actigraph</strong></div></td><td>" + (actigraphStart == null ? "&nbsp;" : actigraphStart) + "</td><td>" + (hasActigraph ? "Yes" : "No") + "</td><td>";
 
                 for (int r = 0; (r < actigraphData.Length); r++)
@@ -1986,10 +1984,12 @@ namespace DataMerger
         public static string ANNOTATION_INTERVALS_FILE = "AnnotationIntervals.xml";
         private List<string> annotation_intervals_file_list = new List<string>();
         private List<string> annotation_subdirectory_list = new List<string>();
-       
-        //variables for storing prev summary data value for PLOT
-        private static string[] prevRawSummaryDataLine;
-        private static string[] prevSummaryDataLine; 
+
+        //JPN: Declare array for storing previous summary data value for PLOT WRAC
+        private static string[] prevWRACPlotDataLine;
+
+        //JPN: Declare array for storing previous summary data value for PLOT WFAC
+        private static string[] prevWFACPlotDataLine; 
 
         public static string CSVProgress = "";
         public static bool hasActigraph = false;
@@ -2042,26 +2042,31 @@ namespace DataMerger
 
         #region Generate the Summary Files
 
-        static TextWriter[] summaryCSV;
-        static Hashtable[] summaryData;
-        //static int[] rawSummaryData;
-        static Hashtable[] rawSummaryData;
-        static TextWriter[] rawSummaryCSV;
-        private static int[] rawCurrentSummary ;
-        private static int[] rawSummaryCounter;
         private static double[] prevUnixTime;
         private static double[] summaryStartUnixTime;
+
+        private static TextWriter[] wWFACSummaryCSV;
+        private static Hashtable[] wWFACData;
+
+        //JPN: Declare textwriter array for outputting WRAC values
+        private static TextWriter[] wWRACSummaryCSV;
+
+        //JPN: Declare array to store the running total of AUC summations for WRAC calculations
+        private static int[] wWRACSummation;
+
+        //JPN: Declare hashtable array for storing WRAC sampling rates for each minute
+        static Hashtable[] wWRACSamplingRate;
+
+        //JPN: Declare hashtable array for storing Wockets Raw Activity Count (WRAC) values to be inserted into CSV file
+        static Hashtable[] wWRACData;
         
-
-
-        public static void toCSV(string aDataDirectory, string masterDirectory, int maxControllers, string[] filter)
+                public static void toCSV(string aDataDirectory, string masterDirectory, int maxControllers, string[] filter)
         {
-
 
 
             #region Declare Variables
 
-            double previousUnixTime = -1;
+            //double previousUnixTime = -1;
 
 
             //------ Annotation Variables ------//
@@ -2129,13 +2134,17 @@ namespace DataMerger
             int[] wprevZ = null;
             int[] wacCounters = null;
 
+            //JPN: Declare array to track number of samples per minute for WRAC
+            int[] wWRACCounterMinute = null;
+
             //Variables to store raw data,running mean and areas under curve
             int[, ,] wrawData = null; //channel,axis ->data            
             long[,] wtimeData = null; //channel ->timestamp
             int[,] wAUC = null;
-            //JPN
+            
+            //JPN: Declare array to store combined AUC used in calculating WRAC
             int[] wAUCXYZ = null;
-
+     
             double[] wVMAG = null;
             int[] whead = null; //channel ->pointer to the head (circular)
             double[] wRMX = null;
@@ -4531,18 +4540,17 @@ namespace DataMerger
                 wprevY = new int[wcontroller._Sensors.Count];
                 wprevZ = new int[wcontroller._Sensors.Count];
                 wacCounters = new int[wcontroller._Sensors.Count];
-                 for (int k = 0; (k < wprevX.Length); k++)
+
+                //JPN: Dimension array used to store number of samples per minute for WRAC
+                wWRACCounterMinute = new int[wcontroller._Sensors.Count];
+                
+                for (int k = 0; (k < wprevX.Length); k++)
                 {
                     wprevX[k] = -1;
                     wprevY[k] = -1;
                     wprevZ[k] = -1;
 
                  }
-
-
-
-
-
 
                 //Initialize arrays based on number of sensors
                 wrawData = new int[wcontroller._Sensors.Count, 3, RM_SIZE];
@@ -4552,8 +4560,10 @@ namespace DataMerger
                             wrawData[i,j,k]=-1;
                 wtimeData = new long[wcontroller._Sensors.Count, RM_SIZE];
                 wAUC = new int[wcontroller._Sensors.Count, 3];
-                //JPN
+                
+                //JPN: Dimension array to store combined AUC counts for all axes
                 wAUCXYZ = new int[wcontroller._Sensors.Count];
+
                 wVMAG = new double[wcontroller._Sensors.Count];
                 whead = new int[wcontroller._Sensors.Count];
 
@@ -4573,7 +4583,8 @@ namespace DataMerger
                     wVMAG[i] = 0;
                     for (int j = 0; (j < 3); j++)
                         wAUC[i, j] = 0;
-                    //JPN
+                    
+                    //JPN: Initialize array to store combined AUC counts for all axes
                     wAUCXYZ[i] = 0;
                 }
             }
@@ -4607,26 +4618,39 @@ namespace DataMerger
                     }
                 }
 
-                summaryCSV = new TextWriter[CurrentWockets._Controller._Sensors.Count];
-                rawSummaryCSV = new TextWriter[CurrentWockets._Controller._Sensors.Count];
-                summaryData = new Hashtable[CurrentWockets._Controller._Sensors.Count];
-                //rawSummaryData = new int[CurrentWockets._Controller._Sensors.Count];
-                rawSummaryData = new Hashtable[CurrentWockets._Controller._Sensors.Count];
-                rawCurrentSummary = new int[CurrentWockets._Controller._Sensors.Count];
-                rawSummaryCounter = new int[CurrentWockets._Controller._Sensors.Count];
+                //JPN: Dimension textwriter array for outputting WFAC values
+                wWFACSummaryCSV = new TextWriter[CurrentWockets._Controller._Sensors.Count];
+
+                //JPN: Dimension textwriter array for outputting WRAC values
+                wWRACSummaryCSV = new TextWriter[CurrentWockets._Controller._Sensors.Count];
+
+                //JPN: Dimension array for storing WFAC output data
+                wWFACData = new Hashtable[CurrentWockets._Controller._Sensors.Count];
+
+                //JPN: Dimension array for storing WRAC output data
+                wWRACData = new Hashtable[CurrentWockets._Controller._Sensors.Count];
+
+                //JPN: Dimension array for storing WRAC running summs
+                wWRACSummation = new int[CurrentWockets._Controller._Sensors.Count];
+
+                //JPN: Dimension array for storing WRAC sampling rates for each minute
+                wWRACSamplingRate = new Hashtable[CurrentWockets._Controller._Sensors.Count];
+
                 prevUnixTime = new double[CurrentWockets._Controller._Sensors.Count];
                 summaryStartUnixTime = new double[CurrentWockets._Controller._Sensors.Count];
 
-                // initialiaing previous line array for PLOT Summary Data
-                prevSummaryDataLine = new string[CurrentWockets._Controller._Sensors.Count];
-                for (int i = 0; i < prevSummaryDataLine.Length; i++)
+                //JPN: Initialize previous line array for PLOT WFAC data
+                prevWFACPlotDataLine = new string[CurrentWockets._Controller._Sensors.Count];
+                for (int i = 0; i < prevWFACPlotDataLine.Length; i++)
                 {
-                    prevSummaryDataLine[i] = "0";
+                    prevWFACPlotDataLine[i] = "0";
                 }
-                prevRawSummaryDataLine =  new string[CurrentWockets._Controller._Sensors.Count];
-                for (int i = 0; i < prevRawSummaryDataLine.Length; i++)
+
+                //JPN: Initialize previous line array for PLOT WRAC data
+                prevWRACPlotDataLine =  new string[CurrentWockets._Controller._Sensors.Count];
+                for (int i = 0; i < prevWRACPlotDataLine.Length; i++)
                 {
-                    prevRawSummaryDataLine[i] = "0";
+                    prevWRACPlotDataLine[i] = "0";
                 }
 
                 try
@@ -4634,12 +4658,22 @@ namespace DataMerger
 
                     for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
                     {
-                        summaryCSV[i] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Wocket_" + i.ToString("00") + "_Summary.csv");
-                        rawSummaryCSV[i] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Wocket_" + i.ToString("00") + "_RawSummary.csv");
-                        summaryData[i] = new Hashtable();
-                        rawSummaryData[i] = new Hashtable();
-                        rawCurrentSummary[i] = 0;
-                        rawSummaryCounter[i] = 0;
+                        wWFACSummaryCSV[i] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Wocket_" + i.ToString("00") + "_WFAC.csv");
+                        
+                        //JPN: Initialize textwriter array for outputting WRAC values for each sensor
+                        wWRACSummaryCSV[i] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Wocket_" + i.ToString("00") + "_WRAC.csv");
+                        
+                        wWFACData[i] = new Hashtable();
+                        
+                        //JPN: Initialze array for storing WRAC values for each sensor
+                        wWRACData[i] = new Hashtable();
+
+                        //JPN: Initialize array for storing WRAC running sums for each sensor
+                        wWRACSummation[i] = 0;
+
+                        //JPN: Initialize array for storing WRAC sampling rates for each minute
+                        wWRACSamplingRate[i] = new Hashtable();
+
                         prevUnixTime[i] = -1;
                         summaryStartUnixTime[i] = 0;
                     }
@@ -4658,7 +4692,7 @@ namespace DataMerger
                             summaryReader = new StreamReader(filename);
                             summary_line = summaryReader.ReadLine();//read first line
 
-                            // These are the headers from the log file which will populate the tokens array
+                            // JPN: These are the headers from the log file which will populate the tokens array
                             // [0] time when data is retrieved from the decoder and written to the file
                             // [1] index in the activity count array in the decoder: nextACindex (repeats until Decoders[].ActivityCountIndex)
                             // [2] AC sequence number according to the wocket
@@ -4683,7 +4717,7 @@ namespace DataMerger
                                             summaryStart = summaryTime.Year + "/" + summaryTime.Month + "/" + summaryTime.Day + " " + summaryTime.Hour + ":" + summaryTime.Minute + ":" + summaryTime.Second;
                                         if (summaryStartUnixTime[i]<=0)
                                             summaryStartUnixTime[i] = summaryUnixTime;
-                                        summaryData[i].Add(summaryKey, summaryLine);
+                                        wWFACData[i].Add(summaryKey, summaryLine);
                                     }
                                 }
                                 catch (Exception e)
@@ -4726,46 +4760,43 @@ namespace DataMerger
 
             #endregion Actigraph Summary Header
 
-
             #region Wockets Summary Header
 
-            if (summaryData != null)
+            if (wWFACData != null)
             {
                 //commented because headers are incorrect
-                //for (int i = 0; (i < summaryData.Length); i++)
+                //for (int i = 0; (i < wWFACData.Length); i++)
                 //{
                 //    master_csv_header += ",WocketSummary" + i.ToString("00") + ",RawWocketSummary" + i.ToString("00");
-                //    summaryCSV[i].WriteLine(summary_csv_header);
+                //    wWFACSummaryCSV[i].WriteLine(summary_csv_header);
                 //}
 
-                for (int i = 0; (i < summaryData.Length); i++)
+                for (int i = 0; (i < wWFACData.Length); i++)
                 {
-                    master_csv_header += ",Wocket_PerMinute_AC_" + i.ToString("00");  
-                    summaryCSV[i].WriteLine(summary_csv_header);
+                    master_csv_header += ",Wocket_PerMinute_WFAC_" + i.ToString("00");  
+                    wWFACSummaryCSV[i].WriteLine(summary_csv_header);
                 }
 
-                for (int i = 0; (i < summaryData.Length); i++)
+                for (int i = 0; (i < wWFACData.Length); i++)
                 {
-                    master_csv_header += ",Wocket_PerMinute_AUC_XYZ_RawData_" + i.ToString("00");
+                    master_csv_header += ",Wocket_PerMinute_WRAC_" + i.ToString("00");
                 }
 
                 //Wocket Firmware Activity Counts for Plotting
-                for (int i = 0; (i < summaryData.Length); i++)
+                for (int i = 0; (i < wWFACData.Length); i++)
                 {
-                    master_csv_header += ",PLOT_Wocket_PerMinute_AC_" + i.ToString("00");
+                    master_csv_header += ",PLOT_Wocket_PerMinute_WFAC_" + i.ToString("00");
                 }
 
                 //Wocket Raw Data Activity Counts for Plotting
-                for (int i = 0; (i < summaryData.Length); i++)
+                for (int i = 0; (i < wWFACData.Length); i++)
                 {
-                    master_csv_header += ",PLOT_Wocket_PerMinute_AUC_XYZ_RawData_" + i.ToString("00");
+                    master_csv_header += ",PLOT_Wocket_PerMinute_WRAC_" + i.ToString("00");
                 }
 
             }
 
             #endregion Wockets Summary Header
-
-
 
             #region Other Sensors Headers
 
@@ -4813,10 +4844,6 @@ namespace DataMerger
 
 
             #endregion Other Sensors Headers
-
-
-
-
 
 
             int year = 0;
@@ -4900,7 +4927,6 @@ namespace DataMerger
             
             #endregion If there is MITES data
 
-
             #region If there is Wockets data
 
             //check wockets start and end times
@@ -4971,7 +4997,6 @@ namespace DataMerger
             #endregion If there is Wockets data
 
 
-
             //sele check
             #region check annotation start and end times
             
@@ -5024,7 +5049,7 @@ namespace DataMerger
 
 
 
-            if (summaryData != null)
+            if (wWFACData != null)
             {
                 for (int i = 0; (i < wcontroller._Sensors.Count); i++)
                 {
@@ -5073,10 +5098,10 @@ namespace DataMerger
                     actigraph_csv_line[i] = "";
 
                 string[] summary_csv_line = null; 
-                if (summaryData != null)
+                if (wWFACData != null)
                 {
-                    summary_csv_line = new string[summaryData.Length];
-                    for (int i = 0; (i < summaryData.Length); i++)
+                    summary_csv_line = new string[wWFACData.Length];
+                    for (int i = 0; (i < wWFACData.Length); i++)
                         summary_csv_line[i] = "";
                 }
 
@@ -5114,15 +5139,14 @@ namespace DataMerger
       
                 #region Setup prefix of CSV lines
 
-
                 master_csv_line = timestamp;
                 hr_csv_line = timestamp;
                 for (int i = 0; (i < actigraphData.Length); i++)
                     actigraph_csv_line[i] = timestamp;
 
-                if (summaryData != null)
+                if (wWFACData != null)
                 {
-                    for (int i = 0; (i < summaryData.Length); i++)
+                    for (int i = 0; (i < wWFACData.Length); i++)
                         summary_csv_line[i] = timestamp;
                 }
                 sensewear_csv_line = timestamp;
@@ -5610,6 +5634,9 @@ namespace DataMerger
                                     waverageZ[wcontroller._Sensors[i]._ID] = waverageZ[wcontroller._Sensors[i]._ID] + Math.Abs(wprevZ[wcontroller._Sensors[i]._ID] - wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr]);
                                     waverageRawZ[wcontroller._Sensors[i]._ID] = waverageRawZ[wcontroller._Sensors[i]._ID] + wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr];
                                     wacCounters[wcontroller._Sensors[i]._ID] = wacCounters[wcontroller._Sensors[i]._ID] + 1;
+                                    
+                                    //JPN: Increment counter used to determine samples per minute for WRAC calculations
+                                    wWRACCounterMinute[wcontroller._Sensors[i]._ID]++;
                                 }
 
                                 wprevX[wcontroller._Sensors[i]._ID] = wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr];
@@ -5627,18 +5654,11 @@ namespace DataMerger
                                 if ((wt2 > 0) & (wt1 > 0))
                                 {
 
-
                                     wAUC[wcontroller._Sensors[i]._ID, 0] = wAUC[wcontroller._Sensors[i]._ID, 0] + (int)Math.Abs((wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr] - wrunningMeanX));
                                     wAUC[wcontroller._Sensors[i]._ID, 1] = wAUC[wcontroller._Sensors[i]._ID, 1] + (int)Math.Abs((wrawData[wcontroller._Sensors[i]._ID, 1, wheadPtr] - wrunningMeanY));
                                     wAUC[wcontroller._Sensors[i]._ID, 2] = wAUC[wcontroller._Sensors[i]._ID, 2] + (int)Math.Abs((wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr] - wrunningMeanZ));
 
-                                    //JPN
-                                    //int myRawAC = wAUCXYZ[channel] + wAUC[channel, 0] + wAUC[channel, 1] + wAUC[channel, 2];
-                                    //myRawAC /= 24;
-                                    //wAUCXYZ[channel] = (myRawAC > 65535 ? 65535 : myRawAC);
-
                                     wVMAG[wcontroller._Sensors[i]._ID] = wVMAG[wcontroller._Sensors[i]._ID] + Math.Sqrt(Math.Pow((double)(wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr] - wrunningMeanX), 2.0) + Math.Pow((double)(wrawData[wcontroller._Sensors[i]._ID, 1, wheadPtr] - wrunningMeanY), 2.0) + Math.Pow((double)(wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr] - wrunningMeanZ), 2.0));
-
                                 }
                             }
 
@@ -5665,21 +5685,24 @@ namespace DataMerger
                         wAUC[wcontroller._Sensors[i]._ID, 0] = 0;
                         wAUC[wcontroller._Sensors[i]._ID, 1] = 0;
                         wAUC[wcontroller._Sensors[i]._ID, 2] = 0;
-                        //JPN
+                        
+                        //JPN: Reset combined AUC array for next second
                         wAUCXYZ[wcontroller._Sensors[i]._ID] = 0;
+                        
                         wVMAG[wcontroller._Sensors[i]._ID] = 0;
-                        
-                        
+
                         for (int k = 0; (k < RM_SIZE); k++)
                         {
                             wAUC[wcontroller._Sensors[i]._ID, 0] = wAUC[wcontroller._Sensors[i]._ID, 0] + (int)Math.Abs((wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr] - wrunningMeanX));
                             wAUC[wcontroller._Sensors[i]._ID, 1] = wAUC[wcontroller._Sensors[i]._ID, 1] + (int)Math.Abs((wrawData[wcontroller._Sensors[i]._ID, 1, wheadPtr] - wrunningMeanY));
                             wAUC[wcontroller._Sensors[i]._ID, 2] = wAUC[wcontroller._Sensors[i]._ID, 2] + (int)Math.Abs((wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr] - wrunningMeanZ));
 
-                            //JPN
-                            int myRawAC = wAUCXYZ[wcontroller._Sensors[i]._ID] + wAUC[wcontroller._Sensors[i]._ID, 0] + wAUC[wcontroller._Sensors[i]._ID, 1] + wAUC[wcontroller._Sensors[i]._ID, 2];
+                            //JPN: Sum AUC values for each axis for the current sample and add to a running total for the current second
+                            double myRawAC = wAUCXYZ[wcontroller._Sensors[i]._ID] + wAUC[wcontroller._Sensors[i]._ID, 0] + wAUC[wcontroller._Sensors[i]._ID, 1] + wAUC[wcontroller._Sensors[i]._ID, 2];
+                            //JPN: Divide running total by the scaling factor used in Wockets Firmware Activity Counts (WFAC)
                             myRawAC /= 24;
-                            wAUCXYZ[wcontroller._Sensors[i]._ID] = (myRawAC > 65535 ? 65535 : myRawAC);
+                            //JPN: Trim oversized values to match integer size of WFAC calculations and add to combined AUC array for WRAC
+                            wAUCXYZ[wcontroller._Sensors[i]._ID] += (myRawAC > 65535 ? 65535 : (int)myRawAC);
 
                             wVMAG[wcontroller._Sensors[i]._ID] = wVMAG[wcontroller._Sensors[i]._ID] + Math.Sqrt(Math.Pow((double)(wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr] - wrunningMeanX), 2.0) + Math.Pow((double)(wrawData[wcontroller._Sensors[i]._ID, 1, wheadPtr] - wrunningMeanY), 2.0) + Math.Pow((double)(wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr] - wrunningMeanZ), 2.0));
                         }
@@ -5745,25 +5768,30 @@ namespace DataMerger
 
                             #endregion Append Wockets Statistics
 
-                            //JPN
-                            if (rawCurrentSummary != null)
+                            //JPN: If WRAC sums are available
+                            if (wWRACSummation != null)
                             {
-                                //JPN: sum the raw ACs for each accelerometer axis (X,Y,Z) per second for each sensor
-                                rawCurrentSummary[wcontroller._Sensors[i]._ID] += wAUCXYZ[wcontroller._Sensors[i]._ID];
+                                //JPN: Sum the raw ACs for each accelerometer axis (X,Y,Z) per second for each sensor
+                                wWRACSummation[wcontroller._Sensors[i]._ID] += wAUCXYZ[wcontroller._Sensors[i]._ID];
                                 
-                                //JPN: increase the AC counter for each sensor
-                                rawSummaryCounter[wcontroller._Sensors[i]._ID]++;
-                               
-                                //JPN: update the unix counter for the AC per minute calculation 
+                                //JPN: Update the unix counter for the AC per minute calculation 
                                 if (prevUnixTime[wcontroller._Sensors[i]._ID] == -1)
                                     prevUnixTime[wcontroller._Sensors[i]._ID] = currentUnixTime;
                                
-                                //JPN: If finished, compute the per minute AC, clean the variables 
+                                //JPN: If one minute has elapsed, computer WRAC for this sensor
                                 if ((currentUnixTime - prevUnixTime[wcontroller._Sensors[i]._ID]) > 60000)
                                 {
-                                    rawSummaryData[wcontroller._Sensors[i]._ID].Add(key, rawCurrentSummary[wcontroller._Sensors[i]._ID]);
-                                    rawCurrentSummary[wcontroller._Sensors[i]._ID] = 0;
-                                    rawSummaryCounter[wcontroller._Sensors[i]._ID] = 0;
+                                    //JPN: Add the last minute's worth of WRAC data to the final array
+                                    wWRACData[wcontroller._Sensors[i]._ID][key] = Convert.ToInt32(wWRACData[wcontroller._Sensors[i]._ID][key]) + wWRACSummation[wcontroller._Sensors[i]._ID];
+                                    
+                                    //JPN: Compute sampling rate for this WRAC by dividing number of samples by 60 seconds
+                                    wWRACSamplingRate[wcontroller._Sensors[i]._ID][key] = (double)wWRACCounterMinute[wcontroller._Sensors[i]._ID] / 60;
+                                    
+                                    //JPN: Reset arrays used to compute WRAC
+                                    wWRACSummation[wcontroller._Sensors[i]._ID] = 0;
+                                    wWRACCounterMinute[wcontroller._Sensors[i]._ID] = 0;
+
+                                    //JPN: Mark the start of the next epoch for WRAC calcluation
                                     prevUnixTime[wcontroller._Sensors[i]._ID] = currentUnixTime;
                                 }
                             }
@@ -5806,7 +5834,8 @@ namespace DataMerger
                         wVMAG[sensor_id] = 0;
                         for (int j = 0; (j < 3); j++)
                             wAUC[sensor_id, j] = 0;
-                        //JPN
+                        
+                        //JPN: reset AUC summation for next second's WRAC calculation
                         wAUCXYZ[sensor_id] = 0;
                        
                     }
@@ -5817,13 +5846,9 @@ namespace DataMerger
 
             #endregion If Wockets Decoder Exist
 
-
-
             #region Write the CSV lines for each sensor
 
-
                 #region Write CSV lines for Actigraphs
-
                 
                 for (int i = 0; (i < actigraphData.Length); i++)
                 {
@@ -5866,99 +5891,106 @@ namespace DataMerger
                         
                     }
                 }
+
                 #endregion Write CSV lines for Actigraphs
 
-               
+                #region Write CSV lines for Wockets Firmware Activity Counts (WFAC)
 
-                #region Write CSV lines for Wockets Summary
-
-                if (summaryData != null)
+                if (wWFACData != null)
                 {
-                    for (int i = 0; (i < summaryData.Length); i++)
+                    for (int i = 0; (i < wWFACData.Length); i++)
                     {
-                        if (summaryData[i].ContainsKey(key) == false)
+                        if (wWFACData[i].ContainsKey(key) == false)
                         {
-                            summaryCSV[i].WriteLine(summary_csv_line[i] + ",");
+                            wWFACSummaryCSV[i].WriteLine(summary_csv_line[i] + ",");
                             master_csv_line = master_csv_line + ",";                            
                         }
                         else
                         {
-                            string myline = summary_csv_line[i] + "," + summaryData[i][key];
-                            summaryCSV[i].WriteLine(summary_csv_line[i] + "," + summaryData[i][key]);
-                            master_csv_line = master_csv_line + "," + summaryData[i][key];
-                        }
-                    }
-                }                
-
-                #endregion Write CSV lines for Wockets Summary
-
-
-                #region Write CSV lines for Raw Wockets Summary
-                
-                
-                if (rawSummaryData != null)
-                {
-                    for (int i = 0; (i < rawSummaryData.Length); i++)
-                    {
-                        if (rawSummaryData[i].ContainsKey(key) == false)
-                        {
-                            rawSummaryCSV[i].WriteLine(summary_csv_line[i] + ",");
-                            master_csv_line = master_csv_line + ",";                            
-                        }
-                        else
-                        {
-                            string myline = summary_csv_line[i] + "," + rawSummaryData[i][key];         
-                            rawSummaryCSV[i].WriteLine(summary_csv_line[i] + "," + rawSummaryData[i][key]);
-                            master_csv_line = master_csv_line + "," + rawSummaryData[i][key];
-                        }
-                    }
-                }    
-                #endregion Write CSV lines for Raw Wockets Summary
-
-
-                #region Write CSV lines for PLOT Wockets Summary
-                if (summaryData != null)
-                {
-                    for (int i = 0; (i < summaryData.Length); i++)
-                    {
-                        if (summaryData[i].ContainsKey(key) == false)
-                        {
-                            //summaryCSV[i].WriteLine(summary_csv_line[i] + ",");                            
-                            master_csv_line = master_csv_line + "," + prevSummaryDataLine[i] ;
-                        }
-                        else
-                        {
-                            //PLOT value
-                            master_csv_line = master_csv_line + "," + summaryData[i][key];
-                            prevSummaryDataLine[i] = summaryData[i][key].ToString();
+                            wWFACSummaryCSV[i].WriteLine(summary_csv_line[i] + "," + wWFACData[i][key]);
+                            master_csv_line = master_csv_line + "," + wWFACData[i][key];
                         }
                     }
                 }
-                #endregion Write CSV lines for PLOT Wockets Summary
 
-                #region Write CSV lines for PLOT Raw Wockets Summary
-                
-                
-                if (rawSummaryData != null)
+                #endregion Write CSV lines for Wockets Firmware Activity Counts (WFAC)
+
+                #region Write CSV lines for Wockets Raw Activity Counts (WRAC)
+
+                //JPN: If WRAC data is available, add that to the summary spreadsheets
+                if (wWRACData != null)
                 {
-                    for (int i = 0; (i < rawSummaryData.Length); i++)
+                    //JPN: Iterate through each sensor
+                    for (int i = 0; (i < wWRACData.Length); i++)
                     {
-                        if (rawSummaryData[i].ContainsKey(key) == false)
+                        //JPN: Write blank data column if the current sample is not the start of a new WRAC minute epoch
+                        if (wWRACData[i].ContainsKey(key) == false)
+                        {
+                            wWRACSummaryCSV[i].WriteLine(summary_csv_line[i] + ",");
+                            master_csv_line = master_csv_line + ",";          
+                        }
+                        else
+                        {
+                            //JPN: Retrieve WRAC data point and divide by computed sampling rate for the minute observed
+                            int value = Convert.ToInt32(Convert.ToDouble(wWRACData[i][key]) / Convert.ToDouble(wWRACSamplingRate[i][key]));
+                            //JPN: Add scaled WRAC data to the WRAC text stream
+                            wWRACSummaryCSV[i].WriteLine(summary_csv_line[i] + "," + value);
+                            //JPN: Add scaled WRAC data to the master summary CSV file
+                            master_csv_line = master_csv_line + "," + value;
+                        }
+                    }
+                }
+
+                #endregion Write CSV lines for Wockets Raw Activity Counts (WRAC)
+
+                #region Write CSV lines for PLOT Wockets Firmware Activity Counts (WFAC)
+                if (wWFACData != null)
+                {
+                    for (int i = 0; (i < wWFACData.Length); i++)
+                    {
+                        if (wWFACData[i].ContainsKey(key) == false)
+                        {
+                            master_csv_line = master_csv_line + "," + prevWFACPlotDataLine[i] ;
+                        }
+                        else
+                        {
+                            master_csv_line = master_csv_line + "," + wWFACData[i][key];
+                            prevWFACPlotDataLine[i] = wWFACData[i][key].ToString();
+                        }
+                    }
+                }
+                #endregion Write CSV lines for PLOT Wockets Firmware Activity Counts (WFAC)
+
+                #region Write CSV lines for PLOT Wockets Raw Activity Counts (WRAC)
+
+                //JPN: If WRAC data is available, add that to the summary spreadsheets
+                if (wWRACData != null)
+                {
+                    //JPN: Iterate through each sensor
+                    for (int i = 0; (i < wWRACData.Length); i++)
+                    {
+                        //JPN: Carry over previous WRAC value if the current sample is not the start of a new WRAC minute epoch
+                        if (wWRACData[i].ContainsKey(key) == false)
                         {                         
-                            master_csv_line = master_csv_line + "," + prevRawSummaryDataLine[i]; 
+                            master_csv_line = master_csv_line + "," + prevWRACPlotDataLine[i]; 
                         }
+                        //JPN: Log new WRAC value when the next minute epoch starts
                         else
-                        {                            
-                            //PLOT value
-                            master_csv_line = master_csv_line + "," + rawSummaryData[i][key];                            
-                            prevRawSummaryDataLine[i] = rawSummaryData[i][key].ToString();
+                        {
+                            //JPN: Retrieve WRAC data point and divide by computed sampling rate for the minute observed
+                            int value = Convert.ToInt32(Convert.ToDouble(wWRACData[i][key]) / Convert.ToDouble(wWRACSamplingRate[i][key]));
+                            //JPN: Add scaled WRAC data to the text stream
+                            master_csv_line = master_csv_line + "," + value;                            
+                            //JPN: Store this line so it can be repeated in the summary CSV until the WRAC value changes
+                            prevWRACPlotDataLine[i] = value.ToString();
                         }
                     }
                 }
-                #endregion Write CSV lines for PLOT Raw Wockets Summary
 
+                #endregion Write CSV lines for PLOT Wockets Raw Activity Counts (WRAC)
 
                 #region Write CSV line for Sensewear
+
                 if ((sensewearFound) && (sensewearCSV != null))
                 {
                     if (SSR.ContainsKey(key))
@@ -5974,12 +6006,11 @@ namespace DataMerger
                         master_csv_line = master_csv_line + ",,,,";
                     }
                 }
-                //else
-                 //   master_csv_line = master_csv_line + ",,,,";
+                
                 #endregion Write CSV line for Sensewear
 
-
                 #region Write CSV line for Sensewear Vanderbilt
+                
                 if ((sensewearVanderbiltFound) && (sensewearCSV != null))
                 {
                     if (sensewearData.ContainsKey(key))
@@ -5993,14 +6024,11 @@ namespace DataMerger
                         master_csv_line = master_csv_line + ",,,,,,,,,,,,,";
                     }
                 }
-                //else
-                  //  master_csv_line = master_csv_line + ",,,,,,,,,,,,,";
-
-
+                
                 #endregion Write CSV line for Sensewear Vanderbilt
 
-
                 #region Write CSV line for Zephyr
+
                 if ((zephyrFound) && (zephyrCSV != null))
                 {
                     if (zephyrData.ContainsKey(key))
@@ -6014,21 +6042,17 @@ namespace DataMerger
                         master_csv_line = master_csv_line + ",,,,,,,,,,,,,,,,";
                     }
                 }
-               // else
-               //     master_csv_line = master_csv_line + ",,,,,,,,,,,,,,,,";
+               
                 #endregion Write CSV line for Zephyr
-
-
+                
                 #region Write CSV line for Oxycon
+
                 if ((oxyconFound) && (oxyconCSV != null))
                 {
                     if (oxyconData.ContainsKey(key))
                     {
                         oxyconCSV.WriteLine(oxycon_csv_line + "," + ((string)oxyconData[key]));
                         master_csv_line = master_csv_line + "," + ((string)oxyconData[key]);
-
-
-
                     }
                     else
                     {
@@ -6036,12 +6060,11 @@ namespace DataMerger
                         master_csv_line = master_csv_line + ",,,,,,,,";
                     }
                 }
-             //   else
-               //     master_csv_line = master_csv_line + ",,,,,,,,";
+
                 #endregion Write CSV line for Oxycon
 
-
                 #region Write CSV line for Omron
+
                 if ((omronFound) && (omronCSV != null))
                 {
                     if (omronData.Contains(key))
@@ -6055,12 +6078,11 @@ namespace DataMerger
                         master_csv_line = master_csv_line + ",";
                     }
                 }
-               // else
-                 //   master_csv_line = master_csv_line + ",";
+
                 #endregion Write CSV line for Omron
 
-
                 #region Write CSV line for Columbia
+
                 if ((columbiaFound) && (columbiaCSV != null))
                 {
                     if (columbiaData.ContainsKey(key))
@@ -6074,12 +6096,11 @@ namespace DataMerger
                         master_csv_line = master_csv_line + ",,,,,";
                     }
                 }
-             //   else
-               //     master_csv_line = master_csv_line + ",,,,,";
+
                 #endregion Write CSV line for Columbia
 
-
                 #region Write CSV line for GPS
+
                 if ((gpsFound) && (gpsCSV != null))
                 {
                     if (gpsData.ContainsKey(key))
@@ -6093,12 +6114,11 @@ namespace DataMerger
                         master_csv_line = master_csv_line + ",,,,";
                     }
                 }
-              //  else
-                //    master_csv_line = master_csv_line + ",,,,";
+
                 #endregion Write CSV line for GPS
 
-
                 #region Write CSV line for RTI
+                
                 if ((rtiFound) && (rtiCSV != null))
                 {
                     if (rtiData.ContainsKey(key))
@@ -6112,12 +6132,11 @@ namespace DataMerger
                         master_csv_line = master_csv_line + ",,,,";
                     }
                 }
-               // else
-                 //   master_csv_line = master_csv_line + ",,,,";
+
                 #endregion Write CSV line for RTI
 
-
                 #region Write CSV line for RT3
+                
                 if ((rt3Found) && (rt3CSV != null))
                 {
                     if (rt3Data.ContainsKey(key))
@@ -6131,18 +6150,13 @@ namespace DataMerger
                         master_csv_line = master_csv_line + ",,,,";
                     }
                 }
-                else
-                    master_csv_line = master_csv_line + ",,,,";
+                
                 #endregion Write CSV line for RT3
-
-
 
                 masterCSV.WriteLine(master_csv_line);
                 
                 
            #endregion Write the CSV lines for each sensor
-
-
 
                 //reinitialize variables
                 hrCount = 0;
@@ -6151,8 +6165,6 @@ namespace DataMerger
                 currentDateTime = currentDateTime.AddSeconds(1.0);
 
             }
-
-
 
             #region Convert Actigraph Raw Data to Wockets Raw Format and CSV
 
@@ -6457,14 +6469,16 @@ namespace DataMerger
             for (int i = 0; (i < actigraphCSV.Length); i++)
                 actigraphCSV[i].Close();
 
-            if (summaryCSV != null)
-            {
-                for (int i = 0; (i < summaryCSV.Length); i++)
-                {
-                    summaryCSV[i].Close();
-                    rawSummaryCSV[i].Close();
-                }
-            }
+            //JPN: Close WFAC summary datafiles
+            if (wWFACSummaryCSV != null)
+                for (int i = 0; (i < wWFACSummaryCSV.Length); i++)
+                    wWFACSummaryCSV[i].Close();
+
+            //JPN: Close WRAC summary datafiles
+            if (wWRACSummaryCSV != null)
+                for (int i = 0; (i < wWRACSummaryCSV.Length); i++)
+                    wWRACSummaryCSV[i].Close();
+
             if (sensewearCSV != null)
                 sensewearCSV.Close();
             if (zephyrCSV != null)
