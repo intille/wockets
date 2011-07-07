@@ -2141,10 +2141,10 @@ namespace DataMerger
             int[, ,] wrawData = null; //channel,axis ->data            
             long[,] wtimeData = null; //channel ->timestamp
             int[,] wAUC = null;
-            
+
             //JPN: Declare array to store combined AUC used in calculating WRAC
             int[] wAUCXYZ = null;
-     
+
             double[] wVMAG = null;
             int[] whead = null; //channel ->pointer to the head (circular)
             double[] wRMX = null;
@@ -2235,17 +2235,17 @@ namespace DataMerger
             double rtiUnixTime = 0;
             DateTime rtiTime = new DateTime();
             Hashtable rtiData = new Hashtable();
-      
+
 
 
             //RT3
             TextWriter rt3CSV = null;
             TextReader rt3Reader = null;
-            int rt3SR = 0;    
+            int rt3SR = 0;
             double rt3UnixTime = 0;
             DateTime rt3Time = new DateTime();
             Hashtable rt3Data = new Hashtable();
-            string rt3_dataline="";
+            string rt3_dataline = "";
 
 
 
@@ -2288,7 +2288,7 @@ namespace DataMerger
             bool columbiaFound = false;
             bool gpsFound = false;
             bool rtiFound = false;
-            bool rt3Found=false;
+            bool rt3Found = false;
 
 
             //Sensor Offsets
@@ -2300,7 +2300,7 @@ namespace DataMerger
             double oxyconOffset = 0;
             //for upto 6 actigraphs
             double[] actigraphOffset = new double[] { 0, 0, 0, 0, 0, 0 };
-            
+
 
             double annotationsOffset = 0;
             double mitesOffset = 0;
@@ -2345,8 +2345,8 @@ namespace DataMerger
                 configuration.FromXML(aDataDirectory + "\\wockets\\Configuration.xml");
             }
             catch
-            {                
-             //   configuration.FromXML(aDataDirectory + "\\Configuration.xml");
+            {
+                //   configuration.FromXML(aDataDirectory + "\\Configuration.xml");
             }
             CurrentWockets._Configuration = configuration;
 
@@ -2357,11 +2357,11 @@ namespace DataMerger
             #region Read RTI data
             string[] file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*-rti*.csv");
 
-            
 
 
-           string rti_line = "";
-            
+
+            string rti_line = "";
+
             try
             {
                 if (file.Length == 1)
@@ -2369,28 +2369,28 @@ namespace DataMerger
                     if (CSVProgress == "")
                         CSVProgress = "Processing RTI Data";
                     rtiReader = new StreamReader(file[0]);
-                     DateTime rtiOriginTime = new DateTime();
-                     bool rtiOriginFound = false;
-                     if (File.Exists(aDataDirectory + "\\" + OTHER_SUBDIRECTORY + "\\RTISynchronizationTime.txt"))
-                     {
-                         TextReader rtiOriginTR = new StreamReader(aDataDirectory + "\\" + OTHER_SUBDIRECTORY + "\\RTISynchronizationTime.txt");
-                         string originRTI = rtiOriginTR.ReadLine();
+                    DateTime rtiOriginTime = new DateTime();
+                    bool rtiOriginFound = false;
+                    if (File.Exists(aDataDirectory + "\\" + OTHER_SUBDIRECTORY + "\\RTISynchronizationTime.txt"))
+                    {
+                        TextReader rtiOriginTR = new StreamReader(aDataDirectory + "\\" + OTHER_SUBDIRECTORY + "\\RTISynchronizationTime.txt");
+                        string originRTI = rtiOriginTR.ReadLine();
 
-                         try
-                         {
-                             tokens = originRTI.Split(',');
-                             tokens = tokens[0].Split('.');
-                             rtiOriginTR.Close();
-                             UnixTime.GetDateTime(Convert.ToInt64(tokens[0]), out rtiOriginTime);
-                         }
-                         catch (Exception e)
-                         {
-                             throw new Exception("RTI Synchronization: Parsing failed " + e.Message);
-                         }
+                        try
+                        {
+                            tokens = originRTI.Split(',');
+                            tokens = tokens[0].Split('.');
+                            rtiOriginTR.Close();
+                            UnixTime.GetDateTime(Convert.ToInt64(tokens[0]), out rtiOriginTime);
+                        }
+                        catch (Exception e)
+                        {
+                            throw new Exception("RTI Synchronization: Parsing failed " + e.Message);
+                        }
 
-                         rtiOriginTime = rtiOriginTime.AddSeconds(rtiOffset);
-                         rtiOriginFound = true;
-                     }
+                        rtiOriginTime = rtiOriginTime.AddSeconds(rtiOffset);
+                        rtiOriginFound = true;
+                    }
 
                     //skip first 25 lines
                     for (int k = 0; (k < 7); k++)
@@ -2406,8 +2406,8 @@ namespace DataMerger
                     int rtiCount = 0;
                     int rtiPrevIndex = 0;
                     int runningMeanSize = 0;
-                    int rti_sample_counter=0;
-                    rtiTime=rtiOriginTime;
+                    int rti_sample_counter = 0;
+                    rtiTime = rtiOriginTime;
                     while ((rti_line = rtiReader.ReadLine()) != null)
                     {
                         tokens = rti_line.Split(',');
@@ -2416,8 +2416,8 @@ namespace DataMerger
 
                             if (!rtiOriginFound)
                             {
-                                string[] dateTokens = tokens[0].Split(new char[] { ' ', '\t' });                            
-                                string[] timeTokens=null;
+                                string[] dateTokens = tokens[0].Split(new char[] { ' ', '\t' });
+                                string[] timeTokens = null;
                                 if (dateTokens[1].Contains("/"))
                                     timeTokens = dateTokens[0].Split('.');
                                 else
@@ -2432,7 +2432,7 @@ namespace DataMerger
                                     dateTokens = dateTokens[0].Split('/');
                                 if (dateTokens[2].Length == 2)
                                     dateTokens[2] = "20" + dateTokens[2];
-                                rtiTime = new DateTime(Convert.ToInt32(dateTokens[2]), Convert.ToInt32(dateTokens[0]), Convert.ToInt32(dateTokens[1]), Convert.ToInt32(timeTokens[0]), Convert.ToInt32(timeTokens[1]), Convert.ToInt32(timeTokens[2]),mseconds);
+                                rtiTime = new DateTime(Convert.ToInt32(dateTokens[2]), Convert.ToInt32(dateTokens[0]), Convert.ToInt32(dateTokens[1]), Convert.ToInt32(timeTokens[0]), Convert.ToInt32(timeTokens[1]), Convert.ToInt32(timeTokens[2]), mseconds);
                                 rtiTime = rtiTime.AddSeconds(rtiOffset);
                             }
                             if ((rtiOriginFound) && (rti_sample_counter == 20))
@@ -2441,12 +2441,12 @@ namespace DataMerger
                                 rti_sample_counter = 0;
                             }
                             rti_sample_counter++;
-                            
-                            
+
+
                             //if (isPM)
                             //    rtiTime.AddHours(12.0);
 
-                         
+
                             rtiUnixTime = UnixTime.GetUnixTime(rtiTime);
                             string rtiKey = rtiTime.Year + "-" + rtiTime.Month + "-" + rtiTime.Day + "-" + rtiTime.Hour + "-" + rtiTime.Minute + "-" + rtiTime.Second;
                             string rtiLine = "";
@@ -2483,7 +2483,7 @@ namespace DataMerger
 
                                 rtiRMX = 0;
                                 rtiRMY = 0;
-                                rtiRMZ =0; 
+                                rtiRMZ = 0;
                                 for (int m = 0; (m < 5); m++)
                                 {
                                     rtiRMX += rtiPrevX[m];
@@ -2499,11 +2499,11 @@ namespace DataMerger
                                 rtiPrevCounts[rtiPrevIndex] = rtiCount;
                                 rtiPrevX[rtiPrevIndex] = xRTI;
                                 rtiPrevY[rtiPrevIndex] = yRTI;
-                                rtiPrevZ[rtiPrevIndex++] = zRTI;                                
+                                rtiPrevZ[rtiPrevIndex++] = zRTI;
                                 rtiPrevIndex = (rtiPrevIndex % 5);
 
 
-                                if (runningMeanSize<5)
+                                if (runningMeanSize < 5)
                                     runningMeanSize++;
 
 
@@ -2533,7 +2533,7 @@ namespace DataMerger
                     }
 
                     rtiFound = true;
-                    
+
                 }
             }
             catch (Exception e)
@@ -2543,7 +2543,7 @@ namespace DataMerger
 
 
             hasRTI = (rtiData.Count > 0);
-            rtiRecords = rtiData.Count ;
+            rtiRecords = rtiData.Count;
             #endregion Read RTI data
 
 
@@ -2560,7 +2560,7 @@ namespace DataMerger
                     columbiaReader = new StreamReader(file[0]);
 
                     //skip first 25 lines
-                    for (int k=0;(k<25);k++)
+                    for (int k = 0; (k < 25); k++)
                         columbia_line = columbiaReader.ReadLine();
 
 
@@ -2569,13 +2569,13 @@ namespace DataMerger
                         tokens = columbia_line.Split(',');
                         if (tokens.Length == 14)
                         {
-                            
+
                             string[] dateTokens = tokens[1].Split('/');
                             string[] timeTokens = tokens[2].Split(':');
-                            columbiaTime = new DateTime(Convert.ToInt32("20"+dateTokens[2]), Convert.ToInt32(dateTokens[0]), Convert.ToInt32(dateTokens[1]), Convert.ToInt32(timeTokens[0]), Convert.ToInt32(timeTokens[1]), Convert.ToInt32(timeTokens[2]));
+                            columbiaTime = new DateTime(Convert.ToInt32("20" + dateTokens[2]), Convert.ToInt32(dateTokens[0]), Convert.ToInt32(dateTokens[1]), Convert.ToInt32(timeTokens[0]), Convert.ToInt32(timeTokens[1]), Convert.ToInt32(timeTokens[2]));
 
-                           // if (columbiaOffset > 0)
-                             columbiaTime=columbiaTime.AddSeconds(columbiaOffset);
+                            // if (columbiaOffset > 0)
+                            columbiaTime = columbiaTime.AddSeconds(columbiaOffset);
 
                             columbiaUnixTime = UnixTime.GetUnixTime(columbiaTime);
                             string columbiaKey = columbiaTime.Year + "-" + columbiaTime.Month + "-" + columbiaTime.Day + "-" + columbiaTime.Hour + "-" + columbiaTime.Minute + "-" + columbiaTime.Second;
@@ -2646,8 +2646,8 @@ namespace DataMerger
                             gpsTime = gpsTime.AddSeconds(gpsOffset);
 
                             gpsUnixTime = UnixTime.GetUnixTime(gpsTime);
-                            
-                            
+
+
                             string gpsKey = gpsTime.Year + "-" + gpsTime.Month + "-" + gpsTime.Day + "-" + gpsTime.Hour + "-" + gpsTime.Minute + "-" + gpsTime.Second;
                             string gpsLine = "";
 
@@ -2665,7 +2665,7 @@ namespace DataMerger
                             gpsLine += ",";
                             if (tokens[6].Length > 0)
                                 gpsLine += Convert.ToDouble(tokens[6]);
-                           // gpsLine += ",";
+                            // gpsLine += ",";
 
                             if (gpsData.Contains(gpsKey) == false)
                                 gpsData.Add(gpsKey, gpsLine);
@@ -2772,8 +2772,8 @@ namespace DataMerger
                         Match m1 = Regex.Match(tokens[0].Trim(), "([0-9]+)/([0-9]+)/([0-9]+)");
                         Match m2 = Regex.Match(tokens[1].Trim(), "([0-9]+):([0-9]+):([0-9]+)");
                         actigraphTime = new DateTime(Convert.ToInt32("20" + m1.Groups[3].Value), Convert.ToInt32(m1.Groups[1].Value), Convert.ToInt32(m1.Groups[2].Value), Convert.ToInt32(m2.Groups[1].Value), Convert.ToInt32(m2.Groups[2].Value), Convert.ToInt32(m2.Groups[3].Value));
-                        
-                        
+
+
                         //if (actigraphOffset > 0)
                         actigraphTime = actigraphTime.AddSeconds(actigraphOffset[i]);
                         actigraphUnixTime = UnixTime.GetUnixTime(actigraphTime);
@@ -2791,7 +2791,7 @@ namespace DataMerger
                                 m2 = Regex.Match(tokens[1], "([0-9]+):([0-9]+):([0-9]+)");
                                 actigraphTime = new DateTime(Convert.ToInt32("20" + m1.Groups[3].Value), Convert.ToInt32(m1.Groups[1].Value), Convert.ToInt32(m1.Groups[2].Value), Convert.ToInt32(m2.Groups[1].Value), Convert.ToInt32(m2.Groups[2].Value), Convert.ToInt32(m2.Groups[3].Value));
                                 //if (actigraphOffset > 0)
-                                    actigraphTime = actigraphTime.AddSeconds(actigraphOffset[i]);
+                                actigraphTime = actigraphTime.AddSeconds(actigraphOffset[i]);
                                 actigraphUnixTime = UnixTime.GetUnixTime(actigraphTime);
                                 string actigraphKey = actigraphTime.Year + "-" + actigraphTime.Month + "-" + actigraphTime.Day + "-" + actigraphTime.Hour + "-" + actigraphTime.Minute + "-" + actigraphTime.Second;
                                 if (actigraphStart == null)
@@ -2829,16 +2829,16 @@ namespace DataMerger
                                 actiday = Convert.ToInt32(m.Groups[2].Value);
                                 actiyear = Convert.ToInt32(m.Groups[3].Value);
                             }
-                            tokens = actigraph_line.Split(',');                            
-                        } while (tokens.Length!=3);
+                            tokens = actigraph_line.Split(',');
+                        } while (tokens.Length != 3);
 
 
                         tokens = actigraph_line.Split(',');
                         //Match m1 = Regex.Match(tokens[0].Trim(), "([0-9]+)/([0-9]+)/([0-9]+)");
                         //Match m2 = Regex.Match(tokens[1].Trim(), "([0-9]+):([0-9]+):([0-9]+)");
                         actigraphTime = new DateTime(actiyear, actimonth, actiday, actihour, actiminute, actisecond);//(Convert.ToInt32("20" + m1.Groups[3].Value), Convert.ToInt32(m1.Groups[1].Value), Convert.ToInt32(m1.Groups[2].Value), Convert.ToInt32(m2.Groups[1].Value), Convert.ToInt32(m2.Groups[2].Value), Convert.ToInt32(m2.Groups[3].Value));
-                       // if (actigraphOffset > 0)
-                            actigraphTime = actigraphTime.AddSeconds(actigraphOffset[i]);
+                        // if (actigraphOffset > 0)
+                        actigraphTime = actigraphTime.AddSeconds(actigraphOffset[i]);
                         actigraphUnixTime = UnixTime.GetUnixTime(actigraphTime);
 
                         do
@@ -2859,7 +2859,7 @@ namespace DataMerger
                                 actigraphTime = actigraphTime.AddSeconds(1.0);
 
                                 //if (actigraphLine.Contains("144,92"))
-                                  //  Console.Write("");
+                                //  Console.Write("");
                             }
                         } while ((actigraph_line = actigraphReader.ReadLine()) != null);
 
@@ -2944,7 +2944,7 @@ namespace DataMerger
                                 actigraphData[i].Add(actigraphKey, actigraphLine);
                                 actigraphTime = actigraphTime.AddSeconds(1.0);
                             }
-                        } while ((actigraph_line = actigraphReader.ReadLine()) != null);                    
+                        } while ((actigraph_line = actigraphReader.ReadLine()) != null);
                     }
                     else if (actigraph_line.Contains("GT3X"))
                     {
@@ -3046,11 +3046,11 @@ namespace DataMerger
                             string[] timeTokens = (tokens1[1].Split('.'))[0].Split(':');
                             zephyrTime = new DateTime(Convert.ToInt32(dateTokens[0]), Convert.ToInt32(dateTokens[1]), Convert.ToInt32(dateTokens[2]), Convert.ToInt32(timeTokens[0]), Convert.ToInt32(timeTokens[1]), Convert.ToInt32(timeTokens[2]));
 
-                           // if (zephyrOffset > 0)
-                            zephyrTime=zephyrTime.AddSeconds(zephyrOffset);
+                            // if (zephyrOffset > 0)
+                            zephyrTime = zephyrTime.AddSeconds(zephyrOffset);
                             zephyrUnixTime = UnixTime.GetUnixTime(zephyrTime);
-                            
-                            
+
+
                             string zephyrKey = zephyrTime.Year + "-" + zephyrTime.Month + "-" + zephyrTime.Day + "-" + zephyrTime.Hour + "-" + zephyrTime.Minute + "-" + zephyrTime.Second;
                             string zephyrLine = "";
                             if (zephyrStart == null)
@@ -3163,7 +3163,7 @@ namespace DataMerger
                                 oxycon_line = oxycon_line.Trim();
                                 RegexOptions options = RegexOptions.None;
                                 Regex regex = new Regex(@"[ ]{2,}", options);
-                                
+
                                 oxycon_line = regex.Replace(oxycon_line, @" ");
                                 regex = new Regex(@"[\t]", options);
                                 oxycon_line = regex.Replace(oxycon_line, @" ");
@@ -3366,7 +3366,7 @@ namespace DataMerger
                                     if (oxyconStart == null)
                                         oxyconStart = oxyconTime.Year + "/" + oxyconTime.Month + "/" + oxyconTime.Day + " " + oxyconTime.Hour + ":" + oxyconTime.Minute + ":" + oxyconTime.Second;
                                     //if (oxyconTime.Day >= 10)
-                                      //  Console.Write("");
+                                    //  Console.Write("");
                                     if ((tokens[1].Length > 0) && (tokens[1] != "-"))
                                         oxyconLine += Convert.ToInt32(tokens[1]);
                                     oxyconLine += ",";
@@ -3636,7 +3636,7 @@ namespace DataMerger
                                     oxyconLine += ",";
                                     if ((tokens[8].Length > 0) && (tokens[8] != "-"))
                                         oxyconLine += Convert.ToDouble(tokens[8]);
-                                   // oxyconLine += ",";
+                                    // oxyconLine += ",";
                                     if (oxyconData.ContainsKey(oxyconKey) == false)
                                         oxyconData.Add(oxyconKey, oxyconLine);
                                 }
@@ -3672,7 +3672,7 @@ namespace DataMerger
                 if (file.Length == 1)
                 {
                     sensewearReader = new StreamReader(file[0]);
-                    sensewear_line=sensewearReader.ReadLine(); //skip first line
+                    sensewear_line = sensewearReader.ReadLine(); //skip first line
                     if (sensewear_line.Contains("numpeaks_"))
                         sensewearVanderbiltFound = true;
                     else
@@ -3693,19 +3693,19 @@ namespace DataMerger
                             string[] timeTokens = tsTokens[1].Split('.');
                             timeTokens = timeTokens[0].Split(':');
                             sensewearTime = new DateTime(Convert.ToInt32(dateTokens[0]), Convert.ToInt32(dateTokens[1]), Convert.ToInt32(dateTokens[2]), Convert.ToInt32(timeTokens[0]), Convert.ToInt32(timeTokens[1]), Convert.ToInt32(timeTokens[2]));
-                           
+
                             //if (sensewearOffset > 0)
-                           sensewearTime=sensewearTime.AddSeconds(sensewearOffset);
+                            sensewearTime = sensewearTime.AddSeconds(sensewearOffset);
                             sensewearUnixTime = UnixTime.GetUnixTime(sensewearTime);
                         }
                         else
                         { //unix time
                             TimeZone localZone = TimeZone.CurrentTimeZone;
                             DaylightTime daylight = localZone.GetDaylightChanges(DateTime.Now.Year);
-                            sensewearUnixTime = Convert.ToInt64(tokens[0].Trim()) - (8 * 60 * 60 * 1000);                            
+                            sensewearUnixTime = Convert.ToInt64(tokens[0].Trim()) - (8 * 60 * 60 * 1000);
                             UnixTime.GetDateTime((long)sensewearUnixTime, out sensewearTime);
 
-                            if (!TimeZone.IsDaylightSavingTime(new DateTime(sensewearTime.Year,sensewearTime.Month,sensewearTime.Day), daylight))          
+                            if (!TimeZone.IsDaylightSavingTime(new DateTime(sensewearTime.Year, sensewearTime.Month, sensewearTime.Day), daylight))
                                 sensewearUnixTime = Convert.ToInt64(tokens[0].Trim()) - (8 * 60 * 60 * 1000);
                             else
                                 sensewearUnixTime = Convert.ToInt64(tokens[0].Trim()) - (7 * 60 * 60 * 1000);
@@ -3733,7 +3733,7 @@ namespace DataMerger
                             }
                             else
                             {
-                                string time = prevSensewearTime.Year + "-" + prevSensewearTime.Month + "-" + prevSensewearTime.Day + "-" + prevSensewearTime.Hour + "-" + prevSensewearTime.Minute + "-" + prevSensewearTime.Second;                               
+                                string time = prevSensewearTime.Year + "-" + prevSensewearTime.Month + "-" + prevSensewearTime.Day + "-" + prevSensewearTime.Hour + "-" + prevSensewearTime.Minute + "-" + prevSensewearTime.Second;
                                 SSR.Add(time, sensewearSR);
                                 STrans.Add(time, sensewearTrans);
                                 SLong.Add(time, sensewearLong);
@@ -3747,22 +3747,22 @@ namespace DataMerger
                         }
                         else if (sensewearVanderbiltFound)
                         {
-                            
+
                             string time = sensewearTime.Year + "-" + sensewearTime.Month + "-" + sensewearTime.Day + "-" + sensewearTime.Hour + "-" + sensewearTime.Minute + "-" + sensewearTime.Second;
                             sensewearSR = 1;
                             vanderbiltSensewearDataLine = sensewearSR + ",";
-                            vanderbiltSensewearDataLine += tokens[1]+",";
-                            vanderbiltSensewearDataLine += tokens[2]+",";
-                            vanderbiltSensewearDataLine += tokens[3]+",";
-                            vanderbiltSensewearDataLine += tokens[4]+",";
-                            vanderbiltSensewearDataLine += tokens[5]+",";
-                            vanderbiltSensewearDataLine += tokens[6]+",";
-                            vanderbiltSensewearDataLine += tokens[7]+",";
-                            vanderbiltSensewearDataLine += tokens[8]+",";
-                            vanderbiltSensewearDataLine += tokens[9]+",";
-                            vanderbiltSensewearDataLine +=tokens[10]+",";
-                            vanderbiltSensewearDataLine +=tokens[11]+",";
-                            vanderbiltSensewearDataLine +=tokens[15];
+                            vanderbiltSensewearDataLine += tokens[1] + ",";
+                            vanderbiltSensewearDataLine += tokens[2] + ",";
+                            vanderbiltSensewearDataLine += tokens[3] + ",";
+                            vanderbiltSensewearDataLine += tokens[4] + ",";
+                            vanderbiltSensewearDataLine += tokens[5] + ",";
+                            vanderbiltSensewearDataLine += tokens[6] + ",";
+                            vanderbiltSensewearDataLine += tokens[7] + ",";
+                            vanderbiltSensewearDataLine += tokens[8] + ",";
+                            vanderbiltSensewearDataLine += tokens[9] + ",";
+                            vanderbiltSensewearDataLine += tokens[10] + ",";
+                            vanderbiltSensewearDataLine += tokens[11] + ",";
+                            vanderbiltSensewearDataLine += tokens[15];
                             sensewearData.Add(time, vanderbiltSensewearDataLine);
                         }
 
@@ -3770,7 +3770,7 @@ namespace DataMerger
 
                     }
 
-                    
+
                 }
             }
             catch (Exception e)
@@ -3792,9 +3792,9 @@ namespace DataMerger
             {
                 if (file.Length == 1)
                 {
-                    rt3Reader = new StreamReader(file[0]);                                      
-                    rt3Found = true;                   
-                    for (int j = 0; (j < 20); j++)                       
+                    rt3Reader = new StreamReader(file[0]);
+                    rt3Found = true;
+                    for (int j = 0; (j < 20); j++)
                         rt3_line = rt3Reader.ReadLine(); //skip first line
 
                     rt3SR = 1;
@@ -3843,12 +3843,12 @@ namespace DataMerger
             {
                 masterCSV = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\MITesSummaryData.csv");
                 hrCSV = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\HeartRate_MITes.csv");
-                
+
                 for (int i = 0; (i < actigraphCSV.Length); i++)
                     actigraphCSV[i] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Actigraph" + (i + 1) + ".csv");
 
 
-                if ( (sensewearFound) || (sensewearVanderbiltFound))
+                if ((sensewearFound) || (sensewearVanderbiltFound))
                     sensewearCSV = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Sensewear.csv");
 
 
@@ -3861,7 +3861,7 @@ namespace DataMerger
                 if (columbiaFound)
                     columbiaCSV = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Columbia.csv");
                 if (gpsFound)
-                    gpsCSV= new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\GPS.csv");
+                    gpsCSV = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\GPS.csv");
                 if (rtiFound)
                     rtiCSV = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\RTI.csv");
                 if (rt3Found)
@@ -3880,7 +3880,7 @@ namespace DataMerger
             AXML.Annotation aannotation = null;
             try
             {
-                if (File.Exists(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\" + ANNOTATION_INTERVALS_FILE )) 
+                if (File.Exists(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\" + ANNOTATION_INTERVALS_FILE))
                 {
                     //AXML.Reader reader = new AXML.Reader(masterDirectory, aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY, "AnnotationIntervals.xml");
                     //aannotation = reader.parse();
@@ -3893,7 +3893,7 @@ namespace DataMerger
                     // If there is an offset add it 
                     //---------------------------------------------------------------------
                     Session xmlSession = new Session();
-                    xmlSession.FromXML(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\" + ANNOTATION_INTERVALS_FILE); 
+                    xmlSession.FromXML(aDataDirectory + "\\" + ANNOTATION_SUBDIRECTORY + "\\" + ANNOTATION_INTERVALS_FILE);
 
                     AnnotationList ann_list = xmlSession.Annotations;
 
@@ -3948,7 +3948,8 @@ namespace DataMerger
 
                     // Annotation Intervals Files
                     if (File.Exists(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "AnnotationIntervals.xml"))
-                    { File.Delete(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "AnnotationIntervals.xml"); 
+                    {
+                        File.Delete(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "AnnotationIntervals.xml");
                     }
 
                     if (File.Exists(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "AnnotationIntervals.csv"))
@@ -3970,21 +3971,21 @@ namespace DataMerger
                     ann_intervals_csv.Flush();
                     ann_intervals_csv.Close();
                 }
-                    
-                    //--------------------------------------------------------------------------
-                    //Read the corrected annotation files
-                    // original code, but now the reader is pointing to the corrected xml file
-                    // it is done in this way for backwards compatibility
-                    //--------------------------------------------------------------------------
-                    if (File.Exists(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\AnnotationIntervals.xml"))
-                    {
-                        AXML.Reader reader = new AXML.Reader(masterDirectory, aDataDirectory + "\\" + MERGED_SUBDIRECTORY, "AnnotationIntervals.xml");
-                        aannotation = reader.parse();
-                        aannotation.RemoveData(filter);
-                        aannotation.DataDirectory = aDataDirectory;
-                    }
 
-                
+                //--------------------------------------------------------------------------
+                //Read the corrected annotation files
+                // original code, but now the reader is pointing to the corrected xml file
+                // it is done in this way for backwards compatibility
+                //--------------------------------------------------------------------------
+                if (File.Exists(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\AnnotationIntervals.xml"))
+                {
+                    AXML.Reader reader = new AXML.Reader(masterDirectory, aDataDirectory + "\\" + MERGED_SUBDIRECTORY, "AnnotationIntervals.xml");
+                    aannotation = reader.parse();
+                    aannotation.RemoveData(filter);
+                    aannotation.DataDirectory = aDataDirectory;
+                }
+
+
             }
             catch (Exception e)
             {
@@ -4032,8 +4033,8 @@ namespace DataMerger
                 }
             }
 
-            
-            
+
+
 
             if (Directory.Exists(aDataDirectory + "\\" + MITES_SUBDIRECTORY + "\\data\\"))
             {
@@ -4107,20 +4108,21 @@ namespace DataMerger
                             "MITes" + sensor_id.ToString("00") + "_RM_X," + "MITes" + sensor_id.ToString("00") + "_RM_Y," + "MITes" + sensor_id.ToString("00") + "_RM_Z," +
                             "MITes" + sensor_id.ToString("00") + "_RM_SIZE," + "MITes" + sensor_id.ToString("00") + "_VMAG";
 
-                    }else
+                    }
+                    else
                         master_csv_header += ",HR";
                 }
 
-                
+
 
 
 
                 //Initialize arrays based on number of sensors
                 rawData = new int[sannotation.MaximumSensorID + 1, 3, mites_RM_SIZE];
                 for (int i = 0; (i < sannotation.MaximumSensorID + 1); i++)
-                    for (int j=0;(j<3);j++)
+                    for (int j = 0; (j < 3); j++)
                         for (int k = 0; (k < mites_RM_SIZE); k++)
-                            rawData[i,j,k]=-1;
+                            rawData[i, j, k] = -1;
                 timeData = new long[sannotation.MaximumSensorID + 1, mites_RM_SIZE];
                 AUC = new int[sannotation.MaximumSensorID + 1, 3];
                 VMAG = new double[sannotation.MaximumSensorID + 1];
@@ -4161,16 +4163,16 @@ namespace DataMerger
             AXML.AnnotatedRecord annotatedRecord = null;
             if (aannotation != null)
             {
-                    
-                    annotatedRecord = ((AXML.AnnotatedRecord)aannotation.Data[activityIndex]);
 
-                    for (int j = 0; (j < annotatedRecord.Labels.Count); j++)
-                    {
-                        if (j == annotatedRecord.Labels.Count - 1)
-                            current_activity += "";
-                        else
-                            current_activity += ",";
-                    }   
+                annotatedRecord = ((AXML.AnnotatedRecord)aannotation.Data[activityIndex]);
+
+                for (int j = 0; (j < annotatedRecord.Labels.Count); j++)
+                {
+                    if (j == annotatedRecord.Labels.Count - 1)
+                        current_activity += "";
+                    else
+                        current_activity += ",";
+                }
             }
 
             #endregion
@@ -4187,9 +4189,9 @@ namespace DataMerger
 
             //Size of the moving average 
             int RM_DURATION = 1000;
-            int RM_SIZE = 0;  
+            int RM_SIZE = 0;
 
-            if ((Directory.Exists(aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY)) && (Directory.GetFiles(aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY).Length>0))
+            if ((Directory.Exists(aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY)) && (Directory.GetFiles(aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY).Length > 0))
             {
                 wcontroller = new WocketsController("", "", "");
                 CurrentWockets._Controller = wcontroller;
@@ -4225,7 +4227,7 @@ namespace DataMerger
                 waucCSVs = new StreamWriter[wcontroller._Sensors.Count];
                 wvmagCSVs = new StreamWriter[wcontroller._Sensors.Count];
                 wrmCSVs = new StreamWriter[wcontroller._Sensors.Count];
-             
+
 
                 /* Write Wockets raw data to csv files */
                 WocketsController wc = new WocketsController("", "", "");
@@ -4236,7 +4238,7 @@ namespace DataMerger
 
 
                 int[] wocketsSR = new int[wcontroller._Sensors.Count];
-                
+
                 for (int i = 0; (i < wcontroller._Sensors.Count); i++)
                 {
                     int sensor_id = wcontroller._Sensors[i]._ID;
@@ -4249,59 +4251,59 @@ namespace DataMerger
 
                     //try
                     //{
-                        //TODO: check this line: Write out raw data
-                        //TextWriter tw = null;
+                    //TODO: check this line: Write out raw data
+                    //TextWriter tw = null;
 
-                        //try
-                        //{
-                        TextWriter tw = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "Wocket_" + sensor_id.ToString("00") + "_RawData_" + wcontroller._Sensors[i]._Location.Replace(' ', '-') + ".csv");
-                        //}
-                        //catch
-                        //{
-                            //if (tw != null)
-                           // {
-                           //     tw.Flush();
-                           //     tw.Close();
-                            //}
-                           // tw = null;
-                        //}
-                        
-                        
-                        int lastDecodedPacket = 0;
+                    //try
+                    //{
+                    TextWriter tw = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "Wocket_" + sensor_id.ToString("00") + "_RawData_" + wcontroller._Sensors[i]._Location.Replace(' ', '-') + ".csv");
+                    //}
+                    //catch
+                    //{
+                    //if (tw != null)
+                    // {
+                    //     tw.Flush();
+                    //     tw.Close();
+                    //}
+                    // tw = null;
+                    //}
 
-                        while (wc._Sensors[i].Load())
-                        {
-                            if (wc._Sensors[i]._Decoder._Head == 0)
-                                lastDecodedPacket = wc._Sensors[i]._Decoder._Data.Length - 1;
-                            else
-                                lastDecodedPacket = wc._Sensors[i]._Decoder._Head - 1;
 
-                            Wockets.Data.Accelerometers.AccelerationData data = (Wockets.Data.Accelerometers.AccelerationData)wc._Sensors[i]._Decoder._Data[lastDecodedPacket];
-                            
-                            //added by selene
-                            //if( tw != null)
-                                tw.WriteLine(data.UnixTimeStamp + "," + data._X + "," + data._Y + "," + data._Z);
+                    int lastDecodedPacket = 0;
 
-                            long currentTS = (long)(data.UnixTimeStamp / 1000.0);
-                            if ((currentTS - prevWocketTS) < 1)
-                                wocketSR++;
-                            if ((prevWocketTS > 0) & (currentTS - prevWocketTS) >= 1)
-                                totalseconds += (int)(currentTS - prevWocketTS);
-                            prevWocketTS = currentTS;
-                        }
-                        wocketsSR[i] = (int)Math.Round((double)wocketSR / (double)totalseconds);
+                    while (wc._Sensors[i].Load())
+                    {
+                        if (wc._Sensors[i]._Decoder._Head == 0)
+                            lastDecodedPacket = wc._Sensors[i]._Decoder._Data.Length - 1;
+                        else
+                            lastDecodedPacket = wc._Sensors[i]._Decoder._Head - 1;
+
+                        Wockets.Data.Accelerometers.AccelerationData data = (Wockets.Data.Accelerometers.AccelerationData)wc._Sensors[i]._Decoder._Data[lastDecodedPacket];
 
                         //added by selene
-                        //if (tw != null)
-                        //{
-                            tw.Flush();
-                            tw.Close();
-                        //}
+                        //if( tw != null)
+                        tw.WriteLine(data.UnixTimeStamp + "," + data._X + "," + data._Y + "," + data._Z);
+
+                        long currentTS = (long)(data.UnixTimeStamp / 1000.0);
+                        if ((currentTS - prevWocketTS) < 1)
+                            wocketSR++;
+                        if ((prevWocketTS > 0) & (currentTS - prevWocketTS) >= 1)
+                            totalseconds += (int)(currentTS - prevWocketTS);
+                        prevWocketTS = currentTS;
+                    }
+                    wocketsSR[i] = (int)Math.Round((double)wocketSR / (double)totalseconds);
+
+                    //added by selene
+                    //if (tw != null)
+                    //{
+                    tw.Flush();
+                    tw.Close();
+                    //}
 
                     //}
                     //catch(Exception e)
                     //{ }
-           
+
                     //--------------------------------------------------------------
 
                     string location = wcontroller._Sensors[i]._Location.Replace(' ', '-');
@@ -4318,8 +4320,8 @@ namespace DataMerger
                     waveragedRaw[sensor_id].WriteLine(csv_line1);
                     wsamplingCSVs[sensor_id] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Wocket_" + sensor_id.ToString("00") + "_SampleRate_" + location + ".csv");
                     wsamplingCSVs[sensor_id].WriteLine(csv_line2);
-                    
-                    
+
+
                     // Add the headers to the "Summary Data" master file
                     master_csv_header += ",Wocket" + sensor_id.ToString("00") + "_SR," + "Wocket" + sensor_id.ToString("00") + "_AVRaw_X," +
                         "Wocket" + sensor_id.ToString("00") + "_AVRaw_Y," + "Wocket" + sensor_id.ToString("00") + "_AVRaw_Z," + "Wocket" + sensor_id.ToString("00") + "_SAD_X," +
@@ -4329,7 +4331,7 @@ namespace DataMerger
                         "Wocket" + sensor_id.ToString("00") + "_RM_SIZE," + "Wocket" + sensor_id.ToString("00") + "_VMAG";
                 }
 
-               // wc.Dispose();
+                // wc.Dispose();
 
 
 
@@ -4350,7 +4352,7 @@ namespace DataMerger
                 for (int k = 0; (k < wcontroller._Sensors.Count); k++)
                 {
                     wocketsTR[k] = new StreamReader(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "Wocket_" + wcontroller._Sensors[k]._ID.ToString("00") + "_RawData_" + wcontroller._Sensors[k]._Location.Replace(' ', '-') + ".csv");
-                    wocketsTW[k] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "Wocket_" + wcontroller._Sensors[k]._ID.ToString("00") + "_RawCorrectedData_"  + wcontroller._Sensors[k]._Location.Replace(' ', '-') + ".csv");
+                    wocketsTW[k] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "Wocket_" + wcontroller._Sensors[k]._ID.ToString("00") + "_RawCorrectedData_" + wcontroller._Sensors[k]._Location.Replace(' ', '-') + ".csv");
 
                     ArrayList[] loadedData = new ArrayList[LoadedSeconds];
                     long[] loadedDataTime = new long[LoadedSeconds];
@@ -4361,11 +4363,11 @@ namespace DataMerger
                     long lastSecond = 0;
                     int nextCorrected = 0;
                     long nextCorrectedTime = 0;
-                    double delta = 1000.0/wocketsSR[k];
+                    double delta = 1000.0 / wocketsSR[k];
                     double recordTime = 0;
 
                     if (CSVProgress == "")
-                        CSVProgress = "Correcting Timestamps for Raw Data File for Wocket " +  wcontroller._Sensors[k]._ID.ToString("00");
+                        CSVProgress = "Correcting Timestamps for Raw Data File for Wocket " + wcontroller._Sensors[k]._ID.ToString("00");
 
                     while ((dataline = wocketsTR[k].ReadLine()) != null)
                     {
@@ -4373,20 +4375,20 @@ namespace DataMerger
                         int wocketX = Convert.ToInt32(wocketTokens[1]);
                         int wocketY = Convert.ToInt32(wocketTokens[2]);
                         int wocketZ = Convert.ToInt32(wocketTokens[3]);
-                        long unixtime = (long)(Convert.ToDouble(wocketTokens[0])/1000.0);
+                        long unixtime = (long)(Convert.ToDouble(wocketTokens[0]) / 1000.0);
 
-                       // if ((k == 2) && (unixtime >= 1255347111))
-                         //   Console.Write(""); 
-                                               
+                        // if ((k == 2) && (unixtime >= 1255347111))
+                        //   Console.Write(""); 
+
                         if (nextCorrectedTime == 0)
                             nextCorrectedTime = unixtime;
                         if (lastSecond == 0)
                             lastSecond = unixtime;
-                        
+
                         //if a new second is being loaded
                         if (lastSecond != unixtime)
                         {
-                           
+
                             //check if you have enough to correct
                             while ((unixtime - nextCorrectedTime) > 8)
                             {
@@ -4429,8 +4431,8 @@ namespace DataMerger
                                         compensatedWindows[compensatedCounter] = compensatedWindows[compensatedCounter] + 1;
                                         //int totalCompensatedPoints = loadedData[nextCorrected].Count;
                                         int correctingArray = nextCorrected;
-                                       // if (compensatedCounter > 3)
-                                       //     Console.Write("");
+                                        // if (compensatedCounter > 3)
+                                        //     Console.Write("");
                                         //go through all arrays that were used in correction
                                         for (int r = 0; (r < compensatedCounter); r++)
                                         {
@@ -4483,7 +4485,7 @@ namespace DataMerger
                                 {
                                     int correctionIndex = 0;
                                     int correctionLength = compensatedCounter;
-                                    
+
                                     while (correctionIndex != compensatedCounter)
                                     {
                                         recordTime = nextCorrectedTime * 1000.0;
@@ -4504,9 +4506,9 @@ namespace DataMerger
                             }
 
 
-                            while ((lastSecond < unixtime) && (unixtime!=0))
+                            while ((lastSecond < unixtime) && (unixtime != 0))
                             {
-                               
+
                                 loadedIndex++;
                                 if (loadedIndex == LoadedSeconds)
                                     loadedIndex = 0;
@@ -4515,8 +4517,8 @@ namespace DataMerger
                             }
                         }
 
-                        
-                       
+
+
 
                         loadedData[loadedIndex].Add(unixtime + "," + wocketX + "," + wocketY + "," + wocketZ);
                         lastSecond = unixtime;
@@ -4543,24 +4545,24 @@ namespace DataMerger
 
                 //JPN: Dimension array used to store number of samples per minute for WRAC
                 wWRACCounterMinute = new int[wcontroller._Sensors.Count];
-                
+
                 for (int k = 0; (k < wprevX.Length); k++)
                 {
                     wprevX[k] = -1;
                     wprevY[k] = -1;
                     wprevZ[k] = -1;
 
-                 }
+                }
 
                 //Initialize arrays based on number of sensors
                 wrawData = new int[wcontroller._Sensors.Count, 3, RM_SIZE];
                 for (int i = 0; (i < wcontroller._Sensors.Count); i++)
                     for (int j = 0; (j < 3); j++)
                         for (int k = 0; (k < RM_SIZE); k++)
-                            wrawData[i,j,k]=-1;
+                            wrawData[i, j, k] = -1;
                 wtimeData = new long[wcontroller._Sensors.Count, RM_SIZE];
                 wAUC = new int[wcontroller._Sensors.Count, 3];
-                
+
                 //JPN: Dimension array to store combined AUC counts for all axes
                 wAUCXYZ = new int[wcontroller._Sensors.Count];
 
@@ -4583,7 +4585,7 @@ namespace DataMerger
                     wVMAG[i] = 0;
                     for (int j = 0; (j < 3); j++)
                         wAUC[i, j] = 0;
-                    
+
                     //JPN: Initialize array to store combined AUC counts for all axes
                     wAUCXYZ[i] = 0;
                 }
@@ -4595,7 +4597,7 @@ namespace DataMerger
             #region Read Summary data
 
             //string[] file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY+"\\data\\summary", "Sensor*.csv");
-            string[] subdirectories = null; 
+            string[] subdirectories = null;
             if (Directory.Exists(aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY + "\\data\\summary"))
             {
                 subdirectories = Directory.GetDirectories(aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY + "\\data\\summary");
@@ -4647,7 +4649,7 @@ namespace DataMerger
                 }
 
                 //JPN: Initialize previous line array for PLOT WRAC data
-                prevWRACPlotDataLine =  new string[CurrentWockets._Controller._Sensors.Count];
+                prevWRACPlotDataLine = new string[CurrentWockets._Controller._Sensors.Count];
                 for (int i = 0; i < prevWRACPlotDataLine.Length; i++)
                 {
                     prevWRACPlotDataLine[i] = "0";
@@ -4659,12 +4661,12 @@ namespace DataMerger
                     for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
                     {
                         wWFACSummaryCSV[i] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Wocket_" + i.ToString("00") + "_WFAC.csv");
-                        
+
                         //JPN: Initialize textwriter array for outputting WRAC values for each sensor
                         wWRACSummaryCSV[i] = new StreamWriter(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\Wocket_" + i.ToString("00") + "_WRAC.csv");
-                        
+
                         wWFACData[i] = new Hashtable();
-                        
+
                         //JPN: Initialze array for storing WRAC values for each sensor
                         wWRACData[i] = new Hashtable();
 
@@ -4715,7 +4717,7 @@ namespace DataMerger
                                         string summaryLine = tokens[5];
                                         if (summaryStart == null)
                                             summaryStart = summaryTime.Year + "/" + summaryTime.Month + "/" + summaryTime.Day + " " + summaryTime.Hour + ":" + summaryTime.Minute + ":" + summaryTime.Second;
-                                        if (summaryStartUnixTime[i]<=0)
+                                        if (summaryStartUnixTime[i] <= 0)
                                             summaryStartUnixTime[i] = summaryUnixTime;
                                         wWFACData[i].Add(summaryKey, summaryLine);
                                     }
@@ -4760,43 +4762,39 @@ namespace DataMerger
 
             #endregion Actigraph Summary Header
 
-            #region Wockets Summary Header
+            #region Wockets Activity Counts Header
 
+            //JPN: Add CSV headers for Wocket Firmware Activity Counts (WFAC)
             if (wWFACData != null)
             {
-                //commented because headers are incorrect
-                //for (int i = 0; (i < wWFACData.Length); i++)
-                //{
-                //    master_csv_header += ",WocketSummary" + i.ToString("00") + ",RawWocketSummary" + i.ToString("00");
-                //    wWFACSummaryCSV[i].WriteLine(summary_csv_header);
-                //}
-
                 for (int i = 0; (i < wWFACData.Length); i++)
                 {
-                    master_csv_header += ",Wocket_PerMinute_WFAC_" + i.ToString("00");  
+                    master_csv_header += ",Wocket" + i.ToString("00") + "_PerMinute_WFAC";
                     wWFACSummaryCSV[i].WriteLine(summary_csv_header);
                 }
-
-                for (int i = 0; (i < wWFACData.Length); i++)
-                {
-                    master_csv_header += ",Wocket_PerMinute_WRAC_" + i.ToString("00");
-                }
-
-                //Wocket Firmware Activity Counts for Plotting
-                for (int i = 0; (i < wWFACData.Length); i++)
-                {
-                    master_csv_header += ",PLOT_Wocket_PerMinute_WFAC_" + i.ToString("00");
-                }
-
-                //Wocket Raw Data Activity Counts for Plotting
-                for (int i = 0; (i < wWFACData.Length); i++)
-                {
-                    master_csv_header += ",PLOT_Wocket_PerMinute_WRAC_" + i.ToString("00");
-                }
-
             }
 
-            #endregion Wockets Summary Header
+            //JPN: Add CSV headers for Wocket Raw Activity Counts (WRAC)
+            if (wWRACData != null)
+            {
+                for (int i = 0; (i < wWRACData.Length); i++)
+                {
+                    master_csv_header += ",Wocket" + i.ToString("00") + "_PerMinute_WRAC";
+                    wWRACSummaryCSV[i].WriteLine(summary_csv_header);
+                }
+            }
+
+            //JPN: Add CSV headers for Plottable Firmware Raw Activity Counts (WFAC)
+            if (wWFACData != null)
+                for (int i = 0; (i < wWFACData.Length); i++)
+                    master_csv_header += ",Wocket" + i.ToString("00") + "_PLOT_PerMinute_WFAC";
+
+            //JPN: Add CSV headers for Plottable Wocket Raw Activity Counts (WRAC)
+            if (wWRACData != null)
+                for (int i = 0; (i < wWRACData.Length); i++)
+                    master_csv_header += ",Wocket" + i.ToString("00") + "_PLOT_PerMinute_WRAC";
+
+            #endregion Wockets Activity Counts Header
 
             #region Other Sensors Headers
 
@@ -4826,7 +4824,7 @@ namespace DataMerger
                     sensewearCSV.WriteLine(sensewear_csv_header);
                 else if (sensewearVanderbiltFound)
                     sensewearCSV.WriteLine(sensewear_csv_header_vanderbilt);
-           
+
             if ((zephyrCSV != null) && (zephyrFound))
                 zephyrCSV.WriteLine(zephyr_csv_header);
             if ((oxyconCSV != null) && (oxyconFound))
@@ -4867,8 +4865,6 @@ namespace DataMerger
             DateTime startDateTime = new DateTime(startyear, startmonth, startday, starthr, startmin, startsec);
             DateTime endDateTime = new DateTime(endyear, endmonth, endday, endhr, endmin, endsec);
 
-
-
             #region If there is MITES data
 
             //check mites start and end times
@@ -4889,20 +4885,20 @@ namespace DataMerger
                     month = Convert.ToInt32(datetokens[1]);
                     day = Convert.ToInt32(datetokens[2]);
 
-                  /*  if ((startyear == 0) || (year < startyear))
-                        startyear = year;
-                    if ((endyear == 0) || (year > endyear))
-                        endyear = year;
+                    /*  if ((startyear == 0) || (year < startyear))
+                          startyear = year;
+                      if ((endyear == 0) || (year > endyear))
+                          endyear = year;
 
-                    if ((startmonth == 0) || (month < startmonth))
-                        startmonth = month;
-                    if ((endmonth == 0) || (month > endmonth))
-                        endmonth = month;
+                      if ((startmonth == 0) || (month < startmonth))
+                          startmonth = month;
+                      if ((endmonth == 0) || (month > endmonth))
+                          endmonth = month;
 
-                    if ((startday == 0) || (day < startday))
-                        startday = day;
-                    if ((endday == 0) || (day > endday))
-                        endday = day;*/
+                      if ((startday == 0) || (day < startday))
+                          startday = day;
+                      if ((endday == 0) || (day > endday))
+                          endday = day;*/
 
 
                     for (int i = 0; i < 30; i++)
@@ -4910,10 +4906,10 @@ namespace DataMerger
                         if (Directory.Exists(subdirectory + "\\" + i))
                         {
                             int hr = i;
-                           /* if (hr < starthr)
-                                starthr = hr;
-                            if (hr > endhr)
-                                endhr = hr;*/
+                            /* if (hr < starthr)
+                                 starthr = hr;
+                             if (hr > endhr)
+                                 endhr = hr;*/
                             DateTime d = new DateTime(year, month, day, hr, 0, 0);
                             if (d.Subtract(startDateTime).TotalSeconds < 0)
                                 startDateTime = d;
@@ -4924,7 +4920,7 @@ namespace DataMerger
                     }
                 }
             }
-            
+
             #endregion If there is MITES data
 
             #region If there is Wockets data
@@ -4988,8 +4984,8 @@ namespace DataMerger
             {
                 if ((actigraphEndTimes[0] != null) && (actigraphStartTimes[0] != null))
                 {
-                    startDateTime = actigraphStartTimes[0];                    
-                    endDateTime = actigraphEndTimes[0];                    
+                    startDateTime = actigraphStartTimes[0];
+                    endDateTime = actigraphEndTimes[0];
                 }
             }
 
@@ -4999,8 +4995,8 @@ namespace DataMerger
 
             //sele check
             #region check annotation start and end times
-            
-            
+
+
             if (aannotation != null)
             {
                 AXML.AnnotatedRecord record = ((AXML.AnnotatedRecord)aannotation.Data[0]);
@@ -5012,22 +5008,22 @@ namespace DataMerger
                 if (d.Subtract(startDateTime).TotalSeconds < 0)
                     startDateTime = d;
 
-               /* if ((startyear == 0) || (year < startyear))
-                    startyear = year;
+                /* if ((startyear == 0) || (year < startyear))
+                     startyear = year;
 
-                if ((startmonth == 0) || (month < startmonth))
-                    startmonth = month;
-                if ((startday == 0) || (day < startday))
-                    startday = day;
+                 if ((startmonth == 0) || (month < startmonth))
+                     startmonth = month;
+                 if ((startday == 0) || (day < startday))
+                     startday = day;
 
-                if (record.StartHour < starthr)
-                    starthr = record.StartHour;
-                */
+                 if (record.StartHour < starthr)
+                     starthr = record.StartHour;
+                 */
                 record = ((AXML.AnnotatedRecord)aannotation.Data[aannotation.Data.Count - 1]);
                 year = Convert.ToInt32(record.StartDate.Split('-')[2]);
                 month = Convert.ToInt32(record.StartDate.Split('-')[0]);
                 day = Convert.ToInt32(record.StartDate.Split('-')[1]);
-                d = new DateTime(year, month, day, record.EndHour, 59,59);
+                d = new DateTime(year, month, day, record.EndHour, 59, 59);
                 if (d.Subtract(endDateTime).TotalSeconds > 0)
                     endDateTime = d;
                 /*
@@ -5055,7 +5051,7 @@ namespace DataMerger
                 {
                     DateTime d = new DateTime();
                     UnixTime.GetDateTime((long)summaryStartUnixTime[i], out d);
-                   
+
                     if (d.Subtract(startDateTime).TotalSeconds < 0)
                         startDateTime = d;
 
@@ -5074,7 +5070,7 @@ namespace DataMerger
                 }
             }
 
-            
+
             DateTime currentDateTime = startDateTime;
             DateTime origin = new DateTime(1970, 1, 1, 0, 0, 0, 0); ;
             TimeSpan diff;
@@ -5088,38 +5084,38 @@ namespace DataMerger
 
 
             #region Cleanup CSV lines
-            
-            
-                string master_csv_line = "";
-                string hr_csv_line = "";
-                
-                string[] actigraph_csv_line = new string[actigraphData.Length];                
-                for (int i = 0; (i < actigraphData.Length); i++)
-                    actigraph_csv_line[i] = "";
 
-                string[] summary_csv_line = null; 
-                if (wWFACData != null)
-                {
-                    summary_csv_line = new string[wWFACData.Length];
-                    for (int i = 0; (i < wWFACData.Length); i++)
-                        summary_csv_line[i] = "";
-                }
 
-                string sensewear_csv_line = "";
-                string zephyr_csv_line = "";
-                string oxycon_csv_line = "";
-                string omron_csv_line = "";
-                string columbia_csv_line = "";
-                string gps_csv_line = "";
-                string rti_csv_line = "";
-                string rt3_csv_line = "";
+            string master_csv_line = "";
+            string hr_csv_line = "";
+
+            string[] actigraph_csv_line = new string[actigraphData.Length];
+            for (int i = 0; (i < actigraphData.Length); i++)
+                actigraph_csv_line[i] = "";
+
+            string[] summary_csv_line = null;
+            if (wWFACData != null)
+            {
+                summary_csv_line = new string[wWFACData.Length];
+                for (int i = 0; (i < wWFACData.Length); i++)
+                    summary_csv_line[i] = "";
+            }
+
+            string sensewear_csv_line = "";
+            string zephyr_csv_line = "";
+            string oxycon_csv_line = "";
+            string omron_csv_line = "";
+            string columbia_csv_line = "";
+            string gps_csv_line = "";
+            string rti_csv_line = "";
+            string rt3_csv_line = "";
 
 
             #endregion Initialize CSV lines
 
 
 
-            TextReader[] wocketsTR1=null;
+            TextReader[] wocketsTR1 = null;
             if (wcontroller != null)
             {
                 wocketsTR1 = new TextReader[wcontroller._Sensors.Count];
@@ -5130,13 +5126,13 @@ namespace DataMerger
 
 
             while (((TimeSpan)endDateTime.Subtract(currentDateTime)).TotalSeconds >= 0)
-            {                
+            {
                 string key = currentDateTime.Year + "-" + currentDateTime.Month + "-" + currentDateTime.Day + "-" + currentDateTime.Hour + "-" + currentDateTime.Minute + "-" + currentDateTime.Second;
                 diff = currentDateTime.Subtract(origin);
                 timestamp = diff.TotalMilliseconds + "," + currentDateTime.ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ssK");
                 currentUnixTime = diff.TotalMilliseconds;
 
-      
+
                 #region Setup prefix of CSV lines
 
                 master_csv_line = timestamp;
@@ -5157,7 +5153,7 @@ namespace DataMerger
                 gps_csv_line = timestamp;
                 rti_csv_line = timestamp;
                 rt3_csv_line = timestamp;
-                
+
                 if (aannotation != null)
                     master_csv_line += "," + current_activity;
 
@@ -5176,7 +5172,7 @@ namespace DataMerger
                 {
 
                     #region Load Activity Labels
-                    
+
                     if (currentUnixTime > annotatedRecord.EndUnix)
                     {
                         current_activity = "";
@@ -5243,7 +5239,7 @@ namespace DataMerger
                                 rawData[channel, 0, head[channel]] = hr;
 
                                 //Here the offset was added
-                                
+
                                 mitesTime = unixtimestamp;
                                 timeData[channel, head[channel]] = (long)mitesTime;
                                 head[channel] = (head[channel] + 1) % mites_RM_SIZE;
@@ -5256,12 +5252,9 @@ namespace DataMerger
                             y = aMITesDecoder.GetSomeMITesData()[0].y;
                             z = aMITesDecoder.GetSomeMITesData()[0].z;
 
-
-
-
                             //Here add the offset
                             unixtimestamp = aMITesDecoder.GetSomeMITesData()[0].unixTimeStamp;
-                            
+
                             rawData[channel, 0, head[channel]] = x;
                             rawData[channel, 1, head[channel]] = y;
                             rawData[channel, 2, head[channel]] = z;
@@ -5274,7 +5267,7 @@ namespace DataMerger
                             timeData[channel, head[channel]] = (long)mitesTime;
                             head[channel] = (head[channel] + 1) % mites_RM_SIZE;
 
-                            
+
                         }
 
                     }
@@ -5496,7 +5489,7 @@ namespace DataMerger
                                 }
                                 headPtr--;
                                 if (headPtr < 0)
-                                    headPtr = mites_RM_SIZE-1;
+                                    headPtr = mites_RM_SIZE - 1;
                             }
                             if (hrCount > 0)
                             {
@@ -5543,26 +5536,26 @@ namespace DataMerger
 
                 }
 
-            #endregion if there is MITes data
+                #endregion if there is MITes data
 
                 #region If Wockets Decoder exist
 
                 if (wcontroller != null)
                 {
-                    
+
                     #region Load Wockets data if needed
                     for (int i = 0; (i < wcontroller._Sensors.Count); i++)
                     {
 
                         string s = "";
-                        while (((wunixtimestamp[i] - currentUnixTime) <= RM_DURATION) && ((s=wocketsTR1[i].ReadLine())!=null))
+                        while (((wunixtimestamp[i] - currentUnixTime) <= RM_DURATION) && ((s = wocketsTR1[i].ReadLine()) != null))
                         {
                             string[] wocketsTokens = s.Split(',');
                             wrawData[wcontroller._Sensors[i]._ID, 0, whead[wcontroller._Sensors[i]._ID]] = Convert.ToInt32(wocketsTokens[1]);
                             wrawData[wcontroller._Sensors[i]._ID, 1, whead[wcontroller._Sensors[i]._ID]] = Convert.ToInt32(wocketsTokens[2]);
                             wrawData[wcontroller._Sensors[i]._ID, 2, whead[wcontroller._Sensors[i]._ID]] = Convert.ToInt32(wocketsTokens[3]);
                             wtimeData[wcontroller._Sensors[i]._ID, whead[wcontroller._Sensors[i]._ID]] = (long)Convert.ToDouble(wocketsTokens[0]);
-                            wunixtimestamp[i] = Convert.ToDouble(wocketsTokens[0]);                                           
+                            wunixtimestamp[i] = Convert.ToDouble(wocketsTokens[0]);
                             whead[wcontroller._Sensors[i]._ID] = (whead[wcontroller._Sensors[i]._ID] + 1) % RM_SIZE;
                         }
                     }
@@ -5580,21 +5573,21 @@ namespace DataMerger
 
                         int wheadPtr = whead[wcontroller._Sensors[i]._ID] - 1;
                         if (wheadPtr < 0)
-                            wheadPtr = RM_SIZE-1;
+                            wheadPtr = RM_SIZE - 1;
 
 
                         #region compute running means
 
-                        while ((wtimeData[wcontroller._Sensors[i]._ID, wheadPtr] > 0) && (wheadPtr != whead[wcontroller._Sensors[i]._ID]) && (wnumMeanPts <= (RM_SIZE-1)))
+                        while ((wtimeData[wcontroller._Sensors[i]._ID, wheadPtr] > 0) && (wheadPtr != whead[wcontroller._Sensors[i]._ID]) && (wnumMeanPts <= (RM_SIZE - 1)))
                         {
                             wrunningMeanX += wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr];
                             wrunningMeanY += wrawData[wcontroller._Sensors[i]._ID, 1, wheadPtr];
                             wrunningMeanZ += wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr];
-                            wnumMeanPts++;                           
+                            wnumMeanPts++;
                             wheadPtr--;
 
                             if (wheadPtr < 0)
-                                wheadPtr = (RM_SIZE-1);
+                                wheadPtr = (RM_SIZE - 1);
                         }
 
                         wrunningMeanX = wrunningMeanX / wnumMeanPts;
@@ -5608,7 +5601,7 @@ namespace DataMerger
 
                         wheadPtr = whead[wcontroller._Sensors[i]._ID] - 1;
                         if (wheadPtr < 0)
-                            wheadPtr = (RM_SIZE-1);
+                            wheadPtr = (RM_SIZE - 1);
 
 
                         #endregion compute running means
@@ -5620,7 +5613,7 @@ namespace DataMerger
                         //compute values per second
                         while ((wtimeData[wcontroller._Sensors[i]._ID, wheadPtr] > 0) && (wheadPtr != whead[wcontroller._Sensors[i]._ID]))
                         {
-                            double ttt=wtimeData[wcontroller._Sensors[i]._ID, wheadPtr] ;
+                            double ttt = wtimeData[wcontroller._Sensors[i]._ID, wheadPtr];
 
                             if (((wtimeData[wcontroller._Sensors[i]._ID, wheadPtr] - currentUnixTime) >= 0) && ((wtimeData[wcontroller._Sensors[i]._ID, wheadPtr] - currentUnixTime) <= 1000))
                             {
@@ -5634,7 +5627,7 @@ namespace DataMerger
                                     waverageZ[wcontroller._Sensors[i]._ID] = waverageZ[wcontroller._Sensors[i]._ID] + Math.Abs(wprevZ[wcontroller._Sensors[i]._ID] - wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr]);
                                     waverageRawZ[wcontroller._Sensors[i]._ID] = waverageRawZ[wcontroller._Sensors[i]._ID] + wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr];
                                     wacCounters[wcontroller._Sensors[i]._ID] = wacCounters[wcontroller._Sensors[i]._ID] + 1;
-                                    
+
                                     //JPN: Increment counter used to determine samples per minute for WRAC calculations
                                     wWRACCounterMinute[wcontroller._Sensors[i]._ID]++;
                                 }
@@ -5664,7 +5657,7 @@ namespace DataMerger
 
                             wheadPtr--;
                             if (wheadPtr < 0)
-                                wheadPtr = (RM_SIZE-1);
+                                wheadPtr = (RM_SIZE - 1);
                         }
 
                         wrunningMeanX = 0;
@@ -5685,10 +5678,10 @@ namespace DataMerger
                         wAUC[wcontroller._Sensors[i]._ID, 0] = 0;
                         wAUC[wcontroller._Sensors[i]._ID, 1] = 0;
                         wAUC[wcontroller._Sensors[i]._ID, 2] = 0;
-                        
+
                         //JPN: Reset combined AUC array for next second
                         wAUCXYZ[wcontroller._Sensors[i]._ID] = 0;
-                        
+
                         wVMAG[wcontroller._Sensors[i]._ID] = 0;
 
                         for (int k = 0; (k < RM_SIZE); k++)
@@ -5759,7 +5752,7 @@ namespace DataMerger
                             master_csv_line += ((double)wAUC[sensor_id, 1]).ToString("00.00") + ",";
                             master_csv_line += ((double)wAUC[sensor_id, 2]).ToString("00.00") + ",";
                             master_csv_line += ((double)(wAUC[sensor_id, 0] + wAUC[sensor_id, 1] + wAUC[sensor_id, 2])).ToString("00.00") + ",";
-                            
+
                             master_csv_line += ((double)wRMX[sensor_id]).ToString("00.00") + ",";
                             master_csv_line += ((double)wRMY[sensor_id]).ToString("00.00") + ",";
                             master_csv_line += ((double)wRMZ[sensor_id]).ToString("00.00") + ",";
@@ -5773,20 +5766,20 @@ namespace DataMerger
                             {
                                 //JPN: Sum the raw ACs for each accelerometer axis (X,Y,Z) per second for each sensor
                                 wWRACSummation[wcontroller._Sensors[i]._ID] += wAUCXYZ[wcontroller._Sensors[i]._ID];
-                                
+
                                 //JPN: Update the unix counter for the AC per minute calculation 
                                 if (prevUnixTime[wcontroller._Sensors[i]._ID] == -1)
                                     prevUnixTime[wcontroller._Sensors[i]._ID] = currentUnixTime;
-                               
+
                                 //JPN: If one minute has elapsed, computer WRAC for this sensor
                                 if ((currentUnixTime - prevUnixTime[wcontroller._Sensors[i]._ID]) > 60000)
                                 {
                                     //JPN: Add the last minute's worth of WRAC data to the final array
                                     wWRACData[wcontroller._Sensors[i]._ID][key] = Convert.ToInt32(wWRACData[wcontroller._Sensors[i]._ID][key]) + wWRACSummation[wcontroller._Sensors[i]._ID];
-                                    
+
                                     //JPN: Compute sampling rate for this WRAC by dividing number of samples by 60 seconds
                                     wWRACSamplingRate[wcontroller._Sensors[i]._ID][key] = (double)wWRACCounterMinute[wcontroller._Sensors[i]._ID] / 60;
-                                    
+
                                     //JPN: Reset arrays used to compute WRAC
                                     wWRACSummation[wcontroller._Sensors[i]._ID] = 0;
                                     wWRACCounterMinute[wcontroller._Sensors[i]._ID] = 0;
@@ -5834,22 +5827,22 @@ namespace DataMerger
                         wVMAG[sensor_id] = 0;
                         for (int j = 0; (j < 3); j++)
                             wAUC[sensor_id, j] = 0;
-                        
+
                         //JPN: reset AUC summation for next second's WRAC calculation
                         wAUCXYZ[sensor_id] = 0;
-                       
+
                     }
 
                     #endregion Calculate Statistics
 
                 }
 
-            #endregion If Wockets Decoder Exist
+                #endregion If Wockets Decoder Exist
 
-            #region Write the CSV lines for each sensor
+                #region Write the CSV lines for each sensor
 
                 #region Write CSV lines for Actigraphs
-                
+
                 for (int i = 0; (i < actigraphData.Length); i++)
                 {
                     if (actigraphData[i].ContainsKey(key) == false)
@@ -5868,9 +5861,9 @@ namespace DataMerger
                         else
                         {
                             actigraphCSV[i].WriteLine(actigraph_csv_line[i] + ",");
-                            master_csv_line = master_csv_line + ",";                            
+                            master_csv_line = master_csv_line + ",";
                         }
-              
+
                     }
                     else
                     {
@@ -5882,13 +5875,13 @@ namespace DataMerger
                         try
                         {
                             prevActXYZ = prevActLine[i].Split(',');
-                            prevActAC_XYZ = Convert.ToInt32(prevActXYZ[0]) + Convert.ToInt32(prevActXYZ[1]) + Convert.ToInt32(prevActXYZ[2]);                        
+                            prevActAC_XYZ = Convert.ToInt32(prevActXYZ[0]) + Convert.ToInt32(prevActXYZ[1]) + Convert.ToInt32(prevActXYZ[2]);
                         }
                         catch (Exception ex)
                         {
                         }
                         master_csv_line = master_csv_line + "," + actigraphData[i][key] + "," + prevActAC_XYZ;
-                        
+
                     }
                 }
 
@@ -5903,7 +5896,7 @@ namespace DataMerger
                         if (wWFACData[i].ContainsKey(key) == false)
                         {
                             wWFACSummaryCSV[i].WriteLine(summary_csv_line[i] + ",");
-                            master_csv_line = master_csv_line + ",";                            
+                            master_csv_line = master_csv_line + ",";
                         }
                         else
                         {
@@ -5927,7 +5920,7 @@ namespace DataMerger
                         if (wWRACData[i].ContainsKey(key) == false)
                         {
                             wWRACSummaryCSV[i].WriteLine(summary_csv_line[i] + ",");
-                            master_csv_line = master_csv_line + ",";          
+                            master_csv_line = master_csv_line + ",";
                         }
                         else
                         {
@@ -5950,7 +5943,7 @@ namespace DataMerger
                     {
                         if (wWFACData[i].ContainsKey(key) == false)
                         {
-                            master_csv_line = master_csv_line + "," + prevWFACPlotDataLine[i] ;
+                            master_csv_line = master_csv_line + "," + prevWFACPlotDataLine[i];
                         }
                         else
                         {
@@ -5971,8 +5964,8 @@ namespace DataMerger
                     {
                         //JPN: Carry over previous WRAC value if the current sample is not the start of a new WRAC minute epoch
                         if (wWRACData[i].ContainsKey(key) == false)
-                        {                         
-                            master_csv_line = master_csv_line + "," + prevWRACPlotDataLine[i]; 
+                        {
+                            master_csv_line = master_csv_line + "," + prevWRACPlotDataLine[i];
                         }
                         //JPN: Log new WRAC value when the next minute epoch starts
                         else
@@ -5980,7 +5973,7 @@ namespace DataMerger
                             //JPN: Retrieve WRAC data point and divide by computed sampling rate for the minute observed
                             int value = Convert.ToInt32(Convert.ToDouble(wWRACData[i][key]) / Convert.ToDouble(wWRACSamplingRate[i][key]));
                             //JPN: Add scaled WRAC data to the text stream
-                            master_csv_line = master_csv_line + "," + value;                            
+                            master_csv_line = master_csv_line + "," + value;
                             //JPN: Store this line so it can be repeated in the summary CSV until the WRAC value changes
                             prevWRACPlotDataLine[i] = value.ToString();
                         }
@@ -5997,7 +5990,7 @@ namespace DataMerger
                     {
                         sensewearCSV.WriteLine(sensewear_csv_line + "," + (int)SSR[key] + "," + (double)STrans[key] +
                             "," + (double)SLong[key] + "," + (double)SAcc[key]);
-                        master_csv_line = master_csv_line +","+ (int)SSR[key] + "," + (double)STrans[key] +
+                        master_csv_line = master_csv_line + "," + (int)SSR[key] + "," + (double)STrans[key] +
                             "," + (double)SLong[key] + "," + (double)SAcc[key];
                     }
                     else
@@ -6006,11 +5999,11 @@ namespace DataMerger
                         master_csv_line = master_csv_line + ",,,,";
                     }
                 }
-                
+
                 #endregion Write CSV line for Sensewear
 
                 #region Write CSV line for Sensewear Vanderbilt
-                
+
                 if ((sensewearVanderbiltFound) && (sensewearCSV != null))
                 {
                     if (sensewearData.ContainsKey(key))
@@ -6024,7 +6017,7 @@ namespace DataMerger
                         master_csv_line = master_csv_line + ",,,,,,,,,,,,,";
                     }
                 }
-                
+
                 #endregion Write CSV line for Sensewear Vanderbilt
 
                 #region Write CSV line for Zephyr
@@ -6042,9 +6035,9 @@ namespace DataMerger
                         master_csv_line = master_csv_line + ",,,,,,,,,,,,,,,,";
                     }
                 }
-               
+
                 #endregion Write CSV line for Zephyr
-                
+
                 #region Write CSV line for Oxycon
 
                 if ((oxyconFound) && (oxyconCSV != null))
@@ -6118,7 +6111,7 @@ namespace DataMerger
                 #endregion Write CSV line for GPS
 
                 #region Write CSV line for RTI
-                
+
                 if ((rtiFound) && (rtiCSV != null))
                 {
                     if (rtiData.ContainsKey(key))
@@ -6136,11 +6129,11 @@ namespace DataMerger
                 #endregion Write CSV line for RTI
 
                 #region Write CSV line for RT3
-                
+
                 if ((rt3Found) && (rt3CSV != null))
                 {
                     if (rt3Data.ContainsKey(key))
-                    {                
+                    {
                         rt3CSV.WriteLine(rt3_csv_line + "," + ((string)rt3Data[key]));
                         master_csv_line = master_csv_line + "," + ((string)rt3Data[key]);
                     }
@@ -6150,13 +6143,13 @@ namespace DataMerger
                         master_csv_line = master_csv_line + ",,,,";
                     }
                 }
-                
+
                 #endregion Write CSV line for RT3
 
                 masterCSV.WriteLine(master_csv_line);
-                
-                
-           #endregion Write the CSV lines for each sensor
+
+
+                #endregion Write the CSV lines for each sensor
 
                 //reinitialize variables
                 hrCount = 0;
