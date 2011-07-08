@@ -245,7 +245,7 @@ namespace Wockets.Utils
 
 
 
-        public static void Write(String log)
+        public static void Write(String log, string type)
         {
 
                 DateTime now = DateTime.Now;
@@ -307,7 +307,12 @@ namespace Wockets.Utils
                     }
 
                     tw = new StreamWriter(filename, true);
-                    tw.WriteLine(log);
+
+                    if (type.CompareTo("phone") == 0)
+                        tw.WriteLine(log);
+                    else
+                        tw.Write(log);
+
                     tw.Flush();
                     tw.Close();
                     
@@ -323,6 +328,7 @@ namespace Wockets.Utils
                         tw.Close();
                     }
                 }
+
         }
 
 

@@ -214,15 +214,8 @@ namespace CollectDataUser
 
 
             #region Read the Software Version
-                
-            #region commented
-            //System.Reflection.Assembly a = System.Reflection.Assembly.GetExecutingAssembly();
-            //System.Reflection.AssemblyName an = a.GetName();
-            //software_version = "Version: " + an.Version.ToString();
-            //this.label_software_version.Text = software_version.Substring(0, 14);
-            #endregion
-
-            software_version = "Version: " + "1.58";
+             
+            software_version = "Version: " + "1.59 Test2";
             this.label_software_version.Text = software_version;
 
             #endregion
@@ -518,9 +511,11 @@ namespace CollectDataUser
 
                     tr_sensors_data.Close();
 
-                    if (!is_IMEI_found)
+
+
+
+                    if ( !is_IMEI_found )
                     {
-                        
                         appLogger.Debug("User IMEI not found in master list.");
 
 
@@ -534,11 +529,17 @@ namespace CollectDataUser
                                 if (line.Trim().Length > 0)
                                 {
                                     CurrentPhone._IMEI = rline;
-                                    label_phone_IMEI.Text = CurrentPhone._IMEI;
+                                    label_phone_IMEI.Text = rline;
 
                                     if ((line = tr.ReadLine()) != null)
+                                    {
                                         if (rline.Trim().Length > 0)
-                                            subjectID = rline;
+                                          subjectID = rline;
+                                        else
+                                            appLogger.Debug("User ID not found in local file updater_id.txt.");
+                                    }
+                                    else
+                                        appLogger.Debug("User ID not found in local file updater_id.txt.");
                                 }
                             }
                             else
@@ -548,7 +549,6 @@ namespace CollectDataUser
                            appLogger.Debug("User IMEI not found in local file updater_id.txt.");
                         
                     }
-
                 }
             }
             catch(Exception e)
@@ -560,62 +560,6 @@ namespace CollectDataUser
             #endregion
 
 
-            #endregion
-
-
-            #region Initialize the wockets controller (commented)
-
-            //try
-            //{
-            //    // Create the session directory
-            //    DateTime now = DateTime.Now;
-            //    Settings._DataStorageDirectory = firstCard + "\\Wockets\\Session-" + now.Month.ToString("00") + "-" + now.Day.ToString("00") + "-" + now.Year.ToString("0000") + "-" + now.Hour.ToString("00") + "-" + now.Minute.ToString("00") + "-" + now.Second.ToString("00");
-            //    if (!Directory.Exists(Settings._DataStorageDirectory))
-            //        Directory.CreateDirectory(Settings._DataStorageDirectory);
-
-            //    //TODO: separate the controller logger from the application one
-            //    appLogger.InitLogger(Settings._DataStorageDirectory + "\\log\\");   
-            //    appLogger.Debug("Session and log directories created.");
-
-
-            //    if (wockets_controller != null)
-            //    {   wockets_controller.Dispose();
-            //        wockets_controller = null;
-            //    }
-               
-            //    wockets_controller = new WocketsController("", "", "");
-            //    wockets_controller._StorageDirectory = Settings._DataStorageDirectory;
-            //    CurrentWockets._Controller = wockets_controller;
-                
-            //    appLogger.Debug("Wockets controller initialized.");
-
-            //}
-            //catch (Exception e)
-            //{
-            //    appLogger.Error("Exception when trying to create the application directories. Ex: " + e.ToString());
-            //}
-
-
-            #endregion
-
-
-            #region commented
-            #region Load MAC addresses, locations from sensordata.xml files && match them to the master list (commented)
-            //sensors_loaded = LoadSensorsFromMasterList(wockets_controller, sensor_data, this.sensor_set);
-            #endregion
-
-            #region Initialize Location Picture  (commented)
-            //pictureBox_Location.Image = (Image)Resources.HumanBody;
-
-            ////Assign the parent to the button
-            //this.button1.Parent = this.pictureBox_Location;
-            //this.button1.BackColor = Color.Transparent;
-
-
-            //ButtonImList.Images.Add((Image)Resources.buttonIm);
-            //ButtonImList.Images.Add((Image)Resources.buttonIm2);
-            //ButtonImList.Images.Add((Image)Resources.buttonIm3);
-            #endregion
             #endregion
 
 
@@ -681,296 +625,12 @@ namespace CollectDataUser
             }
 
 
-
-            #region commented
-            #region Try to connect sensors to the wockets controller (commneted)
-
-            //if (CurrentWockets._Controller._Sensors.Count > 0 & sensors_loaded)
-            //{
-
-            //    #region connect wockets
-
-
-            //    #region Load The Configuration Xml File
-
-            //    //Load the wockets configuration directory
-            //    WocketsConfiguration configuration = new WocketsConfiguration();
-            //    configuration.FromXML(Settings._MainWocketsDirectory + "NeededFiles\\Master\\Configuration.xml");
-
-            //    try
-            //    {
-            //        File.Copy(Settings._MainWocketsDirectory + "NeededFiles\\Master\\Configuration.xml", Settings._DataStorageDirectory + "\\Configuration.xml");
-            //    }
-            //    catch (Exception e)
-            //    {
-            //        appLogger.Error("program.cs: Exception when trying to copy the Configuration.xml file to storage card. " + e.ToString());
-            //    }
-
-            //    CurrentWockets._Configuration = configuration;
-
-            //    #endregion
-
-
-            //    //Save the SensorData.Xml to the session data directory
-            //    try
-            //    {
-            //        StreamWriter sensors_data_xml = new StreamWriter(Settings._DataStorageDirectory + "\\SensorData.xml");
-            //        sensors_data_xml.Write(wockets_controller.ToXML());
-            //        sensors_data_xml.Close();
-            //    }
-            //    catch (Exception e)
-            //    {
-            //        appLogger.Error("program.cs: Exception when trying to copy the SensorData.xml file to storage card." + e.ToString());
-            //    }
-
-
-            //    //Set memory mode to local
-            //    wockets_controller._Mode = MemoryMode.BluetoothToLocal;
-
-            //    //Initialize wockets controller and set it to "bursty mode"
-            //    wockets_controller._TMode = TransmissionMode.Bursty60;
-
-            //    //Initialize pointers to loaded sensors
-            //    for (int i = 0; (i < wockets_controller._Sensors.Count); i++)
-            //    {
-            //        CurrentWockets._Controller._Receivers[i]._ID = i;
-            //        CurrentWockets._Controller._Decoders[i]._ID = i;
-            //        CurrentWockets._Controller._Sensors[i]._ID = i;
-            //        CurrentWockets._Controller._Sensors[i]._Receiver = CurrentWockets._Controller._Receivers[i];
-            //        CurrentWockets._Controller._Sensors[i]._Decoder = CurrentWockets._Controller._Decoders[i];
-            //        CurrentWockets._Controller._Sensors[i]._Loaded = true;
-            //        CurrentWockets._Controller._Sensors[i]._RootStorageDirectory = CurrentWockets._Controller._StorageDirectory + "\\data\\raw\\PLFormat\\";
-
-            //        appLogger.Debug("Program.cs: Sensor Loaded= " + CurrentWockets._Controller._Sensors[i]._Address);
-            //    }
-
-
-            //    #region commented
-            //    #region commented
-            //    ////Load sensors addresses to array list
-            //    //sensors_list = new ArrayList();
-            //    //for (int i = 0; (i < CurrentWockets._Controller._Receivers.Count); i++)
-            //    //{
-            //    //    sensors_list.Add(((RFCOMMReceiver)CurrentWockets._Controller._Receivers[i])._Address);
-            //    //    appLogger.Debug("Sensor Info Loaded From Xml, Sensor Set: " + sensor_set + "," +
-            //    //                 "MAC " + i.ToString() + ":"+ sensors_list[i]);
-            //    //}
-            //    #endregion
-
-            //    #region Suscribe to Kernel Events (commented)
-
-
-            //    //SuscribeToKernelEvents();
-
-            //    #endregion
-            //    #endregion
-
-
-            //    #region Initialize thread that tracks the connection status
-
-
-            //    ACsUpdateTimer = new System.Windows.Forms.Timer();
-            //    ACsUpdateTimer.Interval = 10000; //update every 10sec
-            //    ACsUpdateTimer.Tick += new EventHandler(ACsUpdateTimer_Tick);
-            //    ACsUpdateTimer.Enabled = false;
-
-
-
-            //    #region Initialization of Connection Status Variables
-
-            //    PrevFullPkg = new int[wockets_controller._Receivers.Count];
-            //    PrevPartialPkg = new int[wockets_controller._Receivers.Count];
-            //    PrevEmptyPkg = new int[wockets_controller._Receivers.Count];
-            //    LastPkgTime = new DateTime[wockets_controller._Receivers.Count];
-            //    ElapsedConnectionTime = new TimeSpan[wockets_controller._Receivers.Count];
-
-
-            //    #region Initialize the sensor connection status text labels
-            //    textBox_sensors_status_0.Visible = false;
-            //    textBox_sensors_status_0.Enabled = false;
-            //    textBox_sensor_location_0.Visible = false;
-            //    textBox_sensor_location_0.Enabled = false;
-            //    textBox_sensors_status_1.Visible = false;
-            //    textBox_sensors_status_1.Enabled = false;
-            //    textBox_sensor_location_1.Visible = false;
-            //    textBox_sensor_location_1.Enabled = false;
-            //    textBox_sensors_status_2.Visible = false;
-            //    textBox_sensors_status_2.Enabled = false;
-            //    textBox_sensor_location_2.Visible = false;
-            //    textBox_sensor_location_2.Enabled = false;
-
-            //    for (int np = 0; np < wockets_controller._Receivers.Count; np++)
-            //    {
-
-            //        //PrevFullPkg[np] = 0;
-            //        //PrevPartialPkg[np] = 0;
-            //        //PrevEmptyPkg[np] = 0;
-            //        //LastPkgTime[np] = DateTime.Now;
-            //        //ElapsedConnectionTime[np] = TimeSpan.Zero;
-
-
-            //        switch (np)
-            //        {
-
-            //            case 0:
-            //                textBox_sensors_status_0.Visible = true;
-            //                textBox_sensors_status_0.Enabled = true;
-            //                textBox_sensor_location_0.Visible = true;
-            //                textBox_sensor_location_0.Enabled = true;
-            //                break;
-            //            case 1:
-            //                textBox_sensors_status_1.Visible = true;
-            //                textBox_sensors_status_1.Enabled = true;
-            //                textBox_sensor_location_1.Visible = true;
-            //                textBox_sensor_location_1.Enabled = true;
-            //                break;
-            //            case 2:
-            //                textBox_sensors_status_2.Visible = true;
-            //                textBox_sensors_status_2.Enabled = true;
-            //                textBox_sensor_location_2.Visible = true;
-            //                textBox_sensor_location_2.Enabled = true;
-            //                break;
-            //            default:
-            //                break;
-            //        }
-            //    }
-            //    #endregion
-
-
-            //    #endregion
-
-
-
-            //    #region Initialization of upload Status Variables
-
-            //    ElapsedTime_LogUpload = TimeSpan.Zero;
-            //    LastLogUploadInvoke = new DateTime();
-            //    LastLogUploadInvoke = DateTime.Now;
-            //    ElapsedTime_DataUpload = TimeSpan.Zero;
-
-            //    #endregion
-
-
-
-            //    #endregion
-
-
-            //    #region Initialize Elapsed Time Counter On File Upload Screen
-
-            //    //Hide the timer label
-            //    textBox_elapsed_time.Visible = false;
-            //    textBox_elapsed_time.Enabled = false;
-            //    textBox_elapsed_time.Text = "00h:00m:00s";
-
-            //    #endregion
-
-
-            //    #region Initialize GUI Panels
-
-            //    InitializePanels();
-            //    TurnOnPanel(PanelID.CONNECTION);
-            //    label_kernel_status.Text = "Loading Application";
-
-            //    #endregion
-
-
-            //    #region Launch Wockets Controller for Data Collection
-
-
-            //    //if (CurrentWockets._Controller._Sensors.Count > 0)
-            //    //{
-            //    try
-            //    {
-            //        CurrentWockets._Controller.Initialize();
-            //        _WocketsRunning = true;
-            //        appLogger.Debug("Program.cs: The wockets controller successfully initialized.");
-
-            //        if ( WocketsConnect(_WocketsRunning))
-            //        {
-            //            //Launch the wocketsQA questionarie program
-            //            LaunchWocketsQuestionarie();
-            //        }
-            //        else
-            //        {
-            //            //TODO: consolidate this part
-            //            TurnOnPanel(PanelID.CONNECTION);
-            //            label_kernel_status.Text = "The wockets cannot connect. Please restart the Application.";
-            //            Application.DoEvents();
-
-            //            Thread.Sleep(2000);
-
-            //            Application.Exit();
-            //            System.Diagnostics.Process.GetCurrentProcess().Kill();
-            //        }
-
-            //    }
-            //    catch (Exception e)
-            //    {
-            //        appLogger.Debug("Program.cs: The wockets controller was NOT initialized. Ex:" + e.ToString());
-
-            //        TurnOnPanel(PanelID.CONNECTION);
-            //        label_kernel_status.Text = "The wockets controller was NOT initialized. Please restart the Application.";
-            //        Application.DoEvents();
-
-            //        Thread.Sleep(2000);
-
-            //        Application.Exit();
-            //        System.Diagnostics.Process.GetCurrentProcess().Kill();
-            //    }
-
-            //    //}
-
-            //    #endregion Launch Wockets Controller for Data Collection
-
-
-            //    #endregion connect wockets
-
-            //}
-            //else //Sensors Macs not loaded
-            //{
-            //    #region send error message and quit app
-
-            //    appLogger.Debug("The Sensors Couldn't be loaded. Please restart the Application.");
-
-            //    TurnOnPanel(PanelID.CONNECTION);
-            //    label_kernel_status.Text = "The Sensors Couldn't be loaded. Please restart the Application.";
-            //    Application.DoEvents();
-
-            //    Thread.Sleep(2000);
-
-            //    Application.Exit();
-            //    System.Diagnostics.Process.GetCurrentProcess().Kill();
-
-            //    #endregion
-
-            //}
-
-            #endregion If there are sensors, connect the wockets controller
-            #region commented
-            #region Try to connect to kernel, (commented)
-            //Start the kernel connection sequence
-            //StartLoadingWocketsToKernel();
-            //appLogger.Debug("Connecting to Kernel in Silent Mode");
-            #endregion
-
-
-            #region Reset Uploader and Received Data Pkgs Counters (commented)
-
-            //ResetUploaderCounters();
-            //ResetACsCounters(wockets_controller);
-
-            #endregion
-            #endregion 
-            #endregion
-
-
         }
 
         #endregion
 
 
         #region Storage Card Identification 
-
 
         private string GetStorageCardName(int TIMEOUT_SECONDS)
         {
@@ -1039,7 +699,6 @@ namespace CollectDataUser
             appLogger.Debug("Session and log directories created.");
         }
 
-
         #endregion
 
 
@@ -1099,17 +758,7 @@ namespace CollectDataUser
             int[] _posx = new int[_max_number_buttons];
             int[] _posy = new int[_max_number_buttons];
            
-            #region commented
-            //_posx[0] = 0;    _posy[0] = 5;      location_id[0] = "";
-            //_posx[1] = 240;  _posy[1] = 5;      location_id[1] = "";
-            //_posx[2] = 0;    _posy[2] = 145;    location_id[2] = "Right Wrist";
-            //_posx[3] = 240;  _posy[3] = 145;    location_id[3] = "Left Wrist";
-            //_posx[4] = 0;    _posy[4] = 285;    location_id[4] = "Right Pocket";
-            //_posx[5] = 240;  _posy[5] = 285;    location_id[5] = "Left Pocket";
-            //_posx[6] = 0;    _posy[6] = 425;    location_id[6] = "Right Ankle";
-            //_posx[7] = 240;  _posy[7] = 425;    location_id[7] = "Left Ankle"; 
-            #endregion
-
+           
 
             _posx[0] = 0;       _posy[0] = 5; 
             _posx[1] = 240;     _posy[1] = 5;
