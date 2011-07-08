@@ -141,16 +141,22 @@ namespace Wockets.Decoders
         }
         #endregion Access Properties
 
-          protected void FireEvent(Response e)
-          {
-              ThreadPool.QueueUserWorkItem(func =>
-              {
-                  if (this.subscribed[(int)e._Type])
-                      this.delegates[(int)e._Type](e);
-              });
-          }
 
-        public void Subscribe(ResponseTypes type, ResponseHandler handler)
+          #region ================== FireEvent Function Commented ======================
+          //This function is used in the kernel version of the wockets controller
+          // To trigger the response events
+          //protected void FireEvent(Response e)
+          //{
+          //    ThreadPool.QueueUserWorkItem(func =>
+          //    {
+          //        if (this.subscribed[(int)e._Type])
+          //            this.delegates[(int)e._Type](e);
+          //    });
+          //}
+          #endregion ====================================================================
+
+
+          public void Subscribe(ResponseTypes type, ResponseHandler handler)
         {
             this.subscribed[(int)type] = true;
             this.delegates[(int)type] = handler;

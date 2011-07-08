@@ -19,12 +19,6 @@ using Wockets.Decoders.Accelerometers;
 using Wockets.Utils.IPC;
 using System.Runtime.InteropServices;
 
-//using Wockets.Data.Features;
-//using WocketsWeka;
-//using weka.classifiers;
-//using weka;
-//using weka.core;
-//using weka.classifiers.trees;
 
 #if (PocketPC)
 using Wockets.Utils.IPC.MMF;
@@ -39,31 +33,38 @@ namespace Wockets
     /// The wockets controller manages data connections, writes raw data and classifies data
     /// </summary>
     public sealed class WocketsController : XMLSerializable
-    {     
-        
-   
+    {
+
+
+        #region Variable Declaration
+
 
         #region Serialization Constants
-            
+
         private const string SENSORDATA_ELEMENT = "SENSORDATA";
 
         #endregion Serialization Constants
 
 
         #region Wockets Controller Information
+        
         public string _Description;
         public string _Filename;
         public string _Name;
+        
         #endregion Wockets Controller Information
 
         #region Wockets controller components
+        
         public ReceiverList _Receivers;
         public DecoderList _Decoders;        
         public SensorList _Sensors;
+        
         #endregion Wockets controller components
 
         #region Threads instantiated by the controller
         
+
         /// <summary>
         /// Polls the data from BT serial to a local buffer, a shared memory buffer or polls data
         /// from a shared memory buffer to a local buffer.
@@ -84,8 +85,8 @@ namespace Wockets
         #endregion Threads instantiated by the controller
 
 
-       
-        
+        #region General Class Variables
+
         //polling
         private AutoResetEvent waitToPollEvent;
         private AutoResetEvent pollingEvent;
@@ -130,7 +131,15 @@ namespace Wockets
         public TransmissionMode _TMode = TransmissionMode.Continuous;
 
 
-        #region Thread Status Properties 
+        #endregion 
+
+
+        #endregion
+
+
+
+        #region Thread Status Properties
+
         /// <summary>
         /// A property that controls the data saving thread. When set to true the saving thread is signaled to run.
         /// When set to false it is guruanteed that the saving thread will be stopped prior to the call returning to avoid race
@@ -204,6 +213,8 @@ namespace Wockets
         #endregion Thread Status Properties
 
 
+        #region Wockets Controller Initialization Functions
+
 
         public WocketsController(string name, string filename, string description)
         {
@@ -211,9 +222,6 @@ namespace Wockets
             this._Name = name;
             this._Filename = filename;
             this._Description = description;
-
-
-
             
             this.savingEvent = new AutoResetEvent(false);
             this.waitToSaveEvent = new AutoResetEvent(false);
@@ -232,6 +240,7 @@ namespace Wockets
 
         public void Deinitialize()
         {
+
             if (aPollingThread!=null)
                 aPollingThread.Abort();
 
@@ -257,11 +266,8 @@ namespace Wockets
         }
 
 
-
-
         public void Initialize()
         {
-
 
             if (this._Mode == MemoryMode.SharedToLocal)
             {
@@ -298,7 +304,6 @@ namespace Wockets
                     {
                         //TODO: add log
                     }
-
                 }
             }
             
@@ -323,7 +328,11 @@ namespace Wockets
             if (this._TMode == TransmissionMode.Continuous)
             {
 
+
+
                 #region Launch the saving thread
+
+
 
                 if ((this._Mode == MemoryMode.BluetoothToShared) || (this._Mode == MemoryMode.BluetoothToLocal))
                 {
@@ -332,6 +341,8 @@ namespace Wockets
                     aSavingThread.Priority = ThreadPriority.Highest;
                     aSavingThread.Start();
                 }
+
+
 #if (PocketPC)
                 try
                 {
@@ -365,16 +376,17 @@ namespace Wockets
 
                 #endregion Launch the saving thread
 
-            }
 
 
+            }  
+            else if (this._TMode == TransmissionMode.Bursty60)
+            {
                 //If bursty spawn interface tracking thread//data writing
                 //termination thread
                 //wakeup thread
-            else if (this._TMode == TransmissionMode.Bursty60)
-            {
 
                 #region Launch the datacollection thread and wakeup every 60 secs
+
 
                 try
                 {
@@ -387,9 +399,11 @@ namespace Wockets
                 }
 
 #if (PocketPC)
+
                 countSeconds = new bool[this._Sensors.Count];
                 LastACIndex = new int[this._Sensors.Count];
                 LastSeqNum = new int[this._Sensors.Count];
+
                 for (int i = 0; (i < this._Sensors.Count); i++)
                 {
                     this._Sensors[i]._Loaded = true;
@@ -401,10 +415,13 @@ namespace Wockets
                 }
 
                 reminderDateTime = DateTime.Now.AddSeconds(60);
+
+
                 //default is local memory
                 interfaceActivityThread = new Thread(new ThreadStart(InterfaceActivityTracker));
                 interfaceActivityThread.Priority = ThreadPriority.Highest;
                 dataCollectionThread = new Thread(new ThreadStart(DataCollection));
+
 
                 //terminationThread = new Thread(new ThreadStart(TerminateWockets));
                 //terminationThread.Start();
@@ -426,10 +443,12 @@ namespace Wockets
 
                 #endregion Launch the datacollection thread and wakeup every 60 secs
 
-
             }
 
         }
+
+
+        #endregion
 
 
         #region Power Management
@@ -460,6 +479,7 @@ namespace Wockets
             public UInt32 MaxSound;
             public UInt32 Reserved;
         }
+        
         [DllImport("coredll.dll", EntryPoint = "CeClearUserNotification", SetLastError = true)]
         private static extern bool CeClearUserNotification(int hNotification);
 
@@ -475,17 +495,12 @@ namespace Wockets
         static extern int SetSystemPowerState(string psState, int StateFlags, int Options);
 
 
-
-
-
-
         const int POWER_STATE_ON = 0x00010000;
         const int POWER_STATE_OFF = 0x00020000;
         const int POWER_STATE_IDLE = 0x00100000;
         const int POWER_STATE_SUSPEND = 0x00200000;
         const int POWER_FORCE = 4096;
         const int POWER_STATE_RESET = 0x00800000;
-
 
         int reminderID = 0;
 
@@ -522,13 +537,9 @@ namespace Wockets
             }
         }
 
-
-
-
         const string WOCKETS_SUSPEND_LOCK_FOLDER = @"\Lockets\";
         const string WOCKETS_SUSPEND_LOCK_EXTENSION = @".lckt";
 
-       
         // Add this to Wockets if statement to check if any other applications are 
         // requesting suspension prevention
         private static bool getIsSuspendPermitted()
@@ -546,16 +557,13 @@ namespace Wockets
         } 
 
 
-
-
-
         #endregion Power Management
 
 
 
 
 
-#if (PocketPC)
+        #if (PocketPC)
 
         bool[] countSeconds = null;
         bool connecting = false;
@@ -566,6 +574,7 @@ namespace Wockets
 
         void InterfaceActivityTracker()
         {
+
 
             int k = 0;
             int[] dataSavedSeconds = new int[this._Sensors.Count];
@@ -583,7 +592,8 @@ namespace Wockets
             if (!Directory.Exists(this._StorageDirectory + "\\data\\summary\\"))
                 Directory.CreateDirectory(this._StorageDirectory + "\\data\\summary\\");
 
-            #endregion Initialize log directories
+            #endregion 
+
 
 
             #region Initialize ACs counters
@@ -599,48 +609,36 @@ namespace Wockets
                 this._Sensors[i]._TotalReceivedACs = 0;
                 this._Sensors[i]._SavedACs = 0;
                 this._Sensors[i]._TotalSavedACs = 0;
-
-                //---------------------------------------------
-                //Set packet values from sensors
-                //--------------------------------------------
                 this._Sensors[i]._Full = 0;
                 this._Sensors[i]._Partial = 0;
                 this._Sensors[i]._Empty = 0;
-                
-
-                //== Core.WRITE_FULL_RECEIVED_COUNT(i, 0);
-                //== Core.WRITE_PARTIAL_RECEIVED_COUNT(i, 0);
-                //== Core.WRITE_EMPTY_RECEIVED_COUNT(i, 0);
-                //== *** Core.WRITE_RECEIVED_ACs(i, -1);
-                //== *** Core.WRITE_SAVED_ACs(i, -1);
-                //--------------------------------------------
-
             }
 
-            #endregion Initialize ACs counters
+            #endregion 
 
 
 
             while (true)
             {
 
-                
+                //Check flag indicating if it is time to wake up and connect to wockets
                 if (connecting)
                 {
 
-
-                    //SystemIdleReset, when used by itself, keeps the system from 
-                    //going into Suspend mode by keeping the phone in another 
-                    //power state. Used by itself, however, it may keep the device 
-                    //in UserIdle mode, which means the backlight is off, but the LCD is on 
+                    // SystemIdleReset, when used by itself, 
+                    // keeps the system from going into Suspend mode by keeping the phone in another 
+                    // power state. Used by itself, however, it may keep the device 
+                    // in UserIdle mode, which means the backlight is off, but the LCD is on 
                     SystemIdleTimerReset();
                     
                     
                     if ((this != null) && (this._Sensors.Count > 0))
                     {
-                        
-                        
-                        //Check 2 things, num of connection failures
+
+
+                        #region check if the BT connection succeded & data is received
+
+                        // Check 2 things, num of connection failures
                         // check if data received is > 0
                         // if num connections >2, ready to pause
                         // if data received is >0, ready to pause within 2 seconds.
@@ -653,135 +651,329 @@ namespace Wockets
                         {
                             receivedFullData &= (this._Sensors[i]._ReceivedPackets == ((WocketsDecoder)this._Decoders[i])._ExpectedBatchCount);
 
-                            //halt, if either 1 successful connection was made
+                            // halt, if either 1 successful connection was made
                             // or any data was received
                             // or 3 or more reconnections were made
                             if ((((RFCOMMReceiver)this._Receivers[i])._Reconnections < 3))
                                 receiveFailed = false;
 
+
+                            #region commented
+                            //--------- this line was commented since the kernel version ----------------//
                             //if (((RFCOMMReceiver)this._Receivers[i])._SuccessfulConnections >= 1)
+                            #endregion
+
                             secondsCounter[i] = secondsCounter[i] + 1;
 
                             notimeoutData &= (secondsCounter[i] > 20);
                         }
 
-
+                        #endregion
 
 
                         if ((receivedFullData) || (receiveFailed) || (notimeoutData))
                         {
 
-
                             // if didnt get full data, sleep for 3 seconds
                             if (!receivedFullData)
                                 Thread.Sleep(3000);
 
-                            #region save whatever we have so far then sleep
 
                             connecting = false;
-                            SYSTEM_POWER_STATUS_EX2 bpower = Battery.GetSystemPowerStatus();
+
+
+                            #region save whatever we have so far then sleep
+
+
+                            #region get the current phone time stamp for the log files
+
                             DateTime now = DateTime.Now;
-                            double unixtime = WocketsTimer.GetUnixTime(now);
                             string currentTime = now.ToString("yyyy-MM-dd HH:mm:ss");
-                            string log_line = ++k + "," + currentTime + "," + bpower.BatteryLifePercent + "," + bpower.BatteryVoltage + "," + bpower.BatteryCurrent + "," + bpower.BatteryTemperature;
+                            double unixtime = WocketsTimer.GetUnixTime(now);
                             string hourlyPath = now.ToString("yyyy-MM-dd") + "\\" + now.Hour;
 
+                            #endregion
+
+
+                            #region get the phone stats
+
+                            SYSTEM_POWER_STATUS_EX2 bpower = Battery.GetSystemPowerStatus();
                             DiskSpace space1 = Memory.GetDiskSpace(this._StorageDirectory);
                             DiskSpace space2 = Memory.GetDiskSpace("/");
                             int remainingStorage1=(int)(space1.TotalNumberOfBytes /  System.Math.Pow(2, 20));
                             int remainingStorage2=(int)(space2.TotalNumberOfBytes /  System.Math.Pow(2, 20));
 
+                            #endregion 
 
-                            //construct the upload log summary
-                            string upload_log = currentTime + "," + bpower.BatteryLifePercent + "," + remainingStorage2 + "," + remainingStorage1;
+
+                            #region add phone stats to log lines
                             
-                        
+                            // construct the log summary lines for the "warn.csv" and "phone stats log upload" files
+                            string phone_log_line = ++k + "," + currentTime + "," + bpower.BatteryLifePercent + "," + bpower.BatteryVoltage + "," + bpower.BatteryCurrent + "," + bpower.BatteryTemperature;
+                            string upload_log = currentTime + "," + bpower.BatteryLifePercent + "," + remainingStorage2 + "," + remainingStorage1;
+
+                            #endregion
+
+
 
                             for (int i = 0; (i < this._Sensors.Count); i++)
                             {
 
-                                #region compute-write the ACs to summary file and upload log file
+                                
+                                #region  Add the wockets battery level to the upload log
 
-
-                                if ((this._Sensors[i]._ReceivedPackets > 4000) || (((WocketsDecoder)this._Decoders[i])._ExpectedBatchCount>4000))
+                                // Fahd says that the 4000 number comes from trial and error to determine that the data didn't overflow the bt internal buffer
+                                if ((this._Sensors[i]._ReceivedPackets > 4000) || ( ((WocketsDecoder)this._Decoders[i])._ExpectedBatchCount > 4000))
+                                {
                                     upload_log += "," + this._Sensors[i]._BatteryLevel + "," + 0 + "," + 0;
+                                    
+                                    //TODO: review this log line
+                                    Logger.Debug("InterfaceActivityTracker: The Received Packets # is > 4000: RcvPkts: " + 
+                                                   this._Sensors[i]._ReceivedPackets + ", ExpectedBatchCount: " +
+                                                   ((WocketsDecoder)this._Decoders[i])._ExpectedBatchCount );
+                                        
+                                }
                                 else
                                     upload_log += "," + this._Sensors[i]._BatteryLevel + "," + ((WocketsDecoder)this._Decoders[i])._ExpectedBatchCount + "," + this._Sensors[i]._ReceivedPackets;
+                                
+                                #endregion
+
+
+                                #region Check the packets that came with the wocket batch
+                                
+                                //ExpectedBatchCount/SentPackets are the packets sent by the wocket
+                                //ReceivedPackets are the packets received and decoded by the phone
                                 if (this._Sensors[i]._ReceivedPackets == ((WocketsDecoder)this._Decoders[i])._ExpectedBatchCount)
                                     full[i] = full[i] + 1;
-                                else if (this._Sensors[i]._ReceivedPackets ==0)
+                                else if (this._Sensors[i]._ReceivedPackets == 0)
                                     empty[i] = empty[i] + 1;
                                 else
                                     partial[i] = partial[i] + 1;
 
 
-                                //---------------------------------------------
-                                //Set packet values from sensors
-                                //--------------------------------------------
+                                // Save the batch packet counts to the wockets controller data structure
                                 this._Sensors[i]._Full = full[i];
                                 this._Sensors[i]._Partial = partial[i];
                                 this._Sensors[i]._Empty = empty[i];
-                                
 
+             
+                                #region commented
+                                //---------------------code belongs to previous version ------------------
                                 //== Core.WRITE_FULL_RECEIVED_COUNT(i,full[i]);
                                 //== Core.WRITE_PARTIAL_RECEIVED_COUNT(i, partial[i]);
                                 //== Core.WRITE_EMPTY_RECEIVED_COUNT(i, empty[i]);
-
                                 //== *** Core.WRITE_RECEIVED_ACs(i, ((WocketsDecoder)this._Decoders[i])._ACIndex);
                                 //== *** Core.WRITE_RECEIVED_COUNT(i, this._Sensors[i]._ReceivedPackets);
+                                //------------------------------------------------------------------------
+                                #endregion 
 
-                                //-------------------------------------------------
 
-                                log_line += "," + this._Sensors[i]._ReceivedPackets + "," + ((WocketsDecoder)this._Decoders[i])._ExpectedBatchCount + "," + ((RFCOMMReceiver)this._Receivers[i])._SuccessfulConnections + "," + ((RFCOMMReceiver)this._Receivers[i])._Reconnections + "," + ((RFCOMMReceiver)this._Receivers[i])._ConnectionTime;
+                                #endregion
+
+
+                                #region Add the batch counts to the phone log line
+
+                                phone_log_line += "," + this._Sensors[i]._ReceivedPackets + "," + 
+                                            ((WocketsDecoder)this._Decoders[i])._ExpectedBatchCount + "," + 
+                                            ((RFCOMMReceiver)this._Receivers[i])._SuccessfulConnections + "," + 
+                                            ((RFCOMMReceiver)this._Receivers[i])._Reconnections + "," + 
+                                            ((RFCOMMReceiver)this._Receivers[i])._ConnectionTime;
+                                
+                                #endregion
+
+
+                                #region Reset the batch count variables
+
                                 dataSavedSeconds[i] = 0;
                                 countSeconds[i] = false;
                                 secondsCounter[i] = 0;
                                 ((WocketsDecoder)this._Decoders[i])._ExpectedBatchCount = -1;
 
-
-                                if (!Directory.Exists(this._StorageDirectory + "\\data\\summary\\" + hourlyPath))                                
-                                    Directory.CreateDirectory(this._StorageDirectory + "\\data\\summary\\" + hourlyPath);                                
+                                #endregion
 
 
+                                #region Save log lines corresponding to Phone Stats/Info to the log files
+
+                                Logger.Log(phone_log_line);
+                                SynchronizedLogger.Write(upload_log, "phone");
+
+                                #endregion
+
+
+                                #region compute-write the ACs to summary file and upload log file
+
+
+                                #region === commented ======
                                 //Create the summary file
-                                //Here add the summary data header
-                                TextWriter tw2 = new StreamWriter(this._StorageDirectory+ "\\data\\summary\\"+hourlyPath+"\\SummaryAC-" + this._Sensors[i]._Location + "-" + i + ".csv", true);
+                                //TextWriter tw2 = new StreamWriter(this._StorageDirectory+ "\\data\\summary\\"+hourlyPath+"\\SummaryAC-" + this._Sensors[i]._Location + "-" + i + ".csv", true);
+                                #endregion
+
+
+                                #region Extract the ACs from Decoder
+
+
+                                int countsaved = 0;
                                 int nextACIndex = LastACIndex[i] + 1;
+
                                 if (nextACIndex == 960)
                                     nextACIndex = 0;
-                                int countsaved = 0;
+
+                                string summary_data_log = "";
+                                string upload_summary_data_log = "";
+                                string ac_currentTime = "";
+
+                                // Add log to track indexes
+                                // TODO: take out this function, only be used for debugging
+                                Logger.Debug("WocketsController.cs: InterfaceActivityTracker(): acs summary log index" + 
+                                             ",WKT_ID:, " + i + 
+                                             ",NextACIndex:," + nextACIndex + 
+                                             ",ActivityCountIndex:," + ((WocketsDecoder)this._Decoders[i])._ActivityCountIndex);
+
 
                                 for (int j = nextACIndex; (j != ((WocketsDecoder)this._Decoders[i])._ActivityCountIndex); )
                                 {
+                                    
                                     DateTime ac_dt = new DateTime();
-                                    WocketsTimer.GetDateTime((long)((WocketsDecoder)this._Decoders[i])._ActivityCounts[j]._TimeStamp, out ac_dt);
-                                    string ac_currentTime = ac_dt.ToString("yyyy-MM-dd HH:mm:ss");
 
+                                    //try-catch added to make sure there are not problems accessing the data here
+                                    try
+                                    {
+                                        WocketsTimer.GetDateTime((long)((WocketsDecoder)this._Decoders[i])._ActivityCounts[j]._TimeStamp, out ac_dt);
+                                        //string ac_currentTime = ac_dt.ToString("yyyy-MM-dd HH:mm:ss");
+                                        ac_currentTime = ac_dt.ToString("yyyy-MM-dd HH:mm:ss");
+                                    }
+                                    catch
+                                    {
+                                        Logger.Debug("WocketsController.cs: InterfaceActivityTracker() : summary acs failed when extracting data from decoder" +
+                                                     ",WKT_ID," + i + ",nextACIndex," + j + 
+                                                     ",_Decoders[i])._ActivityCountIndex," + ((WocketsDecoder)this._Decoders[i])._ActivityCountIndex );
+                                    }
+
+
+
+                                    #region === commented ====
                                     //write summary data line to the summary file in the data folder
-                                    tw2.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")+","+j+","+((WocketsDecoder)this._Decoders[i])._ActivityCounts[j]._SeqNum + "," + ac_currentTime + "," + ((WocketsDecoder)this._Decoders[i])._ActivityCounts[j]._TimeStamp + "," + ((WocketsDecoder)this._Decoders[i])._ActivityCounts[j]._Count);
+                                    //tw2.WriteLine( DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "," +
+                                    //               j + "," +
+                                    //               ((WocketsDecoder)this._Decoders[i])._ActivityCounts[j]._SeqNum + "," +
+                                    //               ac_currentTime + "," + 
+                                    //              ((WocketsDecoder)this._Decoders[i])._ActivityCounts[j]._TimeStamp + "," + 
+                                    //              ((WocketsDecoder)this._Decoders[i])._ActivityCounts[j]._Count);
+                                    #endregion 
+
+
+                                    //write the log line to be added the summary ACs data file
+                                    summary_data_log +=   DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "," +
+                                                          j + "," +
+                                                          ((WocketsDecoder)this._Decoders[i])._ActivityCounts[j]._SeqNum + "," +
+                                                          ac_currentTime + "," +
+                                                          ((WocketsDecoder)this._Decoders[i])._ActivityCounts[j]._TimeStamp + "," +
+                                                          ((WocketsDecoder)this._Decoders[i])._ActivityCounts[j]._Count + "\r\n";
                                     
-                                    //write the summary data line to the upload log file
-                                    SynchronizedLogger.Write(i + "," + ac_currentTime + "," + ((RFCOMMReceiver)this._Receivers[i])._Address + "," + ((WocketsDecoder)this._Decoders[i])._ActivityCounts[j]._Count);
+
+
+
+                                    //write the summary data line to the added to the upload log file
+                                    //SynchronizedLogger.Write(i + "," + ac_currentTime + "," + ((RFCOMMReceiver)this._Receivers[i])._Address + "," + ((WocketsDecoder)this._Decoders[i])._ActivityCounts[j]._Count);
+                                    upload_summary_data_log +=   i + "," +
+                                                                 ac_currentTime + "," +
+                                                                 ((RFCOMMReceiver)this._Receivers[i])._Address + "," +
+                                                                 ((WocketsDecoder)this._Decoders[i])._ActivityCounts[j]._Count + "\r\n";
                                     
-                                    
+
                                     LastSeqNum[i] = ((WocketsDecoder)this._Decoders[i])._ActivityCounts[j]._SeqNum;
                                     LastACIndex[i] = j;
                                     countsaved++;
                                     j++;
                                     if (j == 960)
                                         j = 0;
+
                                 }
 
+                                #endregion
 
-                                #region commented
+
+                                #region ==== commented ====
                                 //== if (countsaved>10)
                                 //==    Core.WRITE_SAVED_ACs(i, 10);
                                 //== else 
                                 //==    Core.WRITE_SAVED_ACs(i, countsaved);
-                                #endregion 
+                               
+
+                                //tw2.Flush();
+                                //tw2.Close();
+                                #endregion
 
 
-                                tw2.Close();
+
+                                #region commented
+
+                               //#region Write Extracted ACs To File Summary-Acs-Data File (Storage Card)
+
+                               // TextWriter tw2 = null;
+                               // string summary_data_filename_sdcard = "";
+
+
+                               // try
+                               // {
+
+                               //     //Create the ACs summary data CSV files in the storage card
+                               //     if (!Directory.Exists(this._StorageDirectory + "\\data\\summary\\" + hourlyPath))                                
+                               //         Directory.CreateDirectory(this._StorageDirectory + "\\data\\summary\\" + hourlyPath);
+
+                               //     summary_data_filename = this._StorageDirectory + "\\data\\summary\\" + hourlyPath + "\\SummaryAC-" + this._Sensors[i]._Location + "-" + i + ".csv";
+
+
+                               //     if ( !File.Exists(summary_data_filename) )
+                               //     {
+                               //         tw2 = new StreamWriter(summary_data_filename, true);
+
+                               //         //Add the summary data header
+                               //         tw2.WriteLine("Write Time" + "," + "AC Decoder Index" + "," + "AC SeqNum" + "," + "AC Current Time" + "," +
+                               //                        "AC Unix Time Stamp" + "," + "AC Value");
+                               //     }
+                               //     else
+                               //         tw2 = new StreamWriter(summary_data_filename, true);
+
+                                 
+                               //     tw2.Write(summary_data_log);
+
+                               //     tw2.Flush();
+                               //     tw2.Close();
+
+
+                                   
+
+                               // }
+                               // catch
+                               // {
+                               //     Logger.Error("currentTime: " + currentTime + "," + "ac_currentTime: " + ac_currentTime + "," +
+                               //                  "WocketsController: InterfaceActivityTracker: Failed to write AC data in summary file: " + 
+                               //                  summary_data_filename);
+                               // }
+
+                               // #endregion
+
+                                #endregion
+
+
+                                Write_ACs_To_SummaryData_File(i, summary_data_log , hourlyPath, "sd_card");
+                                //Write_ACs_To_SummaryData_File(i, summary_data_log, hourlyPath, "main");    
+
+
+                                #region Write Extracted ACs To Log Upload File
+                                
+                                try
+                                {
+                                    SynchronizedLogger.Write(upload_summary_data_log, "wocket");
+                                }
+                                catch
+                                {
+                                    Logger.Error("currentTime: " + currentTime + "," + "ac_currentTime: " + ac_currentTime + "," +
+                                                 "WocketsController: InterfaceActivityTracker: Failed to write AC data in synchronizedlogger (logupload) file. HourlyPath: " + hourlyPath);
+                                }
+
+                                #endregion
 
 
                                 #endregion compute-write the ACs to file
@@ -789,48 +981,17 @@ namespace Wockets
                             }
 
 
-                         
+                            #endregion save whatever we have so far then sleep
+
+
+                            //stop the polling thread
                             this._Polling = false;
 
 
-                            #region Shutdown the bluetooth
-
-                            //shutting down BT here causes a strange delay on wakeup.
-                            int btshutdown_counter = 0;
-                            while (true)
-                            {
-                                btshutdown_counter++;
-                                try
-                                {
-                                    if ((Wockets.Utils.network.NetworkStacks._BluetoothStack.Dispose()) || (btshutdown_counter > 5))
-                                    {   //TODO: tracking
-                                        Logger.Debug("InterfaceActivityTracker: trying to shutdown BT. Trial: " + btshutdown_counter.ToString());
-                                        break;
-                                    }
-                                }
-                                catch
-                                {
-                                    //TODO:tracking
-                                    Logger.Error("InterfaceActivityTracker: trying to shutdown BT. Trial: " + btshutdown_counter.ToString() );
-                                }
-
-                                SystemIdleTimerReset();
-                                Thread.Sleep(1000);
-                            }
-
-                            #endregion Shutdown the bluetooth
-
-
-                            Logger.Log(log_line);
-                            SynchronizedLogger.Write(upload_log);
-
-                            //TextWriter tw = new StreamWriter(this._StorageDirectory + "\\data\\log\\" + hourlyPath + "\\stats.csv", true);
-                            //tw.Close();
-
-                            Thread.Sleep(500);
-                            
+                            #region Save Raw Data To Phone SD Memory Card
 
                             SystemIdleTimerReset();
+
                             for (int i = 0; (i < this._Sensors.Count); i++)
                             {
                                 try
@@ -845,16 +1006,47 @@ namespace Wockets
 
                             Thread.Sleep(1000);
 
-                          
+                            #endregion
+
+
+                            #region Shutdown the bluetooth
+
+                            //TODO: the BT shutdown needs to be improved
+                            //shutting down BT here causes a strange delay on wakeup.
+                            int btshutdown_counter = 0;
+
+                            while (true)
+                            {
+                                btshutdown_counter++;
+                                try
+                                {
+                                    if ((Wockets.Utils.network.NetworkStacks._BluetoothStack.Dispose()) || (btshutdown_counter > 5))
+                                    {   //TODO: tracking
+                                        Logger.Debug("InterfaceActivityTracker: trying to shutdown BT. Trial: " + btshutdown_counter.ToString());
+                                        break;
+                                    }
+                                }
+                                catch
+                                {
+                                    //TODO:tracking
+                                    Logger.Error("InterfaceActivityTracker: trying to shutdown BT. Trial: " + btshutdown_counter.ToString());
+                                }
+
+                                SystemIdleTimerReset();
+                                Thread.Sleep(1000);
+                            }
+
+                            #endregion Shutdown the bluetooth
+
+
+                            #region Suspend the phone if nothing is running
 
                             if ( (bpower.BatteryCurrent<0) && 
                                  (DateTime.Now.Subtract(lastActivity).TotalSeconds > 30) &&
                                  getIsSuspendPermitted() )
                               SetSystemPowerState(null, POWER_STATE_SUSPEND, POWER_FORCE);
 
-
-
-                            #endregion save whatever we have so far then sleep
+                            #endregion
 
 
                         }
@@ -867,7 +1059,70 @@ namespace Wockets
             }
         }
 
+
+
+        bool Write_ACs_To_SummaryData_File(int sensor_id, string summary_data_log_line , string hourPath, string memory_type)                                     
+        {
         
+            bool success = false;
+            TextWriter tw2 = null;
+            string directory_path = "";
+            string summary_data_filename = "\\SummaryAC-" + this._Sensors[sensor_id]._Location + "-" + sensor_id + ".csv";
+
+            
+            //Create the ACs summary data CSV files in the storage card    
+            try
+            {
+                if( memory_type.CompareTo("main") == 0 )
+                    directory_path = "\\Wockets\\data\\summary\\" + hourPath;
+                else
+                    directory_path = this._StorageDirectory + "\\data\\summary\\" + hourPath;
+
+                if (!Directory.Exists(directory_path))
+                    Directory.CreateDirectory(directory_path);
+
+                summary_data_filename = directory_path + summary_data_filename;
+            }
+            catch
+            {
+                Logger.Error( "WocketsController: InterfaceActivityTracker: Failed to create directory for summary AC data. Memory : " + 
+                              memory_type + ", filename : " + summary_data_filename);
+            }
+              
+
+            //Create Summary ACs File & Write Data
+            try
+            {
+                if ( !File.Exists(summary_data_filename) )
+                {
+                    tw2 = new StreamWriter(summary_data_filename, true);
+
+                    //Add the summary data header
+                    tw2.WriteLine("Phone_Write_Time" + "," + "AC_DecoderIndex" + "," + "AC_SeqNum" + "," + "AC_TimeStamp" + "," +
+                                   "AC_Unix_TimeStamp" + "," + "AC_Value");
+                }
+                else
+                    tw2 = new StreamWriter(summary_data_filename, true);
+
+             
+                tw2.Write(summary_data_log_line);
+                tw2.Flush();
+                tw2.Close();
+
+
+                success = true;
+            }
+            catch
+            {
+                Logger.Error("WocketsController: InterfaceActivityTracker: Failed to write AC data in summary file to " + 
+                              memory_type + " memory, filename : " + summary_data_filename);
+            }
+
+            return success;
+        }
+
+
+
 
         void DataCollection()
         {
@@ -1390,8 +1645,10 @@ namespace Wockets
                 //System.Reflection.Assembly a = System.Reflection.Assembly.GetExecutingAssembly();
                 //System.Reflection.AssemblyName an = a.GetName();
                 //Logger.Warn("Version " + an.Version.ToString() +" Date:"+ DateTime.Now.ToString("f"));
-                Logger.Warn("Version: 1.58" + " Date: 6/16/2011 1:39:40 AM");
+                Logger.Warn("Version: 1.59 Test1" + " Date: 7/01/2011 9:46 PM");
                 this.StartTime = WocketsTimer.GetUnixTime();
+
+
 
                 while (true)
                 {
