@@ -1991,6 +1991,9 @@ namespace DataMerger
         //JPN: Declare array for storing previous summary data value for PLOT WFAC
         private static string[] prevWFACPlotDataLine; 
 
+        //JPN: TEMP: store previous SR for PLOT WRAC
+        private static string[] prevWRACPlotSampleCount;
+
         public static string CSVProgress = "";
         public static bool hasActigraph = false;
         public static bool hasOxycon = false;
@@ -4655,6 +4658,13 @@ namespace DataMerger
                     prevWRACPlotDataLine[i] = "0";
                 }
 
+                //JPN: TEMP: Initialize previous line array for PLOT WRAC Sample Count
+                prevWRACPlotSampleCount = new string[CurrentWockets._Controller._Sensors.Count];
+                for (int i = 0; i < prevWRACPlotSampleCount.Length; i++)
+                {
+                    prevWRACPlotSampleCount[i] = "0";
+                }
+
                 try
                 {
 
@@ -4793,6 +4803,11 @@ namespace DataMerger
             if (wWRACData != null)
                 for (int i = 0; (i < wWRACData.Length); i++)
                     master_csv_header += ",Wocket" + i.ToString("00") + "_PLOT_PerMinute_WRAC";
+
+            //JPN: TEMP: Add CSV headers for Plottable Wocket Raw Activity Counts (WRAC)
+            if (wWRACData != null)
+                for (int i = 0; (i < wWRACData.Length); i++)
+                    master_csv_header += ",Wocket" + i.ToString("00") + "_PLOT_PerMinute_SampleCount";
 
             #endregion Wockets Activity Counts Header
 
@@ -5670,7 +5685,7 @@ namespace DataMerger
                             wrunningMeanY += wrawData[wcontroller._Sensors[i]._ID, 1, k];
                             wrunningMeanZ += wrawData[wcontroller._Sensors[i]._ID, 2, k];
                         }
-
+                        
                         wrunningMeanX = wrunningMeanX / RM_SIZE;
                         wrunningMeanY = wrunningMeanY / RM_SIZE;
                         wrunningMeanZ = wrunningMeanZ / RM_SIZE;
@@ -5684,23 +5699,28 @@ namespace DataMerger
 
                         wVMAG[wcontroller._Sensors[i]._ID] = 0;
 
-                        for (int k = 0; (k < RM_SIZE); k++)
+
+
+                        for (int k = 0; k < RM_SIZE; k++)
                         {
-                            wAUC[wcontroller._Sensors[i]._ID, 0] = wAUC[wcontroller._Sensors[i]._ID, 0] + (int)Math.Abs((wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr] - wrunningMeanX));
-                            wAUC[wcontroller._Sensors[i]._ID, 1] = wAUC[wcontroller._Sensors[i]._ID, 1] + (int)Math.Abs((wrawData[wcontroller._Sensors[i]._ID, 1, wheadPtr] - wrunningMeanY));
-                            wAUC[wcontroller._Sensors[i]._ID, 2] = wAUC[wcontroller._Sensors[i]._ID, 2] + (int)Math.Abs((wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr] - wrunningMeanZ));
+                            wAUC[wcontroller._Sensors[i]._ID, 0] = wAUC[wcontroller._Sensors[i]._ID, 0] + (int)Math.Abs((wrawData[wcontroller._Sensors[i]._ID, 0, k] - wrunningMeanX));
+                            wAUC[wcontroller._Sensors[i]._ID, 1] = wAUC[wcontroller._Sensors[i]._ID, 1] + (int)Math.Abs((wrawData[wcontroller._Sensors[i]._ID, 1, k] - wrunningMeanY));
+                            wAUC[wcontroller._Sensors[i]._ID, 2] = wAUC[wcontroller._Sensors[i]._ID, 2] + (int)Math.Abs((wrawData[wcontroller._Sensors[i]._ID, 2, k] - wrunningMeanZ));
+
+                            //JPN!!!!!
+                            //wAUC[wcontroller._Sensors[i]._ID, 0] = Filter(wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr], 0);
+                            //wAUC[wcontroller._Sensors[i]._ID, 1] = Filter(wrawData[wcontroller._Sensors[i]._ID, 1, wheadPtr], 1);
+                            //wAUC[wcontroller._Sensors[i]._ID, 2] = Filter(wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr], 2);
 
                             //JPN: Sum AUC values for each axis for the current sample and add to a running total for the current second
                             double myRawAC = wAUCXYZ[wcontroller._Sensors[i]._ID] + wAUC[wcontroller._Sensors[i]._ID, 0] + wAUC[wcontroller._Sensors[i]._ID, 1] + wAUC[wcontroller._Sensors[i]._ID, 2];
                             //JPN: Divide running total by the scaling factor used in Wockets Firmware Activity Counts (WFAC)
                             myRawAC /= 24;
                             //JPN: Trim oversized values to match integer size of WFAC calculations and add to combined AUC array for WRAC
-                            wAUCXYZ[wcontroller._Sensors[i]._ID] += (myRawAC > 65535 ? 65535 : (int)myRawAC);
+                            wAUCXYZ[wcontroller._Sensors[i]._ID] = (myRawAC > 65535 ? 65535 : (int)myRawAC);
 
                             wVMAG[wcontroller._Sensors[i]._ID] = wVMAG[wcontroller._Sensors[i]._ID] + Math.Sqrt(Math.Pow((double)(wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr] - wrunningMeanX), 2.0) + Math.Pow((double)(wrawData[wcontroller._Sensors[i]._ID, 1, wheadPtr] - wrunningMeanY), 2.0) + Math.Pow((double)(wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr] - wrunningMeanZ), 2.0));
                         }
-
-
 
                         //Inititalize lines to be written to cvs files
                         int sensor_id = wcontroller._Sensors[i]._ID;
@@ -5710,8 +5730,6 @@ namespace DataMerger
                         csv_line4 = timestamp;
                         csv_line5 = timestamp;
                         csv_line6 = timestamp;
-
-
 
                         if (wacCounters[sensor_id] > 0)
                         {
@@ -5756,6 +5774,7 @@ namespace DataMerger
                             master_csv_line += ((double)wRMX[sensor_id]).ToString("00.00") + ",";
                             master_csv_line += ((double)wRMY[sensor_id]).ToString("00.00") + ",";
                             master_csv_line += ((double)wRMZ[sensor_id]).ToString("00.00") + ",";
+
                             master_csv_line += ((double)wRMSize[sensor_id]).ToString("00.00") + ",";
                             master_csv_line += ((double)(wVMAG[sensor_id] / (double)wacCounters[sensor_id])).ToString("00.00");
 
@@ -5772,7 +5791,7 @@ namespace DataMerger
                                     prevUnixTime[wcontroller._Sensors[i]._ID] = currentUnixTime;
 
                                 //JPN: If one minute has elapsed, computer WRAC for this sensor
-                                if ((currentUnixTime - prevUnixTime[wcontroller._Sensors[i]._ID]) > 60000)
+                                if ((currentUnixTime - prevUnixTime[wcontroller._Sensors[i]._ID]) >= 60000)
                                 {
                                     //JPN: Add the last minute's worth of WRAC data to the final array
                                     wWRACData[wcontroller._Sensors[i]._ID][key] = Convert.ToInt32(wWRACData[wcontroller._Sensors[i]._ID][key]) + wWRACSummation[wcontroller._Sensors[i]._ID];
@@ -5925,7 +5944,9 @@ namespace DataMerger
                         else
                         {
                             //JPN: Retrieve WRAC data point and divide by computed sampling rate for the minute observed
-                            int value = Convert.ToInt32(Convert.ToDouble(wWRACData[i][key]) / Convert.ToDouble(wWRACSamplingRate[i][key]));
+                            //int value = Convert.ToInt32(Convert.ToDouble(wWRACData[i][key]) * Convert.ToDouble(wWRACSamplingRate[i][key]));
+                            //JPN!!!!
+                            int value = Convert.ToInt32(Convert.ToDouble(wWRACData[i][key]));
                             //JPN: Add scaled WRAC data to the WRAC text stream
                             wWRACSummaryCSV[i].WriteLine(summary_csv_line[i] + "," + value);
                             //JPN: Add scaled WRAC data to the master summary CSV file
@@ -5971,11 +5992,33 @@ namespace DataMerger
                         else
                         {
                             //JPN: Retrieve WRAC data point and divide by computed sampling rate for the minute observed
-                            int value = Convert.ToInt32(Convert.ToDouble(wWRACData[i][key]) / Convert.ToDouble(wWRACSamplingRate[i][key]));
+                            //JPN!!!
+                            //int value = Convert.ToInt32(Convert.ToDouble(wWRACData[i][key]) / Convert.ToDouble(wWRACSamplingRate[i][key]));
+                            int value = Convert.ToInt32(Convert.ToDouble(wWRACData[i][key]));
                             //JPN: Add scaled WRAC data to the text stream
                             master_csv_line = master_csv_line + "," + value;
                             //JPN: Store this line so it can be repeated in the summary CSV until the WRAC value changes
                             prevWRACPlotDataLine[i] = value.ToString();
+                        }
+                    }
+
+                    //JPN: TEMP: Output computed sampling rate with values...
+                    for (int i = 0; (i < wWRACData.Length); i++)
+                    {
+                        //JPN: Carry over previous WRAC Sample Count the current sample is not the start of a new WRAC minute epoch
+                        if (wWRACData[i].ContainsKey(key) == false)
+                        {
+                            master_csv_line = master_csv_line + "," + prevWRACPlotSampleCount[i];
+                        }
+                        //JPN: Log new WRAC value when the next minute epoch starts
+                        else
+                        {
+                            //JPN: Retrieve WRAC sampling rate and multiply by 60 to represent numbers of samples in the minute
+                            int value = Convert.ToInt32(wWRACSamplingRate[i][key]) * 60;
+                            //JPN: Add WRAC Sample Rate to the text stream
+                            master_csv_line = master_csv_line + "," + value;
+                            //JPN: Store this line so it can be repeated in the summary CSV until the WRAC value changes
+                            prevWRACPlotSampleCount[i] = value.ToString();
                         }
                     }
                 }
@@ -6407,6 +6450,7 @@ namespace DataMerger
 
 
             #region Close all files
+
             if (aMITesDecoder != null)
             {
                 foreach (SXML.Sensor sensor in sannotation.Sensors)
@@ -6491,31 +6535,27 @@ namespace DataMerger
 
         }
         
-        private static int[,] xv = new int[3,41];
-
-        private static int Filter(int data, int axis)
-        {
-            int mean = 0;
-            int j = 0;
-            for (; (j < 40); j++)
-            {
-                mean+=xv[axis, j];
-                xv[axis, j] = xv[axis, j + 1];
-            }
-            mean=mean/40;
-            xv[axis, j] = data;
-            if (data > mean)
-                return (data-mean);
-            else
-                return (mean-data);
-        }
-
-
-
-      
         #endregion
 
+        static int[,] xv = new int[3, 41];
 
+        static int Filter(int data, int axis)
+        {
+            int mean=0;
+            int j=0;
+            for (; (j < 40); j++)
+            {
+                mean += xv[axis, j];
+                xv[axis, j] = xv[axis, j + 1];
+            }
+            mean = mean / 40;
+            xv[axis, j] = data;
+
+            if (data > mean)
+                return (data - mean);
+            else
+                return (mean - data);
+        }
 
 
     }
