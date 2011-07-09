@@ -50,6 +50,7 @@ namespace DataMerger
         
         private void button2_Click(object sender, EventArgs e)
         {
+            
             DialogResult result = this.folderBrowserDialog1.ShowDialog();
             
             
@@ -1991,9 +1992,6 @@ namespace DataMerger
         //JPN: Declare array for storing previous summary data value for PLOT WFAC
         private static string[] prevWFACPlotDataLine; 
 
-        //JPN: TEMP: store previous SR for PLOT WRAC
-        private static string[] prevWRACPlotSampleCount;
-
         public static string CSVProgress = "";
         public static bool hasActigraph = false;
         public static bool hasOxycon = false;
@@ -2054,18 +2052,11 @@ namespace DataMerger
         //JPN: Declare textwriter array for outputting WRAC values
         private static TextWriter[] wWRACSummaryCSV;
 
-        //JPN: Declare array to store the running total of AUC summations for WRAC calculations
-        private static int[] wWRACSummation;
-
-        //JPN: Declare hashtable array for storing WRAC sampling rates for each minute
-        static Hashtable[] wWRACSamplingRate;
-
         //JPN: Declare hashtable array for storing Wockets Raw Activity Count (WRAC) values to be inserted into CSV file
         static Hashtable[] wWRACData;
         
-                public static void toCSV(string aDataDirectory, string masterDirectory, int maxControllers, string[] filter)
+        public static void toCSV(string aDataDirectory, string masterDirectory, int maxControllers, string[] filter)
         {
-
 
             #region Declare Variables
 
@@ -2076,6 +2067,13 @@ namespace DataMerger
 
 
             /**** MITes,wockets Variables ****/
+
+            int _wPC = 0;
+            int summary_count = AC_NUMS;
+            int[] acount = new int[AC_BUFFER_SIZE];
+            int ci = 0;
+
+
 
             //Variables that average raw values
             int[] averageX = null;
@@ -2137,16 +2135,10 @@ namespace DataMerger
             int[] wprevZ = null;
             int[] wacCounters = null;
 
-            //JPN: Declare array to track number of samples per minute for WRAC
-            int[] wWRACCounterMinute = null;
-
             //Variables to store raw data,running mean and areas under curve
             int[, ,] wrawData = null; //channel,axis ->data            
             long[,] wtimeData = null; //channel ->timestamp
             int[,] wAUC = null;
-
-            //JPN: Declare array to store combined AUC used in calculating WRAC
-            int[] wAUCXYZ = null;
 
             double[] wVMAG = null;
             int[] whead = null; //channel ->pointer to the head (circular)
@@ -4546,9 +4538,6 @@ namespace DataMerger
                 wprevZ = new int[wcontroller._Sensors.Count];
                 wacCounters = new int[wcontroller._Sensors.Count];
 
-                //JPN: Dimension array used to store number of samples per minute for WRAC
-                wWRACCounterMinute = new int[wcontroller._Sensors.Count];
-
                 for (int k = 0; (k < wprevX.Length); k++)
                 {
                     wprevX[k] = -1;
@@ -4565,9 +4554,6 @@ namespace DataMerger
                             wrawData[i, j, k] = -1;
                 wtimeData = new long[wcontroller._Sensors.Count, RM_SIZE];
                 wAUC = new int[wcontroller._Sensors.Count, 3];
-
-                //JPN: Dimension array to store combined AUC counts for all axes
-                wAUCXYZ = new int[wcontroller._Sensors.Count];
 
                 wVMAG = new double[wcontroller._Sensors.Count];
                 whead = new int[wcontroller._Sensors.Count];
@@ -4589,8 +4575,6 @@ namespace DataMerger
                     for (int j = 0; (j < 3); j++)
                         wAUC[i, j] = 0;
 
-                    //JPN: Initialize array to store combined AUC counts for all axes
-                    wAUCXYZ[i] = 0;
                 }
             }
             #endregion Setup Wockets Data
@@ -4635,12 +4619,6 @@ namespace DataMerger
                 //JPN: Dimension array for storing WRAC output data
                 wWRACData = new Hashtable[CurrentWockets._Controller._Sensors.Count];
 
-                //JPN: Dimension array for storing WRAC running summs
-                wWRACSummation = new int[CurrentWockets._Controller._Sensors.Count];
-
-                //JPN: Dimension array for storing WRAC sampling rates for each minute
-                wWRACSamplingRate = new Hashtable[CurrentWockets._Controller._Sensors.Count];
-
                 prevUnixTime = new double[CurrentWockets._Controller._Sensors.Count];
                 summaryStartUnixTime = new double[CurrentWockets._Controller._Sensors.Count];
 
@@ -4658,13 +4636,6 @@ namespace DataMerger
                     prevWRACPlotDataLine[i] = "0";
                 }
 
-                //JPN: TEMP: Initialize previous line array for PLOT WRAC Sample Count
-                prevWRACPlotSampleCount = new string[CurrentWockets._Controller._Sensors.Count];
-                for (int i = 0; i < prevWRACPlotSampleCount.Length; i++)
-                {
-                    prevWRACPlotSampleCount[i] = "0";
-                }
-
                 try
                 {
 
@@ -4679,12 +4650,6 @@ namespace DataMerger
 
                         //JPN: Initialze array for storing WRAC values for each sensor
                         wWRACData[i] = new Hashtable();
-
-                        //JPN: Initialize array for storing WRAC running sums for each sensor
-                        wWRACSummation[i] = 0;
-
-                        //JPN: Initialize array for storing WRAC sampling rates for each minute
-                        wWRACSamplingRate[i] = new Hashtable();
 
                         prevUnixTime[i] = -1;
                         summaryStartUnixTime[i] = 0;
@@ -4803,11 +4768,6 @@ namespace DataMerger
             if (wWRACData != null)
                 for (int i = 0; (i < wWRACData.Length); i++)
                     master_csv_header += ",Wocket" + i.ToString("00") + "_PLOT_PerMinute_WRAC";
-
-            //JPN: TEMP: Add CSV headers for Plottable Wocket Raw Activity Counts (WRAC)
-            if (wWRACData != null)
-                for (int i = 0; (i < wWRACData.Length); i++)
-                    master_csv_header += ",Wocket" + i.ToString("00") + "_PLOT_PerMinute_SampleCount";
 
             #endregion Wockets Activity Counts Header
 
@@ -5559,9 +5519,67 @@ namespace DataMerger
                 {
 
                     #region Load Wockets data if needed
+
+                    //JPN: Iterate through each sensor ID
+                    if (!isWRACLoaded)
+                    {
+                        for (int i = 0; (i < wcontroller._Sensors.Count); i++)
+                        {
+
+                            //JPN: Take a first pass through the raw corrected data to generate Wockets Raw Activity Counts (WRAC)
+                            string line = "";
+                            while ((line = wocketsTR1[i].ReadLine()) != null)
+                            {
+                                //JPN: WRAC computation code block
+                                {
+                                    string[] wWRACTokens = line.Split(',');
+                                    //JPN: Generate combined (X+Y+Z) AUC using running mean filter
+                                    wAUCSigma += Filter(Convert.ToInt32(wWRACTokens[1]), 0);
+                                    wAUCSigma += Filter(Convert.ToInt32(wWRACTokens[2]), 1);
+                                    wAUCSigma += Filter(Convert.ToInt32(wWRACTokens[3]), 2);
+                                    double wWRACUnixTime = Convert.ToDouble(wWRACTokens[0]);
+                                    //JPN: Ignore the first 40 samples to establish a running mean
+                                    if (_wPC > 40)
+                                    {
+                                        if (summary_count == 0)
+                                        {
+                                            //JPN: NOTE!!!! Divide by firmware scaling value. For some reason this is 24 in the firmware, but must be 20 here.
+                                            wAUCSigma = wAUCSigma / 20;
+                                            //JPN: Trim summations to match size of firmware unsigned short int
+                                            if (wAUCSigma > 65535)
+                                                acount[ci] = 65535;
+                                            else
+                                                acount[ci] = (int)wAUCSigma;
+                                            //JPN: Compute DateTime of sample from the UnixTimeStamp
+                                            DateTime plotDt = new DateTime();
+                                            UnixTime.GetDateTime(Convert.ToInt64(wWRACUnixTime), out plotDt);
+                                            //JPN: Convert DateTime to string key that is used in indexing values for CSV output
+                                            string plotKey = plotDt.Year + "-" + plotDt.Month + "-" + plotDt.Day + "-" + plotDt.Hour + "-" + plotDt.Minute + "-" + plotDt.Second;
+                                            //JPN: Add summation to hashtable for later output to CSV file
+                                            wWRACData[wcontroller._Sensors[i]._ID][plotKey] = wAUCSigma;
+                                            //JPN: Reset values
+                                            wAUCSigma = 0;
+                                            ++ci;
+                                            if (ci == AC_BUFFER_SIZE)
+                                                ci = 0;
+                                            acount[ci] = 0;
+                                            summary_count = AC_NUMS;
+                                        }
+                                        else
+                                            summary_count--;
+                                    }
+                                    else if (_wPC == 40)
+                                        wAUCSigma = 0;
+                                    _wPC++;
+                                }
+                            }
+                            wocketsTR1[i] = new StreamReader(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "Wocket_" + wcontroller._Sensors[i]._ID.ToString("00") + "_RawCorrectedData_" + wcontroller._Sensors[i]._Location.Replace(' ', '-') + ".csv");
+                        }
+                        isWRACLoaded = true;
+                    }
+                   
                     for (int i = 0; (i < wcontroller._Sensors.Count); i++)
                     {
-
                         string s = "";
                         while (((wunixtimestamp[i] - currentUnixTime) <= RM_DURATION) && ((s = wocketsTR1[i].ReadLine()) != null))
                         {
@@ -5572,9 +5590,9 @@ namespace DataMerger
                             wtimeData[wcontroller._Sensors[i]._ID, whead[wcontroller._Sensors[i]._ID]] = (long)Convert.ToDouble(wocketsTokens[0]);
                             wunixtimestamp[i] = Convert.ToDouble(wocketsTokens[0]);
                             whead[wcontroller._Sensors[i]._ID] = (whead[wcontroller._Sensors[i]._ID] + 1) % RM_SIZE;
+
                         }
                     }
-
                     #endregion Load Wockets data if needed
 
                     #region Calculate Statistics
@@ -5599,10 +5617,12 @@ namespace DataMerger
                             wrunningMeanY += wrawData[wcontroller._Sensors[i]._ID, 1, wheadPtr];
                             wrunningMeanZ += wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr];
                             wnumMeanPts++;
+
                             wheadPtr--;
 
                             if (wheadPtr < 0)
                                 wheadPtr = (RM_SIZE - 1);
+
                         }
 
                         wrunningMeanX = wrunningMeanX / wnumMeanPts;
@@ -5617,6 +5637,11 @@ namespace DataMerger
                         wheadPtr = whead[wcontroller._Sensors[i]._ID] - 1;
                         if (wheadPtr < 0)
                             wheadPtr = (RM_SIZE - 1);
+
+
+                     
+
+
 
 
                         #endregion compute running means
@@ -5642,9 +5667,6 @@ namespace DataMerger
                                     waverageZ[wcontroller._Sensors[i]._ID] = waverageZ[wcontroller._Sensors[i]._ID] + Math.Abs(wprevZ[wcontroller._Sensors[i]._ID] - wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr]);
                                     waverageRawZ[wcontroller._Sensors[i]._ID] = waverageRawZ[wcontroller._Sensors[i]._ID] + wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr];
                                     wacCounters[wcontroller._Sensors[i]._ID] = wacCounters[wcontroller._Sensors[i]._ID] + 1;
-
-                                    //JPN: Increment counter used to determine samples per minute for WRAC calculations
-                                    wWRACCounterMinute[wcontroller._Sensors[i]._ID]++;
                                 }
 
                                 wprevX[wcontroller._Sensors[i]._ID] = wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr];
@@ -5690,37 +5712,14 @@ namespace DataMerger
                         wrunningMeanY = wrunningMeanY / RM_SIZE;
                         wrunningMeanZ = wrunningMeanZ / RM_SIZE;
 
-                        wAUC[wcontroller._Sensors[i]._ID, 0] = 0;
-                        wAUC[wcontroller._Sensors[i]._ID, 1] = 0;
-                        wAUC[wcontroller._Sensors[i]._ID, 2] = 0;
+                        //wAUC[wcontroller._Sensors[i]._ID, 0] = 0;
+                        //wAUC[wcontroller._Sensors[i]._ID, 1] = 0;
+                        //wAUC[wcontroller._Sensors[i]._ID, 2] = 0;
 
-                        //JPN: Reset combined AUC array for next second
-                        wAUCXYZ[wcontroller._Sensors[i]._ID] = 0;
-
-                        wVMAG[wcontroller._Sensors[i]._ID] = 0;
+                        //wVMAG[wcontroller._Sensors[i]._ID] = 0;
+                        wVMAG[wcontroller._Sensors[i]._ID] = wVMAG[wcontroller._Sensors[i]._ID] + Math.Sqrt(Math.Pow((double)(wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr] - wrunningMeanX), 2.0) + Math.Pow((double)(wrawData[wcontroller._Sensors[i]._ID, 1, wheadPtr] - wrunningMeanY), 2.0) + Math.Pow((double)(wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr] - wrunningMeanZ), 2.0));
 
 
-
-                        for (int k = 0; k < RM_SIZE; k++)
-                        {
-                            wAUC[wcontroller._Sensors[i]._ID, 0] = wAUC[wcontroller._Sensors[i]._ID, 0] + (int)Math.Abs((wrawData[wcontroller._Sensors[i]._ID, 0, k] - wrunningMeanX));
-                            wAUC[wcontroller._Sensors[i]._ID, 1] = wAUC[wcontroller._Sensors[i]._ID, 1] + (int)Math.Abs((wrawData[wcontroller._Sensors[i]._ID, 1, k] - wrunningMeanY));
-                            wAUC[wcontroller._Sensors[i]._ID, 2] = wAUC[wcontroller._Sensors[i]._ID, 2] + (int)Math.Abs((wrawData[wcontroller._Sensors[i]._ID, 2, k] - wrunningMeanZ));
-
-                            //JPN!!!!!
-                            //wAUC[wcontroller._Sensors[i]._ID, 0] = Filter(wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr], 0);
-                            //wAUC[wcontroller._Sensors[i]._ID, 1] = Filter(wrawData[wcontroller._Sensors[i]._ID, 1, wheadPtr], 1);
-                            //wAUC[wcontroller._Sensors[i]._ID, 2] = Filter(wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr], 2);
-
-                            //JPN: Sum AUC values for each axis for the current sample and add to a running total for the current second
-                            double myRawAC = wAUCXYZ[wcontroller._Sensors[i]._ID] + wAUC[wcontroller._Sensors[i]._ID, 0] + wAUC[wcontroller._Sensors[i]._ID, 1] + wAUC[wcontroller._Sensors[i]._ID, 2];
-                            //JPN: Divide running total by the scaling factor used in Wockets Firmware Activity Counts (WFAC)
-                            myRawAC /= 24;
-                            //JPN: Trim oversized values to match integer size of WFAC calculations and add to combined AUC array for WRAC
-                            wAUCXYZ[wcontroller._Sensors[i]._ID] = (myRawAC > 65535 ? 65535 : (int)myRawAC);
-
-                            wVMAG[wcontroller._Sensors[i]._ID] = wVMAG[wcontroller._Sensors[i]._ID] + Math.Sqrt(Math.Pow((double)(wrawData[wcontroller._Sensors[i]._ID, 0, wheadPtr] - wrunningMeanX), 2.0) + Math.Pow((double)(wrawData[wcontroller._Sensors[i]._ID, 1, wheadPtr] - wrunningMeanY), 2.0) + Math.Pow((double)(wrawData[wcontroller._Sensors[i]._ID, 2, wheadPtr] - wrunningMeanZ), 2.0));
-                        }
 
                         //Inititalize lines to be written to cvs files
                         int sensor_id = wcontroller._Sensors[i]._ID;
@@ -5780,33 +5779,8 @@ namespace DataMerger
 
                             #endregion Append Wockets Statistics
 
-                            //JPN: If WRAC sums are available
-                            if (wWRACSummation != null)
-                            {
-                                //JPN: Sum the raw ACs for each accelerometer axis (X,Y,Z) per second for each sensor
-                                wWRACSummation[wcontroller._Sensors[i]._ID] += wAUCXYZ[wcontroller._Sensors[i]._ID];
-
-                                //JPN: Update the unix counter for the AC per minute calculation 
-                                if (prevUnixTime[wcontroller._Sensors[i]._ID] == -1)
-                                    prevUnixTime[wcontroller._Sensors[i]._ID] = currentUnixTime;
-
-                                //JPN: If one minute has elapsed, computer WRAC for this sensor
-                                if ((currentUnixTime - prevUnixTime[wcontroller._Sensors[i]._ID]) >= 60000)
-                                {
-                                    //JPN: Add the last minute's worth of WRAC data to the final array
-                                    wWRACData[wcontroller._Sensors[i]._ID][key] = Convert.ToInt32(wWRACData[wcontroller._Sensors[i]._ID][key]) + wWRACSummation[wcontroller._Sensors[i]._ID];
-
-                                    //JPN: Compute sampling rate for this WRAC by dividing number of samples by 60 seconds
-                                    wWRACSamplingRate[wcontroller._Sensors[i]._ID][key] = (double)wWRACCounterMinute[wcontroller._Sensors[i]._ID] / 60;
-
-                                    //JPN: Reset arrays used to compute WRAC
-                                    wWRACSummation[wcontroller._Sensors[i]._ID] = 0;
-                                    wWRACCounterMinute[wcontroller._Sensors[i]._ID] = 0;
-
-                                    //JPN: Mark the start of the next epoch for WRAC calcluation
-                                    prevUnixTime[wcontroller._Sensors[i]._ID] = currentUnixTime;
-                                }
-                            }
+                            if (prevUnixTime[wcontroller._Sensors[i]._ID] == -1)
+                                prevUnixTime[wcontroller._Sensors[i]._ID] = currentUnixTime;
                         }
                         else
                         {
@@ -5846,10 +5820,6 @@ namespace DataMerger
                         wVMAG[sensor_id] = 0;
                         for (int j = 0; (j < 3); j++)
                             wAUC[sensor_id, j] = 0;
-
-                        //JPN: reset AUC summation for next second's WRAC calculation
-                        wAUCXYZ[sensor_id] = 0;
-
                     }
 
                     #endregion Calculate Statistics
@@ -5943,9 +5913,7 @@ namespace DataMerger
                         }
                         else
                         {
-                            //JPN: Retrieve WRAC data point and divide by computed sampling rate for the minute observed
-                            //int value = Convert.ToInt32(Convert.ToDouble(wWRACData[i][key]) * Convert.ToDouble(wWRACSamplingRate[i][key]));
-                            //JPN!!!!
+                            //JPN: Retrieve WRAC data point
                             int value = Convert.ToInt32(Convert.ToDouble(wWRACData[i][key]));
                             //JPN: Add scaled WRAC data to the WRAC text stream
                             wWRACSummaryCSV[i].WriteLine(summary_csv_line[i] + "," + value);
@@ -5991,34 +5959,12 @@ namespace DataMerger
                         //JPN: Log new WRAC value when the next minute epoch starts
                         else
                         {
-                            //JPN: Retrieve WRAC data point and divide by computed sampling rate for the minute observed
-                            //JPN!!!
-                            //int value = Convert.ToInt32(Convert.ToDouble(wWRACData[i][key]) / Convert.ToDouble(wWRACSamplingRate[i][key]));
+                            //JPN: Retrieve WRAC data point
                             int value = Convert.ToInt32(Convert.ToDouble(wWRACData[i][key]));
                             //JPN: Add scaled WRAC data to the text stream
                             master_csv_line = master_csv_line + "," + value;
                             //JPN: Store this line so it can be repeated in the summary CSV until the WRAC value changes
                             prevWRACPlotDataLine[i] = value.ToString();
-                        }
-                    }
-
-                    //JPN: TEMP: Output computed sampling rate with values...
-                    for (int i = 0; (i < wWRACData.Length); i++)
-                    {
-                        //JPN: Carry over previous WRAC Sample Count the current sample is not the start of a new WRAC minute epoch
-                        if (wWRACData[i].ContainsKey(key) == false)
-                        {
-                            master_csv_line = master_csv_line + "," + prevWRACPlotSampleCount[i];
-                        }
-                        //JPN: Log new WRAC value when the next minute epoch starts
-                        else
-                        {
-                            //JPN: Retrieve WRAC sampling rate and multiply by 60 to represent numbers of samples in the minute
-                            int value = Convert.ToInt32(wWRACSamplingRate[i][key]) * 60;
-                            //JPN: Add WRAC Sample Rate to the text stream
-                            master_csv_line = master_csv_line + "," + value;
-                            //JPN: Store this line so it can be repeated in the summary CSV until the WRAC value changes
-                            prevWRACPlotSampleCount[i] = value.ToString();
                         }
                     }
                 }
@@ -6537,12 +6483,18 @@ namespace DataMerger
         
         #endregion
 
+
+        static int wAUCSigma = 0;
+
+        const int AC_BUFFER_SIZE = 9600;
+        const int AC_NUMS = 2000;
         static int[,] xv = new int[3, 41];
+        static bool isWRACLoaded = false;
 
         static int Filter(int data, int axis)
         {
-            int mean=0;
-            int j=0;
+            int mean = 0;
+            int j = 0;
             for (; (j < 40); j++)
             {
                 mean += xv[axis, j];
