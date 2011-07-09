@@ -5544,7 +5544,7 @@ namespace DataMerger
                                         if (summary_count == 0)
                                         {
                                             //JPN: NOTE!!!! Divide by firmware scaling value. For some reason this is 24 in the firmware, but must be 20 here.
-                                            wAUCSigma = wAUCSigma / 20;
+                                            wAUCSigma = wAUCSigma / 24;
                                             //JPN: Trim summations to match size of firmware unsigned short int
                                             if (wAUCSigma > 65535)
                                                 acount[ci] = 65535;
@@ -6487,7 +6487,7 @@ namespace DataMerger
         static int wAUCSigma = 0;
 
         const int AC_BUFFER_SIZE = 9600;
-        const int AC_NUMS = 2000;
+        const int AC_NUMS = 2400;
         static int[,] xv = new int[3, 41];
         static bool isWRACLoaded = false;
 
