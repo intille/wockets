@@ -5543,7 +5543,7 @@ namespace DataMerger
                                     {
                                         if (summary_count == 0)
                                         {
-                                            //JPN: NOTE!!!! Divide by firmware scaling value. For some reason this is 24 in the firmware, but must be 20 here.
+                                            //JPN: Divide by firmware scaling value.
                                             wAUCSigma = wAUCSigma / 24;
                                             //JPN: Trim summations to match size of firmware unsigned short int
                                             if (wAUCSigma > 65535)
@@ -5553,6 +5553,8 @@ namespace DataMerger
                                             //JPN: Compute DateTime of sample from the UnixTimeStamp
                                             DateTime plotDt = new DateTime();
                                             UnixTime.GetDateTime(Convert.ToInt64(wWRACUnixTime), out plotDt);
+                                            //JPN: Subtract a minute to aling with starting point of activity counts
+                                            plotDt = plotDt.AddMinutes(-1);
                                             //JPN: Convert DateTime to string key that is used in indexing values for CSV output
                                             string plotKey = plotDt.Year + "-" + plotDt.Month + "-" + plotDt.Day + "-" + plotDt.Hour + "-" + plotDt.Minute + "-" + plotDt.Second;
                                             //JPN: Add summation to hashtable for later output to CSV file
