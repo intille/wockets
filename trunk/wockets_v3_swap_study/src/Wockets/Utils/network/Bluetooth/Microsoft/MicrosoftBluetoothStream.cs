@@ -256,12 +256,18 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
             if (CurrentWockets._Configuration._SoftwareMode == SoftwareConfiguration.DEBUG)
                 Logger.Debug("MicrosoftBluetoothStream: Process: Processing thread started for connection " + this._HexAddress);
 
+
+
+
             while (this._Status == BluetoothStatus.Connected)
-            {            
+            {           
+ 
                 int bytesReceived = 0;
 
                 try
                 {
+
+                    #region commented
                     /*if (CurrentWockets._Continuous)
                     {
                         Wockets.Data.Commands.SET_TM tm = new Wockets.Data.Commands.SET_TM(Wockets.Data.Types.TransmissionMode.Continuous);
@@ -269,6 +275,10 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                         CurrentWockets._Continuous = false;
                         Thread.Sleep(1000);
                     }*/
+                    #endregion
+
+
+                    #region Sending Comands
 
                     // Transmit data if needed 1 byte at a time, for a maximum of 10 bytes in each iteration
                     // then receive to avoid substantial delays
@@ -278,8 +288,10 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                         while (this.sbuffer._Tail != this.sbuffer._Head)
                         {
                             sendByte[0] = this.sbuffer._Bytes[this.sbuffer._Head];
+
                             lock (socketLock)
                             {
+                                //send the command
                                 if (socket.Send(sendByte, 1, SocketFlags.None) != 1)
                                 {                                    
                                     CurrentWockets._LastError = ErrorCodes.SOCKET_SEND_FAILED;
@@ -289,6 +301,7 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                                     return;
                                 }
                             }
+
                             sentBytes++;
 
                             if (this.sbuffer._Head >= (this.sbuffer._Bytes.Length - 1))
@@ -300,10 +313,28 @@ namespace Wockets.Utils.network.Bluetooth.Microsoft
                             counter++;
                             if (counter == 10)
                                 break;
-                        }                        
+                        }
                     }
 
-       
+                    #endregion
+
+
+
+                    //-------------------------------------------------------
+                    //Test Code -- padding after sending the commands  -----//
+
+                    if (this.sbuffer._Tail != this.sbuffer._Head)
+                    {
+                        for (int k = 0; k < 100; k++)
+                        {
+                            sendByte[0] = 0xff;
+                            socket.Send(sendByte, 1, SocketFlags.None);
+                        }
+                    }
+
+                    //-------------------------------------------
+
+
                     // Receive data
                     lock (socketLock)
                     {
