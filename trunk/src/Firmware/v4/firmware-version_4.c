@@ -46,6 +46,8 @@ data_unit data7[50];*/
 data_unit data[750];
 unsigned short acount[AC_BUFFER_SIZE]; //array 960 capacity => If 1 AC per minute = 16h of capacity
 unsigned short AC_NUMS=0;
+unsigned short AC_SCALING=24;
+
 unsigned short summaryindex=0;
 unsigned short summary_count=2400;
 
@@ -223,8 +225,7 @@ int main()
 
 			//sample the accelerometer and wocket battery level
             
-			//--// #ifdef _VERSION ==3
-			
+			//--// #ifdef _VERSION ==3			
 			x=_atmega_a2dConvert10bit(ADC0);
 		
 			y=_atmega_a2dConvert10bit(ADC1);
@@ -251,7 +252,7 @@ int main()
 						
 				if (summary_count==0)
 				{
-					vmag=vmag/24;
+					vmag=vmag/AC_SCALING;
 					
 					if (vmag>65535)
 						acount[ci]=65535;
@@ -376,7 +377,15 @@ int main()
 
 					if (_wTM==_TM_Continuous)
 						continue;
+                   
+
+                   //---------------------
+				   // Test Code
+				    _delay_ms(5);
+					_receive_data();
 						
+					//-------------------
+
 
 					for (int ixz=0;(ixz<100);ixz++) 
 					{                                                                                      
@@ -401,7 +410,7 @@ int main()
 								if (_wPC>40){	//Skip the first samples						
 									if (summary_count==0)
 									{
-										vmag=vmag/24;
+										vmag=vmag/AC_SCALING;
 										if (vmag>65535)
 											acount[ci]=65535;
 										else
@@ -523,7 +532,7 @@ int main()
 								if (_wPC>40){	//Skip the first samples						
 									if (summary_count==0)
 									{
-										vmag=vmag/24;
+										vmag=vmag/AC_SCALING;
 										if (vmag>65535)
 											acount[ci]=65535;
 										else
@@ -650,7 +659,7 @@ int main()
 								if (_wPC>40){	//Skip the first samples						
 									if (summary_count==0)
 									{
-										vmag=vmag/24;
+										vmag=vmag/AC_SCALING;
 										if (vmag>65535)
 											acount[ci]=65535;
 										else
@@ -741,7 +750,7 @@ int main()
 								if (_wPC>40){	//Skip the first samples						
 									if (summary_count==0)
 									{
-										vmag=vmag/24;
+										vmag=vmag/AC_SCALING;
 										if (vmag>65535)
 											acount[ci]=65535;
 										else

@@ -510,6 +510,7 @@ void _send_acs()
 //	_send_ac_count(num_acs);
 	_send_ac_offset(AC_NUMS-summary_count); //send offset of the last activity count
 	_send_ac_count(cseq);	
+
 	for (int i=si;(i!=ci);)
 	{		
 		count=acount[i];
@@ -532,6 +533,10 @@ void _send_acs()
 				return;
 		}
 	}
+
+
+	_receive_data();
+
 }
 
 /*void _send_summary_count(unsigned short count)
@@ -620,6 +625,7 @@ void _send_data(void)
 		   _bluetooth_reset();
            	alive_timer=0;                                  
         }
+
 #ifdef _VERSION==3
 		x=_atmega_a2dConvert10bit(ADC2);
 		y=_atmega_a2dConvert10bit(ADC1);
@@ -643,8 +649,11 @@ void _receive_data(void)
 	unsigned char aByte;
 
 	// Attempt to receive a byte only if no command is being received or a partial comman has been received
-	if ( ((command_counter==0)||(command_counter<command_length))  && (_bluetooth_receive_uart0_byte(&aByte)) )
-    {
+	// This line was replaced with results from Harshit experiments
+	// if ( ((command_counter==0)||(command_counter<command_length))  && (_bluetooth_receive_uart0_byte(&aByte)) )
+    
+	if(_bluetooth_receive_uart0_byte(&aByte))
+	{
 		rBuffer[command_counter++]=aByte;
 		
 		if ((aByte>>5)==COMMAND_PREFIX)
