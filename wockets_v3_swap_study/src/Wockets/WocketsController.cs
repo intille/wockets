@@ -635,8 +635,7 @@ namespace Wockets
                     if ((this != null) && (this._Sensors.Count > 0))
                     {
 
-
-                        #region check if the BT connection succeded & data is received
+                        #region Check if the BT connection succeded & data is received
 
                         // Check 2 things, num of connection failures
                         // check if data received is > 0
@@ -670,6 +669,8 @@ namespace Wockets
 
                         #endregion
 
+
+                        #region IF DATA RECEIVED
 
                         if ((receivedFullData) || (receiveFailed) || (notimeoutData))
                         {
@@ -903,9 +904,6 @@ namespace Wockets
                                 //tw2.Flush();
                                 //tw2.Close();
                                 #endregion
-
-
-
                                 #region commented
 
                                //#region Write Extracted ACs To File Summary-Acs-Data File (Storage Card)
@@ -1051,13 +1049,22 @@ namespace Wockets
 
                         }
 
+
+                        #endregion IF DATA RECEIVED
+
                     }
-                }
+
+                } //ends if connected 
+
 
                 Thread.Sleep(1000);
 
-            }
+
+            }//while loop ends
+
+
         }
+
 
 
 
@@ -1120,6 +1127,7 @@ namespace Wockets
 
             return success;
         }
+
 
 
 
@@ -1645,7 +1653,7 @@ namespace Wockets
                 //System.Reflection.Assembly a = System.Reflection.Assembly.GetExecutingAssembly();
                 //System.Reflection.AssemblyName an = a.GetName();
                 //Logger.Warn("Version " + an.Version.ToString() +" Date:"+ DateTime.Now.ToString("f"));
-                Logger.Warn("Version: 1.59 Test1" + " Date: 7/01/2011 9:46 PM");
+                Logger.Warn("Version: 1.60 Test 1" + " Date: 7/10/2011 11:51 PM, With change in MicrosoftBTStack.cs File");
                 this.StartTime = WocketsTimer.GetUnixTime();
 
 

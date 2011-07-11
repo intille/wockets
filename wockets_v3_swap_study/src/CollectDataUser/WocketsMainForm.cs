@@ -71,12 +71,13 @@ namespace CollectDataUser
     {
 
 
-        #region Variables
+        #region --- Global Variables ---
 
         //General Status Variables
         private String sensor_set = "";
         private String app_status = "running";
         private String software_version = "";
+
         private bool is_rebooting = false;
         private bool upload_raw_data = true;
         private string firstCard = "";
@@ -118,10 +119,9 @@ namespace CollectDataUser
 
         private DateTime LastLogUploadInvoke;
         private TimeSpan ElapsedTime_LogUpload;
-
         private TimeSpan ElapsedTime_DataUpload;
        
-        //System Wide Lock
+        //SystemWide Lock
         public static string APP_LOCK = "APPLock";
         private static Semaphore appLock = new Semaphore(1, 1, APP_LOCK);
 
@@ -129,15 +129,12 @@ namespace CollectDataUser
         private internalMessageWindow messageWindow;
         public IntPtr wndPtr;
 
-
         //Wockets Controller
         private static WocketsController wockets_controller = null;
         public  static bool _WocketsRunning = false;
         private string[] sensor_data = null;
         private bool sensors_loaded = false;
-        //private string WOCKETS_ROOT_PATH = @"\Program Files\wockets\";
-        //private static string rootStorageDirectory = "";
-        
+ 
 
         #region -- PInvokes --
         //Find the Internal Message Window
@@ -157,7 +154,9 @@ namespace CollectDataUser
         #endregion 
 
 
-        #region Initialize Form
+
+        #region --- Initialize Form  ---
+
 
         public WocketsMainForm()
         {
@@ -215,7 +214,7 @@ namespace CollectDataUser
 
             #region Read the Software Version
              
-            software_version = "Version: " + "1.59 Test2";
+            software_version = "Version: " + "1.60 Test1";
             this.label_software_version.Text = software_version;
 
             #endregion
@@ -273,6 +272,7 @@ namespace CollectDataUser
                     appLogger.Debug("Events Upload Logger | Started | path: " +  UploadLoggerEvents.path );
 
 
+                //SAM TODO: DELETE
                 #region commented
                 ////// Create the session directory
                 //DateTime now = DateTime.Now;
@@ -300,7 +300,7 @@ namespace CollectDataUser
                 //appappLogger.InitLogger(Settings._DataStorageDirectory + "\\log\\");   //"\\Wockets\\applog\\");
                 //appappLogger.Debug("Starting Application");
                 #endregion
-
+                //SAM TODO: DELETE
 
             }
             catch(Exception e)
@@ -347,8 +347,8 @@ namespace CollectDataUser
             if (File.Exists("\\Windows\\Start Menu\\Programs\\" + "Wockets Updater.lnk"))
                 File.Delete("\\Windows\\Start Menu\\Programs\\Wockets Updater.lnk");
 
-            if (File.Exists("\\Windows\\Start Menu\\Programs\\Updater(1).lnk"))
-                File.Delete("\\Windows\\Start Menu\\Programs\\Updater(1).lnk");
+            if (File.Exists("\\Windows\\Start Menu\\Programs\\Updater (1).lnk"))
+                File.Delete("\\Windows\\Start Menu\\Programs\\Updater (1).lnk");
 
             if( !File.Exists("\\Windows\\Start Menu\\Programs\\Updater.lnk") )
                if ( File.Exists(Settings._MainWocketsDirectory + "Updater.lnk") )
@@ -592,6 +592,7 @@ namespace CollectDataUser
             ElapsedTime_EventWrite = TimeSpan.Zero;
 
 
+#region Test Code ------
             if (app_status.CompareTo("swap") == 0)
             {
                 if (InitializeWocketsController())
@@ -605,7 +606,9 @@ namespace CollectDataUser
             }
             else
             {
-                if (InitializeWocketsController())
+#endregion --------------
+
+            if (InitializeWocketsController())
                 {
 
                     //Load MAC addresses, locations from sensordata.xml files && match them to the master list
@@ -613,24 +616,21 @@ namespace CollectDataUser
                         sensors_loaded = LoadSensorsFromMasterList(sensor_data, sensor_set, selected_sensor_locations);
 
                     if (!ConnetToWocketsController(sensor_set))
-                        appLogger.Debug("program.cs: The wockets controller was not innitialized correctly. ConnetToWocketsController Function returned false.");
+                        appLogger.Debug("WocketsMainForm.cs:Initialize(): The wockets controller was not innitialized correctly. ConnetToWocketsController Function returned false.");
 
                     restart_event = 1;
                     Minimize_Main_Window();
-
                 }
                 else
                     appLogger.Debug("program.cs: The wockets controller was not innitialized correctly. LoadSensors Function returned false.");
-
-            }
-
-
+}
         }
 
         #endregion
 
 
-        #region Storage Card Identification 
+
+        #region Functions For Identifying Storage Card
 
         private string GetStorageCardName(int TIMEOUT_SECONDS)
         {
@@ -673,7 +673,6 @@ namespace CollectDataUser
             }
 
             return firstCard;
-
         }
 
         private void UpdateDataStorageDirectoryPath()
@@ -703,7 +702,7 @@ namespace CollectDataUser
 
 
 
-        #region Location Buttons
+        #region Functions for Sensors Location Interface
 
         public static string NEEDED_FILES_PATH = ""; 
         public static string LOCATION_IMAGES_DIRECTORY = "";
@@ -987,29 +986,26 @@ namespace CollectDataUser
 
         bool is_change_locations_panel_launched = false;
         bool sensors_setup_in_panel = false;
-
-
-
         private void buttonLocation_OK_Click(object sender, EventArgs e)
         {
             buttonLocation_OK.Enabled = false;
 
             if (panel_sensor_verification_1.Visible)
             {
+                #region Check if sensor locations need to be modified
 
-                if( textBox_sensor_verification_msg.Text.Contains("SWAP") )
+                if ( textBox_sensor_verification_msg.Text.Contains("SWAP") )
                 {
-                    // finish setting up the sensors set id and locations, consequently,
-                    // connect to the controller for fist time
+
+                    #region finish setting up the sensors set id and locations, consequently,connect to the controller for fist time
+
                     panel_sensor_verification_1.Visible = false;
                     panel_sensor_verification_1.Enabled = false;
                     buttonLocation_OK.Enabled = false;
                     buttonLocation_OK.Visible = false;
                     Application.DoEvents();
 
-
                     CurrentPanel = PanelID.LOCATION;
-
 
                     #region commented 
                         ////Load MAC addresses, locations from sensordata.xml files && match them to the master list
@@ -1090,22 +1086,25 @@ namespace CollectDataUser
 
                     #endregion         
                     
-
                     if( !UpdateSensorLocations( selected_sensor_locations) )
-                        appLogger.Debug("program.cs: the locations were not updated.");
+                        appLogger.Debug("WocketsMainForm.cs: buttonLocation_OK_Click((): the locations were not updated.");
 
                     if (!ConnetToWocketsController(sensor_set))
-                            appLogger.Debug("program.cs: The wockets controller was not innitialized correctly. ConnetToWocketsController Function returned false.");
+                        appLogger.Debug("WocketsMainForm.cs: buttonLocation_OK_Click((): The wockets controller was not innitialized correctly. ConnetToWocketsController Function returned false.");
 
                     is_change_locations_panel_launched = false;
                     sensors_setup_in_panel = false;
 
                     Minimize_Main_Window();
 
+                    #endregion
+
                 }
                 else if (textBox_sensor_verification_msg.Text.Contains("LOCATION"))
                 {
-                    //update # of sensors and sensor locations and reconect controller
+
+                    #region update number of sensors and sensor locations and reconect to the controller
+
                     panel_sensor_verification_1.Visible = false;
                     panel_sensor_verification_1.Enabled = false;
                     buttonLocation_OK.Enabled = false;
@@ -1117,7 +1116,8 @@ namespace CollectDataUser
                     Disconnect_WocketsController();
                     Thread.Sleep(500);
 
-                    
+                    //SAM TODO: DELETE
+                    #region commented
                     ////Update Session Directory
                     //DateTime now = DateTime.Now;
                     //Settings._DataStorageDirectory = Settings._MemoryCardDirectory + "\\Wockets\\Session-" + now.Month.ToString("00") + "-" + now.Day.ToString("00") + "-" + now.Year.ToString("0000") + "-" + now.Hour.ToString("00") + "-" + now.Minute.ToString("00") + "-" + now.Second.ToString("00");
@@ -1132,11 +1132,12 @@ namespace CollectDataUser
                     ////Initialize the wockets controller logger
                     //Logger.InitLogger(Settings._DataStorageDirectory + "\\log");
                     //appLogger.Debug("Session and log directories created.");
-
+                    #endregion
+                    //----------------
 
                     UpdateDataStorageDirectoryPath();
 
-
+                    //SAM CHECK: HERE THE WC get initialized
                     if (InitializeWocketsController())
                     {
                         //Load MAC addresses, locations from sensordata.xml files && match them to the master list
@@ -1153,19 +1154,28 @@ namespace CollectDataUser
                     else
                         appLogger.Debug("program.cs: The wockets controller was not innitialized correctly. LoadSensors Function returned false.");
 
-              
+
+                    #endregion
+
                 }
                 else
                 {
-                    //Set locations after specify sensor set
+                    #region Set locations after specify sensor set
+
                     GoToPanel(PanelID.PREPARE_SET, PanelID.LOCATION_BUTTONS);
                     menuMainAppActions.Text = "Back";
                     menuQuitApp.Text = "";
+
+                    #endregion 
                 }
+
+                #endregion
 
             }
             else if (panel_location_buttons.Visible)
             {
+                #region If the assigment of the sensor locations is cancelled or the location panel goes back to previous screen
+
                 NUMBER_OF_SENSORS = GetSelectedLocationsFromPanel();
 
                 //Finish selecting the locations
@@ -1224,7 +1234,6 @@ namespace CollectDataUser
                     {
                         PostLocationPanelButtonsMsg(NUMBER_OF_SENSORS);
                     }
-
                 }
                 else
                 {
@@ -1238,13 +1247,18 @@ namespace CollectDataUser
                         PostLocationPanelButtonsMsg(NUMBER_OF_SENSORS);
                 }
 
+                #endregion
             }
             else if( panel_sensor_verification_2.Visible)
             {
+                #region If one of the location verification panels is back
+
                 if ( (panel_sensor_verification_labelID.Text.CompareTo("W") == 0) & NUMBER_OF_SENSORS == 2)
                     GoToPanel(PanelID.VERIFY_W_SENSOR, PanelID.VERIFY_A_SENSOR);
                 else
                     GoToPanel(PanelID.VERIFY_A_SENSOR, PanelID.SWAP_COMPLETED);
+
+                #endregion 
             }
         }
 
@@ -1263,6 +1277,7 @@ namespace CollectDataUser
         }
 
 
+        //SAM TODO: DELETE
         #region commented
         //private Bitmap MakeBitmap(Color color, int width, int height)
         //{
@@ -1275,16 +1290,15 @@ namespace CollectDataUser
         //    return bmp;
         //}
         #endregion
-
+        //------------
 
         #endregion
 
 
-        #region Set Panels ON/OFF
+        #region Set Panels ON-OFF / Initialize Status Labels
 
             private PanelID LastPanel = PanelID.NONE;
             private PanelID CurrentPanel = PanelID.NONE;
-
             private void InitializePanels()
             {
                 //Settings panels
@@ -2025,14 +2039,13 @@ namespace CollectDataUser
            
             }
 
-
         #endregion
 
 
         #region Swap Sensors
 
 
-        private void GoToSwapButton_Click(object sender, EventArgs e)
+           private void GoToSwapButton_Click(object sender, EventArgs e)
             {
                 
                 GoToSwapButton.Enabled = false;
@@ -2072,8 +2085,11 @@ namespace CollectDataUser
                     //Thread.Sleep(1000);
                     #endregion
 
+                    //Test Code -------
                     //close application & reboot
                     this.Close();
+
+                    //-------------------
                 }
                 catch (Exception ex)
                 {
@@ -2762,11 +2778,9 @@ namespace CollectDataUser
      #endregion 
 
 
-        #region Connect/Disconnect Sensors Functions
+        #region Functions to Connect/Disconnect Sensors: Prepare Wockets Controller
 
         WocketsConfiguration wockets_controller_configuration;
-
-
         private bool InitializeWocketsController()
         {
             bool success = false;
@@ -3226,8 +3240,6 @@ namespace CollectDataUser
         }
 
 
-
-
         private bool WocketsConnect(bool wockets_running)
         {
             bool success = false;
@@ -3300,8 +3312,6 @@ namespace CollectDataUser
         }
 
 
-
-
         private void WocketsDisconnect()
         {
 
@@ -3309,7 +3319,6 @@ namespace CollectDataUser
             {
                 try
                 {
-
                     TurnOnPanel(PanelID.CONNECTION);
                     label_kernel_status.Text = "Disconnecting Wockets";
                     Application.DoEvents();
@@ -3341,7 +3350,6 @@ namespace CollectDataUser
                 {
                     try
                     {
-                        
                         //Determine which set will be used 
                         if (this.sensor_set.CompareTo("red") == 0)
                             sensor_set = "green";
@@ -3390,20 +3398,20 @@ namespace CollectDataUser
         }
 
 
-    #endregion
+        #endregion
 
 
-        #region Connection Status Message Callback 
+        #region Connection Status Message CallBack 
 
-        delegate void UpdateMsgCallback(string msg);
+         delegate void UpdateMsgCallback(string msg);
 
          private void UpdateMsg(string msg)
-        {
+         {
             try
             {
-            //     InvokeRequired required compares the thread ID of the
-            //     calling thread to the thread ID of the creating thread.
-            //     If these threads are different, it returns true.
+                // InvokeRequired required compares the thread ID of the
+                // calling thread to the thread ID of the creating thread.
+                // If these threads are different, it returns true.
                 if (this.InvokeRequired || this.InvokeRequired)
                 {
                     UpdateMsgCallback d = new UpdateMsgCallback(UpdateMsg);
@@ -3414,7 +3422,6 @@ namespace CollectDataUser
                     label_kernel_status.Text = msg;
                     Application.DoEvents();
                 }
-
             }
             catch (Exception e)
             {
@@ -3426,9 +3433,9 @@ namespace CollectDataUser
 
 
         #region Reboot Phone
+        
         [DllImport("aygshell.dll")]
         private static extern bool ExitWindowsEx(uint uFlags, int dwReserved);
-
 
         enum ExitWindowsAction : uint
         {
@@ -3548,8 +3555,7 @@ namespace CollectDataUser
        // internal static extern int waveOutGetVolume(IntPtr device, ref int volume);
         #endregion
 
-
-     #endregion
+        #endregion
 
 
         #region Exit/terminate application functions
@@ -4221,7 +4227,6 @@ namespace CollectDataUser
       #endregion
 
 
-
         #region QA Questionnaire
         
         
@@ -4367,7 +4372,7 @@ namespace CollectDataUser
 
 
         public void StopUpdateUploadThread()
-      {
+        {
           if (uploadThread != null)
           { uploadThread.Abort();
             uploadThread = null;
@@ -4408,7 +4413,7 @@ namespace CollectDataUser
       }
 
 
-     #endregion
+        #endregion
 
 
         #region File Upload Update Status
@@ -4497,7 +4502,6 @@ namespace CollectDataUser
       #endregion
 
 
-
         #region Reset ACs Registries (COMMENTED)
 
          //private void ResetUploaderCounters()
@@ -4536,17 +4540,12 @@ namespace CollectDataUser
       #endregion
 
 
-
         #region Thread tracking the sensor connection status
 
         double WAIT_INTERVAL_LOG_UPLOADER = 60.0; //in minutes
         private int MAX_NSENSORS_TO_UPLOAD = 3;
         //double WAIT_INTERVAL_DATA_UPLOADER= 60.0; //in minutes
-        
-
-
-
-     private void ACsUpdateTimer_Tick(object sender, EventArgs e)
+        private void ACsUpdateTimer_Tick(object sender, EventArgs e)
      {
          DateTime now = DateTime.Now;
 
@@ -4922,13 +4921,11 @@ namespace CollectDataUser
 
      }
 
-
         private void StartACsUpdater()
         {
             ACsUpdateTimer.Enabled = true;
             appLogger.Debug("Interface Update Thread Timer | Started.");
         }
-
 
         private void StopACsUpdater()
         {
@@ -4936,7 +4933,6 @@ namespace CollectDataUser
             appLogger.Debug("Interface Update Thread Timer | Stopped.");
 
         }
-
 
         private void WriteEventsToUploadFile(DateTime now, bool dispose)
         {
@@ -5030,16 +5026,14 @@ namespace CollectDataUser
 
         }
 
+        #endregion
 
-     #endregion
-
-   
-    
+  
     }
 
 
 
-    #region Internal Message Window
+        #region Internal Message Window
     
     #region Description
     //This window receives messages from another program (in this case the updater).
