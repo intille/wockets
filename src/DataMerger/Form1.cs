@@ -2023,6 +2023,7 @@ namespace DataMerger
         //Actigraph
         static TextWriter[] actigraphCSV;
         static Hashtable[] actigraphData;
+        static Hashtable[] actigraphMinutes;
         static string[] actigraphType;
         public static string[] prevActLine;
         public static string[] prevActXYZ;
@@ -2715,6 +2716,7 @@ namespace DataMerger
             file = Directory.GetFileSystemEntries(aDataDirectory + "\\" + OTHER_SUBDIRECTORY, "*-actigraph*.csv");
             actigraphCSV = new TextWriter[file.Length];
             actigraphData = new Hashtable[file.Length];
+            actigraphMinutes = new Hashtable[file.Length];
             actigraphType = new string[file.Length];
             prevActLine = new string[file.Length];
             for (int i = 0; i < prevActLine.Length; i++)
@@ -2730,7 +2732,10 @@ namespace DataMerger
             try
             {
                 for (int i = 0; (i < file.Length); i++)
+                {
                     actigraphData[i] = new Hashtable();
+                    actigraphMinutes[i] = new Hashtable();
+                }
                 for (int i = 0; (i < file.Length); i++)
                 {
                     if (CSVProgress == "")
@@ -3013,6 +3018,29 @@ namespace DataMerger
                     hasActigraph = (actigraphData[r].Count > 0);
                 actigraphRecords += actigraphData[r].Count;
             }
+
+            //JPN: Encode Actigraph Minute Count into array of hashtables
+            for (int i = 0; (i < file.Length); i++)
+            {
+                foreach (string ski in actigraphData[i].Keys)
+                {
+                    string[] acTokens = ski.Split('-');
+                    DateTime minuteDT = new DateTime(Convert.ToInt32(acTokens[0]), Convert.ToInt32(acTokens[1]), Convert.ToInt32(acTokens[2]), Convert.ToInt32(acTokens[3]), Convert.ToInt32(acTokens[4]), 0);
+                    string minuteKey = minuteDT.Year + "-" + minuteDT.Month + "-" + minuteDT.Day + "-" + minuteDT.Hour + "-" + minuteDT.Minute + "-" + minuteDT.Second;
+                    int acMinCount = 0;
+                    if (actigraphMinutes[i].ContainsKey(minuteKey))
+                        acMinCount = Convert.ToInt32(actigraphMinutes[i][minuteKey]);
+                    if (actigraphData[i].ContainsKey(ski))
+                    {
+                        string[] acDataLine = actigraphData[i][ski].ToString().Split(',');
+                        foreach (string acds in acDataLine)
+                            acMinCount += Convert.ToInt32(acds);
+                    }
+                    actigraphMinutes[i][minuteKey] = acMinCount;
+                }
+            }
+
+
             #endregion Read Actigraph data
 
 
@@ -4741,6 +4769,7 @@ namespace DataMerger
                     master_csv_header += ",Actigraph" + (i + 1);
                     actigraphCSV[i].WriteLine(actigraph_csv_header);
                 }
+                master_csv_header += ",PLOT_Actigraph" + (i + 1) + "_MinuteCounts";
             }
 
             #endregion Actigraph Summary Header
@@ -5579,7 +5608,7 @@ namespace DataMerger
                                             //JPN: Compute DateTime of sample from the UnixTimeStamp
                                             DateTime plotDt = new DateTime();
                                             UnixTime.GetDateTime(Convert.ToInt64(wWRACUnixTime), out plotDt);
-                                            //JPN: Subtract a minute to aling with starting point of activity counts
+                                            //JPN: Subtract a minute to align with starting point of activity counts
                                             plotDt = plotDt.AddMinutes(-1);
                                             //JPN: Convert DateTime to string key that is used in indexing values for CSV output
                                             string plotKey = plotDt.Year + "-" + plotDt.Month + "-" + plotDt.Day + "-" + plotDt.Hour + "-" + plotDt.Minute + "-" + plotDt.Second;
@@ -5898,7 +5927,17 @@ namespace DataMerger
                         {
                         }
                         master_csv_line = master_csv_line + "," + actigraphData[i][key] + "," + prevActAC_XYZ;
-
+                    }
+                    //JPN:
+                    if (actigraphMinutes[i].Count > 0)
+                    {
+                        string[] acTokens = key.Split('-');
+                        DateTime minuteDT = new DateTime(Convert.ToInt32(acTokens[0]), Convert.ToInt32(acTokens[1]), Convert.ToInt32(acTokens[2]), Convert.ToInt32(acTokens[3]), Convert.ToInt32(acTokens[4]), 0);
+                        string minuteKey = minuteDT.Year + "-" + minuteDT.Month + "-" + minuteDT.Day + "-" + minuteDT.Hour + "-" + minuteDT.Minute + "-" + minuteDT.Second;
+                        if (actigraphMinutes[i].ContainsKey(minuteKey))
+                            master_csv_line += "," + actigraphMinutes[i][minuteKey];
+                        else
+                            master_csv_line += ",";
                     }
                 }
 
