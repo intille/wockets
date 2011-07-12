@@ -5574,9 +5574,14 @@ namespace DataMerger
 
                         //JPN: Dimension array for storing WRAC output data
                         wWRACData = new Hashtable[CurrentWockets._Controller._Sensors.Count];
-
                         for (int i = 0; (i < wcontroller._Sensors.Count); i++)
                         {
+                        
+                            //JPN: Track the amount of time between samples to check that the sampling rate is valid for calculation
+                            double lastUnixTime = 0;
+                            
+                            //JPN: Use the UnixTime milliseconds to evaluate sampling rate. Target SR = 40 Hz
+                            double targetSampleTime = (1.0 / 40.0) * 1000;
 
                             //JPN: Initialze array for storing WRAC values for each sensor
                             wWRACData[i] = new Hashtable();
@@ -5588,46 +5593,55 @@ namespace DataMerger
                                 //JPN: WRAC computation code block
                                 {
                                     string[] wWRACTokens = line.Split(',');
-                                    //JPN: Generate combined (X+Y+Z) AUC using running mean filter
-                                    wAUCSigma += Filter(Convert.ToInt32(wWRACTokens[1]), 0);
-                                    wAUCSigma += Filter(Convert.ToInt32(wWRACTokens[2]), 1);
-                                    wAUCSigma += Filter(Convert.ToInt32(wWRACTokens[3]), 2);
                                     double wWRACUnixTime = Convert.ToDouble(wWRACTokens[0]);
-                                    //JPN: Ignore the first 40 samples to establish a running mean
-                                    if (_wPC > 40)
+                                    if (wWRACUnixTime - lastUnixTime >= targetSampleTime)
                                     {
-                                        if (summary_count == 0)
-                                        {
-                                            //JPN: Divide by firmware scaling value.
-                                            wAUCSigma = wAUCSigma / 24;
-                                            //JPN: Trim summations to match size of firmware unsigned short int
-                                            if (wAUCSigma > 65535)
-                                                acount[ci] = 65535;
-                                            else
-                                                acount[ci] = (int)wAUCSigma;
-                                            //JPN: Compute DateTime of sample from the UnixTimeStamp
-                                            DateTime plotDt = new DateTime();
-                                            UnixTime.GetDateTime(Convert.ToInt64(wWRACUnixTime), out plotDt);
-                                            //JPN: Subtract a minute to align with starting point of activity counts
-                                            plotDt = plotDt.AddMinutes(-1);
-                                            //JPN: Convert DateTime to string key that is used in indexing values for CSV output
-                                            string plotKey = plotDt.Year + "-" + plotDt.Month + "-" + plotDt.Day + "-" + plotDt.Hour + "-" + plotDt.Minute + "-" + plotDt.Second;
-                                            //JPN: Add summation to hashtable for later output to CSV file
-                                            wWRACData[wcontroller._Sensors[i]._ID][plotKey] = wAUCSigma;
-                                            //JPN: Reset values
-                                            wAUCSigma = 0;
-                                            ++ci;
-                                            if (ci == AC_BUFFER_SIZE)
-                                                ci = 0;
-                                            acount[ci] = 0;
-                                            summary_count = AC_NUMS;
-                                        }
+                                        if (lastUnixTime > 0)
+                                            lastUnixTime = wWRACUnixTime - ((wWRACUnixTime - lastUnixTime) - targetSampleTime);
                                         else
-                                            summary_count--;
+                                            lastUnixTime = wWRACUnixTime;
+
+
+                                        //JPN: Generate combined (X+Y+Z) AUC using running mean filter
+                                        wAUCSigma += Filter(Convert.ToInt32(wWRACTokens[1]), 0);
+                                        wAUCSigma += Filter(Convert.ToInt32(wWRACTokens[2]), 1);
+                                        wAUCSigma += Filter(Convert.ToInt32(wWRACTokens[3]), 2);
+                                        //JPN: Ignore the first 40 samples to establish a running mean
+                                        if (_wPC > 40)
+                                        {
+                                            if (summary_count == 0)
+                                            {
+                                                //JPN: Divide by firmware scaling value.
+                                                wAUCSigma = wAUCSigma / 24;
+                                                //JPN: Trim summations to match size of firmware unsigned short int
+                                                if (wAUCSigma > 65535)
+                                                    acount[ci] = 65535;
+                                                else
+                                                    acount[ci] = (int)wAUCSigma;
+                                                //JPN: Compute DateTime of sample from the UnixTimeStamp
+                                                DateTime plotDt = new DateTime();
+                                                UnixTime.GetDateTime(Convert.ToInt64(wWRACUnixTime), out plotDt);
+                                                //JPN: Subtract a minute to align with starting point of activity counts
+                                                plotDt = plotDt.AddMinutes(-1);
+                                                //JPN: Convert DateTime to string key that is used in indexing values for CSV output
+                                                string plotKey = plotDt.Year + "-" + plotDt.Month + "-" + plotDt.Day + "-" + plotDt.Hour + "-" + plotDt.Minute + "-" + plotDt.Second;
+                                                //JPN: Add summation to hashtable for later output to CSV file
+                                                wWRACData[wcontroller._Sensors[i]._ID][plotKey] = wAUCSigma;
+                                                //JPN: Reset values
+                                                wAUCSigma = 0;
+                                                ++ci;
+                                                if (ci == AC_BUFFER_SIZE)
+                                                    ci = 0;
+                                                acount[ci] = 0;
+                                                summary_count = AC_NUMS;
+                                            }
+                                            else
+                                                summary_count--;
+                                        }
+                                        else if (_wPC == 40)
+                                            wAUCSigma = 0;
+                                        _wPC++;
                                     }
-                                    else if (_wPC == 40)
-                                        wAUCSigma = 0;
-                                    _wPC++;
                                 }
                             }
                             wocketsTR1[i] = new StreamReader(aDataDirectory + "\\" + MERGED_SUBDIRECTORY + "\\" + "Wocket_" + wcontroller._Sensors[i]._ID.ToString("00") + "_RawCorrectedData_" + wcontroller._Sensors[i]._Location.Replace(' ', '-') + ".csv");
