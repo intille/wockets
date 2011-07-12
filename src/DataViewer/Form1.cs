@@ -454,14 +454,14 @@ namespace NESPDataViewer
             _alLinesWithSymbols.Add(pointsCurveAUC);
             pointsCurveAUC.Line.IsVisible = false;
 
-            LineItem pointsCurveWKTAC = pane.AddCurve("WKT AC", pplWKTActivityCount, Color.Red, SymbolType.Circle);
+            LineItem pointsCurveWKTAC = pane.AddCurve("Firmware Activity Count", pplWKTActivityCount, Color.Red, SymbolType.Circle);
             pointsCurveWKTAC.Symbol.Size = 1F;
             pointsCurveWKTAC.Symbol.Fill = new Fill(Color.Red);
             _alLinesWithSymbols.Add(pointsCurveWKTAC);
             pointsCurveWKTAC.Line.IsVisible =true;
 
 
-            LineItem pointsCurveRawWKTAC = pane.AddCurve("Raw WKT AC", pplRawWKTActivityCount, Color.DarkGray, SymbolType.Circle);
+            LineItem pointsCurveRawWKTAC = pane.AddCurve("Raw Activty Count", pplRawWKTActivityCount, Color.DarkGray, SymbolType.Circle);
             pointsCurveRawWKTAC.Symbol.Size = 1F;
             pointsCurveRawWKTAC.Symbol.Fill = new Fill(Color.DarkGray);
             _alLinesWithSymbols.Add(pointsCurveRawWKTAC);
@@ -627,7 +627,7 @@ namespace NESPDataViewer
 
             #region WKT ACTIVITY COUNTS
             string[] wktcounts = new string[0];
-            matches = Directory.GetFiles(Path.GetDirectoryName(filepath), String.Format(type + "_{0}_Summary*", channel));
+            matches = Directory.GetFiles(Path.GetDirectoryName(filepath), String.Format(type + "_{0}_WFAC*", channel));
             if (matches.Length == 1)
                 wktcounts = FileReadWrite.ReadLinesFromFile(matches[0]);
             PointPairList listWKTActivityCounts = new PointPairList();
@@ -654,7 +654,7 @@ namespace NESPDataViewer
 
             #region WKT Raw ACTIVITY COUNTS
             string[] rawwktcounts = new string[0];
-            matches = Directory.GetFiles(Path.GetDirectoryName(filepath), String.Format(type + "_{0}_RawSummary*", channel));
+            matches = Directory.GetFiles(Path.GetDirectoryName(filepath), String.Format(type + "_{0}_WRAC*", channel));
             if (matches.Length == 1)
                 rawwktcounts = FileReadWrite.ReadLinesFromFile(matches[0]);
             PointPairList listRawWKTActivityCounts = new PointPairList();
