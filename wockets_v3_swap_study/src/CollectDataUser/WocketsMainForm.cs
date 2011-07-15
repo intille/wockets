@@ -214,7 +214,7 @@ namespace CollectDataUser
 
             #region Read the Software Version
              
-            software_version = "Version: " + "1.60 Test1";
+            software_version = "Version: " + "1.61 Test 2";
             this.label_software_version.Text = software_version;
 
             #endregion
@@ -272,7 +272,7 @@ namespace CollectDataUser
                     appLogger.Debug("Events Upload Logger | Started | path: " +  UploadLoggerEvents.path );
 
 
-                //SAM TODO: DELETE
+                //--- SAM TODO: DELETE -----
                 #region commented
                 ////// Create the session directory
                 //DateTime now = DateTime.Now;
@@ -300,7 +300,7 @@ namespace CollectDataUser
                 //appappLogger.InitLogger(Settings._DataStorageDirectory + "\\log\\");   //"\\Wockets\\applog\\");
                 //appappLogger.Debug("Starting Application");
                 #endregion
-                //SAM TODO: DELETE
+                //--- SAM TODO: DELETE -----
 
             }
             catch(Exception e)
@@ -413,7 +413,7 @@ namespace CollectDataUser
 
             #region Read the last sensor set, master list file and app_status
 
-
+            //SAM : TODO : Check, it might not be necessary anymore
             #region Read the last app status
 
             try
@@ -565,7 +565,7 @@ namespace CollectDataUser
 
             InitializePanels();
 
-
+            //SAM : TODO : Check if the time interval is optimal
             #region Create thread that tracks the connection status
 
             ACsUpdateTimer = new System.Windows.Forms.Timer();
@@ -592,38 +592,48 @@ namespace CollectDataUser
             ElapsedTime_EventWrite = TimeSpan.Zero;
 
 
-#region Test Code ------
-            if (app_status.CompareTo("swap") == 0)
-            {
-                if (InitializeWocketsController())
-                {
-                    TurnOnPanel(PanelID.PREPARE_SET);
-                    swap_event = 1;
-                    restart_event = 1;
-                }
-                else
-                    appLogger.Debug("program.cs: The wockets controller was not innitialized correctly. LoadSensors Function returned false.");
-            }
-            else
-            {
-#endregion --------------
+            #region Test Code ------
+
+            restart_event = 1;
+
+            //if (app_status.CompareTo("swap") == 0)
+            //{
+            //    if (InitializeWocketsController())
+            //    {
+            //        TurnOnPanel(PanelID.PREPARE_SET);
+            //        swap_event = 1;
+            //        restart_event = 1;
+            //    }
+            //    else
+            //        appLogger.Debug("program.cs: The wockets controller was not innitialized correctly. LoadSensors Function returned false.");
+            //}
+            //else
+            //{
+           
 
             if (InitializeWocketsController())
-                {
+            {
 
-                    //Load MAC addresses, locations from sensordata.xml files && match them to the master list
-                    if (!sensors_loaded)
-                        sensors_loaded = LoadSensorsFromMasterList(sensor_data, sensor_set, selected_sensor_locations);
+                //Load MAC addresses, locations from sensordata.xml files && match them to the master list
+                if (!sensors_loaded)
+                    //sensors_loaded = LoadSensorsFromMasterList(sensor_data, sensor_set, selected_sensor_locations);
+                  sensors_loaded = LoadSensorsFromMasterList(sensor_data, sensor_set, selected_sensor_locations);
 
-                    if (!ConnetToWocketsController(sensor_set))
-                        appLogger.Debug("WocketsMainForm.cs:Initialize(): The wockets controller was not innitialized correctly. ConnetToWocketsController Function returned false.");
 
-                    restart_event = 1;
-                    Minimize_Main_Window();
-                }
-                else
-                    appLogger.Debug("program.cs: The wockets controller was not innitialized correctly. LoadSensors Function returned false.");
-}
+                if (!ConnetToWocketsController(sensor_set))
+                    appLogger.Debug("WocketsMainForm.cs:Initialize(): The wockets controller was not innitialized correctly. ConnetToWocketsController Function returned false.");
+
+                //restart_event = 1;
+                Minimize_Main_Window();
+            }
+            else
+                appLogger.Debug("program.cs: The wockets controller was not innitialized correctly. LoadSensors Function returned false.");
+        //}
+
+
+         #endregion --------------
+
+
         }
 
         #endregion
@@ -992,12 +1002,16 @@ namespace CollectDataUser
 
             if (panel_sensor_verification_1.Visible)
             {
+
                 #region Check if sensor locations need to be modified
+
 
                 if ( textBox_sensor_verification_msg.Text.Contains("SWAP") )
                 {
 
                     #region finish setting up the sensors set id and locations, consequently,connect to the controller for fist time
+
+                    #region Update Interface
 
                     panel_sensor_verification_1.Visible = false;
                     panel_sensor_verification_1.Enabled = false;
@@ -1007,8 +1021,10 @@ namespace CollectDataUser
 
                     CurrentPanel = PanelID.LOCATION;
 
-                    #region commented 
-                        ////Load MAC addresses, locations from sensordata.xml files && match them to the master list
+                    #endregion
+
+                    #region commented
+                    ////Load MAC addresses, locations from sensordata.xml files && match them to the master list
                     //if (!sensors_loaded)
                     //    sensors_loaded = LoadSensorsFromMasterList(sensor_data, this.sensor_set, selected_sensor_locations);
 
@@ -1086,16 +1102,64 @@ namespace CollectDataUser
 
                     #endregion         
                     
-                    if( !UpdateSensorLocations( selected_sensor_locations) )
-                        appLogger.Debug("WocketsMainForm.cs: buttonLocation_OK_Click((): the locations were not updated.");
 
-                    if (!ConnetToWocketsController(sensor_set))
-                        appLogger.Debug("WocketsMainForm.cs: buttonLocation_OK_Click((): The wockets controller was not innitialized correctly. ConnetToWocketsController Function returned false.");
+                    //TEST CODE ----------------------------
 
-                    is_change_locations_panel_launched = false;
-                    sensors_setup_in_panel = false;
+                    #region original code (commented)
+                    //if( !UpdateSensorLocations( selected_sensor_locations) )
+                    //    appLogger.Debug("WocketsMainForm.cs: buttonLocation_OK_Click((): the locations were not updated.");
 
-                    Minimize_Main_Window();
+                    //if (!ConnetToWocketsController(sensor_set))
+                    //    appLogger.Debug("WocketsMainForm.cs: buttonLocation_OK_Click((): The wockets controller was not innitialized correctly. ConnetToWocketsController Function returned false.");
+
+                    //is_change_locations_panel_launched = false;
+                    //sensors_setup_in_panel = false;
+
+                    //Minimize_Main_Window();
+                    #endregion 
+
+                    // SAM : TODO : Check if necessary
+                    // Save application status to file
+                    // SaveApplicationStatusToFile("swap");
+
+                    // Disconnect Wockets Controller
+                    Disconnect_WocketsController();
+                    Thread.Sleep(500);
+
+                    // Create a new wockets controller
+                    wockets_controller = new WocketsController("", "", "");
+
+                    // Load new Sensors Set from Xml File
+                    //if (!sensors_loaded)
+                    sensors_loaded = LoadSensorsFromMasterList(wockets_controller, sensor_data, sensor_set, selected_sensor_locations);
+
+                    // Save the right locations to the XML file
+                    SaveSensorDataToXml(wockets_controller, sensor_set);
+
+
+                    //Dispose Controller
+                    try
+                    {
+                        if (wockets_controller != null)
+                        {
+                            wockets_controller.Dispose();
+                            wockets_controller = null;
+                        }
+                    }
+                    catch (Exception _ex)
+                    {
+                        appLogger.Debug("WocketsMainForm.cs : buttonLocation_OK_Click() : If SWAP : Problem Clossing wockets controller (wc).");
+                    }
+
+
+                    // Reboot phone
+                    swap_event = 1;
+                    is_rebooting = true;
+                    this.Close();
+
+                    //-----------------------------------------
+
+
 
                     #endregion
 
@@ -2045,56 +2109,65 @@ namespace CollectDataUser
         #region Swap Sensors
 
 
-           private void GoToSwapButton_Click(object sender, EventArgs e)
+            private void GoToSwapButton_Click(object sender, EventArgs e)
             {
-                
-                GoToSwapButton.Enabled = false;
 
+                GoToSwapButton.Enabled = false;
                 appLogger.Debug("Swapping Sensors Button Clicked");
 
-                TurnOnPanel(PanelID.CONNECTION);
+                //Change the SensorID variable in files
+                ChangeSensorSetID();
+
+                //Start the swap sequence
+                TurnOnPanel(PanelID.PREPARE_SET);
+
+                // SAM : TODO : DELETE
+                #region commented
+
+                //TurnOnPanel(PanelID.CONNECTION);
+
+                //try
+                //{
+                //    is_rebooting = true;
+
+                //    #region Save the app status to file
+
+                //    try
+                //    {
+                //        StreamWriter wr_status = new StreamWriter(Settings._MainWocketsDirectory + "\\updater_appstatus.txt");
+                //        wr_status.WriteLine("swap");
+                //        wr_status.Close();
+                //    }
+                //    catch (Exception ex)
+                //    {
+                //        appLogger.Debug("CollectDataUser.cs: the app status -- swap-- failed to be written to file. Ex: " + ex);
+                //    }
+
+                //    #endregion
 
 
-                try
-                {
-                    is_rebooting = true;
+                //    //TODO: monitor the time that takes to receive the disconnect response
+                //    //      to avoid the operation hangs.
+                //    #region commented
+                //    //Disconnect current sensors set from kernel
+                //    //WocketsDisconnect();
+                //    //UpdateMsg("Clossing Application");
+                //    //appLogger.Debug("Closing Application");
+                //    //Thread.Sleep(1000);
+                //    #endregion
 
-                    #region Save the app status to file
+                //    //Test Code -------
+                //    //close application & reboot
+                //    this.Close();
 
-                    try
-                    {
-                        StreamWriter wr_status = new StreamWriter(Settings._MainWocketsDirectory + "\\updater_appstatus.txt");
-                        wr_status.WriteLine("swap");
-                        wr_status.Close();
-                    }
-                    catch (Exception ex)
-                    {
-                        appLogger.Debug("CollectDataUser.cs: the app status -- swap-- failed to be written to file. Ex: " + ex);
-                    }
+                //}
+                //catch (Exception ex)
+                //{
+                //    appLogger.Debug("An exception ocurred when trying to disconnect from kernel, after the swap button was clicked. Ex: " + ex.ToString());
+                //}
 
-                    #endregion
+                #endregion
 
-
-                    //TODO: monitor the time that takes to receive the disconnect response
-                    //      to avoid the operation hangs.
-                    #region commented
-                    //Disconnect current sensors set from kernel
-                    //WocketsDisconnect();
-                    //UpdateMsg("Clossing Application");
-                    //appLogger.Debug("Closing Application");
-                    //Thread.Sleep(1000);
-                    #endregion
-
-                    //Test Code -------
-                    //close application & reboot
-                    this.Close();
-
-                    //-------------------
-                }
-                catch (Exception ex)
-                {
-                    appLogger.Debug("An exception ocurred when trying to disconnect from kernel, after the swap button was clicked. Ex: " + ex.ToString());
-                }
             }
 
 
@@ -2278,7 +2351,6 @@ namespace CollectDataUser
             }
         }
 
-        
         private void UpdateSensorSetIDColor(string sensor_set_id)
         { 
             Color scolor = Color.Tomato;
@@ -2292,13 +2364,20 @@ namespace CollectDataUser
 
         }
 
-
         private void ResetStatusLabels()
         {
             textBox_sensors_status_0.Text = "---";
             textBox_sensors_status_1.Text = "---";
             textBox_sensors_status_2.Text = "---";
         }
+
+
+        #endregion
+
+
+
+
+        #region Load/Save Sensors to XML Files
 
 
         private bool LoadSensorsFromMasterList(string[] loaded_sensor_data, string sensor_set_id, Dictionary<int, string> selected_locations)
@@ -2310,8 +2389,9 @@ namespace CollectDataUser
                 // Open the Xml File containing the sensor parameters for Set 1
                 if (LoadSensorSetFromXml(sensor_set_id))
                 {
+
                     if (!CompareSensorSetToMasterList(sensor_set_id, loaded_sensor_data))
-                        appLogger.Debug("CollectDataUser: the sensors data could NOT be compared with the Master List, an error ocurred and the function returned false.");
+                            appLogger.Debug("CollectDataUser: the sensors data could NOT be compared with the Master List, an error ocurred and the function returned false.");
 
 
                     if (selected_locations == null)
@@ -2349,7 +2429,7 @@ namespace CollectDataUser
             }
 
 
-
+            //SAM : TODO : DELETE
             #region commented for now
             //if (loaded_sensor_data != null )
             //{
@@ -2554,6 +2634,52 @@ namespace CollectDataUser
         }
 
 
+        private bool LoadSensorsFromMasterList(WocketsController wc, string[] loaded_sensor_data, string sensor_set_id, Dictionary<int, string> selected_locations)
+        {
+
+            bool success = false;
+
+            try
+            {
+                // Open the Xml File containing the sensor parameters for Set 1
+                if (LoadSensorSetFromXml(wc, sensor_set_id))
+                {
+                    
+                    if (selected_locations == null)
+                        selected_locations = new Dictionary<int, string>();
+
+                    if (selected_locations.Count > 0)
+                    {
+                        for (int i = 0; i < wc._Sensors.Count; i++)
+                        {
+                            if (i < selected_sensor_locations.Count)
+                                wc._Sensors[i]._Location = selected_sensor_locations[i];
+                            else
+                                wc._Sensors[i]._Location = "null";
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 0; i < wc._Sensors.Count; i++)
+                        {
+                            if (wc._Sensors[i]._Location.CompareTo("null") != 0)
+                                selected_locations.Add(i, wc._Sensors[i]._Location);
+                        }
+                    }
+
+                    success = true;
+                }
+                else
+                    appLogger.Debug("CollectDataUser: sensors info could not be loaded from sensordata file. Loadsensors from MasterList function.");
+            }
+            catch
+            {  
+                appLogger.Debug("CollectDataUser: an exeption occurred whre trying to load sensors from the Master List. Problem when assigning sensors locations.");
+            }
+
+            return success;
+        }
+
 
         private bool UpdateSensorLocations(Dictionary<int, string> selected_locations)
         {
@@ -2587,6 +2713,39 @@ namespace CollectDataUser
         }
 
 
+        private bool UpdateSensorLocations(WocketsController wc, Dictionary<int, string> selected_locations)
+        {
+            bool is_updated = false;
+
+            try
+            {
+                if (selected_locations != null)
+                {
+                    if ( wc != null)
+                        if ( wc._Sensors != null)
+                            for (int i = 0; i < wc._Sensors.Count; i++)
+                            {
+                                if (i < selected_sensor_locations.Count)
+                                    wc._Sensors[i]._Location = selected_sensor_locations[i];
+                                else
+                                    wc._Sensors[i]._Location = "null";
+                            }
+
+                    is_updated = true;
+                }
+                else
+                    appLogger.Debug("CollectDataUser: UpdateSensorsLocations: selected_locations = null");
+            }
+            catch
+            {
+                appLogger.Debug("CollectDataUser: an exeption occurred when trying to update the sensor locations in controller: UpdateSensorLocations()");
+            }
+
+            return is_updated;
+        }
+
+
+        //This function is used when restarting or changing sensor locations
         private bool LoadSensorSetFromXml(string sensor_set_ID)
         {
             bool success = false;
@@ -2611,9 +2770,86 @@ namespace CollectDataUser
                         if (File.Exists(Settings._MainWocketsDirectory + "\\SensorData2.xml"))
                             xml_filename = "\\SensorData2.xml";
                 }
+            }
+            catch
+            {
+                appLogger.Debug("The " + xml_filename + " for " + sensor_set_ID + " couldn't be found. An exception was launched when trying to assign the file name. "); 
+            }
+            
+
+            success = OpenSensorSetXml(xml_filename, sensor_set_ID);
+
+
+            //SAM : TODO : DELETE
+            #region commented
+        //    if (xml_filename.CompareTo("") != 0)
+        //    {
+        //        CurrentWockets._Controller.FromXML(Settings._MainWocketsDirectory + xml_filename);
+
+        //        if (CurrentWockets._Controller != null)
+        //        {
+        //            if (CurrentWockets._Controller._Receivers != null & CurrentWockets._Controller._Sensors != null)
+        //                if (CurrentWockets._Controller._Receivers.Count > 0 & CurrentWockets._Controller._Sensors.Count > 0)
+        //                    success = true;
+        //                else
+        //                    appLogger.Debug("An error occurred when trying to read the " + xml_filename + ", wc._Receivers.Count = 0");
+        //            else
+        //                appLogger.Debug("An error occurred when trying to read the " + xml_filename + ", wc._Receivers = null");
+        //        }
+        //        else
+        //            appLogger.Debug("An error occurred when trying to read the " + xml_filename + ", wc = null");
+        //    }
+        //    else
+        //    {
+        //        appLogger.Debug("An error occurred when trying to read the " + xml_filename + ". The file was not found.");   
+        //    } 
+        //}
+        //catch
+        //{
+        //    appLogger.Debug("The " + xml_filename + " for " + sensor_set_ID + " couldn't be opened."); 
+        //}
+#endregion 
 
 
 
+            if (!success)
+            {
+                try
+                {
+                    //If failed to open the local file, try to open the one from the server
+                    if (xml_filename.Contains("\\updater_"))
+                    {
+                        if (sensor_set_ID.CompareTo("red") == 0)
+                        {
+                            if (File.Exists(Settings._MainWocketsDirectory + "\\SensorData1.xml"))
+                                xml_filename = "\\SensorData1.xml";
+                        }
+                        else
+                        {
+                            if (File.Exists(Settings._MainWocketsDirectory + "\\SensorData2.xml"))
+                                xml_filename = "\\SensorData2.xml";
+                        }
+                    }
+
+                    success = OpenSensorSetXml(xml_filename, sensor_set_ID);
+                }
+                catch
+                {
+                    appLogger.Debug("The " + xml_filename + " for " + sensor_set_ID + " couldn't be opened. It is the second Attempt to open the file. ");
+                }
+            }
+           
+           return success;
+        }
+
+
+        private bool OpenSensorSetXml(string xml_filename, string sensor_set_ID)
+        {
+
+            bool success = false;
+
+            try
+            {
                 if (xml_filename.CompareTo("") != 0)
                 {
                     CurrentWockets._Controller.FromXML(Settings._MainWocketsDirectory + xml_filename);
@@ -2635,15 +2871,77 @@ namespace CollectDataUser
                 {
                     appLogger.Debug("An error occurred when trying to read the " + xml_filename + ". The file was not found.");
                 }
-                
             }
             catch
             {
-                appLogger.Debug("The " + xml_filename + " for " + sensor_set_ID + " couldn't be opened."); 
+                appLogger.Debug("The " + xml_filename + " for " + sensor_set_ID + " couldn't be opened.");
             }
-            
 
-           return success;
+
+            return success;
+        }
+
+
+
+
+        // This function is using when swapping
+        private bool LoadSensorSetFromXml(WocketsController wc, string sensor_set_ID)
+        {
+            bool success = false;
+            string xml_filename = "";
+
+            //Open the Xml File containing the sensor parameters for the Set
+            try
+            {
+                if (sensor_set_ID.CompareTo("red") == 0)
+                {
+                    if (File.Exists(Settings._MainWocketsDirectory + "\\updater_SensorData1.xml"))
+                        xml_filename = "\\updater_SensorData1.xml";
+                    else
+                        if (File.Exists(Settings._MainWocketsDirectory + "\\SensorData1.xml"))
+                            xml_filename = "\\SensorData1.xml";
+                }
+                else
+                {
+                    if (File.Exists(Settings._MainWocketsDirectory + "\\updater_SensorData2.xml"))
+                        xml_filename = "\\updater_SensorData2.xml";
+                    else
+                        if (File.Exists(Settings._MainWocketsDirectory + "\\SensorData2.xml"))
+                            xml_filename = "\\SensorData2.xml";
+                }
+
+
+
+                if (xml_filename.CompareTo("") != 0)
+                {
+                    wc.FromXML(Settings._MainWocketsDirectory + xml_filename);
+
+                    if (wc != null)
+                    {
+                        if (wc._Receivers != null & wc._Sensors != null)
+                            if (wc._Receivers.Count > 0 & wc._Sensors.Count > 0)
+                                success = true;
+                            else
+                                appLogger.Debug("An error occurred when trying to read the " + xml_filename + ", wc._Receivers.Count = 0");
+                        else
+                            appLogger.Debug("An error occurred when trying to read the " + xml_filename + ", wc._Receivers = null");
+                    }
+                    else
+                        appLogger.Debug("An error occurred when trying to read the " + xml_filename + ", wc = null");
+                }
+                else
+                {
+                    appLogger.Debug("An error occurred when trying to read the " + xml_filename + ". The file was not found.");
+                }
+
+            }
+            catch
+            {
+                appLogger.Debug("The " + xml_filename + " for " + sensor_set_ID + " couldn't be opened.");
+            }
+
+
+            return success;
         }
 
 
@@ -2744,6 +3042,39 @@ namespace CollectDataUser
             return success;
         }
 
+        private bool SaveSensorDataToXml(WocketsController wc, string sensor_set_ID)
+        {
+            bool success = false;
+
+            //Save selected locations to local xml file
+            string xml_filename = "";
+
+            try
+            {
+                if (sensor_set_ID.CompareTo("red") == 0)
+                    xml_filename = "\\updater_SensorData1.xml";
+                else
+                    xml_filename = "\\updater_SensorData2.xml";
+
+                //if (CurrentWockets._Controller != null)
+                if (wc != null)
+                {
+                    StreamWriter sensors_data_xml = sensors_data_xml = new StreamWriter(Settings._MainWocketsDirectory + xml_filename);
+                    sensors_data_xml.Write(wc.ToXML());
+                    sensors_data_xml.Close();
+
+                    success = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                appLogger.Debug("program.cs: Exception when trying to save sensor data to the " + xml_filename + ". SetID: " + sensor_set + ". EX:" + ex.ToString());
+            }
+
+
+            return success;
+        }
+
 
         private bool ChangeSensorSetID()
         {
@@ -2783,18 +3114,19 @@ namespace CollectDataUser
         WocketsConfiguration wockets_controller_configuration;
         private bool InitializeWocketsController()
         {
+            
             bool success = false;
 
             try
             {
-
                 if (wockets_controller != null)
                 {
                     wockets_controller.Dispose();
                     wockets_controller = null;
                 }
 
-
+                //SAM : TODO : DELETE
+                #region commented
                 // Create the session directory
                 //DateTime now = DateTime.Now;
                 //Settings._DataStorageDirectory = Settings._MemoryCardDirectory + "\\Wockets\\Session-" + now.Month.ToString("00") + "-" + now.Day.ToString("00") + "-" + now.Year.ToString("0000") + "-" + now.Hour.ToString("00") + "-" + now.Minute.ToString("00") + "-" + now.Second.ToString("00");
@@ -2804,7 +3136,7 @@ namespace CollectDataUser
                 //TODO: separate the controller logger from the application one
                 //Logger.InitLogger(Settings._DataStorageDirectory + "\\log\\");
                 //appLogger.Debug("Session and log directories created.");
-
+                #endregion
 
                 wockets_controller = new WocketsController("", "", "");
                 wockets_controller._StorageDirectory = Settings._DataStorageDirectory;
@@ -2836,6 +3168,8 @@ namespace CollectDataUser
 
             if (sensors_loaded)
             {
+                // Test Code
+                // SAM : TODO : DELETE : If works
                 SaveSensorDataToXml(sensor_set_ID);
 
 
@@ -2920,6 +3254,7 @@ namespace CollectDataUser
                     #endregion
 
 
+                    // SAM : TODO : DELETE 
                     #region  Code Commented
 
                     #region commented
@@ -2935,8 +3270,6 @@ namespace CollectDataUser
                     #endregion
 
                     #region Suscribe to Kernel Events (commented)
-
-
                     //SuscribeToKernelEvents();
 
                     #endregion
@@ -3154,7 +3487,7 @@ namespace CollectDataUser
 
                             SaveApplicationStatusToFile("running");
 
-
+                            //SAM : TODO : DELETE
                             #region Save the app status to file (commented)
 
                             //try
@@ -3326,10 +3659,16 @@ namespace CollectDataUser
 
                     if (CurrentWockets._Controller != null)
                     {
-                        
                         CurrentWockets._Controller.Dispose();
                         CurrentWockets._Controller = null;
+
+                        wockets_controller.Dispose();
+                        wockets_controller = null;
+
                         _WocketsRunning = false;
+                        sensors_loaded = false;
+
+                        //Flushes files that save the wockets activity counts and phone stats
                         SynchronizedLogger.Flush();
                     }
 
@@ -3338,7 +3677,7 @@ namespace CollectDataUser
                     Thread.Sleep(500);
 
                     appLogger.Debug("Wockets Disconnected");
-      
+
                 }
                 catch (Exception e)
                 {
@@ -3346,33 +3685,36 @@ namespace CollectDataUser
                 }
 
 
-                if ( is_rebooting )
-                {
-                    try
-                    {
-                        //Determine which set will be used 
-                        if (this.sensor_set.CompareTo("red") == 0)
-                            sensor_set = "green";
-                        else
-                            sensor_set = "red";
+                // SAM : TODO : DELETE
+                // Not necessary
+                #region connected
+                //if ( is_rebooting )
+                //{
+                //    try
+                //    {
+                //        //Determine which set will be used 
+                //        if (this.sensor_set.CompareTo("red") == 0)
+                //            sensor_set = "green";
+                //        else
+                //            sensor_set = "red";
 
-                        //Indicate the swap sequence in the status files
-                        StreamWriter wr_sensors = new StreamWriter(Settings._MainWocketsDirectory + "\\updater_last_set.txt");
+                //        //Indicate the swap sequence in the status files
+                //        StreamWriter wr_sensors = new StreamWriter(Settings._MainWocketsDirectory + "\\updater_last_set.txt");
 
-                        wr_sensors.WriteLine(sensor_set);
-                        wr_sensors.Flush();
-                        wr_sensors.Close();
+                //        wr_sensors.WriteLine(sensor_set);
+                //        wr_sensors.Flush();
+                //        wr_sensors.Close();
 
-                    }
-                    catch (Exception ex)
-                    {
-                        appLogger.Debug("An exception occurred when trying to save set ID to file after disconnecting." + ex.ToString());
-                    }
-                }
+                //    }
+                //    catch (Exception ex)
+                //    {
+                //        appLogger.Debug("An exception occurred when trying to save set ID to file after disconnecting." + ex.ToString());
+                //    }
+                //}
+                #endregion
 
             }
         }
-
 
 
         private bool SaveApplicationStatusToFile(string my_app_status)
@@ -3401,7 +3743,7 @@ namespace CollectDataUser
         #endregion
 
 
-        #region Connection Status Message CallBack 
+      #region Connection Status Message CallBack 
 
          delegate void UpdateMsgCallback(string msg);
 
@@ -3452,7 +3794,7 @@ namespace CollectDataUser
             ExitWindowsEx((uint)ExitWindowsAction.EWX_REBOOT, 0);
         }
 
-
+        // SAM : TODO : DELETE
         #region restart silently code commented
             //public enum SND_SOUNDTYPE
        // {
@@ -3555,14 +3897,15 @@ namespace CollectDataUser
        // internal static extern int waveOutGetVolume(IntPtr device, ref int volume);
         #endregion
 
+
         #endregion
 
 
-        #region Exit/terminate application functions
+      #region Exit/terminate application functions
 
 
         private void TerminateLogUploader()
-        {
+      {
             try
             {
                 System.Diagnostics.Process uploader_process = null;
@@ -3705,7 +4048,7 @@ namespace CollectDataUser
       #endregion
 
 
-        #region Minimize/Back Main Menu Button 
+        #region Minimize/Back Main Menu Button
 
 
         private void menuQuitApp_Click(object sender, EventArgs e)
@@ -3750,7 +4093,7 @@ namespace CollectDataUser
                 #endregion
 
             }
-            else if (menuQuitApp.Text.CompareTo("Options") == 0) 
+            else if (menuQuitApp.Text.CompareTo("Options") == 0)
             {
                 menu_status += "Options Button Clicked";
 
@@ -3760,7 +4103,7 @@ namespace CollectDataUser
             }
             else if (menuQuitApp.Text.CompareTo("Settings") == 0)
             {
-                 menu_status += "Settings Button Clicked";
+                menu_status += "Settings Button Clicked";
 
                 menuQuitApp.Text = "Quit";
                 menuMainAppActions.Text = "Back";
@@ -3793,28 +4136,30 @@ namespace CollectDataUser
                 }
                 else if (menuMainAppActions.Text.CompareTo("Cancel") == 0)
                 {
+
                     sensors_setup_in_panel = false;
                     TurnOnPanel(PanelID.SETTINGS_OPTIONS);
                     appLogger.Debug("Go to the sensor options panel");
+
                 }
                 else if (menuMainAppActions.Text.CompareTo("Back") == 0)
                 {
 
-                   if ( PanelSettingsDetailed.Visible )
-                   {
+                    if (PanelSettingsDetailed.Visible)
+                    {
                         TurnOnPanel(PanelID.SETTINGS_OPTIONS);
                         appLogger.Debug("Go to the sensor options panel");
-                   }
-                   else if( UploadDataPanel.Visible | SensorPacketsPanel.Visible | SwapPanel.Visible) //!LocationPanel.Visible & !PanelSettingsDetailed.Visible)
-                   {
-                       TurnOnPanel(PanelID.SETTINGS_DETAILS);
-                       appLogger.Debug("Go to the sensor details panel");
-                   } 
-                   else if (LocationPanel.Visible & panel_location_buttons.Visible)
+                    }
+                    else if (UploadDataPanel.Visible | SensorPacketsPanel.Visible | SwapPanel.Visible) //!LocationPanel.Visible & !PanelSettingsDetailed.Visible)
+                    {
+                        TurnOnPanel(PanelID.SETTINGS_DETAILS);
+                        appLogger.Debug("Go to the sensor details panel");
+                    }
+                    else if (LocationPanel.Visible & panel_location_buttons.Visible)
                         GoToPanel(PanelID.LOCATION_BUTTONS, PanelID.PREPARE_SET);
 
-                   else if ( LocationPanel.Visible & panel_sensor_verification_2.Visible &
-                             (panel_sensor_verification_labelID.Text.CompareTo("W") == 0))
+                    else if (LocationPanel.Visible & panel_sensor_verification_2.Visible &
+                              (panel_sensor_verification_labelID.Text.CompareTo("W") == 0))
                     {
                         GoToPanel(PanelID.VERIFY_W_SENSOR, PanelID.LOCATION_BUTTONS);
 
@@ -3830,15 +4175,15 @@ namespace CollectDataUser
                             menuQuitApp.Text = "";
                         }
                     }
-                    else if (  LocationPanel.Visible & panel_sensor_verification_2.Visible &
-                               (panel_sensor_verification_labelID.Text.CompareTo("A") == 0))
+                    else if (LocationPanel.Visible & panel_sensor_verification_2.Visible &
+                                (panel_sensor_verification_labelID.Text.CompareTo("A") == 0))
                     {
                         GoToPanel(PanelID.VERIFY_A_SENSOR, PanelID.VERIFY_W_SENSOR);
-                        
+
                         menuMainAppActions.Text = "Back";
                         menuQuitApp.Text = "";
                     }
-                    else if (  LocationPanel.Visible & panel_sensor_verification_1.Visible &
+                    else if (LocationPanel.Visible & panel_sensor_verification_1.Visible &
                                (textBox_sensor_verification_msg.Text.Contains("SWAP") | textBox_sensor_verification_msg.Text.Contains("LOCATION")))
                     {
                         if (NUMBER_OF_SENSORS == 2)
@@ -3847,7 +4192,7 @@ namespace CollectDataUser
                             GoToPanel(PanelID.SWAP_COMPLETED, PanelID.VERIFY_W_SENSOR);
                         else
                             GoToPanel(PanelID.SWAP_COMPLETED, PanelID.LOCATION_BUTTONS);
-                            
+
                         menuMainAppActions.Text = "Back";
                         menuQuitApp.Text = "";
                     }
@@ -3861,8 +4206,8 @@ namespace CollectDataUser
                     appLogger.Debug("Change sensor set button clicked | set changed.");
                 }
             }
-            catch(Exception ex) 
-            {   appLogger.Debug("An exception occurred when minimizing/main menu button clicked. ex: " + ex);   }
+            catch (Exception ex)
+            { appLogger.Debug("An exception occurred when minimizing/main menu button clicked. ex: " + ex); }
 
 
             menuMainAppActions.Enabled = true;
@@ -3876,7 +4221,7 @@ namespace CollectDataUser
         }
 
 
-      #endregion 
+        #endregion 
 
 
         #region Settings Panel Buttons
@@ -3906,11 +4251,11 @@ namespace CollectDataUser
             SensorsStatusButton.Enabled = true;
         }
 
-     #endregion
+        #endregion
 
 
         #region Data Uploader
-        
+
         //Upload Button From UploadDataPanel
         private void UploadButton_Click(object sender, EventArgs e)
         {
@@ -3932,10 +4277,10 @@ namespace CollectDataUser
 
         private void LaunchDataUploader()
         {
-            
+
             try
             {
-               
+
                 //Launch the uploader process
                 ProcessStartInfo startInfo = new ProcessStartInfo();
                 startInfo.WorkingDirectory = Settings._MainWocketsDirectory + "rawdatauploader\\";
@@ -3981,7 +4326,7 @@ namespace CollectDataUser
 
                 if (processes != null)
                 {
-                   
+
                     for (int i = 0; (i < processes.Length); i++)
                     {
                         if (processes[i].FullPath.IndexOf("DataUploader.exe") >= 0)
@@ -4002,7 +4347,7 @@ namespace CollectDataUser
                 else
                 {
                     appLogger.Debug("Check Processes RawDataUploader | the running processes were not retrieved.");
-                    return false; 
+                    return false;
                 }
             }
             catch (Exception e)
@@ -4045,7 +4390,7 @@ namespace CollectDataUser
                 else
                 {
                     appLogger.Debug("Check Processes RawDataUploader | the running processes were not retrieved.");
-                    return false; 
+                    return false;
                 }
 
             }
@@ -4057,9 +4402,9 @@ namespace CollectDataUser
         }
 
 
-     #endregion
+        #endregion
 
-     
+
         #region Log Uploader
 
         private void InitializeUploadStatusVariables()
@@ -4069,7 +4414,7 @@ namespace CollectDataUser
             LastLogUploadInvoke = DateTime.Now;
             ElapsedTime_DataUpload = TimeSpan.Zero;
 
-           //Initialize Elapsed Time Counter On File Upload Screen
+            //Initialize Elapsed Time Counter On File Upload Screen
             //textBox_elapsed_time.Visible = false;
             //textBox_elapsed_time.Enabled = false;
             //textBox_elapsed_time.Text = "00h:00m:00s";
@@ -4082,7 +4427,7 @@ namespace CollectDataUser
             appLogger.Debug("upload logs button clicked");
 
 
-            if ( !Is_LogUploader_Running() )
+            if (!Is_LogUploader_Running())
             {
                 //Start Log Uploader
                 label_upload_data_status.Text = "Starting Log Uploader...";
@@ -4101,12 +4446,12 @@ namespace CollectDataUser
                 //Launch the uploader process
                 ProcessStartInfo startInfo = new ProcessStartInfo();
                 startInfo.WorkingDirectory = Settings._MainWocketsDirectory + "loguploader\\";
-                startInfo.FileName = Settings._MainWocketsDirectory + "loguploader\\" + "LogUploader.exe";   
+                startInfo.FileName = Settings._MainWocketsDirectory + "loguploader\\" + "LogUploader.exe";
                 startInfo.UseShellExecute = false;
                 _LogUploaderProcess = System.Diagnostics.Process.Start(startInfo.FileName, "");
 
                 //update status
-                if ( _LogUploaderProcess != null)
+                if (_LogUploaderProcess != null)
                 {
                     label_upload_data_status.Text = "Uploading Data Logs";
                     label_upload_data_status.ForeColor = Color.Green;
@@ -4164,7 +4509,7 @@ namespace CollectDataUser
                 else
                 {
                     appLogger.Debug("Check Processes LogDataUploader | the running processes were not retrieved.");
-                    return false; 
+                    return false;
                 }
 
             }
@@ -4212,7 +4557,7 @@ namespace CollectDataUser
                 else
                 {
                     appLogger.Debug("Check Processes LogDataUploader | the running processes were not retrieved.");
-                    return false; 
+                    return false;
                 }
             }
             catch (Exception ex)
@@ -4224,12 +4569,12 @@ namespace CollectDataUser
         }
 
 
-      #endregion
+        #endregion
 
 
         #region QA Questionnaire
-        
-        
+
+
         private void LaunchWocketsQuestionarie()
         {
             try
@@ -4359,7 +4704,8 @@ namespace CollectDataUser
         }
 
 
-     #endregion
+        #endregion
+
 
 
         #region Elapsed Time Counter & Upload Thread
@@ -4373,49 +4719,52 @@ namespace CollectDataUser
 
         public void StopUpdateUploadThread()
         {
-          if (uploadThread != null)
-          { uploadThread.Abort();
-            uploadThread = null;
-            appLogger.Debug("UpdateUploadThread Monitoring Thread | Stopped");
-          }
-      }
+            if (uploadThread != null)
+            {
+                uploadThread.Abort();
+                uploadThread = null;
+                appLogger.Debug("UpdateUploadThread Monitoring Thread | Stopped");
+            }
+        }
 
 
         //Application Running Elapsed Time
         //private string ElapsedTime = "00days  00h:00m:00s";
         private void RunUploadThread()
         {
-          try
-          {
-              appLogger.Debug("UpdateUploadThread Monitoring Thread | Started");
+            try
+            {
+                appLogger.Debug("UpdateUploadThread Monitoring Thread | Started");
 
-              while (true)
-              {
-                  #region commented
-                  //TODO: Compute Elapsed Time
-                  //TimeSpan elapsed_duration = DateTime.Now.Subtract(Settings._SessionStart);
+                while (true)
+                {
 
-                  //if (elapsed_duration.Days > 0)
-                  //    ElapsedTime = elapsed_duration.Days.ToString("00") + "days  " + elapsed_duration.Hours.ToString("00") + "h:" + elapsed_duration.Minutes.ToString("00") + "m:" + elapsed_duration.Seconds.ToString("00") + "s";
-                  //else
-                  //    ElapsedTime = elapsed_duration.Hours.ToString("00") + "h:" + elapsed_duration.Minutes.ToString("00") + "m:" + elapsed_duration.Seconds.ToString("00") + "s";
-                  #endregion
+                    //SAM : TODO : DELETE
+                    #region commented
+                    //TODO: Compute Elapsed Time
+                    //TimeSpan elapsed_duration = DateTime.Now.Subtract(Settings._SessionStart);
 
+                    //if (elapsed_duration.Days > 0)
+                    //    ElapsedTime = elapsed_duration.Days.ToString("00") + "days  " + elapsed_duration.Hours.ToString("00") + "h:" + elapsed_duration.Minutes.ToString("00") + "m:" + elapsed_duration.Seconds.ToString("00") + "s";
+                    //else
+                    //    ElapsedTime = elapsed_duration.Hours.ToString("00") + "h:" + elapsed_duration.Minutes.ToString("00") + "m:" + elapsed_duration.Seconds.ToString("00") + "s";
+                    #endregion
 
-                  UpdateFilesUploaded();
-                  Thread.Sleep(1000);
-              }
-          }
-          catch
-          {
-              appLogger.Debug("UpdateUploadThread Monitoring Thread | an exception occurred when trying to update the file upload parameters");
-          }
-      }
+                    UpdateFilesUploaded();
+                    Thread.Sleep(1000);
+                }
+            }
+            catch
+            {
+                appLogger.Debug("UpdateUploadThread Monitoring Thread | an exception occurred when trying to update the file upload parameters");
+            }
+        }
 
 
         #endregion
 
 
+        // SAM : TODO : DELETE : IF Necessary
         #region File Upload Update Status
 
         //delegate void UpdateTimeCallback();
@@ -4490,7 +4839,7 @@ namespace CollectDataUser
                 counter = 0;
             }
 
-
+            // SAM : TODO : DELETE
             #region commented
             //this.Invalidate();
             //}
@@ -4502,7 +4851,9 @@ namespace CollectDataUser
       #endregion
 
 
-        #region Reset ACs Registries (COMMENTED)
+
+      //SAM : TODO : DELETE
+      #region Reset ACs Registries (COMMENTED)
 
          //private void ResetUploaderCounters()
          //{
@@ -4546,347 +4897,347 @@ namespace CollectDataUser
         private int MAX_NSENSORS_TO_UPLOAD = 3;
         //double WAIT_INTERVAL_DATA_UPLOADER= 60.0; //in minutes
         private void ACsUpdateTimer_Tick(object sender, EventArgs e)
-     {
-         DateTime now = DateTime.Now;
+        {
+            DateTime now = DateTime.Now;
 
 
 
-         #region Update Sensors Connection Status
+            #region Update Sensors Connection Status
 
-         try
-         {
-             if (CurrentWockets._Controller._Sensors != null)
-             {
-                 if (CurrentWockets._Controller._Sensors.Count > 0)
-                 {
-                     for (int i = 0; i < CurrentWockets._Controller._Sensors.Count; i++)
-                     {
-                         
-                         //== Compute the elapsed time since the last connection
-                         ElapsedConnectionTime[i] = now.Subtract(LastPkgTime[i]);
-
-                         //if elapsed time > 1min check pkg status
-                         if (ElapsedConnectionTime[i].TotalMinutes > 1.0)
-                         {
-                             #region IF ELAPSED TIME > 1MIN
-
-
-                             #region Load the AC Counts to Kernel (commented)
-
-                             //if (!received_count_read)
-                             //{
-                             //    Core.READ_EMPTY_RECEIVED_COUNT();
-                             //    Core.READ_FULL_RECEIVED_COUNT();
-                             //    Core.READ_PARTIAL_RECEIVED_COUNT();
-                             //    Core.READ_RECEIVED_ACs();
-                             //    Core.READ_SAVED_ACs();
-
-                             //    received_count_read = true;
-                             //}
-
-                             #endregion
-
-
-                             #region Update the ACs on Panel
-
-                             if (i == 0)
-                             {
-                                 this.textBox_spanel_ac_full_0.Text = CurrentWockets._Controller._Sensors[i]._Full.ToString();
-                                 this.textBox_spanel_ac_partial_0.Text = CurrentWockets._Controller._Sensors[i]._Partial.ToString();
-                                 this.textBox_spanel_ac_empty_0.Text = CurrentWockets._Controller._Sensors[i]._Empty.ToString();
-
-                                 this.textBox_spanel_ac_new_0.Text = CurrentWockets._Controller._Sensors[i]._SavedACs + " - " + CurrentWockets._Controller._Sensors[i]._TotalSavedACs;
-                                 this.textBox_spanel_ac_last_0.Text = CurrentWockets._Controller._Sensors[i]._ReceivedACs + " - " + CurrentWockets._Controller._Sensors[i]._TotalReceivedACs;
-                             }
-                             else if (i == 1)
-                             {
-                                 this.textBox_spanel_ac_full_1.Text = CurrentWockets._Controller._Sensors[i]._Full.ToString();
-                                 this.textBox_spanel_ac_partial_1.Text = CurrentWockets._Controller._Sensors[i]._Partial.ToString();
-                                 this.textBox_spanel_ac_empty_1.Text = CurrentWockets._Controller._Sensors[i]._Empty.ToString();
-
-                                 this.textBox_spanel_ac_new_1.Text = CurrentWockets._Controller._Sensors[i]._SavedACs + " - " + CurrentWockets._Controller._Sensors[i]._TotalSavedACs;
-                                 this.textBox_spanel_ac_last_1.Text = CurrentWockets._Controller._Sensors[i]._ReceivedACs + " - " + CurrentWockets._Controller._Sensors[i]._TotalReceivedACs;
-                             }
-
-                             #endregion
-
-
-
-                             //If Full/Partial Packages Changed
-                             if (CurrentWockets._Controller._Sensors[i]._Full > PrevFullPkg[i] ||
-                                  CurrentWockets._Controller._Sensors[i]._Partial > PrevPartialPkg[i])
-                             {
-
-                                 #region Update Fields
-
-                                 PrevFullPkg[i] = CurrentWockets._Controller._Sensors[i]._Full;
-                                 PrevPartialPkg[i] = CurrentWockets._Controller._Sensors[i]._Partial;
-
-                                 if (i == 0)
-                                 {
-                                     textBox_sensors_status_0.Text = "Saving Data";
-                                     textBox_sensors_status_0.ForeColor = Color.Orange;
-                                 }
-                                 else if (i == 1)
-                                 {
-                                     textBox_sensors_status_1.Text = "Saving Data";
-                                     textBox_sensors_status_1.ForeColor = Color.Orange;
-                                 }
-                                 else
-                                 {
-                                     textBox_sensors_status_2.Text = "Saving Data";
-                                     textBox_sensors_status_2.ForeColor = Color.Orange;
-                                 }
-
-
-                                 LastPkgTime[i] = DateTime.Now;
-
-                                 #endregion
-
-                             }
-                             //If Empty Packages Changed
-                             else if (CurrentWockets._Controller._Sensors[i]._Empty > PrevEmptyPkg[i])
-                             {
-
-                                 #region Update Fields
-
-                                 PrevEmptyPkg[i] = CurrentWockets._Controller._Sensors[i]._Empty;
-
-                                 if (i == 0)
-                                 {
-                                     textBox_sensors_status_0.Text = "Data Lost";
-                                     textBox_sensors_status_0.ForeColor = Color.Tomato;
-                                 }
-                                 else if (i == 1)
-                                 {
-                                     textBox_sensors_status_1.Text = "Data Lost";
-                                     textBox_sensors_status_1.ForeColor = Color.Tomato;
-                                 }
-                                 else
-                                 {
-                                     textBox_sensors_status_2.Text = "Data Lost";
-                                     textBox_sensors_status_2.ForeColor = Color.Tomato;
-                                 }
-
-                                 #endregion
-
-                             }
-                             //If the # of packages didn't changed
-                             else
-                             {
-
-                                 #region Check if packets arrived within 5min & update fields
-
-                                 if (ElapsedConnectionTime[i].TotalMinutes <= 5.0)
-                                 {
-                                     if (i == 0)
-                                     {
-                                         textBox_sensors_status_0.Text = "Waiting For Data";
-                                         textBox_sensors_status_0.ForeColor = Color.DimGray;
-                                     }
-                                     else if (i == 1)
-                                     {
-                                         textBox_sensors_status_1.Text = "Waiting For Data";
-                                         textBox_sensors_status_1.ForeColor = Color.DimGray;
-                                     }
-                                     else
-                                     {
-                                         textBox_sensors_status_2.Text = "Waiting For Data";
-                                         textBox_sensors_status_2.ForeColor = Color.DimGray;
-                                     }
-
-                                 }
-                                 else
-                                 {
-                                     if (i == 0)
-                                     {
-                                         textBox_sensors_status_0.Text = "No Data Received";
-                                         textBox_sensors_status_0.ForeColor = Color.Red;
-                                     }
-                                     else if (i == 1)
-                                     {
-                                         textBox_sensors_status_1.Text = "No Data Received";
-                                         textBox_sensors_status_1.ForeColor = Color.Red;
-                                     }
-                                     else
-                                     {
-                                         textBox_sensors_status_2.Text = "No Data Received";
-                                         textBox_sensors_status_2.ForeColor = Color.Red;
-                                     }
-
-
-                                 }
-
-                                 #endregion
-
-                             }
-
-
-                             #endregion
-                         }
-                         else
-                         {
-                             #region IF ELAPSED TIME < 1min
-
-                             //If Full/Partial Packages == 0 never received data                     
-                             if (CurrentWockets._Controller._Sensors[i]._Full == 0 &
-                                 CurrentWockets._Controller._Sensors[i]._Partial == 0)
-                             {
-                                 if (i == 0)
-                                 {
-                                     textBox_sensors_status_0.Text = "---";
-                                     textBox_sensors_status_0.ForeColor = Color.DimGray;
-                                 }
-                                 else if (i == 1)
-                                 {
-                                     textBox_sensors_status_1.Text = "---";
-                                     textBox_sensors_status_1.ForeColor = Color.DimGray;
-                                 }
-                                 else
-                                 {
-                                     textBox_sensors_status_2.Text = "---";
-                                     textBox_sensors_status_2.ForeColor = Color.DimGray;
-                                 }
-
-                             }
-                             else
-                             {
-                                 if (i == 0)
-                                 {
-                                     textBox_sensors_status_0.Text = "Data Received";
-                                     textBox_sensors_status_0.ForeColor = Color.Green;
-                                 }
-                                 else if (i == 1)
-                                 {
-                                     textBox_sensors_status_1.Text = "Data Received";
-                                     textBox_sensors_status_1.ForeColor = Color.Green;
-                                 }
-                                 else
-                                 {
-                                     textBox_sensors_status_2.Text = "Data Received";
-                                     textBox_sensors_status_2.ForeColor = Color.Green;
-                                 }
-                             }
-
-                             #endregion
-                         }
-                     }//ends for loop
-                 }//if sensors count >0
-             }//if sensors list != null
-         }
-         catch (Exception ex)
-         {
-             appLogger.Debug("An exeption occurred when updating/monitoring the Acs counts for connection status. Ex: " + ex.ToString());
-         }
-
-        #endregion
-
-         
-         WriteEventsToUploadFile(now, false);
-
-         #region Write Events To Upload File (commented)
-
-         //if (swap_event == 1 | restart_event == 1 | locationChanged_event == 1)
-         //{
-             
-         //    #region Add the event log content (commented)
-
-         //    //string currentTime = now.ToString("yyyy-MM-dd HH:mm:ss");             
-         //    //string event_status_log = currentTime + "," + swap_event.ToString() + "," + restart_event.ToString() + "," +
-         //    //                          locationChanged_event.ToString() + "," + sensor_set;
-
-
-         //    //if (CurrentWockets._Controller._Sensors != null)
-         //    //{
-
-         //    //    event_status_log += "," + CurrentWockets._Controller._Sensors.Count.ToString();
-
-
-         //    //    for (int w = 0; w < MAX_NSENSORS_TO_UPLOAD; w++)
-         //    //    {
-
-         //    //        if (w < CurrentWockets._Controller._Sensors.Count)
-         //    //        {
-         //    //            if ((CurrentWockets._Controller._Sensors[w]._Location.CompareTo("null") != 0) &
-         //    //                (CurrentWockets._Controller._Sensors[w]._Location.Trim().CompareTo("") != 0))
-         //    //            {
-
-         //    //                event_status_log += "," + CurrentWockets._Controller._Sensors[w]._Address + "," +
-         //    //                                    CurrentWockets._Controller._Sensors[w]._Location + ",";
-
-         //    //                if (w == 0)
-         //    //                    event_status_log += "W";
-         //    //                else if (w == 1)
-         //    //                    event_status_log += "A";
-
-         //    //            }
-         //    //            else
-         //    //                event_status_log += ",,,";
-         //    //        }
-         //    //        else
-         //    //            event_status_log += ",,,";
-
-         //    //    }
-         //    //}
-         //    //else
-         //    //{
-         //    //    event_status_log += ",0";
-
-         //    //    for (int w = 0; w < MAX_NSENSORS_TO_UPLOAD; w++)
-         //    //        event_status_log += ",,,";
-         //    //}
-
-         //    #endregion
-
-
-         //    //write the events to upload file
-         //    if ( !UploadLoggerEvents.Write(event_status_log))
-         //        appLogger.Debug("WocketsMainForm.cs: ACsUpdateTimer_Tick : problem writing to the event logs to stats upload folder");
-             
-         //    //reset event variables
-         //    swap_event = restart_event = locationChanged_event = 0;
-         //    LastTime_EventWrite = now;
-         //}
-         //else
-         //{ 
-         //    ElapsedTime_EventWrite = now.Subtract(LastTime_EventWrite);
-
-         //    //TODO: if the moving of files fails, try the next hour.
-         //    if (ElapsedTime_EventWrite.Minutes > 3)
-         //        if (UploadLoggerEvents.Move(now))
-         //            LastTime_EventWrite = now;
-         //        else
-         //           appLogger.Debug("WocketsMainForm.cs: ACsUpdateTimer_Tick : problem moving the event logs files to stats upload folder");
-                
-             
-         //}
-         #endregion
-
-
-         #region Determine if the log/data uploader needs to be launched
-
-         try 
-         {  
-            //Launch the data uploader at midnight once a day
-            DateTime current_time = now;
-
-            //Launch log uploader within a time interval
-            ElapsedTime_LogUpload = current_time.Subtract(LastLogUploadInvoke);
-
-            if (ElapsedTime_LogUpload.TotalMinutes > WAIT_INTERVAL_LOG_UPLOADER)
+            try
             {
-                if (!Is_DataUploader_Running() )
+                if (CurrentWockets._Controller._Sensors != null)
                 {
-                    //bool launch_log_uploader = true;
-
-                    //upload raw data between 1am and 5am
-                    if (current_time.Hour >= 1 && current_time.Hour <= 5 & upload_raw_data)
+                    if (CurrentWockets._Controller._Sensors.Count > 0)
                     {
-                        //Core.READ_LAST_UPLOAD_TIME();
-                        //ElapsedTime_DataUpload = current_time.Subtract(CurrentWockets._UploadLastTime);
+                        for (int i = 0; i < CurrentWockets._Controller._Sensors.Count; i++)
+                        {
 
-                        //if (ElapsedTime_DataUpload.TotalMinutes > WAIT_INTERVAL_DATA_UPLOADER)
-                        //{
+                            //== Compute the elapsed time since the last connection
+                            ElapsedConnectionTime[i] = now.Subtract(LastPkgTime[i]);
+
+                            //if elapsed time > 1min check pkg status
+                            if (ElapsedConnectionTime[i].TotalMinutes > 1.0)
+                            {
+                                #region IF ELAPSED TIME > 1MIN
+
+
+                                #region Load the AC Counts to Kernel (commented)
+
+                                //if (!received_count_read)
+                                //{
+                                //    Core.READ_EMPTY_RECEIVED_COUNT();
+                                //    Core.READ_FULL_RECEIVED_COUNT();
+                                //    Core.READ_PARTIAL_RECEIVED_COUNT();
+                                //    Core.READ_RECEIVED_ACs();
+                                //    Core.READ_SAVED_ACs();
+
+                                //    received_count_read = true;
+                                //}
+
+                                #endregion
+
+
+                                #region Update the ACs on Panel
+
+                                if (i == 0)
+                                {
+                                    this.textBox_spanel_ac_full_0.Text = CurrentWockets._Controller._Sensors[i]._Full.ToString();
+                                    this.textBox_spanel_ac_partial_0.Text = CurrentWockets._Controller._Sensors[i]._Partial.ToString();
+                                    this.textBox_spanel_ac_empty_0.Text = CurrentWockets._Controller._Sensors[i]._Empty.ToString();
+
+                                    this.textBox_spanel_ac_new_0.Text = CurrentWockets._Controller._Sensors[i]._SavedACs + " - " + CurrentWockets._Controller._Sensors[i]._TotalSavedACs;
+                                    this.textBox_spanel_ac_last_0.Text = CurrentWockets._Controller._Sensors[i]._ReceivedACs + " - " + CurrentWockets._Controller._Sensors[i]._TotalReceivedACs;
+                                }
+                                else if (i == 1)
+                                {
+                                    this.textBox_spanel_ac_full_1.Text = CurrentWockets._Controller._Sensors[i]._Full.ToString();
+                                    this.textBox_spanel_ac_partial_1.Text = CurrentWockets._Controller._Sensors[i]._Partial.ToString();
+                                    this.textBox_spanel_ac_empty_1.Text = CurrentWockets._Controller._Sensors[i]._Empty.ToString();
+
+                                    this.textBox_spanel_ac_new_1.Text = CurrentWockets._Controller._Sensors[i]._SavedACs + " - " + CurrentWockets._Controller._Sensors[i]._TotalSavedACs;
+                                    this.textBox_spanel_ac_last_1.Text = CurrentWockets._Controller._Sensors[i]._ReceivedACs + " - " + CurrentWockets._Controller._Sensors[i]._TotalReceivedACs;
+                                }
+
+                                #endregion
+
+
+
+                                //If Full/Partial Packages Changed
+                                if (CurrentWockets._Controller._Sensors[i]._Full > PrevFullPkg[i] ||
+                                     CurrentWockets._Controller._Sensors[i]._Partial > PrevPartialPkg[i])
+                                {
+
+                                    #region Update Fields
+
+                                    PrevFullPkg[i] = CurrentWockets._Controller._Sensors[i]._Full;
+                                    PrevPartialPkg[i] = CurrentWockets._Controller._Sensors[i]._Partial;
+
+                                    if (i == 0)
+                                    {
+                                        textBox_sensors_status_0.Text = "Saving Data";
+                                        textBox_sensors_status_0.ForeColor = Color.Orange;
+                                    }
+                                    else if (i == 1)
+                                    {
+                                        textBox_sensors_status_1.Text = "Saving Data";
+                                        textBox_sensors_status_1.ForeColor = Color.Orange;
+                                    }
+                                    else
+                                    {
+                                        textBox_sensors_status_2.Text = "Saving Data";
+                                        textBox_sensors_status_2.ForeColor = Color.Orange;
+                                    }
+
+
+                                    LastPkgTime[i] = DateTime.Now;
+
+                                    #endregion
+
+                                }
+                                //If Empty Packages Changed
+                                else if (CurrentWockets._Controller._Sensors[i]._Empty > PrevEmptyPkg[i])
+                                {
+
+                                    #region Update Fields
+
+                                    PrevEmptyPkg[i] = CurrentWockets._Controller._Sensors[i]._Empty;
+
+                                    if (i == 0)
+                                    {
+                                        textBox_sensors_status_0.Text = "Data Lost";
+                                        textBox_sensors_status_0.ForeColor = Color.Tomato;
+                                    }
+                                    else if (i == 1)
+                                    {
+                                        textBox_sensors_status_1.Text = "Data Lost";
+                                        textBox_sensors_status_1.ForeColor = Color.Tomato;
+                                    }
+                                    else
+                                    {
+                                        textBox_sensors_status_2.Text = "Data Lost";
+                                        textBox_sensors_status_2.ForeColor = Color.Tomato;
+                                    }
+
+                                    #endregion
+
+                                }
+                                //If the # of packages didn't changed
+                                else
+                                {
+
+                                    #region Check if packets arrived within 5min & update fields
+
+                                    if (ElapsedConnectionTime[i].TotalMinutes <= 5.0)
+                                    {
+                                        if (i == 0)
+                                        {
+                                            textBox_sensors_status_0.Text = "Waiting For Data";
+                                            textBox_sensors_status_0.ForeColor = Color.DimGray;
+                                        }
+                                        else if (i == 1)
+                                        {
+                                            textBox_sensors_status_1.Text = "Waiting For Data";
+                                            textBox_sensors_status_1.ForeColor = Color.DimGray;
+                                        }
+                                        else
+                                        {
+                                            textBox_sensors_status_2.Text = "Waiting For Data";
+                                            textBox_sensors_status_2.ForeColor = Color.DimGray;
+                                        }
+
+                                    }
+                                    else
+                                    {
+                                        if (i == 0)
+                                        {
+                                            textBox_sensors_status_0.Text = "No Data Received";
+                                            textBox_sensors_status_0.ForeColor = Color.Red;
+                                        }
+                                        else if (i == 1)
+                                        {
+                                            textBox_sensors_status_1.Text = "No Data Received";
+                                            textBox_sensors_status_1.ForeColor = Color.Red;
+                                        }
+                                        else
+                                        {
+                                            textBox_sensors_status_2.Text = "No Data Received";
+                                            textBox_sensors_status_2.ForeColor = Color.Red;
+                                        }
+
+
+                                    }
+
+                                    #endregion
+
+                                }
+
+
+                                #endregion
+                            }
+                            else
+                            {
+                                #region IF ELAPSED TIME < 1min
+
+                                //If Full/Partial Packages == 0 never received data                     
+                                if (CurrentWockets._Controller._Sensors[i]._Full == 0 &
+                                    CurrentWockets._Controller._Sensors[i]._Partial == 0)
+                                {
+                                    if (i == 0)
+                                    {
+                                        textBox_sensors_status_0.Text = "---";
+                                        textBox_sensors_status_0.ForeColor = Color.DimGray;
+                                    }
+                                    else if (i == 1)
+                                    {
+                                        textBox_sensors_status_1.Text = "---";
+                                        textBox_sensors_status_1.ForeColor = Color.DimGray;
+                                    }
+                                    else
+                                    {
+                                        textBox_sensors_status_2.Text = "---";
+                                        textBox_sensors_status_2.ForeColor = Color.DimGray;
+                                    }
+
+                                }
+                                else
+                                {
+                                    if (i == 0)
+                                    {
+                                        textBox_sensors_status_0.Text = "Data Received";
+                                        textBox_sensors_status_0.ForeColor = Color.Green;
+                                    }
+                                    else if (i == 1)
+                                    {
+                                        textBox_sensors_status_1.Text = "Data Received";
+                                        textBox_sensors_status_1.ForeColor = Color.Green;
+                                    }
+                                    else
+                                    {
+                                        textBox_sensors_status_2.Text = "Data Received";
+                                        textBox_sensors_status_2.ForeColor = Color.Green;
+                                    }
+                                }
+
+                                #endregion
+                            }
+                        }//ends for loop
+                    }//if sensors count >0
+                }//if sensors list != null
+            }
+            catch (Exception ex)
+            {
+                appLogger.Debug("An exeption occurred when updating/monitoring the Acs counts for connection status. Ex: " + ex.ToString());
+            }
+
+            #endregion
+
+
+            WriteEventsToUploadFile(now, false);
+
+            #region Write Events To Upload File (commented)
+
+            //if (swap_event == 1 | restart_event == 1 | locationChanged_event == 1)
+            //{
+
+            //    #region Add the event log content (commented)
+
+            //    //string currentTime = now.ToString("yyyy-MM-dd HH:mm:ss");             
+            //    //string event_status_log = currentTime + "," + swap_event.ToString() + "," + restart_event.ToString() + "," +
+            //    //                          locationChanged_event.ToString() + "," + sensor_set;
+
+
+            //    //if (CurrentWockets._Controller._Sensors != null)
+            //    //{
+
+            //    //    event_status_log += "," + CurrentWockets._Controller._Sensors.Count.ToString();
+
+
+            //    //    for (int w = 0; w < MAX_NSENSORS_TO_UPLOAD; w++)
+            //    //    {
+
+            //    //        if (w < CurrentWockets._Controller._Sensors.Count)
+            //    //        {
+            //    //            if ((CurrentWockets._Controller._Sensors[w]._Location.CompareTo("null") != 0) &
+            //    //                (CurrentWockets._Controller._Sensors[w]._Location.Trim().CompareTo("") != 0))
+            //    //            {
+
+            //    //                event_status_log += "," + CurrentWockets._Controller._Sensors[w]._Address + "," +
+            //    //                                    CurrentWockets._Controller._Sensors[w]._Location + ",";
+
+            //    //                if (w == 0)
+            //    //                    event_status_log += "W";
+            //    //                else if (w == 1)
+            //    //                    event_status_log += "A";
+
+            //    //            }
+            //    //            else
+            //    //                event_status_log += ",,,";
+            //    //        }
+            //    //        else
+            //    //            event_status_log += ",,,";
+
+            //    //    }
+            //    //}
+            //    //else
+            //    //{
+            //    //    event_status_log += ",0";
+
+            //    //    for (int w = 0; w < MAX_NSENSORS_TO_UPLOAD; w++)
+            //    //        event_status_log += ",,,";
+            //    //}
+
+            //    #endregion
+
+
+            //    //write the events to upload file
+            //    if ( !UploadLoggerEvents.Write(event_status_log))
+            //        appLogger.Debug("WocketsMainForm.cs: ACsUpdateTimer_Tick : problem writing to the event logs to stats upload folder");
+
+            //    //reset event variables
+            //    swap_event = restart_event = locationChanged_event = 0;
+            //    LastTime_EventWrite = now;
+            //}
+            //else
+            //{ 
+            //    ElapsedTime_EventWrite = now.Subtract(LastTime_EventWrite);
+
+            //    //TODO: if the moving of files fails, try the next hour.
+            //    if (ElapsedTime_EventWrite.Minutes > 3)
+            //        if (UploadLoggerEvents.Move(now))
+            //            LastTime_EventWrite = now;
+            //        else
+            //           appLogger.Debug("WocketsMainForm.cs: ACsUpdateTimer_Tick : problem moving the event logs files to stats upload folder");
+
+
+            //}
+            #endregion
+
+
+            #region Determine if the log/data uploader needs to be launched
+
+            try
+            {
+                //Launch the data uploader at midnight once a day
+                DateTime current_time = now;
+
+                //Launch log uploader within a time interval
+                ElapsedTime_LogUpload = current_time.Subtract(LastLogUploadInvoke);
+
+                if (ElapsedTime_LogUpload.TotalMinutes > WAIT_INTERVAL_LOG_UPLOADER)
+                {
+                    if (!Is_DataUploader_Running())
+                    {
+                        //bool launch_log_uploader = true;
+
+                        //upload raw data between 1am and 5am
+                        if (current_time.Hour >= 1 && current_time.Hour <= 5 & upload_raw_data)
+                        {
+                            //Core.READ_LAST_UPLOAD_TIME();
+                            //ElapsedTime_DataUpload = current_time.Subtract(CurrentWockets._UploadLastTime);
+
+                            //if (ElapsedTime_DataUpload.TotalMinutes > WAIT_INTERVAL_DATA_UPLOADER)
+                            //{
                             //if (Is_LogUploader_Running())
                             //{
                             //    TerminateLogUploader();
@@ -4895,31 +5246,31 @@ namespace CollectDataUser
 
                             LaunchDataUploader();
                             //launch_log_uploader = false;
-                        //}
+                            //}
+                        }
                     }
-                }
 
                     //if (launch_log_uploader)
                     //{
-                        // if log uploader is NOT running, launch it 
+                    // if log uploader is NOT running, launch it 
                     if (!Is_LogUploader_Running())
-                         LaunchLogUploader();
+                        LaunchLogUploader();
                     //}
-                //}
+                    //}
 
 
 
-                LastLogUploadInvoke = current_time;
+                    LastLogUploadInvoke = current_time;
+                }
             }
-         }
-         catch(Exception ex) 
-         {   
-             appLogger.Debug("An exeption occurred when invoking the log uploader. Ex: " + ex.ToString());
-         }
+            catch (Exception ex)
+            {
+                appLogger.Debug("An exeption occurred when invoking the log uploader. Ex: " + ex.ToString());
+            }
 
-        #endregion
+            #endregion
 
-     }
+        }
 
         private void StartACsUpdater()
         {
@@ -5033,8 +5384,8 @@ namespace CollectDataUser
 
 
 
-        #region Internal Message Window
-    
+    #region Internal Message Window
+
     #region Description
     //This window receives messages from another program (in this case the updater).
     //The message is identified and decoded. 
@@ -5063,11 +5414,11 @@ namespace CollectDataUser
             //filter the Terminate Message
             if (m.Msg == TERMINATE_MESSAGE)
             {
-               referedForm.Close();
+                referedForm.Close();
             }
             else if (m.Msg == KEEP_ALIVE_MESSAGE)
             {
-                
+
             }
 
             //make sure to pass along all messages
