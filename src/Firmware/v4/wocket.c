@@ -113,6 +113,7 @@ uint32_t _DEFAULT_SHUTDOWN=0;
 void _wocket_initialize_timer2_interrupt(void)
 {
 	unsigned short ticks=(unsigned short) ((F_CPU/1024)/_SAMPLING_RATE);
+
 	if (ticks>256)
 	{
 		_wTCNT2=0;
@@ -120,9 +121,19 @@ void _wocket_initialize_timer2_interrupt(void)
 		_wTCNT2_last=255-(ticks%256);
 	}else
 	{
+
 		_wTCNT2=255-ticks;
-		_wTCNT2_reps=0;
-		_wTCNT2_last=255;
+
+		//---- SAM: TODO : Test TCT ---
+		//_wTCNT2 = 60; //std TCT
+		//_wTCNT2 = 63; //optimal TCT
+		//_wTCNT2 = 70; //fast TCT
+		//_wTCNT2 = 50; //slow TCT
+
+		//------------------------------
+
+		_wTCNT2_reps = 0;
+		_wTCNT2_last = 255;
 	}
 }
 
@@ -499,18 +510,28 @@ void _send_acs()
 	unsigned char counter=0;
 
 
+    //Determine how many new acs need to be sent
 	if (ci>si)
 		num_acs=ci-si;
 	else
 		num_acs=ci+(AC_BUFFER_SIZE-si);
 
+
+	//-------------------
+	// commented
 	//if (num_acs>10)
 	//	num_acs=10;
+	//	_send_ac_count(num_acs);
+	//--------------------
 
-//	_send_ac_count(num_acs);
-	_send_ac_offset(AC_NUMS-summary_count); //send offset of the last activity count
-	_send_ac_count(cseq);	
 
+
+	//send AC offset accomlated within the minute & the overall ac seq number
+	_send_ac_offset(AC_NUMS - summary_count); 
+	_send_ac_count(cseq);
+		
+
+    //send the acs from start to current ac index
 	for (int i=si;(i!=ci);)
 	{		
 		count=acount[i];
@@ -520,24 +541,34 @@ void _send_acs()
 		aBuffer[3]=m_AC_RSP_BYTE3(seq_num,count);
 		aBuffer[4]=m_AC_RSP_BYTE4(count);
 		aBuffer[5]=m_AC_RSP_BYTE5(count);
+
 		for (int j=0;(j<6);j++)                                                                                       
-       		_bluetooth_transmit_uart0_byte(aBuffer[j]); 
+       		_bluetooth_transmit_uart0_byte(aBuffer[j]);
+			 
 		i++;
+
 		if (i==AC_BUFFER_SIZE)
 			i=0;
+
 		seq_num++;
 
-		if (num_acs<60){
+
+		// SAM TODO: check that this if is not needed
+		if (num_acs < 60)
+		{
 			counter++;
 			if (counter==10)
 				return;
 		}
 	}
 
-
 	_receive_data();
 
 }
+
+
+
+
 
 /*void _send_summary_count(unsigned short count)
 {
