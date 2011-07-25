@@ -855,7 +855,6 @@ unsigned char _bluetooth_is_discoverable(void){
 
 #ifdef _VERSION==3
         return (0x01 & (PINA>>IN_BT_DISC));
-
 #else
          return (0x01 & (PIND>>IN_BT_DISC));
 #endif

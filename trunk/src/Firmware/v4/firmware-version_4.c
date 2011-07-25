@@ -234,9 +234,6 @@ int main()
 
 
 			//battery =_atmega_a2dConvert10bit(ADC7); 
-
-
-
 			//x=y=z=cc++;
 			//if (cc>=1024)
 			//	cc=0;
@@ -280,7 +277,9 @@ int main()
 						summary_count--;
 			}
 			else if (_wPC==40)
-		  				vmag=0;
+		  	{			
+				vmag=0;
+			}
 
 
 			//This was used in the old version of the code (version 2 with micro-usb)
@@ -379,6 +378,7 @@ int main()
 						continue;
                    
 
+					
                    //---------------------
 				   // Test Code
 				    _delay_ms(5);
@@ -450,17 +450,18 @@ int main()
 					}
 
 					
-					//send wocket information
-					_send_fv();
-					_send_hv();
+				
+				// Test Code ----------------
+					//_send_fv();
+					//_send_hv();					
 					_send_sr();					 
-					_send_tm();
-
+					_send_tm();	
+						
 
 					//sample and send the battery level
 					battery =_atmega_a2dConvert10bit(ADC7); 
 					_send_bl(battery);
-
+				//----------------------------
 
 					//send activity counts information
 					_send_batch_count((batch_counter-1)*4);																	
@@ -883,6 +884,10 @@ ISR(TIMER2_OVF_vect)
 		}
 
 	}
+
+
+
+    //Commented -----------------------------------
 	/* If the wocket is docked in shut it down */
 
 /*	if (_is_docked())
@@ -907,8 +912,11 @@ ISR(TIMER2_OVF_vect)
 	}
 	else if (docking_counter>0)
 		docking_counter=0;
-
 */		
+//---------------------------------------------------
+
+
+
 	/* Skip sampling depending on the sampling rate variables/timers */
  	if (interrupt_reps==0)
 	{	
@@ -927,6 +935,7 @@ ISR(TIMER2_OVF_vect)
 	
 	/* Sample data and transmt it if necessary */
 	sampleFlag=1;
+
 	if (_wTM==_TM_Continuous)
 	{
 
@@ -935,28 +944,39 @@ ISR(TIMER2_OVF_vect)
 		if (!_bluetooth_is_connected())
 		{
 			justconnected=0;
-			compress=0; //false
+			compress=0; 
+			
+			//---Commented -------
+			//false
 			//if (_wPDT!=0){
 			//	_wShutdownTimer--;
 				//if (_wShutdownTimer==0)
 				//	_atmega_finalize();
 			//}
+			//---------------------
+
 			return;		
-		}else if (justconnected==0)
+		}
+		else if (justconnected==0)
 			justconnected=1;
+
 
 		if (_wShutdownTimer!=_DEFAULT_SHUTDOWN)
 			_wShutdownTimer=_DEFAULT_SHUTDOWN;
 
 
 		_receive_data();
+
 	}
 	else if (_wTM==_TM_Burst_60)
 	{
 
+		//This only works for Timer1,doesn't have any effect for this timer (Timer2)
 		if (_wPDT!=0)
 			_wShutdownTimer--;
 
+
+		//Increase the packet counter
 		 _wPC++;
 
 
@@ -978,8 +998,7 @@ ISR(TIMER2_OVF_vect)
 
 			return;	
 		}
-
-
+		
 
 		//_atmega_initialize_uart0(ATMEGA_BAUD_38400, TX_RX_UART_MODE);
 		//_atmega_initialize_uart1(ATMEGA_BAUD_38400, TX_RX_UART_MODE);
@@ -988,7 +1007,6 @@ ISR(TIMER2_OVF_vect)
 		//reset shutdown timer if connected
 		if ((_wPDT!=0) && (_wShutdownTimer!=_DEFAULT_SHUTDOWN))
 			_wShutdownTimer=_DEFAULT_SHUTDOWN;
-
 
 
 		_receive_data();		
