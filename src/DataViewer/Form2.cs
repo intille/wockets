@@ -17,7 +17,7 @@ using Wockets;
 
 namespace NESPDataViewer
 {
-   
+
 
     public partial class Form2 : Form
     {
@@ -427,12 +427,12 @@ namespace NESPDataViewer
             LineItem pointsCurveX = pane.AddCurve("X", pplX, Color.LightBlue, SymbolType.Circle);
             LineItem pointsCurveY = pane.AddCurve("Y", pplY, Color.Blue, SymbolType.Circle);
             LineItem pointsCurveZ = pane.AddCurve("Z", pplZ, Color.DarkBlue, SymbolType.Circle);
-            
+
             pointsCurveX.Symbol.Fill = new Fill(Color.LightBlue);
             pointsCurveY.Symbol.Fill = new Fill(Color.Blue);
             pointsCurveZ.Symbol.Fill = new Fill(Color.DarkBlue);
-           
-            
+
+
             if (!_isAdaptingPointSize)
             {
                 pointsCurveX.Symbol.Size = 1F;
@@ -460,17 +460,17 @@ namespace NESPDataViewer
             double endUnix = Wockets.Utils.WocketsTimer.GetDoubleTime(endX.DateTime);
 
             string[] tokens = null;
-            bool foundTime=false;
+            bool foundTime = false;
             double currentTime = 0;
-            int start=0;
+            int start = 0;
             int end = 0;
             TextReader tr = new StreamReader(filepath);
-            while (currentTime<=startUnix)
+            while (currentTime <= startUnix)
             {
                 string s = tr.ReadLine();
                 if (s == null)
                     break;
-                currentTime = Convert.ToDouble(s.Split(',')[0]);      
+                currentTime = Convert.ToDouble(s.Split(',')[0]);
                 start++;
             }
             end = start;
@@ -498,8 +498,8 @@ namespace NESPDataViewer
                     if ((split.Length > 3) && (split[1].Length > 0) && (split[2].Length > 0))
                     {
                         DateTime dt = new DateTime();//DateTime.Parse(split[1]);
-                        double fulltimestamp=Convert.ToDouble(split[0]);
-                        long time=(long)fulltimestamp;
+                        double fulltimestamp = Convert.ToDouble(split[0]);
+                        long time = (long)fulltimestamp;
                         Wockets.Utils.WocketsTimer.GetDateTime((long)fulltimestamp, out dt);
                         //dt.Millisecond
 
@@ -1410,20 +1410,23 @@ namespace NESPDataViewer
         #region ANNOTATION LABELS
 
 
-       private void CreateDiaryGraph(GraphPane gp, string filepath, string dirpath_colors, 
-                                      string title, int yoffset, string type)
+        private void CreateDiaryGraph(GraphPane gp, string filepath, string dirpath_colors,
+                                       string title, int yoffset, string type)
         {
 
-           // -------------- Load Colors  ---------------------------------------
+            // -------------- Load Colors  ---------------------------------------
 
             bool is_category_1 = false;
             bool is_category_2 = false;
+            bool is_category_3 = false;
+            bool is_category_4 = false;
 
             string[] lines_read = null;
             string[] label_color = null;
             BindingList<string[]> labels_color_list_1 = null;
             BindingList<string[]> labels_color_list_2 = null;
-
+            BindingList<string[]> labels_color_list_3 = null;
+            BindingList<string[]> labels_color_list_4 = null;
 
 
             #region read colors files
@@ -1460,6 +1463,38 @@ namespace NESPDataViewer
                     }
                 }
             }
+            else if (type.CompareTo("smoking") == 0)
+            {
+                is_category_3 = true;
+
+                if (File.Exists(dirpath_colors + "ActivityLabelsColors_3.csv"))
+                {
+                    labels_color_list_3 = new BindingList<string[]>();
+                    lines_read = FileReadWrite.ReadLinesFromFile(dirpath_colors + "ActivityLabelsColors_3.csv");
+
+                    foreach (string line in lines_read)
+                    {
+                        label_color = line.Split(',');
+                        labels_color_list_3.Add(label_color);
+                    }
+                }
+            }
+            else if (type.CompareTo("puffing") == 0)
+            {
+                is_category_4 = true;
+
+                if (File.Exists(dirpath_colors + "ActivityLabelsColors_4.csv"))
+                {
+                    labels_color_list_4 = new BindingList<string[]>();
+                    lines_read = FileReadWrite.ReadLinesFromFile(dirpath_colors + "ActivityLabelsColors_4.csv");
+
+                    foreach (string line in lines_read)
+                    {
+                        label_color = line.Split(',');
+                        labels_color_list_4.Add(label_color);
+                    }
+                }
+            }
 
             #endregion
 
@@ -1483,14 +1518,14 @@ namespace NESPDataViewer
 
             TextReader tr = new StreamReader(filepath);
 
-           //Read the hearder
+            //Read the hearder
             s = tr.ReadLine();
-           
-           
+
+
             while (currentTime <= startUnix)
             {
                 s = tr.ReadLine();
-                
+
                 if (s == null)
                     break;
 
@@ -1502,10 +1537,10 @@ namespace NESPDataViewer
                 }
 
                 start++;
-                 
+
             }
 
-            end = start +1;
+            end = start + 1;
             while (currentTime <= endUnix)
             {
                 s = tr.ReadLine();
@@ -1520,8 +1555,8 @@ namespace NESPDataViewer
                     dt_time = DateTime.Parse(str_time);
                     currentTime = Wockets.Utils.WocketsTimer.GetDoubleTime(dt_time);
                 }
-                    end++;
-                
+                end++;
+
 
 
             }
@@ -1540,7 +1575,7 @@ namespace NESPDataViewer
             PointPairList labelList = new PointPairList();
             string[] values = FileReadWrite.ReadLinesFromFile(filepath);
 
-           
+
 
             //for (int i = 0; i < values.Length; i++)
             for (int i = start; i < end; i++)
@@ -1569,64 +1604,99 @@ namespace NESPDataViewer
 
 
                         #region COLOR OF BAR
-                            string color = "white";
-                            bool isSolid = false;
+                        string color = "white";
+                        bool isSolid = false;
 
-                            string clabel = "";
+                        string clabel = "";
 
 
-                            #region Match color with label 
-                            
-                            //determine colors according to the graph type
-                            if ( is_category_1 )
+                        #region Match color with label
+
+                        //determine colors according to the graph type
+                        if (is_category_1)
+                        {
+                            //if log contains postures
+                            if ((split.Length > 2) && (split[3].Length > 0))
                             {
-                                //if log contains postures
-                                if ((split.Length > 2) && (split[3].Length > 0))
-                                {
-                                    clabel = split[3];
+                                clabel = split[3];
 
-                                    for (int j = 0; j < labels_color_list_1.Count; j++)
+                                for (int j = 0; j < labels_color_list_1.Count; j++)
+                                {
+                                    if (labels_color_list_1[j][1].CompareTo(clabel) == 0)
                                     {
-                                        if (labels_color_list_1[j][1].CompareTo(clabel) == 0)
-                                        {
-                                            color = labels_color_list_1[j][3];
-                                            isSolid = true;
-                                            break;
-                                        }
+                                        color = labels_color_list_1[j][3];
+                                        isSolid = true;
+                                        break;
                                     }
                                 }
                             }
-                            else if (is_category_2)
+                        }
+                        else if (is_category_2)
+                        {
+                            //if log contains activities
+                            if ((split.Length > 2) && (split[4].Length > 0))
                             {
-                                //if log contains activities
-                                if ((split.Length > 2) && (split[4].Length > 0))
-                                {
-                                    clabel = split[4];
+                                clabel = split[4];
 
-                                    for (int j = 0; j < labels_color_list_2.Count; j++)
+                                for (int j = 0; j < labels_color_list_2.Count; j++)
+                                {
+                                    if (labels_color_list_2[j][1].CompareTo(clabel) == 0)
                                     {
-                                        if (labels_color_list_2[j][1].CompareTo(clabel) == 0)
-                                        {
-                                            color = labels_color_list_2[j][3];
-                                            isSolid = true;
-                                            break;
-                                        }
+                                        color = labels_color_list_2[j][3];
+                                        isSolid = true;
+                                        break;
                                     }
                                 }
-
                             }
-                            
-                            #endregion
+
+                        }
+                        else if (is_category_3)
+                        {
+                            if ((split.Length > 2) && (split[5].Length > 0))
+                            {
+                                clabel = split[5];
+
+                                for (int j = 0; j < labels_color_list_3.Count; j++)
+                                {
+                                    if (labels_color_list_3[j][1].CompareTo(clabel) == 0)
+                                    {
+                                        color = labels_color_list_3[j][3];
+                                        isSolid = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        else if (is_category_4)
+                        {
+                            if ((split.Length > 2) && (split[6].Length > 0))
+                            {
+                                clabel = split[6];
+
+                                for (int j = 0; j < labels_color_list_4.Count; j++)
+                                {
+                                    if (labels_color_list_4[j][1].CompareTo(clabel) == 0)
+                                    {
+                                        color = labels_color_list_4[j][3];
+                                        isSolid = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
 
 
-                            #region commented
-                            /*if ((split.Length > 2) && (split[2].Length > 0))
+                        #endregion
+
+
+                        #region commented
+                        /*if ((split.Length > 2) && (split[2].Length > 0))
                             {
                                 color = split[2];
                                 isSolid = true;
                             }
                             */
-                            #endregion
+                        #endregion
 
 
                         #endregion Color of bar
@@ -1637,20 +1707,20 @@ namespace NESPDataViewer
                         string label = "";
                         for (int c = 3; c < split.Length; c++)
                         {
-                            label += split[c].Replace("_", ", ").Replace("-", " ").Trim(',',' ') + "\n ";
+                            label += split[c].Replace("_", ", ").Replace("-", " ").Trim(',', ' ') + "\n ";
                         }
 
                         labelList = new PointPairList();
-                        labelList.Add(endx, yoffset, startx, String.Format("{3}: {0}  -  {1}\n {2}",dtStart.ToLongTimeString(),dtEnd.ToLongTimeString(),label,title));
- 
+                        labelList.Add(endx, yoffset, startx, String.Format("{3}: {0}  -  {1}\n {2}", dtStart.ToLongTimeString(), dtEnd.ToLongTimeString(), label, title));
+
                         #endregion
 
                         #region ADD BAR
 
 
                         //HiLowBarItem myBar = gp.AddHiLowBar(title, labelList, Color.FromName(color
-                        HiLowBarItem myBar = gp.AddHiLowBar(title, labelList, Color.FromArgb(Int32.Parse(color)) );
-                        
+                        HiLowBarItem myBar = gp.AddHiLowBar(title, labelList, Color.FromArgb(Int32.Parse(color)));
+
 
                         if (isSolid) myBar.Bar.Fill.Type = FillType.Solid;
                         else myBar.Bar.Fill.Type = FillType.None;
@@ -1663,7 +1733,7 @@ namespace NESPDataViewer
         }
 
         //-----------------------------------------------------------
-        
+
 
         #endregion
 
@@ -2079,7 +2149,7 @@ namespace NESPDataViewer
 
 
             #region GPS
-           /* string gpsFile = Path.Combine(path + "\\merged\\", "GPS.csv");
+            /* string gpsFile = Path.Combine(path + "\\merged\\", "GPS.csv");
 
             if (File.Exists(gpsFile))
             {
@@ -2122,7 +2192,7 @@ namespace NESPDataViewer
                 location = "";
                 string mac = "Actigraph" + (i + 1).ToString();
                 createActigraphRawGraph(paneOrdering, files[i], channel, location, "Actigraph", mac);
-                string title = "Actigraph" + i;                
+                string title = "Actigraph" + i;
             }
 
             #endregion ActigraphsRawData
@@ -2184,7 +2254,7 @@ namespace NESPDataViewer
             if (hPane == null)
             {
                 //paneOrdering++;
-               
+
                 string title = "Annotations";
                 GraphPane aPane = AddPane(title, "Annotations");
                 aPane.YAxis.IsVisible = true;
@@ -2208,23 +2278,31 @@ namespace NESPDataViewer
                 #endregion
 
 
-               //====== add annotations =====
-               // reading the corrected annotations in the merged folder
-               string file_annotations = path + "\\merged\\" + "AnnotationIntervals.csv";
+                //====== add annotations =====
+                // reading the corrected annotations in the merged folder
+                string file_annotations = path + "\\merged\\" + "AnnotationIntervals.csv";
 
-               if (File.Exists(file_annotations))
-               {
-                   string path_annotations_color = "";
-                  
-                   if (Directory.Exists(path + "\\annotation\\audioannotation\\"))
-                       path_annotations_color = path + "\\annotation\\audioannotation\\";
-                   else if (Directory.Exists(path + "\\annotation\\phoneannotation\\"))
-                       path_annotations_color = path + "\\annotation\\phoneannotation\\";
-                       
-                    CreateDiaryGraph(aPane, file_annotations, path_annotations_color, "Time: ", 20, "activity");
-                    CreateDiaryGraph(aPane, file_annotations, path_annotations_color, "Time:", 130, "posture");
-               }
-                
+                if (File.Exists(file_annotations))
+                {
+                    string path_annotations_color = "";
+
+                    if (Directory.Exists(path + "\\annotation\\audioannotation\\"))
+                        path_annotations_color = path + "\\annotation\\audioannotation\\";
+                    else if (Directory.Exists(path + "\\annotation\\phoneannotation\\"))
+                        path_annotations_color = path + "\\annotation\\phoneannotation\\";
+                    else if (Directory.Exists(path + "\\annotation\\tabletannotation\\"))
+                        path_annotations_color = path + "\\annotation\\tabletannotation\\";
+
+                    CreateDiaryGraph(aPane, file_annotations, path_annotations_color, "Time: ", 0, "activity");
+                    CreateDiaryGraph(aPane, file_annotations, path_annotations_color, "Time:", 110, "posture");
+
+                    if (Directory.Exists(path + "\\annotation\\tabletannotation\\"))
+                    {
+                        CreateDiaryGraph(aPane, file_annotations, path_annotations_color, "Time:", 220, "smoking");
+                        CreateDiaryGraph(aPane, file_annotations, path_annotations_color, "Time:", 330, "puffing");
+                    }
+                }
+
 
 
                 //add other types of phone annotations
@@ -2280,7 +2358,7 @@ namespace NESPDataViewer
             return isMatch;
 
         }
-        
+
         #endregion
 
 
@@ -2517,7 +2595,7 @@ namespace NESPDataViewer
 
 
         #region HOVER
-        
+
         PointPair ppHover = null;
         private void HighlightGraphs(double x, double z)
         {
