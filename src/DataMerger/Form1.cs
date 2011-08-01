@@ -4787,7 +4787,7 @@ namespace DataMerger
             }
 
             //JPN: Add CSV headers for Wocket Raw Activity Counts (WRAC)
-            //if (wWRACData != null)
+            if (wWRACData != null)
             if (true)
             {
                 for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
@@ -4803,7 +4803,7 @@ namespace DataMerger
                     master_csv_header += ",Wocket" + i.ToString("00") + "_PLOT_PerMinute_WFAC";
 
             //JPN: Add CSV headers for Plottable Wocket Raw Activity Counts (WRAC)
-            //if (wWRACData != null)
+            if (wWRACData != null)
             if (true)
                 for (int i = 0; (i < CurrentWockets._Controller._Sensors.Count); i++)
                     master_csv_header += ",Wocket" + i.ToString("00") + "_PLOT_PerMinute_WRAC";
@@ -5117,9 +5117,12 @@ namespace DataMerger
                     wfac_csv_line[i] = "";
             }
 
-            wrac_csv_line = new string[wcontroller._Sensors.Count];
-            for (int i = 0; (i < wrac_csv_line.Length); i++)
-                wrac_csv_line[i] = "";
+            if (wWFACData != null)
+            {
+                wrac_csv_line = new string[wcontroller._Sensors.Count];
+                for (int i = 0; (i < wrac_csv_line.Length); i++)
+                    wrac_csv_line[i] = "";
+            }
 
             string sensewear_csv_line = "";
             string zephyr_csv_line = "";
@@ -5165,8 +5168,11 @@ namespace DataMerger
                         wfac_csv_line[i] = timestamp;
 
                 //JPN: Add timestamps to lines in WRAC csv files
-                for (int i = 0; (i < wcontroller._Sensors.Count); i++)
-                    wrac_csv_line[i] = timestamp;
+                if (wWRACData != null)
+                {
+                    for (int i = 0; (i < wcontroller._Sensors.Count); i++)
+                        wrac_csv_line[i] = timestamp;
+                }
 
                 sensewear_csv_line = timestamp;
                 zephyr_csv_line = timestamp;
