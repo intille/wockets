@@ -220,7 +220,7 @@ if (@$totalRows_rsACCOUNTS > 1) {
           </tr>
           <tr>
             <td class="KT_th"><label for="password_<?php echo $cnt1; ?>">Password:</label></td>
-            <td><input type="text" name="password_<?php echo $cnt1; ?>" id="password_<?php echo $cnt1; ?>" value="<?php echo KT_escapeAttribute($row_rsACCOUNTS['password']); ?>" size="32" maxlength="100" />
+            <td><input type="text" name="password_<?php echo $cnt1; ?>" id="password_<?php echo $cnt1; ?>" value="XXXXXXXX" size="32" maxlength="100" />
                 <?php echo $tNGs->displayFieldHint("password");?> <?php echo $tNGs->displayFieldError("ACCOUNTS", "password", $cnt1); ?> </td>
           </tr>
           <tr>
@@ -275,15 +275,10 @@ if (@$totalRows_rsACCOUNTS > 1) {
       // Show IF Conditional region1
       if (@$_GET['user_id'] == "") {
       ?>
-            <input type="submit" name="KT_Insert1" id="KT_Insert1" value="<?php echo NXT_getResource("Insert_FB"); ?>" />
-            <?php 
+              <?php 
       // else Conditional region1
       } else { ?>
-            <div class="KT_operations">
-              <input type="submit" name="KT_Insert1" value="<?php echo NXT_getResource("Insert as new_FB"); ?>" onclick="nxt_form_insertasnew(this, 'user_id')" />
-            </div>
-            <input type="submit" name="KT_Update1" value="<?php echo NXT_getResource("Update_FB"); ?>" />
-            <input type="submit" name="KT_Delete1" value="<?php echo NXT_getResource("Delete_FB"); ?>" onclick="return confirm('<?php echo NXT_getResource("Are you sure?"); ?>');" />
+            <div class="KT_operations"></div>
             <?php }
       // endif Conditional region1
       ?>

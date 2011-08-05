@@ -15,16 +15,8 @@ $tNGs = new tNG_dispatcher("../");
 // Make unified connection variable
 $conn_Wockets = new KT_connection($Wockets, $database_Wockets);
 
-//Start Restrict Access To Page
-$restrict = new tNG_RestrictAccess($conn_Wockets, "../");
-//Grand Levels: Any
-$restrict->Execute();
-//End Restrict Access To Page
-
 // Start trigger
 $formValidation = new tNG_FormValidation();
-$formValidation->addField("participant_id", true, "numeric", "", "", "", "");
-$formValidation->addField("wocket_id", true, "numeric", "", "", "", "");
 $tNGs->prepareValidation($formValidation);
 // End trigger
 
@@ -64,13 +56,13 @@ $row_Recordset1 = mysql_fetch_assoc($Recordset1);
 $totalRows_Recordset1 = mysql_num_rows($Recordset1);
 
 mysql_select_db($database_Wockets, $Wockets);
-$query_Recordset2 = "SELECT * FROM WOCKETS ORDER BY mac ASC";
+$query_Recordset2 = "SELECT last_name, id FROM PARTICIPANTS ORDER BY last_name";
 $Recordset2 = mysql_query($query_Recordset2, $Wockets) or die(mysql_error());
 $row_Recordset2 = mysql_fetch_assoc($Recordset2);
 $totalRows_Recordset2 = mysql_num_rows($Recordset2);
 
 mysql_select_db($database_Wockets, $Wockets);
-$query_Recordset3 = "SELECT last_name, id FROM PARTICIPANTS ORDER BY last_name";
+$query_Recordset3 = "SELECT * FROM WOCKETS ORDER BY mac ASC";
 $Recordset3 = mysql_query($query_Recordset3, $Wockets) or die(mysql_error());
 $row_Recordset3 = mysql_fetch_assoc($Recordset3);
 $totalRows_Recordset3 = mysql_num_rows($Recordset3);
@@ -92,7 +84,7 @@ $ins_PARTICIPANT_WOCKETS->registerTrigger("END", "Trigger_Default_Redirect", 99,
 $ins_PARTICIPANT_WOCKETS->setTable("PARTICIPANT_WOCKETS");
 $ins_PARTICIPANT_WOCKETS->addColumn("participant_id", "NUMERIC_TYPE", "POST", "participant_id");
 $ins_PARTICIPANT_WOCKETS->addColumn("wocket_id", "NUMERIC_TYPE", "POST", "wocket_id");
-$ins_PARTICIPANT_WOCKETS->setPrimaryKey("participant_id", "NUMERIC_TYPE");
+$ins_PARTICIPANT_WOCKETS->setPrimaryKey("id", "NUMERIC_TYPE");
 
 // Make an update transaction instance
 $upd_PARTICIPANT_WOCKETS = new tNG_multipleUpdate($conn_Wockets);
@@ -105,7 +97,7 @@ $upd_PARTICIPANT_WOCKETS->registerTrigger("END", "Trigger_Default_Redirect", 99,
 $upd_PARTICIPANT_WOCKETS->setTable("PARTICIPANT_WOCKETS");
 $upd_PARTICIPANT_WOCKETS->addColumn("participant_id", "NUMERIC_TYPE", "POST", "participant_id");
 $upd_PARTICIPANT_WOCKETS->addColumn("wocket_id", "NUMERIC_TYPE", "POST", "wocket_id");
-$upd_PARTICIPANT_WOCKETS->setPrimaryKey("participant_id", "NUMERIC_TYPE", "GET", "participant_id");
+$upd_PARTICIPANT_WOCKETS->setPrimaryKey("id", "NUMERIC_TYPE", "GET", "id");
 
 // Make an instance of the transaction object
 $del_PARTICIPANT_WOCKETS = new tNG_multipleDelete($conn_Wockets);
@@ -115,16 +107,7 @@ $del_PARTICIPANT_WOCKETS->registerTrigger("STARTER", "Trigger_Default_Starter", 
 $del_PARTICIPANT_WOCKETS->registerTrigger("END", "Trigger_Default_Redirect", 99, "../includes/nxt/back.php");
 // Add columns
 $del_PARTICIPANT_WOCKETS->setTable("PARTICIPANT_WOCKETS");
-$del_PARTICIPANT_WOCKETS->setPrimaryKey("participant_id", "NUMERIC_TYPE", "GET", "participant_id");
-
-// Make a logout transaction instance
-$logoutTransaction = new tNG_logoutTransaction($conn_Wockets);
-$tNGs->addTransaction($logoutTransaction);
-// Register triggers
-$logoutTransaction->registerTrigger("STARTER", "Trigger_Default_Starter", 1, "GET", "KT_logout_now");
-$logoutTransaction->registerTrigger("END", "Trigger_Default_Redirect", 99, "../index.php");
-// Add columns
-// End of logout transaction instance
+$del_PARTICIPANT_WOCKETS->setPrimaryKey("id", "NUMERIC_TYPE", "GET", "id");
 
 // Execute all the registered transactions
 $tNGs->executeTransactions();
@@ -133,21 +116,11 @@ $tNGs->executeTransactions();
 $rsPARTICIPANT_WOCKETS = $tNGs->getRecordset("PARTICIPANT_WOCKETS");
 $row_rsPARTICIPANT_WOCKETS = mysql_fetch_assoc($rsPARTICIPANT_WOCKETS);
 $totalRows_rsPARTICIPANT_WOCKETS = mysql_num_rows($rsPARTICIPANT_WOCKETS);
-
-// Get the transaction recordset
-$rscustom = $tNGs->getRecordset("custom");
-$row_rscustom = mysql_fetch_assoc($rscustom);
-$totalRows_rscustom = mysql_num_rows($rscustom);
 ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
 <title>Untitled Document</title>
-<script src="../includes/cssmenus2/js/cssmenus.js" type="text/javascript"></script>
-<link href="../includes/cssmenus2/skins/interakt_blue/horizontal.css" rel="stylesheet" type="text/css" />
-<script src="../includes/common/js/base.js" type="text/javascript"></script>
-<script src="../includes/common/js/utility.js" type="text/javascript"></script>
-
 <link href="../includes/skins/mxkollection3.css" rel="stylesheet" type="text/css" media="all" />
 <script src="../includes/common/js/base.js" type="text/javascript"></script>
 <script src="../includes/common/js/utility.js" type="text/javascript"></script>
@@ -166,54 +139,14 @@ $NXT_FORM_SETTINGS = {
 
 <body>
 
-
-<p> </p>
-<div id="cssMenu1" class="horizontal" >
-  <ul class="interakt_blue">
-    <li> <a href="../main.php" title="Logout">Home</a> </li>
-    <li> <a href="#" title="Study">Study</a>
-        <ul>
-          <li> <a href="phones.php" title="Phones">Phones</a> </li>
-          <li> <a href="wockets.php" title="Wockets">Wockets</a> </li>
-          <li> <a href="participants.php" title="Participants">Participants</a> </li>
-      </ul>
-    </li>
-    <li> <a href="#" title="Export">Actions</a>
-        <ul>
-          <li> <a href="participant_phone.php" title="Assign phone to participant">Assign Phone</a> </li>
-          <li> <a href="participant_wocket.php" title="Assign Wocket">Assign Wocket</a> </li>
-          <li> <a href="ExportData.php" title="Export Data">Export Data</a> </li>
-      </ul>
-    </li>
-    <li> <a href="#" title="Advanced">Advanced</a>
-        <ul>
-          <li> <a href="accounts.php" title="User Accounts">User Accounts</a> </li>
-          <li> <a href="Files.php" title="Files">Files</a> </li>
-          <li> <a href="phone_stats.php" title="Phone Statistics">Phone Statistics</a> </li>
-          <li> <a href="wocket_stats.php" title="Wockets Statistics">Wockets Statistics</a> </li>
-      </ul>
-    </li>
-    <li> <a href="<?php echo $logoutTransaction->getLogoutLink(); ?>" title="">Logout</a> </li>
-  </ul>
-  <br />
-  <script type="text/javascript">
-	<!--
-    var obj_cssMenu1 = new CSSMenu("cssMenu1");
-    obj_cssMenu1.setTimeouts(400, 200, 800);
-    obj_cssMenu1.setSubMenuOffset(0, 0, 0, 0);
-    obj_cssMenu1.setHighliteCurrent(true);
-    obj_cssMenu1.show();
-   //-->
-  </script>
-</div>
-<p>&nbsp;</p>
-
-
+<?php
+	echo $tNGs->getErrorMsg();
+?>
 <div class="KT_tng">
   <h1>
     <?php 
 // Show IF Conditional region1 
-if (@$_GET['participant_id'] == "") {
+if (@$_GET['id'] == "") {
 ?>
       <?php echo NXT_getResource("Insert_FH"); ?>
       <?php 
@@ -239,7 +172,7 @@ if (@$totalRows_rsPARTICIPANT_WOCKETS > 1) {
 ?>
         <table cellpadding="2" cellspacing="0" class="KT_tngtable">
           <tr>
-            <td class="KT_th"><label for="participant_id_<?php echo $cnt1; ?>">Participant:</label></td>
+            <td class="KT_th"><label for="participant_id_<?php echo $cnt1; ?>">Participant_id:</label></td>
             <td><select name="participant_id_<?php echo $cnt1; ?>" id="participant_id_<?php echo $cnt1; ?>">
               <option value=""><?php echo NXT_getResource("Select one..."); ?></option>
               <?php 
@@ -258,19 +191,19 @@ do {
                 <?php echo $tNGs->displayFieldError("PARTICIPANT_WOCKETS", "participant_id", $cnt1); ?> </td>
           </tr>
           <tr>
-            <td class="KT_th"><label for="wocket_id_<?php echo $cnt1; ?>">Wocket:</label></td>
+            <td class="KT_th"><label for="wocket_id_<?php echo $cnt1; ?>">Wocket_id:</label></td>
             <td><select name="wocket_id_<?php echo $cnt1; ?>" id="wocket_id_<?php echo $cnt1; ?>">
               <option value=""><?php echo NXT_getResource("Select one..."); ?></option>
               <?php 
 do {  
 ?>
-              <option value="<?php echo $row_Recordset2['id']?>"<?php if (!(strcmp($row_Recordset2['id'], $row_rsPARTICIPANT_WOCKETS['wocket_id']))) {echo "SELECTED";} ?>><?php echo $row_Recordset2['mac']?></option>
+              <option value="<?php echo $row_Recordset4['id']?>"<?php if (!(strcmp($row_Recordset4['id'], $row_rsPARTICIPANT_WOCKETS['wocket_id']))) {echo "SELECTED";} ?>><?php echo $row_Recordset4['mac']?></option>
               <?php
-} while ($row_Recordset2 = mysql_fetch_assoc($Recordset2));
-  $rows = mysql_num_rows($Recordset2);
+} while ($row_Recordset4 = mysql_fetch_assoc($Recordset4));
+  $rows = mysql_num_rows($Recordset4);
   if($rows > 0) {
-      mysql_data_seek($Recordset2, 0);
-	  $row_Recordset2 = mysql_fetch_assoc($Recordset2);
+      mysql_data_seek($Recordset4, 0);
+	  $row_Recordset4 = mysql_fetch_assoc($Recordset4);
   }
 ?>
             </select>
@@ -283,14 +216,14 @@ do {
         <div>
           <?php 
       // Show IF Conditional region1
-      if (@$_GET['participant_id'] == "") {
+      if (@$_GET['id'] == "") {
       ?>
             <input type="submit" name="KT_Insert1" id="KT_Insert1" value="<?php echo NXT_getResource("Insert_FB"); ?>" />
             <?php 
       // else Conditional region1
       } else { ?>
             <div class="KT_operations">
-              <input type="submit" name="KT_Insert1" value="<?php echo NXT_getResource("Insert as new_FB"); ?>" onclick="nxt_form_insertasnew(this, 'participant_id')" />
+              <input type="submit" name="KT_Insert1" value="<?php echo NXT_getResource("Insert as new_FB"); ?>" onclick="nxt_form_insertasnew(this, 'id')" />
             </div>
             <input type="submit" name="KT_Update1" value="<?php echo NXT_getResource("Update_FB"); ?>" />
             <input type="submit" name="KT_Delete1" value="<?php echo NXT_getResource("Delete_FB"); ?>" onclick="return confirm('<?php echo NXT_getResource("Are you sure?"); ?>');" />

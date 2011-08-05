@@ -66,7 +66,6 @@ $tfi_listPHONE_STATS1->addColumn("PHONE_STATS.received_bytes1", "NUMERIC_TYPE", 
 $tfi_listPHONE_STATS1->addColumn("PHONE_STATS.battery2", "NUMERIC_TYPE", "battery2", "=");
 $tfi_listPHONE_STATS1->addColumn("PHONE_STATS.transmitted_bytes2", "NUMERIC_TYPE", "transmitted_bytes2", "=");
 $tfi_listPHONE_STATS1->addColumn("PHONE_STATS.received_bytes2", "NUMERIC_TYPE", "received_bytes2", "=");
-$tfi_listPHONE_STATS1->addColumn("PHONE_STATS.swap_event", "NUMERIC_TYPE", "swap_event", "=");
 $tfi_listPHONE_STATS1->Execute();
 
 // Sorter
@@ -83,7 +82,6 @@ $tso_listPHONE_STATS1->addColumn("PHONE_STATS.received_bytes1");
 $tso_listPHONE_STATS1->addColumn("PHONE_STATS.battery2");
 $tso_listPHONE_STATS1->addColumn("PHONE_STATS.transmitted_bytes2");
 $tso_listPHONE_STATS1->addColumn("PHONE_STATS.received_bytes2");
-$tso_listPHONE_STATS1->addColumn("PHONE_STATS.swap_event");
 $tso_listPHONE_STATS1->setDefault("PHONE_STATS.imei");
 $tso_listPHONE_STATS1->Execute();
 
@@ -110,7 +108,7 @@ if (isset($_SESSION['sorter_tso_listPHONE_STATS1'])) {
 }
 mysql_select_db($database_Wockets, $Wockets);
 
-$query_rsPHONE_STATS1 = "SELECT PHONE_STATS.imei, PHONE_STATS.server_date, PHONE_STATS.sender_date, PHONE_STATS.phone_battery, PHONE_STATS.mainmemory, PHONE_STATS.sdmemory, PHONE_STATS.battery1, PHONE_STATS.transmitted_bytes1, PHONE_STATS.received_bytes1, PHONE_STATS.battery2, PHONE_STATS.transmitted_bytes2, PHONE_STATS.received_bytes2, PHONE_STATS.swap_event, PHONE_STATS.id FROM PHONE_STATS WHERE {$NXTFilter_rsPHONE_STATS1} ORDER BY {$NXTSort_rsPHONE_STATS1}";
+$query_rsPHONE_STATS1 = "SELECT PHONE_STATS.imei, PHONE_STATS.server_date, PHONE_STATS.sender_date, PHONE_STATS.phone_battery, PHONE_STATS.mainmemory, PHONE_STATS.sdmemory, PHONE_STATS.battery1, PHONE_STATS.transmitted_bytes1, PHONE_STATS.received_bytes1, PHONE_STATS.battery2, PHONE_STATS.transmitted_bytes2, PHONE_STATS.received_bytes2, PHONE_STATS.id FROM PHONE_STATS WHERE {$NXTFilter_rsPHONE_STATS1} ORDER BY {$NXTSort_rsPHONE_STATS1}";
 $query_limit_rsPHONE_STATS1 = sprintf("%s LIMIT %d, %d", $query_rsPHONE_STATS1, $startRow_rsPHONE_STATS1, $maxRows_rsPHONE_STATS1);
 $rsPHONE_STATS1 = mysql_query($query_limit_rsPHONE_STATS1, $Wockets) or die(mysql_error());
 $row_rsPHONE_STATS1 = mysql_fetch_assoc($rsPHONE_STATS1);
@@ -181,7 +179,6 @@ $NXT_LIST_SETTINGS = {
   .KT_col_battery2 {width:140px; overflow:hidden;}
   .KT_col_transmitted_bytes2 {width:140px; overflow:hidden;}
   .KT_col_received_bytes2 {width:140px; overflow:hidden;}
-  .KT_col_swap_event {width:140px; overflow:hidden;}
 </style>
 </head>
 
@@ -282,8 +279,6 @@ $NXT_LIST_SETTINGS = {
             <th id="battery2" class="KT_sorter KT_col_battery2 <?php echo $tso_listPHONE_STATS1->getSortIcon('PHONE_STATS.battery2'); ?>"> <a href="<?php echo $tso_listPHONE_STATS1->getSortLink('PHONE_STATS.battery2'); ?>">Battery2</a> </th>
             <th id="transmitted_bytes2" class="KT_sorter KT_col_transmitted_bytes2 <?php echo $tso_listPHONE_STATS1->getSortIcon('PHONE_STATS.transmitted_bytes2'); ?>"> <a href="<?php echo $tso_listPHONE_STATS1->getSortLink('PHONE_STATS.transmitted_bytes2'); ?>">Transmitted_bytes2</a> </th>
             <th id="received_bytes2" class="KT_sorter KT_col_received_bytes2 <?php echo $tso_listPHONE_STATS1->getSortIcon('PHONE_STATS.received_bytes2'); ?>"> <a href="<?php echo $tso_listPHONE_STATS1->getSortLink('PHONE_STATS.received_bytes2'); ?>">Received_bytes2</a> </th>
-            <th id="swap_event" class="KT_sorter KT_col_swap_event <?php echo $tso_listPHONE_STATS1->getSortIcon('PHONE_STATS.swap_event'); ?>"> <a href="<?php echo $tso_listPHONE_STATS1->getSortLink('PHONE_STATS.swap_event'); ?>">Swap_Event</a></th>
-            
             <th>&nbsp;</th>
           </tr>
           <?php 
@@ -303,12 +298,7 @@ $NXT_LIST_SETTINGS = {
               <td><input type="text" name="tfi_listPHONE_STATS1_received_bytes1" id="tfi_listPHONE_STATS1_received_bytes1" value="<?php echo KT_escapeAttribute(@$_SESSION['tfi_listPHONE_STATS1_received_bytes1']); ?>" size="20" maxlength="100" /></td>
               <td><input type="text" name="tfi_listPHONE_STATS1_battery2" id="tfi_listPHONE_STATS1_battery2" value="<?php echo KT_escapeAttribute(@$_SESSION['tfi_listPHONE_STATS1_battery2']); ?>" size="20" maxlength="100" /></td>
               <td><input type="text" name="tfi_listPHONE_STATS1_transmitted_bytes2" id="tfi_listPHONE_STATS1_transmitted_bytes2" value="<?php echo KT_escapeAttribute(@$_SESSION['tfi_listPHONE_STATS1_transmitted_bytes2']); ?>" size="20" maxlength="100" /></td>
-
               <td><input type="text" name="tfi_listPHONE_STATS1_received_bytes2" id="tfi_listPHONE_STATS1_received_bytes2" value="<?php echo KT_escapeAttribute(@$_SESSION['tfi_listPHONE_STATS1_received_bytes2']); ?>" size="20" maxlength="100" /></td>
-              
-              <td><input type="text" name="tfi_listPHONE_STATS1_swap_event" id="tfi_listPHONE_STATS1_swap_event" value="<?php echo KT_escapeAttribute(@$_SESSION['tfi_listPHONE_STATS1_swap_event']); ?>" size="20" maxlength="100" /></td>
-             
-              
               <td><input type="submit" name="tfi_listPHONE_STATS1" value="<?php echo NXT_getResource("Filter"); ?>" /></td>
             </tr>
             <?php } 
@@ -339,8 +329,6 @@ $NXT_LIST_SETTINGS = {
                 <td><div class="KT_col_battery2"><?php echo KT_FormatForList($row_rsPHONE_STATS1['battery2'], 20); ?></div></td>
                 <td><div class="KT_col_transmitted_bytes2"><?php echo KT_FormatForList($row_rsPHONE_STATS1['transmitted_bytes2'], 20); ?></div></td>
                 <td><div class="KT_col_received_bytes2"><?php echo KT_FormatForList($row_rsPHONE_STATS1['received_bytes2'], 20); ?></div></td>
-                 <td><div class="KT_col_swap_event"><?php echo KT_FormatForList($row_rsPHONE_STATS1['swap_event'], 20); ?></div></td>
-             
                 <td><a class="KT_edit_link" href="phone_stats_details.php?id=<?php echo $row_rsPHONE_STATS1['id']; ?>&amp;KT_back=1"><?php echo NXT_getResource("edit_one"); ?></a> <a class="KT_delete_link" href="#delete"><?php echo NXT_getResource("delete_one"); ?></a> </td>
               </tr>
               <?php } while ($row_rsPHONE_STATS1 = mysql_fetch_assoc($rsPHONE_STATS1)); ?>
