@@ -1,0 +1,36 @@
+<chart caption="Your Workout Intensity" showvalues="0" decimals="0" xaxisname="Day" yaxisname="Time (Minutes)" numberPrefix="" plotgradientcolor="" plotBgColor="C8C8C8">
+  <categories>
+    <category label="2/8/11"/>
+    <category label="2/9/11"/>
+    <category label="2/10/11"/>
+    <category label="2/11/11"/>
+	<category label="2/12/11"/>
+  </categories>
+
+<dataSet>
+  <dataset seriesName="Low Intensity" color="C8C8C8">
+    <set value="12"/>
+    <set value="21"/>
+    <set value="0"/>
+    <set value="0"/>
+	<set value="27"/>
+  </dataset>
+
+ <dataset seriesName="Medium Intensity" color="FFCC00">
+    <set value="15"/>
+    <set value="19"/>
+    <set value="0"/>
+    <set value="0"/>
+	<set value="7"/>
+  </dataset>
+  
+   <dataset seriesName="High Intensity" color="00CC00">
+    <set value="10"/>
+    <set value="3"/>
+    <set value="0"/>
+    <set value="0"/>
+	<set value="17"/>
+  </dataset>
+</dataSet>
+ 
+</chart>
