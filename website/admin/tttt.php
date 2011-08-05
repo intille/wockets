@@ -41,20 +41,20 @@ function GetSQLValueString($theValue, $theType, $theDefinedValue = "", $theNotDe
 }
 
 // Filter
-$tfi_listPARTICIPANT_WOCKETS5 = new TFI_TableFilter($conn_Wockets, "tfi_listPARTICIPANT_WOCKETS5");
-$tfi_listPARTICIPANT_WOCKETS5->addColumn("PARTICIPANTS.id", "NUMERIC_TYPE", "participant_id", "=");
-$tfi_listPARTICIPANT_WOCKETS5->addColumn("WOCKETS.id", "NUMERIC_TYPE", "wocket_id", "=");
-$tfi_listPARTICIPANT_WOCKETS5->Execute();
+$tfi_listPARTICIPANT_WOCKETS2 = new TFI_TableFilter($conn_Wockets, "tfi_listPARTICIPANT_WOCKETS2");
+$tfi_listPARTICIPANT_WOCKETS2->addColumn("PARTICIPANTS.id", "NUMERIC_TYPE", "participant_id", "=");
+$tfi_listPARTICIPANT_WOCKETS2->addColumn("WOCKETS.id", "NUMERIC_TYPE", "wocket_id", "=");
+$tfi_listPARTICIPANT_WOCKETS2->Execute();
 
 // Sorter
-$tso_listPARTICIPANT_WOCKETS5 = new TSO_TableSorter("rsPARTICIPANT_WOCKETS1", "tso_listPARTICIPANT_WOCKETS5");
-$tso_listPARTICIPANT_WOCKETS5->addColumn("PARTICIPANTS.last_name");
-$tso_listPARTICIPANT_WOCKETS5->addColumn("WOCKETS.mac");
-$tso_listPARTICIPANT_WOCKETS5->setDefault("PARTICIPANT_WOCKETS.participant_id");
-$tso_listPARTICIPANT_WOCKETS5->Execute();
+$tso_listPARTICIPANT_WOCKETS2 = new TSO_TableSorter("rsPARTICIPANT_WOCKETS1", "tso_listPARTICIPANT_WOCKETS2");
+$tso_listPARTICIPANT_WOCKETS2->addColumn("PARTICIPANTS.last_name");
+$tso_listPARTICIPANT_WOCKETS2->addColumn("WOCKETS.mac");
+$tso_listPARTICIPANT_WOCKETS2->setDefault("PARTICIPANT_WOCKETS.participant_id");
+$tso_listPARTICIPANT_WOCKETS2->Execute();
 
 // Navigation
-$nav_listPARTICIPANT_WOCKETS5 = new NAV_Regular("nav_listPARTICIPANT_WOCKETS5", "rsPARTICIPANT_WOCKETS1", "../", $_SERVER['PHP_SELF'], 10);
+$nav_listPARTICIPANT_WOCKETS2 = new NAV_Regular("nav_listPARTICIPANT_WOCKETS2", "rsPARTICIPANT_WOCKETS1", "../", $_SERVER['PHP_SELF'], 10);
 
 mysql_select_db($database_Wockets, $Wockets);
 $query_Recordset1 = "SELECT last_name, id FROM PARTICIPANTS ORDER BY last_name";
@@ -69,7 +69,7 @@ $row_Recordset2 = mysql_fetch_assoc($Recordset2);
 $totalRows_Recordset2 = mysql_num_rows($Recordset2);
 
 //NeXTenesio3 Special List Recordset
-$maxRows_rsPARTICIPANT_WOCKETS1 = $_SESSION['max_rows_nav_listPARTICIPANT_WOCKETS5'];
+$maxRows_rsPARTICIPANT_WOCKETS1 = $_SESSION['max_rows_nav_listPARTICIPANT_WOCKETS2'];
 $pageNum_rsPARTICIPANT_WOCKETS1 = 0;
 if (isset($_GET['pageNum_rsPARTICIPANT_WOCKETS1'])) {
   $pageNum_rsPARTICIPANT_WOCKETS1 = $_GET['pageNum_rsPARTICIPANT_WOCKETS1'];
@@ -78,17 +78,17 @@ $startRow_rsPARTICIPANT_WOCKETS1 = $pageNum_rsPARTICIPANT_WOCKETS1 * $maxRows_rs
 
 // Defining List Recordset variable
 $NXTFilter_rsPARTICIPANT_WOCKETS1 = "1=1";
-if (isset($_SESSION['filter_tfi_listPARTICIPANT_WOCKETS5'])) {
-  $NXTFilter_rsPARTICIPANT_WOCKETS1 = $_SESSION['filter_tfi_listPARTICIPANT_WOCKETS5'];
+if (isset($_SESSION['filter_tfi_listPARTICIPANT_WOCKETS2'])) {
+  $NXTFilter_rsPARTICIPANT_WOCKETS1 = $_SESSION['filter_tfi_listPARTICIPANT_WOCKETS2'];
 }
 // Defining List Recordset variable
 $NXTSort_rsPARTICIPANT_WOCKETS1 = "PARTICIPANT_WOCKETS.participant_id";
-if (isset($_SESSION['sorter_tso_listPARTICIPANT_WOCKETS5'])) {
-  $NXTSort_rsPARTICIPANT_WOCKETS1 = $_SESSION['sorter_tso_listPARTICIPANT_WOCKETS5'];
+if (isset($_SESSION['sorter_tso_listPARTICIPANT_WOCKETS2'])) {
+  $NXTSort_rsPARTICIPANT_WOCKETS1 = $_SESSION['sorter_tso_listPARTICIPANT_WOCKETS2'];
 }
 mysql_select_db($database_Wockets, $Wockets);
 
-$query_rsPARTICIPANT_WOCKETS1 = "SELECT PARTICIPANTS.last_name AS participant_id, WOCKETS.mac AS wocket_id, PARTICIPANT_WOCKETS.id FROM (PARTICIPANT_WOCKETS LEFT JOIN PARTICIPANTS ON PARTICIPANT_WOCKETS.participant_id = PARTICIPANTS.id) LEFT JOIN WOCKETS ON PARTICIPANT_WOCKETS.wocket_id = WOCKETS.id WHERE {$NXTFilter_rsPARTICIPANT_WOCKETS1} ORDER BY {$NXTSort_rsPARTICIPANT_WOCKETS1}";
+$query_rsPARTICIPANT_WOCKETS1 = "SELECT PARTICIPANTS.last_name AS participant_id, WOCKETS.mac AS wocket_id FROM (PARTICIPANT_WOCKETS LEFT JOIN PARTICIPANTS ON PARTICIPANT_WOCKETS.participant_id = PARTICIPANTS.id) LEFT JOIN WOCKETS ON PARTICIPANT_WOCKETS.wocket_id = WOCKETS.id WHERE {$NXTFilter_rsPARTICIPANT_WOCKETS1} ORDER BY {$NXTSort_rsPARTICIPANT_WOCKETS1}";
 $query_limit_rsPARTICIPANT_WOCKETS1 = sprintf("%s LIMIT %d, %d", $query_rsPARTICIPANT_WOCKETS1, $startRow_rsPARTICIPANT_WOCKETS1, $maxRows_rsPARTICIPANT_WOCKETS1);
 $rsPARTICIPANT_WOCKETS1 = mysql_query($query_limit_rsPARTICIPANT_WOCKETS1, $Wockets) or die(mysql_error());
 $row_rsPARTICIPANT_WOCKETS1 = mysql_fetch_assoc($rsPARTICIPANT_WOCKETS1);
@@ -102,7 +102,7 @@ if (isset($_GET['totalRows_rsPARTICIPANT_WOCKETS1'])) {
 $totalPages_rsPARTICIPANT_WOCKETS1 = ceil($totalRows_rsPARTICIPANT_WOCKETS1/$maxRows_rsPARTICIPANT_WOCKETS1)-1;
 //End NeXTenesio3 Special List Recordset
 
-$nav_listPARTICIPANT_WOCKETS5->checkBoundries();
+$nav_listPARTICIPANT_WOCKETS2->checkBoundries();
 ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -131,40 +131,39 @@ $NXT_LIST_SETTINGS = {
 </head>
 
 <body>
-
-<div class="KT_tng" id="listPARTICIPANT_WOCKETS5">
+<div class="KT_tng" id="listPARTICIPANT_WOCKETS2">
   <h1> PARTICIPANT_WOCKETS
     <?php
-  $nav_listPARTICIPANT_WOCKETS5->Prepare();
+  $nav_listPARTICIPANT_WOCKETS2->Prepare();
   require("../includes/nav/NAV_Text_Statistics.inc.php");
 ?>
   </h1>
   <div class="KT_tnglist">
     <form action="<?php echo KT_escapeAttribute(KT_getFullUri()); ?>" method="post" id="form1">
-      <div class="KT_options"> <a href="<?php echo $nav_listPARTICIPANT_WOCKETS5->getShowAllLink(); ?>"><?php echo NXT_getResource("Show"); ?>
-        <?php 
+      <div class="KT_options"> <a href="<?php echo $nav_listPARTICIPANT_WOCKETS2->getShowAllLink(); ?>"><?php echo NXT_getResource("Show"); ?>
+            <?php 
   // Show IF Conditional region1
-  if (@$_GET['show_all_nav_listPARTICIPANT_WOCKETS5'] == 1) {
+  if (@$_GET['show_all_nav_listPARTICIPANT_WOCKETS2'] == 1) {
 ?>
-          <?php echo $_SESSION['default_max_rows_nav_listPARTICIPANT_WOCKETS5']; ?>
-          <?php 
+              <?php echo $_SESSION['default_max_rows_nav_listPARTICIPANT_WOCKETS2']; ?>
+              <?php 
   // else Conditional region1
   } else { ?>
-          <?php echo NXT_getResource("all"); ?>
-          <?php } 
+              <?php echo NXT_getResource("all"); ?>
+              <?php } 
   // endif Conditional region1
 ?>
             <?php echo NXT_getResource("records"); ?></a> &nbsp;
         &nbsp;
                             <?php 
   // Show IF Conditional region2
-  if (@$_SESSION['has_filter_tfi_listPARTICIPANT_WOCKETS5'] == 1) {
+  if (@$_SESSION['has_filter_tfi_listPARTICIPANT_WOCKETS2'] == 1) {
 ?>
-                              <a href="<?php echo $tfi_listPARTICIPANT_WOCKETS5->getResetFilterLink(); ?>"><?php echo NXT_getResource("Reset filter"); ?></a>
+                              <a href="<?php echo $tfi_listPARTICIPANT_WOCKETS2->getResetFilterLink(); ?>"><?php echo NXT_getResource("Reset filter"); ?></a>
                               <?php 
   // else Conditional region2
   } else { ?>
-                              <a href="<?php echo $tfi_listPARTICIPANT_WOCKETS5->getShowFilterLink(); ?>"><?php echo NXT_getResource("Show filter"); ?></a>
+                              <a href="<?php echo $tfi_listPARTICIPANT_WOCKETS2->getShowFilterLink(); ?>"><?php echo NXT_getResource("Show filter"); ?></a>
                               <?php } 
   // endif Conditional region2
 ?>
@@ -174,23 +173,23 @@ $NXT_LIST_SETTINGS = {
           <tr class="KT_row_order">
             <th> <input type="checkbox" name="KT_selAll" id="KT_selAll"/>
             </th>
-            <th id="participant_id" class="KT_sorter KT_col_participant_id <?php echo $tso_listPARTICIPANT_WOCKETS5->getSortIcon('PARTICIPANTS.last_name'); ?>"> <a href="<?php echo $tso_listPARTICIPANT_WOCKETS5->getSortLink('PARTICIPANTS.last_name'); ?>">Participant_id</a> </th>
-            <th id="wocket_id" class="KT_sorter KT_col_wocket_id <?php echo $tso_listPARTICIPANT_WOCKETS5->getSortIcon('WOCKETS.mac'); ?>"> <a href="<?php echo $tso_listPARTICIPANT_WOCKETS5->getSortLink('WOCKETS.mac'); ?>">Wocket_id</a> </th>
+            <th id="participant_id" class="KT_sorter KT_col_participant_id <?php echo $tso_listPARTICIPANT_WOCKETS2->getSortIcon('PARTICIPANTS.last_name'); ?>"> <a href="<?php echo $tso_listPARTICIPANT_WOCKETS2->getSortLink('PARTICIPANTS.last_name'); ?>">Participant_id</a> </th>
+            <th id="wocket_id" class="KT_sorter KT_col_wocket_id <?php echo $tso_listPARTICIPANT_WOCKETS2->getSortIcon('WOCKETS.mac'); ?>"> <a href="<?php echo $tso_listPARTICIPANT_WOCKETS2->getSortLink('WOCKETS.mac'); ?>">Wocket_id</a> </th>
             <th>&nbsp;</th>
           </tr>
           <?php 
   // Show IF Conditional region3
-  if (@$_SESSION['has_filter_tfi_listPARTICIPANT_WOCKETS5'] == 1) {
+  if (@$_SESSION['has_filter_tfi_listPARTICIPANT_WOCKETS2'] == 1) {
 ?>
             <tr class="KT_row_filter">
               <td>&nbsp;</td>
-              <td><select name="tfi_listPARTICIPANT_WOCKETS5_participant_id" id="tfi_listPARTICIPANT_WOCKETS5_participant_id">
-                  <option value="" <?php if (!(strcmp("", @$_SESSION['tfi_listPARTICIPANT_WOCKETS5_participant_id']))) {echo "SELECTED";} ?>><?php echo NXT_getResource("None"); ?></option>
-                  <?php
+              <td><select name="tfi_listPARTICIPANT_WOCKETS2_participant_id" id="tfi_listPARTICIPANT_WOCKETS2_participant_id">
+                <option value="" <?php if (!(strcmp("", @$_SESSION['tfi_listPARTICIPANT_WOCKETS2_participant_id']))) {echo "SELECTED";} ?>><?php echo NXT_getResource("None"); ?></option>
+                <?php
 do {  
 ?>
-                  <option value="<?php echo $row_Recordset1['id']?>"<?php if (!(strcmp($row_Recordset1['id'], @$_SESSION['tfi_listPARTICIPANT_WOCKETS5_participant_id']))) {echo "SELECTED";} ?>><?php echo $row_Recordset1['last_name']?></option>
-                  <?php
+                <option value="<?php echo $row_Recordset1['id']?>"<?php if (!(strcmp($row_Recordset1['id'], @$_SESSION['tfi_listPARTICIPANT_WOCKETS2_participant_id']))) {echo "SELECTED";} ?>><?php echo $row_Recordset1['last_name']?></option>
+                <?php
 } while ($row_Recordset1 = mysql_fetch_assoc($Recordset1));
   $rows = mysql_num_rows($Recordset1);
   if($rows > 0) {
@@ -198,15 +197,15 @@ do {
 	  $row_Recordset1 = mysql_fetch_assoc($Recordset1);
   }
 ?>
-                </select>
+              </select>
               </td>
-              <td><select name="tfi_listPARTICIPANT_WOCKETS5_wocket_id" id="tfi_listPARTICIPANT_WOCKETS5_wocket_id">
-                  <option value="" <?php if (!(strcmp("", @$_SESSION['tfi_listPARTICIPANT_WOCKETS5_wocket_id']))) {echo "SELECTED";} ?>><?php echo NXT_getResource("None"); ?></option>
-                  <?php
+              <td><select name="tfi_listPARTICIPANT_WOCKETS2_wocket_id" id="tfi_listPARTICIPANT_WOCKETS2_wocket_id">
+                <option value="" <?php if (!(strcmp("", @$_SESSION['tfi_listPARTICIPANT_WOCKETS2_wocket_id']))) {echo "SELECTED";} ?>><?php echo NXT_getResource("None"); ?></option>
+                <?php
 do {  
 ?>
-                  <option value="<?php echo $row_Recordset2['id']?>"<?php if (!(strcmp($row_Recordset2['id'], @$_SESSION['tfi_listPARTICIPANT_WOCKETS5_wocket_id']))) {echo "SELECTED";} ?>><?php echo $row_Recordset2['mac']?></option>
-                  <?php
+                <option value="<?php echo $row_Recordset2['id']?>"<?php if (!(strcmp($row_Recordset2['id'], @$_SESSION['tfi_listPARTICIPANT_WOCKETS2_wocket_id']))) {echo "SELECTED";} ?>><?php echo $row_Recordset2['mac']?></option>
+                <?php
 } while ($row_Recordset2 = mysql_fetch_assoc($Recordset2));
   $rows = mysql_num_rows($Recordset2);
   if($rows > 0) {
@@ -214,9 +213,9 @@ do {
 	  $row_Recordset2 = mysql_fetch_assoc($Recordset2);
   }
 ?>
-                </select>
+              </select>
               </td>
-              <td><input type="submit" name="tfi_listPARTICIPANT_WOCKETS5" value="<?php echo NXT_getResource("Filter"); ?>" /></td>
+              <td><input type="submit" name="tfi_listPARTICIPANT_WOCKETS2" value="<?php echo NXT_getResource("Filter"); ?>" /></td>
             </tr>
             <?php } 
   // endif Conditional region3
@@ -231,12 +230,12 @@ do {
           <?php if ($totalRows_rsPARTICIPANT_WOCKETS1 > 0) { // Show if recordset not empty ?>
             <?php do { ?>
               <tr class="<?php echo @$cnt1++%2==0 ? "" : "KT_even"; ?>">
-                <td><input type="checkbox" name="kt_pk_PARTICIPANT_WOCKETS" class="id_checkbox" value="<?php echo $row_rsPARTICIPANT_WOCKETS1['id']; ?>" />
-                    <input type="hidden" name="id" class="id_field" value="<?php echo $row_rsPARTICIPANT_WOCKETS1['id']; ?>" />
+                <td><input type="checkbox" name="kt_pk_PARTICIPANT_WOCKETS" class="id_checkbox" value="<?php echo $row_rsPARTICIPANT_WOCKETS1['participant_id']; ?>" />
+                    <input type="hidden" name="participant_id" class="id_field" value="<?php echo $row_rsPARTICIPANT_WOCKETS1['participant_id']; ?>" />
                 </td>
                 <td><div class="KT_col_participant_id"><?php echo KT_FormatForList($row_rsPARTICIPANT_WOCKETS1['participant_id'], 20); ?></div></td>
                 <td><div class="KT_col_wocket_id"><?php echo KT_FormatForList($row_rsPARTICIPANT_WOCKETS1['wocket_id'], 20); ?></div></td>
-                <td><a class="KT_edit_link" href="participant_wocket_details.php?id=<?php echo $row_rsPARTICIPANT_WOCKETS1['id']; ?>&amp;KT_back=1"><?php echo NXT_getResource("edit_one"); ?></a> <a class="KT_delete_link" href="#delete"><?php echo NXT_getResource("delete_one"); ?></a> </td>
+                <td><a class="KT_edit_link" href="tttt_details.php?participant_id=<?php echo $row_rsPARTICIPANT_WOCKETS1['participant_id']; ?>&amp;KT_back=1"><?php echo NXT_getResource("edit_one"); ?></a> <a class="KT_delete_link" href="#delete"><?php echo NXT_getResource("delete_one"); ?></a> </td>
               </tr>
               <?php } while ($row_rsPARTICIPANT_WOCKETS1 = mysql_fetch_assoc($rsPARTICIPANT_WOCKETS1)); ?>
             <?php } // Show if recordset not empty ?>
@@ -245,20 +244,20 @@ do {
       <div class="KT_bottomnav">
         <div>
           <?php
-            $nav_listPARTICIPANT_WOCKETS5->Prepare();
+            $nav_listPARTICIPANT_WOCKETS2->Prepare();
             require("../includes/nav/NAV_Text_Navigation.inc.php");
           ?>
         </div>
       </div>
       <div class="KT_bottombuttons">
         <div class="KT_operations"> <a class="KT_edit_op_link" href="#" onclick="nxt_list_edit_link_form(this); return false;"><?php echo NXT_getResource("edit_all"); ?></a> <a class="KT_delete_op_link" href="#" onclick="nxt_list_delete_link_form(this); return false;"><?php echo NXT_getResource("delete_all"); ?></a> </div>
-<span>&nbsp;</span>
+        <span>&nbsp;</span>
         <select name="no_new" id="no_new">
           <option value="1">1</option>
           <option value="3">3</option>
           <option value="6">6</option>
         </select>
-        <a class="KT_additem_op_link" href="participant_wocket_details.php?KT_back=1" onclick="return nxt_list_additem(this)"><?php echo NXT_getResource("add new"); ?></a> </div>
+        <a class="KT_additem_op_link" href="tttt_details.php?KT_back=1" onclick="return nxt_list_additem(this)"><?php echo NXT_getResource("add new"); ?></a> </div>
     </form>
   </div>
   <br class="clearfixplain" />
