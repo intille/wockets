@@ -256,7 +256,7 @@ public class CollectData extends Activity implements Runnable,KernelCallback
 		
 		running = false;
 		Application._running = false;
-		
+		Application._Context = null;
 		mUpdateInterface = null;
 		t = null;
 		
