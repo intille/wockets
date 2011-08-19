@@ -27,7 +27,7 @@ public final class BluetoothStack {
 	public BluetoothStack(){
 		_Streams=new Hashtable<String, BluetoothStream>();
 		_Discovered=new Hashtable<String,String>();
-		_Devices=new Hashtable<String,BluetoothDevice>();
+		_Devices=new Hashtable<String,BluetoothDevice>();		
 	}
 	
 	public boolean Initialize()
@@ -112,6 +112,11 @@ public final class BluetoothStack {
 	        }
 	    }
 	};
+	
+	public void cancelDiscovery()
+	{
+		adapter.cancelDiscovery();
+	}
 	
 	public void Discover(){
 		adapter.startDiscovery();

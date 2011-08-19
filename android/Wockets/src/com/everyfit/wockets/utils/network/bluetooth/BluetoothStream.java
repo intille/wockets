@@ -3,6 +3,8 @@ package com.everyfit.wockets.utils.network.bluetooth;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+
+import java.util.ArrayList;
 import java.util.UUID;
 import 	java.lang.Thread;
 import java.lang.reflect.Method;
@@ -11,12 +13,16 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import com.everyfit.wockets.utils.CircularBuffer;
+import com.everyfit.wockets.utils.network.NetworkStacks;
 import com.everyfit.wockets.exceptions.BluetoothException;
 import android.os.Process;
+import android.util.Log;
+
 import 	java.util.concurrent.CyclicBarrier;
 
 public final class BluetoothStream extends Thread{
 
+	private final String TAG = "BluetoothStream";
 	private final BluetoothSocket mmSocket;
     private final BluetoothDevice mmDevice;
     private InputStream mmInStream=null;
@@ -25,6 +31,7 @@ public final class BluetoothStream extends Thread{
     // Unique UUID for this application
     private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     
+    public ArrayList<UUID> ARR_UUIDS;
     private CircularBuffer rBuffer;
     private CircularBuffer sBuffer;
     public long _CurrentConnectionUnixTime = 0;
@@ -35,20 +42,22 @@ public final class BluetoothStream extends Thread{
    
 	public BluetoothStream(String address,CircularBuffer rBuffer,CircularBuffer sBuffer)
 		throws BluetoothException
-	{
-		 // Use a temporary object that is later assigned to mmSocket,
+	{			
+		
+		// Use a temporary object that is later assigned to mmSocket,
         // because mmSocket is final
         BluetoothSocket tmp = null;
      
        
-        mmDevice = BluetoothStack._Devices.get(address);        
+        //mmDevice = BluetoothStack._Devices.get(address);
+        mmDevice = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(address);
         // Get a BluetoothSocket to connect with the given BluetoothDevice
         try 
         {
-            //tmp = mmDevice.createRfcommSocketToServiceRecord(MY_UUID);
+            ////tmp = mmDevice.createRfcommSocketToServiceRecord(MY_UUID);        	
         	Method m = mmDevice.getClass().getMethod("createRfcommSocket", new Class[] {int.class});
         	tmp = (BluetoothSocket) m.invoke(mmDevice, 1);
-
+        	//tmp = mmDevice.createInsecureRfcommSocketToServiceRecord(MY_UUID);
         }
         catch 
         (Exception e) 
@@ -63,7 +72,12 @@ public final class BluetoothStream extends Thread{
         {
             // Connect the device through the socket. This will block
             // until it succeeds or throws an exception
-            mmSocket.connect();
+        	BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
+        	if(mmSocket != null)
+        	{
+        		mmSocket.connect();
+        	}
+                        
         } 
         catch (IOException connectException) 
         {
@@ -202,13 +216,22 @@ public final class BluetoothStream extends Thread{
 		 catch (Exception e)
 		 {			
 		 }
+		 try
+		 {
+			 mmInStream.close();
+			 mmOutStream.close();
+		 }
+		 catch(IOException ex)
+		 {
+			 Log.e(TAG,"Exception while closing streams");
+		 }
 		 try 
 		 {			 	            
 			 mmSocket.close();	       
 		 } 
 		 catch (IOException e) 
 		 { 
-			 
+			 Log.e(TAG,"Exception while closing socket");
 		 }
 	 }
 

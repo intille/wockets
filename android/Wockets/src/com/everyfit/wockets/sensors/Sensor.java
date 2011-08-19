@@ -5,16 +5,20 @@ package com.everyfit.wockets.sensors;
 
 import android.app.AlarmManager;
 import android.util.Log;
-
 import com.everyfit.wockets.receivers.Receiver;
 import com.everyfit.wockets.decoders.Decoder;
+import com.everyfit.wockets.decoders.WocketDecoder;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.TimeZone;
+
 import com.everyfit.wockets.data.AccelerationData;
 import com.everyfit.wockets.data.WocketData;
 import java.util.SimpleTimeZone;
@@ -30,6 +34,7 @@ public abstract class Sensor {
 	public int _ID;
 	public int _ReceivedPDUs=0;
 	public String _StoragePath="";
+	public String _Class;
 	/**
 	 * 
 	 */
@@ -63,7 +68,9 @@ public abstract class Sensor {
 	
 	
 	public abstract void Reconnect();
-	public void Dispose(){
+
+	public void Dispose()
+	{
 		this._Receiver.Dispose();
 		this._Decoder.Dispose();
 	}
@@ -82,6 +89,7 @@ public abstract class Sensor {
 	private Boolean isForceTimestampSave = true;
 	private Boolean _Saving = true;
 	private long aUnixTime    = (System.currentTimeMillis()-(AlarmManager.INTERVAL_HOUR*5));
+	//private long aUnixTime = System.currentTimeMillis();	
 	private long lastUnixTime = aUnixTime;
 	private int presentHour = -1;
 	private int timeSaveCount = 0;
@@ -99,11 +107,24 @@ public abstract class Sensor {
             int currentHead = -1;
             currentHead = this._Decoder._Head;
         
-            long nowms=(System.currentTimeMillis()-(AlarmManager.INTERVAL_HOUR*5));
-            Calendar now = Calendar.getInstance(new SimpleTimeZone(0, "GMT"));
-            now.setTimeInMillis(nowms);
+            //long nowms=(System.currentTimeMillis()-(AlarmManager.INTERVAL_HOUR*5));
+            //long nowms = System.currentTimeMillis();
+            //Calendar now = Calendar.getInstance(new SimpleTimeZone(0, "GMT"));
+            //Calendar now = Calendar.getInstance();
+            //now.setTimeInMillis(nowms);
+            
+            Calendar now = Calendar.getInstance();
+        	now.setTimeInMillis(System.currentTimeMillis());
+        	TimeZone tz = TimeZone.getDefault();                        	
+        	long offset = tz.getOffset(now.getTimeInMillis());
+        	long ts = now.getTimeInMillis() + offset;
+        	Calendar newnow = Calendar.getInstance();
+        	newnow.setTimeInMillis(ts);
+            String datetime = _DateFormat_filename.format(newnow.getTime());
+        	
             DecimalFormat twoPlaces = new DecimalFormat("00");
             int nowHour=now.get(Calendar.HOUR_OF_DAY);           
+            
             if (presentHour != nowHour) 
             {
                 if (bw != null)
@@ -119,20 +140,24 @@ public abstract class Sensor {
                 // Need to create a new directory and switch the file name
                 dayPath =  this._StoragePath+"data/raw/PLFormat/" + _DateFormat_dayDirectory.format(now.getTime());
                 // Make sure hour directory exists 
-                currentDataFile = dayPath +  "/" + twoPlaces.format(now.get(Calendar.HOUR_OF_DAY)) + "/";
-
+                currentDataFile = dayPath +  "/" + now.get(Calendar.HOUR_OF_DAY) + "/";
+                
             	File directory = new File(currentDataFile);
     			if( !directory.isDirectory() )
     				if( !directory.mkdirs() )
     					Log.e(tag, "Error unable to create direcotry: " + currentDataFile );
-
+    			
     			currentDataFile = currentDataFile + FILE_TYPE_PREFIX + "." + 
 				_DateFormat_filename.format(now.getTime()) + "." + this._ID + "." + FILE_EXT;
 
 
-    			try {
+    			try 
+    			{
     				bw = new FileOutputStream(currentDataFile,true);
-    			} catch (FileNotFoundException e) {
+    			} 
+    			catch (FileNotFoundException e) 
+    			{
+    				presentHour = -1;
     				Log.e(tag, "Unable to open output file: " + currentDataFile );
     			}
                 // Ensure that the first data point in the new file will start
@@ -227,11 +252,10 @@ public abstract class Sensor {
         			// TODO Auto-generated catch block
         			e.printStackTrace();
         		}
-            }
+            }            
         }
-		
 	}
-
+	
 	
 	private int diffMS = 0;   
 }

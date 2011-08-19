@@ -3,6 +3,9 @@
  */
 package com.everyfit.wockets.decoders;
 
+import java.util.Calendar;
+import java.util.TimeZone;
+
 import android.app.AlarmManager;
 import android.content.Intent;
 
@@ -94,6 +97,7 @@ public final class WocketDecoder extends Decoder {
                             break;
                         case COMPRESSED_DATA_PDU:
                             bytesToRead = 3;
+                            //TODO Mask the S bits
                             break;
                         case RESPONSE_PDU:
                             responseType = ResponseTypes.values()[((int)(((byte)data._Bytes[rawDataIndex]) & 0x1f))];
@@ -158,7 +162,7 @@ public final class WocketDecoder extends Decoder {
                             this._ActivityCountOffset = -1;
                         }
 
-
+                        	
 
                         if (packetType == SensorDataType.UNCOMPRESSED_DATA_PDU)
                         {
@@ -169,6 +173,7 @@ public final class WocketDecoder extends Decoder {
                         }
                         else
                         {
+                        	//TODO decode according to the S bits decoded (change masking accordingly)
                             x = (short)(((this.packet[0] & 0x0f) << 1) | ((this.packet[1] & 0x40) >> 6));
                             x = ((((short)((this.packet[0] >> 4) & 0x01)) == 1) ? ((short)(prevx + x)) : ((short)(prevx - x)));
                             y = (short)(this.packet[1] & 0x1f);
@@ -185,7 +190,16 @@ public final class WocketDecoder extends Decoder {
 
                         //Use the high precision timer
                         if (WocketsService._Controller._TransmissionMode == TransmissionMode.Continuous)
-                            ts = (System.currentTimeMillis()-(AlarmManager.INTERVAL_HOUR*5));
+                            //ts = (System.currentTimeMillis()-(AlarmManager.INTERVAL_HOUR*5));
+                        {
+                        	Calendar now = Calendar.getInstance();
+                        	now.setTimeInMillis(System.currentTimeMillis());
+                        	TimeZone tz = TimeZone.getDefault();                        	
+                        	long offset = tz.getOffset(now.getTimeInMillis());
+                        	ts = now.getTimeInMillis() + offset;
+                        	//ts = System.currentTimeMillis();
+                        }
+                        	
                         else // use date time now assuming suspension is possible
                         {
                             ts = batchCurrentTime;
@@ -204,7 +218,8 @@ public final class WocketDecoder extends Decoder {
                 		WocketsService._Context.sendBroadcast(myintent);
                         */
                         this._TotalSamples++;                    
-
+                        
+                        //TODO check for transmission mode	
                         //if (CurrentWockets._Configuration._MemoryMode == Wockets.Data.Configuration.MemoryConfiguration.NON_SHARED)
                        // if (CurrentWockets._Controller._Mode== MemoryMode.BluetoothToLocal)
                         //{

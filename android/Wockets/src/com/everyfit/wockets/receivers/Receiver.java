@@ -9,6 +9,8 @@ public abstract class Receiver {
 	public CircularBuffer _SBuffer;
 	public int _ID;
 	public ReceiverStatus _Status;
+	public int _maxSR; 
+	
 	public Receiver(int id){
 		
 		this._ID=id;	
@@ -18,4 +20,5 @@ public abstract class Receiver {
     public abstract boolean Initialize();        
     public abstract boolean Dispose();
     public abstract void CheckStatus();
+    public abstract int getReconnections();
 }
