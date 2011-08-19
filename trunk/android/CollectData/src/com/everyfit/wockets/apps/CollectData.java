@@ -9,7 +9,6 @@ import java.util.List;
 
 import com.everyfit.wockets.WocketsController;
 import com.everyfit.wockets.WocketsService;
-import com.everyfit.wockets.apps.WocketsGraph.GraphicsView;
 import com.everyfit.wockets.data.AccelerationData;
 import com.everyfit.wockets.kernel.KernelCallback;
 import com.everyfit.wockets.kernel.KernelListener;
@@ -46,8 +45,7 @@ import android.widget.Toast;
 public class CollectData extends Activity implements Runnable,KernelCallback
 {
 	Button bWocketConnect;
-	private static final String TAG = "ServicesDemo";
-	private ListView lv1;
+	private static final String TAG = "ServicesDemo";	
 	private String[] wocketaddress;
 	private Hashtable<String,String> selectedwockets;
 	private ArrayList<String> selWockets;
@@ -186,7 +184,7 @@ public class CollectData extends Activity implements Runnable,KernelCallback
 			tails[i]=0;
 		canvasPoints = new ArrayList<int[]>();
 		
-	   NumGraphs = wockets.size();	   	  	   
+	   NumGraphs = Application._Controller._Sensors.size();	   	  	   
 	   view=new GraphicsView(Application._Context,NumGraphs);
 	   setContentView(view);              
 	   
@@ -248,11 +246,20 @@ public class CollectData extends Activity implements Runnable,KernelCallback
 	
 	public void quitSession()
 	{
+		for(int i = 0 ; i < Application._Controller._Sensors.size(); i++)
+		{
+			if(Application._Controller._Sensors.get(i)._Class.equalsIgnoreCase("Android"))
+			{
+				AndroidSensor sensor = (AndroidSensor)Application._Controller._Sensors.get(i);
+				mSensorManager.unregisterListener(sensor.mSensorEventListener);
+			}
+		}
+		
 		Application._Controller.Dispose();
 		
 		Intent intent = new Intent();
 		intent.setClassName("com.everyfit.wockets.apps", "com.everyfit.wockets.apps.DataService");
-		stopService(intent);										
+		stopService(intent);												
 		
 		running = false;
 		Application._running = false;
@@ -280,30 +287,24 @@ public class CollectData extends Activity implements Runnable,KernelCallback
 				Toast.makeText(this, "Wockets discovery completed", Toast.LENGTH_LONG).show();
 				Log.d(TAG, "Discovered");
 				//bWocketDiscover.setEnabled(true);				
-				Serializable data = intent.getSerializableExtra("table");
-				if (data != null) {
-					NetworkStacks._BluetoothStack._Discovered = new Hashtable<String, String>((HashMap<String, String>)data);
-				}	
-				Enumeration<String> e = NetworkStacks._BluetoothStack._Discovered.keys();
-				wocketaddress=new String[ NetworkStacks._BluetoothStack._Discovered.size()];
-				int i=0;
-				while(e.hasMoreElements()){
-					wocketaddress[i]=(String)e.nextElement();
-					i++;
-				}				 
-				//lv1.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_list_item_multiple_choice , wocketaddress));
+//				Serializable data = intent.getSerializableExtra("table");
+//				if (data != null) {
+//					NetworkStacks._BluetoothStack._Discovered = new Hashtable<String, String>((HashMap<String, String>)data);
+//				}	
+//				Enumeration<String> e = NetworkStacks._BluetoothStack._Discovered.keys();
+//				wocketaddress=new String[ NetworkStacks._BluetoothStack._Discovered.size()];
+//				int i=0;
+//				while(e.hasMoreElements()){
+//					wocketaddress[i]=(String)e.nextElement();
+//					i++;
+//				}				 				
 				break;
 		}
 		
 	}
 	
 	public class GraphicsView extends View
-	{
-		
-		public ArrayList<Integer> IDs=new ArrayList<Integer>();
-		public ArrayList<Integer> Xs=new ArrayList<Integer>();
-		public ArrayList<Integer> Ys=new ArrayList<Integer>();
-		public ArrayList<Integer> Zs=new ArrayList<Integer>();
+	{			
 		public int Width;
 		public int Height;		
 		private int NumGraphs=0;	
@@ -376,14 +377,86 @@ public class CollectData extends Activity implements Runnable,KernelCallback
     				try
         			{        				
         				com.everyfit.wockets.sensors.Sensor sensor=Application._Controller._Sensors.get(i);
-        				if(sensor._Receiver._Status == ReceiverStatus.Connected)
+        				if(sensor._Receiver._Status == ReceiverStatus.Connected)        					
         				{                 				
+        					if(sensor._Class.equalsIgnoreCase("Android"))
+        					{
+        						AndroidSensor andSensor = (AndroidSensor)sensor;
+        						int head = 0;
+        						ArrayList<float[]> AccelerationData = andSensor.mRawData;
+        						float[] data;
+        						
+        						while(head != AccelerationData.size() -1 )
+        						{
+        							id = andSensor._ID;        							
+        							
+        							data = andSensor.mRawData.get(head);
+        							x = (int) ((andSensor.mAccelRange + data[0]) / (andSensor.mAccelNorm));        				
+        							x = (int) ((x * scalingFactor)  + offset[id]);
+        							points = new int[]{position[id],prevX[id],position[id]+1,x,0};
+        							canvasPoints.add(points);
+        							
+        							y = (int) ((andSensor.mAccelRange + data[1]) / (andSensor.mAccelNorm));;
+        							y = (int) ((y * scalingFactor)  + offset[id]);
+        							points = new int[]{position[id],prevY[id],position[id]+1,y,1};
+        							canvasPoints.add(points);
+        							
+        							z = (int) ((andSensor.mAccelRange + data[2]) / (andSensor.mAccelNorm));;
+        							z = (int) ((z * scalingFactor)  + offset[id]);
+        							points = new int[]{position[id],prevZ[id],position[id]+1,z,2};
+        							canvasPoints.add(points);
+        							
+        							prevX[id] = x;
+        							prevY[id] = y;
+        							prevZ[id] = z;
+        							position[id]=position[id]+1;			
+        							
+        							pointCount[i]=pointCount[i]+1;
+                					
+                					tails[i]=tails[i]+1;
+                					if (tails[i]==sensor._Decoder._Data.length)
+                						tails[i]=0;
+                					
+                					int start = position[i];
+                					int end = position[i] + pointCount[i];
+                					
+                					if(end > view.Width)
+                					{      
+                     					for(int j = 0 ; j < NumGraphs ; j ++)
+                    	    			{
+                    	    				position[j] = 0 ;
+                    	    				pointCount[i]=0;
+                    	    			}                	    				
+                	    				view.invalidate();
+                	    				canvasPoints.clear();
+                					}
+                					else
+                					{
+                						if( (i+1) < NumGraphs)
+                						{
+                							view.invalidate(start,offset[i],end,offset[i+1]);
+                						}
+                							
+                						else
+                						{
+                							view.invalidate(start,offset[NumGraphs-1],end,view.Height);
+                						}            							            						            					
+                					}            			
+                					head++;
+        						}
+        						AccelerationData.clear();
+        						andSensor = null;
+        						data = null;
+        					}
+        					else
+        					{
+        						
+        					}
              				int head=sensor._Decoder._Head;
             				while(tails[i]!=head)
             				{                					                					                					                					                				
             					AccelerationData datum=((AccelerationData)sensor._Decoder._Data[tails[i]]);				
-            					id= datum._SensorID;    					
-            					view.IDs.add(id);            					            				
+            					id= datum._SensorID;    					            									            			
             					
             					x= (int) ((((int) datum._X) * scalingFactor) + offset[id]);
             					points = new int[]{position[id],prevX[id],position[id]+1, x,0};
