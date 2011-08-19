@@ -28,6 +28,7 @@ public class AndroidReceiver extends Receiver
 	@Override
 	public boolean Initialize() 
 	{
+		this._Status = ReceiverStatus.Connected;
 		// TODO Auto-generated method stub
 		return false;
 	}
