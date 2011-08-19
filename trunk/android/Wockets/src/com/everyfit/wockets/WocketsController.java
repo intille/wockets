@@ -17,7 +17,6 @@ import com.everyfit.wockets.decoders.AndroidDecoder;
 import com.everyfit.wockets.decoders.Decoder;
 import com.everyfit.wockets.decoders.DecoderList;
 import com.everyfit.wockets.decoders.WocketDecoder;
-import com.everyfit.wockets.logger.Logger;
 import com.everyfit.wockets.receivers.AndroidReceiver;
 import com.everyfit.wockets.receivers.RFCOMMReceiver;
 import com.everyfit.wockets.receivers.Receiver;
@@ -44,8 +43,7 @@ public class WocketsController  implements XMLSerializable{
 	public TransmissionMode _TransmissionMode;	
 	public String _RootPath="";	
 	public String _DataStoragePath="";
-	private boolean running=true;
-	public  Logger logger;
+	private boolean running=true;	
 	
 	//Wockets Controller Components
 	public SensorList _Sensors;
