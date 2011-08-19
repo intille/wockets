@@ -3,5 +3,6 @@
     <string name="wocketskernel"></string>
     <string name="hello">Hello World, CollectData!</string>
     <string name="app_name">Collect Data</string>
-<string name="wocketskernel2"></string>
+	<string name="wocketskernel2"></string>
+	<string name="quit_session">Quit</string>
 </resources>
