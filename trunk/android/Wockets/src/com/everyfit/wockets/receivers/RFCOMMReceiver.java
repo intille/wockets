@@ -68,6 +68,23 @@ public final class RFCOMMReceiver extends Receiver {
         	 this._BluetoothStream.Dispose();
         	 return false;
          }
+         
+         //for reconnection
+//         if(this._BluetoothStream == null)
+//         {
+//        	 if(this._Reconnections < 3)
+//        	 {
+//        		 this._Reconnections++;
+//        		 Reconnect();
+//        	 }
+//        	 else
+//        	 {
+//        		 return false;
+//        	 }
+//        	 
+//        	 
+//         }
+         
          this._CurrentConnectionUnixTime = this._BluetoothStream._CurrentConnectionUnixTime;
          this._SuccessfulConnections++;
          this._Status= ReceiverStatus.Connected;                 
@@ -75,13 +92,19 @@ public final class RFCOMMReceiver extends Receiver {
          return true;               
      }
      
-     public synchronized void Reconnect(){
+     public synchronized void Reconnect(){    	    
     	 this._Status= ReceiverStatus.Reconnecting;
     	 if (reconnectionThread!=null)
     		 reconnectionThread.Dispose();
     	 reconnectionThread=new ReconnectionThread(this);
     	 reconnectionThread.start();
      }
+     
+     public synchronized int getReconnections()
+     {
+    	 return this._Reconnections;
+     }
+     
      @Override
      public synchronized void CheckStatus(){
     	 try{
@@ -89,8 +112,8 @@ public final class RFCOMMReceiver extends Receiver {
     		 {
     			 this._BluetoothStream.Dispose();
     			 this._BluetoothStream=null;
-    			 this._Status=ReceiverStatus.Disconnected;    			 
-    		 }
+    			 this._Status=ReceiverStatus.Disconnected;    		    			 
+    		 }    		
     	 }catch(Exception e)
     	 {
     		 
@@ -105,8 +128,11 @@ public final class RFCOMMReceiver extends Receiver {
     		this.receiver=receiver;
     	}    	    	
     	public void run(){
-    		while ((this.receiver._Status==ReceiverStatus.Reconnecting) && (running))    		    	
-    			this.receiver.Initialize();    			    		    		
+    		while ((this.receiver._Status==ReceiverStatus.Reconnecting) && (running) )
+    		{    		
+    			this.receiver.Initialize();
+    		}
+    			    			    		    		
     	}
     	
     	public void Dispose(){
@@ -138,7 +164,8 @@ public final class RFCOMMReceiver extends Receiver {
      }
      public boolean Dispose(){
     	 if (reconnectionThread!=null)
-    		 reconnectionThread.Dispose();    	 
+    		 reconnectionThread.Dispose(); 
+    	 this._BluetoothStream.Dispose();
     	 NetworkStacks._BluetoothStack. Disconnect(this._Address);//.Disconnect
     	 return true;
      }

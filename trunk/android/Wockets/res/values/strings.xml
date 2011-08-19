@@ -2,5 +2,5 @@
 <resources>
     <string name="wocketskernel"></string>
     <string name="hello">Hello World!</string>
-    <string name="app_name">Wockets</string>
+    <string name="app_name">Wockets</string>    
 </resources>
