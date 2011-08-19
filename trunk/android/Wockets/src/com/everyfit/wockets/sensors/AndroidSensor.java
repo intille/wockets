@@ -1207,6 +1207,11 @@ public class AndroidSensor extends Sensor
 		
 	}
 	
+	@Override public void Save()
+	{
+		
+	}
+	
 	@Override
 	public void Dispose()
 	{
