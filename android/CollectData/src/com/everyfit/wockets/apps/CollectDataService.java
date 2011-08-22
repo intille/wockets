@@ -27,7 +27,8 @@ public class CollectDataService extends IntentService
 	
 	@Override
 	public void onCreate()
-	{		
+	{	
+		Toast.makeText(WocketsService._Context, "Starting Data Collection", Toast.LENGTH_LONG).show();
 		if(Application._running == false)
 		{
 			stopSelf();	
@@ -63,9 +64,12 @@ public class CollectDataService extends IntentService
             	saveCounter=500;
             }
             
-            try{
+            try
+            {
             	Thread.sleep(20);
-            }catch(Exception e){
+            }
+            catch(Exception e)
+            {
             	Log.e(TAG,"Collect Data Service terminated");
             }
 		}
