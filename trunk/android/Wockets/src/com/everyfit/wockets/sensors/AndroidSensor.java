@@ -229,7 +229,7 @@ public class AndroidSensor extends Sensor
 								currByte |= (byte)(diffY << 1);
 								currByte |= (byte)(diffSignZ);
 									
-								System.out.println(((byte)currByte));
+								////System.out.println(((byte)currByte));
 								try
 								{
 									bw.write(currByte);
@@ -252,7 +252,7 @@ public class AndroidSensor extends Sensor
 								currByte |= (byte) ((byte)diffX << 3);
 								currByte |= (byte) ((byte)diffSignY << 2);
 								currByte |= (byte) ((byte)diffY);
-								System.out.println(((byte)currByte));
+								//System.out.println(((byte)currByte));
 								try
 								{
 									bw.write(currByte);
@@ -277,7 +277,7 @@ public class AndroidSensor extends Sensor
 								currByte |= (byte)(((byte)diffX) << 2);
 								currByte |= (byte) ((byte)diffSignY << 1);														
 								currByte |= (byte) (diffY >>> 1);
-								System.out.println(((byte)currByte));
+								//System.out.println(((byte)currByte));
 								try
 								{
 									bw.write(currByte);
@@ -301,7 +301,7 @@ public class AndroidSensor extends Sensor
 								currByte |= (byte) ((byte)diffSignX << 3);
 								currByte |= (byte) ((byte)diffX << 1);
 								currByte |= (byte) ((byte)diffSignY);
-								System.out.println(((byte)currByte));
+								//System.out.println(((byte)currByte));
 								try
 								{
 									bw.write(currByte);
@@ -324,7 +324,7 @@ public class AndroidSensor extends Sensor
 								currByte = prevByte;
 								currByte |= (byte)((byte) diffSignX << 2);
 								currByte |= (byte)((byte) diffX);
-								System.out.println(((byte)currByte));
+								//System.out.println(((byte)currByte));
 								try
 								{
 									bw.write(currByte);
@@ -348,7 +348,7 @@ public class AndroidSensor extends Sensor
 								currByte = prevByte;
 								currByte |= (byte) ((byte)diffSignX << 1);
 								currByte |= (byte) (((byte)diffX)>>> 1);
-								System.out.println(((byte)currByte));
+								//System.out.println(((byte)currByte));
 								try
 								{
 									bw.write(currByte);
@@ -372,7 +372,7 @@ public class AndroidSensor extends Sensor
 							{
 								currByte = prevByte;
 								currByte |= (byte)((byte)diffSignX);
-								System.out.println(((byte)currByte));
+								//System.out.println(((byte)currByte));
 								try
 								{
 									bw.write(currByte);
@@ -396,7 +396,7 @@ public class AndroidSensor extends Sensor
 							{
 								currByte = prevByte;
 								currByte |= 0x00;
-								System.out.println(((byte)currByte));
+								//System.out.println(((byte)currByte));
 								try
 								{
 									bw.write(currByte);
@@ -413,7 +413,7 @@ public class AndroidSensor extends Sensor
 								currByte |= (byte) ((byte)diffY << 2);
 								currByte |= (byte) ((byte)diffSignZ << 1);
 								currByte |= (byte) (((byte)diffZ) >>> 1);
-								System.out.println(((byte)currByte));
+								//System.out.println(((byte)currByte));
 								try
 								{
 									bw.write(currByte);
@@ -444,11 +444,11 @@ public class AndroidSensor extends Sensor
 							case 0:
 							{							
 								currByte = (byte) ( (byte)0x02 << 6);
-								System.out.println(((byte)currByte));
+								//System.out.println(((byte)currByte));
 								currByte |= (byte) ((byte)diffSignX << 5);
-								System.out.println(((byte)currByte));
+								//System.out.println(((byte)currByte));
 								currByte |= (byte) ((byte)diffX);
-								System.out.println(((byte)currByte));
+								//System.out.println(((byte)currByte));
 								try
 								{
 									bw.write(currByte);
@@ -463,7 +463,7 @@ public class AndroidSensor extends Sensor
 								currByte |= (byte) ((byte)diffY << 2);
 								currByte |= (byte) ((byte)diffSignZ << 1);
 								currByte |= (byte) ((byte)diffZ >>> 4);
-								System.out.println(((byte)currByte));
+								//System.out.println(((byte)currByte));
 								try
 								{
 									bw.write(currByte);
@@ -485,7 +485,7 @@ public class AndroidSensor extends Sensor
 								currByte |= (byte) ((byte) 0x02 << 5);
 								currByte |= (byte) ((byte) diffSignX << 4);
 								currByte |= (byte)  ((byte) diffX >>> 1);
-								System.out.println(((byte)currByte));
+								//System.out.println(((byte)currByte));
 								try
 								{
 									bw.write(currByte);
@@ -500,7 +500,7 @@ public class AndroidSensor extends Sensor
 								currByte |= (byte) ((byte)diffSignY << 6);
 								currByte |= (byte) ((byte)diffY << 1);
 								currByte |= (byte) ((byte)diffSignZ);
-								System.out.println(((byte)currByte));
+								//System.out.println(((byte)currByte));
 								try
 								{
 									bw.write(currByte);
@@ -522,7 +522,7 @@ public class AndroidSensor extends Sensor
 								currByte |= (byte) ((byte)0x02 << 4);
 								currByte |= (byte) ((byte)diffSignX << 3);
 								currByte |= (byte) ((byte)diffX >>> 2 );
-								System.out.println(((byte)currByte));
+								//System.out.println(((byte)currByte));
 								try
 								{
 									bw.write(currByte);
@@ -532,7 +532,7 @@ public class AndroidSensor extends Sensor
 								{
 									System.out.println(ex.getMessage());
 								}
-								System.out.println(((byte)currByte));
+								//System.out.println(((byte)currByte));
 								currByte = (byte) ((byte)diffX << 6);
 								currByte |= (byte) ((byte)diffSignY << 5);
 								currByte |= (byte) ((byte)diffY);
@@ -546,7 +546,7 @@ public class AndroidSensor extends Sensor
 								{
 									System.out.println(ex.getMessage());
 								}
-								System.out.println(((byte)currByte));
+								//System.out.println(((byte)currByte));
 								currByte = (byte) ((byte)diffSignZ << 7);
 								currByte |= (byte) ((byte)diffZ << 2);
 								prevByte = currByte;
@@ -559,7 +559,7 @@ public class AndroidSensor extends Sensor
 								currByte |= (byte) ((byte)0x02 << 3);
 								currByte |= (byte) ((byte)diffSignX << 3);
 								currByte |= (byte) ((byte)diffX >>> 3);
-								System.out.println(((byte)currByte));
+								//System.out.println(((byte)currByte));
 								try
 								{
 									bw.write(currByte);
@@ -573,7 +573,7 @@ public class AndroidSensor extends Sensor
 								currByte = (byte) ((byte)diffX << 5);
 								currByte |= (byte) ((byte)diffSignY << 4);
 								currByte |= (byte) ((byte)diffY >>> 1);
-								System.out.println(((byte)currByte));
+								//System.out.println(((byte)currByte));
 								try
 								{
 									bw.write(currByte);
@@ -583,7 +583,7 @@ public class AndroidSensor extends Sensor
 								{
 									System.out.println(ex.getMessage());
 								}
-								System.out.println(((byte)currByte));
+								//System.out.println(((byte)currByte));
 								currByte = (byte) ((byte)diffY << 7);
 								currByte |= (byte) ((byte)diffSignZ << 6);
 								currByte |= (byte) ((byte)diffZ << 1);
@@ -597,7 +597,7 @@ public class AndroidSensor extends Sensor
 								currByte |= (byte) ((byte)0x02 << 2);
 								currByte |= (byte) ((byte)diffSignX << 1);
 								currByte |= (byte) ((byte)diffX >>> 4);
-								System.out.println(((byte)currByte));
+								//System.out.println(((byte)currByte));
 								try
 								{
 									bw.write(currByte);
@@ -611,7 +611,7 @@ public class AndroidSensor extends Sensor
 								currByte = (byte) ((byte)diffX << 4);
 								currByte |= (byte) ((byte)diffSignY << 3);
 								currByte |= (byte) ((byte)diffY >>> 2);
-								System.out.println(((byte)currByte));
+								//System.out.println(((byte)currByte));
 								try
 								{
 									bw.write(currByte);
@@ -625,7 +625,7 @@ public class AndroidSensor extends Sensor
 								currByte = (byte) ((byte)diffY << 6);
 								currByte |= (byte) ((byte)diffSignZ << 5);
 								currByte |= (byte) ((byte)diffZ);
-								System.out.println(((byte)currByte));
+								//System.out.println(((byte)currByte));
 								
 								try
 								{
@@ -645,7 +645,7 @@ public class AndroidSensor extends Sensor
 								currByte = prevByte;
 								currByte |= (byte) ((byte)0x02 << 1);
 								currByte |= (byte) ((byte)diffSignX);
-								System.out.println(((byte)currByte));
+								//System.out.println(((byte)currByte));
 								try
 								{
 									bw.write(currByte);
@@ -659,7 +659,7 @@ public class AndroidSensor extends Sensor
 								currByte = (byte) ((byte)diffX << 3);
 								currByte |= (byte) ((byte)diffSignY << 2);
 								currByte |= (byte) ((byte)diffY >>> 3);
-								System.out.println(((byte)currByte));
+								//System.out.println(((byte)currByte));
 								try
 								{
 									bw.write(currByte);
@@ -673,7 +673,7 @@ public class AndroidSensor extends Sensor
 								currByte = (byte) ((byte)diffY << 5);
 								currByte |= (byte) ((byte)diffSignZ << 4);
 								currByte |= (byte) ((byte)diffZ >>> 1);
-								System.out.println(((byte)currByte));
+								//System.out.println(((byte)currByte));
 								try
 								{
 									bw.write(currByte);
@@ -693,7 +693,7 @@ public class AndroidSensor extends Sensor
 							{
 								currByte = prevByte;
 								currByte |= (byte) ((byte)0x02);
-								System.out.println(((byte)currByte));
+								//System.out.println(((byte)currByte));
 								try
 								{
 									bw.write(currByte);
@@ -708,7 +708,7 @@ public class AndroidSensor extends Sensor
 								currByte |= (byte) ((byte)diffX << 2);
 								currByte |= (byte) ((byte)diffSignY << 1);
 								currByte |= (byte) ((byte)diffY >>> 4);
-								System.out.println(((byte)currByte));
+								//System.out.println(((byte)currByte));
 								try
 								{
 									bw.write(currByte);
@@ -722,7 +722,7 @@ public class AndroidSensor extends Sensor
 								currByte = (byte) ((byte)diffY << 4);
 								currByte |= (byte) ((byte)diffSignZ << 3);
 								currByte |= (byte) ((byte)diffZ >>> 2);
-								System.out.println(((byte)currByte));
+								//System.out.println(((byte)currByte));
 								try
 								{
 									bw.write(currByte);
@@ -742,7 +742,7 @@ public class AndroidSensor extends Sensor
 							{
 								currByte = prevByte;
 								currByte |= (byte)((byte)0x01);
-								System.out.println(((byte)currByte));
+								//System.out.println(((byte)currByte));
 								try
 								{
 									bw.write(currByte);
@@ -756,7 +756,7 @@ public class AndroidSensor extends Sensor
 								currByte = (byte) ((byte)diffSignX >> 6);
 								currByte |= (byte) ((byte)diffX << 1);
 								currByte |= (byte) ((byte)diffSignY);
-								System.out.println(((byte)currByte));
+								//System.out.println(((byte)currByte));
 								try
 								{
 									bw.write(currByte);
@@ -770,7 +770,7 @@ public class AndroidSensor extends Sensor
 								currByte = (byte) ((byte)diffY << 3);
 								currByte = (byte) ((byte)diffSignZ << 2);
 								currByte = (byte) ((byte)diffZ >>> 3);
-								System.out.println(((byte)currByte));
+								//System.out.println(((byte)currByte));
 								try
 								{
 									bw.write(currByte);
