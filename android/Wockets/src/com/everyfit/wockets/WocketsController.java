@@ -105,7 +105,7 @@ public class WocketsController  implements XMLSerializable{
 		copyFile(srcSensorData, destSensorData);
 		
 		Intent intent = new Intent();
-		intent.setClassName("com.everyfit.wockets.apps", "com.everyfit.wockets.apps.DataService");
+		intent.setClassName("com.everyfit.wockets.apps", "com.everyfit.wockets.apps.CollectDataService");
 		WocketsService._Context.startService(intent);
 		
 		//this.start();		

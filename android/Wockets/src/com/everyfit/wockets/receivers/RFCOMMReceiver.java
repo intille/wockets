@@ -165,6 +165,7 @@ public final class RFCOMMReceiver extends Receiver {
      public boolean Dispose(){
     	 if (reconnectionThread!=null)
     		 reconnectionThread.Dispose(); 
+    	 reconnectionThread = null;
     	 this._BluetoothStream.Dispose();
     	 NetworkStacks._BluetoothStack. Disconnect(this._Address);//.Disconnect
     	 return true;
