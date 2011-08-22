@@ -70,10 +70,13 @@ public class DataService extends Service
 	@Override
 	public void onCreate()
 	{
-		HandlerThread thread = new HandlerThread("CollectDataService",Process.THREAD_PRIORITY_BACKGROUND);
+		Application._Context = getApplicationContext();
+		Application._running = true;
+		HandlerThread thread = new HandlerThread("CollectDataService",Process.THREAD_PRIORITY_DEFAULT);
 		thread.start();
 		mServiceLooper = thread.getLooper();
 		mServiceHandler = new ServiceHandler(mServiceLooper);
+	
 	}
 	
 	@Override
