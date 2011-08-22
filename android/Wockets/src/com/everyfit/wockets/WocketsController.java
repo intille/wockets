@@ -34,6 +34,7 @@ import java.io.FileOutputStream;
 import android.content.Intent;
 import android.util.Log;
 import android.util.Xml;
+import android.widget.Toast;
 
 
 public class WocketsController  implements XMLSerializable{
@@ -107,7 +108,7 @@ public class WocketsController  implements XMLSerializable{
 		Intent intent = new Intent();
 		intent.setClassName("com.everyfit.wockets.apps", "com.everyfit.wockets.apps.CollectDataService");
 		WocketsService._Context.startService(intent);
-		
+				
 		//this.start();		
 	}
 	
@@ -434,14 +435,7 @@ public class WocketsController  implements XMLSerializable{
 	            	}
 	            	case XmlPullParser.END_TAG:
 	            	{
-//	            		name = parser.getName();
-//	            		
-//	            		if(name.equalsIgnoreCase(WocketsController._RECEIVERS))
-//	            			receivers = false;
-//	            		else if(name.equalsIgnoreCase(WocketsController._DECODERS))
-//	            			decoders = false;
-//	            		else if(name.equalsIgnoreCase(WocketsController._SENSORS))
-//	            			sensors = false;
+
 	            	}
             	}
             	eventType = parser.next();
