@@ -213,13 +213,15 @@ public class WocketsController  implements XMLSerializable{
 		}		
 	}
 	
-	public void Disconnect(){
+	public void Disconnect()
+	{
 		for(Sensor sensor:this._Sensors)
 			sensor.Dispose();
 		//this.stop();
 	}
 	
-	public void Dispose(){
+	public void Dispose()
+	{
 		running=false;		
 				
 		if (this._Sensors!=null){
@@ -228,7 +230,7 @@ public class WocketsController  implements XMLSerializable{
 				sensor._Decoder.Dispose();
 				sensor._Receiver.Dispose();
 			}
-		}
+		}			
 		
 		_Network.Dispose();
 	}

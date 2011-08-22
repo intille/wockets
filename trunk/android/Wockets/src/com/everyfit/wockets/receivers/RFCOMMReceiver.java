@@ -69,22 +69,6 @@ public final class RFCOMMReceiver extends Receiver {
         	 return false;
          }
          
-         //for reconnection
-//         if(this._BluetoothStream == null)
-//         {
-//        	 if(this._Reconnections < 3)
-//        	 {
-//        		 this._Reconnections++;
-//        		 Reconnect();
-//        	 }
-//        	 else
-//        	 {
-//        		 return false;
-//        	 }
-//        	 
-//        	 
-//         }
-         
          this._CurrentConnectionUnixTime = this._BluetoothStream._CurrentConnectionUnixTime;
          this._SuccessfulConnections++;
          this._Status= ReceiverStatus.Connected;                 
@@ -136,8 +120,10 @@ public final class RFCOMMReceiver extends Receiver {
     	}
     	
     	public void Dispose(){
+    		this.receiver._Status = ReceiverStatus.Disconnected;
     		running=false;
     		try {
+    			
 				this.join();
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
@@ -162,12 +148,18 @@ public final class RFCOMMReceiver extends Receiver {
         this._SBuffer._Tail += availableBytes; 
          
      }
-     public boolean Dispose(){
+     public boolean Dispose()
+     {
     	 if (reconnectionThread!=null)
-    		 reconnectionThread.Dispose(); 
-    	 reconnectionThread = null;
-    	 this._BluetoothStream.Dispose();
+    	 {
+    		 this._Status = ReceiverStatus.Disconnected;
+     		 reconnectionThread.running=false;    
+    		 reconnectionThread = null;
+    	 }    		      	
+    	 
     	 NetworkStacks._BluetoothStack. Disconnect(this._Address);//.Disconnect
+    	 if(this._BluetoothStream != null)
+    		 this._BluetoothStream.Dispose();    	 
     	 return true;
      }
                
