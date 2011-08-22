@@ -176,6 +176,7 @@ public class CollectData extends Activity implements Runnable,KernelCallback
 		
 		//set the running variable to true
 		running = true;
+		Application._running = true;
 		
 		ArrayList<String> wockets=Application._Wockets.toAddressArrayList();
 		tails=new int[Application._Controller._Sensors.size()];
@@ -258,7 +259,7 @@ public class CollectData extends Activity implements Runnable,KernelCallback
 		Application._Controller.Dispose();
 		
 		Intent intent = new Intent();
-		intent.setClassName("com.everyfit.wockets.apps", "com.everyfit.wockets.apps.DataService");
+		intent.setClassName("com.everyfit.wockets.apps", "com.everyfit.wockets.apps.CollectDataService");
 		stopService(intent);												
 		
 		running = false;
