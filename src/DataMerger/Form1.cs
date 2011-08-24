@@ -1993,6 +1993,12 @@ namespace DataMerger
         //JPN: Declare array for storing previous summary data value for PLOT WFAC
         private static string[] prevWFACPlotDataLine;
 
+        //Declare counter for PLOT WFAC
+        private static int[] wFACCounter;
+
+        //Declare counter for PLOT WRAC
+        private static int[] wRACCounter;
+
         public static string CSVProgress = "";
         public static bool hasActigraph = false;
         public static bool hasOxycon = false;
@@ -4607,6 +4613,15 @@ namespace DataMerger
                 for (int i = 0; i < prevWRACPlotDataLine.Length; i++)
                     prevWRACPlotDataLine[i] = "0";
 
+                //initialize counter for PLOT WRAC data
+                wRACCounter = new int[wcontroller._Sensors.Count];
+
+                //initialize the counter for PLOT WRAC data
+                for (int i = 0; i < wRACCounter.Length; i++)
+                {
+                    wRACCounter[i] = 0;
+                }
+
                 for (int i = 0; (i < whead.Length); i++)
                 {
                     whead[i] = 0;
@@ -4666,6 +4681,12 @@ namespace DataMerger
                     prevWFACPlotDataLine[i] = "0";
                 }
 
+                //initialize counter for PLOT WFAC
+                wFACCounter = new int[CurrentWockets._Controller._Sensors.Count];
+                for (int i = 0; i < CurrentWockets._Controller._Sensors.Count; i++)
+                {
+                    wFACCounter[i] = 0;
+                }
                 ////JPN: Initialize previous line array for PLOT WRAC data
                 //prevWRACPlotDataLine = new string[CurrentWockets._Controller._Sensors.Count];
                 //for (int i = 0; i < prevWRACPlotDataLine.Length; i++)
@@ -6025,14 +6046,42 @@ namespace DataMerger
                     for (int i = 0; (i < wWFACData.Length); i++)
                     {
                         if (wWFACData[i].ContainsKey(key) == false)
-                        {
+                        {                                                        
                             master_csv_line = master_csv_line + "," + prevWFACPlotDataLine[i];
+                            wFACCounter[i]++;
+                            //to ensure that each activity count is repeated only 60 times corresponding to one minute
+                            if (wFACCounter[i] > 59)
+                            {                                
+                                DateTime tempDateTime = currentDateTime;
+                                string tempKey = "";
+                                for (int j = 0; j < 60; j++)
+                                {
+                                    tempDateTime = tempDateTime.AddSeconds(1.0);
+                                    tempKey = tempDateTime.Year + "-" + tempDateTime.Month + "-" + tempDateTime.Day + "-" + tempDateTime.Hour + "-" + tempDateTime.Minute + "-" + tempDateTime.Second;
+                                    if (wWFACData[i].Contains(tempKey))
+                                        break;
+                                }
+                                if (wWFACData[i].Contains(tempKey))
+                                {
+                                    prevWFACPlotDataLine[i] = wWFACData[i][tempKey].ToString();
+                                }
+                                wFACCounter[i] = 0;
+                            }                                                                                        
                         }
                         else
                         {
                             master_csv_line = master_csv_line + "," + wWFACData[i][key];
                             prevWFACPlotDataLine[i] = wWFACData[i][key].ToString();
-                        }
+                            if (wFACCounter[i] > 59)
+                            {
+                                wFACCounter[i] = 0;
+                            }
+                            else
+                            {
+                                wFACCounter[i]++;
+                            }
+
+                        }                                              
                     }
                 }
                 #endregion Write CSV lines for PLOT Wockets Firmware Activity Counts (WFAC)
@@ -6042,15 +6091,34 @@ namespace DataMerger
                 //JPN: If WRAC data is available, add that to the summary spreadsheets
                 if (wWRACData != null)
                 {
-
-
                     //JPN: Iterate through each sensor
                     for (int i = 0; (i < wWRACData.Length); i++)
                     {
                         //JPN: Carry over previous WRAC value if the current sample is not the start of a new WRAC minute epoch
+                        //make sure each WRAC value is repeated only 60 time corresponding to each minute
                         if (wWRACData[i].ContainsKey(key) == false)
                         {
                             master_csv_line = master_csv_line + "," + prevWRACPlotDataLine[i];
+                            wRACCounter[i]++;
+                            if(wRACCounter[i] > 59)
+                            {
+                                DateTime tempDateTime = currentDateTime;
+                                string tempKey = "";
+                                for (int j = 0; j < 60; j++)
+                                {
+                                    tempDateTime = tempDateTime.AddSeconds(1.0);
+                                    tempKey = tempDateTime.Year + "-" + tempDateTime.Month + "-" + tempDateTime.Day + "-" + tempDateTime.Hour + "-" + tempDateTime.Minute + "-" + tempDateTime.Second;
+                                    if (wWRACData[i].Contains(tempKey))
+                                        break;
+                                }
+                                if(wWRACData[i].Contains(tempKey))
+                                {
+                                    int value = Convert.ToInt32(Convert.ToDouble(wWRACData[i][tempKey]));
+                                    prevWRACPlotDataLine[i] = value.ToString();
+                                }
+                                wRACCounter[i] = 0;
+                            }
+                            
                         }
                         //JPN: Log new WRAC value when the next minute epoch starts
                         else
@@ -6061,6 +6129,15 @@ namespace DataMerger
                             master_csv_line = master_csv_line + "," + value;
                             //JPN: Store this line so it can be repeated in the summary CSV until the WRAC value changes
                             prevWRACPlotDataLine[i] = value.ToString();
+
+                            if (wRACCounter[i] > 59)
+                            {
+                                wRACCounter[i] = 0;
+                            }
+                            else
+                            {
+                                wRACCounter[i]++;
+                            }
                         }
                     }
                 }
