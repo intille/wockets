@@ -69,7 +69,7 @@ public final class WocketsService extends Service implements ApplicationCallback
     public void onCreate() {    
 		  _Context=this.getApplicationContext();
           _Controller= new WocketsController();
-          _Controller.Initialize();        
+          _Controller.Initialize("SensorData.xml");        
     }
 
 	@Override
