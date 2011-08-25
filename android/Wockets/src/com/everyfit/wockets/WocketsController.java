@@ -44,7 +44,8 @@ public class WocketsController  implements XMLSerializable{
 	public TransmissionMode _TransmissionMode;	
 	public String _RootPath="";	
 	public String _DataStoragePath="";
-	private boolean running=true;	
+	private boolean running=true;
+	private String _SensorData ;
 	
 	//Wockets Controller Components
 	public SensorList _Sensors;
@@ -85,10 +86,12 @@ public class WocketsController  implements XMLSerializable{
 	    this._DataStoragePath=this._RootPath+"Session-" + (twoPlaces.format(now.get(Calendar.MONTH) + 1)) + "-" + twoPlaces.format(now.get(Calendar.DAY_OF_MONTH)) + "-" + now.get(Calendar.YEAR) + "-" + twoPlaces.format(now.get(Calendar.HOUR_OF_DAY)) + "-" + twoPlaces.format(now.get(Calendar.MINUTE)) + "-" + twoPlaces.format(now.get(Calendar.SECOND))+"/";
 	}
 		
-	public void Initialize() {		
+	public void Initialize(String sensorData) 
+	{		
 		this._TransmissionMode=TransmissionMode.Continuous;
 		_Network=new NetworkStacks();
-		_Network.Initialize();			
+		_Network.Initialize();
+		this._SensorData = sensorData;
 		this._Receivers = new ReceiverList();
 		this._Decoders = new DecoderList();
 		this._Sensors = new SensorList();
@@ -101,7 +104,7 @@ public class WocketsController  implements XMLSerializable{
 	{
 			
 		//copying SensorData.xml to data folder
-		String srcSensorData = Environment.getExternalStorageDirectory().getAbsolutePath() + "/wockets/SensorData.xml";
+		String srcSensorData = Environment.getExternalStorageDirectory().getAbsolutePath() + "/wockets/" + this._SensorData;
 		String destSensorData = this._DataStoragePath + "SensorData.xml";
 		copyFile(srcSensorData, destSensorData);
 		

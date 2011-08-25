@@ -106,7 +106,7 @@ public final class BluetoothStack {
 				myintent.putExtra("KernelMessage",KernelMessage.Discovered.name());
 				myintent.putExtra("table",NetworkStacks._BluetoothStack._Discovered);
 				WocketsService._Context.sendBroadcast(myintent);
-	        }
+	        }	        
 	        }catch(Exception e){
 	        	Log.e("t", "t");
 	        }
