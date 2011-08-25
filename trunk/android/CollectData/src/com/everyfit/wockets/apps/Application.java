@@ -10,4 +10,5 @@ public class Application{
 	public static Context _Context=null;
 	public static Wockets _Wockets=null;
 	public static boolean _running = false;
+	public static String _SensorData = null;
 }
