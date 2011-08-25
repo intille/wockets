@@ -1,13 +1,13 @@
 package com.everyfit.wockets.apps;
 
-import com.everyfit.wockets.WocketsController;
-import com.everyfit.wockets.WocketsService;
 import com.everyfit.wockets.receivers.ReceiverStatus;
 import com.everyfit.wockets.sensors.Sensor;
 
 
 import android.app.IntentService;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
@@ -15,6 +15,8 @@ import android.widget.Toast;
 public class CollectDataService extends IntentService
 {
 	private final String TAG = "CollectDataService";
+	public static final String PREF_FILE_NAME = "WocketsPrefFile";
+
 	private boolean running = true;
 	final Handler mHandler = new Handler();
 	
@@ -28,11 +30,17 @@ public class CollectDataService extends IntentService
 	@Override
 	public void onCreate()
 	{	
-		Toast.makeText(WocketsService._Context, "Starting Data Collection", Toast.LENGTH_LONG).show();
-		if(Application._running == false)
+		SharedPreferences preferences = getSharedPreferences(PREF_FILE_NAME, MODE_PRIVATE);
+		SharedPreferences.Editor editor = preferences.edit();
+		running = preferences.getBoolean("running", false);
+				
+		if(running == false)
 		{
 			stopSelf();	
 		}
+		Log.d(TAG, "running in data service=" + running);
+		Toast.makeText(Application._Context, "Starting Data Collection", Toast.LENGTH_LONG).show();
+		
 		super.onCreate();
 	}
 
@@ -46,10 +54,14 @@ public class CollectDataService extends IntentService
             for (Sensor sensor:Application._Controller._Sensors)
             {            	  
             	sensor._Receiver.CheckStatus();
-            	if (sensor._Receiver._Status==ReceiverStatus.Connected)            		
+            	if (sensor._Receiver._Status==ReceiverStatus.Connected)
+            	{
             		sensor.Read();
-            	else if (sensor._Receiver._Status==ReceiverStatus.Disconnected)           	
-    				sensor.Reconnect();        				        			
+            	}            		
+            	else if (sensor._Receiver._Status==ReceiverStatus.Disconnected)
+            	{        			
+              		sensor.Reconnect(); 
+            	}            		        				        		
             }
             
             //Save and flush data infrequently
@@ -75,9 +87,16 @@ public class CollectDataService extends IntentService
 		}
 	}
 	
+	
+	
 	@Override
 	public void onDestroy()
-	{		
+	{
+		SharedPreferences preferences = getSharedPreferences(PREF_FILE_NAME, MODE_PRIVATE);
+		SharedPreferences.Editor editor = preferences.edit();
+		editor.clear();
+		editor.commit();
+		
 		super.onDestroy();
 	}
 }

@@ -68,7 +68,7 @@ public class CollectData_old extends Activity implements KernelCallback
 		Application._Controller= new WocketsController();
 		WocketsService._Context=Application._Context;
 		WocketsService._Controller=Application._Controller;
-		Application._Controller.Initialize();
+		Application._Controller.Initialize("SensorData.xml");
 		Application._running = true;
 		
 		Application._Controller.FromXML(this._ROOTPATH + "SensorData.xml");

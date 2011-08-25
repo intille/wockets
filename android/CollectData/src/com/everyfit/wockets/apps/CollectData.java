@@ -1,10 +1,6 @@
 package com.everyfit.wockets.apps;
 
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 
 import com.everyfit.wockets.WocketsController;
@@ -17,11 +13,12 @@ import com.everyfit.wockets.receivers.RFCOMMReceiver;
 import com.everyfit.wockets.receivers.ReceiverStatus;
 import com.everyfit.wockets.sensors.AndroidSensor;
 import com.everyfit.wockets.sensors.SensorList;
-import com.everyfit.wockets.utils.network.NetworkStacks;
-
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.hardware.Sensor;
@@ -38,20 +35,20 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
 public class CollectData extends Activity implements Runnable,KernelCallback
-{
-	Button bWocketConnect;
-	private static final String TAG = "ServicesDemo";	
-	private String[] wocketaddress;
-	private Hashtable<String,String> selectedwockets;
-	private ArrayList<String> selWockets;
+{	
+	private static final String TAG = "Collect Data";
+	public static final String PREF_FILE_NAME = "WocketsPrefFile";
 	private boolean running = false;
-	private int requestCode = 1;
 	private String _ROOTPATH = Environment.getExternalStorageDirectory().getAbsolutePath() + "/wockets/";
+	private String _SensorData = "SensorData_1.xml";
+	private int sensorSet = 1;
+	private boolean prefRunning = false;
 	
 	private SensorManager mSensorManager;
     private PowerManager mPowerManager;
@@ -62,14 +59,14 @@ public class CollectData extends Activity implements Runnable,KernelCallback
     private float mAccelResolution;
     private float mAccelBits;
     private float mAccelNorm;
-    private Sensor mAccelerometer;
+    private Sensor mAccelerometer;       
     
     // variables for graph
     private GraphicsView view;
 	private int NumGraphs=0;
 	private int[] tails;	
-	private Thread t;
-
+	private Thread t;	
+	
 	Canvas canvas;
 	
 	public int[] position;
@@ -100,26 +97,166 @@ public class CollectData extends Activity implements Runnable,KernelCallback
 	public void onCreate(Bundle savedInstanceState)
 	{		
 		super.onCreate(savedInstanceState);
-		
-		bWocketConnect = (Button) findViewById(R.id.connect);
-		
+			
 		KernelListener.callbacks.add(this);
 		
-		if(Application._Context == null)
+		SharedPreferences preferences = getSharedPreferences(PREF_FILE_NAME, MODE_PRIVATE);
+		SharedPreferences.Editor editor = preferences.edit();					
+		prefRunning =  preferences.getBoolean("running", false);
+		
+		if(prefRunning == false)
+		{				
+			ArrayList<String> arrAlert = new ArrayList<String>();
+			arrAlert.add("Green Set");
+			arrAlert.add("Red Set");
+			
+			final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			final ListView listView = new ListView(this);		
+			listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);		
+			listView.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_list_item_single_choice,arrAlert));
+			listView.setItemChecked(0, true);
+			listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+				public void onItemClick(AdapterView<?> myAapter, View myView, int myItem,
+						long myLong)
+				{
+					String selected = (String) listView.getItemAtPosition(myItem);
+					if(selected.equalsIgnoreCase("Green Set"))
+					{
+						sensorSet = 1;
+						_SensorData = "SensorData_1.xml";					
+					}
+					else
+					{
+						sensorSet = 2;
+						_SensorData = "SensorData_2.xml";
+					}
+				}
+				
+			});
+			
+			builder.setMessage("Select the Wocket Set :");
+			builder.setView(listView);
+			builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+				
+				public void onClick(DialogInterface dialog, int which) 
+				{				
+					SharedPreferences preferences = getSharedPreferences(PREF_FILE_NAME, MODE_PRIVATE);
+					SharedPreferences.Editor editor = preferences.edit();
+					if (sensorSet == 2)
+					{
+						editor.putInt("sensorSet", 2);			
+					}
+					else
+					{
+						editor.putInt("sensorSet", 1);			
+					}						
+									
+					editor.commit();
+									
+					Application._SensorData = _SensorData;
+					
+					startSession();
+				}
+			});
+			
+			builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				
+				public void onClick(DialogInterface dialog, int which) 
+				{
+					finish();				
+				}
+			});
+			
+			builder.show();						
+		}
+		else
 		{
+			if(Application._Context == null )
+			{				
+				prefRunning =  false;
+				editor.putBoolean("running", prefRunning);
+				editor.commit();
+			}
+			startSession();
+		}					
+	}
+	
+	@Override
+	protected void onPause() 
+	{	
+		mUpdateInterface = null;
+		t = null;
+		running = false;
+	    super.onPause();    
+	    
+	}
+	
+	@Override
+	protected void onResume()
+	{	
+		super.onResume();
+	}
+	
+	
+	@Override
+	protected void onDestroy()
+	{
+		//finish();
+		KernelListener.callbacks.remove(this);	
+		super.onDestroy();
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu)
+	{
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.wockets_menu,menu);
+		return true;
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item)
+	{
+		switch(item.getItemId())
+		{
+			case R.id.quit_session:
+			{
+				quitSession();
+				return true;
+			}
+			case R.id.swap:
+			{
+				swapWockets();
+				return true;
+			}
+			default:
+			{
+				return super.onOptionsItemSelected(item);
+			}
+		}
+	}
+	
+	public void startSession()
+	{		
+		
+		if(prefRunning == false)
+		{
+			prefRunning = true;
+			SharedPreferences preferences = getSharedPreferences(PREF_FILE_NAME, MODE_PRIVATE);		
+			SharedPreferences.Editor editor = preferences.edit();
+			editor.putBoolean("running", prefRunning);			
+			editor.commit();
+			
 			Application._Context = this.getApplicationContext();
 			Application._Wockets = new Wockets();
-		}
-		
-		if(Application._running == false)
-		{
 			Application._Controller= new WocketsController();
 			WocketsService._Context=Application._Context;
 			WocketsService._Controller=Application._Controller;
-			Application._Controller.Initialize();
+			Application._Controller.Initialize(this._SensorData);
 			Application._running = true;
 			
-			Application._Controller.FromXML(this._ROOTPATH + "SensorData.xml");
+			Application._Controller.FromXML(this._ROOTPATH + this._SensorData);
 			SensorList sensorList = Application._Controller._Sensors;
 			for(int i = 0 ; i < sensorList.size(); i++)
 			{
@@ -157,6 +294,7 @@ public class CollectData extends Activity implements Runnable,KernelCallback
 			        mWakeLock.acquire();
 			        
 			        mSensorManager.registerListener(((AndroidSensor)sensorList.get(i)).mSensorEventListener, mAccelerometer,SensorManager.SENSOR_DELAY_GAME);
+
 				}
 					
 			}
@@ -191,101 +329,158 @@ public class CollectData extends Activity implements Runnable,KernelCallback
 	   
 	   //Startup the thread       
 	   t=new Thread(this);
-	   t.start();
-		
-	}
-	
-	@Override
-	protected void onPause() 
-	{	
-		mUpdateInterface = null;
-		t = null;
-		running = false;
-	    super.onPause();    
-	    
-	}
-	
-	@Override
-	protected void onResume()
-	{	
-		super.onResume();
-	}
-	
-	
-	@Override
-	protected void onDestroy()
-	{
-		//finish();
-		KernelListener.callbacks.remove(this);
-		super.onDestroy();
-	}
-	
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu)
-	{
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.wockets_menu,menu);
-		return true;
-	}
-	
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item)
-	{
-		switch(item.getItemId())
-		{
-			case R.id.quit_session:
-			{
-				quitSession();
-				return true;
-			}
-			case R.id.swap:
-			{
-				swapWockets();
-				return true;
-			}
-			default:
-			{
-				return super.onOptionsItemSelected(item);
-			}
-		}
+	   t.start();	
+	   
+	   //clear
+	   wockets.clear();
+	   wockets = null;
 	}
 	
 	public void swapWockets()
-	{
-		
+	{	
+			final AlertDialog.Builder alert = new AlertDialog.Builder(this);
+			alert.setMessage("Are you sure you want to swap wockets?");
+			alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
+				
+				public void onClick(DialogInterface dialog, int which) 
+				{					
+					return;
+				}
+			});
+			
+			alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+				
+				public void onClick(DialogInterface dialog, int which)
+				{
+					try
+					{
+						t = null;
+						running = false;
+						Application._running = false;
+						
+						prefRunning = false;
+						SharedPreferences preferences = getSharedPreferences(PREF_FILE_NAME, MODE_PRIVATE);		
+						SharedPreferences.Editor editor = preferences.edit();
+						editor.putBoolean("running", prefRunning);			
+						editor.commit();
+						
+						for(int i = 0 ; i < Application._Controller._Sensors.size(); i++)
+						{
+							if(Application._Controller._Sensors.get(i)._Class.equalsIgnoreCase("Android"))
+							{
+								AndroidSensor sensor = (AndroidSensor)Application._Controller._Sensors.get(i);
+								mSensorManager.unregisterListener(sensor.mSensorEventListener);
+							}
+						}
+						
+						Intent intent = new Intent();
+						intent.setClassName("com.everyfit.wockets.apps", "com.everyfit.wockets.apps.CollectDataService");
+						stopService(intent);
+						
+						Application._Controller.Dispose();
+						Application._running = false;
+						Application._Context = null;
+						Application._Wockets.clear();
+						Application._Controller = null;		
+						
+						mUpdateInterface = null;
+						t = null;
+					
+						finish();
+									
+						
+						Thread.sleep(3000);
+						
+						
+						preferences = getSharedPreferences(PREF_FILE_NAME, MODE_PRIVATE);
+						int sensorSet = preferences.getInt("sensorSet", 0);
+						editor = preferences.edit();
+						
+						if (sensorSet == 2)
+						{
+							sensorSet = 1;
+							editor.putInt("sensorSet", 1);				
+						}
+						else
+						{
+							sensorSet = 2;
+							editor.putInt("sensorSet", 2);				
+						}		
+										
+						editor.commit();
+						
+						_SensorData = "SensorData_" + sensorSet + ".xml";
+						Application._SensorData = _SensorData;			
+						
+						intent = new Intent();
+						intent.setClassName("com.everyfit.wockets.apps", "com.everyfit.wockets.apps.CollectData");
+						startActivity(intent);
+
+					}
+					catch(Exception ex)
+					{
+						Log.e(TAG,"Error in swapping wockets");
+					}														
+				}
+			});
+			alert.show();
 	}
 	
 	public void quitSession()
 	{
-		for(int i = 0 ; i < Application._Controller._Sensors.size(); i++)
-		{
-			if(Application._Controller._Sensors.get(i)._Class.equalsIgnoreCase("Android"))
-			{
-				AndroidSensor sensor = (AndroidSensor)Application._Controller._Sensors.get(i);
-				mSensorManager.unregisterListener(sensor.mSensorEventListener);
+		final AlertDialog.Builder alert = new AlertDialog.Builder(this);
+		alert.setMessage("Are you sure you want to quit?");
+		alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
+			
+			public void onClick(DialogInterface dialog, int which) 
+			{					
+				return;
 			}
-		}
+		});
+		
+		alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+			
+			public void onClick(DialogInterface dialog, int which) 
+			{
+				for(int i = 0 ; i < Application._Controller._Sensors.size(); i++)
+				{
+					if(Application._Controller._Sensors.get(i)._Class.equalsIgnoreCase("Android"))
+					{
+						AndroidSensor sensor = (AndroidSensor)Application._Controller._Sensors.get(i);
+						mSensorManager.unregisterListener(sensor.mSensorEventListener);
+					}
+				}
+						
 				
+				Intent intent = new Intent();
+				intent.setClassName("com.everyfit.wockets.apps", "com.everyfit.wockets.apps.CollectDataService");
+				stopService(intent);												
+				
+				running = false;
+				prefRunning = false;
+				SharedPreferences preferences = getSharedPreferences(PREF_FILE_NAME, MODE_PRIVATE);
+				SharedPreferences.Editor editor = preferences.edit();
+				editor.putBoolean("running", prefRunning);
+				editor.clear();
+				editor.commit();
+				
+				//clear the Application object
+				Application._Controller.Dispose();
+				Application._running = false;
+				Application._Context = null;
+				Application._Wockets.clear();
+				Application._Controller = null;		
+				
+				mUpdateInterface = null;
+				t = null;
+				
+				finish();
+				
+			}
+		});
 		
-		Intent intent = new Intent();
-		intent.setClassName("com.everyfit.wockets.apps", "com.everyfit.wockets.apps.CollectDataService");
-		stopService(intent);												
+		alert.show();
 		
-		running = false;
-		
-		//clear the Application object
-		Application._Controller.Dispose();
-		Application._running = false;
-		Application._Context = null;
-		Application._Wockets.clear();
-		Application._Controller = null;		
-		
-		
-		
-		mUpdateInterface = null;
-		t = null;
-		
-		finish();
 	}
 
 
@@ -364,7 +559,10 @@ public class CollectData extends Activity implements Runnable,KernelCallback
 				{
 					points = canvasPoints.get(i);
 					canvas.drawLine(points[0], points[1], points[2], points[3], arrPaints[points[4]]);
-				}											
+				}
+				
+				//clear
+				points = null;
 			}
 		}		
 	}
@@ -378,13 +576,12 @@ public class CollectData extends Activity implements Runnable,KernelCallback
         		int[] pointCount=new int[Application._Controller._Sensors.size()];
         		int[] points;        		
         		for(int i=0;(i<Application._Controller._Sensors.size());i++)
-        		{
-        			
+        		{        			
     				try
         			{        				
         				com.everyfit.wockets.sensors.Sensor sensor=Application._Controller._Sensors.get(i);
         				if(sensor._Receiver._Status == ReceiverStatus.Connected)        					
-        				{                 				
+        				{                 			        					
         					if(sensor._Class.equalsIgnoreCase("Android"))
         					{
         						AndroidSensor andSensor = (AndroidSensor)sensor;
@@ -513,13 +710,17 @@ public class CollectData extends Activity implements Runnable,KernelCallback
                 				}
         					}
                 				                				
-        				}         				        				
+        				}
         			}
         			catch(Exception e)
         			{        				
-        				Log.e(TAG,"error in mUpdateInterface thread");
+        				Log.e(TAG,"error in mUpdateInterface thread");        			
         			}        			        		
-        		}        		        		
+        		}
+        		
+        		//clear
+        		points = null;
+        		pointCount = null;
         	}    			    		
         }
     };
