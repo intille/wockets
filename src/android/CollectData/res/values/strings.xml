@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="wocketskernel"></string>
+    <string name="hello">Hello World, CollectData!</string>
+    <string name="app_name">Collect Data</string>
+	<string name="wocketskernel2"></string>
+	<string name="quit_session">Quit</string>
+	<string name="swap_wockets">Swap</string>
+</resources>
