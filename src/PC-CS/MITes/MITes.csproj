@@ -1,0 +1,100 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{061C7F1B-8A40-4D9C-BED3-F6583F07BFE3}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MITes</RootNamespace>
+    <AssemblyName>MITes</AssemblyName>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>2.0</OldToolsVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\..\bin\PC-CS\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\..\bin\PC-CS\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <Link>Properties\AssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="DirectoryStructure.cs" />
+    <Compile Include="GenericAccelerometerData.cs" />
+    <Compile Include="MITesActivityCounter.cs" />
+    <Compile Include="MITesActivityLogger.cs" />
+    <Compile Include="MITesActivityLoggerNew.cs" />
+    <Compile Include="MITesCalibratorInstructor.cs" />
+    <Compile Include="MITesCurrentAnalyzer.cs" />
+    <Compile Include="MITesData.cs" />
+    <Compile Include="MITesDataFilterer.cs" />
+    <Compile Include="MITesDecoder.cs" />
+    <Compile Include="MITesDemoObjectAnalyzer.cs" />
+    <Compile Include="MITesHRAnalyzer.cs" />
+    <Compile Include="MITesLightAnalyzer.cs" />
+    <Compile Include="MITesLoggerNew.cs" />
+    <Compile Include="MITesLoggerPLFormat.cs" />
+    <Compile Include="MITesLoggerReader.cs" />
+    <Compile Include="MITesLoggerReaderMR.cs" />
+    <Compile Include="MITesLoggerReaderNew.cs" />
+    <Compile Include="MITesLoggerReaderPLFormat.cs" />
+    <Compile Include="MITesObjectAnalyzer.cs" />
+    <Compile Include="MITesPerformanceStats.cs" />
+    <Compile Include="MITesRangeAnalyzer.cs" />
+    <Compile Include="MITesRawLogger.cs" />
+    <Compile Include="MITesReceiverController.cs" />
+    <Compile Include="MITesScalablePlotter.cs" />
+    <Compile Include="MITesSensorCalibrator.cs" />
+    <Compile Include="MITesSystemTime.cs" />
+    <Compile Include="MITesTempAnalyzer.cs" />
+    <Compile Include="MITesUVAnalyzer.cs" />
+    <Compile Include="SocketTransmitter.cs" />
+    <Compile Include="UDPServer.cs" />
+    <Compile Include="UnixTime.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\IO\IO.csproj">
+      <Project>{1D75F70F-B268-4262-817A-4A0D39E90F86}</Project>
+      <Name>IO</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SerialIO\SerialIO.csproj">
+      <Project>{26831A48-F3A8-4019-8C62-842D3B8D2A6F}</Project>
+      <Name>SerialIO</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

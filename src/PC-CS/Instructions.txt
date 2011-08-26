@@ -1,0 +1,12 @@
+Wockets PC code (written in c sharp) for Wocket setup and calibration, data merging (of multiple Wockets data and other sensors), and data visualization. 
+
+At the moment there are also some other utility functions being used in MIT/Northeastern/Stanford work that assist with device timesyncing in lab experiments. Eventually that code will be removed from here.
+
+The merger will merge Wockets data as well as older data formats used at MIT (MITes).
+
+For questions about this software, send an email to the Wockets developers mailing list: http://mailman.mit.edu/mailman/listinfo/wockets-developers
+
+To use this code, click on the WocketsPC-CS.sln file (Visual Studio 2008 solution file). In VS2008, you should be able to simply build the project. You will end up with a file in trunk/bin/PC-CS/Installer/Release/WocketsInstaller.msi 
+Run the MSI and the applications will be installed. You can run from the Start menu. Look under Wockets. 
+
+See the Wockets website for more information on getting started, including how to merge and view a sample dataset. http://web.mit.edu/wockets 
