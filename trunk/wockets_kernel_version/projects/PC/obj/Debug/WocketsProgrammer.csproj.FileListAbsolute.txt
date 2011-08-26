@@ -1,8 +1,0 @@
-C:\Data\Project\Google Code\googleCodeApril_12\google code latest\wockets_latest_version_with_kernel SVN Jun_8_2011\bin\PC\WocketsProgrammer.exe
-C:\Data\Project\Google Code\googleCodeApril_12\google code latest\wockets_latest_version_with_kernel SVN Jun_8_2011\bin\PC\WocketsProgrammer.pdb
-C:\Data\Project\Google Code\googleCodeApril_12\google code latest\wockets_latest_version_with_kernel SVN Jun_8_2011\projects\PC\obj\Debug\ResolveAssemblyReference.cache
-C:\Data\Project\Google Code\googleCodeApril_12\google code latest\wockets_latest_version_with_kernel SVN Jun_8_2011\projects\PC\obj\Debug\WocketsProgrammer.Form1.resources
-C:\Data\Project\Google Code\googleCodeApril_12\google code latest\wockets_latest_version_with_kernel SVN Jun_8_2011\projects\PC\obj\Debug\WocketsProgrammer.Resources.resources
-C:\Data\Project\Google Code\googleCodeApril_12\google code latest\wockets_latest_version_with_kernel SVN Jun_8_2011\projects\PC\obj\Debug\WocketsProgrammer.csproj.GenerateResource.Cache
-C:\Data\Project\Google Code\googleCodeApril_12\google code latest\wockets_latest_version_with_kernel SVN Jun_8_2011\projects\PC\obj\Debug\WocketsProgrammer.exe
-C:\Data\Project\Google Code\googleCodeApril_12\google code latest\wockets_latest_version_with_kernel SVN Jun_8_2011\projects\PC\obj\Debug\WocketsProgrammer.pdb
