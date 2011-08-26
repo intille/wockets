@@ -1,0 +1,201 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{16986364-6B54-443E-B1F3-A6F17F0523B2}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Wockets</RootNamespace>
+    <AssemblyName>Wockets</AssemblyName>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>2.0</OldToolsVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\..\bin\PC-CS\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\..\bin\PC-CS\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="InTheHand.Net.Personal, Version=2.3.0.0, Culture=neutral, PublicKeyToken=ea38caa273134499, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>.\InTheHand.Net.Personal.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="CurrentWockets.cs" />
+    <Compile Include="Data\Accelerometers\AccelerationData.cs" />
+    <Compile Include="Data\Accelerometers\HTCDiamondTouchAccelerationData.cs" />
+    <Compile Include="Data\Accelerometers\MITesAccelerationData.cs" />
+    <Compile Include="Data\Accelerometers\SparkfunAccelerationData.cs" />
+    <Compile Include="Data\Accelerometers\WocketsAccelerationData.cs" />
+    <Compile Include="Data\Annotation\Activity.cs" />
+    <Compile Include="Data\Annotation\ActivityList.cs" />
+    <Compile Include="Data\Annotation\Annotation.cs" />
+    <Compile Include="Data\Annotation\AnnotationList.cs" />
+    <Compile Include="Data\Annotation\AnnotationProtocol.cs" />
+    <Compile Include="Data\Annotation\AnnotationProtocolList.cs" />
+    <Compile Include="Data\Annotation\ConcurrentActivityLists.cs" />
+    <Compile Include="Data\Annotation\Session.cs" />
+    <Compile Include="Data\Commands\ACK.cs" />
+    <Compile Include="Data\Commands\ALIVE.cs" />
+    <Compile Include="Data\Commands\Command.cs" />
+    <Compile Include="Data\Commands\CommandTypes.cs" />
+    <Compile Include="Data\Commands\GET_ALT.cs" />
+    <Compile Include="Data\Commands\GET_BP.cs" />
+    <Compile Include="Data\Commands\GET_BT.cs" />
+    <Compile Include="Data\Commands\GET_BTCAL.cs" />
+    <Compile Include="Data\Commands\GET_CAL.cs" />
+    <Compile Include="Data\Commands\GET_FV.cs" />
+    <Compile Include="Data\Commands\GET_HV.cs" />
+    <Compile Include="Data\Commands\GET_PC.cs" />
+    <Compile Include="Data\Commands\GET_PDT.cs" />
+    <Compile Include="Data\Commands\GET_SEN.cs" />
+    <Compile Include="Data\Commands\GET_SR.cs" />
+    <Compile Include="Data\Commands\GET_TCT.cs" />
+    <Compile Include="Data\Commands\GET_TM.cs" />
+    <Compile Include="Data\Commands\PAUSE.cs" />
+    <Compile Include="Data\Commands\RESUME.cs" />
+    <Compile Include="Data\Commands\RST_BT.cs" />
+    <Compile Include="Data\Commands\RST_WK.cs" />
+    <Compile Include="Data\Commands\SET_ALT.cs" />
+    <Compile Include="Data\Commands\SET_BTCAL.cs" />
+    <Compile Include="Data\Commands\SET_CAL.cs" />
+    <Compile Include="Data\Commands\SET_PDT.cs" />
+    <Compile Include="Data\Commands\SET_SEN.cs" />
+    <Compile Include="Data\Commands\SET_SR.cs" />
+    <Compile Include="Data\Commands\SET_TCT.cs" />
+    <Compile Include="Data\Commands\SET_TM.cs" />
+    <Compile Include="Data\Commands\SET_VTM.cs" />
+    <Compile Include="Data\Configuration\MemoryConfiguration.cs" />
+    <Compile Include="Data\Configuration\SoftwareConfiguration.cs" />
+    <Compile Include="Data\Configuration\WocketsConfiguration.cs" />
+    <Compile Include="Data\Converter\ArffConverter.cs" />
+    <Compile Include="Data\Converter\CSVConverter.cs" />
+    <Compile Include="Data\Logger\PLFormatLogger.cs" />
+    <Compile Include="Data\Plotters\WocketScalablePlotter.cs" />
+    <Compile Include="Data\Responses\ACC_RSP.cs" />
+    <Compile Include="Data\Responses\AC_RSP.cs" />
+    <Compile Include="Data\Responses\ALT_RSP.cs" />
+    <Compile Include="Data\Responses\BC_RSP.cs" />
+    <Compile Include="Data\Responses\BL_RSP.cs" />
+    <Compile Include="Data\Responses\BP_RSP.cs" />
+    <Compile Include="Data\Responses\BTCAL_RSP.cs" />
+    <Compile Include="Data\Responses\CAL_RSP.cs" />
+    <Compile Include="Data\Responses\FV_RSP.cs" />
+    <Compile Include="Data\Responses\HV_RSP.cs" />
+    <Compile Include="Data\Responses\OFT_RSP.cs" />
+    <Compile Include="Data\Responses\PC_RSP.cs" />
+    <Compile Include="Data\Responses\PDT_RSP.cs" />
+    <Compile Include="Data\Responses\Response.cs" />
+    <Compile Include="Data\Responses\ResponseTypes.cs" />
+    <Compile Include="Data\Responses\SENS_RSP.cs" />
+    <Compile Include="Data\Responses\SR_RSP.cs" />
+    <Compile Include="Data\Responses\TCT_RSP.cs" />
+    <Compile Include="Data\Responses\TM_RSP.cs" />
+    <Compile Include="Data\Responses\TransmissionModes.cs" />
+    <Compile Include="Data\SensorData.cs" />
+    <Compile Include="Data\SensorDataTypes.cs" />
+    <Compile Include="Data\Summary\Activity.cs" />
+    <Compile Include="Data\Summary\ActivityList.cs" />
+    <Compile Include="Data\Summary\Constants.cs" />
+    <Compile Include="Data\Summary\Reader.cs" />
+    <Compile Include="Data\Types\BatteryCalibration.cs" />
+    <Compile Include="Data\Types\Calibration.cs" />
+    <Compile Include="Data\Types\Sensitivity.cs" />
+    <Compile Include="Data\Types\TransmissionMode.cs" />
+    <Compile Include="Decoders\Accelerometers\GenericDecoder.cs" />
+    <Compile Include="Decoders\Accelerometers\HTCDiamondTouchDecoder.cs" />
+    <Compile Include="Decoders\Accelerometers\MITesDecoder.cs" />
+    <Compile Include="Decoders\Accelerometers\SparkfunDecoder.cs" />
+    <Compile Include="Decoders\Accelerometers\WocketsDecoder.cs" />
+    <Compile Include="Decoders\Decoder.cs" />
+    <Compile Include="Decoders\DecoderList.cs" />
+    <Compile Include="Decoders\DecoderModes.cs" />
+    <Compile Include="Decoders\DecoderTypes.cs" />
+    <Compile Include="Exceptions\BurstyException.cs" />
+    <Compile Include="Exceptions\ErrorCodes.cs" />
+    <Compile Include="MemoryMode.cs" />
+    <Compile Include="Receivers\GenericReceiver.cs" />
+    <Compile Include="Receivers\HTCDiamondReceiver.cs" />
+    <Compile Include="Receivers\Receiver.cs" />
+    <Compile Include="Receivers\ReceiverList.cs" />
+    <Compile Include="Receivers\ReceiverStatus.cs" />
+    <Compile Include="Receivers\ReceiverTypes.cs" />
+    <Compile Include="Receivers\RFCOMMReceiver.cs" />
+    <Compile Include="Receivers\SerialReceiver.cs" />
+    <Compile Include="Receivers\StandardCOMReceiver.cs" />
+    <Compile Include="Sensors\Accelerometers\Accelerometer.cs" />
+    <Compile Include="Sensors\Accelerometers\HTCDiamondTouch.cs" />
+    <Compile Include="Sensors\Accelerometers\MITe.cs" />
+    <Compile Include="Sensors\Accelerometers\Sparkfun.cs" />
+    <Compile Include="Sensors\Accelerometers\Wocket.cs" />
+    <Compile Include="Sensors\HeartRate\HeartRateSensor.cs" />
+    <Compile Include="Sensors\Sensor.cs" />
+    <Compile Include="Sensors\SensorClasses.cs" />
+    <Compile Include="Sensors\SensorList.cs" />
+    <Compile Include="Sensors\SensorModes.cs" />
+    <Compile Include="Sensors\SensorTypes.cs" />
+    <Compile Include="Utils\Barrier.cs" />
+    <Compile Include="Utils\ByteReader.cs" />
+    <Compile Include="Utils\ByteWriter.cs" />
+    <Compile Include="Utils\CircularBuffer.cs" />
+    <Compile Include="Utils\DirectoryStructure.cs" />
+    <Compile Include="Utils\FileReader.cs" />
+    <Compile Include="Utils\FileWriter.cs" />
+    <Compile Include="Utils\Logger.cs" />
+    <Compile Include="Utils\Math.cs" />
+    <Compile Include="Utils\MonitorEx.cs" />
+    <Compile Include="Utils\network\Bluetooth\BluetoothStack.cs" />
+    <Compile Include="Utils\network\Bluetooth\BluetoothStackTypes.cs" />
+    <Compile Include="Utils\network\Bluetooth\BluetoothStatus.cs" />
+    <Compile Include="Utils\network\Bluetooth\BluetoothStream.cs" />
+    <Compile Include="Utils\network\Bluetooth\BluetoothStreamList.cs" />
+    <Compile Include="Utils\network\Bluetooth\Microsoft\MicrosoftBluetoothEndpoint.cs" />
+    <Compile Include="Utils\network\Bluetooth\Microsoft\MicrosoftBluetoothStack.cs" />
+    <Compile Include="Utils\network\Bluetooth\Microsoft\MicrosoftBluetoothStream.cs" />
+    <Compile Include="Utils\network\Bluetooth\TSniff.cs" />
+    <Compile Include="Utils\network\Bluetooth\Widcomm\WidcommBluetoothStack.cs" />
+    <Compile Include="Utils\network\Bluetooth\Widcomm\WidcommBluetoothStream.cs" />
+    <Compile Include="Utils\IPC\Barrier.cs" />
+    <Compile Include="Utils\IPC\MonitorEx.cs" />
+    <Compile Include="Utils\network\NetworkStacks.cs" />
+    <Compile Include="Utils\QuickSort.cs" />
+    <Compile Include="Utils\WocketsTimer.cs" />
+    <Compile Include="Utils\XMLSerializable.cs" />
+    <Compile Include="WocketsController.cs" />
+    <Compile Include="WocketsControllerList.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
