@@ -10,3 +10,6 @@ To use this code, click on the WocketsPC-CS.sln file (Visual Studio 2008 solutio
 Run the MSI and the applications will be installed. You can run from the Start menu. Look under Wockets. 
 
 See the Wockets website for more information on getting started, including how to merge and view a sample dataset. http://web.mit.edu/wockets 
+
+Note: When committing this code, be sure to exclude the obj directories 
+
