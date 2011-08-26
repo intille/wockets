@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<appupdater>
-	<application_exe>FileUploadTestApp.exe</application_exe>
-	<application_folder>\Program Files\fileuploadtestapp</application_folder>
-	<urls>
-		<url>http://participate.media.mit.edu/Wockets/</url>
-	</urls>
-</appupdater>
