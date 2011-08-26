@@ -1,0 +1,8 @@
+Directories are as follows:
+
+docs: documentation files for the Wockets (design docs, etc.). Currently empty because this information is found on the Wiki or website or Google Docs. 
+
+src: all source code for the project for various platforms
+
+website: all source code for the remote website tracking tools. This code is undergoing a major revision. This is temporarily left here until the new code is sufficiently well organized and document to add to the SVN. There are limitations to the website code here, but it does work for remotely monitoring data from phones with two Wockets. 
+
