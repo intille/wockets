@@ -37,199 +37,220 @@ namespace DataMerger
             InitializeComponent();
             progressForm = new ProgressForm();
             progressForm.Show();
-
-
         }
 
-
-
+        public Form1(DirectoryInfo sourceDir)
+        {
+            InitializeComponent();
+            progressForm = new ProgressForm();
+            progressForm.Show();
+            this.textBox1.Text = sourceDir.FullName.ToString();
+            if (validateSourcePath())
+            {
+                this.button2.Enabled = false;
+                this.button1.Enabled = true;
+            }
+            else
+            {
+                this.button2.Enabled = false;
+                this.button1.Enabled = false;
+            }
+        }
+        
+        
         #region Initialize and Check If the Sensors Files Exist
-
-
-
 
         private void button2_Click(object sender, EventArgs e)
         {
+            try { this.folderBrowserDialog1.SelectedPath = textBox1.Text.ToString(); }
+            catch { }
 
             DialogResult result = this.folderBrowserDialog1.ShowDialog();
-
 
             if (result == DialogResult.OK)
             {
                 this.textBox1.Text = this.folderBrowserDialog1.SelectedPath;
 
+                if (validateSourcePath())
+                    this.button1.Enabled = true;
+            }
 
-                //Check if all the files that we are looking for exist
-                try
+        }
+
+        private bool validateSourcePath()
+        {
+
+            //Check if all the files that we are looking for exist
+            try
+            {
+                string[] file;
+
+                #region Delete Older Files
+
+                if (Directory.Exists(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY))
                 {
-                    string[] file;
+                    this.progressForm.AppendLog("Older Merged MITes CSVs .....................Deleting\r\n");
+                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*MITes*.csv");
+                    foreach (string filename in file)
+                        File.Delete(filename);
 
-                    #region Delete Older Files
+                    this.progressForm.AppendLog("Older Merged Wockets CSVs .....................Deleting\r\n");
+                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*Wocket*.csv");
+                    foreach (string filename in file)
+                        File.Delete(filename);
 
-                    if (Directory.Exists(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY))
+                    this.progressForm.AppendLog("Older Merged Actigraph CSVs .....................Deleting\r\n");
+                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*Actigraph*.csv");
+                    foreach (string filename in file)
+                        File.Delete(filename);
+
+
+                    this.progressForm.AppendLog("Older Merged Sensewear CSVs .....................Deleting\r\n");
+                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*Sensewear*.csv");
+                    foreach (string filename in file)
+                        File.Delete(filename);
+
+                    this.progressForm.AppendLog("Older Merged Zephyr CSVs .....................Deleting\r\n");
+                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*Zephyr*.csv");
+                    foreach (string filename in file)
+                        File.Delete(filename);
+
+                    this.progressForm.AppendLog("Older Merged Oxycon CSVs .....................Deleting\r\n");
+                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*Oxycon*.csv");
+                    foreach (string filename in file)
+                        File.Delete(filename);
+
+                    this.progressForm.AppendLog("Older Merged Omron CSVs .....................Deleting\r\n");
+                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*Omron*.csv");
+                    foreach (string filename in file)
+                        File.Delete(filename);
+
+                    this.progressForm.AppendLog("Older Merged Columbia CSVs .....................Deleting\r\n");
+                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*columbia*.csv");
+                    foreach (string filename in file)
+                        File.Delete(filename);
+
+                    this.progressForm.AppendLog("Older Merged GPS CSVs .....................Deleting\r\n");
+                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*gps*.csv");
+                    foreach (string filename in file)
+                        File.Delete(filename);
+
+                    this.progressForm.AppendLog("Older Merged RTI CSVs .....................Deleting\r\n");
+                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*rti*.csv");
+                    foreach (string filename in file)
+                        File.Delete(filename);
+
+                }
+                #endregion
+
+
+                #region Search for annotation files
+
+
+                if (File.Exists(this.textBox1.Text + "\\" + ANNOTATION_SUBDIRECTORY + "\\audioannotation" + "\\AnnotationIntervals.xml"))
+                {
+                    this.progressForm.AppendLog("Annotation File in Audio Folder................Found\r\n");
+                    ANNOTATION_SUBDIRECTORY = ANNOTATION_DIRECTORY + "\\audioannotation";
+                    annotation_subdirectory_list.Add(ANNOTATION_SUBDIRECTORY);
+                    annotation_intervals_file_list.Add("AnnotationIntervals.xml");
+                }
+                else
+                {
+                    bool annotation_file_exist = false;
+
+                    if (File.Exists(this.textBox1.Text + "\\" + ANNOTATION_DIRECTORY + "\\PhoneAnnotation" + "\\" + ANNOTATION_INTERVALS_FILE))
                     {
-                        this.progressForm.AppendLog("Older Merged MITes CSVs .....................Deleting\r\n");
-                        file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*MITes*.csv");
-                        foreach (string filename in file)
-                            File.Delete(filename);
-
-                        this.progressForm.AppendLog("Older Merged Wockets CSVs .....................Deleting\r\n");
-                        file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*Wocket*.csv");
-                        foreach (string filename in file)
-                            File.Delete(filename);
-
-                        this.progressForm.AppendLog("Older Merged Actigraph CSVs .....................Deleting\r\n");
-                        file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*Actigraph*.csv");
-                        foreach (string filename in file)
-                            File.Delete(filename);
-
-
-                        this.progressForm.AppendLog("Older Merged Sensewear CSVs .....................Deleting\r\n");
-                        file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*Sensewear*.csv");
-                        foreach (string filename in file)
-                            File.Delete(filename);
-
-                        this.progressForm.AppendLog("Older Merged Zephyr CSVs .....................Deleting\r\n");
-                        file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*Zephyr*.csv");
-                        foreach (string filename in file)
-                            File.Delete(filename);
-
-                        this.progressForm.AppendLog("Older Merged Oxycon CSVs .....................Deleting\r\n");
-                        file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*Oxycon*.csv");
-                        foreach (string filename in file)
-                            File.Delete(filename);
-
-                        this.progressForm.AppendLog("Older Merged Omron CSVs .....................Deleting\r\n");
-                        file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*Omron*.csv");
-                        foreach (string filename in file)
-                            File.Delete(filename);
-
-                        this.progressForm.AppendLog("Older Merged Columbia CSVs .....................Deleting\r\n");
-                        file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*columbia*.csv");
-                        foreach (string filename in file)
-                            File.Delete(filename);
-
-                        this.progressForm.AppendLog("Older Merged GPS CSVs .....................Deleting\r\n");
-                        file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*gps*.csv");
-                        foreach (string filename in file)
-                            File.Delete(filename);
-
-                        this.progressForm.AppendLog("Older Merged RTI CSVs .....................Deleting\r\n");
-                        file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MERGED_SUBDIRECTORY, "*rti*.csv");
-                        foreach (string filename in file)
-                            File.Delete(filename);
-
-                    }
-                    #endregion
-
-
-                    #region Search for annotation files
-
-
-                    if (File.Exists(this.textBox1.Text + "\\" + ANNOTATION_SUBDIRECTORY + "\\audioannotation" + "\\AnnotationIntervals.xml"))
-                    {
-                        this.progressForm.AppendLog("Annotation File in Audio Folder................Found\r\n");
-                        ANNOTATION_SUBDIRECTORY = ANNOTATION_DIRECTORY + "\\audioannotation";
+                        this.progressForm.AppendLog("Annotation File in Phone Folder.....................Found\r\n");
+                        ANNOTATION_SUBDIRECTORY = ANNOTATION_DIRECTORY + "\\PhoneAnnotation";
                         annotation_subdirectory_list.Add(ANNOTATION_SUBDIRECTORY);
                         annotation_intervals_file_list.Add("AnnotationIntervals.xml");
+                        annotation_file_exist = true;
                     }
-                    else
+
+                    if (Directory.Exists(this.textBox1.Text + "\\" + ANNOTATION_DIRECTORY + "\\videoannotation"))
                     {
-                        bool annotation_file_exist = false;
+                        string dpath = this.textBox1.Text + "\\" + ANNOTATION_DIRECTORY + "\\videoannotation" + "\\";
+                        file = Directory.GetFileSystemEntries(dpath, "*" + ANNOTATION_INTERVALS_FILE);
 
-                        if (File.Exists(this.textBox1.Text + "\\" + ANNOTATION_DIRECTORY + "\\PhoneAnnotation" + "\\" + ANNOTATION_INTERVALS_FILE))
+                        if (file.Length > 0)
                         {
-                            this.progressForm.AppendLog("Annotation File in Phone Folder.....................Found\r\n");
-                            ANNOTATION_SUBDIRECTORY = ANNOTATION_DIRECTORY + "\\PhoneAnnotation";
-                            annotation_subdirectory_list.Add(ANNOTATION_SUBDIRECTORY);
-                            annotation_intervals_file_list.Add("AnnotationIntervals.xml");
-                            annotation_file_exist = true;
-                        }
+                            this.progressForm.AppendLog("Annotation File in Video Folder.....................Found\r\n");
+                            ANNOTATION_SUBDIRECTORY = ANNOTATION_DIRECTORY + "\\videoannotation";
 
-                        if (Directory.Exists(this.textBox1.Text + "\\" + ANNOTATION_DIRECTORY + "\\videoannotation"))
-                        {
-                            string dpath = this.textBox1.Text + "\\" + ANNOTATION_DIRECTORY + "\\videoannotation" + "\\";
-                            file = Directory.GetFileSystemEntries(dpath, "*" + ANNOTATION_INTERVALS_FILE);
 
-                            if (file.Length > 0)
+                            for (int i = 0; i < file.Length; i++)
                             {
-                                this.progressForm.AppendLog("Annotation File in Video Folder.....................Found\r\n");
-                                ANNOTATION_SUBDIRECTORY = ANNOTATION_DIRECTORY + "\\videoannotation";
-
-
-                                for (int i = 0; i < file.Length; i++)
-                                {
-                                    annotation_subdirectory_list.Add(ANNOTATION_SUBDIRECTORY);
-                                    annotation_intervals_file_list.Add(file[i].Substring(dpath.Length));
-                                }
-
-                                annotation_file_exist = true;
+                                annotation_subdirectory_list.Add(ANNOTATION_SUBDIRECTORY);
+                                annotation_intervals_file_list.Add(file[i].Substring(dpath.Length));
                             }
 
-                        }
-
-                        if (File.Exists(this.textBox1.Text + "\\" + ANNOTATION_DIRECTORY + "\\tabletannotation\\" + ANNOTATION_INTERVALS_FILE))
-                        {
-                            this.progressForm.AppendLog("Annotation File in Tablet Folder.....................Found\r\n");
-                            ANNOTATION_SUBDIRECTORY = ANNOTATION_DIRECTORY + "\\tabletannotation";
-                            annotation_subdirectory_list.Add(ANNOTATION_SUBDIRECTORY);
-                            annotation_intervals_file_list.Add("AnnotationIntervals.xml");
                             annotation_file_exist = true;
                         }
 
-                        if (annotation_subdirectory_list.Count > 0)
-                            this.progressForm.AppendLog("Annotation File ..................... Not Found\r\n");
-
                     }
 
-                    #endregion
-
-
-                    #region Load Wockets-MITES Files
-
-                    //activity labels for annotations (Wockets)
-                    if (File.Exists(this.textBox1.Text + "\\" + WOCKETS_SUBDIRECTORY + "\\ActivityLabelsRealtime.xml"))
-                        this.progressForm.AppendLog("Activity Labels File .....................Found\r\n");
-                    else
-                        this.progressForm.AppendLog("Activity Labels File .....................Not Found\r\n");
-
-
-                    try
+                    if (File.Exists(this.textBox1.Text + "\\" + ANNOTATION_DIRECTORY + "\\tabletannotation\\" + ANNOTATION_INTERVALS_FILE))
                     {
-                        if (File.Exists("Configuration.xml"))
-                            File.Copy("Configuration.xml", this.textBox1.Text + "\\" + WOCKETS_SUBDIRECTORY + "\\Configuration.xml", true);
+                        this.progressForm.AppendLog("Annotation File in Tablet Folder.....................Found\r\n");
+                        ANNOTATION_SUBDIRECTORY = ANNOTATION_DIRECTORY + "\\tabletannotation";
+                        annotation_subdirectory_list.Add(ANNOTATION_SUBDIRECTORY);
+                        annotation_intervals_file_list.Add("AnnotationIntervals.xml");
+                        annotation_file_exist = true;
                     }
-                    catch
-                    {
-                        this.progressForm.AppendLog("Wockets Configuration File .....................Not Found\r\n");
-                    }
 
-                    #endregion
+                    if (annotation_subdirectory_list.Count > 0)
+                        this.progressForm.AppendLog("Annotation File ..................... Not Found\r\n");
 
+                }
 
-                    #region Load Other Sensor Files
-
-                    //Sensewear
-                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-sensewear*.csv");
-                    if (file.Length == 1)
-                        this.progressForm.AppendLog("Sensewear File .....................Found\r\n");
-                    else if (file.Length == 0)
-                        this.progressForm.AppendLog("Sensewear File ..................... Not Found\r\n");
+                #endregion
 
 
-                    //actigraph
-                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-actigraph*.csv");
-                    if (file.Length == 1)
-                        this.progressForm.AppendLog("1 Actigraph File .....................Found\r\n");
-                    else if (file.Length == 2)
-                        this.progressForm.AppendLog("2 Actigraph Files .....................Found\r\n");
-                    else if (file.Length == 0)
-                        this.progressForm.AppendLog("Actigraph File ..................... Not Found\r\n");
+                #region Load Wockets-MITES Files
+
+                //activity labels for annotations (Wockets)
+                if (File.Exists(this.textBox1.Text + "\\" + WOCKETS_SUBDIRECTORY + "\\ActivityLabelsRealtime.xml"))
+                    this.progressForm.AppendLog("Activity Labels File .....................Found\r\n");
+                else
+                    this.progressForm.AppendLog("Activity Labels File .....................Not Found\r\n");
 
 
-                    //oxycon
-                    #region commented oxycon read from othersensors
-                    /*
+                try
+                {
+                    if (File.Exists("Configuration.xml"))
+                        File.Copy("Configuration.xml", this.textBox1.Text + "\\" + WOCKETS_SUBDIRECTORY + "\\Configuration.xml", true);
+                }
+                catch
+                {
+                    this.progressForm.AppendLog("Wockets Configuration File .....................Not Found\r\n");
+                }
+
+                #endregion
+
+
+                #region Load Other Sensor Files
+
+                //Sensewear
+                file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-sensewear*.csv");
+                if (file.Length == 1)
+                    this.progressForm.AppendLog("Sensewear File .....................Found\r\n");
+                else if (file.Length == 0)
+                    this.progressForm.AppendLog("Sensewear File ..................... Not Found\r\n");
+
+
+                //actigraph
+                file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-actigraph*.csv");
+                if (file.Length == 1)
+                    this.progressForm.AppendLog("1 Actigraph File .....................Found\r\n");
+                else if (file.Length == 2)
+                    this.progressForm.AppendLog("2 Actigraph Files .....................Found\r\n");
+                else if (file.Length == 0)
+                    this.progressForm.AppendLog("Actigraph File ..................... Not Found\r\n");
+
+
+                //oxycon
+                #region commented oxycon read from othersensors
+                /*
                     if (File.Exists(this.textBox1.Text+"\\"+ OTHER_SUBDIRECTORY + "\\OxyconSyncronizationTime.txt"))
                     {
                         this.progressForm.AppendLog("Oxycon Synchronization File .....................Found\r\n");
@@ -258,186 +279,182 @@ namespace DataMerger
                     else
                         this.progressForm.AppendLog("Oxycon Synchronization File ....................Not Found\r\n");
                     */
-                    #endregion
+                #endregion
 
-                    if (File.Exists(this.textBox1.Text + "\\" + MITES_SUBDIRECTORY + "\\OxyconSyncronizationTime.txt"))
-                    {
-                        if (!File.Exists(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY + "\\OxyconSyncronizationTime.txt"))
-                        {
-                            File.Move(this.textBox1.Text + "\\" + MITES_SUBDIRECTORY + "\\OxyconSyncronizationTime.txt",
-                                      this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY + "\\OxyconSyncronizationTime.txt");
-                        }
-                    }
-
-
-                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-oxycon.dat");
-                    FileInfo finfo;
-                    if (file.Length == 0)
-                    {
-                        file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MITES_SUBDIRECTORY + "\\", "*-oxycon.dat");
-                        for (int i = 0; i < file.Length; i++)
-                        {
-                            finfo = new FileInfo(file[i]);
-                            File.Move(file[i], this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY + "\\" + finfo.Name);
-                        }
-                    }
-
-                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-flashcard*");
-                    if (file.Length == 0)
-                    {
-                        file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MITES_SUBDIRECTORY + "\\", "*-flashcard*");
-                        for (int i = 0; i < file.Length; i++)
-                        {
-                            finfo = new FileInfo(file[i]);
-                            File.Move(file[i], this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY + "\\" + finfo.Name);
-                        }
-                    }
-
-
-                    if (File.Exists(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY + "\\RTITime.txt"))
-                    {
-                        this.progressForm.AppendLog("RTI Synchronization File .....................Found\r\n");
-                    }
-
-
-
-                    // check oxycon files from MITES directory
-                    if (File.Exists(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY + "\\OxyconSyncronizationTime.txt"))
-                    {
-                        this.progressForm.AppendLog("Oxycon Synchronization File .....................Found\r\n");
-                        file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-oxycon.dat");
-                        if (file.Length == 1)
-                            this.progressForm.AppendLog("Oxycon PC File .....................Found\r\n");
-                        else if (file.Length == 0)
-                            this.progressForm.AppendLog("Oxycon PC File .....................Not Found\r\n");
-
-
-                        file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-flashcard.dat");
-                        if (file.Length == 1)
-                            this.progressForm.AppendLog("Oxycon Flash File .....................Found\r\n");
-                        else if (file.Length == 0)
-                        {
-                            file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-flash.dat");
-                            if (file.Length == 1)
-                            {
-                                this.progressForm.AppendLog("Oxycon Flash.dat wrong name .....................Renaming\r\n");
-                                File.Copy(file[0], file[0].Replace("-flash.dat", "-flashcard.dat"));
-                            }
-                            else
-                                this.progressForm.AppendLog("Oxycon Flash file not found.... manual inspection needed\r\n");
-                        }
-                    }
-                    else
-                    { this.progressForm.AppendLog("Oxycon Synchronization File ....................Not Found\r\n"); }
-
-
-
-                    //omron
-                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-omron.csv");
-                    if (file.Length == 1)
-                        this.progressForm.AppendLog("Omron File .....................Found\r\n");
-                    else if (file.Length == 0)
-                        this.progressForm.AppendLog("Omron File ..................... Not Found\r\n");
-
-                    //zephyr
-                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-zephyr*.csv");
-                    if (file.Length == 1)
-                        this.progressForm.AppendLog("Zephyr File .....................Found\r\n");
-                    else if (file.Length == 0)
-                        this.progressForm.AppendLog("Zephyr File ..................... Not Found\r\n");
-
-
-                    //Columbia
-                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-columbia*.csv");
-                    if (file.Length == 1)
-                        this.progressForm.AppendLog("Columbia File .....................Found\r\n");
-                    else if (file.Length == 0)
-                        this.progressForm.AppendLog("Columbia File ..................... Not Found\r\n");
-
-
-                    //GPS
-                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-gps*.csv");
-                    if (file.Length == 1)
-                        this.progressForm.AppendLog("GPS File .....................Found\r\n");
-                    else if (file.Length == 0)
-                        this.progressForm.AppendLog("GPS File ..................... Not Found\r\n");
-
-
-                    //RTI
-                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-rti*.csv");
-                    if (file.Length == 1)
-                        this.progressForm.AppendLog("RTI File .....................Found\r\n");
-                    else if (file.Length == 0)
-                        this.progressForm.AppendLog("RTI File ..................... Not Found\r\n");
-
-                    //MITes
-                    //configuration files
-                    if (File.Exists(this.textBox1.Text + "\\" + MITES_SUBDIRECTORY + "\\Configuration.xml"))
-                        this.progressForm.AppendLog("Configuration.xml File .....................Found\r\n");
-
-                    if (File.Exists(this.textBox1.Text + "\\" + MITES_SUBDIRECTORY + "\\SensorData.xml"))
-                        this.progressForm.AppendLog("SensorData.xml File .....................Found\r\n");
-
-                    if (File.Exists(this.textBox1.Text + "\\" + MITES_SUBDIRECTORY + "\\SensorData.xml"))
-                        this.progressForm.AppendLog("SensorData.xml File .....................Found\r\n");
-
-                    if (Directory.Exists(this.textBox1.Text + "\\" + MITES_SUBDIRECTORY + "\\data\\raw\\PLFormat"))
-                        this.progressForm.AppendLog("PLFormat Data Directory .....................Found\r\n");
-                    else //Attempt to Fix
-                    {
-                        this.progressForm.AppendLog("Non PLFormat Data Directory .....................Fixing\r\n");
-                        if (Directory.Exists(this.textBox1.Text + "\\" + MITES_SUBDIRECTORY + "\\data\\raw"))
-                        {
-                            file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MITES_SUBDIRECTORY + "\\data\\raw", "*.PLFormat");
-                            if (file.Length == 1)
-                            {
-
-                                string timestamp = file[0].Substring(file[0].IndexOf("MITesAccelBytes.") + 16);
-                                timestamp = timestamp.Substring(0, timestamp.IndexOf(".PLFormat"));
-                                string[] times = timestamp.Split('-');
-                                string date = times[0] + "-" + Convert.ToInt32(times[1]).ToString("00") + "-" + Convert.ToInt32(times[2]).ToString("00");
-                                string hour = Convert.ToInt32(times[3]).ToString();
-
-                                Directory.CreateDirectory(this.textBox1.Text + "\\" + MITES_SUBDIRECTORY + "\\data\\raw\\PLFormat\\" + date);
-                                Directory.CreateDirectory(this.textBox1.Text + "\\" + MITES_SUBDIRECTORY + "\\data\\raw\\PLFormat\\" + date + "\\" + hour);
-                                File.Copy(file[0], this.textBox1.Text + "\\" + MITES_SUBDIRECTORY + "\\data\\raw\\PLFormat\\" + date + "\\" + hour + "\\" + file[0].Substring(file[0].IndexOf("MITesAccelBytes.")));
-                            }
-                            else
-                                throw new Exception("Old Format: More than 1 file ....................manual fix needed\r\n");
-                        }
-                    }
-
-
-                    #endregion
-
-
-
-                    #region Search for other sensors files
-
-                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY + "\\");
-
-                    if (file.Length > 1)
-                    {
-                        other_sensors_form = new Form2(this.textBox1.Text);
-                        other_sensors_form.Show();
-                    }
-
-                    #endregion
-
-
-                }
-                catch (Exception ex)
+                if (File.Exists(this.textBox1.Text + "\\" + MITES_SUBDIRECTORY + "\\OxyconSyncronizationTime.txt"))
                 {
-                    MessageBox.Show("Error: " + ex.Message);
-                    Application.Exit();
+                    if (!File.Exists(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY + "\\OxyconSyncronizationTime.txt"))
+                    {
+                        File.Move(this.textBox1.Text + "\\" + MITES_SUBDIRECTORY + "\\OxyconSyncronizationTime.txt",
+                                  this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY + "\\OxyconSyncronizationTime.txt");
+                    }
                 }
 
-                this.button1.Enabled = true;
+
+                file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-oxycon.dat");
+                FileInfo finfo;
+                if (file.Length == 0)
+                {
+                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MITES_SUBDIRECTORY + "\\", "*-oxycon.dat");
+                    for (int i = 0; i < file.Length; i++)
+                    {
+                        finfo = new FileInfo(file[i]);
+                        File.Move(file[i], this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY + "\\" + finfo.Name);
+                    }
+                }
+
+                file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-flashcard*");
+                if (file.Length == 0)
+                {
+                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MITES_SUBDIRECTORY + "\\", "*-flashcard*");
+                    for (int i = 0; i < file.Length; i++)
+                    {
+                        finfo = new FileInfo(file[i]);
+                        File.Move(file[i], this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY + "\\" + finfo.Name);
+                    }
+                }
+
+
+                if (File.Exists(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY + "\\RTITime.txt"))
+                {
+                    this.progressForm.AppendLog("RTI Synchronization File .....................Found\r\n");
+                }
+
+
+
+                // check oxycon files from MITES directory
+                if (File.Exists(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY + "\\OxyconSyncronizationTime.txt"))
+                {
+                    this.progressForm.AppendLog("Oxycon Synchronization File .....................Found\r\n");
+                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-oxycon.dat");
+                    if (file.Length == 1)
+                        this.progressForm.AppendLog("Oxycon PC File .....................Found\r\n");
+                    else if (file.Length == 0)
+                        this.progressForm.AppendLog("Oxycon PC File .....................Not Found\r\n");
+
+
+                    file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-flashcard.dat");
+                    if (file.Length == 1)
+                        this.progressForm.AppendLog("Oxycon Flash File .....................Found\r\n");
+                    else if (file.Length == 0)
+                    {
+                        file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-flash.dat");
+                        if (file.Length == 1)
+                        {
+                            this.progressForm.AppendLog("Oxycon Flash.dat wrong name .....................Renaming\r\n");
+                            File.Copy(file[0], file[0].Replace("-flash.dat", "-flashcard.dat"));
+                        }
+                        else
+                            this.progressForm.AppendLog("Oxycon Flash file not found.... manual inspection needed\r\n");
+                    }
+                }
+                else
+                { this.progressForm.AppendLog("Oxycon Synchronization File ....................Not Found\r\n"); }
+
+
+
+                //omron
+                file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-omron.csv");
+                if (file.Length == 1)
+                    this.progressForm.AppendLog("Omron File .....................Found\r\n");
+                else if (file.Length == 0)
+                    this.progressForm.AppendLog("Omron File ..................... Not Found\r\n");
+
+                //zephyr
+                file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-zephyr*.csv");
+                if (file.Length == 1)
+                    this.progressForm.AppendLog("Zephyr File .....................Found\r\n");
+                else if (file.Length == 0)
+                    this.progressForm.AppendLog("Zephyr File ..................... Not Found\r\n");
+
+
+                //Columbia
+                file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-columbia*.csv");
+                if (file.Length == 1)
+                    this.progressForm.AppendLog("Columbia File .....................Found\r\n");
+                else if (file.Length == 0)
+                    this.progressForm.AppendLog("Columbia File ..................... Not Found\r\n");
+
+
+                //GPS
+                file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-gps*.csv");
+                if (file.Length == 1)
+                    this.progressForm.AppendLog("GPS File .....................Found\r\n");
+                else if (file.Length == 0)
+                    this.progressForm.AppendLog("GPS File ..................... Not Found\r\n");
+
+
+                //RTI
+                file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY, "*-rti*.csv");
+                if (file.Length == 1)
+                    this.progressForm.AppendLog("RTI File .....................Found\r\n");
+                else if (file.Length == 0)
+                    this.progressForm.AppendLog("RTI File ..................... Not Found\r\n");
+
+                //MITes
+                //configuration files
+                if (File.Exists(this.textBox1.Text + "\\" + MITES_SUBDIRECTORY + "\\Configuration.xml"))
+                    this.progressForm.AppendLog("Configuration.xml File .....................Found\r\n");
+
+                if (File.Exists(this.textBox1.Text + "\\" + MITES_SUBDIRECTORY + "\\SensorData.xml"))
+                    this.progressForm.AppendLog("SensorData.xml File .....................Found\r\n");
+
+                if (File.Exists(this.textBox1.Text + "\\" + MITES_SUBDIRECTORY + "\\SensorData.xml"))
+                    this.progressForm.AppendLog("SensorData.xml File .....................Found\r\n");
+
+                if (Directory.Exists(this.textBox1.Text + "\\" + MITES_SUBDIRECTORY + "\\data\\raw\\PLFormat"))
+                    this.progressForm.AppendLog("PLFormat Data Directory .....................Found\r\n");
+                else //Attempt to Fix
+                {
+                    this.progressForm.AppendLog("Non PLFormat Data Directory .....................Fixing\r\n");
+                    if (Directory.Exists(this.textBox1.Text + "\\" + MITES_SUBDIRECTORY + "\\data\\raw"))
+                    {
+                        file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + MITES_SUBDIRECTORY + "\\data\\raw", "*.PLFormat");
+                        if (file.Length == 1)
+                        {
+
+                            string timestamp = file[0].Substring(file[0].IndexOf("MITesAccelBytes.") + 16);
+                            timestamp = timestamp.Substring(0, timestamp.IndexOf(".PLFormat"));
+                            string[] times = timestamp.Split('-');
+                            string date = times[0] + "-" + Convert.ToInt32(times[1]).ToString("00") + "-" + Convert.ToInt32(times[2]).ToString("00");
+                            string hour = Convert.ToInt32(times[3]).ToString();
+
+                            Directory.CreateDirectory(this.textBox1.Text + "\\" + MITES_SUBDIRECTORY + "\\data\\raw\\PLFormat\\" + date);
+                            Directory.CreateDirectory(this.textBox1.Text + "\\" + MITES_SUBDIRECTORY + "\\data\\raw\\PLFormat\\" + date + "\\" + hour);
+                            File.Copy(file[0], this.textBox1.Text + "\\" + MITES_SUBDIRECTORY + "\\data\\raw\\PLFormat\\" + date + "\\" + hour + "\\" + file[0].Substring(file[0].IndexOf("MITesAccelBytes.")));
+                        }
+                        else
+                            throw new Exception("Old Format: More than 1 file ....................manual fix needed\r\n");
+                    }
+                }
+
+
+                #endregion
+
+
+                #region Search for other sensors files
+
+                file = Directory.GetFileSystemEntries(this.textBox1.Text + "\\" + OTHER_SUBDIRECTORY + "\\");
+
+                if (file.Length > 1)
+                {
+                    other_sensors_form = new Form2(this.textBox1.Text);
+                    other_sensors_form.Show();
+                }
+
+                #endregion
+
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error: " + ex.Message);
+                Application.Exit();
             }
 
+            return true;
+
         }
-
-
 
         #endregion
 
@@ -606,7 +623,6 @@ namespace DataMerger
         #endregion
 
 
-
         #region Timer
 
 
@@ -628,7 +644,6 @@ namespace DataMerger
 
 
         #endregion
-
 
 
         #region Generate the Results File with the Statistical Analysis Of the Data
@@ -663,6 +678,7 @@ namespace DataMerger
 
             try
             {
+                //JPN!!!!!
                 sreader = new SXML.Reader(masterDirectory, aDataDirectory + "\\" + MITES_SUBDIRECTORY);
                 sannotation = sreader.parse(maxControllers);
 
@@ -1971,8 +1987,6 @@ namespace DataMerger
 
 
         #endregion
-
-
 
 
         #region Declare Variables
@@ -5316,7 +5330,7 @@ namespace DataMerger
 
                         int headPtr = head[channel] - 1;
                         if (headPtr < 0)
-                            headPtr = 39;
+                            headPtr = mites_RM_SIZE - 1;
 
 
                         if (channel > 0)
@@ -5329,7 +5343,7 @@ namespace DataMerger
                             //compute running means
                             // && ((timeData[channel, headPtr] - currentUnixTime) <=MEAN_SIZE)
 
-                            while ((timeData[channel, headPtr] > 0) && (headPtr != head[channel]) && (numMeanPts <= 39))
+                            while ((timeData[channel, headPtr] > 0) && (headPtr != head[channel]) && (numMeanPts <= mites_RM_SIZE))
                             {
                                 runningMeanX += rawData[channel, 0, headPtr];
                                 runningMeanY += rawData[channel, 1, headPtr];
@@ -5352,7 +5366,7 @@ namespace DataMerger
 
                             headPtr = head[channel] - 1;
                             if (headPtr < 0)
-                                headPtr = 39;
+                                headPtr = mites_RM_SIZE - 1;
                             //compute values per second
 
                             while ((timeData[channel, headPtr] > 0) && (headPtr != head[channel]))
@@ -5383,7 +5397,7 @@ namespace DataMerger
                                         //headPtr = head[channel];
                                         int prevHead = headPtr - 1;
                                         if (prevHead < 0)
-                                            prevHead = 39;
+                                            prevHead = mites_RM_SIZE - 1;
 
 
                                         //trapezoid
@@ -5424,7 +5438,7 @@ namespace DataMerger
 
                                 headPtr--;
                                 if (headPtr < 0)
-                                    headPtr = 39;
+                                    headPtr = mites_RM_SIZE - 1;
                             }
                         }
 
