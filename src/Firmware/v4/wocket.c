@@ -39,7 +39,7 @@ uint8_t EEMEM _NV_TCT;
 uint8_t EEMEM _NV_TCTREPS;
 uint8_t EEMEM _NV_TCTLAST;
 
-#define _DEFAULTBTCAL100 725
+#define _DEFAULTBTCAL100 725   /* Battery Calibration */
 #define _DEFAULTBTCAL80 680
 #define _DEFAULTBTCAL60 640
 #define _DEFAULTBTCAL40 600
@@ -84,7 +84,7 @@ unsigned int _wZN1G_CAL;
 
 unsigned char _INITIALIZED=0;
 unsigned char _STATUS_BYTE=0;
-unsigned char _SAMPLING_RATE=90;
+unsigned char _SAMPLING_RATE=90;	/*Current Sampling Rate is 40Hz and is set in _wocket_initialize() function*/
 unsigned char _wTCNT2_reps=1;
 unsigned char _wTCNT2=0;
 unsigned char _wTCNT2_last=0;
@@ -112,7 +112,7 @@ uint32_t _DEFAULT_SHUTDOWN=0;
 */
 void _wocket_initialize_timer2_interrupt(void)
 {
-	unsigned short ticks=(unsigned short) ((F_CPU/1024)/_SAMPLING_RATE);
+	unsigned short ticks=(unsigned short) ((F_CPU/1024)/_SAMPLING_RATE); 	// 8000000L/40  = 20000
 
 	if (ticks>256)
 	{
@@ -369,44 +369,8 @@ unsigned char _wocket_is_flag_set(unsigned char flag)
 	return ((_STATUS_BYTE>>flag) & 0x01);
 }
 
-
-
-/*
-wockets_uncompressed_packet _encode_packet(unsigned short x, unsigned short y, unsigned short z)
-{
-	wockets_uncompressed_packet packet;
-	unsigned char sensitivity=0;
-	packet.byte1=0;
-	packet.byte2=0;
-	packet.byte3=0;
-	packet.byte4=0;
-	packet.byte5=0;
-	
-	//set the sync bit,no compession, length and channel
-	packet.byte1 =0x80| ((unsigned char)((sensitivity&0x07)<<2)) | ((x>>8)& 0x03);
-	packet.byte2 = ((unsigned char) ((x>>1)&0x7f));
-	packet.byte3 = ((unsigned char) ((x<<6) &0x40)) | ((unsigned char) ((y>>4)&0x3f));
-	packet.byte4 = ((unsigned char) ((y<<3) &0x78)) | ((unsigned char) ((z>>7)&0x07));
-	packet.byte5 = ((unsigned char) (z&0x7f));
-
-	return packet;
-
-}
-
-void _transmit_packet(wockets_uncompressed_packet packet)
-{
-	_bluetooth_transmit_uart0_byte(packet.byte1);
-	
-	_bluetooth_transmit_uart0_byte(packet.byte2);
-	
-	_bluetooth_transmit_uart0_byte(packet.byte3);
-	
-	_bluetooth_transmit_uart0_byte(packet.byte4);
-	
-	_bluetooth_transmit_uart0_byte(packet.byte5);
-	
-}
-*/
+/* 	Function sends uncompressed data via bluetooth: 
+	Currently Continuous and Burst modes use this function */
 void _send_uncompressed_pdu(unsigned short x, unsigned short y, unsigned short z)
 {
 	aBuffer[0] =0x80| ((x>>8)& 0x03);
@@ -421,7 +385,8 @@ void _send_uncompressed_pdu(unsigned short x, unsigned short y, unsigned short z
 	_bluetooth_transmit_uart0_byte(aBuffer[4]);
 }
 
-
+/* 	Function sends uncompressed data via bluetooth: 
+	Currently burst mode uses this function */
 void _send_compressed_pdu(unsigned char x, unsigned char y, unsigned char z)
 {
 	aBuffer[0] =0xe0| ((x>>1)& 0x1f);
@@ -432,6 +397,7 @@ void _send_compressed_pdu(unsigned char x, unsigned char y, unsigned char z)
 	_bluetooth_transmit_uart0_byte(aBuffer[2]);	
 }
 
+/*	Information regarding the number of stored raw data is sent to the phone */
 void _send_batch_count(unsigned short count)
 {
  
@@ -442,7 +408,7 @@ void _send_batch_count(unsigned short count)
        	_bluetooth_transmit_uart0_byte(aBuffer[i]); 
  
 }
-
+/* 	Information regarding the number of activity counts is sent to the phone */
 void _send_ac_count(unsigned short count)
 {
  
@@ -454,7 +420,7 @@ void _send_ac_count(unsigned short count)
  
 }
 
-
+/*	Activity count offset */
 void _send_ac_offset(unsigned short offset)
 {
  
@@ -466,6 +432,7 @@ void _send_ac_offset(unsigned short offset)
  
 }
 
+/*	Probably sends the firmware version */
 void _send_fv()
 {
 
@@ -475,6 +442,7 @@ void _send_fv()
        	_bluetooth_transmit_uart0_byte(aBuffer[i]); 
 }
 
+/* 	Function sends the hardware version */
 void _send_hv()
 {
 
@@ -484,9 +452,7 @@ void _send_hv()
        	_bluetooth_transmit_uart0_byte(aBuffer[i]); 
 }
 
-
-
-
+/* 	Function sends the battery level */
 void _send_bl(unsigned short level)
 {
 
@@ -498,10 +464,7 @@ void _send_bl(unsigned short level)
 
 }
 
-
-
-
-
+/* 	Function sends the Activity counts to the phone */
 void _send_acs()
 {
 	unsigned short count=0;
@@ -566,22 +529,7 @@ void _send_acs()
 
 }
 
-
-
-
-
-/*void _send_summary_count(unsigned short count)
-{
-  	
-    aBuffer[0]=m_AC_RSP_BYTE0;
-    aBuffer[1]=m_AC_RSP_BYTE1(count);
-    aBuffer[2]=m_AC_RSP_BYTE2(count);
-	aBuffer[3]=m_AC_RSP_BYTE3(count);
-	for (int i=0;(i<6);i++)                                                                                       
-       	_bluetooth_transmit_uart0_byte(aBuffer[i]); 
- 
-}*/
-
+/*	Function sends sampling rate */
 void _send_sr()
 {
  
@@ -592,6 +540,7 @@ void _send_sr()
  
 }
 
+/*	Function sends transmission mode */
 void _send_tm()
 {
  
@@ -602,49 +551,7 @@ void _send_tm()
  
 }
 
-
-
-
-void _send_data_bufferred(void)
-{
-	
-		if (paused==0)
-		{
- 			alive_timer++;                                  
-            if (alive_timer>=2730) //if no acks for approx 30 seconds, reset radio
-            {
-            	//_atmega_reset();
-				_bluetooth_reset();
-            	alive_timer=0;                                  
-            }
-			//unsigned short x=_atmega_a2dConvert10bit(ADC3);
-			//unsigned short y=_atmega_a2dConvert10bit(ADC2);
-			//unsigned short z=_atmega_a2dConvert10bit(ADC1);
-
-			unsigned mycounter=0;
-			for (int i=0;(i<2400);i++){
-				//_transmit_packet(_encode_packet(x++,y++,z++));
-			//	_transmit_packet(_encode_packet(xs[mycounter],ys[mycounter],zs[mycounter]));
-				mycounter++;
-				if (mycounter>255)
-					mycounter=0;
-			/*	if ((i==2400))
-					for (int j=0;(j<100);j++)
-						_delay_ms(5);*/
-				}
-			if (x>1023)
-			{
-				x=0;
-				y=0;
-				z=0;
-			}
-			//}
-		}
-}
-
-
-
-
+/*	Function sends data */
 void _send_data(void)
 {	
 	if (paused==0)
@@ -674,7 +581,7 @@ void _send_data(void)
 	}
 }
 
-
+/* 	Receive commands from the phone	*/
 void _receive_data(void)
 {
 	unsigned char aByte;
