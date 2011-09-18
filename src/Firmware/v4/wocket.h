@@ -1,5 +1,9 @@
-#define AC_BUFFER_SIZE 960
 
+/*Refer to the document WOCKETSINTERFACE SPECIFICATION_PDU_Description.rtf for the wockets 
+commands and description */
+
+#define AC_BUFFER_SIZE 960
+/*Each data_unit has 15 bytes of data */
 typedef struct{
 	unsigned char byte1;
 	unsigned char byte2;
@@ -52,22 +56,22 @@ typedef struct{
 #define _4_G		0b010
 #define _6_G		0b011
 #define _8_G		0b100
-#define _INVALID_G	0b111
-
+//#define _INVALID_G	0b111		/* [CAN BE NEGLECTED as it is at 4G currently] */
+#define _12_G	0b111 		//_12G option for Ver #3
 
 /* Wockets Transmission Modes */
 
 #define _TM_Continuous	0b000
-#define _TM_Burst_30	0b001
-#define _TM_Burst_60	0b010
-#define _TM_Burst_90	0b011
-#define	_TM_Burst_120	0b100
+#define _TM_Burst_30	0b001		// Burst after 30 secs
+#define _TM_Burst_60	0b010       // Burst after 60 secs [Currently 60 is geing used]
+#define _TM_Burst_90	0b011		// Burst after 90 secs
+#define	_TM_Burst_120	0b100		// Burst after 120 secs
 
 /* Wockets Status Bits */
 #define _STATUS_INITIALIZED 0
 
 
-#define PERFECT_SAMPLING_FREQUENCY 90
+#define PERFECT_SAMPLING_FREQUENCY 90 // Current Sampling rate or frequncy is 40Hz
 
 
 /**  WOCKETS PDU FORMAT **/
@@ -103,8 +107,10 @@ typedef struct{
 #define HEADER_PACKET 0x80
 #define COMMAND_PREFIX 0b101
 
-
-
+/*Refer the WOCKETSINTERFACE SPECIFICATION_PDU_Description.rtf to know what each byte 
+of information indicates: 8 bits: 1/0bit[H:first byte/L:not first byte] xxbits 
+[00: Full uncompressed data packet/01: Command packet/ 10: Response packet 11: Reserved 
+for Future Use and 5 bits of command or data*/
 
 /* Reserved Wockets Commands Opcodes */
 
@@ -139,25 +145,23 @@ typedef struct{
 
 /* Macros for Wockets Commands */
 
-/* SET_SEN Macros */
+/* SET_SEN Macros */			/* Sensitivity of the accelerometer */
 #define m_SET_SEN(aByte2) 	((aByte2>>3) & 0x07)
 
-/* SET_SR Macros */
+/* SET_SR Macros */				/* sets the sampling rate that a wocket should deliver */
 #define m_SET_SR(aByte2) 	(aByte2 & 0x7f)
 
-/* SET_PDT Macros */
+/* SET_PDT Macros */	/* The time in minutes before the wocket powers down while being disconnected */
 #define m_SET_PDT(aByte2) 	(aByte2 & 0x7f)
 
-/* SET_TM Macros */
+/* SET_TM Macros */		/* sets the transmission mode for the Bluetooth radio */
 #define m_SET_TM(aByte2) 	((aByte2>>4) & 0x07)
 
-/* SET_ALT Macros */
+/* SET_ALT Macros */	/* gets the approximate time that a wocket waits before resetting itself, 
+if no alive packets are received*/ 
 #define m_SET_ALT(aByte2) 	(aByte2 & 0x7f)
 
-/* SET_TM Macros */
-#define m_SET_TM(aByte2) 	((aByte2>>4) & 0x07)
-
-/* SET_CAL Macros */
+/* SET_CAL Macros */    /* sets the calibration values for each axis of the accelerometer on the wocket */
 #define m_SET_CAL_x1g(aByte1,aByte2)  		(	(((unsigned short)(aByte1&0x7f))<<3) | 	(((unsigned short)(aByte2&0x70))>>4)	)
 #define m_SET_CAL_xn1g(aByte2,aByte3)   	( 	(((unsigned short)(aByte2&0x0f))<<6) | 	(((unsigned short)(aByte3&0x7e))>>1)	)
 #define m_SET_CAL_y1g(aByte3,aByte4,aByte5) ( 	(((unsigned short)(aByte3&0x01))<<9) |	(((unsigned short)(aByte4&0x7f))<<2) |	(((unsigned short)(aByte5&0x60))>>5)	)
@@ -166,7 +170,10 @@ typedef struct{
 #define m_SET_CAL_zn1g(aByte8,aByte9)   	( 	(((unsigned short)(aByte8&0x3f))<<4) | 	(((unsigned short)(aByte9&0x78))>>3) 	)
 
 
-/* SET_BTCAL Macros */
+/* SET_BTCAL Macros */ /* Battery Calibration: This section captures the battery performance curve 
+by sampling the battery and recording the values at the specified percentiles. The values will be 
+recorded on the PC/phone and then stored on the firmware using the command on the phone that 
+triggers the macros on the firmware */
 #define m_SET_BTCAL_100(aByte1,aByte2)  		(	(((unsigned short)(aByte1&0x7f))<<3) | 	(((unsigned short)(aByte2&0x70))>>4)	)
 #define m_SET_BTCAL_80(aByte2,aByte3)   	( 	(((unsigned short)(aByte2&0x0f))<<6) | 	(((unsigned short)(aByte3&0x7e))>>1)	)
 #define m_SET_BTCAL_60(aByte3,aByte4,aByte5) ( 	(((unsigned short)(aByte3&0x01))<<9) |	(((unsigned short)(aByte4&0x7f))<<2) |	(((unsigned short)(aByte5&0x60))>>5)	)
@@ -175,38 +182,36 @@ typedef struct{
 #define m_SET_BTCAL_10(aByte8,aByte9)   	( 	(((unsigned short)(aByte8&0x3f))<<4) | 	(((unsigned short)(aByte9&0x78))>>3) 	)
 
 
-/* SET_SR Macros */
-#define m_SET_SR(aByte2) (aByte2 & 0x7f)
-
-
-/* SET_TCT Macros */
+/* SET_TCT Macros */ /* TCT Command was recently being worked on [Aug 2011] to set the ticks*/
 #define m_SET_TCT(aByte1,aByte2) ( ((unsigned char)(aByte1 & 0x7f)<<1)| (unsigned char)((aByte2>>6)&0x01) )
 #define m_SET_TCTREPS(aByte2,aByte3) ( (unsigned char)((aByte2 & 0x3f)<<2)| (unsigned char)((aByte3>>5)&0x03) )
 #define m_SET_TCTLAST(aByte3,aByte4) ( (unsigned char)((aByte3 & 0x1f)<<3)| (unsigned char)((aByte4>>4)&0x07) )
 
 
-/* SET_TM Macros */
+/* SET_TM Macros */		/* Sets the transmission mode for the Bluetooth radio */
 #define m_ACK(aByte2,aByte3,aByte4) 	( (((unsigned short)(aByte2& 0x7f))<<9) | (((unsigned short)(aByte3& 0x7f))<<2) | (((unsigned short)(aByte4>>5))&0x03))
 
 /* Reserved Wockets Response Opcodes */
 
-#define BL_RSP 		0b00000
-#define BP_RSP 		0b00001
-#define PC_RSP		0b00010
-#define SENS_RSP	0b00011
-#define CAL_RSP		0b00100
-#define SR_RSP		0b00101
-#define ALT_RSP		0b00110
+#define BL_RSP 		0b00000		// response sends back the battery level for the wocket 
+#define BP_RSP 		0b00001		/* Battery percent command: the idea here is that once the battery 
+is calibrated we wanted an adjusted value that takes care of battery lifetime, calibration etc... */
+#define PC_RSP		0b00010		// sends back the number of packets that were sent since the last GET_PC */
+#define SENS_RSP	0b00011		// Sends back sensitivity 
+#define CAL_RSP		0b00100		// sends back the calibration data for the wocket
+#define SR_RSP		0b00101		// Sampling Rate
+#define ALT_RSP		0b00110		// a 7 bit timer as outlined by SET_ALT
 #define PDT_RSP		0b00111
 #define TM_RSP		0b01000
-#define BTCAL_RSP 	0b01001
-#define HV_RSP	 	0b01010
-#define FV_RSP	 	0b01011
-#define BC_RSP		0b01100
-#define AC_RSP 		0b01101
-#define TCT_RSP		0b01110
-#define ACC_RSP		0b01111 //activity count count
-#define OFT_RSP		0b10000 //offset AC count
+#define BTCAL_RSP 	0b01001		// Battery Calibration 	
+#define HV_RSP	 	0b01010		// Hardware version 
+#define FV_RSP	 	0b01011		// Firmware version 
+#define BC_RSP		0b01100		/* Batch Count, includes the number of samples in a batch in bursty 
+mode. This is used to determine if the wockets sent a partial or full batch*/
+#define AC_RSP 		0b01101		// Activity count Response packet 
+#define TCT_RSP		0b01110		// Response packet for the ticks 
+#define ACC_RSP		0b01111 	//activity count count
+#define OFT_RSP		0b10000 	//offset AC count
 
 
 
@@ -392,6 +397,7 @@ extern unsigned char command_counter;
 extern unsigned tester;
 extern unsigned long _wLastPC;
 
+/*Packet or frame of 5 bytes*/
 typedef struct{
 	unsigned char byte1; //sync bit, 2 bits packet type, 3 bits sensitivity, 2 bits MSB X
 	unsigned char byte2;	//0 bit, 7 X
@@ -431,6 +437,7 @@ extern unsigned short *zsp;
 
 extern unsigned short acount[AC_BUFFER_SIZE];
 
+/*Section that stores RAW data on the RAM*/
 #define m_SET_X(pdata,x,index) switch(index){\
 									case 0: pdata.byte1=(x>>2);pdata.byte2=((x<<6)&0xc0);break;\
 									case 1: pdata.byte4|=(x>>8);pdata.byte5=(x&0xff);break;\
@@ -447,7 +454,7 @@ extern unsigned short acount[AC_BUFFER_SIZE];
 									case 2: pdata.byte11=(z>>2);pdata.byte12=((z<<6)&0xc0);break;\
 									case 3: pdata.byte14|=(z>>8);pdata.byte15=(z&0xff);break;}
 
-
+/*Section that retrieves RAW data from the RAM*/
 #define m_GET_X(x,byte1,byte2,index) switch(index){\
 									case 0: x=((byte1&0xff)<<2)|((byte2&0xc0)>>6); break;\
 									case 1: x=((byte1&0x03)<<8)|(byte2&0xff);break;\
