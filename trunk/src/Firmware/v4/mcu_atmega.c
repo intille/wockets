@@ -29,7 +29,7 @@
 /* Local Function Definitions */
 
 
-
+/* Different prescalars are made available if the Sampling rate is changed*/
 void _atmega_set_adc_clock(unsigned char prescalar){
         if (prescalar==ADC_PRESCALAR_2){
                 ADCSRA &= ~((1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0));
@@ -53,20 +53,20 @@ void _atmega_set_adc_clock(unsigned char prescalar){
         }
 }
 
-
+/* Function to turn ON the adc by setting ADEN*/
 void _atmega_adc_turn_on()
 {
 
 	sbi(ADCSRA,ADEN);
 }
 
-
+/* Function to turn OFF the adc by clearinging ADEN*/
 void _atmega_adc_turn_off()
 {
 	cbi(ADCSRA,ADEN);
 }
 
-
+/* Function to select adc channels*/
 void _atmega_select_adc(unsigned char channel){
         if (channel==ADC0){
                 cbi(ADMUX,0);
@@ -117,7 +117,7 @@ void _atmega_select_adc(unsigned char channel){
         }
 }
 
-
+/* Function to select 10 bit adc convertion*/
 unsigned short _atmega_a2dConvert10bit(unsigned char channel){
 	
 	// Select channel
@@ -133,6 +133,9 @@ unsigned short _atmega_a2dConvert10bit(unsigned char channel){
 
 	return ((ADCL)|((ADCH)<<8));
 }
+
+/* Even though BOTH UART0 and UART1 are initialized. UART0 is used for the RADIO MODULE 
+in _atmega_initialize()*/
 
 /* 
 	Function Name: _atmega_initialize_uart0
@@ -212,7 +215,7 @@ void _atmega_disable_JTAG(void)
 	SREG = sreg;
 }
 
-
+/* Setting prescalar for the timer 2 whose interrupts are used to sample data regularly at 40 Hz */
 void _atmega_set_timer2_prescalar(unsigned char prescalar)
 {
 	switch(prescalar)
@@ -277,7 +280,7 @@ void _atmega_disable_timer2(void)
 	TCCR2B=0;
 }
 
-
+/* Watch dog timer is enabled to reset the mcu */
 
 void _atmega_reset(void)
 {   
@@ -412,7 +415,7 @@ void _atmega_initialize(unsigned char timer_prescalar)
 	/* Set peripherials to the lowest power states */
 	_bluetooth_turn_on();
 	_accelerometer_turn_on();
-	_accelerometer_set_sensitivity(_4G);
+	_accelerometer_set_sensitivity(_4G); /* Sensitivity of the accelerometer is set to 4G*/
 
 	/* Set UART */
 
@@ -455,7 +458,8 @@ void _atmega_initialize(unsigned char timer_prescalar)
 	
 	_yellowled_turn_off();
 	*/
-	_atmega_initialize_uart0(ATMEGA_BAUD_38400, TX_RX_UART_MODE);
+	_atmega_initialize_uart0(ATMEGA_BAUD_38400, TX_RX_UART_MODE);	/* Looks like UART0 is being used 
+	for the radio connection */
 
 
 	/* Set ADC for conversion */    
@@ -553,8 +557,8 @@ unsigned char _bluetooth_enter_command_mode(void)
 		//for (int i=0;(i<10);i++)        		
 		
 		
-		_bluetooth_transmit_uart0_byte(13);
-		_bluetooth_transmit_uart0_byte(13);
+		_bluetooth_transmit_uart0_byte(13);	//	RETURN or NEWLINE Character for RN-41
+		_bluetooth_transmit_uart0_byte(13);	//	RETURN or NEWLINE Character for RN-41
 		/*_bluetooth_transmit_uart0_byte(13);
 		_bluetooth_transmit_uart0_byte(13);
 		_bluetooth_transmit_uart0_byte(13);*/
@@ -562,8 +566,8 @@ unsigned char _bluetooth_enter_command_mode(void)
 		attempts++;
 
 		if (_bluetooth_receive_uart0_byte(&aByte))
-		{		
-				if (aByte=='C'){					
+		{			
+				if (aByte=='C'){			// RN-41 returns CMD when it enters command mode
 					_bluetooth_transmit_uart0_byte(13);						
 					for (int i=0;(i<10);i++)        		
 						_bluetooth_transmit_uart0_byte(13);
@@ -579,7 +583,7 @@ unsigned char _bluetooth_enter_command_mode(void)
 	return 0;
 }
 
-
+/* Exit Command mode of Bluetooth*/
 unsigned char _bluetooth_exit_command_mode(void)
 {
 	unsigned char attempts=0;
@@ -609,7 +613,7 @@ unsigned char _bluetooth_exit_command_mode(void)
 	return 0;
 }
 
-
+/* Reset Bluetooth */
 void _bluetooth_reset(void)
 {
 	_bluetooth_turn_off();
@@ -619,6 +623,7 @@ void _bluetooth_reset(void)
 
 }
 
+/* Set baud rate _atmega_initialize() sets the baud rate to 38.4K*/
 unsigned char _bluetooth_set_baud_rate(unsigned char baudrate)
 {
 	unsigned char attempts=0;
@@ -707,7 +712,7 @@ unsigned char _bluetooth_set_baud_rate(unsigned char baudrate)
 	return 0;
 }
 
-
+/* Get baud rate */
 unsigned char _bluetooth_get_baud_rate()
 {
 	unsigned char attempts=0;
@@ -840,7 +845,7 @@ unsigned char _is_bluetooth_on(void)
 }
 
 
-
+/* check if RN-41 is connected to phone via bluetooth*/
 unsigned char _bluetooth_is_connected(void){
 
 #ifdef _VERSION==3
@@ -850,7 +855,7 @@ unsigned char _bluetooth_is_connected(void){
 #endif
 }
 
-
+/* check if RN-41 is discoverable*/
 unsigned char _bluetooth_is_discoverable(void){
 
 #ifdef _VERSION==3
@@ -861,13 +866,14 @@ unsigned char _bluetooth_is_discoverable(void){
 }
 
 
-
+/* Clearing the receive register of the UART0*/
 void _receive_uart0_flush( void )
 {
 	unsigned char dummy;
 	while ( UCSR0A & (1<<RXC0) ) dummy = UDR0;
 }
 
+/* Receive data from the UART0*/
 unsigned char _bluetooth_receive_uart0_byte(unsigned char *data)
   {
   	int count=0;
@@ -882,7 +888,7 @@ unsigned char _bluetooth_receive_uart0_byte(unsigned char *data)
    return 1;/* Return success*/
   }
 
-
+/* Transmit data via UART0*/
 void _bluetooth_transmit_uart0_byte( unsigned char data )
 {
   while ( !(UCSR0A & (1<<UDRE0)) );        /* Wait for   empty transmit buffer */
@@ -895,6 +901,7 @@ void _bluetooth_transmit_uart0_byte( unsigned char data )
 
 
 /* Accelerometer Functions */
+/* For version 3 the chose sensitivity is 4G */
 
 unsigned char _accelerometer_set_sensitivity(unsigned char level){
 
