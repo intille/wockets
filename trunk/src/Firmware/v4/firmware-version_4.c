@@ -32,7 +32,7 @@ unsigned char sample=0;
 
 
 
-data_unit data[750];					// Structure defined in wocket.h has 16 unsigned char bytes per data_unit
+data_unit data[750];					// Structure defined in wocket.h has 15 unsigned char bytes per data_unit
 unsigned short acount[AC_BUFFER_SIZE]; //array 960 capacity => If 1 AC (activity count) per minute = 16h of capacity 
 // acount buffer is used to store activity counts in case the wocket's losses the Blutooth connection (phone)
 unsigned short AC_NUMS=0;
