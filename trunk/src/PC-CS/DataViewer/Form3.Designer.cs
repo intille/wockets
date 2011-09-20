@@ -1,7 +1,7 @@
 using ZedGraph;
 using Wockets;
 
-namespace NESPDataViewer
+namespace DataViewer
 {
     partial class Form3
     {

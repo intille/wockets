@@ -10,12 +10,12 @@ using System.Collections; //ArrayList
 using System.IO;
 
 using ZedGraph;
-using MobiRnD_RDT.Utilities;//FileReadWrite
-using MobiRnD_RDT.Logging; //Logger
+using DataViewer.Utilities;//FileReadWrite
+using DataViewer.Logging; //Logger
 using Wockets;
 
 
-namespace NESPDataViewer
+namespace DataViewer
 {
 
 

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 
-namespace NESPDataViewer
+namespace DataViewer
 {
     static class Program
     {
@@ -14,8 +14,8 @@ namespace NESPDataViewer
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            if (args.Length > 1)
-                Application.Run(new Form1(args[1]));
+            if (args.Length > 0)
+                Application.Run(new Form1(args[0]));
             else Application.Run(new Form1());
         }
     }
