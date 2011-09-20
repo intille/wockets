@@ -10,11 +10,11 @@ using System.Collections; //ArrayList
 using System.IO;
 
 using ZedGraph;
-using MobiRnD_RDT.Utilities;//FileReadWrite
-using MobiRnD_RDT.Logging; //Logger
+using DataViewer.Utilities;//FileReadWrite
+using DataViewer.Logging; //Logger
 
 
-namespace NESPDataViewer
+namespace DataViewer
 {
    
     public partial class Form1 : Form
@@ -51,11 +51,13 @@ namespace NESPDataViewer
                 CurrentWockets._Configuration = new Wockets.Data.Configuration.WocketsConfiguration();
                 CurrentWockets._Configuration.FromXML("Configuration.xml");
             }
-            else
+/*
+  else
             {
                 CurrentWockets._Configuration = new Wockets.Data.Configuration.WocketsConfiguration();
-                CurrentWockets._Configuration.FromXML("..\\..\\bin\\NeededFiles\\Master\\Configuration.xml");
+                CurrentWockets._Configuration.FromXML("Configuration.xml");
             }
+ */
             InitializeComponent();
             
         }
@@ -1156,6 +1158,8 @@ namespace NESPDataViewer
 
                     if (split.Length > 2) //TimeStamp + at least one data value
                     {
+                        //JPN: Ignore header row
+                        if (split[0] == "UnixTimeStamp") continue;
                         #region TIMESTAMP - X VALUE
                         DateTime dt = ConvertUNIXDatTime(Convert.ToDouble(split[0]));//UnixTimeStamp, Column 1/A
                         //DateTime dt = DateTime.Parse(split[1]);//TimeStamp, Column 2/B
