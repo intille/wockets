@@ -218,7 +218,12 @@ namespace DataMerger
                 try
                 {
                     if (File.Exists("Configuration.xml"))
-                        File.Copy("Configuration.xml", this.textBox1.Text + "\\" + WOCKETS_SUBDIRECTORY + "\\Configuration.xml", true);
+                    {
+                        if (Directory.Exists(this.textBox1.Text + "\\" + WOCKETS_SUBDIRECTORY))
+                            File.Copy("Configuration.xml", this.textBox1.Text + "\\" + WOCKETS_SUBDIRECTORY + "\\Configuration.xml", true);
+                        else
+                            this.progressForm.AppendLog("Wockets Configuration File .....................Not Found\r\n");
+                    }
                 }
                 catch
                 {
@@ -576,7 +581,7 @@ namespace DataMerger
                     }
                     catch (Exception ee)
                     {
-                        MessageBox.Show("Error: Format error in the result file " + ee.StackTrace);
+                        MessageBox.Show("Error: No Wocket Controllers Found! " + ee.StackTrace);
                     }
                 }
 
@@ -669,9 +674,11 @@ namespace DataMerger
             WocketsController wc = new WocketsController("", "", "");
             CurrentWockets._Controller = wc;
             wc.FromXML(aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY + "\\SensorData.xml");
-            for (int r = 0; (r < wc._Decoders.Count); r++)
-                wc._Decoders[r].Initialize();
-
+            if (wc._Decoders.Count > 0)
+            {
+                for (int r = 0; (r < wc._Decoders.Count); r++)
+                    wc._Decoders[r].Initialize();
+            }
 
             SXML.Reader sreader = null;
             SXML.SensorAnnotation sannotation = null;
@@ -5013,8 +5020,12 @@ namespace DataMerger
             {
                 if ((actigraphEndTimes[0] != null) && (actigraphStartTimes[0] != null))
                 {
-                    startDateTime = actigraphStartTimes[0];
-                    endDateTime = actigraphEndTimes[0];
+                    //JPN: Do not reset if MITes data exists
+                    if (aMITesDecoder == null)
+                    {
+                        startDateTime = actigraphStartTimes[0];
+                        endDateTime = actigraphEndTimes[0];
+                    }
                 }
             }
 
