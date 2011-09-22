@@ -129,7 +129,11 @@ namespace DataViewer
             MasterPane myMaster = zedGraphControl1.MasterPane;
 
             _firstDate = DateTime.Now;
-            _lastDate = DateTime.Now.AddYears(-3);
+
+            //JPN: Initialize the date of last point to be shown in the dataview to the beginning of the Wockets Era.
+            //Let's say 01-01-2007. If a dataset predates 2007, you will have to zoom manually to the region of interest
+            //This value will later be changed to the last timestamp observed in the dataset
+            _lastDate = new DateTime(2007, 01, 01, 00, 00, 00);
 
             myMaster.PaneList.Clear();
 
@@ -1878,8 +1882,6 @@ namespace DataViewer
                         double endx = (double)new XDate(dtEnd);
                         #endregion
 
-
-
                         #region COLOR OF BAR
                             string color = "white";
                             bool isSolid = false;
@@ -1977,7 +1979,6 @@ namespace DataViewer
 
 
                         #endregion Color of bar
-
 
                         #region LABEL AND POINT
 
@@ -2309,6 +2310,7 @@ namespace DataViewer
             #region DETERMINE WHICH GRAPHS TO DISPLAY BASED ON AVAILABLE FILES
             
             #region ACCELEROMETER GRAPHS
+
             files = Directory.GetFiles(path + "\\merged\\", "MITes*Raw*");
             for (int i = 0; i < files.Length; i++)
             {
@@ -2322,6 +2324,7 @@ namespace DataViewer
                 CreateAccelerationGraph(paneOrdering, files[i], channel, location,"MITes","");
                 paneOrdering++;
             }
+
             #endregion
 
 
@@ -2391,8 +2394,8 @@ namespace DataViewer
             }
             #endregion
 
-
             //ADD_GRAPH STEP 1
+
             #region OXYCON
             string oxyFile = Path.Combine(path + "\\merged\\", "Oxycon.csv"); 
             if (File.Exists(oxyFile))
