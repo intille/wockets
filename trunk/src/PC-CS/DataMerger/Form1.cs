@@ -5964,15 +5964,19 @@ namespace DataMerger
                         master_csv_line = master_csv_line + "," + actigraphData[i][key];
                         //PLOT value                        
                         prevActLine[i] = actigraphData[i][key].ToString();
-                        try
+                        //JPN: Only plot repeating values for 3 axis Actigraphs
+                        if (actigraphType[i] == "GT3X" || actigraphType[i] == "GT3X+")
                         {
-                            prevActXYZ = prevActLine[i].Split(',');
-                            prevActAC_XYZ = Convert.ToInt32(prevActXYZ[0]) + Convert.ToInt32(prevActXYZ[1]) + Convert.ToInt32(prevActXYZ[2]);
+                            try
+                            {
+                                prevActXYZ = prevActLine[i].Split(',');
+                                prevActAC_XYZ = Convert.ToInt32(prevActXYZ[0]) + Convert.ToInt32(prevActXYZ[1]) + Convert.ToInt32(prevActXYZ[2]);
+                            }
+                            catch (Exception ex)
+                            {
+                            }
+                            master_csv_line = master_csv_line + "," + actigraphData[i][key] + "," + prevActAC_XYZ;
                         }
-                        catch (Exception ex)
-                        {
-                        }
-                        master_csv_line = master_csv_line + "," + actigraphData[i][key] + "," + prevActAC_XYZ;
                     }
                     //JPN:
                     if (actigraphMinutes[i].Count > 0)
