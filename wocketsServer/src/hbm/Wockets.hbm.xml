@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+	"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping default-lazy="false">
+	<class name="edu.mit.media.wockets.Beans.Wocket" table="Wockets">
+
+		 
+		<id name="wocketId" type="string" column="Mac_Id"/>
+  		<property name="colorSet" type="string" column="Set_Color"/>		
+		<property name="hardwareVersion" type="string" column="Hardware_Version"/>
+		<property name="firmwareVersion" type="string" column="Firmware_Version"/>
+		<property name="notes" type="string" column="Notes"/>
+		<property name="isAssigned" type="char" column="IsAssigned"/>
+		<property name="printed_Id" type="char" column="Printed_Id"/>
+		
+
+	</class>
+	
+</hibernate-mapping>

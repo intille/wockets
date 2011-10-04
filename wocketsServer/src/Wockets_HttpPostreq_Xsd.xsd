@@ -1,0 +1,96 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:element name="Wockets_Data">
+		<xs:complexType>
+			<xs:all>
+				<xs:element name="PROMPTING" maxOccurs="1" minOccurs="1">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="row" maxOccurs="unbounded">
+								<xs:complexType>
+									<xs:all>
+										<xs:element name="Participant_Id" type="xs:integer" maxOccurs="1" minOccurs="1"/>
+										<xs:element name="Prompt_Type" type="xs:string" maxOccurs="1" minOccurs="1"/>
+										<xs:element name="prompt_Time" type="xs:dateTime" maxOccurs="1" minOccurs="1"/>
+										<xs:element name="Response_Time" type="xs:dateTime" maxOccurs="1" minOccurs="0"/>
+										<xs:element name="Activity_Interval" type="xs:integer" maxOccurs="1" minOccurs="1"/>
+										<xs:element name="Primary_Activity" type="xs:string" maxOccurs="1" minOccurs="0"/>
+										<xs:element name="Alternate_Activities" type="xs:string" maxOccurs="1" minOccurs="0"/>
+									</xs:all>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="PHONE_STATS" maxOccurs="1" minOccurs="1">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="row" maxOccurs="unbounded">
+								<xs:complexType>
+									<xs:all>
+										<xs:element name="Participant_Id" type="xs:integer" maxOccurs="1" minOccurs="1"/>
+										<xs:element name="Create_Date" type="xs:dateTime" maxOccurs="1" minOccurs="1"/>
+										<!-- Upload_Date is Default to Current Sys Date -->
+										<xs:element name="Phone_Battery" type="xs:integer" maxOccurs="1" minOccurs="1"/>
+										<xs:element name="Main_Memory" type="xs:integer" maxOccurs="1" minOccurs="1"/>
+										<xs:element name="SD_Memory" type="xs:integer" maxOccurs="1" minOccurs="1"/>
+									</xs:all>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="SWAPPING" maxOccurs="1" minOccurs="1">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="row" maxOccurs="unbounded">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:choice maxOccurs="unbounded">
+											<xs:element name="Participant_Id" type="xs:integer" maxOccurs="1" minOccurs="1"/>
+											<xs:element name="Swap_Time" type="xs:dateTime" maxOccurs="1" minOccurs="1"/>
+											<!-- Upload_Time is Default to Current Sys Date -->
+											<xs:element name="Swap_Event" type="xs:boolean" maxOccurs="1" minOccurs="1"/>
+											<xs:element name="Restarted_Event" type="xs:boolean" maxOccurs="1" minOccurs="1"/>
+											<xs:element name="LocationChanged_Event" type="xs:boolean" maxOccurs="1" minOccurs="1"/>
+											<!-- after swapped sensor position, it goes to SWAPPED_SENSOR table-->
+											<xs:element name="Swapped_Sensor" maxOccurs="unbounded">
+												<xs:complexType>
+													<xs:simpleContent>
+														<xs:extension base="xs:string">
+															<xs:attribute name="Mac_Id" type="xs:string" />
+														</xs:extension>
+													</xs:simpleContent>
+												</xs:complexType>
+											</xs:element>
+										</xs:choice>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="WOCKET_STATS" maxOccurs="1" minOccurs="1">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="row" maxOccurs="unbounded">
+								<xs:complexType>
+									<xs:all>
+										<xs:element name="Participant_Id" type="xs:integer" maxOccurs="1" minOccurs="1"/>
+										<xs:element name="Mac_Id" type="xs:string" maxOccurs="1" minOccurs="1"/>
+										<xs:element name="Create_Date" type="xs:dateTime" maxOccurs="1" minOccurs="1"/>
+										<!-- Upload_Time is Default to Current Sys Date -->
+										<xs:element name="Activity_Count" type="xs:integer" maxOccurs="1" minOccurs="1"/>
+										<xs:element name="Wocket_Battery" type="xs:integer" maxOccurs="1" minOccurs="1"/>
+										<xs:element name="Transmitted_Byte" type="xs:integer" maxOccurs="1" minOccurs="1"/>
+										<xs:element name="Received_Bytes" type="xs:integer" maxOccurs="1" minOccurs="1"/>
+									</xs:all>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:all>
+		</xs:complexType>
+</xs:element>
+</xs:schema>

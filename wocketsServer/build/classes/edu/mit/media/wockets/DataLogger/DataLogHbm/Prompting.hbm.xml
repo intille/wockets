@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+	"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping default-lazy="false">
+	<class name="edu.mit.media.wockets.DataLogger.DataLoggerBean.Prompting" table="Prompting">
+
+		<id name="promptId" type="int" unsaved-value="null" >
+        	<column name="Prompt_Id" not-null="true"/>
+     		<generator class="identity"/>
+ 		</id>
+		
+		<property name="participantId" type="int" column="Participant_Id"/>		
+		<property name="promptType" type="string" column="Prompt_Type"/>
+		<property name="promptTime" type="string" column="Prompt_Time"/>
+		<property name="responseTime" type="string" column="Response_Time"/>
+		<property name="activityInterval" type="int" column="Activity_Interval"/>
+		<property name="primaryActivity" type="string" column="Primary_Activity"/>
+		<property name="alternateActivity" type="string" column="Alternate_Activities"/>
+		
+	</class>
+	
+</hibernate-mapping>
