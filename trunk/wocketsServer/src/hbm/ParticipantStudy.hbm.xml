@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+
+<class name="edu.mit.media.wockets.Beans.ParticipantStudy" table="PARTICIPANT_STUDY">
+<composite-id>
+<key-property name="studyId" type="string" column="Study_Id"/>
+<key-property name="ParticipantId" type="int" column="Participant_Id"/>
+</composite-id>
+<property name="startDate" type="string" column="Start_Date"/>
+<property name="endDate" type="string" column="End_Date"/>
+
+</class>
+
+</hibernate-mapping>

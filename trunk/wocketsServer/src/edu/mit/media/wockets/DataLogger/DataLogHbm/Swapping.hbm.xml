@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+	"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping default-lazy="false">
+	<class name="edu.mit.media.wockets.DataLogger.DataLoggerBean.Swapping" table="Swapping">
+
+		<id name="swappingId" type="int" unsaved-value="null" >
+        	<column name="Swapping_Id" not-null="true"/>
+     		<generator class="identity"/>
+ 		</id>
+		
+		<property name="participantId" type="int" column="Participant_Id"/>		
+		<property name="swapTime" type="string" column="Swap_Time"/>
+		<property name="uploadTime" type="string" column="Upload_Time"/>
+		<property name="swapEvent" type="string" column="Swap_Event"/>
+		<property name="restartedEvent" type="string" column="Restarted_Event"/>
+		<property name="loctChangedevent" type="string" column="LocationChanged_Event"/>
+		
+	</class>
+	
+</hibernate-mapping>
