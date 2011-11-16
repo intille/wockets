@@ -287,12 +287,12 @@ triggers the macros on the firmware */
 #define m_BC_RSP_BYTE2(count)		(count & 0x7f)
 
 /* AC_RSP Macros */
-#define m_AC_RSP_BYTE0				RESPONSE_HEADER(AC_RSP)
-#define m_AC_RSP_BYTE1(seq_num)		((seq_num >> 9) & 0x7f)
-#define m_AC_RSP_BYTE2(seq_num)		((seq_num >> 2) & 0x7f)
+#define m_AC_RSP_BYTE0					RESPONSE_HEADER(AC_RSP)
+#define m_AC_RSP_BYTE1(seq_num)			((seq_num >> 9) & 0x7f)
+#define m_AC_RSP_BYTE2(seq_num)			((seq_num >> 2) & 0x7f)
 #define m_AC_RSP_BYTE3(seq_num, count)	( ((seq_num & 0x03) << 5) | ((count >> 11) & 0x1f) )
-#define m_AC_RSP_BYTE4(count)		((count >> 4) & 0x7f)
-#define m_AC_RSP_BYTE5(count)		((count & 0x0f) << 2)
+#define m_AC_RSP_BYTE4(count)			((count >> 4) & 0x7f)
+#define m_AC_RSP_BYTE5(count)			((count & 0x0f) << 2)
 
 /* TCT_RSP Macros */
 #define m_TCT_RSP_BYTE0				RESPONSE_HEADER(TCT_RSP)

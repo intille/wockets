@@ -58,13 +58,13 @@ In some older hardware versions, the wockets used to reset easily, which caused 
 the receiver would get out of sync seeing small seq numbers that were already ACKed. 
 In the code, there is a test done to deal with that situation. */
 
-unsigned short cseq = 0;		//holds the sequence numbers of the entries in ci
-unsigned short sseq = 0;		//holds the sequence numbers of the entries in si
-unsigned short kseq = 0;
-unsigned short dseq = 0;
-unsigned short ci   = 0;		//ci is a pointer that points to the next empty slot. 
-unsigned short si   = 0;		/*si points to the oldest value in the buffer (i.e. the next value to be sent out or was
-								sent out but no acknowledgment received from the phone). */
+unsigned short cseq = 0;		// the sequence numbers of the last AC
+unsigned short sseq = 0;		// the next sequence number that need to be sent to phone
+unsigned short kseq = 0;		// the acknowledged sequence number 
+unsigned short dseq = 0;		// the difference between the last AC and the new Acknowledged seq: cseq - kseq
+unsigned short ci   = 0;		// the pointer in the circular buffer to the last AC. It corresponds to cseq
+unsigned short si   = 0;		// the pointer in the circular buffer to the next element to be sent, it corresponds to sseq(i.e. the next value to be sent
+								// out or was sent out but no acknowledgment received from the phone). 
 
 unsigned char  gotack = 0;		// When the wocket receives an ACK form the Phone
 
@@ -616,7 +616,7 @@ ISR(TIMER2_OVF_vect)
 		if (_wPDT != 0)
 			_wShutdownTimer--;
 
-		 _wPC++;
+		_wPC++;
 		
 		 /* Segment of the code that turns the Bluetooth ON every 45 seconds approximately 
 		after a previous transmission to have the wocket ready for a connection. */
