@@ -439,7 +439,7 @@ void _send_acs()
 	unsigned short count   = 0;
 	unsigned short seq_num = sseq;
 	unsigned short num_acs = 0;
-	unsigned char counter  = 0;
+	unsigned char  counter = 0;
     //Determine how many new acs need to be sent
 	if (ci > si)
 		num_acs = ci - si;
@@ -451,7 +451,7 @@ void _send_acs()
 	//	num_acs=10;
 	//	_send_ac_count(num_acs);
 	//--------------------
-	//send AC offset accumulated within the minute & the overall ac seq number
+	//send AC offset accumulated within the minute & the overall AC sequence number
 	_send_ac_offset(AC_NUMS - summary_count); 
 	_send_ac_count(cseq);		
 
@@ -584,7 +584,8 @@ void _receive_data(void)
                      command_length = 2;
                      break;
      			case (unsigned char)ACK:
-					 command_length = 1;
+					 //command_length = 1;
+					 command_length = 4;
                      break;
 				case (unsigned char)SET_TCT:                
                      command_length = 5;
@@ -631,35 +632,40 @@ void _receive_data(void)
 								for (int xyz=0;(xyz<80);xyz++)
 									_delay_ms(10);
 								_yellowled_turn_off();
-						}*/
+						}
 
+						if ((_wPC - _wLastPC) > 1000){
+							_wLastPC = _wPC;						
+							kseq = sseq + 10;
+							if ( (kseq <= cseq) && ((kseq - sseq) < AC_BUFFER_SIZE) && ((kseq - sseq) > 0) )						
+							{
+								dseq = cseq - kseq;							
+								if (ci >= dseq) 
+									si = ci-dseq;
+								else
+									si = AC_BUFFER_SIZE - (dseq - ci);
+								sseq = kseq;							
 
-						//if (gotack==1){
-
-							if ((_wPC - _wLastPC) > 1000){
-								_wLastPC = _wPC;						
-								kseq = sseq + 10;
-								if ( (kseq <= cseq) && ((kseq - sseq) < AC_BUFFER_SIZE) && ((kseq - sseq) > 0) )						
-								{
-									dseq = cseq - kseq;							
-									if (ci >= dseq) 
-										si = ci-dseq;
-									else
-										si = AC_BUFFER_SIZE - (dseq - ci);
-									sseq = kseq;							
-
-									_yellowled_turn_on();
-									for (int xyz = 0; (xyz < 80); xyz++)
-										_delay_ms(10);
-									_yellowled_turn_off();
-								//gotack=0;
+								_yellowled_turn_on();
+								for (int xyz = 0; (xyz < 80); xyz++)
+									_delay_ms(10);
+								_yellowled_turn_off();
 								tester++;
-
 								if (tester > 1)
 									_yellowled_turn_on();
-								}
 							}
-						//}						
+						}*/	
+						kseq = rBuffer[1] & 0x7f;
+						kseq = kseq << 7 | (rBuffer[2] & 0x7f);
+						kseq = kseq << 2 | ((rBuffer[3] >> 5) & 0x03);
+						sseq = kseq;
+						
+						dseq = cseq - kseq;
+						if (dseq >= 0)
+							si = ci - dseq;
+						else
+							si = AC_BUFFER_SIZE - (dseq - ci);						
+
 						processed_counter = command_counter;				
 						break;	
 
