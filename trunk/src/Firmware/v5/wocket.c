@@ -92,6 +92,9 @@ unsigned char _wSENS = _4_G;
 unsigned long _wPC = 0;
 unsigned long _wLastPC = 0;
 
+unsigned char _LED_TIME = 0x3f;
+unsigned char _LED_COLOR = 2;
+
 uint8_t EEMEM _NV_PDT;
 #define _DEFAULT_PDT 127
 unsigned char _wPDT;
@@ -215,7 +218,8 @@ void _wocket_initialize(void) //This function initializes the wocket
 		switch(_wTM)
 		{
 			case _TM_Continuous:	
-				_MAX_SAMPLING_RATE = 126;
+				_MAX_SAMPLING_RATE = 126; //This limitation is due to the definition of SEND_SR  and GET_SR commands
+										  // The MCU provided in wocket able to sample at higher rates 							
 				break;			
 			case _TM_Burst_30:    	//a transfer mode that send the burst every 30 secs
 				_MAX_SAMPLING_RATE = 80;		
@@ -581,6 +585,7 @@ void _receive_data(void)
                 case (unsigned char)SET_PDT:
                 case (unsigned char)SET_TM:                
 				case (unsigned char)SET_VTM:  
+				case (unsigned char)SET_LED:
                      command_length = 2;
                      break;
      			case (unsigned char)ACK:
@@ -893,6 +898,26 @@ void _receive_data(void)
 						rBuffer[4] = m_TCT_RSP_BYTE4(_wTCNT2_last);
 						processed_counter = command_counter;				
 						response_length = 5;
+						break;
+					case (unsigned char) SET_LED:  
+				      	_LED_COLOR = m_SET_LED_COLOR(rBuffer[1]);
+						_LED_TIME = m_SET_LED_TIME(rBuffer[1]);
+						if (_LED_COLOR == 0){
+							for (int i = 0; (i < _LED_TIME); i++){
+								_yellowled_turn_on();		
+								for (int j = 0; (j < 200); j++)
+									_delay_ms(5);
+							}
+							_yellowled_turn_off();
+						} if (_LED_COLOR == 1){
+							for (int i = 0; (i < _LED_TIME); i++){
+								_greenled_turn_on();		
+								for (int j = 0; (j < 200); j++)
+									_delay_ms(5);
+							}
+							_greenled_turn_off();
+						} 
+						processed_counter = command_counter;
 						break;
 																					 							                              
                     default:        

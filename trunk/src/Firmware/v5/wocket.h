@@ -130,6 +130,7 @@ for Future Use and 5 bits of command or data*/
 #define SET_TCT			0b11001
 #define SET_VTM			0b11010
 #define ACK				0b11011
+#define SET_LED			0b11100
 
 /* Macros for Wockets Commands */
 
@@ -148,6 +149,11 @@ for Future Use and 5 bits of command or data*/
 /* SET_ALT Macros */	/* gets the approximate time that a wocket waits before resetting itself, 
 if no alive packets are received*/ 
 #define m_SET_ALT(aByte2) 	(aByte2 & 0x7f)
+
+/* SET_LED Macros */
+#define m_SET_LED_COLOR(aByte2)	((aByte2 & 0x40) >> 6)
+#define m_SET_LED_TIME(aByte2)	(aByte2 & 0x3f)
+
 
 /* SET_CAL Macros */    /* sets the calibration values for each axis of the accelerometer on the wocket */
 #define m_SET_CAL_x1g(aByte1, aByte2)  	      (	(((unsigned short)(aByte1 & 0x7f)) << 3) | 	(((unsigned short)(aByte2 & 0x70)) >> 4)	)
@@ -178,6 +184,11 @@ triggers the macros on the firmware */
 
 /* SET_TM Macros */		/* Sets the transmission mode for the Bluetooth radio */
 #define m_ACK(aByte2, aByte3, aByte4)  	( (((unsigned short)(aByte2 & 0x7f)) << 9) | (((unsigned short)(aByte3 & 0x7f)) << 2) | (((unsigned short)(aByte4 >> 5)) & 0x03))
+
+
+
+
+
 
 /* Reserved Wockets Response Opcodes */
 #define BL_RSP 		0b00000		// response sends back the battery level for the wocket 
