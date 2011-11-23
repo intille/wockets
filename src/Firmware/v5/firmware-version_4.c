@@ -197,15 +197,15 @@ void do_sampling()
 	//Filter the raw accelerometer data and compute the vector of magnitude (Activity count)
 	vmag += Filter(x, 0) + Filter(y, 1) + Filter(z, 2);
 		
-	//Skip the first samples to make sure the buffer is clean	
+	//for calculating the activity count, skip the first samples to make sure the buffer is clean	
 	if (_wPC > 40)
 	{							
-		if (summary_count == 0)
+		if (summary_count == 0)			// make the activity count only once per miniute
 		{
-			vmag = vmag / AC_SCALING;//vmag is scaled in order to prevent the overflow 
+			vmag = vmag / AC_SCALING;	// vmag is scaled in order to prevent the overflow 
 			
 			if (vmag > AC_CEILING)
-				acount[ci] = AC_CEILING;	 // Ceiling of the activity counts	
+				acount[ci] = AC_CEILING;// the maximum possible value of activity counts (size: two bytes)	
 			else
 				acount[ci] = (unsigned short) vmag; 
 	 		
@@ -229,7 +229,7 @@ void do_sampling()
 		else
 			summary_count--;
 	}
-	else if (_wPC == 40)		// discard the first 40 samples for the vmag  				
+	else if (_wPC == 40)				// discard the first 40 samples for the vmag  				
 		vmag = 0;
 
 	//Save the raw data in the RAM 
