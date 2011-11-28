@@ -660,19 +660,20 @@ void _receive_data(void)
 									_yellowled_turn_on();
 							}
 						}*/	
+											
+						kseq = rBuffer[1] & 0x7f;
+						kseq = kseq << 7 | (rBuffer[2] & 0x7f);
+						kseq = kseq << 2 | ((rBuffer[3] >> 5) & 0x03);
+						kseq ++;
 						if ( (kseq <= cseq) && ((kseq - sseq) < AC_BUFFER_SIZE) && ((kseq - sseq) > 0) ) {
-							kseq = rBuffer[1] & 0x7f;
-							kseq = kseq << 7 | (rBuffer[2] & 0x7f);
-							kseq = kseq << 2 | ((rBuffer[3] >> 5) & 0x03);
-							sseq = kseq;
 						
+							sseq = kseq;						
 							dseq = cseq - kseq;
 							if (dseq >= 0)
 								si = ci - dseq;
 							else
 								si = AC_BUFFER_SIZE - (dseq - ci);
-						}						
-
+						}
 						processed_counter = command_counter;				
 						break;	
 
