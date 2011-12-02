@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tiles-definitions PUBLIC
+       "-//Apache Software Foundation//DTD Tiles Configuration 2.0//EN"
+       "http://tiles.apache.org/dtds/tiles-config_2_0.dtd">
+
+<tiles-definitions>
+    <definition name="base.definition"
+        template="/WEB-INF/jsp/layout/layout.jsp">
+        <put-attribute name="title" value="" />
+        <put-attribute name="header" value="/WEB-INF/jsp/layout/header.jsp" />
+        <put-attribute name="menu" value="/WEB-INF/jsp/layout/menu.jsp" />
+        <put-attribute name="body" value="" />
+        <put-attribute name="footer" value="/WEB-INF/jsp/layout/footer.jsp" />
+    </definition>
+    
+
+    <definition name="home" extends="base.definition">
+        <put-attribute name="title" value="Wockets - Home" />
+        <put-attribute name="body" value="/WEB-INF/jsp/home.jsp" />
+    </definition>
+    
+    <definition name="login" extends="base.definition">
+        <put-attribute name="title" value="Wockets - Login" />
+        <put-attribute name="body" value="/WEB-INF/jsp/login.jsp" />
+    </definition>
+    
+    <definition name="adminWorkArea" extends="base.definition">
+        <put-attribute name="title" value="Wockets - Admin Work Area" />
+        <put-attribute name="body" value="/WEB-INF/jsp/admin-jsp/AdminWorkArea.jsp" />
+    </definition>
+    
+    <definition name="PersonalINfo" extends="base.definition">
+        <put-attribute name="title" value="Wockets - Personal Information" />
+        <put-attribute name="body" value="/WEB-INF/jsp/common-jsp/PersonalInfo.jsp" />
+    </definition>
+
+    
+    
+    
+    
+    <definition name="UserAccountDirectory" extends="base.definition">
+        <put-attribute name="title" value="Wockets - User Accounts" />
+        <put-attribute name="body" value="/WEB-INF/jsp/admin-jsp/UserAccountDirectory.jsp" />
+    </definition>
+    
+    
+    
+    <definition name="StudyDirectory" extends="base.definition">
+        <put-attribute name="title" value="Wockets - Study Directory" />
+        <put-attribute name="body" value="/WEB-INF/jsp/admin-jsp/StudyDirectory.jsp" />
+    </definition>
+    
+    <definition name="admin-jsp/PhoneDirectory" extends="base.definition">
+        <put-attribute name="title" value="Wockets - Phone Directory" />
+        <put-attribute name="body" value="/WEB-INF/jsp/admin-jsp/PhoneDirectory.jsp" />
+    </definition>
+    
+    <definition name="admin-js/simDirectory" extends="base.definition">
+        <put-attribute name="title" value="Wockets - Simcard Directory" />
+        <put-attribute name="body" value="/WEB-INF/jsp/admin-jsp/SimDirectory.jsp" />
+    </definition>
+    
+    <definition name="admin-jsp/WocketsDirectory" extends="base.definition">
+        <put-attribute name="title" value="Wockets - Wockets Directory" />
+        <put-attribute name="body" value="/WEB-INF/jsp/admin-jsp/WocketsDirectory.jsp" />
+    </definition>
+   
+   
+   <definition name="admin-jsp/NewParticipant" extends="base.definition">
+        <put-attribute name="title" value="Wockets - New Participant" />
+        <put-attribute name="body" value="/WEB-INF/jsp/admin-jsp/NewParticipant.jsp" />
+    </definition>
+    
+    <definition name="admin-jsp/RegisterParticipant" extends="base.definition">
+        <put-attribute name="title" value="Wockets - Registration Success" />
+        <put-attribute name="body" value="/WEB-INF/jsp/admin-jsp/RegisterParticipant.jsp" />
+    </definition>
+    
+    
+   <definition name="admin-jsp/ParticipantDirectory" extends="base.definition">
+        <put-attribute name="title" value="Wockets - Participant Directory" />
+        <put-attribute name="body" value="/WEB-INF/jsp/admin-jsp/ParticipantDirectory.jsp" />
+    </definition>
+    
+    <definition name="admin-jsp/ManageParticipant" extends="base.definition">
+        <put-attribute name="title" value="Wockets - Participant Directory" />
+        <put-attribute name="body" value="/WEB-INF/jsp/admin-jsp/ManageParticipant.jsp" />
+    </definition>
+    
+    
+    <!-- *********Reviewer Work Area************ -->
+    
+    <definition name="reviewerWorkArea" extends="base.definition">
+        <put-attribute name="title" value="Wockets - Reviewer Work Area" />
+        <put-attribute name="body" value="/WEB-INF/jsp/reviewer-jsp/ReviewerWorkArea.jsp" />
+    </definition>
+    
+    <definition name="reviewer-jsp/AssignedStudy" extends="base.definition">
+        <put-attribute name="title" value="Wockets - Reviewer Work Area" />
+        <put-attribute name="body" value="/WEB-INF/jsp/reviewer-jsp/AssignedStudy.jsp" />
+    </definition>
+    
+	<definition name="reviewer-jsp/ReviewPage" 
+        template="/WEB-INF/jsp/reviewer-jsp/ReviewPageLayout.jsp">
+        <put-attribute name="title" value="Wockets - Reviewer Work Area" />
+        <put-attribute name="header" value="/WEB-INF/jsp/layout/header.jsp" />
+        <put-attribute name="body" value="/WEB-INF/jsp/reviewer-jsp/ReviewPage.jsp" />
+        <put-attribute name="footer" value="/WEB-INF/jsp/layout/footer.jsp" />
+    </definition>
+    
+    <!-- ****Reviewer data check*****-->
+    <!--<definition name="reviewerDataCheck" extends="base.definition">
+        <put-attribute name="title" value="Wockets - Reviewer Config" />
+        <put-attribute name="body" value="/WEB-INF/jsp/reviewer-jsp/reviewerAdmin-jsp/ReviewerDataCheck.jsp" />
+    </definition>-->
+    
+    <definition name="reviewerDataCheck" 
+        template="/WEB-INF/jsp/reviewer-jsp/ReviewPageLayout.jsp">
+        <put-attribute name="title" value="Wockets - Reviewer Config"/>
+        <put-attribute name="header" value="/WEB-INF/jsp/layout/header.jsp" />
+        <put-attribute name="body" value="/WEB-INF/jsp/reviewer-jsp/reviewerAdmin-jsp/ReviewerDataCheck.jsp" />
+        <put-attribute name="footer" value="/WEB-INF/jsp/layout/footer.jsp" />
+    </definition>
+    
+    <definition name="DataCheckAction" 
+        template="/WEB-INF/jsp/reviewer-jsp/reviewerAdmin-jsp/DataCheckAction.jsp">
+    </definition>
+    
+    
+    
+    
+  
+  
+  
+  
+  <!-- Access denied page -->  
+      <definition name="AccessDenied" extends="base.definition">
+        <put-attribute name="title" value="Wockets - Access denied" />
+        <put-attribute name="body" value="/WEB-INF/jsp/AccessDenied.jsp" />
+    </definition>  
+    
+   <!-- Account Recovery Page -->
+   <definition name="AccountRecovery" extends="base.definition">
+        <put-attribute name="title" value="Wockets - Account Recovery" />
+        <put-attribute name="body" value="/WEB-INF/jsp/common-jsp/AccountRecovery.jsp" />
+    </definition>  
+   
+    
+    
+    
+ </tiles-definitions>

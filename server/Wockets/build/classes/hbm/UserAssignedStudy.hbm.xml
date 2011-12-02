@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+
+<class name="edu.mit.media.wockets.Beans.UserAssignedStudy" table="User_Assigned_Study">
+<composite-id>
+<key-property name="userId" type="int" column="User_Id"/>
+<key-property name="studyId" type="string" column="Study_Id"/>
+</composite-id>
+</class>
+
+</hibernate-mapping>

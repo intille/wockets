@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+	"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping default-lazy="false">
+	<class name="edu.mit.media.wockets.Beans.Participant" table="PARTICIPANT">
+
+		<id name="participant_Id" type="int" unsaved-value="null" >
+        	<column name="Participant_Id" not-null="true"/>
+     		<generator class="identity"/>
+ 		</id>
+		  
+		<property name="fName" type="string" column="First_Name"/>		
+		<property name="lName" type="string" column="Last_Name"/>
+		<property name="email" type="string" column="Email"/>
+		<property name="gender" type="char" column="Gender"/>
+		<property name="birth_Date" type="string" column="Birth_Date"/>
+		<property name="height" type="float" column="Height"/>
+		<property name="weight" type="float" column="Weight"/>
+		<property name="race" type="string" column="Race"/>
+		<property name="activeStatus" type="char" column="Active_Status"/>
+		<property name="utc_offset" type="int" column="UTC_Offset"/>
+		<property name="notes" type="string" column="Notes"/>
+
+		
+	</class>
+	
+</hibernate-mapping>

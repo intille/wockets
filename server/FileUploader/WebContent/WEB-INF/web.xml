@@ -1,0 +1,15 @@
+<web-app version="1.0" encoding="UTF-8">
+
+
+<servlet>
+		<servlet-name>CommonsFileUploadServlet</servlet-name>
+		<servlet-class>Resources.CommonsFileUploadServlet</servlet-class>
+</servlet>
+	<servlet-mapping>
+		<servlet-name>CommonsFileUploadServlet</servlet-name>
+		<url-pattern>/Commonsfileuploadservlet</url-pattern>
+	</servlet-mapping>
+	<welcome-file-list>
+		<welcome-file>/upload.html</welcome-file>
+	</welcome-file-list>
+</web-app>

@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+	"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping default-lazy="false">
+	<class name="edu.mit.media.wockets.DataLogger.DataLoggerBean.DataUploadEvent" table="Data_Upload_Event">
+
+		<id name="dataUploadEventId" type="int" unsaved-value="null" >
+        	<column name="Data_Upload_Event_Id" not-null="true"/>
+     		<generator class="identity"/>
+ 		</id>
+		
+		<property name="participantID" type="int" column="Participant_Id"/>		
+		<property name="startUploadTime" type="timestamp" column="Start_Upload_Time"/>
+		<property name="endUploadTime" type="timestamp" column="End_Upload_Time"/>
+		<property name="resultStatus" type="boolean" column="Is_Successful"/>
+		<property name="startDataTime" type="timestamp" column="Start_Data_Time"/>
+		<property name="endDataTime" type="timestamp" column="End_Data_Time"/>
+		<property name="fileName" type="string" column="File_Name"/>
+		<property name="fileSize" type="int" column="File_Size"/>
+		<property name="note" type="string" column="Note"/>
+	</class>
+	
+</hibernate-mapping>
