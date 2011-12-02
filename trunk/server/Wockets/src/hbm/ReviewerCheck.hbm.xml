@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+	"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping default-lazy="false">
+	<class name="edu.mit.media.wockets.Beans.ReviewerCheck" table="Reviewer_CheckList">
+		<id name="checkId" type="int" column= "Check_Id">
+			<generator class="identity"/>
+		</id>
+		<property name="checkParameter" type="string" column="Check_Parameter"/>
+	</class>
+</hibernate-mapping>

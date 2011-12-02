@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+	"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping default-lazy="false">
+	<class name="edu.mit.media.wockets.DataLogger.DataLoggerBean.HRData" table="HRData">
+
+		<id name="hrDataId" type="int" unsaved-value="null" >
+        	<column name="HRData_Id" not-null="true"/>
+     		<generator class="identity"/>
+ 		</id>
+		
+		<property name="participantID" type="int" column="Participant_Id"/>		
+		<property name="createTime" type="timestamp" column="Create_Time"/>
+		<property name="heartRate" type="int" column="HeartRate"/>
+		<property name="battery" type="int" column="Sensor_Battery"/>
+		
+	</class>
+	
+</hibernate-mapping>

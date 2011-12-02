@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+
+<class name="edu.mit.media.wockets.Beans.ParticipantSim" table="PARTICIPANT_SIM">
+<composite-id>
+<key-property name="participantId" type="int" column="Participant_Id"/>
+<key-property name="phoneNbr" type="string" column="Phone_Number"/>
+</composite-id>
+<property name="activeStatus" type="char" column="Active_Status"/>
+<property name="inactiveReason" type="string" column="Reason_of_Change"/>
+
+</class>
+
+</hibernate-mapping>
