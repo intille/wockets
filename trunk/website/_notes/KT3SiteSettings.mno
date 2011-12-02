@@ -1,5 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<info>
-	<infoitem key="listNames" value="listACCOUNTS1,listPHONES1,listFILE_UPLOAD1,listWOCKETS1,listFILE_UPLOAD2,listPARTICIPANTS_PHONE1,listPARTICIPANTS1,listPARTICIPANTS_PHONE2,listPARTICIPANT_WOCKETS1,listPHONE_STATS1,listWOCKET_STATS1" />
-	<infoitem key="MultipleUploadIdentifier" value="KT_Upload,KT_Upload1,KT_Upload2,KT_Upload3" />
-</info>
