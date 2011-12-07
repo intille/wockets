@@ -131,6 +131,7 @@ for Future Use and 5 bits of command or data*/
 #define SET_VTM			0b11010
 #define ACK				0b11011
 #define SET_LED			0b11100
+#define WKT_SHUTDOWN	0b11101
 
 /* Macros for Wockets Commands */
 

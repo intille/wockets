@@ -209,8 +209,8 @@ void _wocket_initialize(void) //This function initializes the wocket
 	else
 	{
 		_SAMPLING_RATE = 40; 
-		_wTM = _TM_Continuous;
-		//_wTM = _TM_Burst_60;
+		//_wTM = _TM_Continuous;
+		_wTM = _TM_Burst_60;
 		
 		// Set the overflow interrupt timer 
 		unsigned char _MAX_SAMPLING_RATE = 0;
@@ -577,6 +577,7 @@ void _receive_data(void)
 				case (unsigned char)GET_HV:
 				case (unsigned char)GET_FV:				
 				case (unsigned char)GET_TCT:
+				case (unsigned char)WKT_SHOUTDOWN:
                 	command_length = 1;
                     break;
                 case (unsigned char)SET_SEN:
@@ -885,12 +886,14 @@ void _receive_data(void)
 						processed_counter = command_counter;		
 						response_length = 2;
 						break;				
+				
 					case (unsigned char) GET_FV:  
 				   		rBuffer[0] = m_FV_RSP_BYTE0;
                         rBuffer[1] = m_FV_RSP_BYTE1(_FVERSION);
 						processed_counter = command_counter;
 						response_length=2;
 						break;	
+				
 					case (unsigned char) GET_TCT:  
 				      	rBuffer[0] = m_TCT_RSP_BYTE0;
     					rBuffer[1] = m_TCT_RSP_BYTE1(_wTCNT2);
@@ -900,6 +903,7 @@ void _receive_data(void)
 						processed_counter = command_counter;				
 						response_length = 5;
 						break;
+				
 					case (unsigned char) SET_LED:  
 				      	_LED_COLOR = m_SET_LED_COLOR(rBuffer[1]);
 						_LED_TIME = m_SET_LED_TIME(rBuffer[1]);
@@ -918,6 +922,12 @@ void _receive_data(void)
 							}
 							_greenled_turn_off();
 						} 
+						processed_counter = command_counter;
+						break;
+						_atmega_finalize();
+				
+					case (unsigned char) WKT_SHOUTDOWN:  
+				      	_atmega_finalize();
 						processed_counter = command_counter;
 						break;
 																					 							                              

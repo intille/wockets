@@ -166,7 +166,9 @@ unsigned short Filter(unsigned short data,int axis)
 	 int j=0;                
      for (; (j < _SAMPLING_RATE); j++)	
 	 {
-	 	  mean += xv[axis][j];
+	 	  mean += xv[axis][j];	//Initializing the xv is not required because, the activity count is 
+		  						//calculated and saved only once per minute when xv is filled with 
+								//valid accelerometer data
           xv[axis][j] = xv[axis][j + 1];		  		  
 	 }
 	 mean = mean / _SAMPLING_RATE;
@@ -198,9 +200,9 @@ void do_sampling()
 	vmag += Filter(x, 0) + Filter(y, 1) + Filter(z, 2);
 		
 	//for calculating the activity count, skip the first samples to make sure the buffer is clean	
-	if (_wPC > 40)
+	if (_wPC > _SAMPLING_RATE)
 	{							
-		if (summary_count == 0)			// make the activity count only once per miniute
+		if (summary_count == 0)			// calculate the activity count only once per miniute
 		{
 			vmag = vmag / AC_SCALING;	// vmag is scaled in order to prevent the overflow 
 			
