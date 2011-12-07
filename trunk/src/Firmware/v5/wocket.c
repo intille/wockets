@@ -577,7 +577,7 @@ void _receive_data(void)
 				case (unsigned char)GET_HV:
 				case (unsigned char)GET_FV:				
 				case (unsigned char)GET_TCT:
-				case (unsigned char)WKT_SHOUTDOWN:
+				case (unsigned char)WKT_SHUTDOWN:
                 	command_length = 1;
                     break;
                 case (unsigned char)SET_SEN:
@@ -926,7 +926,7 @@ void _receive_data(void)
 						break;
 						_atmega_finalize();
 				
-					case (unsigned char) WKT_SHOUTDOWN:  
+					case (unsigned char) WKT_SHUTDOWN:  
 				      	_atmega_finalize();
 						processed_counter = command_counter;
 						break;
