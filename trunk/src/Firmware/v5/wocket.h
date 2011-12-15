@@ -52,14 +52,18 @@ typedef struct{	      //Each data_unit has 15 bytes of data
 #define _4_G		0b010 //currently
 #define _6_G		0b011
 #define _8_G		0b100
-#define _12_G		0b111 		
+#define _12_G		0b111 	
+
+/* Radio Transmission Modes */
+#define _TM_1	0b000
+#define _TM_2	0b001			
 
 /* Wockets Transmission Modes */
-#define _TM_Continuous	0b000
-#define _TM_Burst_30	0b001		// Burst after 30 secs
-#define _TM_Burst_60	0b010       // Burst after 60 secs [Currently 60 is being used]
-#define _TM_Burst_90	0b011		// Burst after 90 secs
-#define	_TM_Burst_120	0b100		// Burst after 120 secs
+#define _WTM_Continuous	0b000
+#define _WTM_Burst_30	0b001		// Burst after 30 secs
+#define _WTM_Burst_60	0b010       // Burst after 60 secs [Currently 60 is being used]
+#define _WTM_Burst_90	0b011		// Burst after 90 secs
+#define	_WTM_Burst_120	0b100		// Burst after 120 secs
 
 /* Wockets Status Bits */
 #define _STATUS_INITIALIZED 0
@@ -102,36 +106,37 @@ of information indicates: 8 bits: 1/0bit[H:first byte/L:not first byte] xxbits
 for Future Use and 5 bits of command or data*/
 
 /* Reserved Wockets Commands Opcodes */
-#define GET_BT			0b00000
-#define GET_BP 			0b00001
-#define GET_PC 			0b00010
-#define RST_BT 			0b00011
-#define GET_SEN			0b00100
-#define SET_SEN			0b00101
-#define GET_CAL 		0b00110
-#define SET_CAL			0b00111
-#define GET_SR			0b01000
-#define SET_SR			0b01001
-#define GET_ALT			0b01010
-#define SET_ALT			0b01011
-#define GET_PDT			0b01100
-#define SET_PDT			0b01101
-#define RST_WKT			0b01110
-#define ALIVE			0b01111
-#define PAUSE			0b10000
-#define RESUME			0b10001
-#define GET_TM			0b10010
-#define	SET_TM			0b10011
-#define GET_BTCAL		0b10100
-#define SET_BTCAL		0b10101
-#define GET_HV			0b10110
-#define GET_FV			0b10111
-#define GET_TCT			0b11000
-#define SET_TCT			0b11001
-#define SET_VTM			0b11010
-#define ACK				0b11011
-#define SET_LED			0b11100
-#define WKT_SHUTDOWN	0b11101
+#define GetBatteryLevel				0b00000
+#define GetBatteryPercent 			0b00001
+#define GetPacketCount 				0b00010
+#define ResetBluetooth 				0b00011
+#define GetSensorSentivity			0b00100
+#define SetSensorSentivity			0b00101
+#define GetCalibrationValues 		0b00110
+#define SetCalibrationValues		0b00111
+#define GetSamplingRate				0b01000
+#define SetSamplingRate				0b01001
+#define GetAliveTimer				0b01010
+#define SetAliveTimer				0b01011
+#define GetPowerDownTimer			0b01100
+#define SetPowerDownTimer			0b01101
+#define ResetWocket					0b01110
+#define Alive						0b01111
+#define PausePacket					0b10000
+#define ResumePacket				0b10001
+#define GetRadioTransmissionMode	0b10010
+#define	SetRadioTransmissionMode	0b10011
+#define GetBatteryCalibration		0b10100
+#define SetBatteryCalibration		0b10101
+#define GetHardwareVersion			0b10110
+#define GetFirmwareVersion			0b10111
+#define GetTCT						0b11000
+#define SetTCT						0b11001
+#define SetWocketTransmissionMode	0b11010
+#define ACK							0b11011
+#define SetLED						0b11100
+#define ShutdownWocket				0b11101
+#define GetWocketTransmissionMode	0b11110
 
 /* Macros for Wockets Commands */
 
@@ -146,6 +151,9 @@ for Future Use and 5 bits of command or data*/
 
 /* SET_TM Macros */		/* sets the transmission mode for the Bluetooth radio */
 #define m_SET_TM(aByte2) 	((aByte2 >> 4) & 0x07)
+
+/* SET_WTM Macros */		/* sets the WOCKET transmission mode  */
+#define m_SET_WTM(aByte2) 	((aByte2 >> 4) & 0x07)
 
 /* SET_ALT Macros */	/* gets the approximate time that a wocket waits before resetting itself, 
 if no alive packets are received*/ 
@@ -183,7 +191,7 @@ triggers the macros on the firmware */
 #define m_SET_TCTLAST(aByte3, aByte4) 	((unsigned char)((aByte3 & 0x1f) << 3)| (unsigned char)((aByte4 >> 4) & 0x07) )
 
 
-/* SET_TM Macros */		/* Sets the transmission mode for the Bluetooth radio */
+/* SET_ACK Macros */		/* Sets the transmission mode for the Bluetooth radio */
 #define m_ACK(aByte2, aByte3, aByte4)  	( (((unsigned short)(aByte2 & 0x7f)) << 9) | (((unsigned short)(aByte3 & 0x7f)) << 2) | (((unsigned short)(aByte4 >> 5)) & 0x03))
 
 
@@ -201,7 +209,7 @@ triggers the macros on the firmware */
 #define SR_RSP		0b00101		// Sampling Rate
 #define ALT_RSP		0b00110		// a 7 bit timer as outlined by SET_ALT
 #define PDT_RSP		0b00111
-#define TM_RSP		0b01000
+#define WTM_RSP		0b01000
 #define BTCAL_RSP 	0b01001		// Battery Calibration 	
 #define HV_RSP	 	0b01010		// Hardware version 
 #define FV_RSP	 	0b01011		// Firmware version 
@@ -211,6 +219,7 @@ triggers the macros on the firmware */
 #define TCT_RSP		0b01110		// Response packet for the ticks 
 #define ACC_RSP		0b01111 	//activity count count
 #define OFT_RSP		0b10000 	//offset AC count
+#define TM_RSP		0b10001
 
 /* Macros for Wockets Responses */
 
@@ -284,6 +293,10 @@ triggers the macros on the firmware */
 /* TM_RSP Macros */
 #define m_TM_RSP_BYTE0				RESPONSE_HEADER(TM_RSP)
 #define m_TM_RSP_BYTE1(mode)		((mode & 0x07) << 4)
+
+/* Wocket Traansmission Mode Macros */
+#define m_WTM_RSP_BYTE0				RESPONSE_HEADER(WTM_RSP)
+#define m_WTM_RSP_BYTE1(mode)		((mode & 0x07) << 4)
 
 /* HV_RSP Macros */
 #define m_HV_RSP_BYTE0				RESPONSE_HEADER(HV_RSP)
@@ -446,7 +459,7 @@ void _send_ac_count(unsigned short count);
 void _send_acs();
 void _send_ac_offset(unsigned short offset);
 void _send_data_bufferred(void);
-void _send_tm();
+void _send_wtm();
 void _send_sr();
 void _send_fv();
 void _send_hv();
