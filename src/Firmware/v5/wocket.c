@@ -31,6 +31,7 @@ uint8_t EEMEM _NV_INITIALIZED;
 uint8_t EEMEM _NV_STATUS_BYTE;
 uint8_t EEMEM _NV_SAMPLING_RATE;
 uint8_t EEMEM _NV_TM;
+uint8_t EEMEM _NV_WTM;
 uint8_t EEMEM _NV_SENS;
 uint8_t EEMEM _NV_TCT;
 uint8_t EEMEM _NV_TCTREPS;
@@ -86,7 +87,8 @@ unsigned char _wTCNT2_reps = 1;
 unsigned char _wTCNT2 = 0;
 unsigned char _wTCNT2_last = 0;
 
-unsigned char _wTM = _TM_Continuous;
+unsigned char _TM;
+unsigned char _wTM = _WTM_Continuous;
 unsigned char _wSENS = _4_G;
 
 unsigned long _wPC = 0;
@@ -98,6 +100,10 @@ unsigned char _LED_COLOR = 2;
 uint8_t EEMEM _NV_PDT;
 #define _DEFAULT_PDT 127
 unsigned char _wPDT;
+
+uint8_t EEMEM _NV_ALT;
+unsigned char _wALT;
+
 uint32_t _wShutdownTimer = 0;
 uint32_t _DEFAULT_SHUTDOWN = 0;
 
@@ -176,7 +182,7 @@ void _wocket_initialize(void) //This function initializes the wocket
 			_SAMPLING_RATE = eeprom_read_byte(&_NV_SAMPLING_RATE);
 			_STATUS_BYTE = eeprom_read_byte(&_NV_STATUS_BYTE);
 			// Load the transmission mode
-			_wTM = eeprom_read_byte(&_NV_TM);
+			_wTM = eeprom_read_byte(&_NV_WTM);
 			_wSENS = eeprom_read_byte(&_NV_SENS);
 
 			_wTCNT2 = eeprom_read_byte(&_NV_TCT);
@@ -209,28 +215,28 @@ void _wocket_initialize(void) //This function initializes the wocket
 	else
 	{
 		_SAMPLING_RATE = 40; 
-		//_wTM = _TM_Continuous;
-		_wTM = _TM_Burst_60;
+		//_wTM = _WTM_Continuous;
+		_wTM = _WTM_Burst_60;
 		
 		// Set the overflow interrupt timer 
 		unsigned char _MAX_SAMPLING_RATE = 0;
 		unsigned char _MIN_SAMPLING_RATE = 5;
 		switch(_wTM)
 		{
-			case _TM_Continuous:	
+			case _WTM_Continuous:	
 				_MAX_SAMPLING_RATE = 126; //This limitation is due to the definition of SEND_SR  and GET_SR commands
 										  // The MCU provided in wocket able to sample at higher rates 							
 				break;			
-			case _TM_Burst_30:    	//a transfer mode that send the burst every 30 secs
+			case _WTM_Burst_30:    	//a transfer mode that send the burst every 30 secs
 				_MAX_SAMPLING_RATE = 80;		
 				break;
-			case _TM_Burst_60:		//a transfer mode that send the burst every 60 secs
+			case _WTM_Burst_60:		//a transfer mode that send the burst every 60 secs
 				_MAX_SAMPLING_RATE = 40;		
 				break;
-			case _TM_Burst_90:		//a transfer mode that send the burst every 90 secs
+			case _WTM_Burst_90:		//a transfer mode that send the burst every 90 secs
 				_MAX_SAMPLING_RATE = 30;		
 				break;
-			case _TM_Burst_120:		//a transfer mode that send the burst every 120 secs
+			case _WTM_Burst_120:		//a transfer mode that send the burst every 120 secs
 				_MAX_SAMPLING_RATE = 20;		
 				break;
 			default:
@@ -501,11 +507,11 @@ void _send_sr()
 }
 
 //-------------------------------------------
-//	sends transmission mode 
-void _send_tm()
+//	sends wocket transmission mode 
+void _send_wtm()
 { 
-	aBuffer[0] = m_TM_RSP_BYTE0;
-    aBuffer[1] = m_TM_RSP_BYTE1(_wTM);
+	aBuffer[0] = m_WTM_RSP_BYTE0;
+    aBuffer[1] = m_WTM_RSP_BYTE1(_wTM);
 	for (int i = 0; (i < 2); i++)                                                                                       
        	_bluetooth_transmit_uart0_byte(aBuffer[i]); 
 }
@@ -559,45 +565,46 @@ void _receive_data(void)
         	opcode = aByte & 0x1f;                                              
         	switch (opcode)
 			{
-            	case (unsigned char)GET_BT:
-                case (unsigned char)GET_BP:
-                case (unsigned char)GET_PC:
-                case (unsigned char)RST_BT:
-                case (unsigned char)GET_SEN:
-                case (unsigned char)GET_CAL:
-                case (unsigned char)GET_SR:
-                case (unsigned char)GET_ALT:
-                case (unsigned char)GET_PDT:
-                case (unsigned char)RST_WKT:                      
-                case (unsigned char)ALIVE:
-                case (unsigned char)PAUSE:
-				case (unsigned char)RESUME:
-				case (unsigned char)GET_TM:
-				case (unsigned char)GET_BTCAL:
-				case (unsigned char)GET_HV:
-				case (unsigned char)GET_FV:				
-				case (unsigned char)GET_TCT:
-				case (unsigned char)WKT_SHUTDOWN:
+            	case (unsigned char)GetBatteryLevel:
+                case (unsigned char)GetBatteryPercent:
+                case (unsigned char)GetPacketCount:
+                case (unsigned char)ResetBluetooth:
+                case (unsigned char)GetSensorSentivity:
+                case (unsigned char)GetCalibrationValues:
+                case (unsigned char)GetSamplingRate:
+                case (unsigned char)GetAliveTimer:
+                case (unsigned char)GetPowerDownTimer:
+                case (unsigned char)ResetWocket:                      
+                case (unsigned char)Alive:
+                case (unsigned char)PausePacket:
+				case (unsigned char)ResumePacket:
+				case (unsigned char)GetRadioTransmissionMode:
+				case (unsigned char)GetWocketTransmissionMode:
+				case (unsigned char)GetBatteryCalibration:
+				case (unsigned char)GetHardwareVersion:
+				case (unsigned char)GetFirmwareVersion:				
+				case (unsigned char)GetTCT:
+				case (unsigned char)ShutdownWocket:
                 	command_length = 1;
                     break;
-                case (unsigned char)SET_SEN:
-                case (unsigned char)SET_SR:            
-                case (unsigned char)SET_ALT:
-                case (unsigned char)SET_PDT:
-                case (unsigned char)SET_TM:                
-				case (unsigned char)SET_VTM:  
-				case (unsigned char)SET_LED:
+                case (unsigned char)SetSensorSentivity:
+                case (unsigned char)SetSamplingRate:            
+                case (unsigned char)SetAliveTimer:
+                case (unsigned char)SetPowerDownTimer:
+                case (unsigned char)SetRadioTransmissionMode:                
+				case (unsigned char)SetWocketTransmissionMode:  
+				case (unsigned char)SetLED:
                      command_length = 2;
                      break;
      			case (unsigned char)ACK:
 					 //command_length = 1;
 					 command_length = 4;
                      break;
-				case (unsigned char)SET_TCT:                
+				case (unsigned char)SetTCT:                
                      command_length = 5;
                      break;
-                case (unsigned char)SET_CAL:
-				case (unsigned char)SET_BTCAL:
+                case (unsigned char)SetCalibrationValues:
+				case (unsigned char)SetBatteryCalibration:
                       command_length = 10;                                                              
                       break;                                                          
     		}
@@ -681,7 +688,7 @@ void _receive_data(void)
 			        //This command calibrates the wocket sampling rate by determining how much off it is from the 
 					//_SAMPLING_RATE by counting timer interrupts and using that value to adjust the sampling rate.
 
-				    case (unsigned char) SET_TCT:  
+				    case (unsigned char) SetTCT:  
 				   		_wTCNT2 = m_SET_TCT (rBuffer[1], rBuffer[2]);
 						_wTCNT2_reps = m_SET_TCTREPS (rBuffer[2], rBuffer[3]);
 						_wTCNT2_last = m_SET_TCTLAST (rBuffer[3], rBuffer[4]);
@@ -690,21 +697,21 @@ void _receive_data(void)
 						eeprom_write_byte (&_NV_TCTLAST, _wTCNT2_last);
 						processed_counter = command_counter;
 						break;
-                    case (unsigned char)PAUSE:                                                      
+                    case (unsigned char)PausePacket:                                                      
                             paused = 1;
                             processed_counter = command_counter;                                                      
                             break;
-                    case (unsigned char)RESUME:                                                     
+                    case (unsigned char)ResumePacket:                                                     
                             paused = 0;
                             processed_counter = command_counter;                                                      
                             break;
                     //reset alive timer if it is alive
-                    case (unsigned char)ALIVE:                                                      
+                    case (unsigned char)Alive:                                                      
                             alive_timer = 0;
                             processed_counter = command_counter;		
                             break;
                     //setup battery buffer
-                	case (unsigned char) GET_BT: 
+                	case (unsigned char) GetBatteryLevel: 
                             word = _atmega_a2dConvert10bit(ADC7);
                             rBuffer[0] = m_BL_RSP_BYTE0;
                             rBuffer[1] = m_BL_RSP_BYTE1(word);
@@ -712,13 +719,18 @@ void _receive_data(void)
                             processed_counter = command_counter;
                             response_length = 3;		                                                                          
                             break;		
-                	case (unsigned char) GET_SEN:           			  
+                	case (unsigned char) GetSensorSentivity:           			  
                             rBuffer[0] = m_SENS_RSP_BYTE0;
                             rBuffer[1] = m_SENS_RSP_BYTE1(_wSENS);                       
                             processed_counter = command_counter;
                             response_length = 2;		                                                                          
                             break;	
-                	case (unsigned char) GET_BP:           
+					case (unsigned char) SetSensorSentivity:           			  
+                            _wSENS = m_SET_SEN(rBuffer[1]);
+							eeprom_write_byte(&_NV_SENS, _wSENS);                       
+                            processed_counter = command_counter;                                                                 
+                            break;
+                	case (unsigned char) GetBatteryPercent:           
 				
                             word = _atmega_a2dConvert10bit(ADC7);
 								  
@@ -742,24 +754,24 @@ void _receive_data(void)
                             processed_counter = command_counter;
                             response_length = 2;		                                                                          
                             break;
- 				   case (unsigned char) GET_PDT:  
+ 				   case (unsigned char) GetPowerDownTimer:  
 				   		rBuffer[0] = m_PDT_RSP_BYTE0;
                         rBuffer[1] = m_PDT_RSP_BYTE1(_wPDT);
 						processed_counter = command_counter;
 						response_length = 2;
 						break;			
-                   case (unsigned char) SET_PDT:  
+                   case (unsigned char) SetPowerDownTimer:  
 				   		_wPDT = m_SET_PDT(rBuffer[1]);
 						eeprom_write_byte(&_NV_PDT, _wPDT);
 						processed_counter = command_counter;
 						break;																				
-                   case (unsigned char) GET_SR:  
+                   case (unsigned char) GetSamplingRate:  
 				   		rBuffer[0] = m_SR_RSP_BYTE0;
                         rBuffer[1] = m_SR_RSP_BYTE1(_SAMPLING_RATE);
 						processed_counter = command_counter;
 						response_length = 2;
 						break;
-                   case (unsigned char) GET_PC:  
+                   case (unsigned char) GetPacketCount:  
 				   		rBuffer[0] = m_PC_RSP_BYTE0;
                         rBuffer[1] = m_PC_RSP_BYTE1(_wPC);
 						rBuffer[2] = m_PC_RSP_BYTE2(_wPC);
@@ -769,7 +781,7 @@ void _receive_data(void)
 						processed_counter = command_counter;
 						response_length = 6;
 						break;
-                   case (unsigned char) SET_SR:  
+                   case (unsigned char) SetSamplingRate:  
 				   		_SAMPLING_RATE = m_SET_SR(rBuffer[1]);
 						_wocket_initialize_timer2_interrupt();
 						eeprom_write_byte(&_NV_SAMPLING_RATE, _SAMPLING_RATE);
@@ -779,22 +791,29 @@ void _receive_data(void)
 						processed_counter = command_counter;
 						break;
 
-     			   case (unsigned char) GET_TM:  
+     			   case (unsigned char) GetRadioTransmissionMode:  
 				   		rBuffer[0] = m_TM_RSP_BYTE0;
-                        rBuffer[1] = m_TM_RSP_BYTE1(_wTM);
+                        rBuffer[1] = m_TM_RSP_BYTE1(_TM);
 						processed_counter = command_counter;
 						response_length = 2;
 						break;
-                   case (unsigned char) SET_TM:  
-				   		_wTM = m_SET_TM(rBuffer[1]);
-						eeprom_write_byte(&_NV_TM, _wTM);
+                   case (unsigned char) SetRadioTransmissionMode:  
+				   		_TM = m_SET_TM(rBuffer[1]);
+						eeprom_write_byte(&_NV_TM, _TM);
 						processed_counter = command_counter;
 						break;
-                   case (unsigned char) SET_VTM:  
-				   		_wTM = m_SET_TM(rBuffer[1]);						
+				   case (unsigned char) GetWocketTransmissionMode:  
+				   		rBuffer[0] = m_WTM_RSP_BYTE0;
+                        rBuffer[1] = m_WTM_RSP_BYTE1(_WTM);
+						processed_counter = command_counter;
+						response_length = 2;
+						break;
+                   case (unsigned char) SetWocketTransmissionMode:  
+				   		_wTM = m_SET_WTM(rBuffer[1]);
+						eeprom_write_byte(&_NV_WTM, _wTM);						
 						processed_counter = command_counter;
 						break;
-                   case (unsigned char) SET_CAL:                                                                    
+                   case (unsigned char) SetCalibrationValues:                                                                    
                             if (eeprom_is_ready())
                             {                                    
                                     if (_atmega_a2dConvert10bit(ADC7) < 600)
@@ -818,7 +837,7 @@ void _receive_data(void)
                             }                                                                                                                       
                             //enable global interrupts
                             break;
-                    case (unsigned char) GET_CAL:							                                                              
+                    case (unsigned char) GetCalibrationValues:							                                                              
 							rBuffer[0] = m_CAL_RSP_BYTE0;
                             rBuffer[1] = m_CAL_RSP_BYTE1_x1g(_wX1G_CAL);                                                                   
                             rBuffer[2] = m_CAL_RSP_BYTE2_x1g(_wX1G_CAL);
@@ -837,7 +856,7 @@ void _receive_data(void)
 							processed_counter = command_counter;
                             response_length = 10;                                                                               
                             break;    
-                    case (unsigned char) GET_BTCAL:							                                                              
+                    case (unsigned char) GetBatteryCalibration:							                                                              
 							rBuffer[0] = m_BTCAL_RSP_BYTE0;
                             rBuffer[1] = m_BTCAL_RSP_BYTE1_100(_wBTCAL100);                                                                   
                             rBuffer[2] = m_BTCAL_RSP_BYTE2_100(_wBTCAL100);
@@ -856,7 +875,7 @@ void _receive_data(void)
 							processed_counter = command_counter;
                             response_length = 10;                                                                               
                             break;  
- 					case (unsigned char) SET_BTCAL:
+ 					case (unsigned char) SetBatteryCalibration:
                             if (eeprom_is_ready())
                             {                                    
                                     if (_atmega_a2dConvert10bit(ADC7) < 600)								    
@@ -880,21 +899,21 @@ void _receive_data(void)
                             }                                                                                                                       
                             //enable global interrupts
                             break;	
-	   				case (unsigned char) GET_HV:  
+	   				case (unsigned char) GetHardwareVersion:  
 				   		rBuffer[0] = m_HV_RSP_BYTE0;
                         rBuffer[1] = m_HV_RSP_BYTE1(_VERSION);
 						processed_counter = command_counter;		
 						response_length = 2;
 						break;				
 				
-					case (unsigned char) GET_FV:  
+					case (unsigned char) GetFirmwareVersion:  
 				   		rBuffer[0] = m_FV_RSP_BYTE0;
                         rBuffer[1] = m_FV_RSP_BYTE1(_FVERSION);
 						processed_counter = command_counter;
 						response_length=2;
 						break;	
 				
-					case (unsigned char) GET_TCT:  
+					case (unsigned char) GetTCT:  
 				      	rBuffer[0] = m_TCT_RSP_BYTE0;
     					rBuffer[1] = m_TCT_RSP_BYTE1(_wTCNT2);
     					rBuffer[2] = m_TCT_RSP_BYTE2(_wTCNT2, _wTCNT2_reps);
@@ -904,7 +923,7 @@ void _receive_data(void)
 						response_length = 5;
 						break;
 				
-					case (unsigned char) SET_LED:  
+					case (unsigned char) SetLED:  
 				      	_LED_COLOR = m_SET_LED_COLOR(rBuffer[1]);
 						_LED_TIME = m_SET_LED_TIME(rBuffer[1]);
 						if (_LED_COLOR == 0){
@@ -926,11 +945,32 @@ void _receive_data(void)
 						break;
 						_atmega_finalize();
 				
-					case (unsigned char) WKT_SHUTDOWN:  
+					case (unsigned char) ShutdownWocket:  
 				      	_atmega_finalize();
 						processed_counter = command_counter;
 						break;
-																					 							                              
+					
+					case (unsigned char) ResetBluetooth:  
+				      	_bluetooth_reset();
+						processed_counter = command_counter;
+						break;
+					case (unsigned char) ResetWocket:  
+				      	//_wocket_reset();
+						_atmega_finalize();
+						_wocket_initialize();
+						processed_counter = command_counter;
+						break;
+					case (unsigned char) GetAliveTimer:  
+				   		rBuffer[0] = m_ALT_RSP_BYTE0;
+                        rBuffer[1] = m_ALT_RSP_BYTE1(_wALT);
+						processed_counter = command_counter;
+						response_length = 2;
+						break;			
+                    case (unsigned char) SetAliveTimer:  
+				   		_wALT = m_SET_ALT(rBuffer[1]);
+						eeprom_write_byte(&_NV_ALT, _wALT);
+						processed_counter = command_counter;
+						break;																	 							                              
                     default:        
                             break;
             }

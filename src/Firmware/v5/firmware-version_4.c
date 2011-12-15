@@ -308,7 +308,7 @@ int main()
 			               //"Interrupt Service Routine"			
 			
 			//Get the packets of data from buffer according to the current transmission mode.
-			if (_wTM == _TM_Continuous) //Countinuous Mode
+			if (_wTM == _WTM_Continuous) //Countinuous Mode
 			{		
 				switch(dataSubindex)
 				{
@@ -334,10 +334,10 @@ int main()
 							break;
 				}											
 		
-		        // if the wocket was just connected, confirm the transmission mode 
+		        // if the wocket was just connected, confirm the wocket transmission mode 
 				if (justconnected == 1)
 				{
-					_send_tm();
+					_send_wtm();
 					justconnected = 2;
 				}		
 
@@ -357,7 +357,7 @@ int main()
 					gotack = 1;
 					tester = 0;
 
-					if (_wTM == _TM_Continuous) /* Skips sending that particular batch data if the 
+					if (_wTM == _WTM_Continuous) /* Skips sending that particular batch data if the 
 					phone requests for a mode change */
 						continue;
                    					
@@ -386,7 +386,7 @@ int main()
 				
 				    // Test Code ----------------										
 					_send_sr();			// Send the sampling rate to the phone 				 
-					_send_tm();			// Send the transmission mode to the phone						
+					_send_wtm();		// Send the wocket transmission mode to the phone						
 
 					//sample and send the battery level
 					battery = _atmega_a2dConvert10bit(ADC7); 
@@ -396,7 +396,8 @@ int main()
 					//send activity counts information																
 					_send_acs();		// Send the Activity counts to the phone
 
-					// Send the number of raw data bytes in the batch 
+					// Send the number of raw data bytes in the 
+					 
 					_send_batch_count((batch_counter-1) * 4);	
 					
 					//Send raw data
@@ -494,7 +495,7 @@ int main()
 					} 
 
 					//Don't turn off the radio if a request to switch mode has been received
-					if (_wTM == _TM_Continuous)
+					if (_wTM == _WTM_Continuous)
 						_bluetooth_turn_on();	
 					else
 						_bluetooth_turn_off();		
@@ -505,7 +506,7 @@ int main()
 
 				} // End if (connected)
 
-			} // End else (_wTM==_TM_Continuous) => _wTM is not continuous 
+			} // End else (_wTM==_WTM_Continuous) => _wTM is not continuous 
 
 			_atmega_adc_turn_off();
 			power_adc_disable();
@@ -593,7 +594,7 @@ ISR(TIMER2_OVF_vect)
 	/* Sample data and transmit it if necessary */
 	sampleFlag = 1;
 
-	if (_wTM == _TM_Continuous)
+	if (_wTM == _WTM_Continuous)
 	{
 		_wPC++;
 		// Section of the code to indicate that the wocket got connected
@@ -612,7 +613,7 @@ ISR(TIMER2_OVF_vect)
 		_receive_data();
 	}
 
-	else if (_wTM == _TM_Burst_60)
+	else if (_wTM == _WTM_Burst_60)
 	{
 		//This only works for Timer1,doesn't have any effect for this timer (Timer2)
 		if (_wPDT != 0)
@@ -648,4 +649,7 @@ ISR(TIMER2_OVF_vect)
 		connected = 1;		
 	}
 }
+
+
+
 

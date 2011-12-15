@@ -473,7 +473,6 @@ void _atmega_initialize(unsigned char timer_prescalar)
 	//Turn on ADC conversion_send_data_bufferred
 	 _atmega_adc_turn_on();
 
-
 }
 
 
@@ -532,7 +531,11 @@ void _atmega_finalize(void)
 
 }
 
-
+void _wocket_reset(void)
+{
+	_atmega_initialize(CPU_CLK_PRESCALAR_1024);
+	_atmega_finalize();
+}
 
 
 /* Bluetooth Functions */

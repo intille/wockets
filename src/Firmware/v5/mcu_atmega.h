@@ -207,7 +207,7 @@ unsigned short _atmega_a2dConvert10bit(unsigned char channel);
 void _atmega_reset(void);
 void _atmega_adc_turn_on(void);
 void _atmega_adc_turn_off(void);
-
+void _wocket_reset(void);
 
 /* LED Specific Functions */
 void _greenled_turn_on(void);
