@@ -497,6 +497,15 @@ void _send_acs()
 }
 
 //-------------------------------------------
+// sends confirmation of end of batch data for bursty mode
+void _send_end_batch()
+{
+	aBuffer[0] = m_END_BATCH_BYTE0;    	
+    _bluetooth_transmit_uart0_byte(aBuffer[0]); 
+}
+
+
+//-------------------------------------------
 // sends sampling rate
 void _send_sr()
 {

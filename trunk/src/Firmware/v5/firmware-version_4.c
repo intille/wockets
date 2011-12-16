@@ -478,7 +478,10 @@ int main()
 						} 
 
 						copy_end_item_to_start(end);
-					}	
+					}
+					
+					//send confirmation that all data has been sent for this minute
+					_send_end_batch();	
 
 					batch_counter = 0;
 					dataIndex = 0;
