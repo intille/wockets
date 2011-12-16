@@ -804,7 +804,7 @@ void _receive_data(void)
 						break;
 				   case (unsigned char) GetWocketTransmissionMode:  
 				   		rBuffer[0] = m_WTM_RSP_BYTE0;
-                        rBuffer[1] = m_WTM_RSP_BYTE1(_WTM);
+                        rBuffer[1] = m_WTM_RSP_BYTE1(_wTM);
 						processed_counter = command_counter;
 						response_length = 2;
 						break;

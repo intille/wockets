@@ -44,7 +44,7 @@ With the sampling rate of 40Hz, the memory is allocated as follows:
 data_unit      data[DATA_SIZE];	/* This structure is used to store raw data. Each data unit (15bytes) consists of 4 samples. 
 								Because the accelerometer is sampled using a 10 bit ADC. So, a sample consists of 30 bits for
 								the 3 axes. 30x4= 120 bits i.e. 15 bytes.*/
-unsigned short batch_counter = 0;// Counter of data[]
+unsigned short batch_counter = 0;// Counter of raw data in bursty mode
 
 unsigned short acount[AC_BUFFER_SIZE]; /* A buffer  with capacity of 960 bytes for storing activity counts up to 16 hours in
 									   case the wocket losses the Blutooth connection (with phone)*/ 
@@ -396,7 +396,7 @@ int main()
 					//send activity counts information																
 					_send_acs();		// Send the Activity counts to the phone
 
-					// Send the number of raw data bytes in the 
+					// Send the number of raw data bytes in the wocket
 					 
 					_send_batch_count((batch_counter-1) * 4);	
 					
