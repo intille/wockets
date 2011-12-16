@@ -313,8 +313,9 @@ triggers the macros on the firmware */
 
 /* BC_RSP Macros */
 #define m_BC_RSP_BYTE0				RESPONSE_HEADER(BC_RSP)
-#define m_BC_RSP_BYTE1(count)		((count >> 7) & 0x7f)
-#define m_BC_RSP_BYTE2(count)		(count & 0x7f)
+#define m_BC_RSP_BYTE1(count)		((count >> 9) & 0x7f)
+#define m_BC_RSP_BYTE2(count)		((count >> 2) & 0x7f)
+#define m_BC_RSP_BYTE3(count)		((count & 0x03) << 5)
 
 /* AC_RSP Macros */
 #define m_AC_RSP_BYTE0					RESPONSE_HEADER(AC_RSP)
