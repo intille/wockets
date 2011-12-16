@@ -138,6 +138,7 @@ for Future Use and 5 bits of command or data*/
 #define ShutdownWocket				0b11101
 #define GetWocketTransmissionMode	0b11110
 
+
 /* Macros for Wockets Commands */
 
 /* SET_SEN Macros */			/* Sensitivity of the accelerometer */
@@ -220,8 +221,12 @@ triggers the macros on the firmware */
 #define ACC_RSP		0b01111 	//activity count count
 #define OFT_RSP		0b10000 	//offset AC count
 #define TM_RSP		0b10001
+#define END_BATCH	0b10010		//confirmation that all data has been sent for the minute in bursty mode
 
 /* Macros for Wockets Responses */
+
+/* END_BATCH Macros*/
+#define m_END_BATCH_BYTE0		RESPONSE_HEADER(END_BATCH)
 
 /* BL_RSP Macros */
 #define m_BL_RSP_BYTE0			RESPONSE_HEADER(BL_RSP)
@@ -464,6 +469,7 @@ void _send_sr();
 void _send_fv();
 void _send_hv();
 void _send_bl(unsigned short level);
+void _send_end_batch();
 
 unsigned char _wocket_get_baudrate(void);
 void _wocket_set_baudrate(unsigned char baudrate);
