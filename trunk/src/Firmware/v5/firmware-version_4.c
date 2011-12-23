@@ -1,10 +1,10 @@
 //*****************************************************************************
 //
-// File Name    : 'firmware-version_4.c'
+// File Name    : 'firmware-version_5.c'
 // Title        : Interrupt driven code for the wockets
 // Author       : Fahd Albinali
 // Created      : 12/10/2008
-// Modified     : 06/16/2011
+// Modified     : 12/21/2011
 // 
 //  Description : This file includes the main loop for the code that runs on the wocket and
 //  any interrupt service routines (ISRs). The code supports a variety of configuration modes
@@ -28,9 +28,6 @@
 #include <util/delay.h>
 
 //-----------------------------------Variables------------------------------------------------------------------------------
-
-unsigned char wakeup = 0;
-unsigned char sample = 0;
 
 /*We have a maximum of 16K on the microcontroller. The storage capacity of depends on the sampling rate and that can vary.
 With the sampling rate of 40Hz, the memory is allocated as follows:
@@ -73,6 +70,7 @@ unsigned short battery; 		// Contains battery level after sampling the battery
 unsigned short x;				// Acceleration values of x, y and z axis
 unsigned short y;
 unsigned short z;
+
 unsigned int i = 0;
 
 unsigned short prevx;			// Previous acceleration values 
@@ -106,6 +104,8 @@ unsigned char  isdocked=0;		// Flag to indicate while wocket is  connected to ch
 unsigned int   dockcounter=0;	/* Counter to prevent resetting the wocket, if someone plug in the wocket for a short time 
 								accidentally. This would lead to loose of the activity count data. The counter is used to 
 								count up to 2400 and then shutdown the radio and reset variables to allow for faster charging.*/
+
+char shutdown_flag = 0;
 
 //------------------------------------------------------Functions-----------------------------------------------------------------
 
@@ -352,7 +352,8 @@ int main()
 
 				if (connected)			// check for the BT connection
 				{
-					_greenled_turn_on();
+					if (shutdown_flag == 0)	
+						_greenled_turn_on();
 						
 					gotack = 1;
 					tester = 0;
@@ -396,7 +397,7 @@ int main()
 					//send activity counts information																
 					_send_acs();		// Send the Activity counts to the phone
 
-					// Send the number of raw data bytes in the wocket
+					// Send the number of raw data in the wocket
 					 
 					_send_batch_count((batch_counter-1) * 4);	
 					
@@ -509,7 +510,7 @@ int main()
 
 				} // End if (connected)
 
-			} // End else (_wTM==_WTM_Continuous) => _wTM is not continuous 
+			} // End else (_wTM==_WTM_Continuous) => _wTM is bursty 
 
 			_atmega_adc_turn_off();
 			power_adc_disable();
@@ -553,7 +554,12 @@ ISR(TIMER2_OVF_vect)
 			cseq = 0; 
 			sseq = 0;		
 			_bluetooth_turn_off();
-			isdocked = 1;			
+			isdocked = 1;
+			if (shutdown_flag == 1){
+				_wocket_initialize();
+				shutdown_flag = 0;
+			}
+							
 		}
 		return;
 	}else
@@ -566,7 +572,7 @@ ISR(TIMER2_OVF_vect)
 		}
 	}
 
-	if (connected == 0){
+	if ((connected == 0)&& (shutdown_flag == 0)){
 		blink_counter++;
 		if (blink_counter == (_SAMPLING_RATE * 5))		// ON period
 			_greenled_turn_on();
@@ -577,9 +583,9 @@ ISR(TIMER2_OVF_vect)
 		}
 	}
 
-	/* Skip sampling depending on the sampling rate variables/timers */
-	/*REFER _wocket_initialize_timer2_interrupt 
-	The sampling rate is much slower than the MCU  */
+	/* Adjusting the counter for the sampling rate */
+	//REFER to _wocket_initialize_timer2_interrupt in the wocket.c
+	
  	if (interrupt_reps == 0)
 	{	
 		interrupt_reps = _wTCNT2_reps;
@@ -634,7 +640,7 @@ ISR(TIMER2_OVF_vect)
 				seconds_disconnected++;
 			else if (seconds_disconnected == (_SAMPLING_RATE * 45))
 			{
-				//before turning on the bluetooth make sure you flush the receive buffer
+				//before turning on the bluetooth make sure the receive buffer is flushed
 				_receive_uart0_flush();
 				_bluetooth_turn_on();		
 				seconds_disconnected = (_SAMPLING_RATE * 45) + 1;			

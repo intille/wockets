@@ -197,9 +197,6 @@ triggers the macros on the firmware */
 
 
 
-
-
-
 /* Reserved Wockets Response Opcodes */
 #define BL_RSP 		0b00000		// response sends back the battery level for the wocket 
 #define BP_RSP 		0b00001		/* Battery percent command: the idea here is that once the battery is calibrated we wanted an adjusted value that takes care of
@@ -383,7 +380,7 @@ extern unsigned char  gotack;
 extern unsigned char  command_counter;
 extern unsigned tester;
 extern unsigned long _wLastPC;
-
+extern char shutdown_flag;
 /*Packet or frame of 5 bytes*/
 typedef struct{
 	unsigned char byte1; // sync bit, 2 bits packet type, 3 bits sensitivity, 2 bits MSB X
