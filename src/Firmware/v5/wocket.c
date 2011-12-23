@@ -107,16 +107,19 @@ unsigned char _wALT;
 uint32_t _wShutdownTimer = 0;
 uint32_t _DEFAULT_SHUTDOWN = 0;
 
+//char shutdown_flag = 0;
+
 
 //------------------------------------------------------Functions-----------------------------------------------------------------
 /* 
-	 The wocket is configured to run at 8MHz (theoretically), in practice that is an approximate number. To sample the wocket 
-	 accelerometer at a specified _SAMPLING_RATE for example 40Hz (i.e. 40 samples/second we only have 8/16 bit timers and for
-	 maximum power savings we need to use the 8 bit counter. The MCU provides a feature that would allow the user to increase
-	 the counter on each cycle with each power of 2 up to 2^10. By incrementing the counter every 1024 cycles (8000000/1024=
-	 7812.5), the counter need to overflow with ticks=7812.5/_SAMPLING_RATE. So, the counter for the timer is initialized with 
-	 255-(ticks%256). With the counter overflows, an overflow interrupt gets invoked to show the approximate sampling
-	 time for the accelerometer.	
+	 The sampling rate is much slower than the MCU. MCU is configured to run at 8MHz (theoretically), in practice that is an 
+	 approximate number. 
+	 There are only 8/16 bit timers/counters in the wocket and for maximum power savings the 8 bit counter is used for setting the sampling
+	 rate of the wocket accelerometer at a specified _SAMPLING_RATE value. But,the MCU provides a feature that would allow the user to 
+	 increase the counter on each cycle with each power of 2 up to 2^10. Using the 2^10 mode, it is needed toincrement the counter is needed
+	 to increase every 1024 cycles: (8000000/1024= 7812.5). So, the counter need to overflow with ticks=7812.5/_SAMPLING_RATE and the counter
+	 is initialized with 255-(ticks%256). When the counter overflows, an overflow interrupt gets invoked to show the approximate sampling time
+	 for the accelerometer.	
 */
 void _wocket_initialize_timer2_interrupt(void)
 {
@@ -147,7 +150,7 @@ void _wocket_initialize(void) //This function initializes the wocket
 	
 	unsigned short battery = _atmega_a2dConvert10bit(IN_VSENSE_BAT);
 	if (battery < 700)
-	{// Blink yellow for 5 seconds if the battery is not fully charged 
+	{// Blink yellow 3times for 5 seconds if the battery is not fully charged 
 		for (int i = 0; (i < 3); i++){
 			_yellowled_turn_on();		
 			for (int j = 0; (j < 200); j++)
@@ -172,8 +175,7 @@ void _wocket_initialize(void) //This function initializes the wocket
 		return;
 	}
 	
-	//eeprom_write_byte(&_NV_DEBUG,_INITIALIZED);	
-	// If the wocket has been initialized bef
+	// If the wocket has been initialized before
 	if (_INITIALIZED == _WOCKET_INITIALIZED)
 	{		
 		if (battery > 300)
@@ -215,7 +217,7 @@ void _wocket_initialize(void) //This function initializes the wocket
 	else
 	{
 		_SAMPLING_RATE = 40; 
-		//_wTM = _WTM_Continuous;
+	//	_wTM = _WTM_Continuous;
 		_wTM = _WTM_Burst_60;
 		
 		// Set the overflow interrupt timer 
@@ -635,50 +637,7 @@ void _receive_data(void)
     {                                       
             switch (opcode)
             {
-				case (unsigned char) ACK:						
-						/*
-						kseq=m_ACK(rBuffer[1],rBuffer[2],rBuffer[3]);
-						crc=CRC16(rBuffer,4);
-						rcrc=(rBuffer[6]>>5);
-						rcrc=rcrc|(rBuffer[5]<<2);
-						rcrc=rcrc|(rBuffer[4]<<9);						
-						if ( (crc==rcrc) && (kseq<=cseq) && ((kseq-sseq)<AC_BUFFER_SIZE) && ((kseq-sseq)>0) )						
-						{
-							dseq=cseq-kseq;							
-							if (ci>=dseq) 
-								si=ci-dseq;
-							else
-								si=AC_BUFFER_SIZE-(dseq-ci);
-							sseq=kseq;							
-
-							_yellowled_turn_on();
-								for (int xyz=0;(xyz<80);xyz++)
-									_delay_ms(10);
-								_yellowled_turn_off();
-						}
-
-						if ((_wPC - _wLastPC) > 1000){
-							_wLastPC = _wPC;						
-							kseq = sseq + 10;
-							if ( (kseq <= cseq) && ((kseq - sseq) < AC_BUFFER_SIZE) && ((kseq - sseq) > 0) )						
-							{
-								dseq = cseq - kseq;							
-								if (ci >= dseq) 
-									si = ci-dseq;
-								else
-									si = AC_BUFFER_SIZE - (dseq - ci);
-								sseq = kseq;							
-
-								_yellowled_turn_on();
-								for (int xyz = 0; (xyz < 80); xyz++)
-									_delay_ms(10);
-								_yellowled_turn_off();
-								tester++;
-								if (tester > 1)
-									_yellowled_turn_on();
-							}
-						}*/	
-											
+				case (unsigned char) ACK:											
 						kseq = rBuffer[1] & 0x7f;
 						kseq = kseq << 7 | (rBuffer[2] & 0x7f);
 						kseq = kseq << 2 | ((rBuffer[3] >> 5) & 0x03);
@@ -720,7 +679,6 @@ void _receive_data(void)
                             alive_timer = 0;
                             processed_counter = command_counter;		
                             break;
-                    //setup battery buffer
                 	case (unsigned char) GetBatteryLevel: 
                             word = _atmega_a2dConvert10bit(ADC7);
                             rBuffer[0] = m_BL_RSP_BYTE0;
@@ -744,7 +702,7 @@ void _receive_data(void)
 				
                             word = _atmega_a2dConvert10bit(ADC7);
 								  
-							if (word > _wBTCAL100)
+							if (word > _wBTCAL100) // Calculate the battery percent
 								word = 100;
 							else if (word > _wBTCAL80)
 								word = 80 + ((word - _wBTCAL80) * 20) / (_wBTCAL100 - _wBTCAL80);
@@ -936,7 +894,7 @@ void _receive_data(void)
 					case (unsigned char) SetLED:  
 				      	_LED_COLOR = m_SET_LED_COLOR(rBuffer[1]);
 						_LED_TIME = m_SET_LED_TIME(rBuffer[1]);
-						if (_LED_COLOR == 0){
+						if (_LED_COLOR == 0){							
 							for (int i = 0; (i < _LED_TIME); i++){
 								_yellowled_turn_on();		
 								for (int j = 0; (j < 200); j++)
@@ -953,10 +911,22 @@ void _receive_data(void)
 						} 
 						processed_counter = command_counter;
 						break;
-						_atmega_finalize();
 				
 					case (unsigned char) ShutdownWocket:  
+						shutdown_flag = 1;
 				      	_atmega_finalize();
+						if (_is_docked())
+						{
+							for(int j = 0;(j < 10);j++)			
+								for(int i = 0;(i < 200);i++)
+									_delay_ms(5);
+							if (_is_docked())
+								_wocket_initialize();
+						}
+						/*_atmega_finalize();
+						for (int j = 0; (j < 1000); j++)
+									_delay_ms(5);
+						_wocket_initialize();*/
 						processed_counter = command_counter;
 						break;
 					
@@ -967,6 +937,8 @@ void _receive_data(void)
 					case (unsigned char) ResetWocket:  
 				      	//_wocket_reset();
 						_atmega_finalize();
+						for (int j = 0; (j < 1000); j++)
+									_delay_ms(5);
 						_wocket_initialize();
 						processed_counter = command_counter;
 						break;
