@@ -499,7 +499,7 @@ int main()
 					} 
 
 					//Don't turn off the radio if a request to switch mode has been received
-					if (_wTM == _WTM_Continuous)
+					if ((_wTM == _WTM_Continuous)&&(shutdown_flag == 0))
 						_bluetooth_turn_on();	
 					else
 						_bluetooth_turn_off();		
@@ -556,7 +556,8 @@ ISR(TIMER2_OVF_vect)
 			_bluetooth_turn_off();
 			isdocked = 1;
 			if (shutdown_flag == 1){
-				_wocket_initialize();
+				//_wocket_initialize();
+				//_bluetooth_turn_on();
 				shutdown_flag = 0;
 			}
 							
@@ -642,7 +643,8 @@ ISR(TIMER2_OVF_vect)
 			{
 				//before turning on the bluetooth make sure the receive buffer is flushed
 				_receive_uart0_flush();
-				_bluetooth_turn_on();		
+				if (shutdown_flag == 0)
+					_bluetooth_turn_on();		
 				seconds_disconnected = (_SAMPLING_RATE * 45) + 1;			
 				_delay_ms(10);
 			}
