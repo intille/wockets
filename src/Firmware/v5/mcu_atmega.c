@@ -485,14 +485,14 @@ void _atmega_initialize(unsigned char timer_prescalar)
 */
 void _atmega_finalize(void)
 {
-	cli();
+//	cli();
 	_bluetooth_turn_off();
-	_accelerometer_turn_off();
+//	_accelerometer_turn_off();
 	_greenled_turn_off();
 	_yellowled_turn_off();
 
 	//Set all ports as inputs
-	DDRA=0x00;
+/*	DDRA=0x00;
 	DDRB=0x00;
 	DDRC=0x00;
 	DDRD=0x00;
@@ -527,7 +527,7 @@ void _atmega_finalize(void)
     sei();	
 	set_sleep_mode(SLEEP_MODE_PWR_DOWN);
 //	sleep_cpu();
-    sleep_disable();
+    sleep_disable();*/
 
 }
 
