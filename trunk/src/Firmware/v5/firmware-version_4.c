@@ -557,7 +557,7 @@ ISR(TIMER2_OVF_vect)
 			isdocked = 1;
 			if (shutdown_flag == 1){
 				//_wocket_initialize();
-				//_bluetooth_turn_on();
+				_bluetooth_turn_on();
 				shutdown_flag = 0;
 			}
 							

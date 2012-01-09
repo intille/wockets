@@ -914,15 +914,18 @@ void _receive_data(void)
 				
 					case (unsigned char) ShutdownWocket:  
 						shutdown_flag = 1;
-				      	_atmega_finalize();
-						if (_is_docked())
+						_bluetooth_turn_off();
+						_greenled_turn_off();
+						_yellowled_turn_off();
+				      	//_atmega_finalize();
+						/*if (_is_docked())
 						{
 							for(int j = 0;(j < 10);j++)			
 								for(int i = 0;(i < 200);i++)
 									_delay_ms(5);
 							if (_is_docked())
 								_wocket_initialize();
-						}
+						}*/
 						/*_atmega_finalize();
 						for (int j = 0; (j < 1000); j++)
 									_delay_ms(5);

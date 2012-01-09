@@ -485,14 +485,14 @@ void _atmega_initialize(unsigned char timer_prescalar)
 */
 void _atmega_finalize(void)
 {
-//	cli();
+	//cli();
 	_bluetooth_turn_off();
 //	_accelerometer_turn_off();
 	_greenled_turn_off();
 	_yellowled_turn_off();
 
-	//Set all ports as inputs
-/*	DDRA=0x00;
+/*	//Set all ports as inputs
+	DDRA=0x00;
 	DDRB=0x00;
 	DDRC=0x00;
 	DDRD=0x00;
@@ -500,7 +500,7 @@ void _atmega_finalize(void)
 	PORTA=0x00;
 	PORTB=0x00;
 	PORTC=0x00;
-	PORTD=0x00;
+	PORTD=0x00;*/
 
 	// Disable timer
 //	_atmega_disable_timer2();
@@ -509,11 +509,12 @@ void _atmega_finalize(void)
 	//wdt_disable();
 
 	//Disable ADC Conversion
-	_atmega_adc_turn_off();
+//
+//	_atmega_adc_turn_off();
 
 
 	// Disable pull-ups
-  	MCUCR |= (1u << PUD); 
+/*  	MCUCR |= (1u << PUD); 
 	// Disable Analog comparitor
   	ACSR &= ~(1<<ACIE);   // Disable analog comparator interrupt
   	ACSR |= (1<<ACD);     // Disable analog comparitor 
