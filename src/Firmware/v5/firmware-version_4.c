@@ -559,6 +559,10 @@ ISR(TIMER2_OVF_vect)
 				//_wocket_initialize();
 				_bluetooth_turn_on();
 				shutdown_flag = 0;
+				_yellowled_turn_on();
+				for(int i = 0;(i < 200);i++)
+				_delay_ms(10);
+				_yellowled_turn_off();
 			}
 							
 		}
