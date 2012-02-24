@@ -88,7 +88,8 @@ unsigned char _wTCNT2 = 0;
 unsigned char _wTCNT2_last = 0;
 
 unsigned char _TM;
-unsigned char _wTM = _WTM_Continuous;
+//unsigned char _wTM = _WTM_Continuous;
+unsigned char _wTM = _WTM_Burst_60;
 unsigned char _wSENS = _4_G;
 
 unsigned long _wPC = 0;
@@ -171,21 +172,20 @@ void _wocket_initialize(void) //This function initializes the wocket
 		for(int  i = 0; (i < 1000); i++)
 			_delay_ms(5);
 		_yellowled_turn_off();
+		_delay_ms(500);
 		_atmega_finalize();
 		return;
 	}
-	
-	// If the wocket has been initialized before
+		
 	if (_INITIALIZED == _WOCKET_INITIALIZED)
 	{		
 		if (battery > 300)
 		{
-			// Read the sampling rate from the EEPROM
 			_SAMPLING_RATE = eeprom_read_byte(&_NV_SAMPLING_RATE);
-			_STATUS_BYTE = eeprom_read_byte(&_NV_STATUS_BYTE);
-			// Load the transmission mode
 			_wTM = eeprom_read_byte(&_NV_WTM);
-			_wSENS = eeprom_read_byte(&_NV_SENS);
+			//_wTM = _WTM_Continuous;
+			//_wTM = _WTM_Burst_60;
+			//_wocket_initialize_timer2_interrupt();
 
 			_wTCNT2 = eeprom_read_byte(&_NV_TCT);
 			_wTCNT2_reps = eeprom_read_byte(&_NV_TCTREPS);
@@ -206,18 +206,95 @@ void _wocket_initialize(void) //This function initializes the wocket
 			_wZN1G_CAL = eeprom_read_word(&_NV_ZN1G_CAL);
 
 			_wPDT = eeprom_read_byte(&_NV_PDT);
+
+			_greenled_turn_on();		
+			for(int i = 0; (i < 200); i++)
+				_delay_ms(10);
+			_greenled_turn_off();
+		}
+	}
+
+	// If the wocket has been initialized before
+	/*if (_INITIALIZED == _WOCKET_INITIALIZED)
+	{		
+		if (battery > 300)
+		{
+			// Read the sampling rate from the EEPROM
+			_SAMPLING_RATE = eeprom_read_byte(&_NV_SAMPLING_RATE);
+			_STATUS_BYTE = eeprom_read_byte(&_NV_STATUS_BYTE);
+			// Load the transmission mode
+			//_wTM = eeprom_read_byte(&_NV_WTM);
+			_wTM == _WTM_Burst_60;
+			_wSENS = eeprom_read_byte(&_NV_SENS);
+
+			char temp1 = _wTCNT2;
+			_wTCNT2 = eeprom_read_byte(&_NV_TCT);
+			char temp2 = _wTCNT2_reps;
+			_wTCNT2_reps = eeprom_read_byte(&_NV_TCTREPS);
+			char temp3 = _wTCNT2_reps;
+			_wTCNT2_last = eeprom_read_byte(&_NV_TCTLAST);
+			_wocket_initialize_timer2_interrupt();
+
+
+			_wBTCAL100 = eeprom_read_word(&_NV_BTCAL100);
+			_wBTCAL80  = eeprom_read_word(&_NV_BTCAL80);
+			_wBTCAL60  = eeprom_read_word(&_NV_BTCAL60);
+			_wBTCAL40  = eeprom_read_word(&_NV_BTCAL40);
+			_wBTCAL20  = eeprom_read_word(&_NV_BTCAL20);
+			_wBTCAL10  = eeprom_read_word(&_NV_BTCAL10);
+
+			_wX1G_CAL  = eeprom_read_word(&_NV_X1G_CAL);
+			_wXN1G_CAL = eeprom_read_word(&_NV_XN1G_CAL);
+			_wY1G_CAL  = eeprom_read_word(&_NV_Y1G_CAL);
+			_wYN1G_CAL = eeprom_read_word(&_NV_YN1G_CAL);
+			_wZ1G_CAL  = eeprom_read_word(&_NV_Z1G_CAL);
+			_wZN1G_CAL = eeprom_read_word(&_NV_ZN1G_CAL);
+
+			_wPDT = eeprom_read_byte(&_NV_PDT);
+
+			if ((_wTM == _WTM_Burst_60) && (_STATUS_BYTE == 0x00) && (_wSENS == _4_G) && (_wPDT == _DEFAULT_PDT)){
+				
+				_yellowled_turn_on();
+				_delay_ms(2000);
+				_yellowled_turn_off();
+				_delay_ms(500);
+			}
+			if ((_SAMPLING_RATE == 40) && (_wTCNT2 == temp1) && (_wTCNT2_reps == temp2) && (_wTCNT2_last == temp3)){
+				
+				_yellowled_turn_on();
+				_delay_ms(2000);
+				_yellowled_turn_off();
+				_delay_ms(500);
+			}
+			if ((_wX1G_CAL == _DEFAULT_X1G_CAL) && (_wXN1G_CAL == _DEFAULT_XN1G_CAL) && (_wY1G_CAL == _DEFAULT_Y1G_CAL)
+			 && (_wYN1G_CAL == _DEFAULT_YN1G_CAL) && (_wZ1G_CAL == _DEFAULT_Z1G_CAL) && (_wZN1G_CAL == _DEFAULT_ZN1G_CAL)){
+				
+				_yellowled_turn_on();
+				_delay_ms(3000);
+				_yellowled_turn_off();
+				_delay_ms(500);
+			}
+			if ((_wBTCAL100 == _DEFAULTBTCAL100) && (_wBTCAL80 == _DEFAULTBTCAL80) && (_wBTCAL60 == _DEFAULTBTCAL60)
+			 && (_wBTCAL40 == _DEFAULTBTCAL40) && (_wBTCAL20 == _DEFAULTBTCAL20) && (_wBTCAL10 == _DEFAULTBTCAL10)){
+				
+				_yellowled_turn_on();
+				_delay_ms(4000);
+				_yellowled_turn_off();
+				_delay_ms(500);
+			}
+			
 		}
 								
 		_greenled_turn_on();		
 		for(int i = 0; (i < 200); i++)
-			_delay_ms(5);
+			_delay_ms(10);
 		_greenled_turn_off();		
-	}
-	/* If the wocket has never been initialized, write the default settings and blink green for 5 seconds */
+	}*/
+	// If the wocket has never been initialized, write the default settings and blink green for 5 seconds 
 	else
-	{
+	{ 
 		_SAMPLING_RATE = 40; 
-	//	_wTM = _WTM_Continuous;
+		//_wTM = _WTM_Continuous;
 		_wTM = _WTM_Burst_60;
 		
 		// Set the overflow interrupt timer 
@@ -258,25 +335,89 @@ void _wocket_initialize(void) //This function initializes the wocket
 			
 		
 		if (battery > 300)
-		{	// Write the sampling rate to the EEPROM
+		{	
+			//char c= 0;
+			// Write the sampling rate to the EEPROM
 			eeprom_write_byte(&_NV_SAMPLING_RATE,_SAMPLING_RATE);
+			/*int compare = eeprom_read_byte(&_NV_SAMPLING_RATE);
+			if (compare == 40){
+				
+				c++;
+			}*/
 			// Calculate the timer variables used to sample at the right frequency
 			_wocket_initialize_timer2_interrupt();
+			
 			eeprom_write_byte(&_NV_TCT,_wTCNT2);
+			/*compare = eeprom_read_byte(&_NV_TCT);
+			if (compare == _wTCNT2){
+				
+				c++;
+			}*/
+			
 			eeprom_write_byte(&_NV_TCTREPS,_wTCNT2_reps);
+			/*compare = eeprom_read_byte(&_NV_TCTREPS);
+			if (compare == _wTCNT2_reps){
+				c++;
+			}*/
 			eeprom_write_byte(&_NV_TCTLAST,_wTCNT2_last);
+			/*compare = eeprom_read_byte(&_NV_TCTLAST);
+			if (compare == _wTCNT2_last){
+				
+				c++;
+			}*/
+			
 
-			eeprom_write_byte(&_NV_TM,_wTM);
+			eeprom_write_byte(&_NV_WTM,_wTM);
+			/*compare = eeprom_read_byte(&_NV_TM);
+			if (compare == _wTM){				
+				c++;
+			}*/
 			eeprom_write_byte(&_NV_STATUS_BYTE,0x00);
+			/*compare = eeprom_read_byte(&_NV_STATUS_BYTE);
+			if (compare == 0x00){				
+				c++;
+				
+			}*/
 			eeprom_write_byte(&_NV_SENS,_wSENS);
+			/*compare = eeprom_read_byte(&_NV_SENS);
+			if (compare == _wSENS){				
+				c++;
+				
+			}*/
 
 			//Set default battery calibration values
 			eeprom_write_word(&_NV_BTCAL100,_DEFAULTBTCAL100);
+			/*compare = eeprom_read_word(&_NV_BTCAL100);
+			if (compare == _DEFAULTBTCAL100){				
+				c++;
+				
+			}*/
 			eeprom_write_word(&_NV_BTCAL80, _DEFAULTBTCAL80);
+			/*compare = eeprom_read_word(&_NV_BTCAL80);
+			if (compare == _DEFAULTBTCAL80){				
+				c++;
+				
+			}*/
 			eeprom_write_word(&_NV_BTCAL60, _DEFAULTBTCAL60);
+			/*compare = eeprom_read_word(&_NV_BTCAL60);
+			if (compare == _DEFAULTBTCAL60){				
+				c++;
+			}*/
 			eeprom_write_word(&_NV_BTCAL40, _DEFAULTBTCAL40);
+			/*compare = eeprom_read_word(&_NV_BTCAL40);
+			if (compare == _DEFAULTBTCAL40){				
+				c++;
+			}*/
 			eeprom_write_word(&_NV_BTCAL20, _DEFAULTBTCAL20);
+			/*compare = eeprom_read_word(&_NV_BTCAL20);
+			if (compare == _DEFAULTBTCAL20){				
+				c++;
+			}*/
 			eeprom_write_word(&_NV_BTCAL10, _DEFAULTBTCAL10);
+			/*compare = eeprom_read_word(&_NV_BTCAL10);
+			if (compare == _DEFAULTBTCAL10){				
+				c++;
+			}*/
 
 			_wBTCAL100 = _DEFAULTBTCAL100;
 			_wBTCAL80  = _DEFAULTBTCAL80;
@@ -287,11 +428,36 @@ void _wocket_initialize(void) //This function initializes the wocket
 
 			//Set default Accelerometer calibration values
 			eeprom_write_word(&_NV_X1G_CAL, _DEFAULT_X1G_CAL);
+			/*compare = eeprom_read_word(&_NV_X1G_CAL);
+			if (compare == _DEFAULT_X1G_CAL){				
+				c++;
+			}*/
 			eeprom_write_word(&_NV_XN1G_CAL,_DEFAULT_XN1G_CAL);
+			/*compare = eeprom_read_word(&_NV_XN1G_CAL);
+			if (compare == _DEFAULT_XN1G_CAL){				
+				c++;
+			}*/
 			eeprom_write_word(&_NV_Y1G_CAL, _DEFAULT_Y1G_CAL);
+			/*compare = eeprom_read_word(&_NV_Y1G_CAL);
+			if (compare == _DEFAULT_Y1G_CAL){				
+				c++;
+			}*/
 			eeprom_write_word(&_NV_YN1G_CAL,_DEFAULT_YN1G_CAL);
+			/*compare = eeprom_read_word(&_NV_YN1G_CAL);
+			if (compare == _DEFAULT_YN1G_CAL){				
+				c++;
+			}*/
 			eeprom_write_word(&_NV_Z1G_CAL, _DEFAULT_Z1G_CAL);
+			/*compare = eeprom_read_word(&_NV_Z1G_CAL);
+			if (compare == _DEFAULT_Z1G_CAL){				
+				c++;
+			}*/
 			eeprom_write_word(&_NV_ZN1G_CAL,_DEFAULT_ZN1G_CAL);
+			/*compare = eeprom_read_word(&_NV_ZN1G_CAL);
+			if (compare == _DEFAULT_ZN1G_CAL){				
+				c++;
+				
+			}*/
 
 			_wX1G_CAL  = _DEFAULT_X1G_CAL;
 			_wXN1G_CAL = _DEFAULT_XN1G_CAL;
@@ -303,6 +469,16 @@ void _wocket_initialize(void) //This function initializes the wocket
 			//SET the PDT
 			_wPDT = _DEFAULT_PDT;
 			eeprom_write_byte(&_NV_PDT, _wPDT);
+			/*compare = eeprom_read_byte(&_NV_PDT);
+			if (compare == _wPDT){				
+				c++;
+				
+			}
+			if (c == 20){
+				_yellowled_turn_on();
+				_delay_ms(2000);
+				_yellowled_turn_off();
+			}*/
 
 		}
 
@@ -844,10 +1020,15 @@ void _receive_data(void)
                             response_length = 10;                                                                               
                             break;  
  					case (unsigned char) SetBatteryCalibration:
+
+					/*All of the read/write functions first make sure the EEPROM is ready to be accessed. 
+					Since this may cause long delays if a write operation is still pending, timecritical 
+					applications should first poll the EEPROM e. g. using eeprom_is_ready()	*/
                             if (eeprom_is_ready())
                             {                                    
                                     if (_atmega_a2dConvert10bit(ADC7) < 600)								    
-                                            break;
+                            
+							                break;
                                     else
                                     {   
 										_wBTCAL100 = m_SET_BTCAL_100(rBuffer[1], rBuffer[2]);

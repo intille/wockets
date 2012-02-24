@@ -491,55 +491,6 @@ void _atmega_finalize(void)
 	_greenled_turn_off();
 	_yellowled_turn_off();
 
-/*	//Set all ports as inputs
-	DDRA=0x00;
-	DDRB=0x00;
-	DDRC=0x00;
-	DDRD=0x00;
-
-	PORTA=0x00;
-	PORTB=0x00;
-	PORTC=0x00;
-	PORTD=0x00;*/
-
-	// Disable timer
-//	_atmega_disable_timer2();
-
-	//Disable watchdog
-	//wdt_disable();
-
-	//Disable ADC Conversion
-//
-//	_atmega_adc_turn_off();
-
-
-	// Disable pull-ups
-/*  	MCUCR |= (1u << PUD); 
-	// Disable Analog comparitor
-  	ACSR &= ~(1<<ACIE);   // Disable analog comparator interrupt
-  	ACSR |= (1<<ACD);     // Disable analog comparitor 
-	// Power Reduction Register, everything off;
-  	//PRR |= (uint8_t)((1<<PRADC)|(1<<PRSPI)|(1<<PRTIM0)|(1<<PRTIM1)|(1<<PRTWI)); 
-
-	//Power down the MCU
-
-	sleep_enable();
-    sleep_bod_disable();
-    sei();	
-	set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-//	sleep_cpu();
-    sleep_disable();*/
-
-}
-
-/*void _atmega_finalize2(void)
-{
-	cli();
-	_bluetooth_turn_off();
-	_accelerometer_turn_off();
-	_greenled_turn_off();
-	_yellowled_turn_off();
-
 	//Set all ports as inputs
 	DDRA=0x00;
 	DDRB=0x00;
@@ -558,6 +509,7 @@ void _atmega_finalize(void)
 	wdt_disable();
 
 	//Disable ADC Conversion
+//
 	_atmega_adc_turn_off();
 
 
@@ -572,13 +524,13 @@ void _atmega_finalize(void)
 	//Power down the MCU
 
 	sleep_enable();
-    sleep_bod_disable();
+    //sleep_bod_disable();
     sei();	
 	set_sleep_mode(SLEEP_MODE_PWR_DOWN);
 	sleep_cpu();
     sleep_disable();
 
-}*/
+}
 
 
 void _wocket_reset(void)

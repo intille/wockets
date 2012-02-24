@@ -530,7 +530,7 @@ int main()
 			// set_sleep_mode(SLEEP_MODE_PWR_SAVE);
 			// Built in functionality to enable interrupts and shutdown of the cpu to save power 
     		sleep_enable();		// sleep.h 
-    		sleep_bod_disable();// sleep.h 
+    		//sleep_bod_disable();// sleep.h 
     		sei();				//interrupt.h
     		sleep_cpu();		// sleep.h 
     		sleep_disable();	// sleep.h 	
