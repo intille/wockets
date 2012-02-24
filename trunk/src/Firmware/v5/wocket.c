@@ -4,7 +4,7 @@
 #include "crc.h"
 #include <util/delay.h>
 
-//A buffer to store commands from the phone
+//buffer to store commands from the phone
 unsigned char aBuffer[MAX_COMMAND_SIZE];
 unsigned char rBuffer[MAX_COMMAND_SIZE];
 
@@ -22,7 +22,6 @@ unsigned short word=0;
 unsigned short x = 0;
 unsigned short y = 0;
 unsigned short z = 0;
-
 
 unsigned tester = 0;
 #define _WOCKET_INITIALIZED 0x25
@@ -79,7 +78,6 @@ unsigned int _wYN1G_CAL;
 unsigned int _wZ1G_CAL;
 unsigned int _wZN1G_CAL;
 
-
 unsigned char _INITIALIZED = 0;
 unsigned char _STATUS_BYTE = 0;
 unsigned char _SAMPLING_RATE = 40;	/*Current Sampling Rate is 40Hz and is set in _wocket_initialize() function*/
@@ -88,7 +86,6 @@ unsigned char _wTCNT2 = 0;
 unsigned char _wTCNT2_last = 0;
 
 unsigned char _TM;
-//unsigned char _wTM = _WTM_Continuous;
 unsigned char _wTM = _WTM_Burst_60;
 unsigned char _wSENS = _4_G;
 
@@ -108,8 +105,8 @@ unsigned char _wALT;
 uint32_t _wShutdownTimer = 0;
 uint32_t _DEFAULT_SHUTDOWN = 0;
 
-//char shutdown_flag = 0;
-
+unsigned char _MAX_SAMPLING_RATE = 0;
+unsigned char _MIN_SAMPLING_RATE = 5;
 
 //------------------------------------------------------Functions-----------------------------------------------------------------
 /* 
@@ -138,7 +135,6 @@ void _wocket_initialize_timer2_interrupt(void)
 		_wTCNT2_last = 255;
 	}
 }
-
 
 //-------------------------------------------	
 
@@ -176,16 +172,14 @@ void _wocket_initialize(void) //This function initializes the wocket
 		_atmega_finalize();
 		return;
 	}
-		
+	
+	// If the wocket has been initialized before, read the parameters from EEPROM and blinks green once	
 	if (_INITIALIZED == _WOCKET_INITIALIZED)
 	{		
 		if (battery > 300)
 		{
 			_SAMPLING_RATE = eeprom_read_byte(&_NV_SAMPLING_RATE);
 			_wTM = eeprom_read_byte(&_NV_WTM);
-			//_wTM = _WTM_Continuous;
-			//_wTM = _WTM_Burst_60;
-			//_wocket_initialize_timer2_interrupt();
 
 			_wTCNT2 = eeprom_read_byte(&_NV_TCT);
 			_wTCNT2_reps = eeprom_read_byte(&_NV_TCTREPS);
@@ -214,98 +208,23 @@ void _wocket_initialize(void) //This function initializes the wocket
 		}
 	}
 
-	// If the wocket has been initialized before
-	/*if (_INITIALIZED == _WOCKET_INITIALIZED)
-	{		
-		if (battery > 300)
-		{
-			// Read the sampling rate from the EEPROM
-			_SAMPLING_RATE = eeprom_read_byte(&_NV_SAMPLING_RATE);
-			_STATUS_BYTE = eeprom_read_byte(&_NV_STATUS_BYTE);
-			// Load the transmission mode
-			//_wTM = eeprom_read_byte(&_NV_WTM);
-			_wTM == _WTM_Burst_60;
-			_wSENS = eeprom_read_byte(&_NV_SENS);
-
-			char temp1 = _wTCNT2;
-			_wTCNT2 = eeprom_read_byte(&_NV_TCT);
-			char temp2 = _wTCNT2_reps;
-			_wTCNT2_reps = eeprom_read_byte(&_NV_TCTREPS);
-			char temp3 = _wTCNT2_reps;
-			_wTCNT2_last = eeprom_read_byte(&_NV_TCTLAST);
-			_wocket_initialize_timer2_interrupt();
-
-
-			_wBTCAL100 = eeprom_read_word(&_NV_BTCAL100);
-			_wBTCAL80  = eeprom_read_word(&_NV_BTCAL80);
-			_wBTCAL60  = eeprom_read_word(&_NV_BTCAL60);
-			_wBTCAL40  = eeprom_read_word(&_NV_BTCAL40);
-			_wBTCAL20  = eeprom_read_word(&_NV_BTCAL20);
-			_wBTCAL10  = eeprom_read_word(&_NV_BTCAL10);
-
-			_wX1G_CAL  = eeprom_read_word(&_NV_X1G_CAL);
-			_wXN1G_CAL = eeprom_read_word(&_NV_XN1G_CAL);
-			_wY1G_CAL  = eeprom_read_word(&_NV_Y1G_CAL);
-			_wYN1G_CAL = eeprom_read_word(&_NV_YN1G_CAL);
-			_wZ1G_CAL  = eeprom_read_word(&_NV_Z1G_CAL);
-			_wZN1G_CAL = eeprom_read_word(&_NV_ZN1G_CAL);
-
-			_wPDT = eeprom_read_byte(&_NV_PDT);
-
-			if ((_wTM == _WTM_Burst_60) && (_STATUS_BYTE == 0x00) && (_wSENS == _4_G) && (_wPDT == _DEFAULT_PDT)){
-				
-				_yellowled_turn_on();
-				_delay_ms(2000);
-				_yellowled_turn_off();
-				_delay_ms(500);
-			}
-			if ((_SAMPLING_RATE == 40) && (_wTCNT2 == temp1) && (_wTCNT2_reps == temp2) && (_wTCNT2_last == temp3)){
-				
-				_yellowled_turn_on();
-				_delay_ms(2000);
-				_yellowled_turn_off();
-				_delay_ms(500);
-			}
-			if ((_wX1G_CAL == _DEFAULT_X1G_CAL) && (_wXN1G_CAL == _DEFAULT_XN1G_CAL) && (_wY1G_CAL == _DEFAULT_Y1G_CAL)
-			 && (_wYN1G_CAL == _DEFAULT_YN1G_CAL) && (_wZ1G_CAL == _DEFAULT_Z1G_CAL) && (_wZN1G_CAL == _DEFAULT_ZN1G_CAL)){
-				
-				_yellowled_turn_on();
-				_delay_ms(3000);
-				_yellowled_turn_off();
-				_delay_ms(500);
-			}
-			if ((_wBTCAL100 == _DEFAULTBTCAL100) && (_wBTCAL80 == _DEFAULTBTCAL80) && (_wBTCAL60 == _DEFAULTBTCAL60)
-			 && (_wBTCAL40 == _DEFAULTBTCAL40) && (_wBTCAL20 == _DEFAULTBTCAL20) && (_wBTCAL10 == _DEFAULTBTCAL10)){
-				
-				_yellowled_turn_on();
-				_delay_ms(4000);
-				_yellowled_turn_off();
-				_delay_ms(500);
-			}
-			
-		}
-								
-		_greenled_turn_on();		
-		for(int i = 0; (i < 200); i++)
-			_delay_ms(10);
-		_greenled_turn_off();		
-	}*/
-	// If the wocket has never been initialized, write the default settings and blink green for 5 seconds 
+		
+	// If the wocket has never been initialized, write the default settings and blink green 3 times 
 	else
 	{ 
 		_SAMPLING_RATE = 40; 
 		//_wTM = _WTM_Continuous;
 		_wTM = _WTM_Burst_60;
+
+		// Calculate the timer variables used to sample at the right frequency
+		_wocket_initialize_timer2_interrupt();
 		
-		// Set the overflow interrupt timer 
-		unsigned char _MAX_SAMPLING_RATE = 0;
-		unsigned char _MIN_SAMPLING_RATE = 5;
+		// Set the overflow interrupt timer 		
 		switch(_wTM)
 		{
 			case _WTM_Continuous:	
 				_MAX_SAMPLING_RATE = 126; //This limitation is due to the definition of SEND_SR  and GET_SR commands
-										  // The MCU provided in wocket able to sample at higher rates 							
-				break;			
+				break;					  // The MCU provided in wocket able to sample at higher rates 								
 			case _WTM_Burst_30:    	//a transfer mode that send the burst every 30 secs
 				_MAX_SAMPLING_RATE = 80;		
 				break;
@@ -329,95 +248,30 @@ void _wocket_initialize(void) //This function initializes the wocket
 		}
 		if (_SAMPLING_RATE < _MIN_SAMPLING_RATE)
 		{
-			_SAMPLING_RATE = _MIN_SAMPLING_RATE;
-		
+			_SAMPLING_RATE = _MIN_SAMPLING_RATE;		
 		}
 			
 		
 		if (battery > 300)
 		{	
-			//char c= 0;
-			// Write the sampling rate to the EEPROM
+			// Write the parameters to the EEPROM
 			eeprom_write_byte(&_NV_SAMPLING_RATE,_SAMPLING_RATE);
-			/*int compare = eeprom_read_byte(&_NV_SAMPLING_RATE);
-			if (compare == 40){
 				
-				c++;
-			}*/
-			// Calculate the timer variables used to sample at the right frequency
-			_wocket_initialize_timer2_interrupt();
-			
 			eeprom_write_byte(&_NV_TCT,_wTCNT2);
-			/*compare = eeprom_read_byte(&_NV_TCT);
-			if (compare == _wTCNT2){
-				
-				c++;
-			}*/
-			
 			eeprom_write_byte(&_NV_TCTREPS,_wTCNT2_reps);
-			/*compare = eeprom_read_byte(&_NV_TCTREPS);
-			if (compare == _wTCNT2_reps){
-				c++;
-			}*/
-			eeprom_write_byte(&_NV_TCTLAST,_wTCNT2_last);
-			/*compare = eeprom_read_byte(&_NV_TCTLAST);
-			if (compare == _wTCNT2_last){
-				
-				c++;
-			}*/
-			
+			eeprom_write_byte(&_NV_TCTLAST,_wTCNT2_last);			
 
 			eeprom_write_byte(&_NV_WTM,_wTM);
-			/*compare = eeprom_read_byte(&_NV_TM);
-			if (compare == _wTM){				
-				c++;
-			}*/
 			eeprom_write_byte(&_NV_STATUS_BYTE,0x00);
-			/*compare = eeprom_read_byte(&_NV_STATUS_BYTE);
-			if (compare == 0x00){				
-				c++;
-				
-			}*/
 			eeprom_write_byte(&_NV_SENS,_wSENS);
-			/*compare = eeprom_read_byte(&_NV_SENS);
-			if (compare == _wSENS){				
-				c++;
-				
-			}*/
 
 			//Set default battery calibration values
 			eeprom_write_word(&_NV_BTCAL100,_DEFAULTBTCAL100);
-			/*compare = eeprom_read_word(&_NV_BTCAL100);
-			if (compare == _DEFAULTBTCAL100){				
-				c++;
-				
-			}*/
 			eeprom_write_word(&_NV_BTCAL80, _DEFAULTBTCAL80);
-			/*compare = eeprom_read_word(&_NV_BTCAL80);
-			if (compare == _DEFAULTBTCAL80){				
-				c++;
-				
-			}*/
 			eeprom_write_word(&_NV_BTCAL60, _DEFAULTBTCAL60);
-			/*compare = eeprom_read_word(&_NV_BTCAL60);
-			if (compare == _DEFAULTBTCAL60){				
-				c++;
-			}*/
 			eeprom_write_word(&_NV_BTCAL40, _DEFAULTBTCAL40);
-			/*compare = eeprom_read_word(&_NV_BTCAL40);
-			if (compare == _DEFAULTBTCAL40){				
-				c++;
-			}*/
 			eeprom_write_word(&_NV_BTCAL20, _DEFAULTBTCAL20);
-			/*compare = eeprom_read_word(&_NV_BTCAL20);
-			if (compare == _DEFAULTBTCAL20){				
-				c++;
-			}*/
 			eeprom_write_word(&_NV_BTCAL10, _DEFAULTBTCAL10);
-			/*compare = eeprom_read_word(&_NV_BTCAL10);
-			if (compare == _DEFAULTBTCAL10){				
-				c++;
-			}*/
 
 			_wBTCAL100 = _DEFAULTBTCAL100;
 			_wBTCAL80  = _DEFAULTBTCAL80;
@@ -428,36 +282,11 @@ void _wocket_initialize(void) //This function initializes the wocket
 
 			//Set default Accelerometer calibration values
 			eeprom_write_word(&_NV_X1G_CAL, _DEFAULT_X1G_CAL);
-			/*compare = eeprom_read_word(&_NV_X1G_CAL);
-			if (compare == _DEFAULT_X1G_CAL){				
-				c++;
-			}*/
 			eeprom_write_word(&_NV_XN1G_CAL,_DEFAULT_XN1G_CAL);
-			/*compare = eeprom_read_word(&_NV_XN1G_CAL);
-			if (compare == _DEFAULT_XN1G_CAL){				
-				c++;
-			}*/
 			eeprom_write_word(&_NV_Y1G_CAL, _DEFAULT_Y1G_CAL);
-			/*compare = eeprom_read_word(&_NV_Y1G_CAL);
-			if (compare == _DEFAULT_Y1G_CAL){				
-				c++;
-			}*/
 			eeprom_write_word(&_NV_YN1G_CAL,_DEFAULT_YN1G_CAL);
-			/*compare = eeprom_read_word(&_NV_YN1G_CAL);
-			if (compare == _DEFAULT_YN1G_CAL){				
-				c++;
-			}*/
 			eeprom_write_word(&_NV_Z1G_CAL, _DEFAULT_Z1G_CAL);
-			/*compare = eeprom_read_word(&_NV_Z1G_CAL);
-			if (compare == _DEFAULT_Z1G_CAL){				
-				c++;
-			}*/
 			eeprom_write_word(&_NV_ZN1G_CAL,_DEFAULT_ZN1G_CAL);
-			/*compare = eeprom_read_word(&_NV_ZN1G_CAL);
-			if (compare == _DEFAULT_ZN1G_CAL){				
-				c++;
-				
-			}*/
 
 			_wX1G_CAL  = _DEFAULT_X1G_CAL;
 			_wXN1G_CAL = _DEFAULT_XN1G_CAL;
@@ -466,20 +295,8 @@ void _wocket_initialize(void) //This function initializes the wocket
 			_wZ1G_CAL  = _DEFAULT_Z1G_CAL;
 			_wZN1G_CAL = _DEFAULT_ZN1G_CAL;
 
-			//SET the PDT
 			_wPDT = _DEFAULT_PDT;
 			eeprom_write_byte(&_NV_PDT, _wPDT);
-			/*compare = eeprom_read_byte(&_NV_PDT);
-			if (compare == _wPDT){				
-				c++;
-				
-			}
-			if (c == 20){
-				_yellowled_turn_on();
-				_delay_ms(2000);
-				_yellowled_turn_off();
-			}*/
-
 		}
 
 		// Set the initialized flag in the status byte
@@ -499,8 +316,6 @@ void _wocket_initialize(void) //This function initializes the wocket
 		}		
 	}
 
-
-
 	_DEFAULT_SHUTDOWN = (unsigned long)_wPDT * (unsigned long)_SAMPLING_RATE * (unsigned long)60;
 	_wShutdownTimer = _DEFAULT_SHUTDOWN;
 	
@@ -519,7 +334,6 @@ void _wocket_reset_flag(unsigned char flag)
 {
 	cbi(_STATUS_BYTE, flag);
 }
-
 
 //-------------------------------------------
 unsigned char _wocket_is_flag_set(unsigned char flag)
@@ -593,7 +407,6 @@ void _send_ac_offset(unsigned short offset)
 //	sends the firmware version 
 void _send_fv()
 {
-
     aBuffer[0] = m_FV_RSP_BYTE0;
     aBuffer[1] = m_FV_RSP_BYTE1(_FVERSION);    
 	for (int i = 0; (i < 2); i++)                                                                                       
@@ -634,12 +447,7 @@ void _send_acs()
 		num_acs = ci - si;
 	else
 		num_acs = ci + (AC_BUFFER_SIZE - si);
-	//-------------------
-	// commented
-	//if (num_acs>10)
-	//	num_acs=10;
-	//	_send_ac_count(num_acs);
-	//--------------------
+	
 	//send AC offset accumulated within the minute & the overall AC sequence number
 	_send_ac_offset(AC_NUMS - summary_count); 
 	_send_ac_count(cseq);		
@@ -683,7 +491,6 @@ void _send_end_batch()
     _bluetooth_transmit_uart0_byte(aBuffer[0]); 
 }
 
-
 //-------------------------------------------
 // sends sampling rate
 void _send_sr()
@@ -703,36 +510,6 @@ void _send_wtm()
 	for (int i = 0; (i < 2); i++)                                                                                       
        	_bluetooth_transmit_uart0_byte(aBuffer[i]); 
 }
-
-//-------------------------------------------
-//	sends data 
-//It is not used any more
-/*void _send_data(void)
-{	
-	if (paused == 0)
-	{		
- 		alive_timer++;                                  
-        if (alive_timer >= 2730) //if no acks for approx 30 seconds, reset radio
-        {
-           //	_atmega_reset();
-		   _bluetooth_reset();
-           	alive_timer = 0;                                  
-        }
-
-#ifdef _VERSION==3
-		x=_atmega_a2dConvert10bit(ADC2);
-		y=_atmega_a2dConvert10bit(ADC1);
-		z=_atmega_a2dConvert10bit(ADC0);
-
-#else
-		x=_atmega_a2dConvert10bit(ADC3);
-		y=_atmega_a2dConvert10bit(ADC2);
-		z=_atmega_a2dConvert10bit(ADC1);
-		_transmit_packet(_encode_packet(x,y,z));	
-#endif
-				
-	}
-}*/
 
 //-------------------------------------------
 // 	Receive commands from the phone	
@@ -814,331 +591,374 @@ void _receive_data(void)
             switch (opcode)
             {
 				case (unsigned char) ACK:											
-						kseq = rBuffer[1] & 0x7f;
-						kseq = kseq << 7 | (rBuffer[2] & 0x7f);
-						kseq = kseq << 2 | ((rBuffer[3] >> 5) & 0x03);
-						kseq ++;
-						if ( (kseq <= cseq) && ((kseq - sseq) < AC_BUFFER_SIZE) && ((kseq - sseq) > 0) ) {
+					kseq = rBuffer[1] & 0x7f;
+					kseq = kseq << 7 | (rBuffer[2] & 0x7f);
+					kseq = kseq << 2 | ((rBuffer[3] >> 5) & 0x03);
+					kseq ++;
+					if ( (kseq <= cseq) && ((kseq - sseq) < AC_BUFFER_SIZE) && ((kseq - sseq) > 0) ) {					
+						sseq = kseq;						
+						dseq = cseq - kseq;
+						if (dseq >= 0)
+							si = ci - dseq;
+						else
+							si = AC_BUFFER_SIZE - (dseq - ci);
+					}
+					processed_counter = command_counter;				
+					break;	
+
+		        //This command calibrates the wocket sampling rate by determining how much off it is from the 
+				//_SAMPLING_RATE by counting timer interrupts and using that value to adjust the sampling rate.
+			    case (unsigned char) SetTCT:  
+			   		_wTCNT2 = m_SET_TCT (rBuffer[1], rBuffer[2]);
+					_wTCNT2_reps = m_SET_TCTREPS (rBuffer[2], rBuffer[3]);
+					_wTCNT2_last = m_SET_TCTLAST (rBuffer[3], rBuffer[4]);
+					eeprom_write_byte (&_NV_TCT, _wTCNT2);
+					eeprom_write_byte (&_NV_TCTREPS, _wTCNT2_reps);
+					eeprom_write_byte (&_NV_TCTLAST, _wTCNT2_last);
+					processed_counter = command_counter;
+					break;
+
+                case (unsigned char)PausePacket:                                                      
+                    paused = 1;
+                    processed_counter = command_counter;                                                      
+                    break;
+
+                case (unsigned char)ResumePacket:                                                     
+                    paused = 0;
+                    processed_counter = command_counter;                                                      
+                    break;
+
+                //reset alive timer if it is alive
+                case (unsigned char)Alive:                                                      
+                    alive_timer = 0;
+                    processed_counter = command_counter;		
+                    break;
+
+            	case (unsigned char) GetBatteryLevel: 
+                    word = _atmega_a2dConvert10bit(ADC7);
+                    rBuffer[0] = m_BL_RSP_BYTE0;
+                    rBuffer[1] = m_BL_RSP_BYTE1(word);
+                    rBuffer[2] = m_BL_RSP_BYTE2(word);
+                    processed_counter = command_counter;
+                    response_length = 3;		                                                                          
+                    break;	
 						
-							sseq = kseq;						
-							dseq = cseq - kseq;
-							if (dseq >= 0)
-								si = ci - dseq;
-							else
-								si = AC_BUFFER_SIZE - (dseq - ci);
+            	case (unsigned char) GetSensorSentivity:           			  
+                    rBuffer[0] = m_SENS_RSP_BYTE0;
+                    rBuffer[1] = m_SENS_RSP_BYTE1(_wSENS);                       
+                    processed_counter = command_counter;
+                    response_length = 2;		                                                                          
+                    break;
+						
+				case (unsigned char) SetSensorSentivity:           			  
+                    _wSENS = m_SET_SEN(rBuffer[1]);
+					eeprom_write_byte(&_NV_SENS, _wSENS);                       
+                    processed_counter = command_counter;                                                                 
+                    break;
+
+            	case (unsigned char) GetBatteryPercent: 				
+                    word = _atmega_a2dConvert10bit(ADC7);								  
+					if (word > _wBTCAL100) // Calculate the battery percent
+						word = 100;
+					else if (word > _wBTCAL80)
+						word = 80 + ((word - _wBTCAL80) * 20) / (_wBTCAL100 - _wBTCAL80);
+					else if (word > _wBTCAL60)
+						word = 60 + ((word - _wBTCAL60) * 20) / (_wBTCAL80  - _wBTCAL60);
+					else if (word > _wBTCAL40)
+						word = 40 + ((word - _wBTCAL40) * 20) / (_wBTCAL60  - _wBTCAL40);
+					else if (word > _wBTCAL20)
+						word = 20 + ((word - _wBTCAL20) * 20) / (_wBTCAL40  - _wBTCAL20);
+					else if (word > _wBTCAL10)
+						word = 10 + ((word - _wBTCAL10) * 10) / (_wBTCAL20  - _wBTCAL10);
+					else
+						word = 0;
+
+                    rBuffer[0] = m_BP_RSP_BYTE0;
+                    rBuffer[1] = m_BP_RSP_BYTE1(word);      ;
+                    processed_counter = command_counter;
+                    response_length = 2;		                                                                          
+                    break;
+				   case (unsigned char) GetPowerDownTimer:  
+			   		rBuffer[0] = m_PDT_RSP_BYTE0;
+                    rBuffer[1] = m_PDT_RSP_BYTE1(_wPDT);
+					processed_counter = command_counter;
+					response_length = 2;
+					break;	
+							
+               case (unsigned char) SetPowerDownTimer:  
+			   		_wPDT = m_SET_PDT(rBuffer[1]);
+					eeprom_write_byte(&_NV_PDT, _wPDT);
+					processed_counter = command_counter;
+					break;																				
+               case (unsigned char) GetSamplingRate:  
+			   		rBuffer[0] = m_SR_RSP_BYTE0;
+                    rBuffer[1] = m_SR_RSP_BYTE1(_SAMPLING_RATE);
+					processed_counter = command_counter;
+					response_length = 2;
+					break;
+
+               case (unsigned char) GetPacketCount:  
+			   		rBuffer[0] = m_PC_RSP_BYTE0;
+                    rBuffer[1] = m_PC_RSP_BYTE1(_wPC);
+					rBuffer[2] = m_PC_RSP_BYTE2(_wPC);
+                    rBuffer[3] = m_PC_RSP_BYTE3(_wPC);
+					rBuffer[4] = m_PC_RSP_BYTE4(_wPC);
+                    rBuffer[5] = m_PC_RSP_BYTE5(_wPC);
+					processed_counter = command_counter;
+					response_length = 6;
+					break;
+
+               case (unsigned char) SetSamplingRate:  
+			   		_SAMPLING_RATE = m_SET_SR(rBuffer[1]);
+					if (_SAMPLING_RATE > _MAX_SAMPLING_RATE)
+					{
+						_SAMPLING_RATE = _MAX_SAMPLING_RATE;		
+					}
+					if (_SAMPLING_RATE < _MIN_SAMPLING_RATE)
+					{
+						_SAMPLING_RATE = _MIN_SAMPLING_RATE;		
+					}
+					_wocket_initialize_timer2_interrupt();
+					eeprom_write_byte(&_NV_SAMPLING_RATE, _SAMPLING_RATE);
+					eeprom_write_byte(&_NV_TCT, _wTCNT2);
+					eeprom_write_byte(&_NV_TCTREPS, _wTCNT2_reps);
+					eeprom_write_byte(&_NV_TCTLAST, _wTCNT2_last);
+					processed_counter = command_counter;
+					break;
+
+ 			   case (unsigned char) GetRadioTransmissionMode:  
+			   		rBuffer[0] = m_TM_RSP_BYTE0;
+                    rBuffer[1] = m_TM_RSP_BYTE1(_TM);
+					processed_counter = command_counter;
+					response_length = 2;
+					break;
+
+               case (unsigned char) SetRadioTransmissionMode:  
+			   		_TM = m_SET_TM(rBuffer[1]);
+					eeprom_write_byte(&_NV_TM, _TM);
+					processed_counter = command_counter;
+					break;
+
+			   case (unsigned char) GetWocketTransmissionMode:  
+			   		rBuffer[0] = m_WTM_RSP_BYTE0;
+                    rBuffer[1] = m_WTM_RSP_BYTE1(_wTM);
+					processed_counter = command_counter;
+					response_length = 2;
+					break;
+
+               case (unsigned char) SetWocketTransmissionMode:  
+			   		_wTM = m_SET_WTM(rBuffer[1]);
+					eeprom_write_byte(&_NV_WTM, _wTM);
+					switch(_wTM)
+					{
+						case _WTM_Continuous:	
+							_MAX_SAMPLING_RATE = 126; //This limitation is due to the definition of SEND_SR  and GET_SR commands
+							break;					  // The MCU provided in wocket able to sample at higher rates 							
+						case _WTM_Burst_30:    	//a transfer mode that send the burst every 30 secs
+							_MAX_SAMPLING_RATE = 80;		
+							break;
+						case _WTM_Burst_60:		//a transfer mode that send the burst every 60 secs
+							_MAX_SAMPLING_RATE = 40;		
+							break;
+						case _WTM_Burst_90:		//a transfer mode that send the burst every 90 secs
+							_MAX_SAMPLING_RATE = 30;		
+							break;
+						case _WTM_Burst_120:	//a transfer mode that send the burst every 120 secs
+							_MAX_SAMPLING_RATE = 20;		
+							break;
+						default:
+							break;
+					}						
+					processed_counter = command_counter;
+					break;
+
+               case (unsigned char) SetCalibrationValues:                                                                    
+                    if (eeprom_is_ready())
+                    {                                    
+                        if (_atmega_a2dConvert10bit(ADC7) < 600)
+                                break;
+                        else
+                        {   
+							_wX1G_CAL  = m_SET_CAL_x1g(rBuffer[1], rBuffer[2]);
+							eeprom_write_word(&_NV_X1G_CAL,_wX1G_CAL);
+							_wXN1G_CAL = m_SET_CAL_xn1g(rBuffer[2], rBuffer[3]);
+							eeprom_write_word(&_NV_XN1G_CAL,_wXN1G_CAL);
+							_wY1G_CAL  = m_SET_CAL_y1g(rBuffer[3], rBuffer[4], rBuffer[5]);
+							eeprom_write_word(&_NV_Y1G_CAL,_wY1G_CAL);
+							_wYN1G_CAL = m_SET_CAL_yn1g(rBuffer[5], rBuffer[6]);
+							eeprom_write_word(&_NV_YN1G_CAL, _wYN1G_CAL);
+							_wZ1G_CAL  = m_SET_CAL_z1g(rBuffer[6], rBuffer[7], rBuffer[8]);
+							eeprom_write_word(&_NV_Z1G_CAL, _wZ1G_CAL);
+							_wZN1G_CAL = m_SET_CAL_zn1g(rBuffer[8], rBuffer[8]);
+							eeprom_write_word(&_NV_ZN1G_CAL, _wZN1G_CAL);
+							processed_counter = command_counter;
+                        }                                                                                                                                  
+                    }                                                                                                                       
+                    //enable global interrupts
+                    break;
+
+                case (unsigned char) GetCalibrationValues:							                                                              
+					rBuffer[0] = m_CAL_RSP_BYTE0;
+                    rBuffer[1] = m_CAL_RSP_BYTE1_x1g(_wX1G_CAL);                                                                   
+                    rBuffer[2] = m_CAL_RSP_BYTE2_x1g(_wX1G_CAL);
+					rBuffer[2]|= m_CAL_RSP_BYTE2_xn1g(_wXN1G_CAL);
+                    rBuffer[3] = m_CAL_RSP_BYTE3_xn1g(_wXN1G_CAL);
+					rBuffer[3]|= m_CAL_RSP_BYTE3_y1g(_wY1G_CAL);
+                    rBuffer[4] = m_CAL_RSP_BYTE4_y1g(_wY1G_CAL);
+                    rBuffer[5] = m_CAL_RSP_BYTE5_y1g(_wY1G_CAL);
+                    rBuffer[5]|= m_CAL_RSP_BYTE5_yn1g(_wYN1G_CAL);
+                    rBuffer[6] = m_CAL_RSP_BYTE6_yn1g(_wYN1G_CAL);
+					rBuffer[6]|= m_CAL_RSP_BYTE6_z1g(_wZ1G_CAL);
+                    rBuffer[7] = m_CAL_RSP_BYTE7_z1g(_wZ1G_CAL);
+                    rBuffer[8] = m_CAL_RSP_BYTE8_z1g(_wZ1G_CAL);
+					rBuffer[8]|= m_CAL_RSP_BYTE8_zn1g(_wZN1G_CAL);
+                    rBuffer[9] = m_CAL_RSP_BYTE9_zn1g(_wZN1G_CAL);
+					processed_counter = command_counter;
+                    response_length = 10;                                                                               
+                    break;    
+
+                case (unsigned char) GetBatteryCalibration:							                                                              
+					rBuffer[0] = m_BTCAL_RSP_BYTE0;
+                    rBuffer[1] = m_BTCAL_RSP_BYTE1_100(_wBTCAL100);                                                                   
+                    rBuffer[2] = m_BTCAL_RSP_BYTE2_100(_wBTCAL100);
+					rBuffer[2]|= m_BTCAL_RSP_BYTE2_80(_wBTCAL80);
+                    rBuffer[3] = m_BTCAL_RSP_BYTE3_80(_wBTCAL80);
+					rBuffer[3]|= m_BTCAL_RSP_BYTE3_60(_wBTCAL60);
+                    rBuffer[4] = m_BTCAL_RSP_BYTE4_60(_wBTCAL60);
+                    rBuffer[5] = m_BTCAL_RSP_BYTE5_60(_wBTCAL60);
+                    rBuffer[5]|= m_BTCAL_RSP_BYTE5_40(_wBTCAL40);
+                    rBuffer[6] = m_BTCAL_RSP_BYTE6_40(_wBTCAL40);
+					rBuffer[6]|= m_BTCAL_RSP_BYTE6_20(_wBTCAL20);
+                    rBuffer[7] = m_BTCAL_RSP_BYTE7_20(_wBTCAL20);
+                    rBuffer[8] = m_BTCAL_RSP_BYTE8_20(_wBTCAL20);
+					rBuffer[8]|= m_BTCAL_RSP_BYTE8_10(_wBTCAL10);
+                    rBuffer[9] = m_BTCAL_RSP_BYTE9_10(_wBTCAL10);
+					processed_counter = command_counter;
+                    response_length = 10;                                                                               
+                    break;  
+
+				case (unsigned char) SetBatteryCalibration:
+				/*All of the read/write functions first make sure the EEPROM is ready to be accessed. 
+				Since this may cause long delays if a write operation is still pending, timecritical 
+				applications should first poll the EEPROM e. g. using eeprom_is_ready()	*/
+                    if (eeprom_is_ready())
+                    {                                    
+                        if (_atmega_a2dConvert10bit(ADC7) < 600) 
+                	        break;
+                        else
+                        {   
+							_wBTCAL100 = m_SET_BTCAL_100(rBuffer[1], rBuffer[2]);
+							eeprom_write_word(&_NV_BTCAL100, _wBTCAL100);
+							_wBTCAL80  = m_SET_BTCAL_80(rBuffer[2], rBuffer[3]);
+							eeprom_write_word(&_NV_BTCAL80, _wBTCAL80);
+							_wBTCAL60  = m_SET_BTCAL_60(rBuffer[3], rBuffer[4], rBuffer[5]);
+							eeprom_write_word(&_NV_BTCAL60, _wBTCAL60);
+							_wBTCAL40  = m_SET_BTCAL_40(rBuffer[5], rBuffer[6]);
+							eeprom_write_word(&_NV_BTCAL40, _wBTCAL40);
+							_wBTCAL20  = m_SET_BTCAL_20(rBuffer[6], rBuffer[7], rBuffer[8]);
+							eeprom_write_word(&_NV_BTCAL20, _wBTCAL20);
+							_wBTCAL10  = m_SET_BTCAL_10(rBuffer[8], rBuffer[8]);
+							eeprom_write_word(&_NV_BTCAL10, _wBTCAL10);
+							processed_counter = command_counter;
+                        }                                                                                               
+                    }
+                    break;
+						
+   				case (unsigned char) GetHardwareVersion:  
+			   		rBuffer[0] = m_HV_RSP_BYTE0;
+                    rBuffer[1] = m_HV_RSP_BYTE1(_VERSION);
+					processed_counter = command_counter;		
+					response_length = 2;
+					break;				
+			
+				case (unsigned char) GetFirmwareVersion:  
+			   		rBuffer[0] = m_FV_RSP_BYTE0;
+                    rBuffer[1] = m_FV_RSP_BYTE1(_FVERSION);
+					processed_counter = command_counter;
+					response_length=2;
+					break;	
+			
+				case (unsigned char) GetTCT:  
+			      	rBuffer[0] = m_TCT_RSP_BYTE0;
+					rBuffer[1] = m_TCT_RSP_BYTE1(_wTCNT2);
+					rBuffer[2] = m_TCT_RSP_BYTE2(_wTCNT2, _wTCNT2_reps);
+					rBuffer[3] = m_TCT_RSP_BYTE3(_wTCNT2_reps, _wTCNT2_last);
+					rBuffer[4] = m_TCT_RSP_BYTE4(_wTCNT2_last);
+					processed_counter = command_counter;				
+					response_length = 5;
+					break;
+			
+				case (unsigned char) SetLED:  
+			      	_LED_COLOR = m_SET_LED_COLOR(rBuffer[1]);
+					_LED_TIME = m_SET_LED_TIME(rBuffer[1]);
+					if (_LED_COLOR == 0){							
+						for (int i = 0; (i < _LED_TIME); i++){
+							_yellowled_turn_on();		
+							for (int j = 0; (j < 200); j++)
+								_delay_ms(5);
 						}
-						processed_counter = command_counter;				
-						break;	
-
-			        //This command calibrates the wocket sampling rate by determining how much off it is from the 
-					//_SAMPLING_RATE by counting timer interrupts and using that value to adjust the sampling rate.
-
-				    case (unsigned char) SetTCT:  
-				   		_wTCNT2 = m_SET_TCT (rBuffer[1], rBuffer[2]);
-						_wTCNT2_reps = m_SET_TCTREPS (rBuffer[2], rBuffer[3]);
-						_wTCNT2_last = m_SET_TCTLAST (rBuffer[3], rBuffer[4]);
-						eeprom_write_byte (&_NV_TCT, _wTCNT2);
-						eeprom_write_byte (&_NV_TCTREPS, _wTCNT2_reps);
-						eeprom_write_byte (&_NV_TCTLAST, _wTCNT2_last);
-						processed_counter = command_counter;
-						break;
-                    case (unsigned char)PausePacket:                                                      
-                            paused = 1;
-                            processed_counter = command_counter;                                                      
-                            break;
-                    case (unsigned char)ResumePacket:                                                     
-                            paused = 0;
-                            processed_counter = command_counter;                                                      
-                            break;
-                    //reset alive timer if it is alive
-                    case (unsigned char)Alive:                                                      
-                            alive_timer = 0;
-                            processed_counter = command_counter;		
-                            break;
-                	case (unsigned char) GetBatteryLevel: 
-                            word = _atmega_a2dConvert10bit(ADC7);
-                            rBuffer[0] = m_BL_RSP_BYTE0;
-                            rBuffer[1] = m_BL_RSP_BYTE1(word);
-                            rBuffer[2] = m_BL_RSP_BYTE2(word);
-                            processed_counter = command_counter;
-                            response_length = 3;		                                                                          
-                            break;		
-                	case (unsigned char) GetSensorSentivity:           			  
-                            rBuffer[0] = m_SENS_RSP_BYTE0;
-                            rBuffer[1] = m_SENS_RSP_BYTE1(_wSENS);                       
-                            processed_counter = command_counter;
-                            response_length = 2;		                                                                          
-                            break;	
-					case (unsigned char) SetSensorSentivity:           			  
-                            _wSENS = m_SET_SEN(rBuffer[1]);
-							eeprom_write_byte(&_NV_SENS, _wSENS);                       
-                            processed_counter = command_counter;                                                                 
-                            break;
-                	case (unsigned char) GetBatteryPercent:           
-				
-                            word = _atmega_a2dConvert10bit(ADC7);
-								  
-							if (word > _wBTCAL100) // Calculate the battery percent
-								word = 100;
-							else if (word > _wBTCAL80)
-								word = 80 + ((word - _wBTCAL80) * 20) / (_wBTCAL100 - _wBTCAL80);
-							else if (word > _wBTCAL60)
-								word = 60 + ((word - _wBTCAL60) * 20) / (_wBTCAL80  - _wBTCAL60);
-							else if (word > _wBTCAL40)
-								word = 40 + ((word - _wBTCAL40) * 20) / (_wBTCAL60  - _wBTCAL40);
-							else if (word > _wBTCAL20)
-								word = 20 + ((word - _wBTCAL20) * 20) / (_wBTCAL40  - _wBTCAL20);
-							else if (word > _wBTCAL10)
-								word = 10 + ((word - _wBTCAL10) * 10) / (_wBTCAL20  - _wBTCAL10);
-							else
-								word = 0;
-
-                            rBuffer[0] = m_BP_RSP_BYTE0;
-                            rBuffer[1] = m_BP_RSP_BYTE1(word);      ;
-                            processed_counter = command_counter;
-                            response_length = 2;		                                                                          
-                            break;
- 				   case (unsigned char) GetPowerDownTimer:  
-				   		rBuffer[0] = m_PDT_RSP_BYTE0;
-                        rBuffer[1] = m_PDT_RSP_BYTE1(_wPDT);
-						processed_counter = command_counter;
-						response_length = 2;
-						break;			
-                   case (unsigned char) SetPowerDownTimer:  
-				   		_wPDT = m_SET_PDT(rBuffer[1]);
-						eeprom_write_byte(&_NV_PDT, _wPDT);
-						processed_counter = command_counter;
-						break;																				
-                   case (unsigned char) GetSamplingRate:  
-				   		rBuffer[0] = m_SR_RSP_BYTE0;
-                        rBuffer[1] = m_SR_RSP_BYTE1(_SAMPLING_RATE);
-						processed_counter = command_counter;
-						response_length = 2;
-						break;
-                   case (unsigned char) GetPacketCount:  
-				   		rBuffer[0] = m_PC_RSP_BYTE0;
-                        rBuffer[1] = m_PC_RSP_BYTE1(_wPC);
-						rBuffer[2] = m_PC_RSP_BYTE2(_wPC);
-                        rBuffer[3] = m_PC_RSP_BYTE3(_wPC);
-						rBuffer[4] = m_PC_RSP_BYTE4(_wPC);
-                        rBuffer[5] = m_PC_RSP_BYTE5(_wPC);
-						processed_counter = command_counter;
-						response_length = 6;
-						break;
-                   case (unsigned char) SetSamplingRate:  
-				   		_SAMPLING_RATE = m_SET_SR(rBuffer[1]);
-						_wocket_initialize_timer2_interrupt();
-						eeprom_write_byte(&_NV_SAMPLING_RATE, _SAMPLING_RATE);
-						eeprom_write_byte(&_NV_TCT, _wTCNT2);
-						eeprom_write_byte(&_NV_TCTREPS, _wTCNT2_reps);
-						eeprom_write_byte(&_NV_TCTLAST, _wTCNT2_last);
-						processed_counter = command_counter;
-						break;
-
-     			   case (unsigned char) GetRadioTransmissionMode:  
-				   		rBuffer[0] = m_TM_RSP_BYTE0;
-                        rBuffer[1] = m_TM_RSP_BYTE1(_TM);
-						processed_counter = command_counter;
-						response_length = 2;
-						break;
-                   case (unsigned char) SetRadioTransmissionMode:  
-				   		_TM = m_SET_TM(rBuffer[1]);
-						eeprom_write_byte(&_NV_TM, _TM);
-						processed_counter = command_counter;
-						break;
-				   case (unsigned char) GetWocketTransmissionMode:  
-				   		rBuffer[0] = m_WTM_RSP_BYTE0;
-                        rBuffer[1] = m_WTM_RSP_BYTE1(_wTM);
-						processed_counter = command_counter;
-						response_length = 2;
-						break;
-                   case (unsigned char) SetWocketTransmissionMode:  
-				   		_wTM = m_SET_WTM(rBuffer[1]);
-						eeprom_write_byte(&_NV_WTM, _wTM);						
-						processed_counter = command_counter;
-						break;
-                   case (unsigned char) SetCalibrationValues:                                                                    
-                            if (eeprom_is_ready())
-                            {                                    
-                                    if (_atmega_a2dConvert10bit(ADC7) < 600)
-                                            break;
-                                    else
-                                    {   
-										_wX1G_CAL  = m_SET_CAL_x1g(rBuffer[1], rBuffer[2]);
-										eeprom_write_word(&_NV_X1G_CAL,_wX1G_CAL);
-										_wXN1G_CAL = m_SET_CAL_xn1g(rBuffer[2], rBuffer[3]);
-										eeprom_write_word(&_NV_XN1G_CAL,_wXN1G_CAL);
-										_wY1G_CAL  = m_SET_CAL_y1g(rBuffer[3], rBuffer[4], rBuffer[5]);
-										eeprom_write_word(&_NV_Y1G_CAL,_wY1G_CAL);
-										_wYN1G_CAL = m_SET_CAL_yn1g(rBuffer[5], rBuffer[6]);
-										eeprom_write_word(&_NV_YN1G_CAL, _wYN1G_CAL);
-										_wZ1G_CAL  = m_SET_CAL_z1g(rBuffer[6], rBuffer[7], rBuffer[8]);
-										eeprom_write_word(&_NV_Z1G_CAL, _wZ1G_CAL);
-										_wZN1G_CAL = m_SET_CAL_zn1g(rBuffer[8], rBuffer[8]);
-										eeprom_write_word(&_NV_ZN1G_CAL, _wZN1G_CAL);
-										processed_counter = command_counter;
-                                    }                                                                                                                                  
-                            }                                                                                                                       
-                            //enable global interrupts
-                            break;
-                    case (unsigned char) GetCalibrationValues:							                                                              
-							rBuffer[0] = m_CAL_RSP_BYTE0;
-                            rBuffer[1] = m_CAL_RSP_BYTE1_x1g(_wX1G_CAL);                                                                   
-                            rBuffer[2] = m_CAL_RSP_BYTE2_x1g(_wX1G_CAL);
-							rBuffer[2]|= m_CAL_RSP_BYTE2_xn1g(_wXN1G_CAL);
-                            rBuffer[3] = m_CAL_RSP_BYTE3_xn1g(_wXN1G_CAL);
-							rBuffer[3]|= m_CAL_RSP_BYTE3_y1g(_wY1G_CAL);
-                            rBuffer[4] = m_CAL_RSP_BYTE4_y1g(_wY1G_CAL);
-                            rBuffer[5] = m_CAL_RSP_BYTE5_y1g(_wY1G_CAL);
-                            rBuffer[5]|= m_CAL_RSP_BYTE5_yn1g(_wYN1G_CAL);
-                            rBuffer[6] = m_CAL_RSP_BYTE6_yn1g(_wYN1G_CAL);
-							rBuffer[6]|= m_CAL_RSP_BYTE6_z1g(_wZ1G_CAL);
-                            rBuffer[7] = m_CAL_RSP_BYTE7_z1g(_wZ1G_CAL);
-                            rBuffer[8] = m_CAL_RSP_BYTE8_z1g(_wZ1G_CAL);
-							rBuffer[8]|= m_CAL_RSP_BYTE8_zn1g(_wZN1G_CAL);
-                            rBuffer[9] = m_CAL_RSP_BYTE9_zn1g(_wZN1G_CAL);
-							processed_counter = command_counter;
-                            response_length = 10;                                                                               
-                            break;    
-                    case (unsigned char) GetBatteryCalibration:							                                                              
-							rBuffer[0] = m_BTCAL_RSP_BYTE0;
-                            rBuffer[1] = m_BTCAL_RSP_BYTE1_100(_wBTCAL100);                                                                   
-                            rBuffer[2] = m_BTCAL_RSP_BYTE2_100(_wBTCAL100);
-							rBuffer[2]|= m_BTCAL_RSP_BYTE2_80(_wBTCAL80);
-                            rBuffer[3] = m_BTCAL_RSP_BYTE3_80(_wBTCAL80);
-							rBuffer[3]|= m_BTCAL_RSP_BYTE3_60(_wBTCAL60);
-                            rBuffer[4] = m_BTCAL_RSP_BYTE4_60(_wBTCAL60);
-                            rBuffer[5] = m_BTCAL_RSP_BYTE5_60(_wBTCAL60);
-                            rBuffer[5]|= m_BTCAL_RSP_BYTE5_40(_wBTCAL40);
-                            rBuffer[6] = m_BTCAL_RSP_BYTE6_40(_wBTCAL40);
-							rBuffer[6]|= m_BTCAL_RSP_BYTE6_20(_wBTCAL20);
-                            rBuffer[7] = m_BTCAL_RSP_BYTE7_20(_wBTCAL20);
-                            rBuffer[8] = m_BTCAL_RSP_BYTE8_20(_wBTCAL20);
-							rBuffer[8]|= m_BTCAL_RSP_BYTE8_10(_wBTCAL10);
-                            rBuffer[9] = m_BTCAL_RSP_BYTE9_10(_wBTCAL10);
-							processed_counter = command_counter;
-                            response_length = 10;                                                                               
-                            break;  
- 					case (unsigned char) SetBatteryCalibration:
-
-					/*All of the read/write functions first make sure the EEPROM is ready to be accessed. 
-					Since this may cause long delays if a write operation is still pending, timecritical 
-					applications should first poll the EEPROM e. g. using eeprom_is_ready()	*/
-                            if (eeprom_is_ready())
-                            {                                    
-                                    if (_atmega_a2dConvert10bit(ADC7) < 600)								    
-                            
-							                break;
-                                    else
-                                    {   
-										_wBTCAL100 = m_SET_BTCAL_100(rBuffer[1], rBuffer[2]);
-										eeprom_write_word(&_NV_BTCAL100, _wBTCAL100);
-										_wBTCAL80  = m_SET_BTCAL_80(rBuffer[2], rBuffer[3]);
-										eeprom_write_word(&_NV_BTCAL80, _wBTCAL80);
-										_wBTCAL60  = m_SET_BTCAL_60(rBuffer[3], rBuffer[4], rBuffer[5]);
-										eeprom_write_word(&_NV_BTCAL60, _wBTCAL60);
-										_wBTCAL40  = m_SET_BTCAL_40(rBuffer[5], rBuffer[6]);
-										eeprom_write_word(&_NV_BTCAL40, _wBTCAL40);
-										_wBTCAL20  = m_SET_BTCAL_20(rBuffer[6], rBuffer[7], rBuffer[8]);
-										eeprom_write_word(&_NV_BTCAL20, _wBTCAL20);
-										_wBTCAL10  = m_SET_BTCAL_10(rBuffer[8], rBuffer[8]);
-										eeprom_write_word(&_NV_BTCAL10, _wBTCAL10);
-										processed_counter = command_counter;
-                                    }                                                                                               
-                            }                                                                                                                       
-                            //enable global interrupts
-                            break;	
-	   				case (unsigned char) GetHardwareVersion:  
-				   		rBuffer[0] = m_HV_RSP_BYTE0;
-                        rBuffer[1] = m_HV_RSP_BYTE1(_VERSION);
-						processed_counter = command_counter;		
-						response_length = 2;
-						break;				
-				
-					case (unsigned char) GetFirmwareVersion:  
-				   		rBuffer[0] = m_FV_RSP_BYTE0;
-                        rBuffer[1] = m_FV_RSP_BYTE1(_FVERSION);
-						processed_counter = command_counter;
-						response_length=2;
-						break;	
-				
-					case (unsigned char) GetTCT:  
-				      	rBuffer[0] = m_TCT_RSP_BYTE0;
-    					rBuffer[1] = m_TCT_RSP_BYTE1(_wTCNT2);
-    					rBuffer[2] = m_TCT_RSP_BYTE2(_wTCNT2, _wTCNT2_reps);
-						rBuffer[3] = m_TCT_RSP_BYTE3(_wTCNT2_reps, _wTCNT2_last);
-						rBuffer[4] = m_TCT_RSP_BYTE4(_wTCNT2_last);
-						processed_counter = command_counter;				
-						response_length = 5;
-						break;
-				
-					case (unsigned char) SetLED:  
-				      	_LED_COLOR = m_SET_LED_COLOR(rBuffer[1]);
-						_LED_TIME = m_SET_LED_TIME(rBuffer[1]);
-						if (_LED_COLOR == 0){							
-							for (int i = 0; (i < _LED_TIME); i++){
-								_yellowled_turn_on();		
-								for (int j = 0; (j < 200); j++)
-									_delay_ms(5);
-							}
-							_yellowled_turn_off();
-						} if (_LED_COLOR == 1){
-							for (int i = 0; (i < _LED_TIME); i++){
-								_greenled_turn_on();		
-								for (int j = 0; (j < 200); j++)
-									_delay_ms(5);
-							}
-							_greenled_turn_off();
-						} 
-						processed_counter = command_counter;
-						break;
-				
-					case (unsigned char) ShutdownWocket:  
-						shutdown_flag = 1;
-						_bluetooth_turn_off();
-						_greenled_turn_off();
 						_yellowled_turn_off();
-				      	//_atmega_finalize();
-						/*if (_is_docked())
-						{
-							for(int j = 0;(j < 10);j++)			
-								for(int i = 0;(i < 200);i++)
-									_delay_ms(5);
-							if (_is_docked())
-								_wocket_initialize();
-						}*/
-						/*_atmega_finalize();
-						for (int j = 0; (j < 1000); j++)
-									_delay_ms(5);
-						_wocket_initialize();*/
-						processed_counter = command_counter;
-						break;
-					
-					case (unsigned char) ResetBluetooth:  
-				      	_bluetooth_reset();
-						processed_counter = command_counter;
-						break;
-					case (unsigned char) ResetWocket:  
-				      	//_wocket_reset();
-						_atmega_finalize();
-						for (int j = 0; (j < 1000); j++)
-									_delay_ms(5);
-						_wocket_initialize();
-						processed_counter = command_counter;
-						break;
-					case (unsigned char) GetAliveTimer:  
-				   		rBuffer[0] = m_ALT_RSP_BYTE0;
-                        rBuffer[1] = m_ALT_RSP_BYTE1(_wALT);
-						processed_counter = command_counter;
-						response_length = 2;
-						break;			
-                    case (unsigned char) SetAliveTimer:  
-				   		_wALT = m_SET_ALT(rBuffer[1]);
-						eeprom_write_byte(&_NV_ALT, _wALT);
-						processed_counter = command_counter;
-						break;																	 							                              
-                    default:        
-                            break;
+					} if (_LED_COLOR == 1){
+						for (int i = 0; (i < _LED_TIME); i++){
+							_greenled_turn_on();		
+							for (int j = 0; (j < 200); j++)
+								_delay_ms(5);
+						}
+						_greenled_turn_off();
+					} 
+					processed_counter = command_counter;
+					break;
+			
+				case (unsigned char) ShutdownWocket:  
+					shutdown_flag = 1;
+					_bluetooth_turn_off();
+					_greenled_turn_off();
+					_yellowled_turn_off();
+			      	//_atmega_finalize();
+					/*if (_is_docked())
+					{
+						for(int j = 0;(j < 10);j++)			
+							for(int i = 0;(i < 200);i++)
+								_delay_ms(5);
+						if (_is_docked())
+							_wocket_initialize();
+					}*/
+					/*_atmega_finalize();
+					for (int j = 0; (j < 1000); j++)
+								_delay_ms(5);
+					_wocket_initialize();*/
+					processed_counter = command_counter;
+					break;
+				
+				case (unsigned char) ResetBluetooth:  
+			      	_bluetooth_reset();
+					processed_counter = command_counter;
+					break;
+
+				case (unsigned char) ResetWocket:  
+			      	//_wocket_reset();
+					_atmega_finalize();
+					for (int j = 0; (j < 1000); j++)
+						_delay_ms(5);
+					_wocket_initialize();
+					processed_counter = command_counter;
+					break;
+
+				case (unsigned char) GetAliveTimer:  
+			   		rBuffer[0] = m_ALT_RSP_BYTE0;
+                    rBuffer[1] = m_ALT_RSP_BYTE1(_wALT);
+					processed_counter = command_counter;
+					response_length = 2;
+					break;	
+							
+                case (unsigned char) SetAliveTimer:  
+			   		_wALT = m_SET_ALT(rBuffer[1]);
+					eeprom_write_byte(&_NV_ALT, _wALT);
+					processed_counter = command_counter;
+					break;	
+																					 							                              
+                default:        
+                    break;
             }
 
             if (processed_counter == command_counter)
@@ -1155,11 +975,11 @@ void _receive_data(void)
     } //if command timed out
     else if ((command_timer >= MAX_COMMAND_TIMER))
     {                            
-            command_length = 0;
-            command_counter = 0;
-            command_timer = 0;
-            processed_counter = 0;                            
-            address=0xffff;
-            response_length = 0;
+        command_length = 0;
+        command_counter = 0;
+        command_timer = 0;
+        processed_counter = 0;                            
+        address=0xffff;
+        response_length = 0;
     }
 }
