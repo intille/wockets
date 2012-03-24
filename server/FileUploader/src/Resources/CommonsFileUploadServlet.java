@@ -9,19 +9,24 @@ package Resources;
  * @author Nishant Nagwani
  */
 import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.math.BigInteger;
 import java.security.MessageDigest;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -69,6 +74,9 @@ public class CommonsFileUploadServlet extends HttpServlet {
 	// destination directory where files are to be stored after verification
 	private static String DESTINATION_DIR_PATH = "/data/Wockets/";
 	private File destinationDir;
+	//private static String LOGS_DIR_PATH = "/data/WocketsLogs/";
+	//private File logsDir;
+	//private static PrintWriter pw = null;
 	
 	
 	@Override
@@ -84,12 +92,10 @@ public class CommonsFileUploadServlet extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
-		String imei = null, md5Checksum = null;
+		String phoneID = null, md5Checksum = null, subjectID = null;
 		PrintWriter out = response.getWriter();
 		response.setContentType("text/plain");
-		out.println("<h1>Servlet File Upload Example using Commons File Upload</h1>");
-		out.println();
-
+		
 		DiskFileItemFactory fileItemFactory = new DiskFileItemFactory();
 		/*
 		 * Set the size threshold, above which content will be stored on disk.
@@ -115,12 +121,23 @@ public class CommonsFileUploadServlet extends HttpServlet {
 				 */
 				if (item.isFormField()) {
 					String currentItem = item.getFieldName();
-					if (currentItem.equalsIgnoreCase("imei")) {
-						imei = item.getString();
+					if (currentItem.equalsIgnoreCase("phoneID")) {
+						phoneID = item.getString();
+					//	pw.write("Recieved ");
+						subjectID = ServiceClient.getSubjectID(phoneID);
+						if(subjectID.equalsIgnoreCase("NoRecordFound")){
+							out.println("No record found for given phoneID : "+phoneID);
+							break;
+						}
+						if(subjectID.equalsIgnoreCase("")){
+							out.println("Database Server is temporalily down.");
+							break;
+						}
+						
 					} else if (currentItem.equalsIgnoreCase("md5Checksum")) {
 						md5Checksum = item.getString();
 					} else {
-						out.print("Invalid parameter");
+						out.println("Invalid parameter");
 						break;
 					}
 					
@@ -128,7 +145,7 @@ public class CommonsFileUploadServlet extends HttpServlet {
 					
 					// Handle uploaded files
 					
-					String tmpDirectoryString = tmpDir + "/" + "temp" + imei;  
+					String tmpDirectoryString = tmpDir + "/" + "temp" + subjectID;  
 					File tempDirectory = new File(tmpDirectoryString);
 					if (!tempDirectory.isDirectory())
 						tempDirectory.mkdirs();
@@ -138,36 +155,51 @@ public class CommonsFileUploadServlet extends HttpServlet {
 					
 					String filename = item.getName();
 
-					out.println("Field Name = " + item.getFieldName()
-							+ ", File Name = " + item.getName()
-							+ ", Content type = " + item.getContentType()
-							+ ", File Size = " + item.getSize());
-
+					
 					
 					// Handle json files
 					if (isJsonFile(filename)) {
 						
-						out.println("Json file recieved. Request Forwarded to AndroidLogs service.");
+						out.println("Json file received. Request Forwarding to AndroidLogs service.");
 						
+						String unzippedFile = null;
 						// unzip the file
-						String unzippedFile = getUnzippedFile(filename, tmpDirectoryString);
+						if(checkIsZIP(filename)){
+							unzippedFile = getUnzippedFile(filename, tmpDirectoryString, true);
+							if(unzippedFile == null)
+								out.println("Problem unzipping file.");
+						}else{
+							unzippedFile = getFileAsString(filename, tmpDirectoryString);
+							if(unzippedFile == null)
+								out.println("Problem reading file.");
+							
+						}
 						if(unzippedFile != null){
 							int responseFromTest = ServiceClient.callAndroidLogsService(unzippedFile);
 							if(responseFromTest == 200){
-								out.println("json file successfully submitted.");
+								out.println("Json file successfully submitted.");
+								tempFile.delete();
+							}else if(responseFromTest == 400){
+								out.println("Android Logs service rejected as Bad Input.");
 							}else{
-								out.println("AndroidLogs service is down");
+								out.println("Android Logs service is down.");
 							}
 							out.println(ServiceClient.responseBody);
-							tempFile.delete();
 							
-						}else{
-							out.println("problem unzipping file.");
+							
 						}
 					} 
 					
 					// handle this way if the incoming file is not a json file
 					else {
+						
+						//out.println("Field Name = " + item.getFieldName()
+						//		+ ", File Name = " + item.getName()
+							//	+ ", Content type = " + item.getContentType()
+							//	+ ", File Size = " + item.getSize());
+
+						out.println("Raw data file recieved.");
+						
 						int verified = verifyFile(filename, md5Checksum, tmpDirectoryString);
 						
 						String parsedFileName = parseFileName(filename);
@@ -179,8 +211,11 @@ public class CommonsFileUploadServlet extends HttpServlet {
 						if (parsedFileName != null) {
 							tempFile.delete();
 							
+							String[] dirStructure = parsedFileName.split("\\\\");
+							String dirPath = dirStructure[0], newFileName = dirStructure[1];
+							
 							// path to the sub directory for user
-							String userDirPath = DESTINATION_DIR_PATH + "/" + imei + "/" + parsedFileName;
+							String userDirPath = DESTINATION_DIR_PATH + "/" + subjectID + "/" + dirPath;
 
 							
 							if (verified == 0) {
@@ -193,8 +228,10 @@ public class CommonsFileUploadServlet extends HttpServlet {
 								 * Write file to the ultimate location.
 								 */
 								File file = new File(destinationDir,
-										filename);
+										newFileName);
 								item.write(file);
+								
+								out.println("File written to destination directory.");
 
 							} else {
 								out.println("File cannot be verified. Please send again.");
@@ -215,33 +252,93 @@ public class CommonsFileUploadServlet extends HttpServlet {
 		}
 
 	}
-
-	// This method checks if the input filename is json file.
-	// If yes, returns true. Otherwise return false.
-	private boolean isJsonFile(String filename) {
+	
+	
+	private boolean checkIsZIP(String filename){
 		String[] fileNameParts = filename.split("\\.");
-		if (fileNameParts[0].equalsIgnoreCase("json"))
+		if(fileNameParts[fileNameParts.length - 1].equalsIgnoreCase("zip"))
 			return true;
+		
 		return false;
+	}
+	
+	
+	private String getFileAsString(String inFileName, String tmpDirPath){
+		StringBuilder sb = new StringBuilder();
+		String FilePath = tmpDirPath + "/" + inFileName;
+		
+		try{
+			  // Open the file that is the first 
+			  // command line parameter
+			  FileInputStream fstream = new FileInputStream(FilePath);
+			  // Get the object of DataInputStream
+			  DataInputStream in = new DataInputStream(fstream);
+			  BufferedReader br = new BufferedReader(new InputStreamReader(in));
+			  String strLine;
+			  //Read File Line By Line
+			  while ((strLine = br.readLine()) != null)   {
+			  // Print the content on the console
+			  sb.append(strLine);
+			  sb.append("\n");
+			  }
+			  //Close the input stream
+			  in.close();
+			    }catch (Exception e){//Catch exception if any
+			  System.err.println("Error: " + e.getMessage());
+			  }
+		
+		
+		return sb.toString().trim();
 	}
 
 	// this method takes in a filename and parses the file name.
-	// Gets the directory structure from the middle part of file name
-	// if the file name fails the specifications, null is returned.
-	private String parseFileName(String fileName) {
-		// file.UniversityTest-S2-Session1__2009-06-25__15__15.3.2009-06-25-15-00-00-015.gzip
-		try {
-			String[] fileNameParts = fileName.split("__");
-			String protocol = fileNameParts[0].substring(5);
-
-			return (protocol + "/" + fileNameParts[1] + "/" + fileNameParts[2]);
-		} catch (Exception ex) {
-			log("Error encountered while parsing filename, needs to be verified by server administrator.",
-					ex);
-			ex.printStackTrace();
-			return null;
-		}
-	}
+			// Gets the directory structure from the middle part of file name
+			// if the file name fails the specifications, null is returned.
+		// this method takes in a filename and parses the file name.
+			// Gets the directory structure from the middle part of file name
+			// if the file name fails the specifications, null is returned.
+			private String parseFileName(String fileName) {
+				// file.UniversityTest-S2-Session1__2009-06-25__15__15.3.2009-06-25-15-00-00-015.gzip
+				// "Dir1__Dir2__file.baf.gz"
+				StringBuilder path = new StringBuilder();
+				try {
+					if(fileName.contains("__")){
+					
+						String[] fileNameParts = fileName.split("__");
+						//String protocol = fileNameParts[0].substring(5);
+						int i = 0, fileDepth = fileNameParts.length;
+						while(i < fileDepth - 1){
+							path.append(fileNameParts[i]);
+							path.append("/");
+							i++;
+						}
+						path.append("\\");
+						path.append(fileNameParts[fileDepth -1]);
+						
+					}else{
+						path.append("\\");
+						path.append(fileName);
+						
+					}
+					return path.toString();
+					
+				} catch (Exception ex) {
+					//log("Error encountered while parsing filename, needs to be verified by server administrator.",
+						//	ex);
+					ex.printStackTrace();
+					return null;
+				}
+			//	return path;
+			}
+			
+			// This method checks if the input filename is json file.
+			// If yes, returns true. Otherwise return false.
+			private boolean isJsonFile(String filename) {
+				String[] fileNameParts = filename.split("\\.");
+				if (fileNameParts[1].equalsIgnoreCase("json"))
+					return true;
+				return false;
+			}
 
 	// this file calculates the md5 for the input file and compares it with
 	// given checksum. returns 0 if file is verified. Otherwise returns 1 or -1.
@@ -281,32 +378,40 @@ public class CommonsFileUploadServlet extends HttpServlet {
 	
 	// This method returns the unzipped contents of the input gzip file from temp directory.
 	// If an exception is thrown, null is returned.
-	public String getUnzippedFile(String inFileName, String tmpDirPath) {
+	public static String getUnzippedFile(String inFileName, String tmpDirPath, boolean isJson) {
+		String zipFilePath = tmpDirPath + "/" + inFileName;
+		
 		
 		try {
-			
-			String gzipFilePath = tmpDirPath + "/" + inFileName; 
-			GZIPInputStream gzipInputStream = null;
-			gzipInputStream = new GZIPInputStream(new FileInputStream(gzipFilePath));
-			InputStreamReader isReader = new InputStreamReader(gzipInputStream);
+			FileInputStream fis = new FileInputStream(zipFilePath);
+		    ZipInputStream zis = new ZipInputStream(fis);
+		    InputStreamReader isReader = new InputStreamReader(zis);
 		    BufferedReader reader = new BufferedReader(isReader);
-			
-			StringBuilder sb = new StringBuilder();
-			String line;
-			while((line = reader.readLine()) != null){	
-				sb.append(line);
+			if(!isJson){
+				//TO DO
+				// do application logic for raw file uploads
 			}
-			
-			reader.close();
-			isReader.close();
-			gzipInputStream.close();
-			
-			return sb.toString();
-		}
+		    
+		    ZipEntry entry;
 
-		catch (IOException e) {
-			System.out.println("Exception has been thrown" + e);
-		}
+		    while ((entry = zis.getNextEntry()) != null) {
+		      //System.out.println("Unzipping: " + entry.getName());
+
+		      StringBuilder sb = new StringBuilder();
+				String line;
+				while((line = reader.readLine()) != null){	
+					sb.append(line);
+				}
+		      if(isJson)
+		    	  return sb.toString();
+		    }
+		    reader.close();
+		    isReader.close();
+		    zis.close();
+		    fis.close();
+		  }catch(Exception ex){
+			  ex.printStackTrace();
+		  }
 		return null;
 	}
 	
