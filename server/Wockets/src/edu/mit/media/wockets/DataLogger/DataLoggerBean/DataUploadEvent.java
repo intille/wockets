@@ -17,7 +17,6 @@ public class DataUploadEvent {
 	
 	private int dataUploadEventId;
 	
-	@SerializedName("pid")
 	private int participantID;
 	 
 	@SerializedName("sutime")

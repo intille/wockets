@@ -76,8 +76,5 @@ public class ReviewerController {
 	{
 		return new ModelAndView("reviewerDataCheck");
 	}
-	
-	
-	
 
 }

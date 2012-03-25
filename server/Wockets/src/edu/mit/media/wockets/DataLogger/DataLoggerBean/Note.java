@@ -12,7 +12,6 @@ public class Note {
 	
 	private int noteId;
 	
-	@SerializedName("pid")
 	private int participantID;
 	
 	@SerializedName("stime")
@@ -23,13 +22,18 @@ public class Note {
 
 	@SerializedName("note")
 	private String note;
+
+	@SerializedName("plot")
+	private int plot;
+
 	
 	private Note()
 	{
 		participantID = -1;  //UNDEFINED_INT 
 		startTime = null;
 		endTime = null;
-		note = null; 
+		note = null;
+		plot = 0;
 	}
 
 	public int getNoteId() {
@@ -72,5 +76,12 @@ public class Note {
 		this.note = note;
 	}
 	
+	public int getPlot() {
+		return plot;
+	}
+
+	public void setPlot(int plot) {
+		this.plot = plot;
+	}
 	
 }

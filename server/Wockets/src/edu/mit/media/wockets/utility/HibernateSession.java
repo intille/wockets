@@ -10,9 +10,15 @@ import org.hibernate.cfg.Configuration;
 
 public class HibernateSession {
 
+	public static SessionFactory factory;
 	public static Session getSession(){
-		Configuration config = new Configuration().configure();
-		SessionFactory factory = config.buildSessionFactory();
+//		Configuration config = new Configuration().configure();
+//		SessionFactory factory = config.buildSessionFactory();
+		if(factory ==null)
+		{
+			Configuration config = new Configuration().configure();
+			factory = config.buildSessionFactory();
+		}
 		Session session = factory.openSession();
 
 		return session;

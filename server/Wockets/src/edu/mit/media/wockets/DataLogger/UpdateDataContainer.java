@@ -4,9 +4,11 @@ import java.util.List;
 
 import com.ibm.icu.text.SimpleDateFormat;
 
+import edu.mit.media.wockets.DataLogger.DataLoggerBean.ActivityCountData;
 import edu.mit.media.wockets.DataLogger.DataLoggerBean.PhoneStats;
 import edu.mit.media.wockets.DataLogger.DataLoggerBean.Prompting;
 import edu.mit.media.wockets.DataLogger.DataLoggerBean.Swapping;
+import edu.mit.media.wockets.DataLogger.DataLoggerBean.WocketInfo;
 import edu.mit.media.wockets.DataLogger.DataLoggerBean.WocketStats;
 
 public class UpdateDataContainer {
@@ -18,11 +20,15 @@ public class UpdateDataContainer {
 		List<PhoneStats> phoneStatsList = dataContainer.getPhoneStatsList();
 		List<Prompting> promptingList = dataContainer.getPromptingList();
 		List<WocketStats> wocketStatsList = dataContainer.getWocketStateList();
+		List<WocketInfo> wocketInfoList = dataContainer.getWocketInfoList();
+		List<ActivityCountData> activityCountDataList = dataContainer.getActivityCountDataList();		
 		List<Swapping> swappingList = dataContainer.getSwappingList();
 		
 		updatePhoneStats(phoneStatsList);
 		updatePrompt(promptingList);
 		updateWocketStats(wocketStatsList);
+		updateWocketInfo(wocketInfoList);
+		updateActivityCountData(activityCountDataList);
 		updateSwapping(swappingList);
 	}
 	
@@ -55,6 +61,24 @@ public class UpdateDataContainer {
 				ws.setCreateDate(DATETIMEFORMAT.format(ws.getDateTime().getTime()));
 		}
 	}
+
+	public void updateWocketInfo(List<WocketInfo> wocketInfoList)
+	{
+		if(wocketInfoList != null)
+		{
+			for(WocketInfo wi: wocketInfoList)
+				wi.setCreateDate(wi.getCreateDate());
+			}
+	}
+	
+	public void updateActivityCountData(List<ActivityCountData> ActivityCountDataList)
+	{
+		if(ActivityCountDataList != null)
+		{
+			for(ActivityCountData acd: ActivityCountDataList)
+				acd.createTime = acd.createTime;
+		}
+	}
 	
 	public void updateSwapping(List<Swapping> swappingList)
 	{
@@ -62,10 +86,10 @@ public class UpdateDataContainer {
 		{
 			for(Swapping sw: swappingList)
 			{
-				sw.setSwapTime(DATETIMEFORMAT.format(sw.getDateTime().getTime()));
-				sw.setSwapEvent(sw.isSwap() == true ? "1":"0");
-				sw.setRestartedEvent(sw.isRestarted() == true ? "1":"0");
-				sw.setLoctChangedevent(sw.isLocationChange() == true ? "1":"0");
+				sw.setSwapTime(sw.getSwapTime());
+				sw.setIsSwap(sw.getIsSwap() == true ? true : false);
+				sw.setIsRestarted(sw.getIsRestarted() == true ? true : false);
+				sw.setIsLocationChange(sw.getIsLocationChange() == true ? true : false);
 			}
 		}
 	}

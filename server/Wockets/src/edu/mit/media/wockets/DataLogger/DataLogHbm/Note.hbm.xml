@@ -8,13 +8,12 @@
 		<id name="noteId" type="int" unsaved-value="null" >
         	<column name="Note_Id" not-null="true"/>
      		<generator class="identity"/>
- 		</id>
-		
+ 		</id>		
 		<property name="participantID" type="int" column="Participant_Id"/>		
 		<property name="startTime" type="timestamp" column="Start_Time"/>
 		<property name="endTime" type="timestamp" column="End_Time"/>
 		<property name="note" type="string" column="Note"/>
-		
+		<property name="plot" type="int" column="Show_On_Chart"/>
 	</class>
 	
 </hibernate-mapping>

@@ -4,11 +4,19 @@ import java.util.Date;
 
 import com.google.gson.annotations.SerializedName;
 
+
+// JPN: NOTE!!! 20120311 This class is deprecated. It is left here for backward compatibility. 
+// This should be removed in the not-too-distant future.
+
 public class WocketStats {
-	private int wocketStatsId;
+
+	public static final int UNDEFINED_INT = -1;
 	
-	@SerializedName("pid")
-	private int participantId;
+	private int wocketStatsId;
+	private int participantId = UNDEFINED_INT;
+
+	private String createDate;
+	private String uploadDate;
 	
 	@SerializedName("mac")
 	private String macId;
@@ -17,16 +25,16 @@ public class WocketStats {
 	private int activityCount;
 	
 	@SerializedName("bat")
-	private int wocketBattery;
+	private int wocketBattery = UNDEFINED_INT;
 	
 	@SerializedName("tbyte")
-	private int transmittedByte;
+	private int transmittedByte = UNDEFINED_INT;
 	
 	@SerializedName("rbyte")
-	private int receivedBytes;
+	private int receivedBytes = UNDEFINED_INT;
 	
 	@SerializedName("time")
-	private Date dateTime;
+	private Date dateTime = new Date();
 	
 	public Date getDateTime() {
 		return dateTime;
@@ -34,10 +42,6 @@ public class WocketStats {
 	public void setDateTime(Date dateTime) {
 		this.dateTime = dateTime;
 	}
-	
-	
-	private String createDate;
-	private String uploadDate;
 	
 	public int getWocketStatsId() {
 		return wocketStatsId;
@@ -94,7 +98,4 @@ public class WocketStats {
 		this.receivedBytes = receivedBytes;
 	}
 	
-	
-	
-
 }

@@ -11,6 +11,7 @@ import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
 import org.hibernate.Query;
+import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -56,7 +57,7 @@ public class DataLoggerUtility {
 	}
 	
 	//insert all data to database
-	public static void insertDataToDB(DataContainer dataContainer)
+	public static void insertDataToDB(DataContainer dataContainer, int participantId)
 	{
 		int rowNbr = 0;//int to check number of records
 		Session session = HibernateSession.getSession();
@@ -72,23 +73,25 @@ public class DataLoggerUtility {
 				pList.set(i,null);
 				if(!pList.contains(prompt))
 				{
-					query = session.createQuery("FROM Prompting prompting WHERE Participant_Id =:pId AND Prompt_type =:promptType AND Prompt_Time =:promptTime " +
-									 "AND Response_Time =:responseTime AND Activity_Interval =:activityInterval AND Primary_Activity =:primaryAct " +
-									 "AND Alternate_Activities=:alternateAct");
-				
-					query.setInteger("pId",prompt.getParticipantId());
-					query.setString("promptType",prompt.getPromptType());
-					query.setString("promptTime",prompt.getPromptTime());
-					query.setString("responseTime",prompt.getResponseTime());
-					query.setInteger("activityInterval",prompt.getActivityInterval());
-					query.setString("primaryAct",prompt.getPrimaryActivity());
-					query.setString("alternateAct",prompt.getAlternateActivity());
-					if(!exists(query))
-					{
+							    
+//					query = session.createQuery("FROM Prompting prompting WHERE Participant_Id =:pId AND Prompt_type =:promptType AND Prompt_Time =:promptTime " +
+//									 "AND Response_Time =:responseTime AND Activity_Interval =:activityInterval AND Primary_Activity =:primaryAct " +
+//									 "AND Alternate_Activities=:alternateAct");
+//
+//					query.setInteger("pId",participantId);
+//					query.setString("promptType",prompt.getPromptType());
+//					query.setString("promptTime",prompt.getPromptTime());
+//					query.setString("responseTime",prompt.getResponseTime());
+//					query.setInteger("activityInterval",prompt.getActivityInterval());
+//					query.setString("primaryAct",prompt.getPrimaryActivity());
+//					query.setString("alternateAct",prompt.getAlternateActivity());
+//					if(!exists(query))
+//					{
+						prompt.setParticipantId(participantId);
 						session.save(prompt);
 						rowNbr++;
 						checkFirstLevelCache(rowNbr, session);
-					}
+//					}
 				}
 			}
 		}
@@ -98,46 +101,99 @@ public class DataLoggerUtility {
 		{
 			for(PhoneStats ps:dataContainer.getPhoneStatsList())
 			{
-				query = session.createQuery("FROM PhoneStats phonestats WHERE Participant_Id =:pId AND Create_Date =:createDate AND Phone_Battery =:phoneBattery "+
-					 "AND Main_Memory=:mainMemory AND SD_Memory=:sdMemory");
-
-
-				query.setInteger("pId",ps.getParticipantId());
-				query.setString("createDate",ps.getCreateDate());
-				query.setInteger("phoneBattery",ps.getPhoneBattery());
-				query.setInteger("mainMemory",ps.getMainMemo());
-				query.setInteger("sdMemory",ps.getSdMemo());
-				if(!exists(query))
-				{
+//				query = session.createQuery("FROM PhoneStats phonestats WHERE Participant_Id =:pId AND Create_Date =:createDate AND Phone_Battery =:phoneBattery "+
+//					 "AND Main_Memory=:mainMemory AND SD_Memory=:sdMemory");
+//				query.setInteger("pId",participantId);
+//				query.setString("createDate",ps.getCreateDate());
+//				query.setInteger("phoneBattery",ps.getPhoneBattery());
+//				query.setInteger("mainMemory",ps.getMainMemo());
+//				query.setInteger("sdMemory",ps.getSdMemo());
+//				if(!exists(query))
+//				{
+					ps.setParticipantId(participantId);
 					session.save(ps);
-					rowNbr++;
-					checkFirstLevelCache(rowNbr, session);
-				}
+//				}
+				rowNbr++;
+				checkFirstLevelCache(rowNbr, session);
 			}
 		}
+		
 		//insert WocketStats
 		if(dataContainer.getWocketStateList() != null)
 		{
 			for(WocketStats ws: dataContainer.getWocketStateList())
 			{
-				query = session.createQuery("FROM WocketStats wocketStats WHERE Participant_Id =:pId AND Mac_Id =:macId AND Create_Date =:createDate "+
-					 "AND Activity_Count=:activityCount AND Wocket_Battery=:wocketBattery AND Transmitted_Bytes=:transmittedByte AND Received_Bytes=:receivedBytes");
+//				query = session.createQuery("FROM WocketStats wocketStats WHERE Participant_Id =:pId AND Mac_Id =:macId AND Create_Date =:createDate "+
+//					 "AND Activity_Count=:activityCount AND Wocket_Battery=:wocketBattery AND Transmitted_Bytes=:transmittedByte AND Received_Bytes=:receivedBytes");
+//
+//				query.setInteger("pId",participantId);
+//				query.setString("macId", ws.getMacId());
+//				query.setString("createDate",ws.getCreateDate());
+//				query.setInteger("activityCount",ws.getActivityCount());
+//				query.setInteger("wocketBattery",ws.getWocketBattery());
+//				query.setInteger("transmittedByte",ws.getTransmittedByte());
+//				query.setInteger("receivedBytes",ws.getReceivedBytes());
+//				if(!exists(query))
+//				{
+					ws.setParticipantId(participantId);
+					session.save(ws);
+//				}
+				rowNbr++;
+				checkFirstLevelCache(rowNbr, session);
 
-				query.setInteger("pId",ws.getParticipantId());
-				query.setString("macId", ws.getMacId());
-				query.setString("createDate",ws.getCreateDate());
-				query.setInteger("activityCount",ws.getActivityCount());
-				query.setInteger("wocketBattery",ws.getWocketBattery());
-				query.setInteger("transmittedByte",ws.getTransmittedByte());
-				query.setInteger("receivedBytes",ws.getReceivedBytes());
-				if(!exists(query))
-				{
+			}
+		}
+		
+		//JPN: NOTE: using "ws" instead of "wi" is a lazy shorthand. Oops.  
+		if(dataContainer.getWocketInfoList() != null)
+		{
+			for(WocketInfo ws: dataContainer.getWocketInfoList())
+			{
+//				query = session.createQuery("FROM WocketInfo wocketInfo WHERE Participant_Id =:pId AND Mac_Id =:macId AND Create_Date =:createDate "+
+//					 "AND Wocket_Battery=:wocketBattery AND Transmitted_Bytes=:transmittedByte AND Received_Bytes=:receivedBytes");
+//				query.setInteger("pId",participantId);
+//				query.setString("macId", ws.getMacId());
+//				query.setDate("createDate",ws.getCreateDate());
+//				query.setInteger("wocketBattery",ws.getWocketBattery());
+//				query.setInteger("transmittedByte",ws.getTransmittedByte());
+//				query.setInteger("receivedBytes",ws.getReceivedBytes());
+//				if(!exists(query))
+//				{
+					ws.setParticipantID(participantId);
 					session.save(ws);
 					rowNbr++;
 					checkFirstLevelCache(rowNbr, session);
-				}
+//				}
 			}
 		}
+
+		// JPN: Please make this faster!  
+		// Change iteraction?
+		// Create prepared statement for query?
+		// Find an update method that works...
+		if(dataContainer.getActivityCountDataList() != null)
+		{
+			for(ActivityCountData acd: dataContainer.getActivityCountDataList())
+			{
+//				query = session.createQuery("FROM ActivityCountData acd WHERE Participant_Id =:pId " +
+//				"AND Mac_Id =:mac AND Create_Date =:time "+
+//				"AND Upload_Date =:otime AND Activity_Count =:ac");
+//				query.setInteger("pId", participantId);
+//				query.setString("mac", acd.macID);
+//				query.setDate("time", acd.createTime);
+//				query.setDate("otime", acd.createTime);
+//				query.setInteger("ac",acd.activityCount);
+//				query.executeUpdate();
+//				if(!exists(query))
+//				{
+					acd.participantID = participantId;
+					session.save(acd);
+//				}
+				rowNbr++;
+				checkFirstLevelCache(rowNbr, session);
+			}
+		}
+
 		//insert swapping and SwappedSensor record
 		if(dataContainer.getSwappingList() != null)
 		{
@@ -146,13 +202,14 @@ public class DataLoggerUtility {
 				query = session.createQuery("FROM Swapping swapping WHERE Participant_Id =:pId AND Swap_Time =:swapTime AND Swap_event =:swapEvent "+
 					 					"AND Restarted_Event=:restartedEvent AND LocationChanged_Event=:loctChangedevent");
 
-				query.setInteger("pId",s.getParticipantId());
-				query.setString("swapTime", s.getSwapTime());
-				query.setString("swapEvent",s.getSwapEvent());
-				query.setString("restartedEvent",s.getRestartedEvent());
-				query.setString("loctChangedevent",s.getLoctChangedevent());
+				query.setInteger("pId",participantId);
+				query.setDate("swapTime", s.getSwapTime());
+				query.setBoolean("swapEvent",s.getIsSwap());
+				query.setBoolean("restartedEvent",s.getIsRestarted());
+				query.setBoolean("loctChangedevent",s.getIsLocationChange());
 				if(!exists(query))
 				{
+					s.setParticipantId(participantId);
 					session.save(s);
 					rowNbr++;
 
@@ -185,26 +242,21 @@ public class DataLoggerUtility {
 			}
 		}
 		
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		//insert some notes
 		if(dataContainer.getSomeNotes()!=null)
 		{
 			for(Note note : dataContainer.getSomeNotes())
 			{
-				query = session.createSQLQuery("SELECT * FROM Note WHERE Participant_Id =:pId AND Start_Time =:sTime AND Note =:note");
-
-				query.setInteger("pId",note.getParticipantID());
-				query.setString("sTime",sdf.format(note.getStartTime()));
-				//not consider End_Time for duplicate entry because getting problem because of IS NULL in database
-//				if(note.getEndTime()!=null)
-//					query.setString("eTime",sdf.format(note.getEndTime()));
-//				else
-//					query.setString("eTime",null);
-				query.setString("note",note.getNote());
-				if(!exists(query))
-				{
+//				query = session.createSQLQuery("SELECT * FROM Note WHERE Participant_Id =:pId AND Start_Time =:sTime AND Note =:note AND Show_On_Chart =:plot");
+//				query.setInteger("pId",participantId);
+//				query.setString("sTime",sdf.format(note.getStartTime()));
+//				query.setString("note",note.getNote());
+//				query.setInteger("plot",note.getPlot());
+//				if(!exists(query))
+//				{
+					note.setParticipantID(participantId);
 					session.save(note);
-				}
+//				}
 				rowNbr++;
 				checkFirstLevelCache(rowNbr, session);
 			}
@@ -215,15 +267,16 @@ public class DataLoggerUtility {
 		{
 			for(HRData hr : dataContainer.getSomeHRData())
 			{
-				query = session.createQuery("FROM HRData hrdata WHERE Participant_Id =:pId AND Create_Time =:cTime AND HeartRate =:hr AND Sensor_Battery =:battery");
-				query.setInteger("pId",hr.getParticipantID());
-				query.setString("cTime",sdf.format(hr.getCreateTime()));
-				query.setInteger("hr",hr.getHeartRate());
-				query.setInteger("battery",hr.getBattery());
-				if(!exists(query))
-				{
+//				query = session.createQuery("FROM HRData hrdata WHERE Participant_Id =:pId AND Create_Time =:cTime AND HeartRate =:hr AND Sensor_Battery =:battery");
+//				query.setInteger("pId",participantId);
+//				query.setString("cTime",sdf.format(hr.getCreateTime()));
+//				query.setInteger("hr",hr.getHeartRate());
+//				query.setInteger("battery",hr.getBattery());
+//				if(!exists(query))
+//				{
+					hr.setParticipantID(participantId);
 					session.save(hr);
-				}
+//				}
 				rowNbr++;
 				checkFirstLevelCache(rowNbr, session);
 			}
@@ -234,25 +287,23 @@ public class DataLoggerUtility {
 		{
 			for(DataUploadEvent due : dataContainer.getSomeRawUploads())
 			{
-//				query = session.createQuery("FROM DataUploadEvent dataUploadEvent WHERE Participant_Id =:pId AND Start_Upload_Time =:sut " +
+//				query = session.createSQLQuery("SELECT * FROM Data_Upload_Event WHERE Participant_Id =:pId AND Start_Upload_Time =:sut " +
 //											"AND End_Upload_Time =:eut AND IS_Successful =:isSucc AND Start_Data_Time =:sdt AND End_Data_Time =:edt " +
 //											"AND File_Name =:fName AND File_Size =:fSize AND Note=:note");
-				query = session.createSQLQuery("SELECT * FROM Data_Upload_Event WHERE Participant_Id =:pId AND Start_Upload_Time =:sut " +
-											"AND End_Upload_Time =:eut AND IS_Successful =:isSucc AND Start_Data_Time =:sdt AND End_Data_Time =:edt " +
-											"AND File_Name =:fName AND File_Size =:fSize AND Note=:note");
-				query.setInteger("pId",due.getParticipantID());
-				query.setString("sut",sdf.format(due.getStartUploadTime()));
-				query.setString("eut",due.getEndUploadTime()!=null?sdf.format(due.getEndUploadTime()):null);
-				query.setCharacter("isSucc", due.getResultStatus()==true ?'1':'0');
-				query.setString("sdt",sdf.format(due.getStartDataTime()));
-				query.setString("edt",sdf.format(due.getEndDataTime()));
-				query.setString("fName",due.getFileName());
-				query.setInteger("fSize", due.getFileSize());
-				query.setString("note",due.getNote());
-				if(!exists(query))
-				{
+//				query.setInteger("pId",participantId);
+//				query.setString("sut",sdf.format(due.getStartUploadTime()));
+//				query.setString("eut",due.getEndUploadTime()!=null?sdf.format(due.getEndUploadTime()):null);
+//				query.setCharacter("isSucc", due.getResultStatus()==true ?'1':'0');
+//				query.setString("sdt",sdf.format(due.getStartDataTime()));
+//				query.setString("edt",sdf.format(due.getEndDataTime()));
+//				query.setString("fName",due.getFileName());
+//				query.setInteger("fSize", due.getFileSize());
+//				query.setString("note",due.getNote());
+//				if(!exists(query))
+//				{
+					due.setParticipantID(participantId);
 					session.save(due);
-				}
+//				}
 				rowNbr++;
 				checkFirstLevelCache(rowNbr, session);
 			}
@@ -277,6 +328,18 @@ public class DataLoggerUtility {
 	public static Boolean exists(Query query) {
 		
 	    return (query.list().size() > 0);
+	}
+	
+	public static int getParticipantId(String phoneId)
+	{
+		Session session = HibernateSession.getSession();
+		Query q = session.createSQLQuery("SELECT Participant_Id FROM Participant_Phone WHERE IMEI =:phId");
+		q.setString("phId",phoneId);
+		List list = q.list();
+		int pId = -1;
+		if(list.size() > 0)
+			pId = Integer.parseInt(list.get(0).toString());
+		return pId;
 	}
 
 	

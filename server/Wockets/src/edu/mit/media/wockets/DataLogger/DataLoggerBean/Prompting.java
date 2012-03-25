@@ -12,7 +12,6 @@ public class Prompting {
 	 */
 	private int promptId;
 	
-	@SerializedName("pid")
 	private int participantId;
 	
 	@SerializedName("type")

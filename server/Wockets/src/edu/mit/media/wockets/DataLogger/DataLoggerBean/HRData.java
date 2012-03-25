@@ -13,7 +13,6 @@ public class HRData {
 	
 	private int hrDataId;
 	
-	@SerializedName("pid")
 	private int participantID;
 	
 	@SerializedName("time")

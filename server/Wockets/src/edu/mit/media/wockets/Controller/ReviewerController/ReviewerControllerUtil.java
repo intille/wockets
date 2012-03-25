@@ -93,13 +93,18 @@ public class ReviewerControllerUtil {
 		String[] dateArray = date.split("-");//split date "YYYY-MM-DD" based on "-"
 		
 		Session session = HibernateSession.getSession();
+		
+		//add note JSON object
+		JSONObject tableNoteDetail = getNoteDetail(participantId, dateArray, session, 0);
+		chartJSONObj.put("tableNoteList", tableNoteDetail);
+		JSONObject plotNoteDetail = getNoteDetail(participantId, dateArray, session, 1);
+		chartJSONObj.put("plotNoteList", plotNoteDetail);
+		
 		//add wockets data and swapped flags
 		JSONArray wktJsonList = getWocketsStatsData(participantId, dateArray, session);
 		chartJSONObj.put("wocketData", wktJsonList);
 		
 		//add wockets swapped flags data
-//		JSONArray swappedFlags = getSwappedFlag(participantId, dateArray, session);
-//		chartJSONObj.put("swappedFlag", swappedFlags);
 		JSONObject swappedFlags = getSwappedFlag(participantId, dateArray, session);
 		chartJSONObj.put("swappedFlag", swappedFlags);
 
@@ -118,19 +123,13 @@ public class ReviewerControllerUtil {
 		//add prompt JSON object
 		JSONObject promptDetail = getPromptDetail(participantId, dateArray, session);
 		chartJSONObj.put("promptList", promptDetail);
-		
-		//add note JSON object
-		JSONObject noteDetail = getNoteDetail(participantId, dateArray, session);
-		chartJSONObj.put("noteList", noteDetail);
-		
+				
 		//add HR data JSON object
 		JSONArray hrData = getHRData(participantId, dateArray, session);
 		chartJSONObj.put("hrData", hrData);
 		
 		JSONObject dataUploadEvent = getDataUploadEventDetail(participantId, dateArray, session);
 		chartJSONObj.put("dataUploadEvent", dataUploadEvent);
-
-		
 		
 		//add hidden series to make Y-axis fix
 		JSONObject hiddenSeries = getHiddenSeries(dateArray);
@@ -188,18 +187,21 @@ public class ReviewerControllerUtil {
 		//get disticnt mac_id for selected day
 		ArrayList<String> macIds = getParticipnatMacIds(participantId,dateArray,session);
 		//for each wocket get its data from wocket_stats table for selected day
+//		JSONArray wktRecordJSONArr = new JSONArray();
 		for(String macId:macIds)
 		{
 			List Swaplist = getSwappedTime(macId, dateArray, session);//check for entire day swap time
 			
-			String query = "SELECT Create_Date, Activity_Count, Wocket_Battery "+
+			//JPN: Removed battery from query.
+			String query = "SELECT Create_Date, Activity_Count "+
 										"FROM Wockets_Stats "+
 										"WHERE Participant_Id =:pId "+
 										"AND Mac_Id =:mac_Id "+
 										"AND Create_Date >=:startTime "+
 										"AND Create_Date <=:endTime "+
+										"AND Activity_Count >= 0 "+
 										"ORDER BY Create_Date ASC";
-			
+//		JPN TEST TEMP REMOVAL !!!!!!!!	
 			JSONArray wktRecordJSONArr = new JSONArray();
 			if(Swaplist.size()==0)//if there was no swap occurred for wocket on selected day
 			{
@@ -212,10 +214,10 @@ public class ReviewerControllerUtil {
 				String position = wocketPosition(macId, dateArray[0]+"-"+dateArray[1]+"-"+dateArray[2], session);
 				
 				JSONObject wocketActivitySeries = new JSONObject();
-				wocketActivitySeries.put("name",position+"("+macId+")");
+				wocketActivitySeries.put("name",position+"("+macId.substring(8)+")");
 				JSONArray activitydata = ChartUtility.getChartSeriesJSON(list,0,1);//get activity data by passing time and activity valueindices of list
 				wocketActivitySeries.put("data", activitydata);
-				wocketActivitySeries.put("id", position+"("+macId+")");//set each series unique Id as mac ID
+				wocketActivitySeries.put("id", position+"("+macId.substring(8)+")");//set each series unique Id as mac ID
 				wktRecordJSONArr.add(wocketActivitySeries);
 			}
 			else
@@ -235,7 +237,7 @@ public class ReviewerControllerUtil {
 					q.setString("mac_Id",macId);
 					q.setString("startTime",startTime);
 					q.setString("endTime",endTime);
-					String key = position+"("+macId+")";
+					String key = position+"("+macId.substring(8)+")";
 					if(wcktMap.containsKey(key))
 					{
 						List list = wcktMap.get(key);
@@ -261,17 +263,29 @@ public class ReviewerControllerUtil {
 					wocketActivitySeries.put("id", pairs.getKey());//set each series unique Id as mac ID
 					wktRecordJSONArr.add(wocketActivitySeries);
 					}
+				
+				
 			}
-			
 			JSONObject wocketBatterySeries = new JSONObject();
-			wocketBatterySeries.put("name","Battery("+macId+")");
+			wocketBatterySeries.put("name","Battery ("+macId.substring(8)+")");
 			JSONArray batteryData = ChartUtility.getChartSeriesJSON(getBatteryValue(participantId, macId, dateArray, session),0,1);//get activity data by passing time and battery valueindices of list 
 			wocketBatterySeries.put("data", batteryData);
 			wktRecordJSONArr.add(wocketBatterySeries);
+
+			JSONObject wocketRbyteSeries = new JSONObject();
+			wocketRbyteSeries.put("name","Rx Bytes ("+macId.substring(8)+")");
+			JSONArray rbyteData = ChartUtility.getChartSeriesJSON(getRbyteValue(participantId, macId, dateArray, session),0,1); 
+			wocketRbyteSeries.put("data", rbyteData);
+			wktRecordJSONArr.add(wocketRbyteSeries);
+		
+			JSONObject wocketTbyteSeries = new JSONObject();
+			wocketTbyteSeries.put("name","Tx Bytes ("+macId.substring(8)+")");
+			JSONArray tbyteData = ChartUtility.getChartSeriesJSON(getTbyteValue(participantId, macId, dateArray, session),0,1);
+			wocketTbyteSeries.put("data", tbyteData);
+			wktRecordJSONArr.add(wocketTbyteSeries);
 			
 			wktsJsonList.add(wktRecordJSONArr);
 		}
-
 		return wktsJsonList;
 	}
 	
@@ -293,12 +307,6 @@ public class ReviewerControllerUtil {
 			position = list.get(0).toString();
 		else
 		{
-//			q = session.createSQLQuery("SELECT Sensor_Placement " +
-//										"FROM Swapped_Sensor "+
-//										"WHERE Swapping_Id = (SELECT Swapping_Id FROM Swapping "+ 
-//										"WHERE Swap_Time >=:startTime "+
-//										"Order By Swap_Time ASC limit 1)"+
-//										"AND Mac_Id =:macId");
 			q = session.createSQLQuery("SELECT Sensor_Placement " +
 										"FROM Swapped_Sensor "+
 										"WHERE Swapping_Id IN (SELECT Swapping_Id FROM Swapping "+ 
@@ -311,7 +319,7 @@ public class ReviewerControllerUtil {
 			if(lis.size()>0)
 				position = lis.get(0).toString();
 			else
-				position = "UnKnownPosition";
+				position = "Wocket ";
 		}
 		return position;
 	}
@@ -333,64 +341,7 @@ public class ReviewerControllerUtil {
 		List list = q.list();
 		return list;
 	}
-	
-//	//get Swapped Flags 
-//	@SuppressWarnings("all")	
-//	public static JSONArray getSwappedFlag(int participantId,String[] dateArray,Session session)
-//	{
-//		String qStr = "SELECT S.Swap_Time, SS.Sensor_Placement "+ 
-//				  "FROM Swapping S INNER JOIN Swapped_Sensor SS "+
-//				  "ON S.Swapping_Id = SS.Swapping_Id "+
-//				  "WHERE Mac_ID =:macId "+
-//				  "AND S.Swap_Time >=:startTime "+ 
-//				  "AND S.Swap_Time <=:endTime "+
-//				  "ORDER By S.Swap_Time ASC";
-//
-//	ArrayList<String> macIds = getParticipnatMacIds(participantId,dateArray,session);
-//	JSONArray swappedFlagArray = new JSONArray();
-//	int nbrSwap = 1;
-//	int flagHeight = -50;
-//	for(String macId: macIds)//for each find all swapped time for selected day
-//	{
-//		//List Swaplist = getSwappedTime(macId, dateArray, session);
-//		SQLQuery q = session.createSQLQuery(qStr);
-//		q.setString("macId",macId);
-//		q.setString("startTime",dateArray[0]+"-"+dateArray[1]+"-"+dateArray[2]);
-//		q.setString("endTime",dateArray[0]+"-"+dateArray[1]+"-"+(Integer.parseInt(dateArray[2])+1));
-//		List Swaplist = q.list();
-//		
-//		if(Swaplist.size()>0)
-//		{
-//			JSONObject swappedFlag = new JSONObject();
-//			swappedFlag.put("type","flags");
-//			JSONArray swappedData = new JSONArray();
-//			for(int n=0;n<Swaplist.size();n++)
-//			{
-//				JSONObject data = new JSONObject();
-//				Object[] objects = (Object[])Swaplist.get(n); 
-//				String timeStr = objects[0].toString();
-//				data.put("x",ChartUtility.convertToUTC(timeStr));
-//				data.put("title","S-"+nbrSwap);
-//				data.put("text","Wocket-"+macId+": Swapped at "+timeStr+" to "+objects[1].toString()+" position");//text string show swapped detail
-//				swappedData.add(data);
-//				nbrSwap++;
-//			}
-//			swappedFlag.put("name","Swapped("+macId+")");
-//			swappedFlag.put("data",swappedData);
-//			swappedFlag.put("shape","flag");
-//			swappedFlag.put("fillColor","#FAC0F3");
-//			swappedFlag.put("stackDistance",20);
-//			if(flagHeight <= -150)
-//				flagHeight = -50;  //reset flag height to -50 if it become -150
-//			flagHeight += -50;
-//			swappedFlag.put("y", flagHeight);
-//			swappedFlagArray.add(swappedFlag);
-//		}
-//	}
-//
-//	return swappedFlagArray;
-//}
-	
+		
 	//get Swapped Flags 
 	@SuppressWarnings("all")	
 	public static JSONObject getSwappedFlag(int participantId,String[] dateArray,Session session)
@@ -416,16 +367,25 @@ public class ReviewerControllerUtil {
 			Object[] objects = (Object[])list.get(i);
 			JSONObject data = new JSONObject();
 			data.put("x",ChartUtility.convertToUTC(objects[0].toString()));
-			String title = "S #"+(i+1);
+			String title = "SW"+(i+1);
 			data.put("title",title);//swapped unique Id
 			String text = "Wocket-"+objects[2].toString()+": Swapped at "+objects[0]+" to "+objects[1].toString()+" position";
 			data.put("text",text);//swapped message
 			dataList.add(data);
 		}
+		
+//		JSONObject data = new JSONObject();
+//		data.put("x",ChartUtility.convertToUTC(dateArray[0]+"-"+dateArray[1]+"-"+dateArray[2]+" 00:00:01"));
+//		data.put("title","x");//swapped unique Id
+//		data.put("text","x");//swapped message
+//		dataList.add(data);
+//		
 		swappedObject.put("data",dataList);
-		swappedObject.put("width",50);//flsg width
-		swappedObject.put("y", -100);//distance from x-axis
+		swappedObject.put("width",40);//flsg width
+//		swappedObject.put("y", -100);//distance from x-axis
 		swappedObject.put("fillColor","#C29BA5");
+		swappedObject.put("lineColor","#C29BA5");
+		swappedObject.put("borderColor","#C29BA5");
 		return swappedObject;
 	}
 	
@@ -465,7 +425,53 @@ public static String getLastTimeBeforeSwapped(String macId,String swappedTime,Se
 											"AND Mac_Id =:mac_Id "+
 											"AND YEAR(Create_Date) =:year "+
 											"AND MONTH(Create_Date) =:month "+
+											"AND DAY(Create_Date) =:day " +
+											"AND Wocket_Battery >=0 "+
+											"ORDER BY Create_Date ASC");
+		q.setInteger("pId",participantId);
+		q.setString("mac_Id",macId);
+		q.setString("year",dateArray[0]);
+		q.setString("month",dateArray[1]);
+		q.setString("day",dateArray[2]);
+		List list = q.list();
+		return list;
+	}
+
+	//JPN: get received Bytes data for wocket
+	@SuppressWarnings("all")
+	public static List getRbyteValue(int participantId,String macId,String[] dateArray,Session session)
+	{
+		SQLQuery q = session.createSQLQuery("SELECT Create_Date, Received_Bytes "+
+											"FROM Wockets_Stats "+
+											"WHERE Participant_Id =:pId "+
+											"AND Mac_Id =:mac_Id "+
+											"AND YEAR(Create_Date) =:year "+
+											"AND MONTH(Create_Date) =:month "+
 											"AND DAY(Create_Date) =:day "+
+											"AND Received_Bytes >= 0 "+
+											"ORDER BY Create_Date ASC");
+		q.setInteger("pId",participantId);
+		q.setString("mac_Id",macId);
+		q.setString("year",dateArray[0]);
+		q.setString("month",dateArray[1]);
+		q.setString("day",dateArray[2]);
+		List list = q.list();
+		return list;
+	}
+
+	
+	//JPN: get Transmitted Bytes data for wocket
+	@SuppressWarnings("all")
+	public static List getTbyteValue(int participantId,String macId,String[] dateArray,Session session)
+	{
+		SQLQuery q = session.createSQLQuery("SELECT Create_Date, Transmitted_Bytes "+
+											"FROM Wockets_Stats "+
+											"WHERE Participant_Id =:pId "+
+											"AND Mac_Id =:mac_Id "+
+											"AND YEAR(Create_Date) =:year "+
+											"AND MONTH(Create_Date) =:month "+
+											"AND DAY(Create_Date) =:day "+
+											"AND Transmitted_Bytes >= 0 "+
 											"ORDER BY Create_Date ASC");
 		q.setInteger("pId",participantId);
 		q.setString("mac_Id",macId);
@@ -481,17 +487,30 @@ public static String getLastTimeBeforeSwapped(String macId,String swappedTime,Se
 	public static JSONArray getPhoneStats(int participantId,String[] dateArray,Session session)
 	{
 		JSONArray phoneStats = new JSONArray();
+//		SQLQuery query = session.createSQLQuery("SELECT Create_Date, Phone_Battery, Main_Memory, SD_Memory "+
+//												"FROM Phone_Stats "+
+//												"WHERE Participant_Id =:pId "+
+//												"AND YEAR(Create_Date) =:year "+
+//												"AND MONTH(Create_Date) =:month "+
+//												"AND DAY(Create_Date) =:day "+
+//												"ORDER BY Create_Date ASC");
 		SQLQuery query = session.createSQLQuery("SELECT Create_Date, Phone_Battery, Main_Memory, SD_Memory "+
 												"FROM Phone_Stats "+
 												"WHERE Participant_Id =:pId "+
 												"AND YEAR(Create_Date) =:year "+
 												"AND MONTH(Create_Date) =:month "+
 												"AND DAY(Create_Date) =:day "+
+												"AND (Phone_Battery >=:intg1 "+
+												"OR Main_Memory >=:intg2 "+
+												"OR SD_Memory >=:intg3) "+
 												"ORDER BY Create_Date ASC");
 		query.setInteger("pId",participantId);
 		query.setString("year",dateArray[0]);
 		query.setString("month",dateArray[1]);
 		query.setString("day",dateArray[2]);
+		query.setInteger("intg1",0);
+		query.setInteger("intg2",0);
+		query.setInteger("intg3",0);
 		List list = query.list();
 		//phone battery JSON object
 		JSONObject PhoneBatterySeries = new JSONObject();
@@ -564,15 +583,17 @@ public static String getLastTimeBeforeSwapped(String macId,String swappedTime,Se
 			JSONObject data = new JSONObject();
 			data.put("x",ChartUtility.convertToUTC(objects[1].toString()));//sms time
 			//data.put("title","SMS #"+objects[0].toString());//sms unique Id
-			data.put("title","SMS #"+(i+1));//sms unique Id
+			data.put("title","SM"+(i+1));//sms unique Id
 			data.put("text",objects[2].toString());//sms message
 			dataList.add(data);
 		}
 		smsObj.put("data",dataList);
-		smsObj.put("width",50);//flsg width
-		smsObj.put("y", -150);//distance from x-axis
+		smsObj.put("width",40);//flsg width
+//		smsObj.put("y", -150);//distance from x-axis
 		smsObj.put("fillColor","#77E8F7");
-
+		smsObj.put("lineColor","#77E8F7");
+		smsObj.put("borderColor","#77E8F7");
+		
 		return smsObj;
 	}
 	
@@ -589,7 +610,8 @@ public static String getLastTimeBeforeSwapped(String macId,String swappedTime,Se
 												"Primary_Activity,Alternate_Activities "+
 												"FROM PROMPTING "+
 												"WHERE Participant_Id =:pId "+
-												"AND Prompt_time BETWEEN :startTime AND :endTime");
+												"AND Prompt_time BETWEEN :startTime AND :endTime " +
+												"ORDER By Prompt_Time ASC");
 		query.setInteger("pId", participantId);
 		query.setString("startTime",dateArray[0]+"-"+dateArray[1]+"-"+dateArray[2]);
 		query.setString("endTime",dateArray[0]+"-"+dateArray[1]+"-"+(Integer.parseInt(dateArray[2])+1));
@@ -599,9 +621,10 @@ public static String getLastTimeBeforeSwapped(String macId,String swappedTime,Se
 			Object[] objects = (Object[])list.get(i);
 			JSONObject data = new JSONObject();
 			data.put("x",ChartUtility.convertToUTC(objects[2].toString()));
-			String title = "P #"+(i+1);
-			if(objects[3]==null)
-				title += ":NR";
+			String title = "PR"+(i+1);
+			//JPN: Removed NR notation
+//			if(objects[3]==null)
+//				title += ":NR";
 			data.put("title",title);//sms unique Id
 			String text = "Prompt-Type:"+objects[1].toString()+"<br/>"+
 						  "Prompt-Time:"+objects[2].toString()+"<br/>"+
@@ -614,9 +637,11 @@ public static String getLastTimeBeforeSwapped(String macId,String swappedTime,Se
 			dataList.add(data);
 		}
 		promptObj.put("data",dataList);
-		promptObj.put("width",50);//flsg width
-		promptObj.put("y", -50);//distance from x-axis
-		promptObj.put("fillColor","#C29BA5");
+		promptObj.put("width",40);//flag width
+//		promptObj.put("y", -100);//distance from x-axis
+		promptObj.put("fillColor","#C2CB55");
+		promptObj.put("lineColor","#C2CB55");
+		promptObj.put("borderColor","#C2CB55");
 		return promptObj;
 	}
 	
@@ -633,12 +658,16 @@ public static String getLastTimeBeforeSwapped(String macId,String swappedTime,Se
 		data.add(ChartUtility.convertToUTC(date));
 		data.add(20000);
 		dataList.add(data);
-		
-		data = new JSONArray();
-		date = dateArray[0]+"-"+dateArray[1]+"-"+dateArray[2]+" "+"12:00:00";
-		data.add(ChartUtility.convertToUTC(date));
-		data.add(null);
-		dataList.add(data);
+
+		// *** JPN ***
+		for (int hour = 1; hour < 23; hour++)
+		{		
+			data = new JSONArray();
+			date = dateArray[0]+"-"+dateArray[1]+"-"+dateArray[2]+" " + hour + ":00:00";
+			data.add(ChartUtility.convertToUTC(date));
+			data.add(20000);
+			dataList.add(data);
+		}
 		
 		data = new JSONArray();
 		date = dateArray[0]+"-"+dateArray[1]+"-"+dateArray[2]+" "+"23:59:59";
@@ -646,48 +675,59 @@ public static String getLastTimeBeforeSwapped(String macId,String swappedTime,Se
 		data.add(20000);
 		dataList.add(data);
 		hiddenSeries.put("data",dataList);
+		hiddenSeries.put("lineWidth", 0);
+//		hiddenSeries.put("visible",false);		
 		hiddenSeries.put("showInLegend",false);
 
 		return hiddenSeries;
 	}
 	
-//get Note series
+	//get Note series
+	//JPN: Added parameter to allow selective getting of notes to be plotted
 	@SuppressWarnings("all")
-	public static JSONObject getNoteDetail(int participantId,String[] dateArray,Session session)
+	public static JSONObject getNoteDetail(int participantId,String[] dateArray,Session session,int showPlot)
 	{
 		JSONObject noteObj = new JSONObject();
 		noteObj.put("type","flags");
 		noteObj.put("name","Arbitrary-Note");
 		JSONArray dataList = new JSONArray();
-
+		//JPN: Ordered list by Start_Time
 		Query query = session.createQuery("FROM Note note "+
 												"WHERE Participant_Id =:pId "+
-												"AND Start_Time BETWEEN :startTime AND :endTime");
+												"AND Start_Time BETWEEN :startTime AND :endTime "+
+												"ORDER BY Start_Time ASC");
 		query.setInteger("pId", participantId);
 		query.setString("startTime",dateArray[0]+"-"+dateArray[1]+"-"+dateArray[2]);
 		query.setString("endTime",dateArray[0]+"-"+dateArray[1]+"-"+(Integer.parseInt(dateArray[2])+1));
 		List<Note> list = (List<Note>)query.list();
-		int i=1;
+		//JPN: Changed to incremental iteration
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		for(Note note : list)
+		for(int i = 0; i < list.size(); i++)
 		{
-			JSONObject data = new JSONObject();
-			data.put("x",ChartUtility.convertToUTC(sdf.format(note.getStartTime())));
-			String title = "AN #"+(i);
-			data.put("title",title);//note unique Id
-			String text = "Start-Time:"+note.getStartTime().toString()+"<br/>";
-			if(note.getEndTime()!=null)
-				text += "End-Time:"+note.getEndTime().toString()+"<br/>";
-			text += "Note:"+note.getNote();
-			data.put("text",text);//note message
-			dataList.add(data);
-			i++;
+			Note note = list.get(i);
+			//JPN return all notes if showPlot == 0
+			//JPN Only return notes to be plotted if showPlot >= 1
+			if (showPlot <= note.getPlot())
+			{
+				JSONObject data = new JSONObject();
+				data.put("x",ChartUtility.convertToUTC(sdf.format(note.getStartTime())));
+				String title = "AN"+ (i+1);
+				data.put("title",title);//note unique Id
+				String text = "Start-Time:"+note.getStartTime().toString()+"<br/>";
+				if(note.getEndTime()!=null)
+					text += "End-Time:"+note.getEndTime().toString()+"<br/>";
+				text += "Note:"+note.getNote();
+				data.put("text",text);//note message
+				dataList.add(data);
+			}
 		}
 		
 		noteObj.put("data",dataList);
-		noteObj.put("width",50);//flsg width
-		noteObj.put("y", -55);//distance from x-axis
+		noteObj.put("width",40);//flag width
+		//noteObj.put("y", 100);//distance from x-axis
 		noteObj.put("fillColor","#5DE2FC");
+		noteObj.put("lineColor","#5DE2FC");
+		noteObj.put("borderColor","#5DE2FC");
 		return noteObj;
 	}
 	
@@ -746,7 +786,7 @@ public static String getLastTimeBeforeSwapped(String macId,String swappedTime,Se
 			{
 				JSONObject data = new JSONObject();
 				data.put("x",ChartUtility.convertToUTC(sdf.format(due.getStartUploadTime())));
-				String title = "RDU #"+(i);
+				String title = "UP"+(i);
 				data.put("title",title);//note unique Id
 				String text = "Start-Upload-Time:"+due.getStartUploadTime().toString()+"<br/>";
 				if(due.getEndUploadTime()!=null)
@@ -763,9 +803,11 @@ public static String getLastTimeBeforeSwapped(String macId,String swappedTime,Se
 			}
 			
 			dataUploadEventObj.put("data",dataList);
-			dataUploadEventObj.put("width",50);//flsg width
-			dataUploadEventObj.put("y", -80);//distance from x-axis
+			dataUploadEventObj.put("width",40);//flsg width
+//			dataUploadEventObj.put("y", -100);//distance from x-axis
 			dataUploadEventObj.put("fillColor","#98F569");
+			dataUploadEventObj.put("lineColor","#98F569");
+			dataUploadEventObj.put("borderColor","#98F569");
 			return dataUploadEventObj;
 		}
 	

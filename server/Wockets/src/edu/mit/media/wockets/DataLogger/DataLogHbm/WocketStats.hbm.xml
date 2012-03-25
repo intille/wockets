@@ -4,12 +4,10 @@
 	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping default-lazy="false">
 	<class name="edu.mit.media.wockets.DataLogger.DataLoggerBean.WocketStats" table="Wockets_Stats">
-
 		<id name="wocketStatsId" type="int" unsaved-value="null" >
         	<column name="Wocket_Stats_Id" not-null="true"/>
      		<generator class="identity"/>
  		</id>
-		
 		<property name="participantId" type="int" column="Participant_Id"/>		
 		<property name="macId" type="string" column="Mac_Id"/>
 		<property name="createDate" type="string" column="Create_Date"/>
@@ -18,7 +16,5 @@
 		<property name="wocketBattery" type="int" column="Wocket_Battery"/>
 		<property name="transmittedByte" type="int" column="Transmitted_Bytes"/>
 		<property name="receivedBytes" type="int" column="Received_Bytes"/>
-		
-	</class>
-	
+	</class>	
 </hibernate-mapping>

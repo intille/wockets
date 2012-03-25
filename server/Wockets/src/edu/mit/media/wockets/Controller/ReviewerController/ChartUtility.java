@@ -14,6 +14,86 @@ public class ChartUtility {
 /*****Returns the Data JSON object which has UTC time and data
  * e.g dataJSON = [[12222045555,10],[454454512,21],[14356565,null],.....]
  */
+	
+//	public static JSONArray getChartSeriesJSON(List list, int dateIndx, int dataIndx)
+//	{
+//		int gapSizeInSecs = 2;
+//		String oldDateTime = "2017-01-01 00:00:00";
+//		JSONArray dataJSON = new JSONArray();
+//		for(int n=0; n < list.size(); n++)
+//		{
+//        	Object[] objectList = (Object[])list.get(n);
+//			String dateTime = objectList[dateIndx].toString();
+//			String[] dateTimeArray = dateTime.split(" ");
+//			if (getDateDiffInSecs(dateTime, oldDateTime) > gapSizeInSecs)
+//			{
+//	            JSONArray data = new JSONArray();	//create a data JSON object which has time and value e.g.[2011-08-12 11:02:30, null]
+//				data.add(convertToUTC(addSecondsToDateTime(oldDateTime, 60)));
+//				data.add(null);
+//	            dataJSON.add(data);
+//			}
+//			oldDateTime = dateTime;
+//			float newValue = Float.parseFloat(objectList[dataIndx].toString());
+//			if (newValue >= 0)
+//			{
+//				JSONArray data = new JSONArray();//create a data JSON object which has time and value e.g.[2011-08-12 11:02:30, null]
+//				data.add(convertToUTC(dateTime));
+//				data.add(Float.parseFloat(objectList[dataIndx].toString()));//add value by dataIndx index from objectLIst
+//				dataJSON.add(data);
+//			}
+//			else
+//			{
+//				JSONArray data = new JSONArray();//create a data JSON object which has time and value e.g.[2011-08-12 11:02:30, null]
+//				data.add(convertToUTC(dateTime));
+//				data.add(null);//add value by dataIndx index from objectLIst
+//				dataJSON.add(data);				
+//			}
+//		} 
+//		return dataJSON;
+//	}
+
+	public static String addSecondsToDateTime(String dateStr, int seconds)
+	{
+		Calendar cal = Calendar.getInstance();
+		String date = dateStr.split(" ")[0];
+		String time = dateStr.split(" ")[1];
+		int year = Integer.parseInt(date.split("-")[0]);
+		int month = Integer.parseInt(date.split("-")[1]);
+		int day = Integer.parseInt(date.split("-")[2]);
+		int hr = Integer.parseInt(time.split(":")[0]);
+		int min = Integer.parseInt(time.split(":")[1]);
+		int sec = (int)Float.parseFloat((time.split(":")[2]));
+		cal.set(year, month, day, hr, min, sec);
+		cal.add(Calendar.SECOND, seconds);
+		return Calendar.YEAR + "-" + Calendar.MONTH + "-" + Calendar.DAY_OF_MONTH + " " + Calendar.HOUR + ":" + Calendar.MINUTE + ":" + Calendar.SECOND;
+	}		
+
+	
+	public static long getDateDiffInSecs(String dateStr, String oldDateStr)
+	{
+		String[] dtString = {dateStr, oldDateStr};
+		Calendar[] cal = new Calendar[2];
+		for(int i = 0; i < 2; i++)
+		{
+			cal[i] = Calendar.getInstance();
+			String date = dtString[i].split(" ")[0];
+			String time = dtString[i].split(" ")[1];
+	        int year = Integer.parseInt(date.split("-")[0]);
+	        int month = Integer.parseInt(date.split("-")[1]);
+	        int day = Integer.parseInt(date.split("-")[2]);
+	        int hr = Integer.parseInt(time.split(":")[0]);
+	        int min = Integer.parseInt(time.split(":")[1]);
+	        int sec = (int)Float.parseFloat((time.split(":")[2]));
+			cal[i].set(year, month, day, hr, min, sec);
+		}
+		long mSec1 = cal[0].getTimeInMillis();
+		long mSec2 = cal[1].getTimeInMillis();
+		long diffMsec = (mSec1 - mSec2);
+		return diffMsec / 1000;
+	}		
+
+		
+		
 	public static JSONArray getChartSeriesJSON(List list,int dateIndx,int dataIndx)
 	{
 		int prevHr = 0;
@@ -47,7 +127,8 @@ public class ChartUtility {
 	            {
 	                //check last inserted minute if its not 59 then insert null value for remaining minute
 	                int nbrOfNullMin = 59 - prevMin;
-	                if(nbrOfNullMin > 1 && nbrOfNullMin !=59)
+	                // JPN: Changed null min constant
+	                if(nbrOfNullMin > 2 && nbrOfNullMin !=59)
 	                {
 	                    for(int m=1;m<=nbrOfNullMin ;m++)
 	                    {
@@ -132,23 +213,23 @@ public class ChartUtility {
 
 	                }
 	                    
-//	                int diff = 23-hr;//check missing hours
-//	                if(diff >1)
-//	                {
-//	                    for(int x=1;x<=diff;x++)
-//	                    {
-//	                        for(int y=0;y<60;y++)//put null for each minute
-//	                        {                               
-//	                            sb.delete(0, sb.length());
-//	                            sb.append(convertToUTC(date.split(" ")[0]+" "+(prevHr+x)+":"+y+":00"));
-//		                        JSONArray d = new JSONArray();//create a data JSON object which has time and value e.g.[2011-08-12 11:02:30, null]
-//		                        //d.add(Long.parseLong(sb.toString()));
-//		                        d.add(sb.toString());
-//		                        d.add(null);
-//		                        dataJSON.add(d);
-//	                        }
-//	                    }
-//	                }
+	                int diff = 23-hr;//check missing hours
+	                if(diff > 1)
+	                {
+	                    for(int x=1;x<=diff;x++)
+	                    {
+	                        for(int y=0;y<60;y++)//put null for each minute
+	                        {                               
+	                            sb.delete(0, sb.length());
+	                            sb.append(convertToUTC(date.split(" ")[0]+" "+(prevHr+x)+":"+y+":00"));
+		                        JSONArray d = new JSONArray();//create a data JSON object which has time and value e.g.[2011-08-12 11:02:30, null]
+		                        //d.add(Long.parseLong(sb.toString()));
+		                        d.add(sb.toString());
+		                        d.add(null);
+		                        dataJSON.add(d);
+	                        }
+	                    }
+	                }
 	             }
 	                prevHr = hr;
 	                prevMin = min;
