@@ -39,6 +39,7 @@ public class AndroidServiceController {
 													"WHERE IMEI =:imei");
 			query.setString("imei",imei);
 			List list = query.list();
+			HibernateSession.sessionClose(session);
 			if(list.size() == 1)
 			{
 				pId = list.get(0).toString();
@@ -60,37 +61,83 @@ public class AndroidServiceController {
 		}
 	}
 	
-	//return all active wockets detail based on participant Id
+	//return all active wockets detail based on phoneID
 	@RequestMapping(value="/android/getWocketsDetail.html",method=RequestMethod.GET)
 	public void androidGetWocketsDetail(HttpServletRequest request, HttpServletResponse response)
 	{
+		
 		int pId;
+		Session session = null;
 		try{
-		pId = Integer.parseInt(request.getParameter("pId"));//get participant_Id from request
-		Session session = HibernateSession.getSession();
-		SQLQuery query = session.createSQLQuery("SELECT W.Mac_Id,W.Set_Color,W.Hardware_Version,W.FirmWare_Version,W.Printed_Id " +
+			
+			session = HibernateSession.getSession();
+			//get phoneID from request
+			String phoneId = request.getParameter("phoneID");
+			//phoneID is null retuen bad request
+			if(phoneId == null)
+			{
+				response.sendError(response.SC_BAD_REQUEST,"missing parameter in request, request must have valid phoneID found NULL");
+				return;
+			}
+			
+			SQLQuery query = session.createSQLQuery("SELECT Participant_Id FROM Participant_Phone " +
+					"WHERE IMEI =:phoneID");
+			query.setString("phoneID",phoneId);
+			List list = query.list();
+			//if no phoneID found return bad request
+			if(list.size()== 0)
+			{
+				response.sendError(response.SC_BAD_REQUEST,"No record found for phoneID:"+phoneId);
+				return;
+			}
+			else
+				pId = Integer.parseInt(list.get(0).toString());
+				
+		//pId = Integer.parseInt(request.getParameter("pId"));//get participant_Id from request
+		query = session.createSQLQuery("SELECT W.Mac_Id,W.Set_Color,W.Hardware_Version,W.FirmWare_Version,W.Printed_Id " +
 												"FROM Wockets W INNER JOIN Participant_Wockets PW " +
 												"ON W.Mac_Id = PW.Mac_Id " +
 												"WHERE PW.Participant_Id =:pId");
 		query.setInteger("pId",pId);
-		List list = query.list();
+		list = query.list();
+		HibernateSession.sessionClose(session);
 		if(list.size()!=0)
 		{
 			JSONArray wocketList = new JSONArray();
+			
+// 	JPN: Removed per SSI request
+//			for(int i=0; i<list.size();i++)
+//			{
+//				Object[] wocket = (Object[])list.get(i);
+//				JSONObject wocketJSON = new JSONObject();
+//				wocketJSON.put("mac_id",wocket[0]);
+//				wocketJSON.put("color",wocket[1]);
+//				wocketJSON.put("hardware_version",wocket[2]);
+//				wocketJSON.put("firmware_version",wocket[3]);
+//				wocketJSON.put("printed_id",wocket[4]);
+//				
+//				wocketList.add(wocketJSON);
+//			}
+			
 			for(int i=0; i<list.size();i++)
 			{
 				Object[] wocket = (Object[])list.get(i);
 				JSONObject wocketJSON = new JSONObject();
-				wocketJSON.put("mac_id",wocket[0]);
-				wocketJSON.put("color",wocket[1]);
-				wocketJSON.put("hardware_version",wocket[2]);
-				wocketJSON.put("firmware_version",wocket[3]);
-				wocketJSON.put("printed_id",wocket[4]);
+				wocketJSON.put("mac",wocket[0]);
+				wocketJSON.put("col",wocket[1]);
+				wocketJSON.put("hver",wocket[2]);
+				wocketJSON.put("fver",wocket[3]);
+				wocketJSON.put("lab",wocket[4]);
 				
 				wocketList.add(wocketJSON);
 			}
-			JSONObject wocketJSONObj = new JSONObject();
-			wocketJSONObj.put("wockets",wocketList);
+
+			JSONObject wocketJSONObj = new JSONObject();// updated as stephen wants other format
+			
+			wocketJSONObj.put("someSensors",wocketList );
+			
+			// JPN: Changed per SSI request
+			//  wocketJSONObj.put("wockets",wocketList );
 			response.setContentType("application/x-json");
 			response.getWriter().print(wocketJSONObj);
 		}
@@ -113,6 +160,8 @@ public class AndroidServiceController {
 		{
 			e.printStackTrace();
 		}
-		
-	}
+
+			
+ 	}
+	
 }

@@ -13,7 +13,6 @@ public class PhoneStats {
 	 */
 	private int phoneStatsId;
 	
-	@SerializedName("pid")
 	private int participantId;
 		
 	@SerializedName("bat")

@@ -23,6 +23,12 @@ public class DataContainer {
 	
 	@SerializedName("someWocketData")
 	private List<WocketStats> wocketStateList;
+
+	@SerializedName("someWocketStatsData")
+	private List<WocketInfo> wocketInfoList;
+
+	@SerializedName("someActivityCountData")
+	private List<ActivityCountData> activityCountDataList;
 	
 	@SerializedName("someSensors")
 	private List<Sensor> sensorList;
@@ -39,8 +45,17 @@ public class DataContainer {
 	@SerializedName("someHRData")
 	private List<HRData> someHRData;
 	
+	@SerializedName("phoneID")
+	private String phoneId;
 	
-	
+	public String getPhoneId() {
+		return phoneId;
+	}
+
+	public void setPhoneId(String phoneId) {
+		this.phoneId = phoneId;
+	}
+
 	private List<SwappedSensor> swappedSensorList;
 	
 	public DataContainer()
@@ -50,7 +65,8 @@ public class DataContainer {
 		this.swappedSensorList = new ArrayList<SwappedSensor>();
 		this.swappingList = new ArrayList<Swapping>();
 		this.wocketStateList = new ArrayList<WocketStats>();
-		
+		this.wocketInfoList = new ArrayList<WocketInfo>();
+		this.activityCountDataList = new ArrayList<ActivityCountData>();
 		this.sensorList = new ArrayList<Sensor>();
 		this.somePhones = new ArrayList<Phone>();
 	}
@@ -75,6 +91,14 @@ public class DataContainer {
 		return wocketStateList;
 	}
 
+	public List<WocketInfo> getWocketInfoList() {
+		return wocketInfoList;
+	}
+
+	public List<ActivityCountData> getActivityCountDataList() {
+		return activityCountDataList;
+	}
+	
 	public List<Phone> getSomePhones() {
 		return somePhones;
 	}
@@ -107,11 +131,4 @@ public class DataContainer {
 		this.someHRData = someHRData;
 	}
 	
-	
-	
-	
-	
-	
-	
-
 }

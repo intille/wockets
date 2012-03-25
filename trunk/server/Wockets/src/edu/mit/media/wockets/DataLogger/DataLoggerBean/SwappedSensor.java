@@ -12,8 +12,7 @@ public class SwappedSensor implements Serializable{
 	
 	@SerializedName("loc")
 	private String sensorPlacement;
-	
-	
+
 	public int getSwappingId() {
 		return swappingId;
 	}
@@ -33,7 +32,4 @@ public class SwappedSensor implements Serializable{
 		this.sensorPlacement = sensorPlacement;
 	}
 	
-	
-	
-
 }

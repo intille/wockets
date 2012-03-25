@@ -12,7 +12,6 @@ public class Phone {
 
 	// What else should be in here? 
 	
-	@SerializedName("pid")
 	public int participantID;
 	
 	@SerializedName("phoneid")

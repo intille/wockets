@@ -37,45 +37,46 @@ import edu.mit.media.wockets.DataLogger.DefinedExceptions.SAXFatalException;
 @Controller
 public class DataLogController {
 	
-//	@RequestMapping(value="/isAndroidDataLogValid.html",method=RequestMethod.GET)
-//	public void isAndroidDataLogValid(HttpServletRequest request, HttpServletResponse response)
-//	{
-//		boolean result = true;
-//		try{
-//			//InputStream inputStream = request.getInputStream();//get input stream from Http request
-//			InputStream inputStream = new FileInputStream("C:/Users/Salim/Desktop/Wockets/TestData.xml");
-//			SAXSource source = new SAXSource(new InputSource(inputStream));
-//			result = DataLoggerUtility.isValidate("C:/Users/Salim/Desktop/Wockets/Wockets_HttpPostreq_Xsd.xsd", source);
-//			}
-//		catch(Exception ex)
-//		{
-//			ex.printStackTrace();
-//		}
-//		if(!result)
-////			System.out.println("valid");
-////		else
-//		{
-//			try{response.sendError(response.SC_BAD_REQUEST,"Invalid xml format");}
-//			catch(Exception e){e.printStackTrace();}
-//		}
-//
-//	}
 	
 	@RequestMapping(value="/AndroidDataLog.html", method=RequestMethod.POST)
 	public void LogAndroidData(HttpServletRequest request, HttpServletResponse response)
 	{
+		//JPN
+		DataContainer dataContainer;
+		
 		try
 		{
 			InputStream inputStream = request.getInputStream();
 			Gson gson = new GsonBuilder().serializeNulls().setDateFormat("MMM d, yyyy h:mm:ss a").create();
 			Reader reader = new InputStreamReader(inputStream);
-
-			DataContainer dataContainer = gson.fromJson(reader, DataContainer.class);
 			
+			//JPN
+//			DataContainer dataContainer = gson.fromJson(reader, DataContainer.class);
+			dataContainer = gson.fromJson(reader, DataContainer.class);
+			
+			String phoneId = dataContainer.getPhoneId();
+			//check phoneID null value
+			if(phoneId == null)
+			{
+				try{response.sendError(response.SC_BAD_REQUEST,"PhoneID can not be NULL.");
+					return;
+				}
+				catch(Exception e){e.printStackTrace();}
+			}
+			
+			//validate phoneID and get particpant_Id based on phoneID
+			int participant_Id = DataLoggerUtility.getParticipantId(phoneId);
+			if(participant_Id == -1)
+			{
+				try{response.sendError(response.SC_BAD_REQUEST,"No participant_Id found for PhoneID:"+phoneId);
+					return;
+				}
+				catch(Exception e){e.printStackTrace();}
+			}
 			new UpdateDataContainer().updateDataContainerGSON(dataContainer);
 			
 			//insert all Log data to DB
-			DataLoggerUtility.insertDataToDB(dataContainer);
+			DataLoggerUtility.insertDataToDB(dataContainer,participant_Id);
 		}
 		catch(IOException ioe)
 		{
@@ -87,66 +88,10 @@ public class DataLogController {
 			try{response.sendError(response.SC_BAD_REQUEST,ex.getMessage());}
 			catch(Exception e){e.printStackTrace();}
         }
+		finally
+		{
+			dataContainer = null;
+		}
 	}
-	
-	
-//	@RequestMapping(value="/AndroidDataLog.html", method=RequestMethod.POST)
-//	public void LogAndroidData(HttpServletRequest request, HttpServletResponse response)
-//	{
-//		DataContainer dataContainer;	
-//		try{
-//			InputStream inputStream = request.getInputStream();
-//			SAXParserFactory factory = SAXParserFactory.newInstance();
-//			factory.setValidating(false);
-//			factory.setNamespaceAware(true);
-//			
-//			SchemaFactory schemaFactory = SchemaFactory.newInstance("http://www.w3.org/2001/XMLSchema");
-//			//load xsd as inputStream for validation
-//			InputStream xsdStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("Wockets_HttpPostreq_Xsd.xsd");
-//			factory.setSchema(schemaFactory.newSchema(new Source[] {new StreamSource(xsdStream)}));
-//			SAXParser saxParser = factory.newSAXParser();
-//			XMLReader reader = saxParser.getXMLReader();
-//			reader.setErrorHandler(new SAXErrorHandler());
-//			dataContainer = new DataContainer();//create a data container object to contain all wocket log data
-//			reader.setContentHandler(new SAXHandler(dataContainer));
-//			//reader.parse(new InputSource(new java.io.FileInputStream("C:/Users/Salim/Desktop/TestData.xml")));
-//			reader.parse(new InputSource(inputStream));
-//			//insert all Log data to DB
-//			
-//			
-//			DataLoggerUtility.insertDataToDB(dataContainer);
-//			}
-//			catch(ParserConfigurationException pce)
-//			{
-//				pce.printStackTrace();
-//			}
-//			catch(SAXFatalException sfe)
-//			{
-//				try{response.sendError(response.SC_BAD_REQUEST,sfe.toString());}
-//				catch(Exception e){e.printStackTrace();}
-//			}
-//			catch(SAXErrorException see)
-//			{
-//				try{response.sendError(response.SC_BAD_REQUEST,see.toString());}
-//				catch(Exception e){e.printStackTrace();}
-//			}
-//			catch(SAXException sae)
-//			{
-//				try{response.sendError(response.SC_BAD_REQUEST,sae.toString());}
-//				catch(Exception e){e.printStackTrace();}
-//			}
-//			catch(IOException ioEx)
-//			{
-//				ioEx.printStackTrace();
-//			}
-//			catch(Exception e)
-//			{
-//				e.printStackTrace();
-//			}
-//			finally
-//			{
-//				dataContainer = null;//clear dataContainer resources
-//			}
-//}
 
 }
