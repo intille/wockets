@@ -86,7 +86,7 @@ unsigned char _wTCNT2 = 0;
 unsigned char _wTCNT2_last = 0;
 
 unsigned char _TM;
-unsigned char _wTM = _WTM_Burst_60;
+unsigned char _wTM = _WTM_Continuous;//_WTM_Burst_60;
 unsigned char _wSENS = _4_G;
 
 unsigned long _wPC = 0;
@@ -115,8 +115,7 @@ unsigned char _MIN_SAMPLING_RATE = 5;
 	 There are only 8/16 bit timers/counters in the wocket and for maximum power savings the 8 bit counter is used for setting the sampling
 	 rate of the wocket accelerometer at a specified _SAMPLING_RATE value. But,the MCU provides a feature that would allow the user to 
 	 increase the counter on each cycle with each power of 2 up to 2^10. Using the 2^10 mode, it is needed toincrement the counter is needed
-	 to increase every 1024 cycles: (8000000/1024= 7812.5). So, the counter need to overflow with ticks=7812.5/_SAMPLING_RATE and the counter
-	 is initialized with 255-(ticks%256). When the counter overflows, an overflow interrupt gets invoked to show the approximate sampling time
+	 to increase every 1024 cycles: (8000000/1024= 7812.5). So, the counter need to overflow with ticks=7812.5/_SAMPLING_RATE. When the counter overflows, an overflow interrupt gets invoked to show the approximate sampling time
 	 for the accelerometer.	
 */
 void _wocket_initialize_timer2_interrupt(void)
@@ -213,8 +212,8 @@ void _wocket_initialize(void) //This function initializes the wocket
 	else
 	{ 
 		_SAMPLING_RATE = 40; 
-		//_wTM = _WTM_Continuous;
-		_wTM = _WTM_Burst_60;
+		_wTM = _WTM_Continuous;
+		//_wTM = _WTM_Burst_60;
 
 		// Calculate the timer variables used to sample at the right frequency
 		_wocket_initialize_timer2_interrupt();
@@ -636,16 +635,16 @@ void _receive_data(void)
 
             	case (unsigned char) GetBatteryLevel: 
                     word = _atmega_a2dConvert10bit(ADC7);
-                    rBuffer[0] = m_BL_RSP_BYTE0;
-                    rBuffer[1] = m_BL_RSP_BYTE1(word);
-                    rBuffer[2] = m_BL_RSP_BYTE2(word);
+                    aBuffer[0] = m_BL_RSP_BYTE0;
+                    aBuffer[1] = m_BL_RSP_BYTE1(word);
+                    aBuffer[2] = m_BL_RSP_BYTE2(word);
                     processed_counter = command_counter;
                     response_length = 3;		                                                                          
                     break;	
 						
             	case (unsigned char) GetSensorSentivity:           			  
-                    rBuffer[0] = m_SENS_RSP_BYTE0;
-                    rBuffer[1] = m_SENS_RSP_BYTE1(_wSENS);                       
+                    aBuffer[0] = m_SENS_RSP_BYTE0;
+                    aBuffer[1] = m_SENS_RSP_BYTE1(_wSENS);                       
                     processed_counter = command_counter;
                     response_length = 2;		                                                                          
                     break;
@@ -673,14 +672,15 @@ void _receive_data(void)
 					else
 						word = 0;
 
-                    rBuffer[0] = m_BP_RSP_BYTE0;
-                    rBuffer[1] = m_BP_RSP_BYTE1(word);      ;
+                    aBuffer[0] = m_BP_RSP_BYTE0;
+                    aBuffer[1] = m_BP_RSP_BYTE1(word);      ;
                     processed_counter = command_counter;
                     response_length = 2;		                                                                          
                     break;
-				   case (unsigned char) GetPowerDownTimer:  
-			   		rBuffer[0] = m_PDT_RSP_BYTE0;
-                    rBuffer[1] = m_PDT_RSP_BYTE1(_wPDT);
+			   
+			   case (unsigned char) GetPowerDownTimer:  
+			   		aBuffer[0] = m_PDT_RSP_BYTE0;
+                    aBuffer[1] = m_PDT_RSP_BYTE1(_wPDT);
 					processed_counter = command_counter;
 					response_length = 2;
 					break;	
@@ -689,21 +689,22 @@ void _receive_data(void)
 			   		_wPDT = m_SET_PDT(rBuffer[1]);
 					eeprom_write_byte(&_NV_PDT, _wPDT);
 					processed_counter = command_counter;
-					break;																				
+					break;
+																									
                case (unsigned char) GetSamplingRate:  
-			   		rBuffer[0] = m_SR_RSP_BYTE0;
-                    rBuffer[1] = m_SR_RSP_BYTE1(_SAMPLING_RATE);
+			   		aBuffer[0] = m_SR_RSP_BYTE0;
+                    aBuffer[1] = m_SR_RSP_BYTE1(_SAMPLING_RATE);
 					processed_counter = command_counter;
 					response_length = 2;
 					break;
 
                case (unsigned char) GetPacketCount:  
-			   		rBuffer[0] = m_PC_RSP_BYTE0;
-                    rBuffer[1] = m_PC_RSP_BYTE1(_wPC);
-					rBuffer[2] = m_PC_RSP_BYTE2(_wPC);
-                    rBuffer[3] = m_PC_RSP_BYTE3(_wPC);
-					rBuffer[4] = m_PC_RSP_BYTE4(_wPC);
-                    rBuffer[5] = m_PC_RSP_BYTE5(_wPC);
+			   		aBuffer[0] = m_PC_RSP_BYTE0;
+                    aBuffer[1] = m_PC_RSP_BYTE1(_wPC);
+					aBuffer[2] = m_PC_RSP_BYTE2(_wPC);
+                    aBuffer[3] = m_PC_RSP_BYTE3(_wPC);
+					aBuffer[4] = m_PC_RSP_BYTE4(_wPC);
+                    aBuffer[5] = m_PC_RSP_BYTE5(_wPC);
 					processed_counter = command_counter;
 					response_length = 6;
 					break;
@@ -727,8 +728,8 @@ void _receive_data(void)
 					break;
 
  			   case (unsigned char) GetRadioTransmissionMode:  
-			   		rBuffer[0] = m_TM_RSP_BYTE0;
-                    rBuffer[1] = m_TM_RSP_BYTE1(_TM);
+			   		aBuffer[0] = m_TM_RSP_BYTE0;
+                    aBuffer[1] = m_TM_RSP_BYTE1(_TM);
 					processed_counter = command_counter;
 					response_length = 2;
 					break;
@@ -740,8 +741,8 @@ void _receive_data(void)
 					break;
 
 			   case (unsigned char) GetWocketTransmissionMode:  
-			   		rBuffer[0] = m_WTM_RSP_BYTE0;
-                    rBuffer[1] = m_WTM_RSP_BYTE1(_wTM);
+			   		aBuffer[0] = m_WTM_RSP_BYTE0;
+                    aBuffer[1] = m_WTM_RSP_BYTE1(_wTM);
 					processed_counter = command_counter;
 					response_length = 2;
 					break;
@@ -798,40 +799,40 @@ void _receive_data(void)
                     break;
 
                 case (unsigned char) GetCalibrationValues:							                                                              
-					rBuffer[0] = m_CAL_RSP_BYTE0;
-                    rBuffer[1] = m_CAL_RSP_BYTE1_x1g(_wX1G_CAL);                                                                   
-                    rBuffer[2] = m_CAL_RSP_BYTE2_x1g(_wX1G_CAL);
-					rBuffer[2]|= m_CAL_RSP_BYTE2_xn1g(_wXN1G_CAL);
-                    rBuffer[3] = m_CAL_RSP_BYTE3_xn1g(_wXN1G_CAL);
-					rBuffer[3]|= m_CAL_RSP_BYTE3_y1g(_wY1G_CAL);
-                    rBuffer[4] = m_CAL_RSP_BYTE4_y1g(_wY1G_CAL);
-                    rBuffer[5] = m_CAL_RSP_BYTE5_y1g(_wY1G_CAL);
-                    rBuffer[5]|= m_CAL_RSP_BYTE5_yn1g(_wYN1G_CAL);
-                    rBuffer[6] = m_CAL_RSP_BYTE6_yn1g(_wYN1G_CAL);
-					rBuffer[6]|= m_CAL_RSP_BYTE6_z1g(_wZ1G_CAL);
-                    rBuffer[7] = m_CAL_RSP_BYTE7_z1g(_wZ1G_CAL);
-                    rBuffer[8] = m_CAL_RSP_BYTE8_z1g(_wZ1G_CAL);
-					rBuffer[8]|= m_CAL_RSP_BYTE8_zn1g(_wZN1G_CAL);
-                    rBuffer[9] = m_CAL_RSP_BYTE9_zn1g(_wZN1G_CAL);
+					aBuffer[0] = m_CAL_RSP_BYTE0;
+                    aBuffer[1] = m_CAL_RSP_BYTE1_x1g(_wX1G_CAL);                                                                   
+                    aBuffer[2] = m_CAL_RSP_BYTE2_x1g(_wX1G_CAL);
+					aBuffer[2]|= m_CAL_RSP_BYTE2_xn1g(_wXN1G_CAL);
+                    aBuffer[3] = m_CAL_RSP_BYTE3_xn1g(_wXN1G_CAL);
+					aBuffer[3]|= m_CAL_RSP_BYTE3_y1g(_wY1G_CAL);
+                    aBuffer[4] = m_CAL_RSP_BYTE4_y1g(_wY1G_CAL);
+                    aBuffer[5] = m_CAL_RSP_BYTE5_y1g(_wY1G_CAL);
+                    aBuffer[5]|= m_CAL_RSP_BYTE5_yn1g(_wYN1G_CAL);
+                    aBuffer[6] = m_CAL_RSP_BYTE6_yn1g(_wYN1G_CAL);
+					aBuffer[6]|= m_CAL_RSP_BYTE6_z1g(_wZ1G_CAL);
+                    aBuffer[7] = m_CAL_RSP_BYTE7_z1g(_wZ1G_CAL);
+                    aBuffer[8] = m_CAL_RSP_BYTE8_z1g(_wZ1G_CAL);
+					aBuffer[8]|= m_CAL_RSP_BYTE8_zn1g(_wZN1G_CAL);
+                    aBuffer[9] = m_CAL_RSP_BYTE9_zn1g(_wZN1G_CAL);
 					processed_counter = command_counter;
                     response_length = 10;                                                                               
                     break;    
 
                 case (unsigned char) GetBatteryCalibration:							                                                              
-					rBuffer[0] = m_BTCAL_RSP_BYTE0;
-                    rBuffer[1] = m_BTCAL_RSP_BYTE1_100(_wBTCAL100);                                                                   
-                    rBuffer[2] = m_BTCAL_RSP_BYTE2_100(_wBTCAL100);
-					rBuffer[2]|= m_BTCAL_RSP_BYTE2_80(_wBTCAL80);
-                    rBuffer[3] = m_BTCAL_RSP_BYTE3_80(_wBTCAL80);
-					rBuffer[3]|= m_BTCAL_RSP_BYTE3_60(_wBTCAL60);
-                    rBuffer[4] = m_BTCAL_RSP_BYTE4_60(_wBTCAL60);
-                    rBuffer[5] = m_BTCAL_RSP_BYTE5_60(_wBTCAL60);
-                    rBuffer[5]|= m_BTCAL_RSP_BYTE5_40(_wBTCAL40);
-                    rBuffer[6] = m_BTCAL_RSP_BYTE6_40(_wBTCAL40);
-					rBuffer[6]|= m_BTCAL_RSP_BYTE6_20(_wBTCAL20);
-                    rBuffer[7] = m_BTCAL_RSP_BYTE7_20(_wBTCAL20);
-                    rBuffer[8] = m_BTCAL_RSP_BYTE8_20(_wBTCAL20);
-					rBuffer[8]|= m_BTCAL_RSP_BYTE8_10(_wBTCAL10);
+					aBuffer[0] = m_BTCAL_RSP_BYTE0;
+                    aBuffer[1] = m_BTCAL_RSP_BYTE1_100(_wBTCAL100);                                                                   
+                    aBuffer[2] = m_BTCAL_RSP_BYTE2_100(_wBTCAL100);
+					aBuffer[2]|= m_BTCAL_RSP_BYTE2_80(_wBTCAL80);
+                    aBuffer[3] = m_BTCAL_RSP_BYTE3_80(_wBTCAL80);
+					aBuffer[3]|= m_BTCAL_RSP_BYTE3_60(_wBTCAL60);
+                    aBuffer[4] = m_BTCAL_RSP_BYTE4_60(_wBTCAL60);
+                    aBuffer[5] = m_BTCAL_RSP_BYTE5_60(_wBTCAL60);
+                    aBuffer[5]|= m_BTCAL_RSP_BYTE5_40(_wBTCAL40);
+                    aBuffer[6] = m_BTCAL_RSP_BYTE6_40(_wBTCAL40);
+					aBuffer[6]|= m_BTCAL_RSP_BYTE6_20(_wBTCAL20);
+                    aBuffer[7] = m_BTCAL_RSP_BYTE7_20(_wBTCAL20);
+                    aBuffer[8] = m_BTCAL_RSP_BYTE8_20(_wBTCAL20);
+					aBuffer[8]|= m_BTCAL_RSP_BYTE8_10(_wBTCAL10);
                     rBuffer[9] = m_BTCAL_RSP_BYTE9_10(_wBTCAL10);
 					processed_counter = command_counter;
                     response_length = 10;                                                                               
@@ -865,25 +866,25 @@ void _receive_data(void)
                     break;
 						
    				case (unsigned char) GetHardwareVersion:  
-			   		rBuffer[0] = m_HV_RSP_BYTE0;
-                    rBuffer[1] = m_HV_RSP_BYTE1(_VERSION);
+			   		aBuffer[0] = m_HV_RSP_BYTE0;
+                    aBuffer[1] = m_HV_RSP_BYTE1(_VERSION);
 					processed_counter = command_counter;		
 					response_length = 2;
 					break;				
 			
 				case (unsigned char) GetFirmwareVersion:  
-			   		rBuffer[0] = m_FV_RSP_BYTE0;
-                    rBuffer[1] = m_FV_RSP_BYTE1(_FVERSION);
+			   		aBuffer[0] = m_FV_RSP_BYTE0;
+                    aBuffer[1] = m_FV_RSP_BYTE1(_FVERSION);
 					processed_counter = command_counter;
 					response_length=2;
 					break;	
 			
 				case (unsigned char) GetTCT:  
-			      	rBuffer[0] = m_TCT_RSP_BYTE0;
-					rBuffer[1] = m_TCT_RSP_BYTE1(_wTCNT2);
-					rBuffer[2] = m_TCT_RSP_BYTE2(_wTCNT2, _wTCNT2_reps);
-					rBuffer[3] = m_TCT_RSP_BYTE3(_wTCNT2_reps, _wTCNT2_last);
-					rBuffer[4] = m_TCT_RSP_BYTE4(_wTCNT2_last);
+			      	aBuffer[0] = m_TCT_RSP_BYTE0;
+					aBuffer[1] = m_TCT_RSP_BYTE1(_wTCNT2);
+					aBuffer[2] = m_TCT_RSP_BYTE2(_wTCNT2, _wTCNT2_reps);
+					aBuffer[3] = m_TCT_RSP_BYTE3(_wTCNT2_reps, _wTCNT2_last);
+					aBuffer[4] = m_TCT_RSP_BYTE4(_wTCNT2_last);
 					processed_counter = command_counter;				
 					response_length = 5;
 					break;
@@ -891,20 +892,20 @@ void _receive_data(void)
 				case (unsigned char) SetLED:  
 			      	_LED_COLOR = m_SET_LED_COLOR(rBuffer[1]);
 					_LED_TIME = m_SET_LED_TIME(rBuffer[1]);
-					if (_LED_COLOR == 0){							
-						for (int i = 0; (i < _LED_TIME); i++){
-							_yellowled_turn_on();		
-							for (int j = 0; (j < 200); j++)
-								_delay_ms(5);
+					if (_LED_COLOR == 0){						
+						for (int j=0; j<(_LED_TIME); j++){
+							_yellowled_turn_on();	
+							_delay_ms(500);						
+							_yellowled_turn_off(); 
+							_delay_ms(500);
 						}
-						_yellowled_turn_off();
 					} if (_LED_COLOR == 1){
-						for (int i = 0; (i < _LED_TIME); i++){
-							_greenled_turn_on();		
-							for (int j = 0; (j < 200); j++)
-								_delay_ms(5);
+						for (int j=0; j<(_LED_TIME); j++){
+							_yellowled_turn_on();	
+							_delay_ms(500);						
+							_yellowled_turn_off(); 
+							_delay_ms(500);
 						}
-						_greenled_turn_off();
 					} 
 					processed_counter = command_counter;
 					break;
@@ -913,20 +914,7 @@ void _receive_data(void)
 					shutdown_flag = 1;
 					_bluetooth_turn_off();
 					_greenled_turn_off();
-					_yellowled_turn_off();
-			      	//_atmega_finalize();
-					/*if (_is_docked())
-					{
-						for(int j = 0;(j < 10);j++)			
-							for(int i = 0;(i < 200);i++)
-								_delay_ms(5);
-						if (_is_docked())
-							_wocket_initialize();
-					}*/
-					/*_atmega_finalize();
-					for (int j = 0; (j < 1000); j++)
-								_delay_ms(5);
-					_wocket_initialize();*/
+					_yellowled_turn_off();			      	
 					processed_counter = command_counter;
 					break;
 				
@@ -937,16 +925,16 @@ void _receive_data(void)
 
 				case (unsigned char) ResetWocket:  
 			      	//_wocket_reset();
-					_atmega_finalize();
+					/*_atmega_finalize();
 					for (int j = 0; (j < 1000); j++)
-						_delay_ms(5);
+						_delay_ms(5);*/
 					_wocket_initialize();
 					processed_counter = command_counter;
 					break;
 
 				case (unsigned char) GetAliveTimer:  
-			   		rBuffer[0] = m_ALT_RSP_BYTE0;
-                    rBuffer[1] = m_ALT_RSP_BYTE1(_wALT);
+			   		aBuffer[0] = m_ALT_RSP_BYTE0;
+                    aBuffer[1] = m_ALT_RSP_BYTE1(_wALT);
 					processed_counter = command_counter;
 					response_length = 2;
 					break;	
@@ -964,7 +952,7 @@ void _receive_data(void)
             if (processed_counter == command_counter)
 			{                              
                     for (int i = 0; (i < response_length); i++)                                                                                       
-                     	_bluetooth_transmit_uart0_byte(rBuffer[i]);                                                                                                                                                   
+                     	_bluetooth_transmit_uart0_byte(aBuffer[i]);                                                                                                                                                   
                     command_length = 0;
                     command_counter = 0;
                     command_timer = 0;
