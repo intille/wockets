@@ -464,7 +464,6 @@ namespace DataMerger
         #endregion
 
 
-
         #region Thread that checks for the process status
 
 
@@ -815,13 +814,13 @@ namespace DataMerger
 
 
             int[] timeLostPostureSensorCounter = new int[numPostures];
-            int[] wocketsSR = new int[wc._Sensors.Count];
-            int[] trueWocketsSR = new int[wc._Sensors.Count];
-            int[][] modeWocketsSR = new int[wc._Sensors.Count][];
+            double[] wocketsSR = new double[wc._Sensors.Count];
+            double[] trueWocketsSR = new double[wc._Sensors.Count];
+            double[][] modeWocketsSR = new double[wc._Sensors.Count][];
 
 
             bool[] disconnected = new bool[wc._Sensors.Count];
-            int[] zeroWocketsSR = new int[wc._Sensors.Count];
+            double[] zeroWocketsSR = new double[wc._Sensors.Count];
             int[] numDisconnected = new int[wc._Sensors.Count];
             ArrayList[] disconnectionDistribution = new ArrayList[wc._Sensors.Count];
             int[] disconnectionTimer = new int[wc._Sensors.Count];
@@ -865,7 +864,7 @@ namespace DataMerger
             {
                 wocketsSR[i] = 0;
                 trueWocketsSR[i] = 0;
-                modeWocketsSR[i] = new int[1000];
+                modeWocketsSR[i] = new double[1000];
                 disconnected[i] = false;
                 disconnectionDistribution[i] = new ArrayList();
                 disconnectionTimer[i] = 0;
@@ -4037,12 +4036,13 @@ namespace DataMerger
                 throw new Exception("MITes Configuration Files: Parsing failed " + e.Message);
             }
 
+            // JPN TEST !!!!!!!!!!!!!!!!!!!!!!!!!
 
-            if (aannotation != null)
-            {
-                foreach (AXML.Category category in aannotation.Categories)
-                    master_csv_header += "," + category.Name;
-            }
+            //if (aannotation != null)
+            //{
+            //    foreach (AXML.Category category in aannotation.Categories)
+            //        master_csv_header += "," + category.Name;
+            //}
 
 
 
@@ -4206,19 +4206,22 @@ namespace DataMerger
             string current_activity = "";
             int activityIndex = 0;
             AXML.AnnotatedRecord annotatedRecord = null;
-            if (aannotation != null)
-            {
 
-                annotatedRecord = ((AXML.AnnotatedRecord)aannotation.Data[activityIndex]);
+            // JPN TESTING !!!!!!!!!!!!!!!!!!!!!!!
 
-                for (int j = 0; (j < annotatedRecord.Labels.Count); j++)
-                {
-                    if (j == annotatedRecord.Labels.Count - 1)
-                        current_activity += "";
-                    else
-                        current_activity += ",";
-                }
-            }
+            //if (aannotation != null)
+            //{
+
+            //    annotatedRecord = ((AXML.AnnotatedRecord)aannotation.Data[activityIndex]);
+
+            //    for (int j = 0; (j < annotatedRecord.Labels.Count); j++)
+            //    {
+            //        if (j == annotatedRecord.Labels.Count - 1)
+            //            current_activity += "";
+            //        else
+            //            current_activity += ",";
+            //    }
+            //}
 
             #endregion
 
@@ -4282,12 +4285,12 @@ namespace DataMerger
                     wc._Decoders[r].Initialize();
 
 
-                int[] wocketsSR = new int[wcontroller._Sensors.Count];
+                double[] wocketsSR = new double[wcontroller._Sensors.Count];
 
                 for (int i = 0; (i < wcontroller._Sensors.Count); i++)
                 {
                     int sensor_id = wcontroller._Sensors[i]._ID;
-                    int wocketSR = 0;
+                    double wocketSR = 0;
                     long prevWocketTS = 0;
                     int totalseconds = 0;
                     wc._Sensors[i]._RootStorageDirectory = aDataDirectory + "\\" + WOCKETS_SUBDIRECTORY + "\\data\\raw\\PLFormat\\";
@@ -4315,10 +4318,31 @@ namespace DataMerger
 
 
                     int lastDecodedPacket = 0;
+                    int[] modes = new int[1000];
 
                     while (wc._Sensors[i].Load())
                     {
                         if (wc._Sensors[i]._Decoder._Head == 0)
+                            lastDecodedPacket = wc._Sensors[i]._Decoder._Data.Length - 1;
+                        else
+                            lastDecodedPacket = wc._Sensors[i]._Decoder._Head - 1;
+
+                        Wockets.Data.Accelerometers.AccelerationData data = (Wockets.Data.Accelerometers.AccelerationData)wc._Sensors[i]._Decoder._Data[lastDecodedPacket];
+                        tw.WriteLine(data.UnixTimeStamp + "," + data._X + "," + data._Y + "," + data._Z);
+                        //added by selene
+                        long currentTS = (long)(data.UnixTimeStamp / 1000.0);
+                        if ((currentTS - prevWocketTS) < 1)
+                            wocketSR++;
+                        if ((prevWocketTS > 0) & (currentTS - prevWocketTS) >= 1)
+                        {
+
+                            modes[(int)wocketSR] = modes[(int)wocketSR] + 1;
+                            wocketSR=0;
+                        }
+                     
+
+                         prevWocketTS = currentTS;
+                        /*    if (wc._Sensors[i]._Decoder._Head == 0)
                             lastDecodedPacket = wc._Sensors[i]._Decoder._Data.Length - 1;
                         else
                             lastDecodedPacket = wc._Sensors[i]._Decoder._Head - 1;
@@ -4334,9 +4358,22 @@ namespace DataMerger
                             wocketSR++;
                         if ((prevWocketTS > 0) & (currentTS - prevWocketTS) >= 1)
                             totalseconds += (int)(currentTS - prevWocketTS);
-                        prevWocketTS = currentTS;
+                        prevWocketTS = currentTS;*/
                     }
-                    wocketsSR[i] = (int)Math.Round((double)wocketSR / (double)totalseconds);
+                    int estimatedSR = 0;
+                    int esrCount=0;
+                    for (int iiii = 0; (iiii < modes.Length); iiii++)
+                    {
+                        if ((int)modes[iiii] > esrCount)
+                        {
+                            estimatedSR = iiii;
+                            esrCount = (int)modes[iiii];
+                        }
+                    }
+
+                    wocketsSR[i] = estimatedSR+1;
+                    
+                    //(double)wocketSR / (double)totalseconds;
 
                     //added by selene
                     //if (tw != null)
@@ -4408,7 +4445,7 @@ namespace DataMerger
                     long lastSecond = 0;
                     int nextCorrected = 0;
                     long nextCorrectedTime = 0;
-                    double delta = 1000.0 / wocketsSR[k];
+                    double delta = (1000.0 / wocketsSR[k]);
                     double recordTime = 0;
 
                     if (CSVProgress == "")
@@ -4420,6 +4457,7 @@ namespace DataMerger
                         int wocketX = Convert.ToInt32(wocketTokens[1]);
                         int wocketY = Convert.ToInt32(wocketTokens[2]);
                         int wocketZ = Convert.ToInt32(wocketTokens[3]);
+
                         long unixtime = (long)(Convert.ToDouble(wocketTokens[0]) / 1000.0);
 
                         // if ((k == 2) && (unixtime >= 1255347111))
@@ -4440,12 +4478,12 @@ namespace DataMerger
                                 bool compensated = false;
                                 int compensatedCounter = 0;
                                 //if the data needs compensation
-                                if (loadedData[nextCorrected].Count < (wocketsSR[k] - 2)) //lower number of samples
+                                if (loadedData[nextCorrected].Count < (wocketsSR[k])) //lower number of samples
                                 {
                                     compensatedCounter = 1;
                                     //check if seconds that follow compensate for the current second
                                     int dataCounter = loadedData[nextCorrected].Count;
-                                    int expectedCompensatedSR = 0;
+                                    double expectedCompensatedSR = 0;
                                     for (int r = 1; (r < 8); r++)
                                     {
 
@@ -4459,7 +4497,7 @@ namespace DataMerger
                                             compensatedCounter++;
                                             if ((dataCounter / (r + 1)) >= (wocketsSR[k] - 10))
                                             {
-                                                expectedCompensatedSR = dataCounter / (r + 1);
+                                                expectedCompensatedSR = (double)dataCounter / (r + 1);
                                                 compensated = true;
 
                                                 break;
@@ -4496,10 +4534,10 @@ namespace DataMerger
                                                     //wocketsTW[k].WriteLine(recordTime + "," + recordTokens[1] + "," + recordTokens[2] + "," + recordTokens[3]);
                                                     //recordTime += delta;
                                                     totalCompensatedPoints++;
-                                                    if (expectedCompensatedSR == totalCompensatedPoints)
+                                                    if (expectedCompensatedSR <=(double)totalCompensatedPoints)
                                                         break;
                                                 }
-                                                if (expectedCompensatedSR == totalCompensatedPoints)
+                                                if (expectedCompensatedSR == (double)totalCompensatedPoints)
                                                     break;
                                             }
                                         }
@@ -4512,10 +4550,11 @@ namespace DataMerger
 
                                 //Write out all data that got time corrected
                                 //including where we have taken data points
+                                delta = 1000.0 / loadedData[nextCorrected].Count;
                                 if (!compensated) //no compensation
                                 {
 
-                                    recordTime = nextCorrectedTime * 1000.0;
+                                    recordTime = nextCorrectedTime * 1000.0;                                    
                                     for (int n = 0; (n < loadedData[nextCorrected].Count); n++)
                                     {
                                         string[] recordTokens = ((string)loadedData[nextCorrected][n]).Split(',');
@@ -5037,48 +5076,50 @@ namespace DataMerger
             #region check annotation start and end times
 
 
-            if (aannotation != null)
-            {
-                AXML.AnnotatedRecord record = ((AXML.AnnotatedRecord)aannotation.Data[0]);
-                year = Convert.ToInt32(record.StartDate.Split('-')[2]);
-                month = Convert.ToInt32(record.StartDate.Split('-')[0]);
-                day = Convert.ToInt32(record.StartDate.Split('-')[1]);
+            // JPN TESTING !!!!!!!!!!!!!!!!!!!!!!!!!!
 
-                DateTime d = new DateTime(year, month, day, record.StartHour, 0, 0);
-                if (d.Subtract(startDateTime).TotalSeconds < 0)
-                    startDateTime = d;
+            //if (aannotation != null)
+            //{
+            //    AXML.AnnotatedRecord record = ((AXML.AnnotatedRecord)aannotation.Data[0]);
+            //    year = Convert.ToInt32(record.StartDate.Split('-')[2]);
+            //    month = Convert.ToInt32(record.StartDate.Split('-')[0]);
+            //    day = Convert.ToInt32(record.StartDate.Split('-')[1]);
 
-                /* if ((startyear == 0) || (year < startyear))
-                     startyear = year;
+            //    DateTime d = new DateTime(year, month, day, record.StartHour, 0, 0);
+            //    if (d.Subtract(startDateTime).TotalSeconds < 0)
+            //        startDateTime = d;
 
-                 if ((startmonth == 0) || (month < startmonth))
-                     startmonth = month;
-                 if ((startday == 0) || (day < startday))
-                     startday = day;
+            //    /* if ((startyear == 0) || (year < startyear))
+            //         startyear = year;
 
-                 if (record.StartHour < starthr)
-                     starthr = record.StartHour;
-                 */
-                record = ((AXML.AnnotatedRecord)aannotation.Data[aannotation.Data.Count - 1]);
-                year = Convert.ToInt32(record.StartDate.Split('-')[2]);
-                month = Convert.ToInt32(record.StartDate.Split('-')[0]);
-                day = Convert.ToInt32(record.StartDate.Split('-')[1]);
-                d = new DateTime(year, month, day, record.EndHour, 59, 59);
-                if (d.Subtract(endDateTime).TotalSeconds > 0)
-                    endDateTime = d;
-                /*
-                if ((endyear == 0) || (year > endyear))
-                    endyear = year;
-                if ((endmonth == 0) || (month > endmonth))
-                    endmonth = month;
-                if ((endday == 0) || (day > endday))
-                    endday = day;
-                if (record.EndHour > endhr)
-                    endhr = record.EndHour;
-                if ((record.EndMinute < 54) && (record.EndMinute < endmin))
-                    endmin = record.EndMinute + 5;
-                 */
-            }
+            //     if ((startmonth == 0) || (month < startmonth))
+            //         startmonth = month;
+            //     if ((startday == 0) || (day < startday))
+            //         startday = day;
+
+            //     if (record.StartHour < starthr)
+            //         starthr = record.StartHour;
+            //     */
+            //    record = ((AXML.AnnotatedRecord)aannotation.Data[aannotation.Data.Count - 1]);
+            //    year = Convert.ToInt32(record.StartDate.Split('-')[2]);
+            //    month = Convert.ToInt32(record.StartDate.Split('-')[0]);
+            //    day = Convert.ToInt32(record.StartDate.Split('-')[1]);
+            //    d = new DateTime(year, month, day, record.EndHour, 59, 59);
+            //    if (d.Subtract(endDateTime).TotalSeconds > 0)
+            //        endDateTime = d;
+            //    /*
+            //    if ((endyear == 0) || (year > endyear))
+            //        endyear = year;
+            //    if ((endmonth == 0) || (month > endmonth))
+            //        endmonth = month;
+            //    if ((endday == 0) || (day > endday))
+            //        endday = day;
+            //    if (record.EndHour > endhr)
+            //        endhr = record.EndHour;
+            //    if ((record.EndMinute < 54) && (record.EndMinute < endmin))
+            //        endmin = record.EndMinute + 5;
+            //     */
+            //}
 
 
             #endregion
@@ -5209,8 +5250,10 @@ namespace DataMerger
                 rti_csv_line = timestamp;
                 rt3_csv_line = timestamp;
 
-                if (aannotation != null)
-                    master_csv_line += "," + current_activity;
+                //JPN TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+                //if (aannotation != null)
+                //    master_csv_line += "," + current_activity;
 
 
 
@@ -5223,53 +5266,55 @@ namespace DataMerger
 
 
 
-                if (aannotation != null)
-                {
+                // JPN TEST !!!!!!!!!!!!!!!!!
 
-                    #region Load Activity Labels
+                //if (aannotation != null)
+                //{
 
-                    if (currentUnixTime > annotatedRecord.EndUnix)
-                    {
-                        current_activity = "";
-                        for (int j = 0; (j < annotatedRecord.Labels.Count); j++)
-                        {
-                            if (j == annotatedRecord.Labels.Count - 1)
-                                current_activity += "";
-                            else
-                                current_activity += ",";
-                        }
-                        if (activityIndex < aannotation.Data.Count - 1)
-                        {
-                            activityIndex++;
-                            annotatedRecord = ((AXML.AnnotatedRecord)aannotation.Data[activityIndex]);
-                        }
-                    }
+                //    #region Load Activity Labels
 
-
-                    if ((currentUnixTime >= annotatedRecord.StartUnix) &&
-                         (currentUnixTime <= annotatedRecord.EndUnix))
-                    {
-
-                        current_activity = "";
-                        for (int j = 0; (j < annotatedRecord.Labels.Count); j++)
-                        {
-                            if (j == annotatedRecord.Labels.Count - 1)
-                                current_activity += ((AXML.Label)annotatedRecord.Labels[j]).Name;
-                            else
-                                current_activity += ((AXML.Label)annotatedRecord.Labels[j]).Name + ",";
-                        }
+                //    if (currentUnixTime > annotatedRecord.EndUnix)
+                //    {
+                //        current_activity = "";
+                //        for (int j = 0; (j < annotatedRecord.Labels.Count); j++)
+                //        {
+                //            if (j == annotatedRecord.Labels.Count - 1)
+                //                current_activity += "";
+                //            else
+                //                current_activity += ",";
+                //        }
+                //        if (activityIndex < aannotation.Data.Count - 1)
+                //        {
+                //            activityIndex++;
+                //            annotatedRecord = ((AXML.AnnotatedRecord)aannotation.Data[activityIndex]);
+                //        }
+                //    }
 
 
+                //    if ((currentUnixTime >= annotatedRecord.StartUnix) &&
+                //         (currentUnixTime <= annotatedRecord.EndUnix))
+                //    {
 
-                        current_activity = current_activity.Replace("none", "").Replace('-', '_').Replace(':', '_').Replace('%', '_').Replace('/', '_');
-                        current_activity = Regex.Replace(current_activity, "[_]+", "_");
-                        current_activity = Regex.Replace(current_activity, "^[_]+", "");
-                        current_activity = Regex.Replace(current_activity, "[_]+$", "");
-                    }
+                //        current_activity = "";
+                //        for (int j = 0; (j < annotatedRecord.Labels.Count); j++)
+                //        {
+                //            if (j == annotatedRecord.Labels.Count - 1)
+                //                current_activity += ((AXML.Label)annotatedRecord.Labels[j]).Name;
+                //            else
+                //                current_activity += ((AXML.Label)annotatedRecord.Labels[j]).Name + ",";
+                //        }
 
 
-                    #endregion Load Activity Label
-                }
+
+                //        current_activity = current_activity.Replace("none", "").Replace('-', '_').Replace(':', '_').Replace('%', '_').Replace('/', '_');
+                //        current_activity = Regex.Replace(current_activity, "[_]+", "_");
+                //        current_activity = Regex.Replace(current_activity, "^[_]+", "");
+                //        current_activity = Regex.Replace(current_activity, "[_]+$", "");
+                //    }
+
+
+                //    #endregion Load Activity Label
+                //}
 
                 #region If MITes Decoder exist
 
@@ -5839,7 +5884,7 @@ namespace DataMerger
                             #region Append Wockets Statistics
 
 
-                            csv_line2 += "," + wacCounters[sensor_id];
+                            csv_line2 += "," + (double)(wacCounters[sensor_id]);
 
                             csv_line1 += "," + ((double)(waverageX[sensor_id] / (double)wacCounters[sensor_id])).ToString("00.00") + ",";
                             csv_line1 += ((double)(waverageY[sensor_id] / (double)wacCounters[sensor_id])).ToString("00.00") + ",";
