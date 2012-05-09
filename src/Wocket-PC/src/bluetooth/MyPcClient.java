@@ -139,20 +139,8 @@ public class MyPcClient implements DiscoveryListener{
         
         Calibrate_SamplingRate(40, inStream,  outStream);
         
-    	System.out.println("start testing");      
-        while (true){
-        	if ((sr.total_time >= 60000)){
-    			System.out.print("minute:"+(sr.flag+1));
-        		System.out.println("\tSampling Rate: "+ sr.samplingRate);
-        		sr.counter = 0;
-            	sr.total_time = 0;
-            	sr.flag ++;
-            }  
-        	if (inStream.available() > 0){
-        		inStream.read(bytes);
-		        myDecoder.Decode(0, bytes, cnt, sr);
-        	}
-		}
+    	//System.out.println("start testing");      
+        //double samplingRate = measureSamplingRate(inStream);
     }//main
     
   //*******************************Calibrate_SamplingRate**********************************************************************
