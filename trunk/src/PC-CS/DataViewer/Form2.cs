@@ -143,7 +143,11 @@ namespace DataViewer
             MasterPane myMaster = zedGraphControl1.MasterPane;
 
             _firstDate = DateTime.Now;
-            _lastDate = DateTime.Now.AddYears(-3);
+
+            //JPN: Initialize the date of last point to be shown in the dataview to the beginning of the Wockets Era.
+            //Let's say 01-01-2007. If a dataset predates 2007, you will have to zoom manually to the region of interest
+            //This value will later be changed to the last timestamp observed in the dataset
+            _lastDate = new DateTime(2007, 01, 01, 00, 00, 00);
 
             myMaster.PaneList.Clear();
 
