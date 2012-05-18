@@ -4335,8 +4335,8 @@ namespace DataMerger
                             wocketSR++;
                         if ((prevWocketTS > 0) & (currentTS - prevWocketTS) >= 1)
                         {
-
-                            modes[(int)wocketSR] = modes[(int)wocketSR] + 1;
+                            if (wocketSR < modes.Length)
+                                modes[(int)wocketSR] = modes[(int)wocketSR] + 1;
                             wocketSR=0;
                         }
                      
