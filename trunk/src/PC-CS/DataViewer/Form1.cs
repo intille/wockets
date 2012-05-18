@@ -2377,6 +2377,12 @@ namespace DataViewer
                                 case "Left Wrist":
                                     loc = "LW";
                                     break;
+                                case "Left Ankle":
+                                    loc = "LA";
+                                    break;
+                                case "Right Ankle":
+                                    loc = "RA";
+                                    break;
                                 default:
                                     //loc = "lOC";
                                     break;
