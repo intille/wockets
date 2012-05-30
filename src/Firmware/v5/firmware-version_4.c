@@ -343,6 +343,10 @@ int main()
 
 				//if the firmware is in continous mode then it will not compress the data
 				_send_uncompressed_pdu(x, y, z);
+				//sample and send the battery level
+				battery = _atmega_a2dConvert10bit(ADC7); 
+				//_send_bl(battery);
+				_receive_data();
 			}
 			
 			else  //Bursty modes
