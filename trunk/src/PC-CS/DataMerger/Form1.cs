@@ -580,7 +580,7 @@ namespace DataMerger
                     }
                     catch (Exception ee)
                     {
-                        MessageBox.Show("Error: No Wocket Controllers Found! " + ee.StackTrace);
+                        //MessageBox.Show("Error: No Wocket Controllers Found! " + ee.StackTrace);
                     }
                 }
 
