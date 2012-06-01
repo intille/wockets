@@ -27,9 +27,11 @@ public class mainJFrame extends javax.swing.JFrame {
         startjButton = new javax.swing.JButton();
         stopjButton = new javax.swing.JButton();
         userProcessContainer = new javax.swing.JPanel();
-        jLabel3 = new javax.swing.JLabel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTextArea1 = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setPreferredSize(new java.awt.Dimension(640, 480));
 
         jSplitPane1.setDividerLocation(120);
 
@@ -65,17 +67,20 @@ public class mainJFrame extends javax.swing.JFrame {
                 .add(startjButton)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(stopjButton)
-                .addContainerGap(140, Short.MAX_VALUE))
+                .addContainerGap(152, Short.MAX_VALUE))
         );
 
         jSplitPane1.setLeftComponent(jPanel1);
 
         userProcessContainer.setLayout(new java.awt.CardLayout());
 
-        jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel3.setText("This program helps you to Calibrate the Wocket's sampling rate.");
-        jLabel3.setVerticalTextPosition(javax.swing.SwingConstants.TOP);
-        userProcessContainer.add(jLabel3, "card2");
+        jTextArea1.setColumns(20);
+        jTextArea1.setFont(new java.awt.Font("Tahoma", 0, 13)); // NOI18N
+        jTextArea1.setRows(5);
+        jTextArea1.setText("\n\n\n\n\nWocket Calibration Program:\n\nThis program helps you to calibrate Wockets'\n  *Sampling rate\n  *Accelerometer\n  *Noise \n  *Battery\n\nYou need to have Wockets initialized and fully\ncharged before starting the calibration procedure.");
+        jScrollPane1.setViewportView(jTextArea1);
+
+        userProcessContainer.add(jScrollPane1, "card3");
 
         jSplitPane1.setRightComponent(userProcessContainer);
 
@@ -134,13 +139,15 @@ private void stopjButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
 
             public void run() {
                 new mainJFrame().setVisible(true);
+                
             }
         });
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel jLabel3;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSplitPane jSplitPane1;
+    private javax.swing.JTextArea jTextArea1;
     private javax.swing.JButton startjButton;
     private javax.swing.JButton stopjButton;
     private javax.swing.JPanel userProcessContainer;

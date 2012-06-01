@@ -4,6 +4,7 @@
  */
 package UserInterface;
 
+import bluetooth.CalibrationValues;
 import bluetooth.PcClient;
 import java.awt.CardLayout;
 import java.io.IOException;
@@ -16,6 +17,7 @@ import javax.swing.JPanel;
 import javax.swing.table.DefaultTableModel;
 import javax.microedition.io.StreamConnection;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
 /**
  *
@@ -26,20 +28,16 @@ public class ConnectPanel extends javax.swing.JPanel {
     JPanel userProcessContainer; 
     Vector btDevices;
     PcClient btConnect;
+    int index = 0;
+    CalibrationValues calibrationValues;
     
-    public ConnectPanel(JPanel upc) {
-        initComponents();
+    public ConnectPanel(JPanel upc, Vector btDevices) {
+        initComponents();        
         
+        this.btDevices = btDevices;
         userProcessContainer = upc;
-        //btDevices = btD;  
-        try {
-            PcClient.findDevices();
-        } catch (IOException ex) {
-            Logger.getLogger(ConnectPanel.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        btDevices = PcClient.vecDevices;
-        
-        refresh();
+        refresh();  
+        calibrationValues = new CalibrationValues();
     }
 
     /**
@@ -51,13 +49,21 @@ public class ConnectPanel extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jTextArea1 = new javax.swing.JTextArea();
         jScrollPane1 = new javax.swing.JScrollPane();
         wocketsTable = new javax.swing.JTable();
-        connect = new javax.swing.JButton();
+        connectjButton = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
+        refreshButton = new javax.swing.JButton();
+        messageLabel = new javax.swing.JLabel();
+
+        jTextArea1.setColumns(20);
+        jTextArea1.setRows(5);
+        jScrollPane2.setViewportView(jTextArea1);
 
         wocketsTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -72,15 +78,15 @@ public class ConnectPanel extends javax.swing.JPanel {
         ));
         jScrollPane1.setViewportView(wocketsTable);
 
-        connect.setText("Connect");
-        connect.addActionListener(new java.awt.event.ActionListener() {
+        connectjButton.setText("Connect");
+        connectjButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                connectActionPerformed(evt);
+                connectjButtonActionPerformed(evt);
             }
         });
 
         jLabel2.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
-        jLabel2.setText("Select the Wocket you want to calibrate and click Conncet");
+        jLabel2.setText("Select the Wocket you want to calibrate. Then click Conncet:");
 
         jLabel1.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         jLabel1.setText("PC-Wocket Application");
@@ -89,36 +95,53 @@ public class ConnectPanel extends javax.swing.JPanel {
         jLabel3.setText("Connecting to Wocket");
 
         jLabel4.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
-        jLabel4.setText("Available Wockets");
+        jLabel4.setText("Available Wockets:");
+
+        refreshButton.setText("Refresh");
+        refreshButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                refreshButtonActionPerformed(evt);
+            }
+        });
+
+        messageLabel.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        messageLabel.setText("   ");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jLabel2))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 349, Short.MAX_VALUE))
-                .addGap(41, 41, 41))
             .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(97, 97, 97)
+                        .addGap(0, 0, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel1)
                             .addGroup(layout.createSequentialGroup()
                                 .addGap(18, 18, 18)
-                                .addComponent(jLabel3))))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(133, 133, 133)
-                        .addComponent(jLabel4))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(143, 143, 143)
-                        .addComponent(connect)))
-                .addContainerGap())
+                                .addComponent(jLabel3)))
+                        .addGap(129, 129, 129))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel4)
+                                .addGap(251, 251, 251)
+                                .addComponent(refreshButton)
+                                .addGap(16, 16, 16))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(52, 52, 52)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(messageLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 323, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING)
+                                        .addGroup(layout.createSequentialGroup()
+                                            .addGap(125, 125, 125)
+                                            .addComponent(connectjButton)
+                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 127, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                .addGap(0, 0, Short.MAX_VALUE)))
+                        .addContainerGap())))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -127,15 +150,19 @@ public class ConnectPanel extends javax.swing.JPanel {
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel3)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 46, Short.MAX_VALUE)
-                .addComponent(jLabel4)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGap(44, 44, 44)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(refreshButton)
+                    .addComponent(jLabel4))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(34, 34, 34)
-                .addComponent(jLabel2)
                 .addGap(18, 18, 18)
-                .addComponent(connect)
-                .addGap(29, 29, 29))
+                .addComponent(jLabel2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(connectjButton)
+                .addGap(26, 26, 26)
+                .addComponent(messageLabel)
+                .addContainerGap(51, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
     
@@ -153,7 +180,7 @@ public class ConnectPanel extends javax.swing.JPanel {
         for (int k=0; k<btSize; k++){
             RemoteDevice remoteDevice=(RemoteDevice)btDevices.elementAt(k);
             String adr= remoteDevice.getBluetoothAddress();            
-            if (adr.contains("00066606")){
+            if (adr.contains("0006660")){
                 cnt++;
                 Object[]new_row = new Object[3];
                 new_row[0] = cnt;
@@ -168,32 +195,57 @@ public class ConnectPanel extends javax.swing.JPanel {
         }
     }
     
-    private void connectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectActionPerformed
-        int index = (Integer) wocketsTable.getValueAt(wocketsTable.getSelectedRow(), 0);
-        //System.out.println("index: "+index);
-        StreamConnection streamConnection = null;
-        JPanel calibrationPanel = null;
-        try {
-            streamConnection = btConnect.connect(index-1);
-            //calibrationPanel = new CalibrationPanel(userProcessContainer, streamConnection, btConnect);
-            System.out.println("Connection is done.");
-            calibrationPanel = new CalibrationPanel(userProcessContainer, streamConnection);
-        } catch (IOException ex) {
-            System.out.println("Error in Connecting to Wocket! "+ex);
+    private void connectjButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectjButtonActionPerformed
+        int temp = wocketsTable.getSelectedRow();
+        if (temp == -1){
+            JOptionPane.showMessageDialog(null, "Please select the Wocket(s) you want to calibrate...");
+            return;
         }
-       
-        userProcessContainer.add("CalibrationPanel",calibrationPanel);
-        CardLayout c1 = (CardLayout)userProcessContainer.getLayout();
-        c1.next(userProcessContainer);
-    }//GEN-LAST:event_connectActionPerformed
+        connectjButton.setVisible(false);
+        refreshButton.setVisible(false);
+        messageLabel.setText("Connecting to Wocket...It may take a while...");
+        
+        index = (Integer) wocketsTable.getValueAt(wocketsTable.getSelectedRow(), 0);;        
+        Runnable connectRunnable = new Runnable() {
+            public void run() { 
+                try {                    
+                    StreamConnection streamConnection = btConnect.connect(index-1);
+                    RemoteDevice remoteDevice=(RemoteDevice)btDevices.elementAt(index-1);
+                    calibrationValues.setSensorID("Wocket-"+remoteDevice.getBluetoothAddress().substring(8));
+                    JPanel srPanel = new SetSamplingRatePanel(userProcessContainer, streamConnection, calibrationValues);
+                    userProcessContainer.add("srPanel",srPanel);
+                    CardLayout c1 = (CardLayout)userProcessContainer.getLayout();
+                    c1.next(userProcessContainer);
+                } catch (IOException ex) {
+                    Logger.getLogger(ConnectPanel.class.getName()).log(Level.SEVERE, null, ex);
+                    System.out.println("Error in Connecting to Wocket! "+ex);
+                }
+            }            
+        };
+        SwingUtilities.invokeLater(connectRunnable); 
+    }//GEN-LAST:event_connectjButtonActionPerformed
+
+    private void refreshButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshButtonActionPerformed
+        try {
+            PcClient.findDevices();
+        } catch (IOException ex) {
+            Logger.getLogger(ConnectPanel.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        btDevices = PcClient.vecDevices;
+        refresh();
+    }//GEN-LAST:event_refreshButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton connect;
+    private javax.swing.JButton connectjButton;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JTextArea jTextArea1;
+    private javax.swing.JLabel messageLabel;
+    private javax.swing.JButton refreshButton;
     private javax.swing.JTable wocketsTable;
     // End of variables declaration//GEN-END:variables
 }

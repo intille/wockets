@@ -1,8 +1,14 @@
 package UserInterface;
 
+import bluetooth.PcClient;
 import java.awt.CardLayout;
+import java.io.IOException;
+import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 /**
  *
@@ -15,7 +21,7 @@ public class StartPanel extends javax.swing.JPanel {
     public StartPanel(JPanel upc) {
         initComponents();
         userProcessContainer = upc;
-        messageTextField.setVisible(false);
+        //textField.setVisible(false);
     }
 
     
@@ -25,8 +31,8 @@ public class StartPanel extends javax.swing.JPanel {
 
         jLabel1 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
-        showWockets = new javax.swing.JButton();
-        messageTextField = new javax.swing.JTextField();
+        showWocketsjButton = new javax.swing.JButton();
+        messageLabel = new javax.swing.JLabel();
 
         jLabel1.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         jLabel1.setText("PC-Wocket Application");
@@ -34,14 +40,15 @@ public class StartPanel extends javax.swing.JPanel {
         jLabel3.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         jLabel3.setText("Finding Wockets");
 
-        showWockets.setText("Show Available Wockets");
-        showWockets.addActionListener(new java.awt.event.ActionListener() {
+        showWocketsjButton.setText("Show Available Wockets");
+        showWocketsjButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                showWocketsActionPerformed(evt);
+                showWocketsjButtonActionPerformed(evt);
             }
         });
 
-        messageTextField.setText("   ");
+        messageLabel.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        messageLabel.setText("                              ");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -58,11 +65,11 @@ public class StartPanel extends javax.swing.JPanel {
                                 .addComponent(jLabel3))))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(118, 118, 118)
-                        .addComponent(showWockets))
+                        .addComponent(showWocketsjButton))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(42, 42, 42)
-                        .addComponent(messageTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 303, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(55, Short.MAX_VALUE))
+                        .addGap(62, 62, 62)
+                        .addComponent(messageLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 277, Short.MAX_VALUE)))
+                .addGap(61, 61, 61))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -72,28 +79,37 @@ public class StartPanel extends javax.swing.JPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel3)
                 .addGap(40, 40, 40)
-                .addComponent(showWockets)
-                .addGap(41, 41, 41)
-                .addComponent(messageTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(115, Short.MAX_VALUE))
+                .addComponent(showWocketsjButton)
+                .addGap(85, 85, 85)
+                .addComponent(messageLabel)
+                .addContainerGap(76, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    private void showWocketsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showWocketsActionPerformed
-        JOptionPane.showMessageDialog(null, "Searching for Wockets...It may take a while...");
-        messageTextField.setVisible(true);
-        messageTextField.setText("Searching for Wockets...It may take a while...");
-        JPanel connectPanel =  new ConnectPanel(userProcessContainer);
-        userProcessContainer.add("ConnectPanel",connectPanel);
-        CardLayout c1 = (CardLayout)userProcessContainer.getLayout();
-        c1.next(userProcessContainer);
-        
-    }//GEN-LAST:event_showWocketsActionPerformed
+    private void showWocketsjButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showWocketsjButtonActionPerformed
+        showWocketsjButton.setVisible(false);
+        messageLabel.setText("Searching for Wockets...It may take a while...");        
+        SwingUtilities.invokeLater(findRunnable); 
+    }//GEN-LAST:event_showWocketsjButtonActionPerformed
 
+    Runnable findRunnable = new Runnable() {
+        public void run() { 
+            try {
+                PcClient.findDevices();                    
+                Vector btDevices = PcClient.vecDevices;
+                JPanel connectPanel =  new ConnectPanel(userProcessContainer, btDevices);
+                userProcessContainer.add("ConnectPanel",connectPanel);
+                CardLayout c1 = (CardLayout)userProcessContainer.getLayout();
+                c1.next(userProcessContainer);
+            } catch (IOException ex) {
+                Logger.getLogger(ConnectPanel.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }            
+    };
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JTextField messageTextField;
-    private javax.swing.JButton showWockets;
+    private javax.swing.JLabel messageLabel;
+    private javax.swing.JButton showWocketsjButton;
     // End of variables declaration//GEN-END:variables
 }
