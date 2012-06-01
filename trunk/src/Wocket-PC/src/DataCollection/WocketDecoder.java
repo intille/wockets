@@ -11,7 +11,7 @@ import java.util.TimeZone;
 
 import decoding.mainHandler;
 
-import bluetooth.SamplingRate;
+import bluetooth.WocketParam;
 
 
 import wockets.data.SensorDataType;
@@ -169,7 +169,7 @@ public final class WocketDecoder extends Decoder
     
     
     //*******************************************************************************
-    public int Decode(int sourceSensor, byte[] data, int length, SamplingRate sr)
+    public int Decode(int sourceSensor, byte[] data, int length, WocketParam sr)
     {
     	int bytesToRead = 0;
     	int rawDataIndex = 0;
@@ -182,7 +182,7 @@ public final class WocketDecoder extends Decoder
     	{    		
     		while ( (rawDataIndex < length) )
     		{    			
-    			//System.out.println("data["+rawDataIndex+"]:"+ (data[rawDataIndex]) );
+    			//System.out.print("\tdata["+rawDataIndex+"]:"+ (data[rawDataIndex]) );
     			if (/*(data[rawDataIndex]!=0) &&*/ (data[rawDataIndex]!=0xff)){
 	    			
 	    			if(((data[rawDataIndex]) & 0x80) != 0) //Header:First byte of a packet
@@ -192,28 +192,30 @@ public final class WocketDecoder extends Decoder
 	    				packetType = SensorDataType.values()[((data[rawDataIndex] << 1)&0xff) >> 6];
 	    				//System.out.println("packetType:"+ packetType );
 	    				bytesToRead = DefineByteToRead(packetType, data[rawDataIndex]);
+	    				//System.out.println("bytesToRead:"+ bytesToRead );
 	    			} 
 	    			
 	    			if ((this.headerSeen == true) && (this.packetPosition < bytesToRead)){
-	    				this.packet[this.packetPosition] = data[rawDataIndex];  	                
+	    				this.packet[this.packetPosition] = data[rawDataIndex];  
+	    				//System.out.println("used data["+rawDataIndex+"]:"+ (data[rawDataIndex]) );
 	    			}
 	      			
-	    			this.packetPosition++;	                
-	                //System.out.println("pp:"+packetPosition+"  bytesToRead:"+bytesToRead);	    				            
+	    			this.packetPosition++;	    				            
 	    			    			
 	                if ((this.packetPosition == bytesToRead)) //a full packet was received
 	    			{
 	                	//System.out.println("one packet of "+ packetType +" received compeletly");
-	                	bytesToRead = 0;
+	                	
 	    				if((packetType == SensorDataType.UNCOMPRESSED_DATA_PDU) || (packetType == SensorDataType.COMPRESSED_DATA_PDU))
 	    				{
+	    					sr.data_flag = 1;
+	    					bytesToRead = 0;
 	    					short x  = 0;
 	    					short y = 0; 
 	    					short z = 0;
 	    					
 	    					if(packetType == SensorDataType.UNCOMPRESSED_DATA_PDU)
-	    					{
-	    						//datum._Type = SensorDataType.UNCOMPRESSED_DATA_PDU;
+	    					{	    						
 	    						x = (short)((((int)((int)this.packet[0] & 0x03)) << 8) | (((int)((int)this.packet[1] & 0x7f)) << 1) | (((int)((int)this.packet[2] & 0x40)) >> 6));
 	                            y = (short)((((int)((int)this.packet[2] & 0x3f)) << 4) | (((int)((int)this.packet[3] & 0x78)) >> 3));
 	                            z = (short)((((int)((int)this.packet[3] & 0x07)) << 7) | ((int)((int)this.packet[4] & 0x7f)));
@@ -221,7 +223,6 @@ public final class WocketDecoder extends Decoder
 	    					}
 	    					else
 	    					{
-	    						//datum._Type = SensorDataType.COMPRESSED_DATA_PDU;
 	    						x = (short)(((this.packet[0] & 0x0f) << 1) | ((this.packet[1] & 0x40) >> 6));
 	                            x = ((((short)((this.packet[0] >> 4) & 0x01)) == 1) ? ((short)(prevx + x)) : ((short)(prevx - x)));
 	                            y = (short)(this.packet[1] & 0x1f);
@@ -231,47 +232,29 @@ public final class WocketDecoder extends Decoder
 	                            _CompressedPDUCount++;
 	    					}
 	    					
-	    					//System.out.println("x:"+x+"   y:"+y+ "   z:"+ z);
 	    					Logger.log(this._ID,x + "," + y + "," + z);
 	    					
-	    					prevx = x;
-	    					prevy = y;
-	    					prevz = z;   
+	    					sr.x = x; sr.y = y; sr.z = z;
+	    					
+	    					prevx = x; prevy = y; prevz = z;   
 	    					
 	    					//****************calculating the Sampling rate
 	    					Calendar logDt = Calendar.getInstance();
 	    			        Date logTmpDt = logDt.getTime();
 	    			        
 	    			        long diff = logTmpDt.getTime() - sr.prev_time.getTime();
-	    			        //System.out.println("diff:"+diff);	
-	    			        //System.out.println("Aida code:"+_DateFormat_log.format(logTmpDt));
 	    			        handler.enCode(logDt, x, y, z);
-    			        	
-    			        	/*if ((sr.total_time >= 60000)){
-    			        		System.out.println("Sampling Rate: "+ sr.samplingRate);
-    				        	System.out.println("minute:"+(sr.flag+1));
-    			        		sr.counter = 0;
-    				        	sr.total_time = 0;
-    				        	sr.flag ++;    				        	
-    				        }*/
-    			        	//if (diff < 100) {
-	    			        	sr.counter ++;
-	    			        	sr.total_time = sr.total_time + diff;
-	    			        	//System.out.println("in decoder counter:"+sr.counter+"    total_time:"+sr.total_time);
-	    			        //}
+    			        	sr.counter ++;
+    			        	sr.total_time = sr.total_time + diff;
     			        	sr.prev_time = logTmpDt;
     			        	
     				        if (sr.total_time != 0){
-    				        	//System.out.println("in main counter:"+sr.counter+"    total_time:"+(sr.total_time / 1000));
     				        	long temp1 = sr.counter*100000;
     				        	double temp2 =  temp1 / sr.total_time ;   	
     				        	temp1 = (long)(temp2);
     				        	sr.samplingRate = temp1/ 100.0 ;
-    					        //System.out.println("Sampling Rate: "+ sr.samplingRate);
     				        }
     			        	//************************************************
-    			        	
-	    					
 	    					if(this._Head >= (BUFFER_SIZE -1))
 	    						this._Head = 0;
 	    					else this._Head ++;
@@ -279,14 +262,16 @@ public final class WocketDecoder extends Decoder
 	    				}
 	    				else if (packetType == SensorDataType.RESPONSE_PDU)
 	                    {
-	    					DecodeResponce(responseType, bytesToRead);                 
+	    					DecodeResponce(responseType, bytesToRead, sr);                 
 	                    }
 	    				this.packetPosition = 0;
 						this.headerSeen = false;
+						bytesToRead = 0;
 	    			}//end of processing one complete packet
     			}
     			rawDataIndex++;
     		}
+    		//System.out.println();
     	}
     	return numDecodedPackets;
     }
@@ -309,7 +294,7 @@ public final class WocketDecoder extends Decoder
 			case RESPONSE_PDU :
 			{	    					
 				responseType = ResponseTypes.values()[((int)(pack_header & 0x1f))];
-				System.out.println("responseType:"+ responseType );
+				//System.out.println("responseType:"+ responseType );
 				switch(responseType)
 				{
 					case BP_RSP:
@@ -349,15 +334,22 @@ public final class WocketDecoder extends Decoder
     
     
     //*******************************************************************************
-    public void DecodeResponce (ResponseTypes responseType, int bytesToRead){
+    public void DecodeResponce (ResponseTypes responseType, int bytesToRead, WocketParam wp){
     	
     	switch (responseType)
         {
             case BL_RSP:
                 BL_RSP br = new BL_RSP(this._ID);
-                for (int i = 0; (i < bytesToRead); i++)
+                /*for (int i = 0; (i < bytesToRead); i++){
                     br._RawBytes[i] = this.packet[i];
-                br._BatteryLevel = (((int)this.packet[1]) << 3) | ((this.packet[2] >> 4) & 0x07);                                
+                    System.out.println("packet"+i+": "+this.packet[i]);
+                }*/
+                System.out.println("received a BL packet");
+                br._BatteryLevel = ((this.packet[1]&0x7f)<<3) | ((this.packet[2]&0x70)>>4);//(((int)(this.packet[1]&0x7f) << 3) | (int)((this.packet[2]& 0x07) >> 4));
+                if (br._BatteryLevel>500){
+                	wp.battery = br._BatteryLevel;
+                	System.out.println("BL packet is correct");
+                }
                 break;                                
             case CAL_RSP:
                 CAL_RSP cal = new CAL_RSP(this._ID);

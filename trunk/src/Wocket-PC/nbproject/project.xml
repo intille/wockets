@@ -6,6 +6,7 @@
             <name>WocketPC_RT</name>
             <source-roots>
                 <root id="src.dir" name="src"/>
+                <root id="src.rsc.dir"/>
             </source-roots>
             <test-roots/>
         </data>
