@@ -287,11 +287,11 @@ public class PcClient implements DiscoveryListener{
         Date prev_time = logDt.getTime();
         Date current_time;
         long diff;
-        while ((minute < 100)&&(idleTime < 30000)){
+        while (idleTime < 30000){
             /*if (sr.total_time >= 59950){
                 outStream.write(WOCKET_GET_BATTERY_LEVEL);outStream.flush();
             }*/
-            if (sr.total_time >= 30000){                    
+            if (sr.total_time >= 60000){ //one minute                   
                 outStream.write(WOCKET_GET_BATTERY_LEVEL);outStream.flush();
                 System.out.println("minute:"+(minute+1)+"\tBattery: " +sr.battery);
                 battery.add(sr.battery);
