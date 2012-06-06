@@ -1,3 +1,4 @@
+
 package bluetooth;
 
 import java.io.IOException;
@@ -14,7 +15,7 @@ import javax.bluetooth.UUID;
 import javax.microedition.io.Connector;
 import javax.microedition.io.StreamConnection;
 import DataCollection.WocketDecoder;
-import UserInterface.SetSamplingRatePanel;
+import UserInterface.SetSamplingRate;
 import com.intel.bluetooth.BlueCoveImpl;
 import java.io.*;
 import java.text.SimpleDateFormat;
@@ -26,8 +27,6 @@ import java.util.logging.Logger;
 import javax.bluetooth.*;
 import javax.swing.JLabel;
 import javax.swing.JTextArea;
-import sun.audio.AudioPlayer;
-import sun.audio.AudioStream;
 
 
 /**
@@ -556,15 +555,13 @@ public class PcClient implements DiscoveryListener{
     
     //******************************play sound****************************************
     public static final Runnable beepRunnable = new Runnable() {
-            public void run() { 
-                try { 
-                    InputStream in= new FileInputStream("src/rsc/beep.wav");
-                    AudioStream as = new AudioStream(in);  
-                    AudioPlayer.player.start(as);  
-                    //AudioPlayer.player.stop(as); 
-                } catch (IOException ex) {
-                    System.out.println("beepRunnable IOExeption");
-                } 
+            public void run() {                 
+                try {
+                    java.applet.AudioClip clip = java.applet.Applet.newAudioClip(new java.net.URL("file:src/rsc/beep.wav"));
+                    clip.play();
+                } catch (java.net.MalformedURLException murle) {
+                System.out.println(murle);
+                }
             }            
         };
     

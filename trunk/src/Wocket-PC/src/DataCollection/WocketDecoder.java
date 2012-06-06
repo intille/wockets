@@ -9,8 +9,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
-import decoding.mainHandler;
 
+import bafEncoding.mainHandler;
 import bluetooth.WocketParam;
 
 
@@ -243,7 +243,7 @@ public final class WocketDecoder extends Decoder
 	    			        Date logTmpDt = logDt.getTime();
 	    			        
 	    			        long diff = logTmpDt.getTime() - sr.prev_time.getTime();
-	    			        handler.enCode(logDt, x, y, z);
+	    			        //handler.enCode(logDt, x, y, z);
     			        	sr.counter ++;
     			        	sr.total_time = sr.total_time + diff;
     			        	sr.prev_time = logTmpDt;

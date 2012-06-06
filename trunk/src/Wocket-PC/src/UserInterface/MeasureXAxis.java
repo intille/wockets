@@ -227,7 +227,7 @@ public class MeasureXAxis extends javax.swing.JPanel {
     private void skipButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_skipButtonActionPerformed
         JPanel testBatteryPanel= null;
         try { 
-            testBatteryPanel = new TestBattery(userProcessContainer, inStream, outStream, calibrationValues);
+            testBatteryPanel = new BatteryTest(userProcessContainer, inStream, outStream, calibrationValues);
         } catch (IOException ex) {
             Logger.getLogger(MeasureAxesResult.class.getName()).log(Level.SEVERE, null, ex);
         }

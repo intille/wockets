@@ -175,7 +175,7 @@ public class MeasureAxesResult extends javax.swing.JPanel {
         JPanel testBatteryPanel= null;
         try {
             PcClient.calibrate_Accelerometer(outStream, cal_x, cal_nx, cal_y, cal_ny, cal_z, cal_nz);
-            testBatteryPanel = new TestBattery(userProcessContainer, inStream, outStream, calibrationValues);
+            testBatteryPanel = new BatteryTest(userProcessContainer, inStream, outStream, calibrationValues);
         } catch (IOException ex) {
             Logger.getLogger(MeasureAxesResult.class.getName()).log(Level.SEVERE, null, ex);
         }

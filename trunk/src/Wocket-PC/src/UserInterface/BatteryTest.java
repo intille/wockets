@@ -22,14 +22,14 @@ import wocketXML.XMLWriter;
  *
  * @author Aida
  */
-public class TestBattery extends javax.swing.JPanel {
+public class BatteryTest extends javax.swing.JPanel {
 
     JPanel userProcessContainer;
     InputStream inStream = null;
     OutputStream outStream = null;
     CalibrationValues calibrationValues;
     
-    public TestBattery(JPanel upc, InputStream is, OutputStream os, CalibrationValues cv) throws IOException {
+    public BatteryTest(JPanel upc, InputStream is, OutputStream os, CalibrationValues cv) throws IOException {
         initComponents();
         userProcessContainer = upc;userProcessContainer = upc;
         outStream = os;
@@ -157,7 +157,7 @@ public class TestBattery extends javax.swing.JPanel {
                 CardLayout c1 = (CardLayout)userProcessContainer.getLayout();
                 c1.next(userProcessContainer);
             } catch (IOException ex) {
-                Logger.getLogger(TestBattery.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(BatteryTest.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     };
@@ -171,11 +171,11 @@ public class TestBattery extends javax.swing.JPanel {
 
     private void skipButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_skipButtonActionPerformed
         try {
-            XMLWriter.xmlWriter(calibrationValues);
+            XMLWriter.write(calibrationValues);
         } catch (XmlPullParserException ex) {
             System.out.println("XmlPullParserException in Test Battery jPanel");
         } catch (IOException ex) {
-            Logger.getLogger(TestBattery.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(BatteryTest.class.getName()).log(Level.SEVERE, null, ex);
         }
         JPanel donePanel= null;
         try {
