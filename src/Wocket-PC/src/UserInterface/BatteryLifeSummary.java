@@ -183,11 +183,11 @@ public class BatteryLifeSummary extends javax.swing.JPanel {
     
     private void btCalibrateButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btCalibrateButtonActionPerformed
         try {
-            XMLWriter.xmlWriter(calibrationValues);
+            XMLWriter.write(calibrationValues);
         } catch (XmlPullParserException ex) {
             System.out.println("XmlPullParserException in BatteryLifeSummary jPanel");
         } catch (IOException ex) {
-            Logger.getLogger(TestBattery.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(BatteryTest.class.getName()).log(Level.SEVERE, null, ex);
         }
         JPanel donePanel= null;
         try {

@@ -19,7 +19,7 @@ public class XMLWriter {
 	//private static SensorDataInfo[] sensors;
     private static String fileName = "wocketCalibration.xml";
 
-    public static void xmlWriter (CalibrationValues cValues) throws XmlPullParserException, IOException {
+    public static void write (CalibrationValues cValues) throws XmlPullParserException, IOException {
     	
     	CalibrationValues calibrationValues = cValues;
     	int[] batteryCal= calibrationValues.getBattery_calibration(); 

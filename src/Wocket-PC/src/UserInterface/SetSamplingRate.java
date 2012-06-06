@@ -21,7 +21,7 @@ import  java.io.*;
  *
  * @author Aida
  */
-public class SetSamplingRatePanel extends javax.swing.JPanel {
+public class SetSamplingRate extends javax.swing.JPanel {
     
     JPanel userProcessContainer;
     StreamConnection streamConnection;
@@ -29,7 +29,7 @@ public class SetSamplingRatePanel extends javax.swing.JPanel {
     OutputStream outStream = null;
     CalibrationValues calibrationValues;
     
-    public SetSamplingRatePanel(JPanel upc, StreamConnection sc, CalibrationValues cvalues) throws IOException{
+    public SetSamplingRate(JPanel upc, StreamConnection sc, CalibrationValues cvalues) throws IOException{
         initComponents();
         userProcessContainer = upc;
         streamConnection = sc; 
@@ -201,7 +201,7 @@ public class SetSamplingRatePanel extends javax.swing.JPanel {
                     continueButton.setVisible(true);
                     PcClient.beepRunnable.run();
                 } catch (IOException ex) {
-                    Logger.getLogger(SetSamplingRatePanel.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(SetSamplingRate.class.getName()).log(Level.SEVERE, null, ex);
                 } 
             }            
         };
@@ -236,7 +236,7 @@ public class SetSamplingRatePanel extends javax.swing.JPanel {
             streamConnection.close();
             PcClient.stop();            
         } catch (IOException ex) {
-            Logger.getLogger(SetSamplingRatePanel.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SetSamplingRate.class.getName()).log(Level.SEVERE, null, ex);
         }
         userProcessContainer.removeAll();        
         JPanel startPanel =  new StartPanel(userProcessContainer);
@@ -252,7 +252,7 @@ public class SetSamplingRatePanel extends javax.swing.JPanel {
         try {
             calibrateXPanel = new MeasureXAxis(userProcessContainer, inStream, outStream, calibrationValues);
         } catch (IOException ex) {
-            Logger.getLogger(SetSamplingRatePanel.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SetSamplingRate.class.getName()).log(Level.SEVERE, null, ex);
         }
         userProcessContainer.add("calibrateXPanel",calibrateXPanel);
         CardLayout c1 = (CardLayout)userProcessContainer.getLayout();
@@ -264,7 +264,7 @@ public class SetSamplingRatePanel extends javax.swing.JPanel {
         try {
             calibrateXPanel = new MeasureXAxis(userProcessContainer, inStream, outStream, calibrationValues);
         } catch (IOException ex) {
-            Logger.getLogger(SetSamplingRatePanel.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SetSamplingRate.class.getName()).log(Level.SEVERE, null, ex);
         }
         userProcessContainer.add("calibrateXPanel",calibrateXPanel);
         CardLayout c1 = (CardLayout)userProcessContainer.getLayout();

@@ -37,6 +37,7 @@ public class ConnectPanel extends javax.swing.JPanel {
         this.btDevices = btDevices;
         userProcessContainer = upc;
         refresh();  
+        PcClient.beepRunnable.run();
         calibrationValues = new CalibrationValues();
     }
 
@@ -212,7 +213,8 @@ public class ConnectPanel extends javax.swing.JPanel {
                     StreamConnection streamConnection = btConnect.connect(index-1);
                     RemoteDevice remoteDevice=(RemoteDevice)btDevices.elementAt(index-1);
                     calibrationValues.setSensorID("Wocket-"+remoteDevice.getBluetoothAddress().substring(8));
-                    JPanel srPanel = new SetSamplingRatePanel(userProcessContainer, streamConnection, calibrationValues);
+                    PcClient.beepRunnable.run();
+                    JPanel srPanel = new SetSamplingRate(userProcessContainer, streamConnection, calibrationValues);
                     userProcessContainer.add("srPanel",srPanel);
                     CardLayout c1 = (CardLayout)userProcessContainer.getLayout();
                     c1.next(userProcessContainer);
