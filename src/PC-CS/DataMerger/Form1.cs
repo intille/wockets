@@ -4558,7 +4558,7 @@ namespace DataMerger
                                     for (int n = 0; (n < loadedData[nextCorrected].Count); n++)
                                     {
                                         string[] recordTokens = ((string)loadedData[nextCorrected][n]).Split(',');
-                                        wocketsTW[k].WriteLine(recordTime + "," + recordTokens[1] + "," + recordTokens[2] + "," + recordTokens[3]);
+                                        wocketsTW[k].WriteLine(Math.Round(recordTime) + "," + recordTokens[1] + "," + recordTokens[2] + "," + recordTokens[3]);
                                         recordTime += delta;
                                     }
                                     loadedData[nextCorrected] = new ArrayList();
@@ -4576,7 +4576,7 @@ namespace DataMerger
                                         for (int n = 0; (n < loadedData[nextCorrected].Count); n++)
                                         {
                                             string[] recordTokens = ((string)loadedData[nextCorrected][n]).Split(',');
-                                            wocketsTW[k].WriteLine(recordTime + "," + recordTokens[1] + "," + recordTokens[2] + "," + recordTokens[3]);
+                                            wocketsTW[k].WriteLine(Math.Round(recordTime) + "," + recordTokens[1] + "," + recordTokens[2] + "," + recordTokens[3]);
                                             recordTime += delta;
                                         }
                                         loadedData[nextCorrected] = new ArrayList();
