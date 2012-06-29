@@ -902,9 +902,9 @@ void _receive_data(void)
 						}
 					} if (_LED_COLOR == 1){
 						for (int j=0; j<(_LED_TIME); j++){
-							_yellowled_turn_on();	
+							_greenled_turn_on();	
 							_delay_ms(500);						
-							_yellowled_turn_off(); 
+							_greenled_turn_off(); 
 							_delay_ms(500);
 						}
 					} 

@@ -117,6 +117,7 @@ value is sent in compress mode within 5 bits*/
 static __inline__ void _send_pdu(unsigned short x, unsigned short y, unsigned short z){	
 	if(compress)
 	{
+		deltasign = 0x00;
 		if (x > prevx)
 		{
 			deltasign |= 0x01; //The first bit from right: sign of difference value in x axis
@@ -135,7 +136,7 @@ static __inline__ void _send_pdu(unsigned short x, unsigned short y, unsigned sh
 		
 		if (z > prevz)
 		{
-			deltasign |= 0x04; //The first bit from right: sign of difference value in z axis
+			deltasign |= 0x04; //The third bit from right: sign of difference value in z axis
 			diffz = z - prevz;
 		}
 		else
