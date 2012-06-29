@@ -4,8 +4,6 @@
  */
 package UserInterface;
 
-import bluetooth.AxesCalibration;
-import bluetooth.CalibrationValues;
 import bluetooth.PcClient;
 import java.awt.CardLayout;
 import java.io.IOException;
@@ -18,6 +16,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import wockets.data.AxesCalibration;
+import wockets.data.CalibValues;
+
 /**
  *
  * @author Aida
@@ -27,9 +28,9 @@ public class MeasureZNAxis extends javax.swing.JPanel {
     JPanel userProcessContainer;
     InputStream inStream = null;
     OutputStream outStream = null;
-    CalibrationValues calibrationValues;
+    CalibValues calibrationValues;
     
-    public MeasureZNAxis(JPanel upc, InputStream is, OutputStream os, CalibrationValues cv) throws IOException {
+    public MeasureZNAxis(JPanel upc, InputStream is, OutputStream os, CalibValues cv) throws IOException {
         initComponents();
         userProcessContainer = upc;userProcessContainer = upc;
         outStream = os;

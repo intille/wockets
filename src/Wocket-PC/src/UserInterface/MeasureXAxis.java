@@ -4,8 +4,6 @@
  */
 package UserInterface;
 
-import bluetooth.AxesCalibration;
-import bluetooth.CalibrationValues;
 import bluetooth.PcClient;
 import java.awt.CardLayout;
 import java.io.FileInputStream;
@@ -19,6 +17,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import wockets.data.AxesCalibration;
+import wockets.data.CalibValues;
+
 /**
  *
  * @author Aida
@@ -28,10 +29,10 @@ public class MeasureXAxis extends javax.swing.JPanel {
     JPanel userProcessContainer;
     InputStream inStream = null;
     OutputStream outStream = null;
-    CalibrationValues calibrationValues;
+    CalibValues calibrationValues;
     int mid_value, noise; 
     
-    public MeasureXAxis(JPanel upc, InputStream is, OutputStream os, CalibrationValues cv) throws IOException {
+    public MeasureXAxis(JPanel upc, InputStream is, OutputStream os, CalibValues cv) throws IOException {
         initComponents();
         userProcessContainer = upc;userProcessContainer = upc;
         outStream = os;

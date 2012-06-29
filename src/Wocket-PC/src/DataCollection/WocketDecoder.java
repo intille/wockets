@@ -4,18 +4,16 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.text.SimpleDateFormat;
+//import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
-
-
-import bafEncoding.mainHandler;
-import bluetooth.WocketParam;
-
+import bafFormat.BafEncoder;
+import bafFormat.BafEncoder;
 
 import wockets.data.SensorDataType;
 import wockets.data.WocketData;
+import wockets.data.WocketParam;
 import wockets.data.commands.CommandTypes;
 import wockets.data.commands.Commands;
 import wockets.data.responses.*;
@@ -24,12 +22,12 @@ import wockets.data.types.TransmissionMode;
 import wockets.utils.CircularBuffer;
 import wockets.utils.WocketsTimer;
 
-//import android.util.Log;
 
 /**
  * @author albinali
  *
  */
+
 public final class WocketDecoder extends Decoder 
 {
 	public static final String TAG = "WocketDecoder";
@@ -37,19 +35,20 @@ public final class WocketDecoder extends Decoder
     protected int packetPosition;
     private boolean headerSeen;
     public long _TotalSamples = 0;
-    private long lastDecodedSampleTime = 0; 
 	
 	SensorDataType packetType;
 	private ResponseTypes responseType;
 	public int _ActivityCountOffset = 0;
+	
     private int prevx = 0;
     private int prevy = 0;
     private int prevz = 0;
+    private Date prev_time = new Date();
+    private BafEncoder bafEncoder = new BafEncoder();
+    
     public int _UncompressedPDUCount = 0;
     public int _CompressedPDUCount = 0;
     public int _ExpectedBatchCount = -1;
-    private long batchCurrentTime = 0;
-    private long batchDeltaTime = 0;    
     public int _ExpectedSamplingRate = 0;
     public int _LastActivityCountIndex = -1;
     public AC_RSP[] _ActivityCounts = new AC_RSP[960];
@@ -58,14 +57,10 @@ public final class WocketDecoder extends Decoder
     private double ac_refseq = 0;
     private double ac_delta = 0;
     public int _ACIndex = 0;
-    public int _ActivityCountIndex = 0;   
-    
-    // reading data from PLFormat File
-    private byte b;
-    private byte[] b6 = new byte[6];
-    private double lastUnixTime = 0;
-    private byte[] header = new byte[1];
-    private byte[] pdu = new byte[5];
+    public int _ActivityCountIndex = 0;       
+      
+    private int head = 0;
+    private int bytesToRead = 0;
     
     public WocketDecoder(int id) 
 	{
@@ -90,193 +85,125 @@ public final class WocketDecoder extends Decoder
     {
 		int temp =0;
 		return temp;
-	}
-	
-    //*******************************************************************************
+	}	
+    
     @Override
-    public void Load(FileInputStream br) throws IOException
-    {
-    	// read timestamp
-    	try
-    	{
-    		b = (byte) br.read();
-    	}
-		catch(IOException ex)
-		{
-			String strMsg = TAG + ":Load()\n";
-			strMsg += "Error while reading first byte from PLFormat File\n";
-			strMsg += ex.getMessage() + "\n";
-			
-			StringWriter errTrace = new StringWriter();
-			ex.printStackTrace(new PrintWriter(errTrace));
-			
-			strMsg += errTrace.toString();
-			
-			Logger.error(strMsg);			
-			throw new IOException("Error while reading first byte");
-		}
-							
-    	    	
-    	if(b == 255 || b == -1) //read complete timestamp
-    	{
-			if(br.read(b6) == -1)
-				throw new IOException("Error reading full timestamp from PLFormat file");
-			lastUnixTime = WocketsTimer.UnixTimeFromBytes(b6);		
-    	}
-    	else //read differential timestamp
-    	{
-    		lastUnixTime += (int) b;
-    	}
+    public void Load(FileInputStream br) throws IOException {
     	
-    	Calendar dt = Calendar.getInstance();
-    	dt = WocketsTimer.DateTimeFromUnixTime(lastUnixTime);
-    	
-    	//read header as first byte of pdu
-	
-		if(br.read(header) == -1)
-			throw new IOException("Error reading data in PLFormat File");
-		pdu[0] = header[0];
-    	
-    	int len = 0 ;
-    	
-    	//read header to decode if compressed or uncompressed data
-    	if((header[0] & 0x60) > 0)
-    		len = 3;
-    	else
-    		len = 5;
-    	
-    	//read 3 or 5 bytes according to header
-    
-		if(br.read(pdu, 1, (len-1)) == -1)
-			throw new IOException("Error reading data in PLFormat File");    		
-	    	
-    	int lastDecodedIndex = 0;
-    	
-		//successfully decoded a packet
-    	/*if(this.Decode(this._ID, pdu, len) == 1)
-    	{
-    		if(this._Head == 0)
-    			lastDecodedIndex = this._Data.length - 1;
-    		else
-    			lastDecodedIndex = this._Head - 1;
-    		this._Data[lastDecodedIndex]._UnixTimeStamp = (long) lastUnixTime;
-    		return;
-    	}
-    	else
-    		throw new IOException("Failed to Decode data");    */	    	    
     }
+        
     
+    //******************************Decode**********************************************************************************************
     
-    
-    //*******************************************************************************
-    public int Decode(int sourceSensor, byte[] data, int length, WocketParam sr)
-    {
-    	int bytesToRead = 0;
-    	int rawDataIndex = 0;
-    	int numDecodedPackets = 0 ; 
-    	//SamplingRate local_sr = sr;
-    	mainHandler handler = new mainHandler();
-    	SimpleDateFormat _DateFormat_log = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss.SSS");    	
-    	
-    	if(length != 0)
-    	{    		
-    		while ( (rawDataIndex < length) )
-    		{    			
-    			//System.out.print("\tdata["+rawDataIndex+"]:"+ (data[rawDataIndex]) );
-    			if (/*(data[rawDataIndex]!=0) &&*/ (data[rawDataIndex]!=0xff)){
-	    			
-	    			if(((data[rawDataIndex]) & 0x80) != 0) //Header:First byte of a packet
-	    			{
-	    				this.packetPosition = 0;
-	    				this.headerSeen = true;    				
-	    				packetType = SensorDataType.values()[((data[rawDataIndex] << 1)&0xff) >> 6];
-	    				//System.out.println("packetType:"+ packetType );
-	    				bytesToRead = DefineByteToRead(packetType, data[rawDataIndex]);
-	    				//System.out.println("bytesToRead:"+ bytesToRead );
-	    			} 
-	    			
-	    			if ((this.headerSeen == true) && (this.packetPosition < bytesToRead)){
-	    				this.packet[this.packetPosition] = data[rawDataIndex];  
-	    				//System.out.println("used data["+rawDataIndex+"]:"+ (data[rawDataIndex]) );
-	    			}
-	      			
-	    			this.packetPosition++;	    				            
-	    			    			
-	                if ((this.packetPosition == bytesToRead)) //a full packet was received
-	    			{
-	                	//System.out.println("one packet of "+ packetType +" received compeletly");
-	                	
-	    				if((packetType == SensorDataType.UNCOMPRESSED_DATA_PDU) || (packetType == SensorDataType.COMPRESSED_DATA_PDU))
-	    				{
-	    					sr.data_flag = 1;
-	    					bytesToRead = 0;
-	    					short x  = 0;
-	    					short y = 0; 
-	    					short z = 0;
-	    					
-	    					if(packetType == SensorDataType.UNCOMPRESSED_DATA_PDU)
-	    					{	    						
-	    						x = (short)((((int)((int)this.packet[0] & 0x03)) << 8) | (((int)((int)this.packet[1] & 0x7f)) << 1) | (((int)((int)this.packet[2] & 0x40)) >> 6));
-	                            y = (short)((((int)((int)this.packet[2] & 0x3f)) << 4) | (((int)((int)this.packet[3] & 0x78)) >> 3));
-	                            z = (short)((((int)((int)this.packet[3] & 0x07)) << 7) | ((int)((int)this.packet[4] & 0x7f)));
-	                            _UncompressedPDUCount++;
-	    					}
-	    					else
-	    					{
-	    						x = (short)(((this.packet[0] & 0x0f) << 1) | ((this.packet[1] & 0x40) >> 6));
-	                            x = ((((short)((this.packet[0] >> 4) & 0x01)) == 1) ? ((short)(prevx + x)) : ((short)(prevx - x)));
-	                            y = (short)(this.packet[1] & 0x1f);
-	                            y = ((((short)((this.packet[1] >> 5) & 0x01)) == 1) ? ((short)(prevy + y)) : ((short)(prevy - y)));
-	                            z = (short)((this.packet[2] >> 1) & 0x1f);
-	                            z = ((((short)((this.packet[2] >> 6) & 0x01)) == 1) ? ((short)(prevz + z)) : ((short)(prevz - z)));
-	                            _CompressedPDUCount++;
-	    					}
-	    					
-	    					Logger.log(this._ID,x + "," + y + "," + z);
-	    					
-	    					sr.x = x; sr.y = y; sr.z = z;
-	    					
-	    					prevx = x; prevy = y; prevz = z;   
-	    					
-	    					//****************calculating the Sampling rate
-	    					Calendar logDt = Calendar.getInstance();
-	    			        Date logTmpDt = logDt.getTime();
-	    			        
-	    			        long diff = logTmpDt.getTime() - sr.prev_time.getTime();
-	    			        //handler.enCode(logDt, x, y, z);
-    			        	sr.counter ++;
-    			        	sr.total_time = sr.total_time + diff;
-    			        	sr.prev_time = logTmpDt;
-    			        	
-    				        if (sr.total_time != 0){
-    				        	long temp1 = sr.counter*100000;
-    				        	double temp2 =  temp1 / sr.total_time ;   	
-    				        	temp1 = (long)(temp2);
-    				        	sr.samplingRate = temp1/ 100.0 ;
-    				        }
-    			        	//************************************************
-	    					if(this._Head >= (BUFFER_SIZE -1))
-	    						this._Head = 0;
-	    					else this._Head ++;
-	    					numDecodedPackets++;
-	    				}
-	    				else if (packetType == SensorDataType.RESPONSE_PDU)
-	                    {
-	    					DecodeResponce(responseType, bytesToRead, sr);                 
-	                    }
-	    				this.packetPosition = 0;
-						this.headerSeen = false;
+	public void Decode(int sourceSensor, byte[] data, int end, WocketParam sr) {
+		
+		//SimpleDateFormat _DateFormat_log = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss.SSS");			
+		int rawDataIndex = head;
+		int length = end;
+		
+		while ((rawDataIndex != length)) {
+			// System.out.print("\t data["+rawDataIndex+"]:"+(data[rawDataIndex]) );
+			if (data[rawDataIndex] != 0xff) {
+
+				if (((data[rawDataIndex]) & 0x80) != 0) {// Header:First byte of a packet				
+					this.packetPosition = 0;
+					this.headerSeen = true;
+					packetType = SensorDataType.values()[((data[rawDataIndex] << 1) & 0xff) >> 6];
+					// System.out.println("packetType:"+ packetType );
+					bytesToRead = DefineByteToRead(packetType,
+							data[rawDataIndex]);
+					// System.out.println("bytesToRead:"+ bytesToRead );
+				}
+
+				if ((this.headerSeen == true)
+						&& (this.packetPosition < bytesToRead)) {
+					this.packet[this.packetPosition] = data[rawDataIndex];
+				}
+
+				this.packetPosition++;
+
+				if ((this.packetPosition == bytesToRead)) {// a full packet was received
+					// System.out.println("one packet of "+ packetType
+					// +" received compeletly");
+					if ((packetType == SensorDataType.UNCOMPRESSED_DATA_PDU)
+							|| (packetType == SensorDataType.COMPRESSED_DATA_PDU)) {
+						
+						// ****************calculating the Sampling rate
+						Calendar logDt = Calendar.getInstance();
+						Date current_time = logDt.getTime();
+						long diff = current_time.getTime()
+								- prev_time.getTime();
+						sr.counter++;
+						sr.total_time = sr.total_time + diff;
+						// System.out.println("sr.total_time in decoder"+sr.total_time);
+						prev_time = current_time;
+						if (sr.total_time != 0) {
+							long temp1 = sr.counter * 100000;
+							double temp2 = temp1 / sr.total_time;
+							temp1 = (long) (temp2);
+							sr.samplingRate = temp1 / 100.0;
+						}
+						if (sr.total_time >= 60000) {
+							sr.counter = 0;
+							sr.total_time = 0;
+							sr.minute++;
+							sr.flag = 1;
+						}
+
+						// ***********************Decoding the data***********
+						sr.data_flag = 1;
 						bytesToRead = 0;
-	    			}//end of processing one complete packet
-    			}
-    			rawDataIndex++;
-    		}
-    		//System.out.println();
-    	}
-    	return numDecodedPackets;
-    }
+						short x = 0;
+						short y = 0;
+						short z = 0;
+
+						if (packetType == SensorDataType.UNCOMPRESSED_DATA_PDU) {
+							x = (short) ((((int) ((int) this.packet[0] & 0x03)) << 8)
+									| (((int) ((int) this.packet[1] & 0x7f)) << 1) | (((int) ((int) this.packet[2] & 0x40)) >> 6));
+							y = (short) ((((int) ((int) this.packet[2] & 0x3f)) << 4) | (((int) ((int) this.packet[3] & 0x78)) >> 3));
+							z = (short) ((((int) ((int) this.packet[3] & 0x07)) << 7) | ((int) ((int) this.packet[4] & 0x7f)));
+							_UncompressedPDUCount++;
+						} else {
+							x = (short) (((this.packet[0] & 0x0f) << 1) | ((this.packet[1] & 0x40) >> 6));
+							x = ((((short) ((this.packet[0] >> 4) & 0x01)) == 1) ? ((short) (prevx + x))
+									: ((short) (prevx - x)));
+							y = (short) (this.packet[1] & 0x1f);
+							y = ((((short) ((this.packet[1] >> 5) & 0x01)) == 1) ? ((short) (prevy + y))
+									: ((short) (prevy - y)));
+							z = (short) ((this.packet[2] >> 1) & 0x1f);
+							z = ((((short) ((this.packet[2] >> 6) & 0x01)) == 1) ? ((short) (prevz + z))
+									: ((short) (prevz - z)));
+							_CompressedPDUCount++;
+						}
+
+						Logger.log(this._ID, x + "," + y + "," + z );
+						sr.x = x;
+						sr.y = y;
+						sr.z = z;
+						prevx = x;
+						prevy = y;
+						prevz = z;
+						bafEncoder.encodeAndSaveData(logDt, (int) x, (int) y, (int) z, "007");
+
+						//numDecodedPackets++;
+					} else if (packetType == SensorDataType.RESPONSE_PDU) {
+						DecodeResponce(responseType, bytesToRead, sr);
+					}
+					this.packetPosition = 0;
+					this.headerSeen = false;
+					bytesToRead = 0;
+				}// end of processing one complete packet
+			}
+			rawDataIndex++;
+			if (rawDataIndex == data.length) {
+				rawDataIndex = 0;
+			}			
+		}// End while
+		
+		head = rawDataIndex;		
+	}
     
-    //*******************************************************************************
+    //**************************DefineByteToRead***********************************
     public int DefineByteToRead(SensorDataType packetType, byte pack_header){
     	int bytesToRead = 0;
     	switch(packetType)
@@ -333,7 +260,7 @@ public final class WocketDecoder extends Decoder
     }
     
     
-    //*******************************************************************************
+    //*************************DecodeResponce***************************************
     public void DecodeResponce (ResponseTypes responseType, int bytesToRead, WocketParam wp){
     	
     	switch (responseType)
@@ -345,7 +272,7 @@ public final class WocketDecoder extends Decoder
                     System.out.println("packet"+i+": "+this.packet[i]);
                 }*/
                 System.out.println("received a BL packet");
-                br._BatteryLevel = ((this.packet[1]&0x7f)<<3) | ((this.packet[2]&0x70)>>4);//(((int)(this.packet[1]&0x7f) << 3) | (int)((this.packet[2]& 0x07) >> 4));
+                br._BatteryLevel = ((this.packet[1]&0x7f)<<3) | ((this.packet[2]&0x70)>>4);
                 if (br._BatteryLevel>500){
                 	wp.battery = br._BatteryLevel;
                 	System.out.println("BL packet is correct");
@@ -462,6 +389,17 @@ public final class WocketDecoder extends Decoder
                             this._ActivityCountIndex = 0;                                       
                     }
                 }
+                /**************************
+                byte[] seqNum = new byte[4];
+				byte temp;
+				temp = (byte)(lastSeqNum >> 8);
+				seqNum[0] = (byte)WocketSensor.WOCKET_ACK_PACKET ;
+				seqNum[1] = (byte)((byte)(temp >>> 1) & 0x7f);
+				seqNum[2] = (byte)((byte)(temp << 6) & 0x40);
+				temp = (byte)(lastSeqNum);
+				seqNum[2] |= (byte)((byte)(temp >> 2) & 0x3f);
+				seqNum[3] = (byte) ((byte)(temp << 5) & 0x60);
+                //**************************/
 
                 break;
             case TCT_RSP:

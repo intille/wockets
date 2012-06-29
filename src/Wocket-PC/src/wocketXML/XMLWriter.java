@@ -11,17 +11,18 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 import org.xmlpull.v1.XmlSerializer;
 
-import bluetooth.AxesCalibration;
-import bluetooth.CalibrationValues;
+import wockets.data.AxesCalibration;
+import wockets.data.CalibValues;
+
 
 public class XMLWriter {
 	
 	//private static SensorDataInfo[] sensors;
     private static String fileName = "wocketCalibration.xml";
 
-    public static void write (CalibrationValues cValues) throws XmlPullParserException, IOException {
+    public static void write (CalibValues cValues) throws XmlPullParserException, IOException {
     	
-    	CalibrationValues calibrationValues = cValues;
+    	CalibValues calibrationValues = cValues;
     	int[] batteryCal= calibrationValues.getBattery_calibration(); 
 		AxesCalibration[]axisCalibration = calibrationValues.getAxisCalibration();
     	File wocketFile = new File(fileName);

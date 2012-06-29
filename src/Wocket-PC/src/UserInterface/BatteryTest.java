@@ -4,7 +4,6 @@
  */
 package UserInterface;
 
-import bluetooth.CalibrationValues;
 import bluetooth.PcClient;
 import java.awt.CardLayout;
 import java.io.IOException;
@@ -17,6 +16,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import org.xmlpull.v1.XmlPullParserException;
 import wocketXML.XMLWriter;
+import wockets.data.CalibValues;
 
 /**
  *
@@ -27,9 +27,9 @@ public class BatteryTest extends javax.swing.JPanel {
     JPanel userProcessContainer;
     InputStream inStream = null;
     OutputStream outStream = null;
-    CalibrationValues calibrationValues;
+    CalibValues calibrationValues;
     
-    public BatteryTest(JPanel upc, InputStream is, OutputStream os, CalibrationValues cv) throws IOException {
+    public BatteryTest(JPanel upc, InputStream is, OutputStream os, CalibValues cv) throws IOException {
         initComponents();
         userProcessContainer = upc;userProcessContainer = upc;
         outStream = os;
