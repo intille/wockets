@@ -1,5 +1,10 @@
 package bluetooth;
+import java.io.BufferedInputStream;
+
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -7,6 +12,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Vector;
@@ -21,15 +27,18 @@ import javax.bluetooth.UUID;
 import javax.microedition.io.Connector;
 import javax.microedition.io.StreamConnection;
 
+import bafFormat.BafDecoder;
+import bafFormat.RawDataFileHandler;
 import com.intel.bluetooth.BlueCoveImpl;
 
 import DataCollection.Decoder;
 import DataCollection.Logger;
 import DataCollection.WocketDecoder;
-import java.io.*;
+//import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
+import wockets.data.WocketParam;
 import wockets.utils.CircularBuffer;
  
 /**
@@ -46,39 +55,26 @@ public class MyPcClient implements DiscoveryListener{
     private static String connectionURL=null;
     private static ServiceRecord serviceRecord = null;
     private static java.util.Vector services;
-    /*public class battery_life(){
-    	int level;
-    }*/
+    
     
     private static ArrayList<Integer> battery = new ArrayList<Integer>();
-    //private static int[] battery = new int[600]; 
+    private static BafDecoder bafDecoder = new BafDecoder();
+    boolean isTransmitted = false;
+    SimpleDateFormat dayFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+	Date lastRun = null;
     
-  //*********************************Wocket Commands****************************************
+    //*********************************Wocket Commands****************************************
     public final static byte[] WOCKET_60_SEC_BURST_PACKET = {(byte) 0xBA, (byte)0x20};
     public final static byte[] WOCKET_Continuous_PACKET = {(byte) 0xBA, (byte)0x00};
     public final static byte[] WOCKET_GET_WTM_PACKET = {(byte) 0xBE};
     public final static byte[] WOCKET_GET_BATTERY_LEVEL = {(byte) 0xA0};
     public final static byte[] WOCKET_BATTERY_CALIBRATION_PACKET = {(byte) 0xB5, 0,0,0,0,0,0,0,0,0};
-    public final static byte[] WOCKET_SET_LED_PACKET = {(byte) 0xBC, (byte)0x02}; //Yellow_ LED on for 4 Seconds    
+    public final static byte[] WOCKET_SET_LED_PACKET = {(byte) 0xBC, (byte)0x04}; //Yellow_ LED 4 times    
     public final static byte[] WOCKET_SET_TCT_PACKET = {(byte) 0xB9, (byte)0x1E, (byte) 0x80, (byte)0x1F, (byte)0x70};
     
-    //*********************************Main****************************************
-    public static void main(String[] args) throws IOException {
-    	
-    	 /*BlueCoveImpl.useThreadLocalBluetoothStack();    	 
-    	// Illustrates attaching thread to already initialized stack interface
-    	 Thread t1 = new Thread() {
-    	    public void run() {
-    	    	try{
-	    	    	
-    	    	} catch (IOException e1) {
-                    e1.printStackTrace();
-    	    	}
-    	    }
-    	 };
-    	 t1.start();*/
-    	 
-    	 
+//*********************************Main************************************************************************************************************
+    public static void main(String[] args) throws IOException {   
+    	   	 
     	MyPcClient client=new MyPcClient();
        
         //display local device address and name
@@ -156,26 +152,56 @@ public class MyPcClient implements DiscoveryListener{
         System.out.println("Connection is done.");
        
         //write
-        OutputStream outStream=streamConnection.openOutputStream();
-               
-        //outStream.write(WOCKET_60_SEC_BURST_PACKET);
-        outStream.write(WOCKET_Continuous_PACKET);	
+        OutputStream outStream=streamConnection.openOutputStream();  
 		
         //read		
-        InputStream inStream=streamConnection.openInputStream();
-        int cnt = 10;
-        byte[] bytes = new byte[cnt];        
-        WocketDecoder myDecoder = new WocketDecoder(0);
-        WocketParam sr = new WocketParam();
+        InputStream inStream=streamConnection.openInputStream();        
+        //BufferedInputStream bufferedInStream = new BufferedInputStream(inStream);
         
-        //Calibrate_SamplingRate(40, inStream,  outStream);
+        
+        //****************Continuous Mode******************************
+    	outStream.write(WOCKET_Continuous_PACKET);
+    	try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+    	
+    	/*outStream.write(WOCKET_SET_LED_PACKET[0]);
+    	try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+    	outStream.write(WOCKET_SET_LED_PACKET[1]);
+    	try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} */  
+        
         //System.out.println("start testing");
-        measureSamplingRate(outStream, inStream, 600);
-        //testBattery(outStream,inStream);
-        //CalibrateBattery(outStream);
+        //measureSamplingRate(outStream, inStream, 600);
+    	//set_sr(195, outStream);
+    	//Calibrate_SamplingRate(40, inStream,  outStream); 
+    	test_Axes('x', outStream, inStream);
         //measure_range('x', outStream, inStream);
         //measure_range('y', outStream, inStream);
-        //measure_range('z', outStream, inStream);
+        //measure_range('z', outStream, inStream);       	
+        //testBattery(outStream,inStream);
+        //CalibrateBattery(outStream);
+      //**********************Calling BafDecoder ****************************
+    	/*SimpleDateFormat dayFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+    	Date startDate=null, endDate=null;
+		try {
+			startDate = dayFormat.parse("2012-06-18 13:00");
+			endDate = dayFormat.parse("2012-06-18 14:30");
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	bafDecoder.decodeAndSaveDataWithStream( startDate, endDate,  "");*/
+    	//*********************************************************************
     }//main
     
   //*******************************Calibrate_SamplingRate**********************************************************************
@@ -185,11 +211,7 @@ public class MyPcClient implements DiscoveryListener{
     	double accuracy;
     	double samplingRate = measureSamplingRate(outStream, inStream, 2);
         double diff = samplingRate - fav_samplingRate;
-        if (diff < 0){
-        	accuracy= (7812/(ticks-1))-fav_samplingRate;        	
-        }  else{
-        	accuracy= fav_samplingRate-(7812/(ticks+1));
-        }
+        accuracy = Math.max(Math.abs((7812/(ticks-1))-fav_samplingRate), Math.abs(fav_samplingRate-(7812/(ticks+1))));
         System.out.println("Accuracy of calobrating Sampling rate: +/-("+round(accuracy,2)+")");
         if (Math.abs(diff) < accuracy){
             System.out.println("The Wocket is already calibrated: "+samplingRate);
@@ -207,6 +229,7 @@ public class MyPcClient implements DiscoveryListener{
 	    		tick2 = Math.floor(tick2);
 	    	else 
 	    		tick2 = Math.ceil(tick2);
+	    	System.out.println("tick2: "+tick2);
 	    	if (tick2 != tick1){	
 	    		System.out.println("Modify the sampling rate...");
 		    	set_sr(tick2, outStream);		    	
@@ -219,7 +242,7 @@ public class MyPcClient implements DiscoveryListener{
     	System.out.println("CAlibration is done. The sampling rate after calibration: "+samplingRate);
     }
     
-  //*******************************set sr************************************************
+  //*******************************Set Sampling Rate************************************************
     public static void set_sr(double ticks, OutputStream outStream) throws IOException{
     	
     	byte tct; byte reps; byte last;
@@ -235,7 +258,7 @@ public class MyPcClient implements DiscoveryListener{
 		_Bytes[2]=(byte) ((((byte)tct & 0x01)<<6) | ((byte)reps>>2));
 		_Bytes[3]=(byte) ((((byte)reps & 0x03)<<5) |  (byte)((byte)(last>>3) & 0x1f) );
 		_Bytes[4]=(byte) (((byte)last & 0x07)<<4);
-		for (byte b=0;b<2; b++){// sending the command twice to be sure it is received by Wocket
+		//for (byte b=0;b<10; b++){// sending the command twice to be sure it is received by Wocket
 			for (int m=0; m<5; m++){
 				outStream.write(_Bytes[m]);
 				outStream.flush();
@@ -245,34 +268,46 @@ public class MyPcClient implements DiscoveryListener{
 					e.printStackTrace();
 				}
 			}
-		}
+			outStream.flush();
+			System.out.println("SET TCT is sent.");
+		//}
     }
     
-	//******************************Measure SR****************************************    
+	//******************************Measure Sampling Rate****************************************    
 	public static double measureSamplingRate(OutputStream outStream, InputStream inStream, int t)throws IOException{
 	    System.out.println("Measuring the Wocket's sampling rate...");
+	    
 	    WocketParam sr = new WocketParam();
-	    int cnt = 7;
-	    byte[] wocketData = new byte[cnt]; 
+	    int MAX_SIZE = 2400;
+	    byte[] wocketData = new byte[MAX_SIZE];
+	    int decodeFlag = 0;
+	    int tail = 0;
 	    WocketDecoder myDecoder = new WocketDecoder(0);
-	    while (sr.flag < t){	    
-	    	if (sr.total_time >= 60000){
-	    		outStream.write(WOCKET_GET_BATTERY_LEVEL);outStream.flush();
-                System.out.print("minute:"+(sr.flag+1));
-                System.out.println("\tSampling Rate: "+ sr.samplingRate+"\tBattery: " +sr.battery);
+	    
+	    while (sr.minute < t){
+	    	while (inStream.available() > 0){	
+	    		wocketData[tail] =(byte) inStream.read();
+            	tail ++; 
+            	decodeFlag = 1;
+            	if (tail == (MAX_SIZE)){
+            		tail = 0;
+            		//System.out.println("sr.total_time in main"+sr.total_time);
+            	}            	
+	    	}
+	    	if (decodeFlag == 1){
+	    		myDecoder.Decode(0, wocketData, tail, sr); 
+		    	decodeFlag = 0;
+	    	}
+	    	
+	    	if (sr.flag == 1){
+	    		//outStream.write(WOCKET_GET_BATTERY_LEVEL);outStream.flush();
+                System.out.println("minute:"+(sr.minute)+"\tSampling Rate: "+ sr.samplingRate);//+"\tBattery: " +sr.battery);
                 battery.add(sr.battery);
-                String msg = Double.toString(sr.samplingRate)+","+sr.battery;
+                String msg = Double.toString(sr.samplingRate)+","+sr.battery+ ","+ sr.toString();
                 log (msg);
-                sr.counter = 0;
-                sr.total_time = 0;
-                sr.flag ++;  
-                //temp_sr = sr.samplingRate;
-                outStream.write(WOCKET_GET_BATTERY_LEVEL);outStream.flush();
-            }
-            if (inStream.available() > 0){
-                    inStream.read(wocketData);
-                    myDecoder.Decode(0, wocketData, cnt, sr);    
-            }
+                sr.flag = 0;
+                //System.out.println("reset flag");
+            } 
 	    }              
 	    return sr.samplingRate;
 	}  
@@ -280,17 +315,16 @@ public class MyPcClient implements DiscoveryListener{
 	//******************************Test Battery****************************************    
 	public static int[] testBattery(OutputStream outStream, InputStream inStream)throws IOException{
 	    System.out.println("Testing Wocket's battry...");
+	    
 	    ArrayList<Integer> battery = new ArrayList<Integer>();
 	    WocketParam sr = new WocketParam();
-	    int cnt = 10;
-	    byte[] wocketData = new byte[cnt]; 
+	    int MAX_SIZE = 2400;
+	    byte[] wocketData = new byte[MAX_SIZE];
+	    int decodeFlag = 0;
+	    int tail = 0;
 	    WocketDecoder myDecoder = new WocketDecoder(0);
-	    while (sr.flag < 600){
-	    	
-	    	/*if ((sr.total_time == 10000)|(sr.total_time == 20000)|(sr.total_time == 30000)|(sr.total_time == 40000)|(sr.total_time == 50000)){                    
-                outStream.write(WOCKET_GET_BATTERY_LEVEL);outStream.flush();
-                System.out.println("resending bt command"); 
-	    	}*/
+	    
+	    while (sr.flag < 600){  
 	    	if (sr.total_time >= 60000){  
 	    		sr.counter = 0;
                 sr.total_time = 0;
@@ -304,10 +338,17 @@ public class MyPcClient implements DiscoveryListener{
                 sr.flag ++; 
                 //temp_sr = sr.samplingRate;
             }
-            if (inStream.available() > 0){
-                    inStream.read(wocketData);
-                    myDecoder.Decode(0, wocketData, cnt, sr);    
-            }
+	    	while (inStream.available() > 0){
+	    		wocketData[tail] =(byte) inStream.read();
+            	tail ++; 
+            	decodeFlag = 1;
+            	if (tail == (MAX_SIZE))
+            		tail = 0;
+	    	}
+	    	if (decodeFlag == 1){
+		    	myDecoder.Decode(0, wocketData, tail, sr); 
+		    	decodeFlag = 0;
+	    	}
 	    } 
 	    int life = battery.size();
 	    int[] batterCalibrationValues = new int[6];
@@ -363,16 +404,27 @@ public class MyPcClient implements DiscoveryListener{
   //******************************test Axes**********************************************************
     public static int test_Axes(char axis, OutputStream outStream, InputStream inStream) throws IOException {
     	System.out.println("Testing Wocket's axes...");
-	    WocketParam sr = new WocketParam();
+	    
 	    int diff = 0;
-	    int cnt = 7;
-	    byte[] wocketData = new byte[cnt]; 
+	    WocketParam sr = new WocketParam();
+	    int MAX_SIZE = 2400;
+	    byte[] wocketData = new byte[MAX_SIZE];
+	    int decodeFlag = 0;
+	    int tail = 0;
 	    WocketDecoder myDecoder = new WocketDecoder(0);
+	    
 	    while (sr.total_time <= 30000){ // 30 sec
-            if (inStream.available() > 0){
-                    inStream.read(wocketData);
-                    myDecoder.Decode(0, wocketData, cnt, sr);    
-            }
+	    	while (inStream.available() > 0){
+	    		wocketData[tail] =(byte) inStream.read();
+            	tail ++; 
+            	decodeFlag = 1;
+            	if (tail == (MAX_SIZE))
+            		tail = 0;
+	    	}
+	    	if (decodeFlag == 1){
+		    	myDecoder.Decode(0, wocketData, tail, sr); 
+		    	decodeFlag = 0;
+	    	}
             if (sr.data_flag == 1){
             	sr.data_flag = 0;
             	switch(axis)
@@ -397,34 +449,53 @@ public class MyPcClient implements DiscoveryListener{
 	    sr.counter = 0;
 	    
 	    while (sr.total_time <= 30000){ // 30 sec
-            if (inStream.available() > 0){
-                    inStream.read(wocketData);
-                    myDecoder.Decode(0, wocketData, cnt, sr);    
-            }
+	    	while (inStream.available() > 0){
+	    		wocketData[tail] =(byte) inStream.read();
+            	tail ++; 
+            	decodeFlag = 1;
+            	if (tail == (MAX_SIZE))
+            		tail = 0;
+	    	}
+	    	if (decodeFlag == 1){
+		    	myDecoder.Decode(0, wocketData, tail, sr); 
+		    	decodeFlag = 0;
+	    	}
             if (sr.data_flag == 1){
             	sr.data_flag = 0;
             	diff= Math.abs(sr.x - axis_value);
             }
 	    } 
 	    int noise = diff / sr.counter;
+	    System.out.println("axis_value: "+axis_value);
 	    return axis_value;
     }
     
   //******************************Measure Noise**********************************************************
     public static int[] measureNoise(OutputStream outStream, InputStream inStream, int midx, int midy, int midz) throws IOException {
     	System.out.println("Measuring Noise...");
-	    WocketParam sr = new WocketParam();
+	    
 	    int diffx = 0;
 	    int diffy = 0;
 	    int diffz = 0;
-	    int cnt = 7;
-	    byte[] wocketData = new byte[cnt]; 
+	    WocketParam sr = new WocketParam();
+	    int MAX_SIZE = 2400;
+	    byte[] wocketData = new byte[MAX_SIZE];
+	    int decodeFlag = 0;
+	    int tail = 0;
 	    WocketDecoder myDecoder = new WocketDecoder(0);
+	    
 	    while (sr.total_time <= 30000){ // 30 sec
-            if (inStream.available() > 0){
-                    inStream.read(wocketData);
-                    myDecoder.Decode(0, wocketData, cnt, sr);    
-            }
+	    	while (inStream.available() > 0){
+	    		wocketData[tail] =(byte) inStream.read();
+            	tail ++; 
+            	decodeFlag = 1;
+            	if (tail == (MAX_SIZE))
+            		tail = 0;
+	    	}
+	    	if (decodeFlag == 1){
+		    	myDecoder.Decode(0, wocketData, tail, sr); 
+		    	decodeFlag = 0;
+	    	}
             if (sr.data_flag == 1){
             	sr.data_flag = 0;
             	diffx+= Math.abs(sr.x - midx);
@@ -439,20 +510,31 @@ public class MyPcClient implements DiscoveryListener{
 	    noise[2] = diffz/ sr.counter;
 	    return noise;
     }
-  //******************************Measure range**********************************************************
+  //******************************Measure Axis range**********************************************************
     public static int[] measure_range(char axis, OutputStream outStream, InputStream inStream) throws IOException {
     	System.out.println("Measuring accelerometer range...");
-	    WocketParam sr = new WocketParam();
+	    
 	    int max = 0;
 	    int min = 1000;
-	    int cnt = 7;
-	    byte[] wocketData = new byte[cnt]; 
+	    WocketParam sr = new WocketParam();
+	    int MAX_SIZE = 2400;
+	    byte[] wocketData = new byte[MAX_SIZE];
+	    int decodeFlag = 0;
+	    int tail = 0;
 	    WocketDecoder myDecoder = new WocketDecoder(0);
+	    
 	    while (sr.total_time <= 30000){ // 30 sec
-            if (inStream.available() > 0){
-                    inStream.read(wocketData);
-                    myDecoder.Decode(0, wocketData, cnt, sr);    
-            }
+	    	while (inStream.available() > 0){
+	    		wocketData[tail] =(byte) inStream.read();
+            	tail ++; 
+            	decodeFlag = 1;
+            	if (tail == (MAX_SIZE))
+            		tail = 0;
+	    	}
+	    	if (decodeFlag == 1){
+		    	myDecoder.Decode(0, wocketData, tail, sr); 
+		    	decodeFlag = 0;
+	    	}
             if (sr.data_flag == 1){
             	sr.data_flag = 0;
             	switch(axis)
@@ -510,7 +592,7 @@ public class MyPcClient implements DiscoveryListener{
 			}
 		}
     }
-        
+       
     //******************************log****************************************************************
     static Boolean flag= false; 
     private static SimpleDateFormat _DateFormat_log = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss.SSS");
@@ -556,7 +638,42 @@ public class MyPcClient implements DiscoveryListener{
         long tmp = Math.round(value);
         return (double) tmp / factor;
     }
-       
+    
+  //************************************Send BAF data to the server*********************************************************
+    /**
+	 * Reset configuration file for sensor info in the beginning of a new day
+	 *
+	 * @param time the time
+	 * @param c the c
+	 */
+	public void compressANDTransferZipFiles(Date now){
+		//reset configuration info in the beginning of a new day 
+		
+		if(lastRun == null){
+			Calendar logDt = Calendar.getInstance();
+	        lastRun = logDt.getTime();	
+	        return;
+		}
+		RawDataFileHandler rawDataFileHandler = new RawDataFileHandler();
+		//zip encoded data file for the last hour and put into external memory
+		if(now.getHours() != lastRun.getHours()){
+			rawDataFileHandler.zipRawData(lastRun);
+		}
+		//transmit zip files to server after 10pm
+		int hour = now.getHours();
+		
+		if(isTransmitted && hour < 22){
+			isTransmitted = false;
+		}
+		else if(!isTransmitted && hour >= 22){
+			//check the internal memory, make sure all of the raw data except today are compressed and saved in the SD card
+			//then delete the folder and files
+			//rawDataFileHandler.doubleCheckOldFiles(now);
+
+			if(rawDataFileHandler.transmitRawData())
+				isTransmitted = true; 
+		}
+	}
     //*********************************methods of DiscoveryListener****************************************
     @Override
     public void deviceDiscovered(RemoteDevice btDevice, DeviceClass cod) {

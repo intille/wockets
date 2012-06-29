@@ -28,6 +28,8 @@ import javax.bluetooth.*;
 import javax.swing.JLabel;
 import javax.swing.JTextArea;
 
+import wockets.data.WocketParam;
+
 
 /**
 * A simple SPP client that connects with an SPP server
@@ -165,10 +167,10 @@ public class PcClient implements DiscoveryListener{
         
     }//main
     
- 
-    
+  
   //*******************************Calibrate_SamplingRate**********************************************************************
     public static void Calibrate_SamplingRate(double fav_samplingRate, InputStream inStream, OutputStream outStream, JLabel textArea) throws IOException{
+    	
     	byte tct, reps, last;
     	double ticks = (int)(7812/fav_samplingRate);//8MHz/2^10=7812
     	double accuracy;
@@ -207,7 +209,7 @@ public class PcClient implements DiscoveryListener{
     	}
     	System.out.println("CAlibration is done. The sampling rate after calibration: "+samplingRate);
     }
-  //*******************************set_sr************************************************
+  //*******************************set Sampling Rate************************************************
     public static void set_sr(double ticks, OutputStream outStream) throws IOException{
     	
     	byte tct; byte reps; byte last;
@@ -225,60 +227,69 @@ public class PcClient implements DiscoveryListener{
 		_Bytes[4]=(byte) (((byte)last & 0x07)<<4);
 		for (byte b=0;b<2; b++){
 			for (int m=0; m<5; m++){
-				//System.out.println(_Bytes[m]);
 				outStream.write(_Bytes[m]);
 				outStream.flush();
 				try {
 				Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
+				} catch (InterruptedException e) {					
 					e.printStackTrace();
+					System.out.println("error in setting delay between sending bytes");
 				}
 			}
 		}
     }
     
-	//******************************Measure SR****************************************    
+	//******************************Measure Sampling Rate****************************************    
 	public static double measureSamplingRate(InputStream inStream, int t, JLabel textArea)throws IOException{
-            JLabel label = textArea;
-            label.setText("Measuring the Wocket's sampling rate...");
-            //jTextArea.invalidate();
-            label.repaint();
+        JLabel label = textArea;
+        label.setText("Measuring the Wocket's sampling rate...");
+        //jTextArea.invalidate();
+        label.repaint();
 	    System.out.println("Measuring the Wocket's sampling rate...");
+	    
 	    WocketParam sr = new WocketParam();
-	    int cnt = 7;
-	    byte[] wocketData = new byte[cnt]; 
-	    WocketDecoder myDecoder = new WocketDecoder(0);
-	    while (sr.flag < t){
-	            if (sr.total_time >= 60000){
-	                    System.out.print("minute:"+(sr.flag+1));
-	                    System.out.println("\tSampling Rate: "+ sr.samplingRate);
-                            label.setText("minute:"+(sr.flag+1)+"\tSampling Rate: "+ sr.samplingRate);
-                            //jTextArea.invalidate();
-                            label.repaint();
-	                    sr.counter = 0;
-	                    sr.total_time = 0;
-	                    sr.flag ++;  
-	                    //temp_sr = sr.samplingRate;
-	            }
-	            if (inStream.available() > 0){
-	                    inStream.read(wocketData);
-	                    myDecoder.Decode(0, wocketData, cnt, sr);    
-	            }
-	    }
-            String msg = Double.toString(sr.samplingRate);
-            log (msg);
+	    int MAX_SIZE = 2400;
+	    byte[] wocketData = new byte[MAX_SIZE];
+	    int decodeFlag = 0;
+	    int tail = 0;
+	    WocketDecoder myDecoder = new WocketDecoder(0);	    
+	     
+        while (sr.minute < t){
+	    	while (inStream.available() > 0){	
+	    		wocketData[tail] =(byte) inStream.read();
+            	tail ++; 
+            	decodeFlag = 1;
+            	if (tail == (MAX_SIZE)){
+            		tail = 0;
+            	}            	
+	    	}
+	    	if (decodeFlag == 1){
+	    		myDecoder.Decode(0, wocketData, tail, sr); 
+		    	decodeFlag = 0;
+	    	}
+	    	
+	    	if (sr.flag == 1){
+                System.out.println("minute:"+(sr.minute)+"\tSampling Rate: "+ sr.samplingRate);
+                String msg = Double.toString(sr.samplingRate);
+                log (msg);
+                sr.flag = 0;
+            } 
+	    }        
+        
 	    return sr.samplingRate;
 	}
 	
     //******************************Test Battery****************************************    
     public static int[] testBattery(OutputStream outStream, InputStream inStream)throws IOException{
         System.out.println("Testing Wocket's battry...");
+        
         ArrayList<Integer> battery = new ArrayList<Integer>();
         WocketParam sr = new WocketParam();
-        int cnt = 7;
-        byte[] wocketData = new byte[cnt]; 
-        WocketDecoder myDecoder = new WocketDecoder(0);
+	    int MAX_SIZE = 2400;
+	    byte[] wocketData = new byte[MAX_SIZE];
+	    int decodeFlag = 0;
+	    int tail = 0;
+	    WocketDecoder myDecoder = new WocketDecoder(0);
         int minute = 0;
         long idleTime = 0;
         
@@ -286,33 +297,35 @@ public class PcClient implements DiscoveryListener{
         Date prev_time = logDt.getTime();
         Date current_time;
         long diff;
-        while (idleTime < 30000){
-            /*if (sr.total_time >= 59950){
-                outStream.write(WOCKET_GET_BATTERY_LEVEL);outStream.flush();
-            }*/
-            if (sr.total_time >= 60000){ //one minute                   
+        while (idleTime < 30000){ // if computer doesn't receive data from Wocket for 30Sec, it assumes, the Wocket is discharged. 
+            
+            if (sr.flag == 1){ //one minute                   
                 outStream.write(WOCKET_GET_BATTERY_LEVEL);outStream.flush();
                 System.out.println("minute:"+(minute+1)+"\tBattery: " +sr.battery);
                 battery.add(sr.battery);
                 String msg = Integer.toString(sr.battery);
                 log (msg);
-                sr.counter = 0;
-                sr.total_time = 0;
-                minute ++;  
-                outStream.write(WOCKET_GET_BATTERY_LEVEL);outStream.flush();                
+                outStream.write(WOCKET_GET_BATTERY_LEVEL);outStream.flush(); 
+                sr.flag = 0;
             }
             logDt = Calendar.getInstance();
             current_time = logDt.getTime();            
             diff = current_time.getTime() - prev_time.getTime();
             idleTime += diff;
             prev_time = current_time;
-            if (inStream.available() > 0){
-                    inStream.read(wocketData);
-                    myDecoder.Decode(0, wocketData, cnt, sr); 
-                    idleTime = 0;
-            }
-        } 
-        
+            
+            while (inStream.available() > 0){
+	    		wocketData[tail] =(byte) inStream.read();
+            	tail ++; 
+            	decodeFlag = 1;
+            	if (tail == (MAX_SIZE))
+            		tail = 0;
+	    	}
+	    	if (decodeFlag == 1){
+		    	myDecoder.Decode(0, wocketData, tail, sr); 
+		    	decodeFlag = 0;
+	    	}
+        }         
         
         int life = battery.size();
         int[] batterCalibrationValues = new int[6];
@@ -369,16 +382,27 @@ public class PcClient implements DiscoveryListener{
   //******************************test Axes**********************************************************
     public static int test_Axes(char axis, OutputStream outStream, InputStream inStream) throws IOException {
     	System.out.println("Testing Wocket's axes...");
-	    WocketParam sr = new WocketParam();
+
 	    int diff = 0;
-	    int cnt = 7;
-	    byte[] wocketData = new byte[cnt]; 
+	    WocketParam sr = new WocketParam();
+	    int MAX_SIZE = 2400;
+	    byte[] wocketData = new byte[MAX_SIZE];
+	    int decodeFlag = 0;
+	    int tail = 0;
 	    WocketDecoder myDecoder = new WocketDecoder(0);
-	    while (sr.total_time <= 10000){ // 10 sec
-            if (inStream.available() > 0){
-                    inStream.read(wocketData);
-                    myDecoder.Decode(0, wocketData, cnt, sr);    
-            }
+	    
+	    while (sr.total_time <= 1000){ // 10 sec
+	    	while (inStream.available() > 0){
+	    		wocketData[tail] =(byte) inStream.read();
+            	tail ++; 
+            	decodeFlag = 1;
+            	if (tail == (MAX_SIZE))
+            		tail = 0;
+	    	}
+	    	if (decodeFlag == 1){
+		    	myDecoder.Decode(0, wocketData, tail, sr); 
+		    	decodeFlag = 0;
+	    	}
             if (sr.data_flag == 1){
             	sr.data_flag = 0;
             	switch(axis)
@@ -406,16 +430,27 @@ public class PcClient implements DiscoveryListener{
   //******************************Measure Noise**********************************************************
     public static int measureNoise(OutputStream outStream, InputStream inStream, int mid_value) throws IOException {
     	System.out.println("Measuring Noise...");
-	    WocketParam sr = new WocketParam();
+	    
 	    int diff = 0;
-	    int cnt = 7;
-	    byte[] wocketData = new byte[cnt]; 
-	    WocketDecoder myDecoder = new WocketDecoder(0);	    
-	    while (sr.total_time <= 10000){ // 10 sec
-            if (inStream.available() > 0){
-                    inStream.read(wocketData);
-                    myDecoder.Decode(0, wocketData, cnt, sr);    
-            }
+	    WocketParam sr = new WocketParam();
+	    int MAX_SIZE = 2400;
+	    byte[] wocketData = new byte[MAX_SIZE];
+	    int decodeFlag = 0;
+	    int tail = 0;
+	    WocketDecoder myDecoder = new WocketDecoder(0);
+	    
+	    while (sr.total_time <= 1000){ // 10 sec
+	    	while (inStream.available() > 0){
+	    		wocketData[tail] =(byte) inStream.read();
+            	tail ++; 
+            	decodeFlag = 1;
+            	if (tail == (MAX_SIZE))
+            		tail = 0;
+	    	}
+	    	if (decodeFlag == 1){
+		    	myDecoder.Decode(0, wocketData, tail, sr); 
+		    	decodeFlag = 0;
+	    	}
             if (sr.data_flag == 1){
             	sr.data_flag = 0;
             	diff= Math.abs(sr.x - mid_value);
@@ -429,17 +464,28 @@ public class PcClient implements DiscoveryListener{
   //******************************Measure range**********************************************************
     public static int[] measure_range(char axis, OutputStream outStream, InputStream inStream) throws IOException {
     	System.out.println("Measuring accelerometer range...");
-	    WocketParam sr = new WocketParam();
+	    
 	    int max = 0;
 	    int min = 1000;
-	    int cnt = 7;
-	    byte[] wocketData = new byte[cnt]; 
+	    WocketParam sr = new WocketParam();
+	    int MAX_SIZE = 2400;
+	    byte[] wocketData = new byte[MAX_SIZE];
+	    int decodeFlag = 0;
+	    int tail = 0;
 	    WocketDecoder myDecoder = new WocketDecoder(0);
+	    
 	    while (sr.total_time <= 10000){ // 10 sec
-            if (inStream.available() > 0){
-                    inStream.read(wocketData);
-                    myDecoder.Decode(0, wocketData, cnt, sr);    
-            }
+	    	while (inStream.available() > 0){
+	    		wocketData[tail] =(byte) inStream.read();
+            	tail ++; 
+            	decodeFlag = 1;
+            	if (tail == (MAX_SIZE))
+            		tail = 0;
+	    	}
+	    	if (decodeFlag == 1){
+		    	myDecoder.Decode(0, wocketData, tail, sr); 
+		    	decodeFlag = 0;
+	    	}
             if (sr.data_flag == 1){
             	sr.data_flag = 0;
             	switch(axis)

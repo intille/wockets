@@ -4,8 +4,6 @@
  */
 package UserInterface;
 
-import bluetooth.AxesCalibration;
-import bluetooth.CalibrationValues;
 import bluetooth.PcClient;
 import java.awt.CardLayout;
 import java.io.IOException;
@@ -18,6 +16,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import wockets.data.AxesCalibration;
+import wockets.data.CalibValues;
+
 /**
  *
  * @author Aida
@@ -27,10 +28,10 @@ public class MeasureZAxis extends javax.swing.JPanel {
     JPanel userProcessContainer;
     InputStream inStream = null;
     OutputStream outStream = null;
-    CalibrationValues calibrationValues;
+    CalibValues calibrationValues;
     int mid_value, noise; 
     
-    public MeasureZAxis(JPanel upc, InputStream is, OutputStream os, CalibrationValues cv) throws IOException {
+    public MeasureZAxis(JPanel upc, InputStream is, OutputStream os, CalibValues cv) throws IOException {
         initComponents();
         userProcessContainer = upc;userProcessContainer = upc;
         outStream = os;
@@ -176,7 +177,7 @@ public class MeasureZAxis extends javax.swing.JPanel {
                 try {                     
                     mid_value = PcClient.test_Axes('z', outStream, inStream);
                     calibrationValues.getAxisCalibration()[2].setMid(mid_value);
-                    messageLabel1.setText("\nMeasuring Noise of Z Axis...");
+                    messageLabel2.setText("\nMeasuring Noise of Z Axis...");
                     SwingUtilities.invokeLater(noiseRunnable); 
                 } catch (IOException ex) {
                     System.out.println("test z axis runnable error" + ex);

@@ -4,7 +4,6 @@
  */
 package UserInterface;
 
-import bluetooth.CalibrationValues;
 import bluetooth.PcClient;
 import java.awt.CardLayout;
 import java.io.IOException;
@@ -19,6 +18,8 @@ import javax.microedition.io.StreamConnection;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
+import wockets.data.CalibValues;
+
 /**
  *
  * @author Aida
@@ -29,7 +30,7 @@ public class ConnectPanel extends javax.swing.JPanel {
     Vector btDevices;
     PcClient btConnect;
     int index = 0;
-    CalibrationValues calibrationValues;
+    CalibValues calibrationValues;
     
     public ConnectPanel(JPanel upc, Vector btDevices) {
         initComponents();        
@@ -38,7 +39,7 @@ public class ConnectPanel extends javax.swing.JPanel {
         userProcessContainer = upc;
         refresh();  
         PcClient.beepRunnable.run();
-        calibrationValues = new CalibrationValues();
+        calibrationValues = new CalibValues();
     }
 
     /**

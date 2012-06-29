@@ -1,9 +1,7 @@
 package UserInterface;
 
 import DataCollection.WocketDecoder;
-import bluetooth.CalibrationValues;
 import bluetooth.PcClient;
-import bluetooth.WocketParam;
 import com.intel.bluetooth.BlueCoveImpl;
 import java.awt.CardLayout;
 import java.io.IOException;
@@ -15,6 +13,9 @@ import java.util.logging.Logger;
 import javax.microedition.io.StreamConnection;
 import javax.swing.*;
 import  sun.audio.*;
+import wockets.data.CalibValues;
+import wockets.data.WocketParam;
+
 import  java.io.*;
 
 /**
@@ -27,9 +28,9 @@ public class SetSamplingRate extends javax.swing.JPanel {
     StreamConnection streamConnection;
     InputStream inStream = null;
     OutputStream outStream = null;
-    CalibrationValues calibrationValues;
+    CalibValues calibrationValues;
     
-    public SetSamplingRate(JPanel upc, StreamConnection sc, CalibrationValues cvalues) throws IOException{
+    public SetSamplingRate(JPanel upc, StreamConnection sc, CalibValues cvalues) throws IOException{
         initComponents();
         userProcessContainer = upc;
         streamConnection = sc; 

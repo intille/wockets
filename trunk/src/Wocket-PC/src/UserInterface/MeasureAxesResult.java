@@ -4,8 +4,6 @@
  */
 package UserInterface;
 
-import bluetooth.AxesCalibration;
-import bluetooth.CalibrationValues;
 import bluetooth.PcClient;
 import java.awt.CardLayout;
 import java.io.IOException;
@@ -19,6 +17,9 @@ import javax.microedition.io.StreamConnection;
 import javax.swing.JPanel;
 import javax.swing.table.DefaultTableModel;
 
+import wockets.data.AxesCalibration;
+import wockets.data.CalibValues;
+
 /**
  *
  * @author Aida
@@ -28,9 +29,9 @@ public class MeasureAxesResult extends javax.swing.JPanel {
     JPanel userProcessContainer;
     InputStream inStream;
     OutputStream outStream;
-    CalibrationValues calibrationValues;
+    CalibValues calibrationValues;
     
-    public MeasureAxesResult(JPanel upc, InputStream is, OutputStream os, CalibrationValues cv) throws IOException {
+    public MeasureAxesResult(JPanel upc, InputStream is, OutputStream os, CalibValues cv) throws IOException {
         initComponents();
         userProcessContainer = upc;userProcessContainer = upc;
         outStream = os;
