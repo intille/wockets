@@ -193,9 +193,10 @@ void do_sampling()
 	x = _atmega_a2dConvert10bit(ADC0);		
 	y = _atmega_a2dConvert10bit(ADC1);
 	z = _atmega_a2dConvert10bit(ADC2);
-	/*if (i==6000) i=0;
+	/******test*****
+	if (i==1024) i=0;
 	x=y=z=i;
-	i++;*/
+	i++;************/
 
 	//Filter the raw accelerometer data and compute the vector of magnitude (Activity count)
 	vmag += Filter(x, 0) + Filter(y, 1) + Filter(z, 2);
@@ -415,17 +416,17 @@ int main()
 						{
 							m_GET_X(x, data[i].byte1,  data[i].byte2,  0);
 							m_GET_Y(y, data[i].byte2,  data[i].byte3,  0);
-							m_GET_Z(z, data[i].byte3,  data[i].byte4,  0);					
+							m_GET_Z(z, data[i].byte3,  data[i].byte4,  0);
 							_send_pdu(x, y, z);
 
 							m_GET_X(x, data[i].byte4,  data[i].byte5,  1);
 							m_GET_Y(y, data[i].byte6,  data[i].byte7,  1);
-							m_GET_Z(z, data[i].byte7,  data[i].byte8,  1);					
+							m_GET_Z(z, data[i].byte7,  data[i].byte8,  1);
 							_send_pdu(x, y, z);
 
 							m_GET_X(x, data[i].byte8,  data[i].byte9,  2);
 							m_GET_Y(y, data[i].byte9,  data[i].byte10, 2);
-							m_GET_Z(z, data[i].byte11, data[i].byte12, 2);				
+							m_GET_Z(z, data[i].byte11, data[i].byte12, 2);
 							_send_pdu(x, y, z);
 
 							m_GET_X(x, data[i].byte12, data[i].byte13, 3);
@@ -454,7 +455,7 @@ int main()
 						{
 							m_GET_X(x, data[current].byte1,  data[current].byte2,  0);
 							m_GET_Y(y, data[current].byte2,  data[current].byte3,  0);
-							m_GET_Z(z, data[current].byte3,  data[current].byte4,  0);							
+							m_GET_Z(z, data[current].byte3,  data[current].byte4,  0);
 							_send_pdu(x, y, z);
 
 							m_GET_X(x, data[current].byte4,  data[current].byte5,  1);

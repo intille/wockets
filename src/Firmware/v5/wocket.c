@@ -365,7 +365,7 @@ void _send_compressed_pdu(unsigned char x, unsigned char y, unsigned char z)
 	_bluetooth_transmit_uart0_byte(aBuffer[0]);
 	aBuffer[1] = ((x & 0x01) << 6) | (y & 0x3f);
 	_bluetooth_transmit_uart0_byte(aBuffer[1]);
-	aBuffer[2] = (z << 1);
+	aBuffer[2] = (z << 1) & 0x7e;
 	_bluetooth_transmit_uart0_byte(aBuffer[2]);	
 }
 
@@ -472,13 +472,13 @@ void _send_acs()
 		seq_num++;
 
 
-		// SAM TODO: check that this if is not needed
+		/*// SAM TODO: check that this if is not needed
 		if (num_acs < 60)
 		{
 			counter++;
 			if (counter == 10)
 				return;
-		}
+		}*/
 	}
 	_receive_data();
 }
@@ -524,7 +524,7 @@ void _receive_data(void)
 	if(_bluetooth_receive_uart0_byte(&aByte))
 	{
 		rBuffer[command_counter++] = aByte;
-		
+				
 		if ((aByte >> 5) == COMMAND_PREFIX)
     	{
         	opcode = aByte & 0x1f;                                              
@@ -562,7 +562,6 @@ void _receive_data(void)
                      command_length = 2;
                      break;
      			case (unsigned char)ACK:
-					 //command_length = 1;
 					 command_length = 4;
                      break;
 				case (unsigned char)SetTCT:                
@@ -590,7 +589,7 @@ void _receive_data(void)
     {                                       
             switch (opcode)
             {
-				case (unsigned char) ACK:											
+				case (unsigned char) ACK:																
 					kseq = rBuffer[1] & 0x7f;
 					kseq = kseq << 7 | (rBuffer[2] & 0x7f);
 					kseq = kseq << 2 | ((rBuffer[3] >> 5) & 0x03);
@@ -603,7 +602,7 @@ void _receive_data(void)
 						else
 							si = AC_BUFFER_SIZE - (dseq - ci);
 					}
-					processed_counter = command_counter;				
+					processed_counter = command_counter;
 					break;	
 
 		        //This command calibrates the wocket sampling rate by determining how much off it is from the 
