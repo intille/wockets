@@ -1,0 +1,742 @@
+Archive member included because of file (symbol)
+
+c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/avr51\libgcc.a(_mulsi3.o)
+                              wocket.o (__mulsi3)
+c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/avr51\libgcc.a(_udivmodhi4.o)
+                              firmware-version_6.o (__udivmodhi4)
+c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/avr51\libgcc.a(_udivmodsi4.o)
+                              firmware-version_6.o (__udivmodsi4)
+c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/avr51\libgcc.a(_divmodsi4.o)
+                              wocket.o (__divmodsi4)
+c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/avr51\libgcc.a(_exit.o)
+                              c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51/crtm1284p.o (exit)
+c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/avr51\libgcc.a(_copy_data.o)
+                              firmware-version_6.o (__do_copy_data)
+c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/avr51\libgcc.a(_clear_bss.o)
+                              firmware-version_6.o (__do_clear_bss)
+c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51\libc.a(eerd_byte_atmega1284p.o)
+                              wocket.o (__eerd_byte_m1284p)
+c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51\libc.a(eerd_word_atmega1284p.o)
+                              wocket.o (__eerd_word_m1284p)
+c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51\libc.a(eewr_byte_atmega1284p.o)
+                              wocket.o (__eewr_byte_m1284p)
+c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51\libc.a(eewr_word_atmega1284p.o)
+                              wocket.o (__eewr_word_m1284p)
+c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51\libc.a(eerd_block_atmega1284p.o)
+                              c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51\libc.a(eerd_word_atmega1284p.o) (__eerd_blraw_m1284p)
+
+Allocating common symbols
+Common symbol       size              file
+
+_wX1G_CAL           0x2               wocket.o
+acount              0x780             firmware-version_6.o
+wocket_status       0x1               firmware-version_6.o
+xv                  0x384             firmware-version_6.o
+diffx               0x2               firmware-version_6.o
+summary_count       0x2               firmware-version_6.o
+_wXN1G_CAL          0x2               wocket.o
+prevx               0x2               firmware-version_6.o
+_wBTCAL20           0x2               wocket.o
+_wYN1G_CAL          0x2               wocket.o
+_wBTCAL100          0x2               wocket.o
+_wZN1G_CAL          0x2               wocket.o
+diffy               0x2               firmware-version_6.o
+_wZ1G_CAL           0x2               wocket.o
+prevy               0x2               firmware-version_6.o
+_wBTCAL40           0x2               wocket.o
+data                0x2bf2            firmware-version_6.o
+diffz               0x2               firmware-version_6.o
+_wBTCAL60           0x2               wocket.o
+prevz               0x2               firmware-version_6.o
+_wPDT               0x1               wocket.o
+opcode              0x1               wocket.o
+blink_counter       0x2               firmware-version_6.o
+_wBTCAL10           0x2               wocket.o
+scounter            0x2               firmware-version_6.o
+_wALT               0x1               wocket.o
+battery             0x2               firmware-version_6.o
+_wBTCAL80           0x2               wocket.o
+atmega_clock_prescalar
+                    0x1               firmware-version_6.o
+_TM                 0x1               wocket.o
+vmag                0x4               firmware-version_6.o
+atmega_status       0x1               firmware-version_6.o
+deltasign           0x1               firmware-version_6.o
+_wY1G_CAL           0x2               wocket.o
+num_skipped_timer_interrupts
+                    0x1               firmware-version_6.o
+rBuffer             0xa               wocket.o
+aBuffer             0xa               wocket.o
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+text             0x00000000         0x00020000         xr
+data             0x00800100         0x0000ff00         rw !x
+eeprom           0x00810000         0x00010000         rw !x
+fuse             0x00820000         0x00000400         rw !x
+lock             0x00830000         0x00000400         rw !x
+signature        0x00840000         0x00000400         rw !x
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+Address of section .data set to 0x800100
+LOAD c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51/crtm1284p.o
+LOAD crc.o
+LOAD firmware-version_6.o
+LOAD mcu_atmega.o
+LOAD wocket.o
+LOAD c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/avr51\libgcc.a
+LOAD c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51\libc.a
+LOAD c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/avr51\libgcc.a
+
+.hash
+ *(.hash)
+
+.dynsym
+ *(.dynsym)
+
+.dynstr
+ *(.dynstr)
+
+.gnu.version
+ *(.gnu.version)
+
+.gnu.version_d
+ *(.gnu.version_d)
+
+.gnu.version_r
+ *(.gnu.version_r)
+
+.rel.init
+ *(.rel.init)
+
+.rela.init
+ *(.rela.init)
+
+.rel.text
+ *(.rel.text)
+ *(.rel.text.*)
+ *(.rel.gnu.linkonce.t*)
+
+.rela.text
+ *(.rela.text)
+ *(.rela.text.*)
+ *(.rela.gnu.linkonce.t*)
+
+.rel.fini
+ *(.rel.fini)
+
+.rela.fini
+ *(.rela.fini)
+
+.rel.rodata
+ *(.rel.rodata)
+ *(.rel.rodata.*)
+ *(.rel.gnu.linkonce.r*)
+
+.rela.rodata
+ *(.rela.rodata)
+ *(.rela.rodata.*)
+ *(.rela.gnu.linkonce.r*)
+
+.rel.data
+ *(.rel.data)
+ *(.rel.data.*)
+ *(.rel.gnu.linkonce.d*)
+
+.rela.data
+ *(.rela.data)
+ *(.rela.data.*)
+ *(.rela.gnu.linkonce.d*)
+
+.rel.ctors
+ *(.rel.ctors)
+
+.rela.ctors
+ *(.rela.ctors)
+
+.rel.dtors
+ *(.rel.dtors)
+
+.rela.dtors
+ *(.rela.dtors)
+
+.rel.got
+ *(.rel.got)
+
+.rela.got
+ *(.rela.got)
+
+.rel.bss
+ *(.rel.bss)
+
+.rela.bss
+ *(.rela.bss)
+
+.rel.plt
+ *(.rel.plt)
+
+.rela.plt
+ *(.rela.plt)
+
+.text           0x00000000     0x3152
+ *(.vectors)
+ .vectors       0x00000000       0x8c c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51/crtm1284p.o
+                0x00000000                __vector_default
+                0x00000000                __vectors
+ *(.vectors)
+ *(.progmem.gcc*)
+ .progmem.gcc_sw_table
+                0x0000008c       0x7c wocket.o
+ *(.progmem*)
+                0x00000108                . = ALIGN (0x2)
+                0x00000108                __trampolines_start = .
+ *(.trampolines)
+ .trampolines   0x00000108        0x0 linker stubs
+ *(.trampolines*)
+                0x00000108                __trampolines_end = .
+ *(.jumptables)
+ *(.jumptables*)
+ *(.lowtext)
+ *(.lowtext*)
+                0x00000108                __ctors_start = .
+ *(.ctors)
+                0x00000108                __ctors_end = .
+                0x00000108                __dtors_start = .
+ *(.dtors)
+                0x00000108                __dtors_end = .
+ SORT(*)(.ctors)
+ SORT(*)(.dtors)
+ *(.init0)
+ .init0         0x00000108        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51/crtm1284p.o
+                0x00000108                __init
+ *(.init0)
+ *(.init1)
+ *(.init1)
+ *(.init2)
+ .init2         0x00000108        0xc c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51/crtm1284p.o
+ *(.init2)
+ *(.init3)
+ *(.init3)
+ *(.init4)
+ .init4         0x00000114       0x1a c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/avr51\libgcc.a(_copy_data.o)
+                0x00000114                __do_copy_data
+ .init4         0x0000012e       0x10 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/avr51\libgcc.a(_clear_bss.o)
+                0x0000012e                __do_clear_bss
+ *(.init4)
+ *(.init5)
+ *(.init5)
+ *(.init6)
+ *(.init6)
+ *(.init7)
+ *(.init7)
+ *(.init8)
+ *(.init8)
+ *(.init9)
+ .init9         0x0000013e        0x8 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51/crtm1284p.o
+ *(.init9)
+ *(.text)
+ .text          0x00000146        0x4 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51/crtm1284p.o
+                0x00000146                __vector_22
+                0x00000146                __vector_28
+                0x00000146                __vector_1
+                0x00000146                __vector_32
+                0x00000146                __vector_34
+                0x00000146                __vector_24
+                0x00000146                __vector_12
+                0x00000146                __bad_interrupt
+                0x00000146                __vector_6
+                0x00000146                __vector_31
+                0x00000146                __vector_3
+                0x00000146                __vector_23
+                0x00000146                __vector_30
+                0x00000146                __vector_25
+                0x00000146                __vector_13
+                0x00000146                __vector_17
+                0x00000146                __vector_19
+                0x00000146                __vector_7
+                0x00000146                __vector_27
+                0x00000146                __vector_5
+                0x00000146                __vector_33
+                0x00000146                __vector_4
+                0x00000146                __vector_9
+                0x00000146                __vector_2
+                0x00000146                __vector_21
+                0x00000146                __vector_15
+                0x00000146                __vector_29
+                0x00000146                __vector_8
+                0x00000146                __vector_26
+                0x00000146                __vector_14
+                0x00000146                __vector_10
+                0x00000146                __vector_16
+                0x00000146                __vector_18
+                0x00000146                __vector_20
+ .text          0x0000014a       0xa2 crc.o
+                0x0000014a                ComputeByte
+                0x0000016c                ComputeCRC8
+                0x000001a4                CRC16
+ .text          0x000001ec     0x10f8 firmware-version_6.o
+                0x00000324                Filter
+                0x000003c2                do_sampling
+                0x0000091c                main
+                0x00000fbc                __vector_11
+ .text          0x000012e4      0x886 mcu_atmega.o
+                0x000012e4                _atmega_set_adc_clock
+                0x00001372                _atmega_adc_turn_on
+                0x0000137e                _atmega_adc_turn_off
+                0x0000138a                _atmega_select_adc
+                0x0000145e                _atmega_a2dConvert10bit
+                0x00001494                _atmega_initialize_uart0
+                0x000014bc                _atmega_initialize_uart1
+                0x000014e4                _atmega_disable_JTAG
+                0x000014f8                _atmega_set_timer2_prescalar
+                0x00001554                _atmega_enable_timer2
+                0x0000156a                _atmega_disable_timer2
+                0x00001574                _atmega_reset
+                0x00001592                _atmega_disable_watchdog
+                0x000015a6                _bluetooth_turn_on
+                0x000015bc                _bluetooth_turn_off
+                0x000015ce                _bluetooth_reset
+                0x000015ea                _is_bluetooth_on
+                0x000015f2                _bluetooth_is_connected
+                0x000015fa                _bluetooth_is_discoverable
+                0x00001606                _receive_uart0_flush
+                0x00001616                _bluetooth_receive_uart0_byte
+                0x00001636                _bluetooth_transmit_uart0_byte
+                0x0000164e                _bluetooth_get_baud_rate
+                0x00001722                _bluetooth_set_baud_rate
+                0x000018b6                _bluetooth_exit_command_mode
+                0x00001938                _bluetooth_enter_command_mode
+                0x000019d6                _accelerometer_set_sensitivity
+                0x000019ea                _accelerometer_turn_on
+                0x000019fc                _atmega_initialize
+                0x00001a74                _accelerometer_turn_off
+                0x00001a8c                _is_accelerometer_on
+                0x00001a96                _greenled_turn_on
+                0x00001aa6                _greenled_turn_off
+                0x00001ab8                _is_greenled_on
+                0x00001ac4                _yellowled_turn_on
+                0x00001ad4                _yellowled_turn_off
+                0x00001ae6                _atmega_finalize
+                0x00001b46                _wocket_reset
+                0x00001b52                _is_yellowled_on
+                0x00001b60                _is_docked
+ .text          0x00001b6a     0x14a2 wocket.o
+                0x00001b6a                _wocket_initialize_timer2_interrupt
+                0x00001ba6                _wocket_initialize
+                0x00002014                _wocket_set_flag
+                0x0000202e                _wocket_reset_flag
+                0x0000204a                _wocket_is_flag_set
+                0x00002060                _send_uncompressed_pdu
+                0x000020fa                _send_compressed_pdu
+                0x00002156                _send_batch_count
+                0x0000219c                _send_ac_count
+                0x000021d2                _send_ac_offset
+                0x00002208                _send_fv
+                0x00002224                _send_hv
+                0x00002240                _send_bl
+                0x00002278                _send_end_batch
+                0x00002284                _send_sr
+                0x000022a4                _send_wtm
+                0x000022c8                _receive_data
+                0x00002f14                _send_acs
+ .text          0x0000300c        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/avr51\libgcc.a(_mulsi3.o)
+ .text          0x0000300c        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/avr51\libgcc.a(_udivmodhi4.o)
+ .text          0x0000300c        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/avr51\libgcc.a(_udivmodsi4.o)
+ .text          0x0000300c        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/avr51\libgcc.a(_divmodsi4.o)
+ .text          0x0000300c        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/avr51\libgcc.a(_exit.o)
+ .text          0x0000300c        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/avr51\libgcc.a(_copy_data.o)
+ .text          0x0000300c        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/avr51\libgcc.a(_clear_bss.o)
+ .text          0x0000300c        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51\libc.a(eerd_byte_atmega1284p.o)
+ .text          0x0000300c        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51\libc.a(eerd_word_atmega1284p.o)
+ .text          0x0000300c        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51\libc.a(eewr_byte_atmega1284p.o)
+ .text          0x0000300c        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51\libc.a(eewr_word_atmega1284p.o)
+ .text          0x0000300c        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51\libc.a(eerd_block_atmega1284p.o)
+                0x0000300c                . = ALIGN (0x2)
+ *(.text.*)
+ .text.libgcc   0x0000300c       0x3e c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/avr51\libgcc.a(_mulsi3.o)
+                0x0000300c                __mulsi3
+ .text.libgcc   0x0000304a       0x28 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/avr51\libgcc.a(_udivmodhi4.o)
+                0x0000304a                __udivmodhi4
+ .text.libgcc   0x00003072       0x44 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/avr51\libgcc.a(_udivmodsi4.o)
+                0x00003072                __udivmodsi4
+ .text.libgcc   0x000030b6       0x36 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/avr51\libgcc.a(_divmodsi4.o)
+                0x000030b6                __divmodsi4
+ .text.libgcc   0x000030ec        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/avr51\libgcc.a(_exit.o)
+ .text.libgcc   0x000030ec        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/avr51\libgcc.a(_copy_data.o)
+ .text.libgcc   0x000030ec        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/avr51\libgcc.a(_clear_bss.o)
+ .text.avr-libc
+                0x000030ec       0x10 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51\libc.a(eerd_byte_atmega1284p.o)
+                0x000030ec                __eerd_byte_m1284p
+ .text.avr-libc
+                0x000030fc        0xc c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51\libc.a(eerd_word_atmega1284p.o)
+                0x000030fc                __eerd_word_m1284p
+ .text.avr-libc
+                0x00003108       0x1c c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51\libc.a(eewr_byte_atmega1284p.o)
+                0x00003108                __eewr_byte_m1284p
+                0x0000310a                __eewr_r18_m1284p
+ .text.avr-libc
+                0x00003124        0xa c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51\libc.a(eewr_word_atmega1284p.o)
+                0x00003124                __eewr_word_m1284p
+ .text.avr-libc
+                0x0000312e       0x20 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51\libc.a(eerd_block_atmega1284p.o)
+                0x0000312e                __eerd_block_m1284p
+                0x00003132                __eerd_blraw_m1284p
+                0x0000314e                . = ALIGN (0x2)
+ *(.fini9)
+ .fini9         0x0000314e        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/avr51\libgcc.a(_exit.o)
+                0x0000314e                _exit
+                0x0000314e                exit
+ *(.fini9)
+ *(.fini8)
+ *(.fini8)
+ *(.fini7)
+ *(.fini7)
+ *(.fini6)
+ *(.fini6)
+ *(.fini5)
+ *(.fini5)
+ *(.fini4)
+ *(.fini4)
+ *(.fini3)
+ *(.fini3)
+ *(.fini2)
+ *(.fini2)
+ *(.fini1)
+ *(.fini1)
+ *(.fini0)
+ .fini0         0x0000314e        0x4 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/avr51\libgcc.a(_exit.o)
+ *(.fini0)
+                0x00003152                _etext = .
+
+.data           0x00800100        0xc load address 0x00003152
+                0x00800100                PROVIDE (__data_start, .)
+ *(.data)
+ .data          0x00800100        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51/crtm1284p.o
+ .data          0x00800100        0x0 crc.o
+ .data          0x00800100        0x4 firmware-version_6.o
+                0x00800100                AC_SCALING
+                0x00800102                AC_CEILING
+ .data          0x00800104        0x0 mcu_atmega.o
+ .data          0x00800104        0x8 wocket.o
+                0x00800104                address
+                0x00800106                _SAMPLING_RATE
+                0x00800107                _wTCNT2_reps
+                0x00800108                _wSENS
+                0x00800109                _LED_TIME
+                0x0080010a                _LED_COLOR
+                0x0080010b                _MIN_SAMPLING_RATE
+ .data          0x0080010c        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/avr51\libgcc.a(_mulsi3.o)
+ .data          0x0080010c        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/avr51\libgcc.a(_udivmodhi4.o)
+ .data          0x0080010c        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/avr51\libgcc.a(_udivmodsi4.o)
+ .data          0x0080010c        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/avr51\libgcc.a(_divmodsi4.o)
+ .data          0x0080010c        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/avr51\libgcc.a(_exit.o)
+ .data          0x0080010c        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/avr51\libgcc.a(_copy_data.o)
+ .data          0x0080010c        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/avr51\libgcc.a(_clear_bss.o)
+ .data          0x0080010c        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51\libc.a(eerd_byte_atmega1284p.o)
+ .data          0x0080010c        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51\libc.a(eerd_word_atmega1284p.o)
+ .data          0x0080010c        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51\libc.a(eewr_byte_atmega1284p.o)
+ .data          0x0080010c        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51\libc.a(eewr_word_atmega1284p.o)
+ .data          0x0080010c        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51\libc.a(eerd_block_atmega1284p.o)
+ *(.data*)
+ *(.rodata)
+ *(.rodata*)
+ *(.gnu.linkonce.d*)
+                0x0080010c                . = ALIGN (0x2)
+                0x0080010c                _edata = .
+                0x0080010c                PROVIDE (__data_end, .)
+
+.bss            0x0080010c     0x3797
+                0x0080010c                PROVIDE (__bss_start, .)
+ *(.bss)
+ .bss           0x0080010c        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51/crtm1284p.o
+ .bss           0x0080010c        0x0 crc.o
+ .bss           0x0080010c       0x27 firmware-version_6.o
+                0x0080010c                batch_counter
+                0x0080010e                dataIndex
+                0x00800110                dataSubindex
+                0x00800111                rawHead
+                0x00800113                rawTail
+                0x00800115                AC_NUMS
+                0x00800117                cseq
+                0x00800119                sseq
+                0x0080011b                kseq
+                0x0080011d                dseq
+                0x0080011f                ci
+                0x00800121                si
+                0x00800123                i
+                0x00800125                compress
+                0x00800126                sampleFlag
+                0x00800127                seconds_passed
+                0x00800129                connected
+                0x0080012a                seconds_disconnected
+                0x0080012c                interrupts_passed
+                0x0080012d                interrupt_reps
+                0x0080012e                justconnected
+                0x0080012f                isdocked
+                0x00800130                dockcounter
+                0x00800132                shutdown_flag
+ .bss           0x00800133        0x0 mcu_atmega.o
+ .bss           0x00800133       0x2d wocket.o
+                0x00800133                crc
+                0x00800135                rcrc
+                0x00800137                command_counter
+                0x00800138                command_length
+                0x00800139                command_timer
+                0x0080013b                processed_counter
+                0x0080013c                response_length
+                0x0080013d                paused
+                0x0080013e                alive_timer
+                0x00800140                word
+                0x00800142                x
+                0x00800144                y
+                0x00800146                z
+                0x00800148                tester
+                0x0080014a                _INITIALIZED
+                0x0080014b                _STATUS_BYTE
+                0x0080014c                _wTCNT2
+                0x0080014d                _wTCNT2_last
+                0x0080014e                _wTM
+                0x0080014f                _wPC
+                0x00800153                _wLastPC
+                0x00800157                _wShutdownTimer
+                0x0080015b                _DEFAULT_SHUTDOWN
+                0x0080015f                _MAX_SAMPLING_RATE
+ .bss           0x00800160        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/avr51\libgcc.a(_mulsi3.o)
+ .bss           0x00800160        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/avr51\libgcc.a(_udivmodhi4.o)
+ .bss           0x00800160        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/avr51\libgcc.a(_udivmodsi4.o)
+ .bss           0x00800160        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/avr51\libgcc.a(_divmodsi4.o)
+ .bss           0x00800160        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/avr51\libgcc.a(_exit.o)
+ .bss           0x00800160        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/avr51\libgcc.a(_copy_data.o)
+ .bss           0x00800160        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/avr51\libgcc.a(_clear_bss.o)
+ .bss           0x00800160        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51\libc.a(eerd_byte_atmega1284p.o)
+ .bss           0x00800160        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51\libc.a(eerd_word_atmega1284p.o)
+ .bss           0x00800160        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51\libc.a(eewr_byte_atmega1284p.o)
+ .bss           0x00800160        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51\libc.a(eewr_word_atmega1284p.o)
+ .bss           0x00800160        0x0 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51\libc.a(eerd_block_atmega1284p.o)
+ *(.bss*)
+ *(COMMON)
+ COMMON         0x00800160     0x3713 firmware-version_6.o
+                0x00800160                acount
+                0x008008e0                wocket_status
+                0x008008e1                xv
+                0x00800c65                diffx
+                0x00800c67                summary_count
+                0x00800c69                prevx
+                0x00800c6b                diffy
+                0x00800c6d                prevy
+                0x00800c6f                data
+                0x00803861                diffz
+                0x00803863                prevz
+                0x00803865                blink_counter
+                0x00803867                scounter
+                0x00803869                battery
+                0x0080386b                atmega_clock_prescalar
+                0x0080386c                vmag
+                0x00803870                atmega_status
+                0x00803871                deltasign
+                0x00803872                num_skipped_timer_interrupts
+ COMMON         0x00803873       0x30 wocket.o
+                0x00803873                _wX1G_CAL
+                0x00803875                _wXN1G_CAL
+                0x00803877                _wBTCAL20
+                0x00803879                _wYN1G_CAL
+                0x0080387b                _wBTCAL100
+                0x0080387d                _wZN1G_CAL
+                0x0080387f                _wZ1G_CAL
+                0x00803881                _wBTCAL40
+                0x00803883                _wBTCAL60
+                0x00803885                _wPDT
+                0x00803886                opcode
+                0x00803887                _wBTCAL10
+                0x00803889                _wALT
+                0x0080388a                _wBTCAL80
+                0x0080388c                _TM
+                0x0080388d                _wY1G_CAL
+                0x0080388f                rBuffer
+                0x00803899                aBuffer
+                0x008038a3                PROVIDE (__bss_end, .)
+                0x00003152                __data_load_start = LOADADDR (.data)
+                0x0000315e                __data_load_end = (__data_load_start + SIZEOF (.data))
+
+.noinit         0x008038a3        0x0
+                0x008038a3                PROVIDE (__noinit_start, .)
+ *(.noinit*)
+                0x008038a3                PROVIDE (__noinit_end, .)
+                0x008038a3                _end = .
+                0x008038a3                PROVIDE (__heap_start, .)
+
+.eeprom         0x00810000       0x23
+ *(.eeprom*)
+ .eeprom        0x00810000       0x23 wocket.o
+                0x00810000                _NV_INITIALIZED
+                0x00810001                _NV_STATUS_BYTE
+                0x00810002                _NV_SAMPLING_RATE
+                0x00810003                _NV_TCT
+                0x00810004                _NV_TCTREPS
+                0x00810005                _NV_TCTLAST
+                0x00810006                _NV_TM
+                0x00810007                _NV_WTM
+                0x00810008                _NV_SENS
+                0x00810009                _NV_BTCAL100
+                0x0081000b                _NV_BTCAL80
+                0x0081000d                _NV_BTCAL60
+                0x0081000f                _NV_BTCAL40
+                0x00810011                _NV_BTCAL20
+                0x00810013                _NV_BTCAL10
+                0x00810015                _NV_X1G_CAL
+                0x00810017                _NV_XN1G_CAL
+                0x00810019                _NV_Y1G_CAL
+                0x0081001b                _NV_YN1G_CAL
+                0x0081001d                _NV_Z1G_CAL
+                0x0081001f                _NV_ZN1G_CAL
+                0x00810021                _NV_PDT
+                0x00810022                _NV_ALT
+                0x00810023                __eeprom_end = .
+
+.fuse
+ *(.fuse)
+ *(.lfuse)
+ *(.hfuse)
+ *(.efuse)
+
+.lock
+ *(.lock*)
+
+.signature
+ *(.signature*)
+
+.stab           0x00000000      0xa08
+ *(.stab)
+ .stab          0x00000000      0x6cc c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51/crtm1284p.o
+ .stab          0x000006cc       0x90 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51\libc.a(eerd_byte_atmega1284p.o)
+                                 0x9c (size before relaxing)
+ .stab          0x0000075c       0x6c c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51\libc.a(eerd_word_atmega1284p.o)
+                                 0x78 (size before relaxing)
+ .stab          0x000007c8       0xe4 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51\libc.a(eewr_byte_atmega1284p.o)
+                                 0xf0 (size before relaxing)
+ .stab          0x000008ac       0x54 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51\libc.a(eewr_word_atmega1284p.o)
+                                 0x60 (size before relaxing)
+ .stab          0x00000900      0x108 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51\libc.a(eerd_block_atmega1284p.o)
+                                0x114 (size before relaxing)
+
+.stabstr        0x00000000      0x275
+ *(.stabstr)
+ .stabstr       0x00000000      0x275 c:/program files/atmel/avr tools/avr toolchain/bin/../lib/gcc/avr/4.5.1/../../../../avr/lib/avr51/crtm1284p.o
+
+.stab.excl
+ *(.stab.excl)
+
+.stab.exclstr
+ *(.stab.exclstr)
+
+.stab.index
+ *(.stab.index)
+
+.stab.indexstr
+ *(.stab.indexstr)
+
+.comment
+ *(.comment)
+
+.debug
+ *(.debug)
+
+.line
+ *(.line)
+
+.debug_srcinfo
+ *(.debug_srcinfo)
+
+.debug_sfnames
+ *(.debug_sfnames)
+
+.debug_aranges  0x00000000       0x80
+ *(.debug_aranges)
+ .debug_aranges
+                0x00000000       0x20 crc.o
+ .debug_aranges
+                0x00000020       0x20 firmware-version_6.o
+ .debug_aranges
+                0x00000040       0x20 mcu_atmega.o
+ .debug_aranges
+                0x00000060       0x20 wocket.o
+
+.debug_pubnames
+                0x00000000      0xd54
+ *(.debug_pubnames)
+ .debug_pubnames
+                0x00000000       0x3c crc.o
+ .debug_pubnames
+                0x0000003c      0x2ce firmware-version_6.o
+ .debug_pubnames
+                0x0000030a      0x449 mcu_atmega.o
+ .debug_pubnames
+                0x00000753      0x601 wocket.o
+
+.debug_info     0x00000000     0x2bac
+ *(.debug_info)
+ .debug_info    0x00000000      0x155 crc.o
+ .debug_info    0x00000155      0xb23 firmware-version_6.o
+ .debug_info    0x00000c78      0xbf9 mcu_atmega.o
+ .debug_info    0x00001871     0x133b wocket.o
+ *(.gnu.linkonce.wi.*)
+
+.debug_abbrev   0x00000000      0x82f
+ *(.debug_abbrev)
+ .debug_abbrev  0x00000000       0xaf crc.o
+ .debug_abbrev  0x000000af      0x266 firmware-version_6.o
+ .debug_abbrev  0x00000315      0x274 mcu_atmega.o
+ .debug_abbrev  0x00000589      0x2a6 wocket.o
+
+.debug_line     0x00000000     0x29bb
+ *(.debug_line)
+ .debug_line    0x00000000      0x112 crc.o
+ .debug_line    0x00000112      0xa06 firmware-version_6.o
+ .debug_line    0x00000b18      0xeb9 mcu_atmega.o
+ .debug_line    0x000019d1      0xfea wocket.o
+
+.debug_frame    0x00000000      0x460
+ *(.debug_frame)
+ .debug_frame   0x00000000       0x40 crc.o
+ .debug_frame   0x00000040       0x60 firmware-version_6.o
+ .debug_frame   0x000000a0      0x290 mcu_atmega.o
+ .debug_frame   0x00000330      0x130 wocket.o
+
+.debug_str      0x00000000      0xb59
+ *(.debug_str)
+ .debug_str     0x00000000       0x8f crc.o
+                                 0x94 (size before relaxing)
+ .debug_str     0x0000008f      0x363 firmware-version_6.o
+                                0x415 (size before relaxing)
+ .debug_str     0x000003f2      0x3cc mcu_atmega.o
+                                0x52d (size before relaxing)
+ .debug_str     0x000007be      0x39b wocket.o
+                                0x61b (size before relaxing)
+
+.debug_loc      0x00000000     0x1171
+ *(.debug_loc)
+ .debug_loc     0x00000000      0x1e9 crc.o
+ .debug_loc     0x000001e9      0x334 firmware-version_6.o
+ .debug_loc     0x0000051d      0x3d9 mcu_atmega.o
+ .debug_loc     0x000008f6      0x87b wocket.o
+
+.debug_macinfo
+ *(.debug_macinfo)
+OUTPUT(wockets_firmware_6.elf elf32-avr)
+LOAD linker stubs
+
+.debug_ranges   0x00000000       0x30
+ .debug_ranges  0x00000000       0x18 crc.o
+ .debug_ranges  0x00000018       0x18 mcu_atmega.o
+
+.debug_pubtypes
+                0x00000000       0xb6
+ .debug_pubtypes
+                0x00000000       0x46 firmware-version_6.o
+ .debug_pubtypes
+                0x00000046       0x38 mcu_atmega.o
+ .debug_pubtypes
+                0x0000007e       0x38 wocket.o
