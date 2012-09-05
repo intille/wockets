@@ -36,6 +36,7 @@ public class RunInitPanel extends javax.swing.JPanel {
         jLabel3 = new javax.swing.JLabel();
         initializeButton = new javax.swing.JButton();
         runButton = new javax.swing.JButton();
+        setWocketsjButton = new javax.swing.JButton();
 
         jLabel1.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         jLabel1.setText("PC-Wocket Application");
@@ -54,6 +55,13 @@ public class RunInitPanel extends javax.swing.JPanel {
         runButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 runButtonActionPerformed(evt);
+            }
+        });
+
+        setWocketsjButton.setText("Set new Wockets");
+        setWocketsjButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                setWocketsjButtonActionPerformed(evt);
             }
         });
 
@@ -76,7 +84,10 @@ public class RunInitPanel extends javax.swing.JPanel {
                                         .addComponent(jLabel3))))))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(126, 126, 126)
-                        .addComponent(runButton)))
+                        .addComponent(runButton))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(135, 135, 135)
+                        .addComponent(setWocketsjButton)))
                 .addContainerGap(97, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -88,15 +99,17 @@ public class RunInitPanel extends javax.swing.JPanel {
                 .addComponent(jLabel3)
                 .addGap(78, 78, 78)
                 .addComponent(runButton)
-                .addGap(33, 33, 33)
+                .addGap(26, 26, 26)
                 .addComponent(initializeButton)
-                .addContainerGap(121, Short.MAX_VALUE))
+                .addGap(27, 27, 27)
+                .addComponent(setWocketsjButton)
+                .addContainerGap(78, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
     private void initializeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_initializeButtonActionPerformed
         JPanel initializationPanel =  new InitializationPanel(userProcessContainer, pData);
-        userProcessContainer.add("initializationPanel",initializationPanel);
+        userProcessContainer.add("initializationPanel",initializationPanel);        
         CardLayout c1 = (CardLayout)userProcessContainer.getLayout();
         c1.next(userProcessContainer);
     }//GEN-LAST:event_initializeButtonActionPerformed
@@ -108,11 +121,19 @@ public class RunInitPanel extends javax.swing.JPanel {
         c1.next(userProcessContainer);
     }//GEN-LAST:event_runButtonActionPerformed
 
+    private void setWocketsjButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_setWocketsjButtonActionPerformed
+        JPanel init2Panel =  new Init2Panel(userProcessContainer, pData);
+        userProcessContainer.add("init2Panel",init2Panel);
+        CardLayout c1 = (CardLayout)userProcessContainer.getLayout();
+        c1.next(userProcessContainer);
+    }//GEN-LAST:event_setWocketsjButtonActionPerformed
+
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton initializeButton;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JButton runButton;
+    private javax.swing.JButton setWocketsjButton;
     // End of variables declaration//GEN-END:variables
 }
