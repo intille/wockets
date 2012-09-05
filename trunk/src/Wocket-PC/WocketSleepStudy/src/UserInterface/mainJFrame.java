@@ -1,8 +1,8 @@
 package UserInterface;
 
-
 import bluetooth.PcClient;
 import java.awt.CardLayout;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 import wockets.data.ParticipantData;
 
@@ -110,7 +110,7 @@ public class mainJFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
 private void startjButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startjButtonActionPerformed
-    
+    PcClient.start();
     JPanel runInitPanel =  new RunInitPanel(userProcessContainer, pData);
     userProcessContainer.add("runInitPanel",runInitPanel);
     CardLayout c1 = (CardLayout)userProcessContainer.getLayout();
@@ -124,12 +124,13 @@ private void stopjButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
     userProcessContainer.removeAll(); 
     PcClient.stop();
     stopjButton.setVisible(false);
-    startjButton.setVisible(true);    
+    startjButton.setVisible(true); 
+    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 }//GEN-LAST:event_stopjButtonActionPerformed
 
     private void swapButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_swapButtonActionPerformed
         userProcessContainer.remove(this); 
-        PcClient.stop();
+        PcClient.stop();        
         JPanel runPanel =  new RunPanel(userProcessContainer, pData);
         userProcessContainer.add("runPanel",runPanel);
         CardLayout c1 = (CardLayout)userProcessContainer.getLayout();

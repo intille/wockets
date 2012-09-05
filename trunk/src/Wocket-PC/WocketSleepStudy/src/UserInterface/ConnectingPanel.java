@@ -82,13 +82,8 @@ public class ConnectingPanel extends javax.swing.JPanel {
     
     Runnable connectRunnable = new Runnable() {
         public void run() { 
-            try {
-                PcClient.collectData(remoteDevices, textArea);
-            } catch (IOException ex) {
-                Logger.getLogger(ConnectPanel.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (InterruptedException ex) {
-                Logger.getLogger(ConnectPanel.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            PcClient.start();
+            PcClient.collectData(remoteDevices, textArea);            
         }            
     };
     
