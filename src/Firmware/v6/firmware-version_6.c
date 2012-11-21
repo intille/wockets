@@ -185,14 +185,14 @@ void do_sampling(){
 	sampleFlag = 0;
     
 	//sample the accelerometer
-	/*x = _atmega_a2dConvert10bit(ADC0);		
+	x = _atmega_a2dConvert10bit(ADC0);		
 	y = _atmega_a2dConvert10bit(ADC1);
-	z = _atmega_a2dConvert10bit(ADC2);*/
+	z = _atmega_a2dConvert10bit(ADC2);
 	//------test-----
-	if (i == 1024) 
+	/*if (i == 1024) 
 		i=0;
 	x = y = z = i;
-	i++;
+	i++;*/
 	//---------------
 
 	//Filter the raw accelerometer data and compute the vector of magnitude (Activity count)
