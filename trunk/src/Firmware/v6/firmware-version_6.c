@@ -236,13 +236,15 @@ void do_sampling(){
 
 	dataSubindex++;
 	if (dataSubindex >= 4) {	
-	 	dataSubindex = 0; 
-		dataIndex++;
-		if (dataIndex >= DATA_SIZE)
-			dataIndex = 0;
+	 	dataSubindex = 0;
+		if (_wTM != _WTM_Continuous){ 
+			dataIndex++;
+			if (dataIndex >= DATA_SIZE)
+				dataIndex = 0;
 
-		if (batch_counter < (DATA_SIZE - 1))
-			batch_counter++;
+			if (batch_counter < (DATA_SIZE - 1))
+				batch_counter++;
+		}
 	}
 }	
 
@@ -430,6 +432,13 @@ int main() {
 
 			_atmega_adc_turn_off();
 			power_adc_disable();
+
+			if(_wTM==_WTM_Continuous){
+				if ((dataSubindex == 0) && (!connected))
+					dataIndex++;
+				if (dataIndex == DATA_SIZE)
+					dataIndex = 0;
+			}
 
 			connected = 0;			
 		}// Endof the First if (sampleFlag)	
