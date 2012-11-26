@@ -203,6 +203,7 @@ namespace DataViewer
             }
             else cBox.Location = new Point(5, 15);
             cBox.Text = name;
+            cBox.Width = groupBox1.Width;
             cBox.Checked = true;
             cBox.CheckedChanged += new EventHandler(checkBox_CheckedChanged);
             _alCheckBoxes.Add(cBox);
@@ -872,7 +873,11 @@ namespace DataViewer
                 string s = tr.ReadLine();
                 if (s == null)
                     break;
-                currentTime = Convert.ToDouble(s.Split(',')[0]);
+                try
+                {
+                    currentTime = Convert.ToDouble(s.Split(',')[0]);
+                }
+                catch { }
                 start++;
             }
             end = start;
@@ -937,6 +942,87 @@ namespace DataViewer
 
         #endregion Actigraph
 
+        #region AgnostigraphRawData
+
+        private void createAgnostigraphRawGraph(int paneOrder, string filepath, string channel, string location, string type, string mac)
+        {
+            // Extract only the selected time range
+            double startUnix = Wockets.Utils.WocketsTimer.GetDoubleTime(startX.DateTime);
+            double endUnix = Wockets.Utils.WocketsTimer.GetDoubleTime(endX.DateTime);
+            string[] tokens = null;
+            bool foundTime = false;
+            double currentTime = 0;
+            int start = 0;
+            int end = 0;
+            TextReader tr = new StreamReader(filepath);
+            while (currentTime <= startUnix)
+            {
+                string s = tr.ReadLine();
+                if (s == null)
+                    break;
+                try { currentTime = Convert.ToDouble(s.Split(',')[0]); }
+                catch { }
+                start++;
+            }
+            end = start;
+            while (currentTime <= endUnix)
+            {
+                string s = tr.ReadLine();
+                if (s == null)
+                    break;
+                currentTime = Convert.ToDouble(s.Split(',')[0]);
+                end++;
+            }
+            tr.Close();
+            string[] accel = FileReadWrite.ReadLinesFromFile(filepath);
+
+            PointPairList listX = new PointPairList();
+            PointPairList listY = new PointPairList();
+            PointPairList listZ = new PointPairList();
+
+            for (int i = start; i < end; i++)
+            {
+                try
+                {
+                    string[] split = accel[i].Split(',');
+                    if ((split.Length > 3) && (split[1].Length > 0) && (split[2].Length > 0))
+                    {
+                        DateTime dt = new DateTime();//DateTime.Parse(split[1]);
+                        double fulltimestamp = Convert.ToDouble(split[0]);
+                        long time = (long)fulltimestamp;
+                        Wockets.Utils.WocketsTimer.GetDateTime((long)fulltimestamp, out dt);
+                        //dt.Millisecond
+
+                        //double dt = Convert.ToDouble(split[0]);
+
+                        double x = (double)new XDate(dt);
+                        double value = Convert.ToDouble(split[1]);
+                        string label = String.Format("Channel {0}, X-axis, at {1}\n{2} {3}", channel, location, dt.ToString("HH:mm:ss:fff tt"), value);
+
+                        if (_isUsingLabels) listX.Add(x, value, label);
+                        else listX.Add(x, value);
+
+                        value = Convert.ToDouble(split[2]);
+                        label = String.Format("Channel {0}, Y-axis, at {1}\n{2} {3}", channel, location, dt.ToString("HH:mm:ss:fff tt") + ":" + dt.Millisecond, value);
+                        if (_isUsingLabels) listY.Add(x, value, label);
+                        else listY.Add(x, value);
+
+                        value = Convert.ToDouble(split[3]);
+                        label = label = String.Format("Channel {0}, Z-axis, at {1}\n{2} {3}", channel, location, dt.ToString("HH:mm:ss:fff tt") + ":" + dt.Millisecond, value);
+                        if (_isUsingLabels) listZ.Add(x, value, label);
+                        else listZ.Add(x, value);
+                    }
+                }
+                catch { }
+            }
+            AddAccelerationCurve(mac, location, listX, listY, listZ);
+            paneOrders.Add(mac, paneOrder);
+            paneOrder++;
+            WidenDatesIfNeeded(listX);
+        }
+
+
+        #endregion AgnostigraphRawData
 
 
         #region Zephyr
@@ -2165,38 +2251,53 @@ namespace DataViewer
             }*/
             #endregion
 
+            #region AgnostigraphsRawData
+            
+            //JPN 20121218
 
-            #region Actigraphs
-            /* string[] file = Directory.GetFileSystemEntries(path + "\\merged\\", "Actigraph*.csv");
-
-            if (file.Length > 0)
-            {
-                string title = "Actigraphs";
-                GraphPane ePane = AddPane(title, "Actigraphs");
-                for (int i = 0; (i < file.Length); i++)
-                {
-                    string actigraphFile = Path.Combine(path, "merged\\Actigraph" + (i + 1) + ".csv");
-                    if (File.Exists(actigraphFile))
-                        CreateActigraphGraph(ePane, actigraphFile, i);
-                }
-
-                //CreateActigraphLineSegments(ePane);
-                paneOrders.Add(title, paneOrdering);
-                paneOrdering++;
-            }*/
-
-            #region ActigraphsRawData
-
-            files = Directory.GetFiles(path + "\\merged\\", "*Actigraph_Raw_Data*");
+            files = Directory.GetFiles(path + "\\", "*.rawdata.csv");
             for (int i = 0; i < files.Length; i++)
             {
+                FileInfo fi = new FileInfo(files[i]);
+                string title = fi.Name.Substring(0, fi.Name.LastIndexOf(".rawdata.csv")).Replace(".", "\r\n");
                 string channel = "", location = "";
                 string[] sensorinfo = Path.GetFileNameWithoutExtension(files[i]).Split('_');
                 channel = "";
                 location = "";
-                string mac = "Actigraph" + (i + 1).ToString();
-                createActigraphRawGraph(paneOrdering, files[i], channel, location, "Actigraph", mac);
-                string title = "Actigraph" + i;
+                string mac = title.ToString();
+                createAgnostigraphRawGraph(paneOrdering, files[i], channel, location, "Agnostigraph", mac);
+            }
+
+            #endregion AgnostigraphsRawData
+
+
+            #region Actigraphs
+           
+            #region ActigraphsRawData
+
+            for (int i = 0; i < files.Length; i++)
+            {
+                files[i] = "";
+            }
+
+            try
+            {
+                files = Directory.GetFiles(path + "\\merged\\", "*Actigraph_Raw_Data*");
+            }
+            catch { }
+
+            for (int i = 0; i < files.Length; i++)
+            {
+                if (File.Exists(files[i]))
+                {
+                    string channel = "", location = "";
+                    string[] sensorinfo = Path.GetFileNameWithoutExtension(files[i]).Split('_');
+                    channel = "";
+                    location = "";
+                    string mac = "Actigraph" + (i + 1).ToString();
+                    createActigraphRawGraph(paneOrdering, files[i], channel, location, "Actigraph", mac);
+                    string title = "Actigraph" + i;
+                }
             }
 
             #endregion ActigraphsRawData
@@ -2469,12 +2570,13 @@ namespace DataViewer
             if (!show)
             {
                 if (isPane) RemovePane(item);
+                ((CheckBox)sender).Height = 17;   // JPN added to allow multiline labels
             }
             else
             {
                 if (isPane) ShowPane(item);
+                ((CheckBox)sender).Height = 51;   // JPN added to allow multiline labels
             }
-
             RefreshMasterPaneLayout();
         }
 
