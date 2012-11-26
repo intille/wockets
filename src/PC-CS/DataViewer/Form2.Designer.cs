@@ -107,13 +107,13 @@ namespace DataViewer
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.openToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(35, 20);
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "File";
             // 
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(111, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(103, 22);
             this.openToolStripMenuItem.Text = "Open";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
@@ -131,10 +131,10 @@ namespace DataViewer
             // groupBox1
             // 
             this.groupBox1.Enabled = false;
-            this.groupBox1.Location = new System.Drawing.Point(419, 27);
+            this.groupBox1.Location = new System.Drawing.Point(419, 19);
             this.groupBox1.Margin = new System.Windows.Forms.Padding(3, 0, 3, 3);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(104, 198);
+            this.groupBox1.Size = new System.Drawing.Size(104, 248);
             this.groupBox1.TabIndex = 9;
             this.groupBox1.TabStop = false;
             // 
@@ -175,7 +175,7 @@ namespace DataViewer
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form2";
-            this.Text = "Wockets Raw Data Viewer - Version " + CurrentWockets._Version + " " + CurrentWockets._Date;
+            this.Text = "Wockets Raw Data Viewer - Version 2.0.0.0 August 21st, 2010";
             this.Load += new System.EventHandler(this.Form2_Load);
             this.Resize += new System.EventHandler(this.Form2_Resize);
             this.menuStrip1.ResumeLayout(false);

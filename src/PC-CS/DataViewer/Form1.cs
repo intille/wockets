@@ -189,6 +189,7 @@ namespace DataViewer
             }
             else cBox.Location = new Point(5, 15);
             cBox.Text = name;
+            cBox.Width = groupBox1.Width;
             cBox.Checked = true;
             cBox.CheckedChanged += new EventHandler(checkBox_CheckedChanged);
             _alCheckBoxes.Add(cBox);
@@ -999,6 +1000,156 @@ namespace DataViewer
 
 
 
+        #region Agnostigraph
+        Hashtable agnosticLineSegments = new Hashtable();
+        private void CreateAgnostigraphLineSegments(GraphPane gp)
+        {
+            foreach (DictionaryEntry entry in agnosticLineSegments)
+            {
+
+                LineSegment l = (LineSegment)entry.Value;
+                if ((l.Y1 > 0) || (l.Y2 > 0))
+                {
+                    PointPairList listCounts = new PointPairList();
+                    listCounts.Add(l.X1, l.Y1);
+                    listCounts.Add(l.X2, l.Y2);
+
+                    LineItem pointsCurve = gp.AddCurve("", listCounts, Color.GreenYellow);
+                    pointsCurve.Symbol.IsVisible = false;
+                    pointsCurve.Symbol.Size = 1F;
+                    pointsCurve.Line.IsVisible = true;
+                }
+            }
+
+        }
+
+        private void CreateAgnostigraphGraph(GraphPane gp, string filePath, int id)
+        {
+            FileInfo fi = new FileInfo(filePath);
+            string title = fi.Name.Substring(0,fi.Name.LastIndexOf(".summarydata.csv")).Replace(".", "\r\n");
+            string[] values = FileReadWrite.ReadLinesFromFile(filePath);
+            Color[] colors = new Color[9] { Color.Red, Color.YellowGreen, Color.Blue, Color.Aqua, Color.Violet, Color.Bisque, Color.Cyan, Color.DarkOrange, Color.Khaki };
+            PointPairList listCountsX = new PointPairList();
+            PointPairList listCountsY = new PointPairList();
+            PointPairList listCountsZ = new PointPairList();
+            //for each row, add values to PointPairLists
+            int numAxes = 0;
+            for (int i = 0; i < values.Length; i++)
+            {
+                try
+                {
+                    //expecting values in format: UnixTimeStamp,TimeStamp,OxyconHR,OxyconBF,OxyconVE,OxyconVO2kg,OxyconRER
+                    string[] split = values[i].Split(',');
+
+                    if (split.Length > 2) //TimeStamp + at least one data value
+                    {
+                        #region TIMESTAMP - X VALUE
+                        DateTime dt = ConvertUNIXDatTime(Convert.ToDouble(split[0]));//UnixTimeStamp, Column 1/A
+                        //DateTime dt = DateTime.Parse(split[1]);//TimeStamp, Column 2/B
+                        double x = (double)new XDate(dt);//x value is numeric representation of TimeStamp
+                        #endregion
+
+                        #region DATA VALUE - Y VALUE
+                        double y = 0; string label = "";
+
+                        #region Agnostigraph
+                        if ((split.Length > 2) && (split[2].Length > 0))
+                        {
+                            y = Convert.ToDouble(split[2]);//Column 3/C
+                            if (_isUsingLabels)
+                            {
+                                label = String.Format(title + " AC_X\n{0} {1}", dt.ToLongTimeString(), y);
+                                listCountsX.Add(x, y, label);
+                            }
+                            else listCountsX.Add(x, y);
+                            numAxes = 1;
+                        }
+
+                        if ((split.Length > 3) && (split[3].Length > 0))
+                        {
+                            y = Convert.ToDouble(split[3]);//Column 3/C
+                            if (_isUsingLabels)
+                            {
+                                label = String.Format(title + " AC_Y\n{0} {1}", dt.ToLongTimeString(), y);
+                                listCountsY.Add(x, y, label);
+                            }
+                            else listCountsY.Add(x, y);
+                            numAxes = 2;
+                        }
+
+                        if ((split.Length > 4) && (split[4].Length > 0))
+                        {
+                            y = Convert.ToDouble(split[4]);//Column 3/C
+                            if (_isUsingLabels)
+                            {
+                                label = String.Format(title + " AC_Z\n{0} {1}", dt.ToLongTimeString(), y);
+                                listCountsZ.Add(x, y, label);
+                            }
+                            else listCountsZ.Add(x, y);
+                            numAxes = 3;
+                        }
+
+                        #endregion
+
+                        #endregion
+
+                    }
+
+
+                }
+                catch { }
+            }
+
+
+            #region SET DISPLAY PROPERTIES FOR LINES
+            LineItem pointsCurve;
+
+            #region ON Y-AXIS
+            #region
+            if (numAxes >= 1)
+            {
+                pointsCurve = gp.AddCurve(title + " X", listCountsX, colors[0 % colors.Length], SymbolType.Circle);
+                pointsCurve.Symbol.Fill = new Fill(colors[(id * 3) % colors.Length]);
+                if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
+                pointsCurve.Line.IsVisible = false;
+                pointsCurve.Tag = "AC" + (id + 1);
+                _alLinesWithSymbols.Add(pointsCurve);
+            }
+
+            if (numAxes >= 2)
+            {
+                pointsCurve = gp.AddCurve(title + " Y", listCountsY, colors[1 % colors.Length], SymbolType.Circle);
+                pointsCurve.Symbol.Fill = new Fill(colors[((id * 3) % colors.Length) + 1]);
+
+                if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
+                pointsCurve.Line.IsVisible = false;
+                pointsCurve.Tag = "AC" + (id + 1);
+                _alLinesWithSymbols.Add(pointsCurve);
+            }
+
+            if (numAxes >= 3)
+            {
+                pointsCurve = gp.AddCurve(title + " Z", listCountsZ, colors[2 % colors.Length], SymbolType.Circle);
+                pointsCurve.Symbol.Fill = new Fill(colors[((id * 3) % colors.Length) + 1]);
+
+                if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
+                pointsCurve.Line.IsVisible = false;
+                pointsCurve.Tag = "AC" + (id + 1);
+                _alLinesWithSymbols.Add(pointsCurve);
+            }
+
+
+            #endregion
+            #endregion
+            #endregion
+            WidenDatesIfNeeded(listCountsX);
+        }
+        #endregion Agnostigraph
+
+
+
+
+
         #region Actigraph
         Hashtable lineSegments = new Hashtable();
         private void CreateActigraphLineSegments(GraphPane gp)
@@ -1021,6 +1172,7 @@ namespace DataViewer
             }
             
         }
+
         private void CreateActigraphGraph(GraphPane gp, string filePath, int id)
         {
             string[] values = FileReadWrite.ReadLinesFromFile(filePath);
@@ -1855,6 +2007,23 @@ namespace DataViewer
                     }
                 }
             }
+            else if (type.CompareTo("Label") == 0)
+            {
+                is_category_1 = true;
+
+                if (File.Exists(dirpath_colors + "ActivityLabelsColors_0.csv"))
+                {
+                    labels_color_list_1 = new BindingList<string[]>();
+                    lines_read = FileReadWrite.ReadLinesFromFile(dirpath_colors + "ActivityLabelsColors_0.csv");
+
+                    foreach (string line in lines_read)
+                    {
+                        label_color = line.Split(',');
+                        labels_color_list_1.Add(label_color);
+                    }
+                }
+            }
+
 
             #endregion
 
@@ -2002,6 +2171,8 @@ namespace DataViewer
 
                         if (isSolid) myBar.Bar.Fill.Type = FillType.Solid;
                         else myBar.Bar.Fill.Type = FillType.None;
+
+                        myBar.Bar.Border.IsVisible = false;
 
                         #endregion
                     }
@@ -2302,7 +2473,7 @@ namespace DataViewer
         private void BuildCharts(string path)
         {
             SetGraphPanels();
-            string[] files;
+            string[] files = {""};
             
             paneOrders = new Hashtable();
             int paneOrdering = 1;
@@ -2311,22 +2482,31 @@ namespace DataViewer
             
             #region ACCELEROMETER GRAPHS
 
-            files = Directory.GetFiles(path + "\\merged\\", "MITes*Raw*");
-            for (int i = 0; i < files.Length; i++)
+            try
             {
-                string channel = "", location = "";
-                string[] sensorinfo = Path.GetFileNameWithoutExtension(files[i]).Split('_');
-                if (sensorinfo.Length >= 4)
+                files = Directory.GetFiles(path + "\\merged\\", "MITes*Raw*");
+            }
+            catch { }
+            if (files != null)
+            {
+                for (int i = 0; i < files.Length; i++)
                 {
-                    channel = sensorinfo[1];
-                    location = sensorinfo[3];
+                    if (File.Exists(files[i]))
+                    {
+                        string channel = "", location = "";
+                        string[] sensorinfo = Path.GetFileNameWithoutExtension(files[i]).Split('_');
+                        if (sensorinfo.Length >= 4)
+                        {
+                            channel = sensorinfo[1];
+                            location = sensorinfo[3];
+                        }
+                        CreateAccelerationGraph(paneOrdering, files[i], channel, location, "MITes", "");
+                        paneOrdering++;
+                    }
                 }
-                CreateAccelerationGraph(paneOrdering, files[i], channel, location,"MITes","");
-                paneOrdering++;
             }
 
             #endregion
-
 
             #region WOCKETS ACCELEROMETER GRAPHS
             if ((Directory.Exists(path + "\\wockets\\")) && (Directory.GetFiles(path + "\\wockets\\").Length > 0))
@@ -2471,22 +2651,31 @@ namespace DataViewer
 
 
             #region Actigraphs
-            string[] file = Directory.GetFileSystemEntries(path + "\\merged\\", "Actigraph*.csv");
+            string[] file = { "" };
 
-            if (file.Length > 0)
+            try
             {
-                string title = "Actigraphs";
-                GraphPane ePane = AddPane(title, "Actigraphs");
-                for (int i = 0; (i < file.Length); i++)
-                {
-                    string actigraphFile = Path.Combine(path, "merged\\Actigraph" + (i + 1) + ".csv");
-                    if (File.Exists(actigraphFile))                    
-                        CreateActigraphGraph(ePane, actigraphFile,i);
-                }
+                Directory.GetFileSystemEntries(path + "\\merged\\", "Actigraph*.csv");
+            }
+            catch {}
 
-                //CreateActigraphLineSegments(ePane);
-                paneOrders.Add(title, paneOrdering);
-                paneOrdering++;
+            if (File.Exists(file[0]))
+            {
+                if (file.Length > 0)
+                {
+                    string title = "Actigraphs";
+                    GraphPane ePane = AddPane(title, "Actigraphs");
+                    for (int i = 0; (i < file.Length); i++)
+                    {
+                        string actigraphFile = Path.Combine(path, "merged\\Actigraph" + (i + 1) + ".csv");
+                        if (File.Exists(actigraphFile))
+                            CreateActigraphGraph(ePane, actigraphFile, i);
+                    }
+
+                    //CreateActigraphLineSegments(ePane);
+                    paneOrders.Add(title, paneOrdering);
+                    paneOrdering++;
+                }
             }
 
             #endregion Actigraphs
@@ -2506,21 +2695,57 @@ namespace DataViewer
             #endregion Sensewear
 
 
+            #region Agnostigraphs
+
+            string[] agnosticFiles = {""};
+
+            try
+            {
+                agnosticFiles = Directory.GetFileSystemEntries(path + "\\", "*.summarydata.csv");
+            }
+            catch { }
+            if (agnosticFiles.Length > 0)
+            {
+                for (int i = 0; (i < agnosticFiles.Length); i++)
+                {
+                    if (File.Exists(agnosticFiles[i]))
+                    {
+                        FileInfo fi = new FileInfo(agnosticFiles[i]);
+                        string title = fi.Name.Substring(0,fi.Name.LastIndexOf(".summarydata.csv")).Replace(".", "\r\n");
+                        //JPN - no y-axis label at the moment
+                        GraphPane ePane = AddPane(title, "");
+                        CreateAgnostigraphGraph(ePane, agnosticFiles[i], i);
+                        //CreateActigraphLineSegments(ePane);
+                        paneOrders.Add(title, paneOrdering);
+                        paneOrdering++;
+                    }
+                }
+            }
+
+            #endregion Agnostigraphs
+
             GraphPane hPane = null;
             string filepath = "";
 
             #region COMBINED DATATYPE GRAPH - USUALLY HAS HEART RATE + 1 or more of GPS data, Annotation labels, or Survey responses
-            
-            files = Directory.GetFiles(path + "\\merged\\", "HeartRate*");
-            if (files.Length > 0)
+
+            try
             {
-                FileInfo finfo = new FileInfo(files[0]);
-                if( finfo.Length > 0)
+                files = Directory.GetFiles(path + "\\merged\\", "HeartRate*");
+            }
+            catch { }
+            if (File.Exists(files[0]))
+            {
+                if (files.Length > 0)
                 {
-                    string title = "Heart Rate";
-                    hPane = AddPane(title, "Beats Per Minute");
-                    paneOrders.Add(title, paneOrdering);
-                    CreateHeartRateGraph(hPane, files);
+                    FileInfo finfo = new FileInfo(files[0]);
+                    if (finfo.Length > 0)
+                    {
+                        string title = "Heart Rate";
+                        hPane = AddPane(title, "Beats Per Minute");
+                        paneOrders.Add(title, paneOrdering);
+                        CreateHeartRateGraph(hPane, files);
+                    }
                 }
             }
 
@@ -2594,6 +2819,7 @@ namespace DataViewer
                 
                 //reading the corrected annotations in the merged folder
                 string file_annotations = path + "\\merged\\" + "AnnotationIntervals.csv";
+                string agnostic_annotations = path + "\\" + "annotation.csv";
 
                 if (File.Exists(file_annotations))
                 {
@@ -2618,6 +2844,12 @@ namespace DataViewer
                         CreateDiaryGraph(aPane, file_annotations, path_annotations_color, "Time:", 330, "puffing");
                     }
                 }
+                else if (File.Exists(agnostic_annotations))
+                {
+                    string path_annotations_color = path + "\\";
+                    CreateDiaryGraph(aPane, agnostic_annotations, path_annotations_color, "Time: ", 0, "Label");
+                }
+
 
                 #endregion
 
@@ -2781,12 +3013,13 @@ namespace DataViewer
             if (!show)
             {
                 if (isPane) RemovePane(item);
+                ((CheckBox)sender).Height = 17;   // JPN added to allow multiline labels
             }
             else
             {
                 if (isPane) ShowPane(item);
+                ((CheckBox)sender).Height = 51;   // JPN added to allow multiline labels
             }
-           
             RefreshMasterPaneLayout();
         }
 

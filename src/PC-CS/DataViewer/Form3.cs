@@ -306,7 +306,7 @@ namespace DataViewer
                 cBox.Location = new Point(5, y);
             }
             else cBox.Location = new Point(5, 15);
-            
+            cBox.Width = groupBox1.Width;
             cBox.Text = name;
             cBox.Checked = true;
             cBox.CheckedChanged += new EventHandler(checkBox_CheckedChanged);
@@ -2931,12 +2931,13 @@ namespace DataViewer
             if (!show)
             {
                 if (isPane) RemovePane(item);
+                ((CheckBox)sender).Height = 17;   // JPN added to allow multiline labels
             }
             else
             {
                 if (isPane) ShowPane(item);
+                ((CheckBox)sender).Height = 51;   // JPN added to allow multiline labels
             }
-           
             RefreshMasterPaneLayout();
         }
 
