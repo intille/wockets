@@ -138,7 +138,7 @@ namespace DataMerger
             try
             {
                 this._ActigraphSeconds[5] = Convert.ToDouble(this.textBox_actigraph6.Text.Trim());
-                Save();
+                //Save();
             }
             catch
             {
@@ -264,27 +264,41 @@ namespace DataMerger
                 TextReader tr = new StreamReader(directory + FILENAME);
                 string line = "";
 
-
-
                 try
                 {
                     for (int i = 0; i < _TotalActigraphs; i++)
                     {
                         line = tr.ReadLine();
-                        this._ActigraphSeconds[i] = Convert.ToDouble(line.Substring(11));
+                        string[] parts = line.Split(':');
+                        if (parts[0].Contains("Actigraph"))
+                        {
+                            this._ActigraphSeconds[i] = Convert.ToDouble(parts[1]);
+                        }
+                        else
+                        {
+                            tr.Close();
+                            break;
+                        }
                     }
+                    tr.Close();
                     //line = tr.ReadLine();
                     //this._ActigraphSeconds = Convert.ToDouble(line.Substring(10));
                 }
                 catch
                 {
                     this._ActigraphSeconds = new double[] { 0, 0, 0, 0, 0, 0 };
+                    tr.Close();
                 }
 
+                tr = new StreamReader(directory + FILENAME);
+                line = tr.ReadLine();
+
+                while (line.Contains("Actigraph"))
+                    line = tr.ReadLine();
 
                 try
                 {
-                    line = tr.ReadLine();
+                    //line = tr.ReadLine();
                     this._SensewearSeconds = Convert.ToDouble(line.Substring(10));
                 }
                 catch
@@ -373,9 +387,6 @@ namespace DataMerger
                 {
                     this._GpsSeconds = 0;
                 }
-
-
-
 
                 tr.Close();
             }
