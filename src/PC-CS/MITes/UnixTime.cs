@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 namespace HousenCS.MITes
 {
 	/// <summary>
-	/// Summary description for UnixTime.
+	/// Sumamary description for UnixTime.
 	/// </summary>
 	public class UnixTime
 	{
