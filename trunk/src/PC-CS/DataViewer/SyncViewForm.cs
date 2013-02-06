@@ -190,11 +190,6 @@ namespace DataViewer
 
         #endregion
 
-
-
-
-
-
         #region LAYOUT and FORMATTING
 
 
@@ -490,11 +485,6 @@ namespace DataViewer
 
 
         #endregion  LAYOUT and FORMATTING
-
-
-
-
-
 
         #region CHART CONTENT
 
@@ -2405,9 +2395,6 @@ namespace DataViewer
 
         #endregion Chart content
 
-
-
-
         #region Build Graphs
 
         Hashtable paneOrders;
@@ -2618,62 +2605,6 @@ namespace DataViewer
             GraphPane hPane = null;
             string filepath = "";
 
-            #region COMBINED DATATYPE GRAPH - USUALLY HAS HEART RATE + 1 or more of GPS data, Annotation labels, or Survey responses
-
-            #region Commented
-            /*
-            files = Directory.GetFiles(path + "\\merged\\", "HeartRate*");
-            if (files.Length > 0)
-            {
-                string title = "Heart Rate";
-                hPane = AddPane(title, "Beats Per Minute");
-                paneOrders.Add(title, paneOrdering);
-                CreateHeartRateGraph(hPane, files);
-            }
-            else if (AnyMatches(path + "\\merged\\", "GPS*,POI*"))
-            {
-                string title = paneOrdering + " Location";
-                hPane = AddPane(title, "");
-            }
-            else if (AnyMatches(path + "\\annotation\\phoneannotation\\", "annotat*,photos*,surveys*"))
-            {
-                string title = paneOrdering + " Labels";
-                hPane = AddPane(title, "");
-            }
-            else if (AnyMatches(path + "\\annotation\\audioannotation\\", "annotat*"))
-            {
-                string title = paneOrdering + " Labels";
-                hPane = AddPane(title, "");
-            }
-            else if (AnyMatches(path + "\\annotation\\phoneannotation\\", "average-*"))
-            {
-                string title = paneOrdering + " Annotation";
-                hPane = AddPane(title, "");
-                hPane.YAxis.IsVisible = false;
-                _doesShowHover = false;
-            }
-            */
-            #endregion  
-
-            /*
-            if (AnyMatches(path + "\\annotation\\audioannotation\\", "annotat*"))
-            {
-                string title = paneOrdering + " Labels";
-                hPane = AddPane(title, "");
-            }
-            else if (AnyMatches(path + "\\annotation\\phoneannotation\\", "average-*"))
-            {
-                string title = paneOrdering + " Annotation";
-                hPane = AddPane(title, "");
-                hPane.YAxis.IsVisible = false;
-                _doesShowHover = false;
-            }
-            */
-
-
-            #endregion  COMBINED DATATYPE GRAPH
-
-
             #region Annotations
 
             //if (hPane != null)
@@ -2783,42 +2714,12 @@ namespace DataViewer
             }
             #endregion
 
-
-
-
-
             #endregion
 
             hScrollBar1.Value = 0;            
             SetTimes();
             RefreshMasterPaneLayout();
         }
-
-
-
-        /// <summary>
-        /// Determines whether there is at least one file matching one of the supplied filename patterns
-        /// </summary>
-        /// <param name="pathSearchDirectory">absolute path of the directory to search</param>
-        /// <param name="filePatterns">comma separated list of file patterns (using wild cards such as asterisk) to match against directory file list</param>
-        /// <returns>true if any files matched for one or more of the supplied patterns within the directory specified by the path</returns>
-        private bool AnyMatches(string pathSearchDirectory, string filePatterns)
-        {
-            bool isMatch = false;
-            string[] patternsToMatch = filePatterns.Split(',');
-            int i = 0;
-
-           
-                while (!isMatch && (i < patternsToMatch.Length))
-                {
-                    if (Directory.GetFiles(pathSearchDirectory, patternsToMatch[i]).Length > 0) isMatch = true;
-                    i++;
-                }
-
-                return isMatch;
-
-            }
-
 
         #endregion Build Graphs
 
@@ -2920,7 +2821,6 @@ namespace DataViewer
 
         #endregion
 
-
         #region SHOW/HIDE PANES
         
         private void checkBox_CheckedChanged(object sender, EventArgs e)
@@ -2983,8 +2883,6 @@ namespace DataViewer
 
 
         #endregion       
-
-
 
         #region HOVER
 
@@ -3059,11 +2957,7 @@ namespace DataViewer
 
         #endregion
 
-        
-
-
         #endregion
-
 
     }
 }

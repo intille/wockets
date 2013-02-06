@@ -74,7 +74,6 @@ namespace DataViewer
             this.hScrollBar1.Size = new System.Drawing.Size(404, 40);
             this.hScrollBar1.TabIndex = 3;
             this.hScrollBar1.ValueChanged += new System.EventHandler(this.hScrollBar1_ValueChanged);
-            this.hScrollBar1.Scroll += new System.Windows.Forms.ScrollEventHandler(this.hScrollBar1_Scroll);
             // 
             // lbFirstDate
             // 
@@ -111,13 +110,13 @@ namespace DataViewer
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.openToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(35, 20);
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "File";
             // 
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(111, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(103, 22);
             this.openToolStripMenuItem.Text = "Open";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
@@ -188,7 +187,7 @@ namespace DataViewer
             this.button_sync.MouseCaptureChanged += new System.EventHandler(this.button_sync_Click);
             this.button_sync.Click += new System.EventHandler(this.button_sync_Click);
             // 
-            // Form1
+            // DataViewForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -205,10 +204,10 @@ namespace DataViewer
             this.Controls.Add(this.zedGraphControl1);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
-            this.Name = "Form1";
-            this.Text = "Wockets Data Viewer - Version " + CurrentWockets._Version + " " + CurrentWockets._Date;
-            this.Load += new System.EventHandler(this.Form1_Load);
-            this.Resize += new System.EventHandler(this.Form1_Resize);
+            this.Name = "DataViewForm";
+            this.Text = "Wockets Data Viewer Version 20130205";
+            this.Load += new System.EventHandler(this.DataViewForm_Load);
+            this.Resize += new System.EventHandler(this.DataViewForm_Resize);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();

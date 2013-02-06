@@ -1409,10 +1409,7 @@ namespace DataViewer
         }
         #endregion
 
-
-
         #region ANNOTATION LABELS
-
 
         private void CreateDiaryGraph(GraphPane gp, string filepath, string dirpath_colors,
                                        string title, int yoffset, string type)
@@ -1741,12 +1738,6 @@ namespace DataViewer
 
         #endregion
 
-
-
-
-
-
-
         #region PHOTOS and SURVEYS
         private void CreatePhotoGraph(GraphPane gp, string filepath, string imagedir)
         {
@@ -2012,9 +2003,6 @@ namespace DataViewer
 
         #endregion
 
-
-
-
         Hashtable paneOrders;
         // Build the Chart
         private void BuildCharts(string path)
@@ -2219,41 +2207,7 @@ namespace DataViewer
             GraphPane hPane = null;
             string filepath = "";
 
-            #region Commented
-            /* files = Directory.GetFiles(path + "\\merged\\", "HeartRate*");
-            if (files.Length > 0)
-            {
-                string title = "Heart Rate";
-                hPane = AddPane(title, "Beats Per Minute");
-                paneOrders.Add(title, paneOrdering);
-                CreateHeartRateGraph(hPane, files);
-            }
-            else if (AnyMatches(path + "\\merged\\", "GPS*,POI*"))
-            {
-                string title = paneOrdering + " Location";
-                hPane = AddPane(title, "");
-            }
-            else if (AnyMatches(path + "\\annotation\\phoneannotation\\", "annotat*,photos*,surveys*"))
-            {
-                string title = paneOrdering + " Labels";
-                hPane = AddPane(title, "");
-            }
-            else if (AnyMatches(path + "\\annotation\\audioannotation\\", "annotat*"))
-            {
-                string title = paneOrdering + " Labels";
-                hPane = AddPane(title, "");
-            }
-            else if (AnyMatches(path + "\\annotation\\phoneannotation\\", "average-*"))
-            {
-                string title = paneOrdering + " Annotation";
-                hPane = AddPane(title, "");
-                hPane.YAxis.IsVisible = false;
-                _doesShowHover = false;
-            }
-            */
-            #endregion Commented
-
-
+            
             //if (hPane != null)
             if (hPane == null)
             {
@@ -2669,7 +2623,6 @@ namespace DataViewer
         #endregion
 
         #endregion
-
 
     }
 }
