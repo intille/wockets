@@ -16,10 +16,12 @@ using DataViewer.Logging; //Logger
 
 namespace DataViewer
 {
-   
+
     public partial class DataViewForm : Form
     {
+        //DONE
         #region FIELDS
+
         string _pathDataset = "";
         DateTime _firstDate = DateTime.MinValue;
         DateTime _lastDate = DateTime.MinValue;
@@ -30,7 +32,7 @@ namespace DataViewer
         Hashtable _htBoxes = new Hashtable();
 
         bool _isFirstTime = true; //used to determine whether graphs need to be cleared on Reset
-        bool _doesShowHover = true; 
+        bool _doesShowHover = true;
 
         int _minutesPage = 60;
 
@@ -39,11 +41,13 @@ namespace DataViewer
         bool _isAdaptingPointSize = true; //as graph gets larger/smaller, changes point size to match
         bool _zoomedOut = true;
 
+        Color[] colorPalette = new Color[9] { Color.Red, Color.YellowGreen, Color.Beige, Color.Aqua, Color.Violet, Color.Bisque, Color.Cyan, Color.DarkOrange, Color.Khaki };
+
         #endregion
 
-
+        //DONE
         #region INITIALIZE
-        
+
         public DataViewForm()
         {
             if (File.Exists("Configuration.xml"))
@@ -51,25 +55,17 @@ namespace DataViewer
                 CurrentWockets._Configuration = new Wockets.Data.Configuration.WocketsConfiguration();
                 CurrentWockets._Configuration.FromXML("Configuration.xml");
             }
-/*
-  else
-            {
-                CurrentWockets._Configuration = new Wockets.Data.Configuration.WocketsConfiguration();
-                CurrentWockets._Configuration.FromXML("Configuration.xml");
-            }
- */
             InitializeComponent();
-            
-        }
-        public DataViewForm(string pathStartDS)
-        {
-            Logger.LogDebug("Form1", "arguments " + pathStartDS);
-            _pathDataset = pathStartDS;
-            InitializeComponent();
-            
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        public DataViewForm(string pathStartDS)
+        {
+            Logger.LogDebug("DataViewForm", "arguments " + pathStartDS);
+            _pathDataset = pathStartDS;
+            InitializeComponent();
+        }
+
+        private void DataViewForm_Load(object sender, EventArgs e)
         {
             this.WindowState = FormWindowState.Maximized;
             SetGraphPanels();
@@ -79,50 +75,46 @@ namespace DataViewer
 
             if (_pathDataset.Length > 0) OpenDataset(_pathDataset);
         }
-        
+
         #endregion
 
-
+        //DONE
         #region LAYOUT and FORMATTING
-        private void Form1_Resize(object sender, EventArgs e)
+
+        private void DataViewForm_Resize(object sender, EventArgs e)
         {
             SetLayout();
         }
 
         private void SetLayout()
-        {   
-            int graphwidth = ClientRectangle.Width-groupBox1.Width;
+        {
+            int graphwidth = ClientRectangle.Width - groupBox1.Width;
             int graphheight = ClientRectangle.Height - 110;
 
-
             // Control Group dimentions
-            groupBox1.Location = new Point(graphwidth, MainMenuStrip.Bottom +5);//+5
-            groupBox1.Size = new Size(groupBox1.Width, graphheight -15); // added          
-                       
+            groupBox1.Location = new Point(graphwidth, MainMenuStrip.Bottom + 5);//+5
+            groupBox1.Size = new Size(groupBox1.Width, graphheight - 15); // added          
+
             //Graph Dimensions
             zedGraphControl1.Location = new Point(0, MainMenuStrip.Bottom);
-            zedGraphControl1.Size = new Size(graphwidth,graphheight);
+            zedGraphControl1.Size = new Size(graphwidth, graphheight);
 
             //Scroll Bar Dimentions
-            hScrollBar1.Width = graphwidth-10;
+            hScrollBar1.Width = graphwidth - 10;
             hScrollBar1.Location = new Point(5, zedGraphControl1.Bottom + 20);
 
             //Date and Time Labels Locations
             lbFirstDate.Location = new Point(5, hScrollBar1.Bottom);
-            lbSecondDate.Location = new Point(hScrollBar1.Right - lbSecondDate.Width -100, hScrollBar1.Bottom);
+            lbSecondDate.Location = new Point(hScrollBar1.Right - lbSecondDate.Width - 100, hScrollBar1.Bottom);
             lbScrollTime.Location = new Point(hScrollBar1.Left, hScrollBar1.Top - lbScrollTime.Height);
-            
-            //Buttons Location
-            buttonZoomOut.Location = new Point(hScrollBar1.Right + 5, hScrollBar1.Top-20); //-30
-            buttonDisplayRaw.Location = new Point(hScrollBar1.Right + 5, hScrollBar1.Top+5);//+5
-            button_sync.Location = new Point(hScrollBar1.Right +5, hScrollBar1.Top + 30);
 
+            //Buttons Location
+            buttonZoomOut.Location = new Point(hScrollBar1.Right + 5, hScrollBar1.Top - 20); //-30
+            buttonDisplayRaw.Location = new Point(hScrollBar1.Right + 5, hScrollBar1.Top + 5);//+5
+            button_sync.Location = new Point(hScrollBar1.Right + 5, hScrollBar1.Top + 30);
 
             hScrollBar1.Visible = false;
         }
-
-
-
 
         private void SetGraphPanels()
         {
@@ -154,12 +146,10 @@ namespace DataViewer
             // Vertical pan and zoom not allowed
             zedGraphControl1.IsEnableVPan = false;
             zedGraphControl1.IsEnableVZoom = false;
-
             zedGraphControl1.IsShowPointValues = _isUsingLabels;
-            zedGraphControl1.IsSynchronizeXAxes = true;        
-
-
+            zedGraphControl1.IsSynchronizeXAxes = true;
         }
+
         private GraphPane AddPane(string name, string ytitle)
         {
             GraphPane pane = new GraphPane();
@@ -175,10 +165,9 @@ namespace DataViewer
             //pane.YAxis.Scale.Min = 0;
             pane.Fill.Color = Color.Empty;
             zedGraphControl1.MasterPane.Add(pane);
-
             _htBoxes.Add(name, new BoxObj());
 
-            #region ADD CHECKBOX
+            // Add checkbox
             _htPanes.Add(name, pane);
             CheckBox cBox = new CheckBox();
             cBox.Parent = groupBox1;
@@ -192,25 +181,24 @@ namespace DataViewer
             cBox.Checked = true;
             cBox.CheckedChanged += new EventHandler(checkBox_CheckedChanged);
             _alCheckBoxes.Add(cBox);
-            #endregion
 
             //RefreshMasterPaneLayout();
 
             return pane;
-
         }
+
         private void RefreshMasterPaneLayout()
         {
             // Tell ZedGraph to auto layout all the panes
             using (Graphics g = CreateGraphics())
             {
-                zedGraphControl1.MasterPane.SetLayout(g, PaneLayout.SingleColumn);                
+                zedGraphControl1.MasterPane.SetLayout(g, PaneLayout.SingleColumn);
             }
             if (_isAdaptingPointSize) SetPointSize();
             zedGraphControl1.AxisChange();
             zedGraphControl1.Refresh();
 
-            #region ARRANGE CHECKBOXES
+            // Arrange checkboxes
             if (_alCheckBoxes.Count > 1)
             {
                 int lastcheckbox = 10;
@@ -235,8 +223,6 @@ namespace DataViewer
                 groupBox1.Visible = true;
             }
             else groupBox1.Visible = false;
-            #endregion
-
         }
 
         private void SetPointSize()
@@ -244,9 +230,9 @@ namespace DataViewer
             if (zedGraphControl1.MasterPane.PaneList.Count > 0)
             {
                 double minutes = ((TimeSpan)(_lastDate - _firstDate)).TotalMinutes;
-                double ticks = (zedGraphControl1.MasterPane.PaneList[0].XAxis.Scale.Max - zedGraphControl1.MasterPane.PaneList[0].XAxis.Scale.Min)*1000;
+                double ticks = (zedGraphControl1.MasterPane.PaneList[0].XAxis.Scale.Max - zedGraphControl1.MasterPane.PaneList[0].XAxis.Scale.Min) * 1000;
                 int charts = zedGraphControl1.MasterPane.PaneList.Count;
-               //float point = (float)((10 * 7) / (ticks * charts));
+                //float point = (float)((10 * 7) / (ticks * charts));
                 float point = 1;
                 //else if (point > 10) point = 10;
                 for (int i = 0; i < _alLinesWithSymbols.Count; i++)
@@ -255,6 +241,7 @@ namespace DataViewer
                 }
             }
         }
+
         private void SetTimes()
         {
             lbFirstDate.Text = _firstDate.ToString();
@@ -262,7 +249,7 @@ namespace DataViewer
             lbScrollTime.Text = _firstDate.ToString();
             TimeSpan ts = _lastDate - _firstDate;
 
-            #region DETERMINE PAGING SIZE BASED ON TOTAL TIMESPAN OF DATA
+            // Determine paging width based on total duration of data
             //if (ts.TotalHours > 1)//4 or more hours of data
             //    _minutesPage = 20;
             //else 
@@ -272,12 +259,10 @@ namespace DataViewer
                 _minutesPage = 20;
             else if (ts.TotalMinutes > 15) _minutesPage = 5; //between 15-60 minutes of data
             else _minutesPage = 1;
-            #endregion
 
             hScrollBar1.LargeChange = 1;
             hScrollBar1.SmallChange = 1;
             hScrollBar1.Maximum = (int)Math.Floor(ts.TotalMinutes / _minutesPage);
-
 
             //XDate startx = new XDate(_firstDate.AddMinutes(-padding));
             XDate startx = new XDate(_firstDate);
@@ -299,6 +284,7 @@ namespace DataViewer
             if (pl.Count > 0)
                 WidenDatesIfNeeded(new XDate(pl[0].X), new XDate(pl[pl.Count - 1].X));
         }
+
         private void WidenDatesIfNeeded(XDate fDate, XDate lDate)
         {
             if (fDate.DateTime < _firstDate) _firstDate = fDate.DateTime;
@@ -313,10 +299,9 @@ namespace DataViewer
             buttonZoomOut.Enabled = isEnabled;
             buttonDisplayRaw.Enabled = isEnabled;
             button_sync.Enabled = isEnabled;
-
-
             zedGraphControl1.Visible = isEnabled;
         }
+
         private void Reset()
         {
             if (!_isFirstTime)
@@ -335,95 +320,150 @@ namespace DataViewer
             else _isFirstTime = false;
 
         }
+
         #endregion
 
-
         #region CHART CONTENT
-        
-        
-        #region HEART RATE
-        private void AddHeartCurve(GraphPane gp, string name, PointPairList ppl,Color lineColor, PointPairList pplInvalid)
-        {
-            LineItem pointsCurve = gp.AddCurve("Heart rate " + name, ppl, lineColor, SymbolType.Circle);
-            if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
-            pointsCurve.Symbol.Fill = new Fill(lineColor);
-            pointsCurve.Line.IsVisible = false;
-            _alLinesWithSymbols.Add(pointsCurve);
 
-            LineItem pointsCurveInvalid = gp.AddCurve("Heart rate " + name +", Out of Range", pplInvalid, lineColor, SymbolType.XCross);
-            pointsCurveInvalid.Line.IsVisible = false;
-            _alLinesWithSymbols.Add(pointsCurveInvalid);
+        #region GENERIC GRAPH
 
-        }
-        
-        private void CreateHeartRateGraph(GraphPane gp, string[] files)
+        // **** JPN LOOK HERE FOR PLOTTING
+
+        private void CreateGenericGraph(GraphPane gp, string filePath)
         {
-            string[] coloroptions = new string[] { "red", "darkred", "tomato", "crimson" };
-            for (int f = 0; f < files.Length; f++)
+            string[] values = FileReadWrite.ReadLinesFromFile(filePath);
+            string[] headers = values[0].Split(',');
+
+            PointPairList[] listDataPoints = new PointPairList[headers.Length - 1];
+            for (int j = 0; j < listDataPoints.Length; j++) listDataPoints[j] = new PointPairList();
+
+            //for each row, add values to PointPairLists
+            for (int i = 1; i < values.Length; i++)
             {
-                string[] values = FileReadWrite.ReadLinesFromFile(files[f]);
-                string name = Path.GetFileNameWithoutExtension(files[f]).Replace("HeartRate_", "");
-
-                PointPairList listValid = new PointPairList();
-                PointPairList listInvalid = new PointPairList();
-                DateTime lastDate = new DateTime(1900, 1, 1);
-                for (int i = 0; i < values.Length; i++)
+                try
                 {
-                    try
+                    string[] split = values[i].Split(',');
+                    for (int j = 1; j < split.Length; j++)
                     {
-                        string[] split = values[i].Split(',');
-                        if ((split.Length > 2) && (split[1].Length > 0) && (split[2].Length > 0))
+                        if (split.Length > 1) //TimeStamp + at least one data value
                         {
-                            DateTime dt = DateTime.Parse(split[1]);
-
-                            double x = (double)new XDate(dt);
-                            double y = Convert.ToDouble(split[2]);
-
-                            string label = String.Format("Heart rate from {0}\n{1} {2}", name, dt.ToLongTimeString(), y);
-
-                            if ((y >= 35) && (y <= 190))
+                            // TIMESTAMP - X VALUE
+                            DateTime dt = DateTimeParse(split[0]); //TimeStamp, Column 0
+                            double x = (double)new XDate(dt);       //x value is numeric representation of TimeStamp
+                            double y = 0; string label = "EMPTY LABEL";
+                            if ((split.Length > 1) && (split[j].Length > 0))
                             {
-                                if (_isUsingLabels) listValid.Add(x, y, label);
-                                else listValid.Add(x, y);
-                            }
-                            else
-                            {
-                                if (_isUsingLabels) listInvalid.Add(x, y, label.Replace("Heart", "Invalid heart"));
-                                else listInvalid.Add(x, y);
+                                y = Convert.ToDouble(split[j]);//Column 3/C
+                                if (_isUsingLabels)
+                                {
+                                    label = String.Format("{0}\n{1} {2}", headers[j], dt.ToLongTimeString(), y);
+                                    listDataPoints[j - 1].Add(x, y, label);
+                                }
+                                else listDataPoints[j - 1].Add(x, y);
                             }
                         }
                     }
-                    catch { }
                 }
-
-                AddHeartCurve(gp, name, listValid,Color.FromName(coloroptions[f]),listInvalid);
-
-                WidenDatesIfNeeded(listValid);
+                catch { }
             }
 
+            LineItem[] pointsCurves = new LineItem[headers.Length - 1];
+            for (int j = 0; j < pointsCurves.Length; j++)
+            {
+                pointsCurves[j] = new LineItem("TEST_LABEL");
+                pointsCurves[j] = gp.AddCurve("JPN SERIES", listDataPoints[j], colorPalette[j], SymbolType.Circle);
+                pointsCurves[j].Symbol.Fill = new Fill(colorPalette[j]);
+                if (!_isAdaptingPointSize) pointsCurves[j].Symbol.Size = 1F;
+                // **** JPN SET TO TRUE IF A LINE IS DESIRED
+                pointsCurves[j].Line.IsVisible = true;
+                pointsCurves[j].Tag = "THIS IS A TAG";
+                _alLinesWithSymbols.Add(pointsCurves[j]);
+                WidenDatesIfNeeded(listDataPoints[j]);
+            }
         }
-        
-        #endregion
+
+        #endregion GENERIC GRAPH
 
 
+        //#region HEART RATE
+
+        //private void AddHeartCurve(GraphPane gp, string name, PointPairList ppl,Color lineColor, PointPairList pplInvalid)
+        //{
+        //    LineItem pointsCurve = gp.AddCurve("Heart rate " + name, ppl, lineColor, SymbolType.Circle);
+        //    if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
+        //    pointsCurve.Symbol.Fill = new Fill(lineColor);
+        //    pointsCurve.Line.IsVisible = false;
+        //    _alLinesWithSymbols.Add(pointsCurve);
+
+        //    LineItem pointsCurveInvalid = gp.AddCurve("Heart rate " + name +", Out of Range", pplInvalid, lineColor, SymbolType.XCross);
+        //    pointsCurveInvalid.Line.IsVisible = false;
+        //    _alLinesWithSymbols.Add(pointsCurveInvalid);
+
+        //}
+
+        //private void CreateHeartRateGraph(GraphPane gp, string[] files)
+        //{
+        //    string[] coloroptions = new string[] { "red", "darkred", "tomato", "crimson" };
+        //    for (int f = 0; f < files.Length; f++)
+        //    {
+        //        string[] values = FileReadWrite.ReadLinesFromFile(files[f]);
+        //        string name = Path.GetFileNameWithoutExtension(files[f]).Replace("HeartRate_", "");
+
+        //        PointPairList listValid = new PointPairList();
+        //        PointPairList listInvalid = new PointPairList();
+        //        DateTime lastDate = new DateTime(1900, 1, 1);
+        //        for (int i = 0; i < values.Length; i++)
+        //        {
+        //            try
+        //            {
+        //                string[] split = values[i].Split(',');
+        //                if ((split.Length > 2) && (split[1].Length > 0) && (split[2].Length > 0))
+        //                {
+        //                    DateTime dt = DateTime.Parse(split[1]);
+
+        //                    double x = (double)new XDate(dt);
+        //                    double y = Convert.ToDouble(split[2]);
+
+        //                    string label = String.Format("Heart rate from {0}\n{1} {2}", name, dt.ToLongTimeString(), y);
+
+        //                    if ((y >= 35) && (y <= 190))
+        //                    {
+        //                        if (_isUsingLabels) listValid.Add(x, y, label);
+        //                        else listValid.Add(x, y);
+        //                    }
+        //                    else
+        //                    {
+        //                        if (_isUsingLabels) listInvalid.Add(x, y, label.Replace("Heart", "Invalid heart"));
+        //                        else listInvalid.Add(x, y);
+        //                    }
+        //                }
+        //            }
+        //            catch { }
+        //        }
+
+        //        AddHeartCurve(gp, name, listValid,Color.FromName(coloroptions[f]),listInvalid);
+
+        //        WidenDatesIfNeeded(listValid);
+        //    }
+
+        //}
+
+        //#endregion
 
         #region MITES
+
         private static DateTime ConvertUNIXDatTime(double timestamp)
         {
             // First make a System.DateTime equivalent to the UNIX Epoch.
             DateTime dateTime = new System.DateTime(1970, 1, 1, 0, 0, 0, 0);
-
             // Add the number of seconds in UNIX timestamp to be converted.
-            dateTime = dateTime.AddSeconds(timestamp/1000);
-
+            dateTime = dateTime.AddSeconds(timestamp / 1000);
             return dateTime;
-
         }
 
-
-        private void AddAccelerationCurve(string name, string title, PointPairList pplX, PointPairList pplY, PointPairList pplZ, PointPairList pplActivityCount, PointPairList pplWKTActivityCount,PointPairList pplRawWKTActivityCount, PointPairList pplSamplingRate, PointPairList pplAUC, PointPairList pplVMag)
+        private void AddAccelerationCurve(string name, string title, PointPairList pplX, PointPairList pplY, PointPairList pplZ, PointPairList pplActivityCount, PointPairList pplWKTActivityCount, PointPairList pplRawWKTActivityCount, PointPairList pplSamplingRate, PointPairList pplAUC, PointPairList pplVMag)
         {
-            GraphPane pane = AddPane(name,"Acceleration - " + title);           
+            GraphPane pane = AddPane(name, "Acceleration - " + title);
 
             LineItem pointsCurveX = pane.AddCurve("X", pplX, Color.LightBlue, SymbolType.Circle);
             LineItem pointsCurveY = pane.AddCurve("Y", pplY, Color.Blue, SymbolType.Circle);
@@ -446,8 +486,6 @@ namespace DataViewer
             pointsCurveZ.Line.IsVisible = false;
 
             LineItem pointsCurveSampling = pane.AddCurve("Sampling Rate", pplSamplingRate, Color.DarkGray, SymbolType.Circle);
-      
-
             LineItem pointsCurveActivity = pane.AddCurve("Sum Absolute Derivative", pplActivityCount, Color.Violet, SymbolType.Circle);
             pointsCurveActivity.Symbol.Size = 1F;
             pointsCurveActivity.Symbol.Fill = new Fill(Color.Violet);
@@ -464,7 +502,7 @@ namespace DataViewer
             pointsCurveWKTAC.Symbol.Size = 1F;
             pointsCurveWKTAC.Symbol.Fill = new Fill(Color.Red);
             _alLinesWithSymbols.Add(pointsCurveWKTAC);
-            pointsCurveWKTAC.Line.IsVisible =true;
+            pointsCurveWKTAC.Line.IsVisible = true;
 
 
             LineItem pointsCurveRawWKTAC = pane.AddCurve("Raw Activty Count", pplRawWKTActivityCount, Color.DarkGray, SymbolType.Circle);
@@ -473,28 +511,24 @@ namespace DataViewer
             _alLinesWithSymbols.Add(pointsCurveRawWKTAC);
             pointsCurveRawWKTAC.Line.IsVisible = true;
 
-              LineItem pointsCurveVMAG = pane.AddCurve("Vector Magnitude", pplVMag, Color.LimeGreen, SymbolType.Circle);
+            LineItem pointsCurveVMAG = pane.AddCurve("Vector Magnitude", pplVMag, Color.LimeGreen, SymbolType.Circle);
             pointsCurveVMAG.Symbol.Size = 1F;
-             pointsCurveVMAG.Symbol.Fill = new Fill(Color.LimeGreen);
+            pointsCurveVMAG.Symbol.Fill = new Fill(Color.LimeGreen);
             _alLinesWithSymbols.Add(pointsCurveVMAG);
-             pointsCurveVMAG.Line.IsVisible = false;
-     
-            pointsCurveActivity.IsY2Axis = true;
-            
+            pointsCurveVMAG.Line.IsVisible = false;
 
-            
+            pointsCurveActivity.IsY2Axis = true;
 
         }
-        
-        
-        private void CreateAccelerationGraph(int paneOrder, string filepath, string channel, string location,string type,string mac)
+
+        private void CreateAccelerationGraph(int paneOrder, string filepath, string channel, string location, string type, string mac)
         {
             #region ACCELERATION X Y Z
             string[] accel = FileReadWrite.ReadLinesFromFile(filepath);
-                 
+
             PointPairList listX = new PointPairList();
             PointPairList listY = new PointPairList();
-            PointPairList listZ = new PointPairList();                      
+            PointPairList listZ = new PointPairList();
 
             for (int i = 1; i < accel.Length; i++)
             {
@@ -580,7 +614,7 @@ namespace DataViewer
 
             #region AUC
             string[] aucs = new string[0];
-            matches = Directory.GetFiles(Path.GetDirectoryName(filepath), String.Format(type+"_{0}_AUC*", channel));
+            matches = Directory.GetFiles(Path.GetDirectoryName(filepath), String.Format(type + "_{0}_AUC*", channel));
             if (matches.Length == 1)
                 aucs = FileReadWrite.ReadLinesFromFile(matches[0]);
             PointPairList listAUCs = new PointPairList();
@@ -593,7 +627,7 @@ namespace DataViewer
                     {
                         DateTime dt = DateTime.Parse(split[1]);
                         double x = (double)new XDate(dt);
-                        double value = (Convert.ToDouble(split[2]) + Convert.ToDouble(split[3]) + Convert.ToDouble(split[4]))/20;
+                        double value = (Convert.ToDouble(split[2]) + Convert.ToDouble(split[3]) + Convert.ToDouble(split[4])) / 20;
                         string label = String.Format("Area Under Curve {0}, {1} at {2}", location, value, dt.ToLongTimeString());
                         if (_isUsingLabels) listAUCs.Add(x, value, label);
                         else listAUCs.Add(x, value);
@@ -605,8 +639,8 @@ namespace DataViewer
 
             #region VMAGS
 
-             string[] vmags = new string[0];
-             matches = Directory.GetFiles(Path.GetDirectoryName(filepath), String.Format(type+"_{0}_VMAG*", channel));
+            string[] vmags = new string[0];
+            matches = Directory.GetFiles(Path.GetDirectoryName(filepath), String.Format(type + "_{0}_VMAG*", channel));
             if (matches.Length == 1)
                 vmags = FileReadWrite.ReadLinesFromFile(matches[0]);
 
@@ -615,7 +649,7 @@ namespace DataViewer
             {
                 try
                 {
-                    string[] split =vmags[i].Split(',');
+                    string[] split = vmags[i].Split(',');
                     if ((split.Length > 2) && (split[1].Length > 0) && (split[2].Length > 0))
                     {
                         DateTime dt = DateTime.Parse(split[1]);
@@ -646,7 +680,7 @@ namespace DataViewer
                     {
                         DateTime dt = DateTime.Parse(split[1]);
                         double x = (double)new XDate(dt);
-                        double value = Convert.ToDouble(split[2])*24.0;
+                        double value = Convert.ToDouble(split[2]) * 24.0;
                         string label = String.Format("WKT Activity Count {0} at {1}", value, dt.ToLongTimeString());
                         if (_isUsingLabels) listWKTActivityCounts.Add(x, value, label);
                         else listWKTActivityCounts.Add(x, value);
@@ -656,7 +690,7 @@ namespace DataViewer
             }
             #endregion
 
-            WidenDatesIfNeeded(listWKTActivityCounts); 
+            WidenDatesIfNeeded(listWKTActivityCounts);
 
             #region WKT Raw ACTIVITY COUNTS
             string[] rawwktcounts = new string[0];
@@ -685,33 +719,26 @@ namespace DataViewer
 
             if (mac.Length == 0)
             {
-                AddAccelerationCurve(type + " " + channel, location, listX, listY, listZ, listActivityCounts, listWKTActivityCounts,listRawWKTActivityCounts, listSampleRates, listAUCs, listVMAGs);
+                AddAccelerationCurve(type + " " + channel, location, listX, listY, listZ, listActivityCounts, listWKTActivityCounts, listRawWKTActivityCounts, listSampleRates, listAUCs, listVMAGs);
                 paneOrders.Add(type + " " + channel, paneOrder);
             }
             else
             {
-                AddAccelerationCurve(mac, location, listX, listY, listZ, listActivityCounts, listWKTActivityCounts,listRawWKTActivityCounts, listSampleRates, listAUCs, listVMAGs);
+                AddAccelerationCurve(mac, location, listX, listY, listZ, listActivityCounts, listWKTActivityCounts, listRawWKTActivityCounts, listSampleRates, listAUCs, listVMAGs);
                 paneOrders.Add(mac, paneOrder);
             }
             WidenDatesIfNeeded(listRawWKTActivityCounts);
-          
+
             WidenDatesIfNeeded(listX);
 
         }
 
         #endregion
 
-
-
-        #region Wockets Summary
-     
-        #endregion Wockets Summary
-
-
-
         #region Columbia Graph
         private void CreateColumbiaGraph(GraphPane gp, string filePath)
         {
+
             #region ACCELERATION X Y Z
             string[] accel = FileReadWrite.ReadLinesFromFile(filePath);
 
@@ -750,8 +777,6 @@ namespace DataViewer
             }
             #endregion
 
-
-            
             LineItem pointsCurveX = gp.AddCurve("Columbia X", listX, Color.LightBlue, SymbolType.Circle);
             LineItem pointsCurveY = gp.AddCurve("Columbia Y", listY, Color.Blue, SymbolType.Circle);
             LineItem pointsCurveZ = gp.AddCurve("Columbia Z", listZ, Color.DarkBlue, SymbolType.Circle);
@@ -778,8 +803,6 @@ namespace DataViewer
         }
 
         #endregion Columbia Graph
-
-
 
         #region RTI Graph
         private void CreateRTIGraph(GraphPane gp, string filePath)
@@ -823,7 +846,7 @@ namespace DataViewer
                         if (_isUsingLabels) listZ.Add(x, value * 1000.0, label);
                         else listZ.Add(x, value * 1000.0);
 
-                        value = Convert.ToDouble(split[5]) ;
+                        value = Convert.ToDouble(split[5]);
                         label = String.Format("RTI X-AUC,\n{0} {1}", dt.ToLongTimeString(), value);
                         if (_isUsingLabels) listAUCX.Add(x, value * 1000.0, label);
                         else listAUCX.Add(x, value * 1000.0);
@@ -838,7 +861,7 @@ namespace DataViewer
                         if (_isUsingLabels) listAUCZ.Add(x, value * 1000.0, label);
                         else listAUCZ.Add(x, value * 1000.0);
 
-                        value = Convert.ToDouble(split[8]) ;
+                        value = Convert.ToDouble(split[8]);
                         label = String.Format("RTI XYZ-AUC,\n{0} {1}", dt.ToLongTimeString(), value);
                         if (_isUsingLabels) listAUCXYZ.Add(x, value * 1000.0, label);
                         else listAUCXYZ.Add(x, value * 1000.0);
@@ -857,7 +880,7 @@ namespace DataViewer
             LineItem pointsCurveAUCY = gp.AddCurve("RTI AUC Y", listAUCY, Color.Turquoise, SymbolType.Circle);
             LineItem pointsCurveAUCZ = gp.AddCurve("RTI AUC Z", listAUCZ, Color.Violet, SymbolType.Circle);
             LineItem pointsCurveAUCXYZ = gp.AddCurve("RTI AUC XYZ", listAUCXYZ, Color.Red, SymbolType.Circle);
-            
+
             pointsCurveX.Symbol.Fill = new Fill(Color.LightBlue);
             pointsCurveY.Symbol.Fill = new Fill(Color.Blue);
             pointsCurveZ.Symbol.Fill = new Fill(Color.DarkBlue);
@@ -865,7 +888,7 @@ namespace DataViewer
             pointsCurveAUCY.Symbol.Fill = new Fill(Color.Turquoise);
             pointsCurveAUCZ.Symbol.Fill = new Fill(Color.Violet);
             pointsCurveAUCXYZ.Symbol.Fill = new Fill(Color.Red);
-            
+
             if (!_isAdaptingPointSize)
             {
                 pointsCurveX.Symbol.Size = 1F;
@@ -900,113 +923,113 @@ namespace DataViewer
 
         #endregion RTI Graph
 
+        //#region GPS Graph
+
+        //// **** JPN LOOK HERE FOR PLOTTING
+
+        //private void CreateGPSDeviceGraph(GraphPane gp, string filePath)
+        //{
+        //    string[] values = FileReadWrite.ReadLinesFromFile(filePath);
+
+        //    PointPairList listSpeed = new PointPairList();
+        //    PointPairList listAltitude = new PointPairList();
 
 
-        #region GPS Graph
-        private void CreateGPSDeviceGraph(GraphPane gp, string filePath)
-        {
-            string[] values = FileReadWrite.ReadLinesFromFile(filePath);
+        //    //for each row, add values to PointPairLists
+        //    for (int i = 0; i < values.Length; i++)
+        //    {
+        //        try
+        //        {
+        //            //expecting values in format: UnixTimeStamp,TimeStamp,OxyconHR,OxyconBF,OxyconVE,OxyconVO2kg,OxyconRER
+        //            string[] split = values[i].Split(',');
 
-            PointPairList listSpeed = new PointPairList();
-            PointPairList listAltitude = new PointPairList();
-  
+        //            if (split.Length > 4) //TimeStamp + at least one data value
+        //            {
+        //                #region TIMESTAMP - X VALUE
+        //                DateTime dt = ConvertUNIXDatTime(Convert.ToDouble(split[0]));//UnixTimeStamp, Column 1/A
+        //                //DateTime dt = DateTime.Parse(split[1]);//TimeStamp, Column 2/B
+        //                double x = (double)new XDate(dt);//x value is numeric representation of TimeStamp
+        //                #endregion
 
-            //for each row, add values to PointPairLists
-            for (int i = 0; i < values.Length; i++)
-            {
-                try
-                {
-                    //expecting values in format: UnixTimeStamp,TimeStamp,OxyconHR,OxyconBF,OxyconVE,OxyconVO2kg,OxyconRER
-                    string[] split = values[i].Split(',');
+        //                #region DATA VALUE - Y VALUE
+        //                double y = 0; string label = "";
 
-                    if (split.Length > 4) //TimeStamp + at least one data value
-                    {
-                        #region TIMESTAMP - X VALUE
-                        DateTime dt = ConvertUNIXDatTime(Convert.ToDouble(split[0]));//UnixTimeStamp, Column 1/A
-                        //DateTime dt = DateTime.Parse(split[1]);//TimeStamp, Column 2/B
-                        double x = (double)new XDate(dt);//x value is numeric representation of TimeStamp
-                        #endregion
+        //                #region GPSSpeed
+        //                if ((split.Length > 4) && (split[4].Length > 0))
+        //                {
+        //                    y = Convert.ToDouble(split[4]);//Column 3/C
+        //                    if (_isUsingLabels)
+        //                    {
+        //                        label = String.Format("GPS Speed\n{0} {1}", dt.ToLongTimeString(), y);
+        //                        listSpeed.Add(x, y, label);
+        //                    }
+        //                    else listSpeed.Add(x, y);
+        //                }
+        //                #endregion
 
-                        #region DATA VALUE - Y VALUE
-                        double y = 0; string label = "";
+        //                #region GPSAltitude
+        //                if ((split.Length > 5) && (split[5].Length > 0))
+        //                {
+        //                    y = Convert.ToDouble(split[5]);//Column 4/D
+        //                    if (_isUsingLabels)
+        //                    {
+        //                        label = String.Format("GPS Altitude\n{0} {1}", dt.ToLongTimeString(), y);
+        //                        listAltitude.Add(x, y, label);
+        //                    }
+        //                    else listAltitude.Add(x, y);
+        //                }
+        //                #endregion                       
 
-                        #region GPSSpeed
-                        if ((split.Length > 4) && (split[4].Length > 0))
-                        {
-                            y = Convert.ToDouble(split[4]);//Column 3/C
-                            if (_isUsingLabels)
-                            {
-                                label = String.Format("GPS Speed\n{0} {1}", dt.ToLongTimeString(), y);
-                                listSpeed.Add(x, y, label);
-                            }
-                            else listSpeed.Add(x, y);
-                        }
-                        #endregion
+        //                #endregion
 
-                        #region GPSAltitude
-                        if ((split.Length > 5) && (split[5].Length > 0))
-                        {
-                            y = Convert.ToDouble(split[5]);//Column 4/D
-                            if (_isUsingLabels)
-                            {
-                                label = String.Format("GPS Altitude\n{0} {1}", dt.ToLongTimeString(), y);
-                                listAltitude.Add(x, y, label);
-                            }
-                            else listAltitude.Add(x, y);
-                        }
-                        #endregion                       
+        //            }
 
-                        #endregion
+        //        }
+        //        catch { }
+        //    }
 
-                    }
+        //    #region SET DISPLAY PROPERTIES FOR LINES
+        //    LineItem pointsCurve;
 
-                }
-                catch { }
-            }
+        //    #region ON Y-AXIS
+        //    #region Speed
+        //    pointsCurve = gp.AddCurve("GPS Speed", listSpeed, Color.Red, SymbolType.Circle);
+        //    pointsCurve.Symbol.Fill = new Fill(Color.Red);
+        //    if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
+        //    pointsCurve.Line.IsVisible = false;
+        //    pointsCurve.Tag = "Speed";
+        //    _alLinesWithSymbols.Add(pointsCurve);
+        //    #endregion
 
-            #region SET DISPLAY PROPERTIES FOR LINES
-            LineItem pointsCurve;
-
-            #region ON Y-AXIS
-            #region Speed
-            pointsCurve = gp.AddCurve("GPS Speed", listSpeed, Color.Red, SymbolType.Circle);
-            pointsCurve.Symbol.Fill = new Fill(Color.Red);
-            if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
-            pointsCurve.Line.IsVisible = false;
-            pointsCurve.Tag = "Speed";
-            _alLinesWithSymbols.Add(pointsCurve);
-            #endregion
-
-            #region Altitude
-            pointsCurve = gp.AddCurve("GPS Altitude", listAltitude, Color.GreenYellow, SymbolType.Square);
-            pointsCurve.Symbol.Fill = new Fill(Color.GreenYellow);
-            if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
-            pointsCurve.Line.IsVisible = false;
-            pointsCurve.Tag = "Altitude";
-            _alLinesWithSymbols.Add(pointsCurve);
-            #endregion
-
- 
-
-            #endregion ON Y-AXIS
-
-            #endregion SET DISPLAY PROPERTIES FOR LINES
-            //if time-dates for lines include dates not previously graphed, widen range
-            WidenDatesIfNeeded(listSpeed); 
-        }
-
-        #endregion GPS Graph
+        //    #region Altitude
+        //    pointsCurve = gp.AddCurve("GPS Altitude", listAltitude, Color.GreenYellow, SymbolType.Square);
+        //    pointsCurve.Symbol.Fill = new Fill(Color.GreenYellow);
+        //    if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
+        //    pointsCurve.Line.IsVisible = false;
+        //    pointsCurve.Tag = "Altitude";
+        //    _alLinesWithSymbols.Add(pointsCurve);
+        //    #endregion
 
 
+
+        //    #endregion ON Y-AXIS
+
+        //    #endregion SET DISPLAY PROPERTIES FOR LINES
+
+        //    //if time-dates for lines include dates not previously graphed, widen range
+        //    WidenDatesIfNeeded(listSpeed); 
+        //}
+
+        //#endregion GPS Graph
 
         #region Actigraph
         Hashtable lineSegments = new Hashtable();
         private void CreateActigraphLineSegments(GraphPane gp)
         {
-            foreach (DictionaryEntry entry in lineSegments)      
+            foreach (DictionaryEntry entry in lineSegments)
             {
-               
-                LineSegment l = (LineSegment) entry.Value;
+
+                LineSegment l = (LineSegment)entry.Value;
                 if ((l.Y1 > 0) || (l.Y2 > 0))
                 {
                     PointPairList listCounts = new PointPairList();
@@ -1019,16 +1042,18 @@ namespace DataViewer
                     pointsCurve.Line.IsVisible = true;
                 }
             }
-            
+
         }
+
+        // **** JPN: LOOK HERE FOR PLOTTING
         private void CreateActigraphGraph(GraphPane gp, string filePath, int id)
         {
             string[] values = FileReadWrite.ReadLinesFromFile(filePath);
-            Color[] colors = new Color[9] { Color.Red, Color.YellowGreen, Color.Beige, Color.Aqua, Color.Violet,Color.Bisque,Color.Cyan,Color.DarkOrange,Color.Khaki };
+            Color[] colors = new Color[9] { Color.Red, Color.YellowGreen, Color.Beige, Color.Aqua, Color.Violet, Color.Bisque, Color.Cyan, Color.DarkOrange, Color.Khaki };
             PointPairList listCountsX = new PointPairList();
             PointPairList listCountsY = new PointPairList();
             PointPairList listCountsZ = new PointPairList();
-                      //for each row, add values to PointPairLists
+            //for each row, add values to PointPairLists
             int numAxes = 0;
             for (int i = 0; i < values.Length; i++)
             {
@@ -1054,7 +1079,7 @@ namespace DataViewer
                             y = Convert.ToDouble(split[2]);//Column 3/C
                             if (_isUsingLabels)
                             {
-                                label = String.Format("Actigraph "+(id+1)+" AC_X\n{0} {1}", dt.ToLongTimeString(), y);
+                                label = String.Format("Actigraph " + (id + 1) + " AC_X\n{0} {1}", dt.ToLongTimeString(), y);
                                 listCountsX.Add(x, y, label);
                             }
                             else listCountsX.Add(x, y);
@@ -1090,7 +1115,7 @@ namespace DataViewer
                         #endregion
 
                     }
-                    
+
 
                 }
                 catch { }
@@ -1101,7 +1126,7 @@ namespace DataViewer
             LineItem pointsCurve;
 
             #region ON Y-AXIS
-            #region 
+            #region
             if (numAxes >= 1)
             {
                 pointsCurve = gp.AddCurve("Actigraph " + id + " X", listCountsX, colors[id % colors.Length], SymbolType.Circle);
@@ -1134,495 +1159,489 @@ namespace DataViewer
                 _alLinesWithSymbols.Add(pointsCurve);
             }
 
-            
+
             #endregion
             #endregion
             #endregion
-            WidenDatesIfNeeded(listCountsX);    
+            WidenDatesIfNeeded(listCountsX);
         }
         #endregion Actigraph
 
-        
-        #region Zephyr
-        private void CreateZephyrGraph(GraphPane gp, string filePath)
-        {
-            string[] values = FileReadWrite.ReadLinesFromFile(filePath);
-
-            PointPairList listHR = new PointPairList();
-            PointPairList listRR = new PointPairList();
-            PointPairList listACT = new PointPairList();
-
-            //for each row, add values to PointPairLists
-            for (int i = 0; i < values.Length; i++)
-            {
-                try
-                {
-                    //expecting values in format: UnixTimeStamp,TimeStamp,OxyconHR,OxyconBF,OxyconVE,OxyconVO2kg,OxyconRER
-                    string[] split = values[i].Split(',');
-
-                    if (split.Length > 2) //TimeStamp + at least one data value
-                    {
-                        //JPN: Ignore header row
-                        if (split[0] == "UnixTimeStamp") continue;
-                        #region TIMESTAMP - X VALUE
-                        DateTime dt = ConvertUNIXDatTime(Convert.ToDouble(split[0]));//UnixTimeStamp, Column 1/A
-                        //DateTime dt = DateTime.Parse(split[1]);//TimeStamp, Column 2/B
-                        double x = (double)new XDate(dt);//x value is numeric representation of TimeStamp
-                        #endregion
-
-                        #region DATA VALUE - Y VALUE
-                        double y = 0; string label = "";
-
-                        #region ZephyrHR
-                        if ((split.Length > 2) && (split[2].Length > 0))
-                        {
-                            y = Convert.ToDouble(split[2]);//Column 3/C
-                            if (_isUsingLabels)
-                            {
-                                label = String.Format("Zephyr HR\n{0} {1}", dt.ToLongTimeString(), y);
-                                listHR.Add(x, y, label);
-                            }
-                            else listHR.Add(x, y);
-                        }
-                        #endregion
-
-                        #region ZephyrRR
-                        if ((split.Length > 6) && (split[6].Length > 0))
-                        {
-                            y = Convert.ToDouble(split[6]);//Column 4/D
-                            if (_isUsingLabels)
-                            {
-                                label = String.Format("Zephyr RR\n{0} {1}", dt.ToLongTimeString(), y);
-                                listRR.Add(x, y, label);
-                            }
-                            else listRR.Add(x, y);
-                        }
-                        #endregion
-
-                        #region ZephyrACT
-                        if ((split.Length > 10) && (split[10].Length > 0))
-                        {
-                            y = Convert.ToDouble(split[10]);//Column 5/E
-                            if (_isUsingLabels)
-                            {
-                                label = String.Format("Zephyr ACT\n{0} {1}", dt.ToLongTimeString(), y);
-                                listACT.Add(x, y, label);
-                            }
-                            else listACT.Add(x, y);
-                        }
-                        #endregion
-
-                        #endregion
-
-                    }
-
-                }
-                catch { }
-            }
-
-            #region SET DISPLAY PROPERTIES FOR LINES
-            LineItem pointsCurve;
-
-            #region ON Y-AXIS 
-            #region HR
-            pointsCurve = gp.AddCurve("Zephyr HR", listHR, Color.Red, SymbolType.Circle);
-            pointsCurve.Symbol.Fill = new Fill(Color.Red);
-            if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
-            pointsCurve.Line.IsVisible = false;
-            pointsCurve.Tag = "HR";
-            _alLinesWithSymbols.Add(pointsCurve);
-            #endregion
-
-            #region BF
-            pointsCurve = gp.AddCurve("Zephyr RR", listRR, Color.GreenYellow, SymbolType.Square);
-            pointsCurve.Symbol.Fill = new Fill(Color.GreenYellow);
-            if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
-            pointsCurve.Line.IsVisible = false;
-            pointsCurve.Tag = "RR";
-            _alLinesWithSymbols.Add(pointsCurve);
-            #endregion
-
-            #region V02kg
-            pointsCurve = gp.AddCurve("Zephyr Activity", listACT, Color.Orchid, SymbolType.TriangleDown);
-            pointsCurve.Symbol.Fill = new Fill(Color.Orchid);
-            if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
-            pointsCurve.Line.IsVisible = false;
-            pointsCurve.Tag = "Activity";
-            pointsCurve.IsY2Axis = true;
-            _alLinesWithSymbols.Add(pointsCurve);
-            #endregion
-
-            #endregion ON Y-AXIS
-
-            #endregion SET DISPLAY PROPERTIES FOR LINES
-            //if time-dates for lines include dates not previously graphed, widen range
-            WidenDatesIfNeeded(listHR);    
-        }
-        #endregion Zephyr
-
-
-
-        #region Sensewear
-        private void CreateSensewearGraph(GraphPane gp, string filePath)
-        {
-            string[] values = FileReadWrite.ReadLinesFromFile(filePath);
-
-            PointPairList listACT = new PointPairList();
-
-            //for each row, add values to PointPairLists
-            for (int i = 0; i < values.Length; i++)
-            {
-                try
-                {
-                    //expecting values in format: UnixTimeStamp,TimeStamp,OxyconHR,OxyconBF,OxyconVE,OxyconVO2kg,OxyconRER
-                    string[] split = values[i].Split(',');
-
-                    if (split.Length > 2) //TimeStamp + at least one data value
-                    {
-                        #region TIMESTAMP - X VALUE
-                        DateTime dt = ConvertUNIXDatTime(Convert.ToDouble(split[0]));//UnixTimeStamp, Column 1/A
-                        //DateTime dt = DateTime.Parse(split[1]);//TimeStamp, Column 2/B
-                        double x = (double)new XDate(dt);//x value is numeric representation of TimeStamp
-                        #endregion
-
-                        #region DATA VALUE - Y VALUE
-                        double y = 0; string label = "";
-
-
-                        #region ZephyrACT
-                        if ((split.Length > 5) && (split[5].Length > 0))
-                        {
-                            y = Convert.ToDouble(split[5]);//Column 5/E
-                            if (_isUsingLabels)
-                            {
-                                label = String.Format("Sensewear ACT\n{0} {1}", dt.ToLongTimeString(), y);
-                                listACT.Add(x, y, label);
-                            }
-                            else listACT.Add(x, y);
-                        }
-                        #endregion
-
-                        #endregion
-
-                    }
-
-                }
-                catch { }
-            }
-
-            #region SET DISPLAY PROPERTIES FOR LINES
-            LineItem pointsCurve;
-
-            #region ON Y-AXIS
-
-            #region ACT
-            pointsCurve = gp.AddCurve("Sensewear Activity", listACT, Color.Orchid, SymbolType.TriangleDown);
-            pointsCurve.Symbol.Fill = new Fill(Color.Orchid);
-            if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
-            pointsCurve.Line.IsVisible = false;
-            pointsCurve.Tag = "Activity";
-            pointsCurve.IsY2Axis = true;
-            _alLinesWithSymbols.Add(pointsCurve);
-            #endregion
-
-            #endregion ON Y-AXIS
-
-            #endregion SET DISPLAY PROPERTIES FOR LINES
-            //if time-dates for lines include dates not previously graphed, widen range
-            WidenDatesIfNeeded(listACT);
-        }
-        #endregion Sensewear
-
-
-        //ADD_GRAPH STEP 2
-        #region Oxycon
-
-        private void CreateOxyconGraph(GraphPane gp, string filePath)
-        {
-            string[] values = FileReadWrite.ReadLinesFromFile(filePath);
-
-            //One PointPairList for each data column to graph
-            //Each of these represents a separate line
-            PointPairList listHR = new PointPairList();
-            PointPairList listBF = new PointPairList();
-            PointPairList listVE = new PointPairList();
-            PointPairList listVO2kg = new PointPairList();
-            PointPairList listRER = new PointPairList();
-            PointPairList listMET = new PointPairList();
-            PointPairList listEE = new PointPairList();
-
-            //for each row, add values to PointPairLists
-            for (int i = 0; i < values.Length; i++)
-            {
-                try
-                {
-                    //expecting values in format: UnixTimeStamp,TimeStamp,OxyconHR,OxyconBF,OxyconVE,OxyconVO2kg,OxyconRER
-                    string[] split = values[i].Split(',');
-
-                    if (split.Length > 2) //TimeStamp + at least one data value
-                    {
-                        #region TIMESTAMP - X VALUE
-                        DateTime dt = ConvertUNIXDatTime(Convert.ToDouble(split[0]));//UnixTimeStamp, Column 1/A
-                        //DateTime dt = DateTime.Parse(split[1]);//TimeStamp, Column 2/B
-                        double x = (double)new XDate(dt);//x value is numeric representation of TimeStamp
-                        #endregion
-
-                        #region DATA VALUE - Y VALUE
-                        double y = 0; string label = "";
-
-                        #region OxyconHR
-                        if ((split.Length > 2) && (split[2].Length > 0))
-                        {
-                            y = Convert.ToDouble(split[2]);//Column 3/C
-                            if (_isUsingLabels)
-                            {
-                                label = String.Format("Oxycon HR\n{0} {1}", dt.ToLongTimeString(), y);
-                                listHR.Add(x, y, label);
-                            }
-                            else listHR.Add(x, y);
-                        }
-                        #endregion
-
-                        #region OxyconBF
-                        if ((split.Length > 3) && (split[3].Length > 0))
-                        {
-                            y = Convert.ToDouble(split[3]);//Column 4/D
-                            if (_isUsingLabels)
-                            {
-                                label = String.Format("Oxycon BF\n{0} {1}", dt.ToLongTimeString(), y);
-                                listBF.Add(x, y, label);
-                            }
-                            else listBF.Add(x, y);
-                        }
-                        #endregion
-
-                        #region OxyconVE
-                        if ((split.Length > 4) && (split[4].Length > 0))
-                        {
-                            y = Convert.ToDouble(split[4]);//Column 5/E
-                            if (_isUsingLabels)
-                            {
-                                label = String.Format("Oxycon VE\n{0} {1}", dt.ToLongTimeString(), y);
-                                listVE.Add(x, y, label);
-                            }
-                            else listVE.Add(x, y);
-                        }
-                        #endregion
-
-                        #region OxyconV02kg
-                        if ((split.Length > 6) && (split[6].Length > 0))
-                        {
-                            y = Convert.ToDouble(split[6]);//Column 6/F
-                            if (_isUsingLabels)
-                            {
-                                label = String.Format("Oxycon VO2kg\n{0} {1}", dt.ToLongTimeString(), y);
-                                listVO2kg.Add(x, y, label);
-                            }
-                            else listVO2kg.Add(x, y);
-                        }
-                        #endregion
-
-
-
-                        #region OxyconMET
-                        if ((split.Length > 7) && (split[7].Length > 0))
-                        {
-                            y = Convert.ToDouble(split[7])*10000.0;//Column 7/G
-                            if (_isUsingLabels)
-                            {
-                                label = String.Format("Oxycon MET\n{0} {1}", dt.ToLongTimeString(), Convert.ToDouble(split[7]));
-                                listMET.Add(x, y, label);
-                            }
-                            else listMET.Add(x, y);
-                        }
-                        #endregion
-
-
-                        #region OxyconEE
-                        if ((split.Length > 8) && (split[8].Length > 0))
-                        {
-                            y = Convert.ToDouble(split[8]);//Column 7/G
-                            if (_isUsingLabels)
-                            {
-                                label = String.Format("Oxycon EE\n{0} {1}", dt.ToLongTimeString(), Convert.ToDouble(split[8]));
-                                listEE.Add(x, y, label);
-                            }
-                            else listEE.Add(x, y);
-                        }
-                        #endregion
-
-                        #region OxyconRER
-                        if ((split.Length > 9) && (split[9].Length > 0))
-                        {
-                            y = Convert.ToDouble(split[9]);//Column 7/G
-                            if (_isUsingLabels)
-                            {
-                                label = String.Format("Oxycon RER\n{0} {1}", dt.ToLongTimeString(), y);
-                                listRER.Add(x, y, label);
-                            }
-                            else listRER.Add(x, y);
-                        }
-                        #endregion
-                        #endregion
-
-                    }
-
-                }
-                catch { }
-            }
-
-            #region SET DISPLAY PROPERTIES FOR LINES
-            LineItem pointsCurve;
-
-            #region ON Y-AXIS 1 (left-side)
-            #region HR
-            pointsCurve = gp.AddCurve("Oxycon HR", listHR, Color.Red, SymbolType.Circle);
-            pointsCurve.Symbol.Fill = new Fill(Color.Red);
-            if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
-            pointsCurve.Line.IsVisible = false;
-            pointsCurve.Tag = "HR";
-            _alLinesWithSymbols.Add(pointsCurve);
-            #endregion
-
-            #region BF
-            pointsCurve = gp.AddCurve("Oxycon BF", listBF, Color.GreenYellow, SymbolType.Square);
-            pointsCurve.Symbol.Fill = new Fill(Color.GreenYellow);
-            if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
-            pointsCurve.Line.IsVisible = false;
-            pointsCurve.Tag = "BF";
-            _alLinesWithSymbols.Add(pointsCurve);
-            #endregion
-            #endregion
-
-            #region ON Y-AXIS 2 - right-side
-            #region VE
-            pointsCurve = gp.AddCurve("Oxycon VE", listVE, Color.Orange, SymbolType.Diamond);
-            pointsCurve.Symbol.Fill = new Fill(Color.Orange);
-            if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
-            pointsCurve.Line.IsVisible = false;
-            pointsCurve.Tag = "VE";
-            pointsCurve.IsY2Axis = true;
-            _alLinesWithSymbols.Add(pointsCurve);
-            #endregion
-
-            #region V02kg
-            pointsCurve = gp.AddCurve("Oxycon VO2kg", listVO2kg, Color.Orchid, SymbolType.TriangleDown);
-            pointsCurve.Symbol.Fill = new Fill(Color.Orchid);
-            if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
-            pointsCurve.Line.IsVisible = false;
-            pointsCurve.Tag = "V02kg";
-            pointsCurve.IsY2Axis = true;
-            _alLinesWithSymbols.Add(pointsCurve);
-            #endregion
-
-            #region RER
-            pointsCurve = gp.AddCurve("Oxycon RER", listRER, Color.Navy, SymbolType.Triangle);
-            pointsCurve.Symbol.Fill = new Fill(Color.Navy);
-            if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
-            pointsCurve.Line.IsVisible = false;
-            pointsCurve.Tag = "RER";
-            pointsCurve.IsY2Axis = true;
-            _alLinesWithSymbols.Add(pointsCurve);
-            #endregion
-
-            #region MET
-            pointsCurve = gp.AddCurve("Oxycon MET", listMET, Color.Aqua, SymbolType.Triangle);
-            pointsCurve.Symbol.Fill = new Fill(Color.Aqua);
-            if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
-            pointsCurve.Line.IsVisible = false;
-            pointsCurve.Tag = "MET";
-            pointsCurve.IsY2Axis = true;
-            _alLinesWithSymbols.Add(pointsCurve);
-            #endregion
-
-
-            #region EE
-            pointsCurve = gp.AddCurve("Oxycon EE", listEE, Color.Black, SymbolType.Triangle);
-            pointsCurve.Symbol.Fill = new Fill(Color.Black);
-            if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
-            pointsCurve.Line.IsVisible = false;
-            pointsCurve.Tag = "EE";
-            pointsCurve.IsY2Axis = true;
-            _alLinesWithSymbols.Add(pointsCurve);
-            #endregion
-            #endregion
-
-            #endregion
-
-            //if time-dates for lines include dates not previously graphed, widen range
-            WidenDatesIfNeeded(listHR);            
-
-        }
-        
-        #endregion
-
-
-        #region GPS
-        private void CreateGPSGraph(GraphPane gp, string filepath)
-        {
-            string[] values = FileReadWrite.ReadLinesFromFile(filepath);
-            PointPairList list_NO = new PointPairList();
-            PointPairList list_HAS = new PointPairList();
-
-            for (int i = 0; i < values.Length; i++)
-            {
-                try
-                {
-                    string[] split = values[i].Split(',');
-                    DateTime dt = DateTime.Parse(split[0]);
-                    double x = (double)new XDate(dt);
-                    if (split[1].Equals("NOT_AVAILABLE"))
-                        list_NO.Add(x, 200, dt.ToLongTimeString() + " GPS NOT AVAILABLE");
-                    else list_HAS.Add(x, 205, dt.ToLongTimeString() + " " + split[1] + ", " + split[2]);
-                }
-                catch { }
-            }
-
-
-            LineItem pointsCurveNo = gp.AddCurve("GPS", list_NO, Color.Gray, SymbolType.Square);
-            pointsCurveNo.Line.IsVisible = false;
-            if (!_isAdaptingPointSize) pointsCurveNo.Symbol.Size = 1F;
-            _alLinesWithSymbols.Add(pointsCurveNo);
-            LineItem pointsCurveHas = gp.AddCurve("GPS", list_HAS, Color.Magenta, SymbolType.Triangle);
-            pointsCurveHas.Line.IsVisible = false;
-            if (!_isAdaptingPointSize) pointsCurveHas.Symbol.Size = 1F;
-            pointsCurveHas.Symbol.Fill = new Fill(Color.Magenta);
-            _alLinesWithSymbols.Add(pointsCurveHas);
-            WidenDatesIfNeeded(list_NO);
-        }
-        private void CreatePOIGraph(GraphPane gp, string filepath)
-        {
-            PointPairList list = new PointPairList();
-            string[] values = FileReadWrite.ReadLinesFromFile(filepath);
-            for (int i = 0; i < values.Length; i++)
-            {
-                try
-                {
-                    string[] split = values[i].Split(',');
-                    double x = (double)new XDate(DateTime.Parse(split[0]));
-                    string tag = "";
-                    split = values[i].Split(':', '(');
-                    for (int j = 5; j < split.Length; j += 2)
-                    {
-                        tag += split[j] + "\n";
-                    }                   
-
-                    list.Add(x, 200, tag);
-                }
-                catch { }
-            }
-
-            LineItem pointsCurve = gp.AddCurve("POI", list, Color.Black, SymbolType.Star);
-            pointsCurve.Line.IsVisible = false;
-            pointsCurve.Symbol.Fill = new Fill(Color.Black);
-            pointsCurve.Symbol.Size = 6F;
-            if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
-            _alLinesWithSymbols.Add(pointsCurve);
-            WidenDatesIfNeeded(list);
-        }
-        #endregion
 
-
+        //#region Zephyr
+        //private void CreateZephyrGraph(GraphPane gp, string filePath)
+        //{
+        //    string[] values = FileReadWrite.ReadLinesFromFile(filePath);
+
+        //    PointPairList listHR = new PointPairList();
+        //    PointPairList listRR = new PointPairList();
+        //    PointPairList listACT = new PointPairList();
+
+        //    //for each row, add values to PointPairLists
+        //    for (int i = 0; i < values.Length; i++)
+        //    {
+        //        try
+        //        {
+        //            //expecting values in format: UnixTimeStamp,TimeStamp,OxyconHR,OxyconBF,OxyconVE,OxyconVO2kg,OxyconRER
+        //            string[] split = values[i].Split(',');
+
+        //            if (split.Length > 2) //TimeStamp + at least one data value
+        //            {
+        //                //JPN: Ignore header row
+        //                if (split[0] == "UnixTimeStamp") continue;
+        //                #region TIMESTAMP - X VALUE
+        //                DateTime dt = ConvertUNIXDatTime(Convert.ToDouble(split[0]));//UnixTimeStamp, Column 1/A
+        //                //DateTime dt = DateTime.Parse(split[1]);//TimeStamp, Column 2/B
+        //                double x = (double)new XDate(dt);//x value is numeric representation of TimeStamp
+        //                #endregion
+
+        //                #region DATA VALUE - Y VALUE
+        //                double y = 0; string label = "";
+
+        //                #region ZephyrHR
+        //                if ((split.Length > 2) && (split[2].Length > 0))
+        //                {
+        //                    y = Convert.ToDouble(split[2]);//Column 3/C
+        //                    if (_isUsingLabels)
+        //                    {
+        //                        label = String.Format("Zephyr HR\n{0} {1}", dt.ToLongTimeString(), y);
+        //                        listHR.Add(x, y, label);
+        //                    }
+        //                    else listHR.Add(x, y);
+        //                }
+        //                #endregion
+
+        //                #region ZephyrRR
+        //                if ((split.Length > 6) && (split[6].Length > 0))
+        //                {
+        //                    y = Convert.ToDouble(split[6]);//Column 4/D
+        //                    if (_isUsingLabels)
+        //                    {
+        //                        label = String.Format("Zephyr RR\n{0} {1}", dt.ToLongTimeString(), y);
+        //                        listRR.Add(x, y, label);
+        //                    }
+        //                    else listRR.Add(x, y);
+        //                }
+        //                #endregion
+
+        //                #region ZephyrACT
+        //                if ((split.Length > 10) && (split[10].Length > 0))
+        //                {
+        //                    y = Convert.ToDouble(split[10]);//Column 5/E
+        //                    if (_isUsingLabels)
+        //                    {
+        //                        label = String.Format("Zephyr ACT\n{0} {1}", dt.ToLongTimeString(), y);
+        //                        listACT.Add(x, y, label);
+        //                    }
+        //                    else listACT.Add(x, y);
+        //                }
+        //                #endregion
+
+        //                #endregion
+
+        //            }
+
+        //        }
+        //        catch { }
+        //    }
+
+        //    #region SET DISPLAY PROPERTIES FOR LINES
+        //    LineItem pointsCurve;
+
+        //    #region ON Y-AXIS 
+        //    #region HR
+        //    pointsCurve = gp.AddCurve("Zephyr HR", listHR, Color.Red, SymbolType.Circle);
+        //    pointsCurve.Symbol.Fill = new Fill(Color.Red);
+        //    if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
+        //    pointsCurve.Line.IsVisible = false;
+        //    pointsCurve.Tag = "HR";
+        //    _alLinesWithSymbols.Add(pointsCurve);
+        //    #endregion
+
+        //    #region BF
+        //    pointsCurve = gp.AddCurve("Zephyr RR", listRR, Color.GreenYellow, SymbolType.Square);
+        //    pointsCurve.Symbol.Fill = new Fill(Color.GreenYellow);
+        //    if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
+        //    pointsCurve.Line.IsVisible = false;
+        //    pointsCurve.Tag = "RR";
+        //    _alLinesWithSymbols.Add(pointsCurve);
+        //    #endregion
+
+        //    #region V02kg
+        //    pointsCurve = gp.AddCurve("Zephyr Activity", listACT, Color.Orchid, SymbolType.TriangleDown);
+        //    pointsCurve.Symbol.Fill = new Fill(Color.Orchid);
+        //    if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
+        //    pointsCurve.Line.IsVisible = false;
+        //    pointsCurve.Tag = "Activity";
+        //    pointsCurve.IsY2Axis = true;
+        //    _alLinesWithSymbols.Add(pointsCurve);
+        //    #endregion
+
+        //    #endregion ON Y-AXIS
+
+        //    #endregion SET DISPLAY PROPERTIES FOR LINES
+        //    //if time-dates for lines include dates not previously graphed, widen range
+        //    WidenDatesIfNeeded(listHR);    
+        //}
+        //#endregion Zephyr
+
+        //#region Sensewear
+        //private void CreateSensewearGraph(GraphPane gp, string filePath)
+        //{
+        //    string[] values = FileReadWrite.ReadLinesFromFile(filePath);
+
+        //    PointPairList listACT = new PointPairList();
+
+        //    //for each row, add values to PointPairLists
+        //    for (int i = 0; i < values.Length; i++)
+        //    {
+        //        try
+        //        {
+        //            //expecting values in format: UnixTimeStamp,TimeStamp,OxyconHR,OxyconBF,OxyconVE,OxyconVO2kg,OxyconRER
+        //            string[] split = values[i].Split(',');
+
+        //            if (split.Length > 2) //TimeStamp + at least one data value
+        //            {
+        //                #region TIMESTAMP - X VALUE
+        //                DateTime dt = ConvertUNIXDatTime(Convert.ToDouble(split[0]));//UnixTimeStamp, Column 1/A
+        //                //DateTime dt = DateTime.Parse(split[1]);//TimeStamp, Column 2/B
+        //                double x = (double)new XDate(dt);//x value is numeric representation of TimeStamp
+        //                #endregion
+
+        //                #region DATA VALUE - Y VALUE
+        //                double y = 0; string label = "";
+
+
+        //                #region ZephyrACT
+        //                if ((split.Length > 5) && (split[5].Length > 0))
+        //                {
+        //                    y = Convert.ToDouble(split[5]);//Column 5/E
+        //                    if (_isUsingLabels)
+        //                    {
+        //                        label = String.Format("Sensewear ACT\n{0} {1}", dt.ToLongTimeString(), y);
+        //                        listACT.Add(x, y, label);
+        //                    }
+        //                    else listACT.Add(x, y);
+        //                }
+        //                #endregion
+
+        //                #endregion
+
+        //            }
+
+        //        }
+        //        catch { }
+        //    }
+
+        //    #region SET DISPLAY PROPERTIES FOR LINES
+        //    LineItem pointsCurve;
+
+        //    #region ON Y-AXIS
+
+        //    #region ACT
+        //    pointsCurve = gp.AddCurve("Sensewear Activity", listACT, Color.Orchid, SymbolType.TriangleDown);
+        //    pointsCurve.Symbol.Fill = new Fill(Color.Orchid);
+        //    if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
+        //    pointsCurve.Line.IsVisible = false;
+        //    pointsCurve.Tag = "Activity";
+        //    pointsCurve.IsY2Axis = true;
+        //    _alLinesWithSymbols.Add(pointsCurve);
+        //    #endregion
+
+        //    #endregion ON Y-AXIS
+
+        //    #endregion SET DISPLAY PROPERTIES FOR LINES
+        //    //if time-dates for lines include dates not previously graphed, widen range
+        //    WidenDatesIfNeeded(listACT);
+        //}
+        //#endregion Sensewear
+
+        ////ADD_GRAPH STEP 2
+        //#region Oxycon
+
+        //private void CreateOxyconGraph(GraphPane gp, string filePath)
+        //{
+        //    string[] values = FileReadWrite.ReadLinesFromFile(filePath);
+
+        //    //One PointPairList for each data column to graph
+        //    //Each of these represents a separate line
+        //    PointPairList listHR = new PointPairList();
+        //    PointPairList listBF = new PointPairList();
+        //    PointPairList listVE = new PointPairList();
+        //    PointPairList listVO2kg = new PointPairList();
+        //    PointPairList listRER = new PointPairList();
+        //    PointPairList listMET = new PointPairList();
+        //    PointPairList listEE = new PointPairList();
+
+        //    //for each row, add values to PointPairLists
+        //    for (int i = 0; i < values.Length; i++)
+        //    {
+        //        try
+        //        {
+        //            //expecting values in format: UnixTimeStamp,TimeStamp,OxyconHR,OxyconBF,OxyconVE,OxyconVO2kg,OxyconRER
+        //            string[] split = values[i].Split(',');
+
+        //            if (split.Length > 2) //TimeStamp + at least one data value
+        //            {
+        //                #region TIMESTAMP - X VALUE
+        //                DateTime dt = ConvertUNIXDatTime(Convert.ToDouble(split[0]));//UnixTimeStamp, Column 1/A
+        //                //DateTime dt = DateTime.Parse(split[1]);//TimeStamp, Column 2/B
+        //                double x = (double)new XDate(dt);//x value is numeric representation of TimeStamp
+        //                #endregion
+
+        //                #region DATA VALUE - Y VALUE
+        //                double y = 0; string label = "";
+
+        //                #region OxyconHR
+        //                if ((split.Length > 2) && (split[2].Length > 0))
+        //                {
+        //                    y = Convert.ToDouble(split[2]);//Column 3/C
+        //                    if (_isUsingLabels)
+        //                    {
+        //                        label = String.Format("Oxycon HR\n{0} {1}", dt.ToLongTimeString(), y);
+        //                        listHR.Add(x, y, label);
+        //                    }
+        //                    else listHR.Add(x, y);
+        //                }
+        //                #endregion
+
+        //                #region OxyconBF
+        //                if ((split.Length > 3) && (split[3].Length > 0))
+        //                {
+        //                    y = Convert.ToDouble(split[3]);//Column 4/D
+        //                    if (_isUsingLabels)
+        //                    {
+        //                        label = String.Format("Oxycon BF\n{0} {1}", dt.ToLongTimeString(), y);
+        //                        listBF.Add(x, y, label);
+        //                    }
+        //                    else listBF.Add(x, y);
+        //                }
+        //                #endregion
+
+        //                #region OxyconVE
+        //                if ((split.Length > 4) && (split[4].Length > 0))
+        //                {
+        //                    y = Convert.ToDouble(split[4]);//Column 5/E
+        //                    if (_isUsingLabels)
+        //                    {
+        //                        label = String.Format("Oxycon VE\n{0} {1}", dt.ToLongTimeString(), y);
+        //                        listVE.Add(x, y, label);
+        //                    }
+        //                    else listVE.Add(x, y);
+        //                }
+        //                #endregion
+
+        //                #region OxyconV02kg
+        //                if ((split.Length > 6) && (split[6].Length > 0))
+        //                {
+        //                    y = Convert.ToDouble(split[6]);//Column 6/F
+        //                    if (_isUsingLabels)
+        //                    {
+        //                        label = String.Format("Oxycon VO2kg\n{0} {1}", dt.ToLongTimeString(), y);
+        //                        listVO2kg.Add(x, y, label);
+        //                    }
+        //                    else listVO2kg.Add(x, y);
+        //                }
+        //                #endregion
+
+
+
+        //                #region OxyconMET
+        //                if ((split.Length > 7) && (split[7].Length > 0))
+        //                {
+        //                    y = Convert.ToDouble(split[7])*10000.0;//Column 7/G
+        //                    if (_isUsingLabels)
+        //                    {
+        //                        label = String.Format("Oxycon MET\n{0} {1}", dt.ToLongTimeString(), Convert.ToDouble(split[7]));
+        //                        listMET.Add(x, y, label);
+        //                    }
+        //                    else listMET.Add(x, y);
+        //                }
+        //                #endregion
+
+
+        //                #region OxyconEE
+        //                if ((split.Length > 8) && (split[8].Length > 0))
+        //                {
+        //                    y = Convert.ToDouble(split[8]);//Column 7/G
+        //                    if (_isUsingLabels)
+        //                    {
+        //                        label = String.Format("Oxycon EE\n{0} {1}", dt.ToLongTimeString(), Convert.ToDouble(split[8]));
+        //                        listEE.Add(x, y, label);
+        //                    }
+        //                    else listEE.Add(x, y);
+        //                }
+        //                #endregion
+
+        //                #region OxyconRER
+        //                if ((split.Length > 9) && (split[9].Length > 0))
+        //                {
+        //                    y = Convert.ToDouble(split[9]);//Column 7/G
+        //                    if (_isUsingLabels)
+        //                    {
+        //                        label = String.Format("Oxycon RER\n{0} {1}", dt.ToLongTimeString(), y);
+        //                        listRER.Add(x, y, label);
+        //                    }
+        //                    else listRER.Add(x, y);
+        //                }
+        //                #endregion
+        //                #endregion
+
+        //            }
+
+        //        }
+        //        catch { }
+        //    }
+
+        //    #region SET DISPLAY PROPERTIES FOR LINES
+        //    LineItem pointsCurve;
+
+        //    #region ON Y-AXIS 1 (left-side)
+        //    #region HR
+        //    pointsCurve = gp.AddCurve("Oxycon HR", listHR, Color.Red, SymbolType.Circle);
+        //    pointsCurve.Symbol.Fill = new Fill(Color.Red);
+        //    if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
+        //    pointsCurve.Line.IsVisible = false;
+        //    pointsCurve.Tag = "HR";
+        //    _alLinesWithSymbols.Add(pointsCurve);
+        //    #endregion
+
+        //    #region BF
+        //    pointsCurve = gp.AddCurve("Oxycon BF", listBF, Color.GreenYellow, SymbolType.Square);
+        //    pointsCurve.Symbol.Fill = new Fill(Color.GreenYellow);
+        //    if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
+        //    pointsCurve.Line.IsVisible = false;
+        //    pointsCurve.Tag = "BF";
+        //    _alLinesWithSymbols.Add(pointsCurve);
+        //    #endregion
+        //    #endregion
+
+        //    #region ON Y-AXIS 2 - right-side
+        //    #region VE
+        //    pointsCurve = gp.AddCurve("Oxycon VE", listVE, Color.Orange, SymbolType.Diamond);
+        //    pointsCurve.Symbol.Fill = new Fill(Color.Orange);
+        //    if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
+        //    pointsCurve.Line.IsVisible = false;
+        //    pointsCurve.Tag = "VE";
+        //    pointsCurve.IsY2Axis = true;
+        //    _alLinesWithSymbols.Add(pointsCurve);
+        //    #endregion
+
+        //    #region V02kg
+        //    pointsCurve = gp.AddCurve("Oxycon VO2kg", listVO2kg, Color.Orchid, SymbolType.TriangleDown);
+        //    pointsCurve.Symbol.Fill = new Fill(Color.Orchid);
+        //    if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
+        //    pointsCurve.Line.IsVisible = false;
+        //    pointsCurve.Tag = "V02kg";
+        //    pointsCurve.IsY2Axis = true;
+        //    _alLinesWithSymbols.Add(pointsCurve);
+        //    #endregion
+
+        //    #region RER
+        //    pointsCurve = gp.AddCurve("Oxycon RER", listRER, Color.Navy, SymbolType.Triangle);
+        //    pointsCurve.Symbol.Fill = new Fill(Color.Navy);
+        //    if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
+        //    pointsCurve.Line.IsVisible = false;
+        //    pointsCurve.Tag = "RER";
+        //    pointsCurve.IsY2Axis = true;
+        //    _alLinesWithSymbols.Add(pointsCurve);
+        //    #endregion
+
+        //    #region MET
+        //    pointsCurve = gp.AddCurve("Oxycon MET", listMET, Color.Aqua, SymbolType.Triangle);
+        //    pointsCurve.Symbol.Fill = new Fill(Color.Aqua);
+        //    if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
+        //    pointsCurve.Line.IsVisible = false;
+        //    pointsCurve.Tag = "MET";
+        //    pointsCurve.IsY2Axis = true;
+        //    _alLinesWithSymbols.Add(pointsCurve);
+        //    #endregion
+
+
+        //    #region EE
+        //    pointsCurve = gp.AddCurve("Oxycon EE", listEE, Color.Black, SymbolType.Triangle);
+        //    pointsCurve.Symbol.Fill = new Fill(Color.Black);
+        //    if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
+        //    pointsCurve.Line.IsVisible = false;
+        //    pointsCurve.Tag = "EE";
+        //    pointsCurve.IsY2Axis = true;
+        //    _alLinesWithSymbols.Add(pointsCurve);
+        //    #endregion
+        //    #endregion
+
+        //    #endregion
+
+        //    //if time-dates for lines include dates not previously graphed, widen range
+        //    WidenDatesIfNeeded(listHR);            
+
+        //}
+
+        //#endregion
+
+        //#region GPS
+        //private void CreateGPSGraph(GraphPane gp, string filepath)
+        //{
+        //    string[] values = FileReadWrite.ReadLinesFromFile(filepath);
+        //    PointPairList list_NO = new PointPairList();
+        //    PointPairList list_HAS = new PointPairList();
+
+        //    for (int i = 0; i < values.Length; i++)
+        //    {
+        //        try
+        //        {
+        //            string[] split = values[i].Split(',');
+        //            DateTime dt = DateTime.Parse(split[0]);
+        //            double x = (double)new XDate(dt);
+        //            if (split[1].Equals("NOT_AVAILABLE"))
+        //                list_NO.Add(x, 200, dt.ToLongTimeString() + " GPS NOT AVAILABLE");
+        //            else list_HAS.Add(x, 205, dt.ToLongTimeString() + " " + split[1] + ", " + split[2]);
+        //        }
+        //        catch { }
+        //    }
+
+
+        //    LineItem pointsCurveNo = gp.AddCurve("GPS", list_NO, Color.Gray, SymbolType.Square);
+        //    pointsCurveNo.Line.IsVisible = false;
+        //    if (!_isAdaptingPointSize) pointsCurveNo.Symbol.Size = 1F;
+        //    _alLinesWithSymbols.Add(pointsCurveNo);
+        //    LineItem pointsCurveHas = gp.AddCurve("GPS", list_HAS, Color.Magenta, SymbolType.Triangle);
+        //    pointsCurveHas.Line.IsVisible = false;
+        //    if (!_isAdaptingPointSize) pointsCurveHas.Symbol.Size = 1F;
+        //    pointsCurveHas.Symbol.Fill = new Fill(Color.Magenta);
+        //    _alLinesWithSymbols.Add(pointsCurveHas);
+        //    WidenDatesIfNeeded(list_NO);
+        //}
+        //private void CreatePOIGraph(GraphPane gp, string filepath)
+        //{
+        //    PointPairList list = new PointPairList();
+        //    string[] values = FileReadWrite.ReadLinesFromFile(filepath);
+        //    for (int i = 0; i < values.Length; i++)
+        //    {
+        //        try
+        //        {
+        //            string[] split = values[i].Split(',');
+        //            double x = (double)new XDate(DateTime.Parse(split[0]));
+        //            string tag = "";
+        //            split = values[i].Split(':', '(');
+        //            for (int j = 5; j < split.Length; j += 2)
+        //            {
+        //                tag += split[j] + "\n";
+        //            }                   
+
+        //            list.Add(x, 200, tag);
+        //        }
+        //        catch { }
+        //    }
+
+        //    LineItem pointsCurve = gp.AddCurve("POI", list, Color.Black, SymbolType.Star);
+        //    pointsCurve.Line.IsVisible = false;
+        //    pointsCurve.Symbol.Fill = new Fill(Color.Black);
+        //    pointsCurve.Symbol.Size = 6F;
+        //    if (!_isAdaptingPointSize) pointsCurve.Symbol.Size = 1F;
+        //    _alLinesWithSymbols.Add(pointsCurve);
+        //    WidenDatesIfNeeded(list);
+        //}
+        //#endregion
 
         #region ANNOTATION LABELS
         private void CreateDiaryGraph(GraphPane gp, string filepath, string title, int y)
@@ -1665,16 +1684,16 @@ namespace DataViewer
                             isSolid = true;
                         }
                         #endregion
-                        
+
 
                         #region LABEL AND POINT
                         string label = "";
                         for (int c = 3; c < split.Length; c++)
                         {
-                            label += split[c].Replace("_", ", ").Replace("-", " ").Trim(',',' ') + "\n ";
+                            label += split[c].Replace("_", ", ").Replace("-", " ").Trim(',', ' ') + "\n ";
                         }
                         labelList = new PointPairList();
-                        labelList.Add(endx, y, startx, String.Format("{3} {0}-{1}\n,{2}",dtStart.ToShortTimeString(),dtEnd.ToShortTimeString(),label,title));
+                        labelList.Add(endx, y, startx, String.Format("{3} {0}-{1}\n,{2}", dtStart.ToShortTimeString(), dtEnd.ToShortTimeString(), label, title));
                         #endregion
 
                         #region ADD BAR
@@ -1764,8 +1783,8 @@ namespace DataViewer
 
 
         #region labels colors on bar
-        
-        private void CreateDiaryGraph(GraphPane gp, string filepath, string dirpath_colors, 
+
+        private void CreateDiaryGraph(GraphPane gp, string filepath, string dirpath_colors,
                                       string title, int yoffset, string type)
         {
             gp.BarSettings.Base = BarBase.Y;
@@ -1782,10 +1801,10 @@ namespace DataViewer
 
             string[] lines_read = null;
             string[] label_color = null;
-            BindingList<string[]> labels_color_list_1 = null; 
+            BindingList<string[]> labels_color_list_1 = null;
             BindingList<string[]> labels_color_list_2 = null;
             BindingList<string[]> labels_color_list_3 = null;
-            BindingList<string[]> labels_color_list_4 = null; 
+            BindingList<string[]> labels_color_list_4 = null;
 
 
 
@@ -1883,99 +1902,99 @@ namespace DataViewer
                         #endregion
 
                         #region COLOR OF BAR
-                            string color = "white";
-                            bool isSolid = false;
+                        string color = "white";
+                        bool isSolid = false;
 
-                            string clabel = "";
+                        string clabel = "";
 
 
-                            #region Match color with label 
-                            
-                            //determine colors according to the graph type
-                            if ( is_category_1 )
+                        #region Match color with label
+
+                        //determine colors according to the graph type
+                        if (is_category_1)
+                        {
+                            //if log contains postures
+                            if ((split.Length > 2) && (split[3].Length > 0))
                             {
-                                //if log contains postures
-                                if ((split.Length > 2) && (split[3].Length > 0))
-                                {
-                                    clabel = split[3];
+                                clabel = split[3];
 
-                                    for (int j = 0; j < labels_color_list_1.Count; j++)
+                                for (int j = 0; j < labels_color_list_1.Count; j++)
+                                {
+                                    if (labels_color_list_1[j][1].CompareTo(clabel) == 0)
                                     {
-                                        if (labels_color_list_1[j][1].CompareTo(clabel) == 0)
-                                        {
-                                            color = labels_color_list_1[j][3];
-                                            isSolid = true;
-                                            break;
-                                        }
+                                        color = labels_color_list_1[j][3];
+                                        isSolid = true;
+                                        break;
                                     }
                                 }
                             }
-                            else if (is_category_2)
+                        }
+                        else if (is_category_2)
+                        {
+                            //if log contains activities
+                            if ((split.Length > 2) && (split[4].Length > 0))
                             {
-                                //if log contains activities
-                                if ((split.Length > 2) && (split[4].Length > 0))
+                                clabel = split[4];
+
+                                for (int j = 0; j < labels_color_list_2.Count; j++)
                                 {
-                                    clabel = split[4];
-
-                                    for (int j = 0; j < labels_color_list_2.Count; j++)
+                                    if (labels_color_list_2[j][1].CompareTo(clabel) == 0)
                                     {
-                                        if (labels_color_list_2[j][1].CompareTo(clabel) == 0)
-                                        {
-                                            color = labels_color_list_2[j][3];
-                                            isSolid = true;
-                                            break;
-                                        }
-                                    }
-                                }
-
-                            }
-                            else if (is_category_3)
-                            {
-                                if ((split.Length > 2) && (split[5].Length > 0))
-                                {
-                                    clabel = split[5];
-
-                                    for (int j = 0; j < labels_color_list_3.Count; j++)
-                                    {
-                                        if (labels_color_list_3[j][1].CompareTo(clabel) == 0)
-                                        {
-                                            color = labels_color_list_3[j][3];
-                                            isSolid = true;
-                                            break;
-                                        }
+                                        color = labels_color_list_2[j][3];
+                                        isSolid = true;
+                                        break;
                                     }
                                 }
                             }
-                            else if (is_category_4)
-                            {
-                                if ((split.Length > 2) && (split[6].Length > 0))
-                                {
-                                    clabel = split[6];
 
-                                    for (int j = 0; j < labels_color_list_4.Count; j++)
+                        }
+                        else if (is_category_3)
+                        {
+                            if ((split.Length > 2) && (split[5].Length > 0))
+                            {
+                                clabel = split[5];
+
+                                for (int j = 0; j < labels_color_list_3.Count; j++)
+                                {
+                                    if (labels_color_list_3[j][1].CompareTo(clabel) == 0)
                                     {
-                                        if (labels_color_list_4[j][1].CompareTo(clabel) == 0)
-                                        {
-                                            color = labels_color_list_4[j][3];
-                                            isSolid = true;
-                                            break;
-                                        }
+                                        color = labels_color_list_3[j][3];
+                                        isSolid = true;
+                                        break;
                                     }
                                 }
                             }
-                        
-                            
-                            #endregion
+                        }
+                        else if (is_category_4)
+                        {
+                            if ((split.Length > 2) && (split[6].Length > 0))
+                            {
+                                clabel = split[6];
+
+                                for (int j = 0; j < labels_color_list_4.Count; j++)
+                                {
+                                    if (labels_color_list_4[j][1].CompareTo(clabel) == 0)
+                                    {
+                                        color = labels_color_list_4[j][3];
+                                        isSolid = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
 
 
-                            #region commented
-                            /*if ((split.Length > 2) && (split[2].Length > 0))
+                        #endregion
+
+
+                        #region commented
+                        /*if ((split.Length > 2) && (split[2].Length > 0))
                             {
                                 color = split[2];
                                 isSolid = true;
                             }
                             */
-                            #endregion
+                        #endregion
 
 
                         #endregion Color of bar
@@ -1985,20 +2004,20 @@ namespace DataViewer
                         string label = "";
                         for (int c = 3; c < split.Length; c++)
                         {
-                            label += split[c].Replace("_", ", ").Replace("-", " ").Trim(',',' ') + "\n ";
+                            label += split[c].Replace("_", ", ").Replace("-", " ").Trim(',', ' ') + "\n ";
                         }
 
                         labelList = new PointPairList();
-                        labelList.Add(endx, yoffset, startx, String.Format("{3}: {0}  -  {1}\n {2}",dtStart.ToLongTimeString(),dtEnd.ToLongTimeString(),label,title));
- 
+                        labelList.Add(endx, yoffset, startx, String.Format("{3}: {0}  -  {1}\n {2}", dtStart.ToLongTimeString(), dtEnd.ToLongTimeString(), label, title));
+
                         #endregion
 
                         #region ADD BAR
 
 
                         //HiLowBarItem myBar = gp.AddHiLowBar(title, labelList, Color.FromName(color
-                        HiLowBarItem myBar = gp.AddHiLowBar(title, labelList, Color.FromArgb(Int32.Parse(color)) );
-                        
+                        HiLowBarItem myBar = gp.AddHiLowBar(title, labelList, Color.FromArgb(Int32.Parse(color)));
+
 
                         if (isSolid) myBar.Bar.Fill.Type = FillType.Solid;
                         else myBar.Bar.Fill.Type = FillType.None;
@@ -2013,13 +2032,11 @@ namespace DataViewer
 
 
         }
-        
-       #endregion
-
 
         #endregion
 
 
+        #endregion
 
         #region PHOTOS and SURVEYS
         private void CreatePhotoGraph(GraphPane gp, string filepath, string imagedir)
@@ -2032,7 +2049,7 @@ namespace DataViewer
                 {
                     string[] split = values[i].Split(',');
                     double x = (double)new XDate(DateTime.Parse(split[0]));
-                    list_Photo.Add(x, 25, split[2]+","+Path.Combine(imagedir,split[1]));
+                    list_Photo.Add(x, 25, split[2] + "," + Path.Combine(imagedir, split[1]));
                 }
                 catch { }
             }
@@ -2055,7 +2072,7 @@ namespace DataViewer
                 {
                     string[] split = values[i].Split(',');
                     double x = (double)new XDate(DateTime.Parse(split[0]));
-                    list.Add(x, 20, split[1].Replace(";","\n"));
+                    list.Add(x, 20, split[1].Replace(";", "\n"));
                 }
                 catch { }
             }
@@ -2069,8 +2086,6 @@ namespace DataViewer
         }
 
         #endregion
-
-
 
         #region ANNOTATOR-CLASSIFIER
         private void CreateAgreementGraph(GraphPane gp, string[] files)
@@ -2101,7 +2116,7 @@ namespace DataViewer
                         string[] split = values[i].Split(',');
                         if (split.Length > 2)
                         {
-                            
+
                             int msec = Convert.ToInt32(split[0]);
                             dtLastDate = dt.AddMilliseconds(msec * 400);
                             double x = (double)new XDate(dtLastDate);
@@ -2145,7 +2160,7 @@ namespace DataViewer
                                 lastDifference = difference;
                             }
 
-                            
+
                             for (int a = 0; a < alAgree_lists.Count; a++)
                             {
                                 if (a != index)
@@ -2288,403 +2303,340 @@ namespace DataViewer
 
         #endregion
 
-
-
-        #endregion Chart content
-
-
-
+        #endregion CHART CONTENT
 
         Hashtable paneOrders;
-        
-        
+
+        // **** JPN
+
         // Build the Chart
-        private void BuildCharts(string path)
+        private bool BuildCharts(string path)
         {
             SetGraphPanels();
             string[] files;
-            
+
             paneOrders = new Hashtable();
             int paneOrdering = 1;
 
             #region DETERMINE WHICH GRAPHS TO DISPLAY BASED ON AVAILABLE FILES
-            
-            #region ACCELEROMETER GRAPHS
 
-            files = Directory.GetFiles(path + "\\merged\\", "MITes*Raw*");
+            #region GENERIC GRAPHS
+
+            // **** JPN
+
+            files = Directory.GetFiles(path + "\\", "*.csv");
             for (int i = 0; i < files.Length; i++)
             {
-                string channel = "", location = "";
-                string[] sensorinfo = Path.GetFileNameWithoutExtension(files[i]).Split('_');
-                if (sensorinfo.Length >= 4)
+                string sensorType = Path.GetFileNameWithoutExtension(files[i]);
+                if (!sensorType.Contains("RAW_DATA"))
                 {
-                    channel = sensorinfo[1];
-                    location = sensorinfo[3];
-                }
-                CreateAccelerationGraph(paneOrdering, files[i], channel, location,"MITes","");
-                paneOrdering++;
-            }
-
-            #endregion
-
-
-            #region WOCKETS ACCELEROMETER GRAPHS
-            if ((Directory.Exists(path + "\\wockets\\")) && (Directory.GetFiles(path + "\\wockets\\").Length > 0))
-            {
-                //CurrentWockets._Configuration = new Wockets.Data.Configuration.WocketsConfiguration();
-                // CurrentWockets._Configuration.FromXML(path + "\\wockets\\Configuration.xml");
-                Wockets.WocketsController wc = new Wockets.WocketsController("", "", "");
-                wc.FromXML(path + "\\wockets\\SensorData.xml");
-                CurrentWockets._Controller = wc;
-                
-                files = Directory.GetFiles(path + "\\merged\\", "Wocket*RawMean*");
-                for (int i = 0; i < files.Length; i++)
-                {
-                    string channel = "", location = "";
-                    string[] sensorinfo = Path.GetFileNameWithoutExtension(files[i]).Split('_');
-                    string mac = "";
-                    if (sensorinfo.Length >= 4)
-                    {
-                        channel = sensorinfo[1];
-                        if (wc._Receivers[Convert.ToInt32(channel)] is Wockets.Receivers.RFCOMMReceiver)
-                        {
-                            mac = ((Wockets.Receivers.RFCOMMReceiver)wc._Receivers[Convert.ToInt32(channel)])._Address;
-                            mac = mac.Substring(mac.Length - 2, 2);
-                            string loc = wc._Sensors[Convert.ToInt32(channel)]._Location;
-                            switch(loc)
-                            {
-                                case "Dominant Hip":
-                                    loc = "DHP";
-                                    break;
-                                case "Dominant Ankle":
-                                    loc = "DAK";
-                                    break;
-                                case "Dominant Upper Arm":
-                                    loc = "DUA";
-                                    break;
-                                case "Dominant Wrist":
-                                    loc = "DW";
-                                    break;
-                                case "Dominant Thigh":
-                                    loc = "DT";
-                                    break;
-                                case "Torso":
-                                    loc = "TR";
-                                    break;
-                                case "Right Wrist":
-                                    loc = "RW";
-                                    break;
-                                case "Left Wrist":
-                                    loc = "LW";
-                                    break;
-                                case "Left Ankle":
-                                    loc = "LA";
-                                    break;
-                                case "Right Ankle":
-                                    loc = "RA";
-                                    break;
-                                default:
-                                    //loc = "lOC";
-                                    break;
-                            }
-
-                            mac = "WKT-"+loc+"-" + mac;
-                        }
-                        else
-                            mac = "Internal";
-                        location = sensorinfo[3];
-                    }
-                    CreateAccelerationGraph(paneOrdering, files[i], channel, location, "Wocket", mac);
+                    GraphPane ePane = AddPane(sensorType, "Y-TITLE");
+                    CreateGenericGraph(ePane, files[i]);
+                    paneOrders.Add(sensorType, "Y-TITLE");
                     paneOrdering++;
                 }
             }
+
             #endregion
 
-            //ADD_GRAPH STEP 1
+            //#region WOCKETS ACCELEROMETER GRAPHS
+            //if ((Directory.Exists(path + "\\wockets\\")) && (Directory.GetFiles(path + "\\wockets\\").Length > 0))
+            //{
+            //    //CurrentWockets._Configuration = new Wockets.Data.Configuration.WocketsConfiguration();
+            //    // CurrentWockets._Configuration.FromXML(path + "\\wockets\\Configuration.xml");
+            //    Wockets.WocketsController wc = new Wockets.WocketsController("", "", "");
+            //    wc.FromXML(path + "\\wockets\\SensorData.xml");
+            //    CurrentWockets._Controller = wc;
 
-            #region OXYCON
-            string oxyFile = Path.Combine(path + "\\merged\\", "Oxycon.csv"); 
-            if (File.Exists(oxyFile))
-            {
-                string title ="Oxycon";
-                GraphPane ePane = AddPane(title, "Oxycon");
-                CreateOxyconGraph(ePane, oxyFile);
-                paneOrders.Add(title, paneOrdering);
-                paneOrdering++;
-            }
-            #endregion
+            //    files = Directory.GetFiles(path + "\\merged\\", "Wocket*RawMean*");
+            //    for (int i = 0; i < files.Length; i++)
+            //    {
+            //        string channel = "", location = "";
+            //        string[] sensorinfo = Path.GetFileNameWithoutExtension(files[i]).Split('_');
+            //        string mac = "";
+            //        if (sensorinfo.Length >= 4)
+            //        {
+            //            channel = sensorinfo[1];
+            //            if (wc._Receivers[Convert.ToInt32(channel)] is Wockets.Receivers.RFCOMMReceiver)
+            //            {
+            //                mac = ((Wockets.Receivers.RFCOMMReceiver)wc._Receivers[Convert.ToInt32(channel)])._Address;
+            //                mac = mac.Substring(mac.Length - 2, 2);
+            //                string loc = wc._Sensors[Convert.ToInt32(channel)]._Location;
+            //                switch(loc)
+            //                {
+            //                    case "Dominant Hip":
+            //                        loc = "DHP";
+            //                        break;
+            //                    case "Dominant Ankle":
+            //                        loc = "DAK";
+            //                        break;
+            //                    case "Dominant Upper Arm":
+            //                        loc = "DUA";
+            //                        break;
+            //                    case "Dominant Wrist":
+            //                        loc = "DW";
+            //                        break;
+            //                    case "Dominant Thigh":
+            //                        loc = "DT";
+            //                        break;
+            //                    case "Torso":
+            //                        loc = "TR";
+            //                        break;
+            //                    case "Right Wrist":
+            //                        loc = "RW";
+            //                        break;
+            //                    case "Left Wrist":
+            //                        loc = "LW";
+            //                        break;
+            //                    case "Left Ankle":
+            //                        loc = "LA";
+            //                        break;
+            //                    case "Right Ankle":
+            //                        loc = "RA";
+            //                        break;
+            //                    default:
+            //                        //loc = "lOC";
+            //                        break;
+            //                }
 
+            //                mac = "WKT-"+loc+"-" + mac;
+            //            }
+            //            else
+            //                mac = "Internal";
+            //            location = sensorinfo[3];
+            //        }
+            //        CreateAccelerationGraph(paneOrdering, files[i], channel, location, "Wocket", mac);
+            //        paneOrdering++;
+            //    }
+            //}
+            //#endregion
 
-            #region Zephyr
-            string zephyrFile = Path.Combine(path + "\\merged\\", "Zephyr.csv");
-            if (File.Exists(zephyrFile))
-            {
-                string title = "Zephyr";
-                GraphPane ePane = AddPane(title, "Zephyr");
-                CreateZephyrGraph(ePane, zephyrFile);
-                paneOrders.Add(title, paneOrdering);
-                paneOrdering++;
-            }
-            #endregion Zephyr
+            //#region OXYCON
+            //string oxyFile = Path.Combine(path + "\\merged\\", "Oxycon.csv"); 
+            //if (File.Exists(oxyFile))
+            //{
+            //    string title ="Oxycon";
+            //    GraphPane ePane = AddPane(title, "Oxycon");
+            //    CreateOxyconGraph(ePane, oxyFile);
+            //    paneOrders.Add(title, paneOrdering);
+            //    paneOrdering++;
+            //}
+            //#endregion
 
+            //#region Zephyr
+            //string zephyrFile = Path.Combine(path + "\\merged\\", "Zephyr.csv");
+            //if (File.Exists(zephyrFile))
+            //{
+            //    string title = "Zephyr";
+            //    GraphPane ePane = AddPane(title, "Zephyr");
+            //    CreateZephyrGraph(ePane, zephyrFile);
+            //    paneOrders.Add(title, paneOrdering);
+            //    paneOrdering++;
+            //}
+            //#endregion Zephyr
 
-            #region Columbia
-            string columbiaFile = Path.Combine(path + "\\merged\\", "Columbia.csv");
-                  
-            if (File.Exists(columbiaFile))
-            {
-                string title = "Columbia";
-                GraphPane ePane = AddPane(title, "Columbia");
-                CreateColumbiaGraph(ePane, columbiaFile);
-                paneOrders.Add(title, paneOrdering);
-                paneOrdering++;
-            }      
-            #endregion
+            //#region Columbia
+            //string columbiaFile = Path.Combine(path + "\\merged\\", "Columbia.csv");
 
+            //if (File.Exists(columbiaFile))
+            //{
+            //    string title = "Columbia";
+            //    GraphPane ePane = AddPane(title, "Columbia");
+            //    CreateColumbiaGraph(ePane, columbiaFile);
+            //    paneOrders.Add(title, paneOrdering);
+            //    paneOrdering++;
+            //}      
+            //#endregion
 
-            #region RTI
-            string rtiFile = Path.Combine(path + "\\merged\\", "RTI.csv");
+            //#region RTI
+            //string rtiFile = Path.Combine(path + "\\merged\\", "RTI.csv");
 
-            if (File.Exists(rtiFile))
-            {
-                string title = "RTI";
-                GraphPane ePane = AddPane(title, "RTI");
-                CreateRTIGraph(ePane, rtiFile);
-                paneOrders.Add(title, paneOrdering);
-                paneOrdering++;
-            }
-            #endregion
+            //if (File.Exists(rtiFile))
+            //{
+            //    string title = "RTI";
+            //    GraphPane ePane = AddPane(title, "RTI");
+            //    CreateRTIGraph(ePane, rtiFile);
+            //    paneOrders.Add(title, paneOrdering);
+            //    paneOrdering++;
+            //}
+            //#endregion
 
+            //#region GPS
+            //string gpsFile = Path.Combine(path + "\\merged\\", "GPS.csv");
 
-            #region GPS
-            string gpsFile = Path.Combine(path + "\\merged\\", "GPS.csv");
+            //if (File.Exists(gpsFile))
+            //{
+            //    string title = "GPS";
+            //    GraphPane ePane = AddPane(title, "GPS");
+            //    CreateGPSDeviceGraph(ePane, gpsFile);
+            //    paneOrders.Add(title, paneOrdering);
+            //    paneOrdering++;
+            //}
+            //#endregion
 
-            if (File.Exists(gpsFile))
-            {
-                string title = "GPS";
-                GraphPane ePane = AddPane(title, "GPS");
-                CreateGPSDeviceGraph(ePane, gpsFile);
-                paneOrders.Add(title, paneOrdering);
-                paneOrdering++;
-            }
-            #endregion
+            //#region Actigraphs
+            //string[] file = Directory.GetFileSystemEntries(path + "\\merged\\", "Actigraph*.csv");
 
+            //if (file.Length > 0)
+            //{
+            //    string title = "Actigraphs";
+            //    GraphPane ePane = AddPane(title, "Actigraphs");
+            //    for (int i = 0; (i < file.Length); i++)
+            //    {
+            //        string actigraphFile = Path.Combine(path, "merged\\Actigraph" + (i + 1) + ".csv");
+            //        if (File.Exists(actigraphFile))                    
+            //            CreateActigraphGraph(ePane, actigraphFile,i);
+            //    }
 
-            #region Actigraphs
-            string[] file = Directory.GetFileSystemEntries(path + "\\merged\\", "Actigraph*.csv");
+            //    //CreateActigraphLineSegments(ePane);
+            //    paneOrders.Add(title, paneOrdering);
+            //    paneOrdering++;
+            //}
 
-            if (file.Length > 0)
-            {
-                string title = "Actigraphs";
-                GraphPane ePane = AddPane(title, "Actigraphs");
-                for (int i = 0; (i < file.Length); i++)
-                {
-                    string actigraphFile = Path.Combine(path, "merged\\Actigraph" + (i + 1) + ".csv");
-                    if (File.Exists(actigraphFile))                    
-                        CreateActigraphGraph(ePane, actigraphFile,i);
-                }
+            //#endregion Actigraphs
 
-                //CreateActigraphLineSegments(ePane);
-                paneOrders.Add(title, paneOrdering);
-                paneOrdering++;
-            }
-
-            #endregion Actigraphs
-
-
-
-            #region Sensewear
-            string sensewearFile = Path.Combine(path + "\\merged\\", "Sensewear.csv");
-            if (File.Exists(sensewearFile))
-            {
-                string title = "Sensewear";
-                GraphPane ePane = AddPane(title, "Sensewear");
-                CreateSensewearGraph(ePane, sensewearFile);
-                paneOrders.Add(title, paneOrdering);
-                paneOrdering++;
-            }
-            #endregion Sensewear
-
+            //#region Sensewear
+            //string sensewearFile = Path.Combine(path + "\\merged\\", "Sensewear.csv");
+            //if (File.Exists(sensewearFile))
+            //{
+            //    string title = "Sensewear";
+            //    GraphPane ePane = AddPane(title, "Sensewear");
+            //    CreateSensewearGraph(ePane, sensewearFile);
+            //    paneOrders.Add(title, paneOrdering);
+            //    paneOrdering++;
+            //}
+            //#endregion Sensewear
 
             GraphPane hPane = null;
             string filepath = "";
 
-            #region COMBINED DATATYPE GRAPH - USUALLY HAS HEART RATE + 1 or more of GPS data, Annotation labels, or Survey responses
-            
-            files = Directory.GetFiles(path + "\\merged\\", "HeartRate*");
-            if (files.Length > 0)
-            {
-                FileInfo finfo = new FileInfo(files[0]);
-                if( finfo.Length > 0)
-                {
-                    string title = "Heart Rate";
-                    hPane = AddPane(title, "Beats Per Minute");
-                    paneOrders.Add(title, paneOrdering);
-                    CreateHeartRateGraph(hPane, files);
-                }
-            }
+            //#region COMBINED DATATYPE GRAPH - USUALLY HAS HEART RATE + 1 or more of GPS data, Annotation labels, or Survey responses
 
-            //if (AnyMatches(path + "\\merged\\", "GPS*,POI*"))
+            //files = Directory.GetFiles(path + "\\merged\\", "HeartRate*");
+            //if (files.Length > 0)
             //{
-            //    string title = paneOrdering + " Location";
-            //    hPane = AddPane(title, "");
+            //    FileInfo finfo = new FileInfo(files[0]);
+            //    if( finfo.Length > 0)
+            //    {
+            //        string title = "Heart Rate";
+            //        hPane = AddPane(title, "Beats Per Minute");
+            //        paneOrders.Add(title, paneOrdering);
+            //        CreateHeartRateGraph(hPane, files);
+            //    }
             //}
 
-            //if (AnyMatches(path + "\\annotation\\audioannotation\\", "annotat*"))
-            //{
-            //    string title = paneOrdering + " Labels";
-            //    hPane = AddPane(title, "");
-            //}
-
-            //if (AnyMatches(path + "\\annotation\\phoneannotation\\", "annotat*,photos*,surveys*"))
-            //{
-            //    string title = paneOrdering + " Labels";
-            //    hPane = AddPane(title, "");
-            //}
-            
-            //if (AnyMatches(path + "\\annotation\\phoneannotation\\", "average-*"))
-            //{
-            //    string title = paneOrdering + " Annotation";
-            //    hPane = AddPane(title, "");
-            //    hPane.YAxis.IsVisible = false;
-            //    _doesShowHover = false;
-            //}
-            
-            #endregion
-
+            //#endregion
 
             #region Annotations
 
-                string ann_title = "Annotations";
-                GraphPane aPane = AddPane(ann_title, "Annotations");
-                aPane.YAxis.IsVisible = true;
+            string ann_title = "Annotations";
+            GraphPane aPane = AddPane(ann_title, "Annotations");
+            aPane.YAxis.IsVisible = true;
 
-                if (hPane != null)
+            if (hPane != null)
+            {
+                paneOrdering++;
+            }
+            else
+            {
+                //Uncomment if Heart Rate Graph is deleted
+                paneOrders.Add(ann_title, paneOrdering);
+            }
+
+
+
+            //Hack - Dummy curve that forces the scale of the Y-axis and alignment not to change
+            PointPairList listACT = new PointPairList();
+            listACT.Add(0, 0);
+            aPane.AddCurve("annotation", listACT, Color.White, SymbolType.TriangleDown);
+
+
+            ////Add GPS
+            //paneOrders.Add("Locations", paneOrdering);
+            //filepath = Path.Combine(path + "\\merged\\", "GPSlog.csv");
+            //if (File.Exists(filepath))
+            //    CreateGPSGraph(hPane, filepath);
+            //filepath = Path.Combine(path + "\\merged\\", "POIlog.csv");
+            //if (File.Exists(filepath))
+            //    CreatePOIGraph(hPane, filepath);
+
+
+
+
+            //====  add audio annotations  =======
+            #region Audio/Phone Annottations
+
+            //reading the corrected annotations in the merged folder
+            string file_annotations = path + "\\merged\\" + "AnnotationIntervals.csv";
+
+            if (File.Exists(file_annotations))
+            {
+                string path_annotations_color = "";
+
+                if (Directory.Exists(path + "\\annotation\\audioannotation\\"))
+                    path_annotations_color = path + "\\annotation\\audioannotation\\";
+                else if (Directory.Exists(path + "\\annotation\\phoneannotation\\"))
+                    path_annotations_color = path + "\\annotation\\phoneannotation\\";
+                else if (Directory.Exists(path + "\\annotation\\tabletannotation\\"))
+                    path_annotations_color = path + "\\annotation\\tabletannotation\\";
+
+                //CreateDiaryGraph(aPane, file_annotations, path_annotations_color, "Time: ", 20, "activity");
+                //CreateDiaryGraph(aPane, file_annotations, path_annotations_color, "Time:", 130, "posture");
+
+                CreateDiaryGraph(aPane, file_annotations, path_annotations_color, "Time: ", 0, "activity");
+                CreateDiaryGraph(aPane, file_annotations, path_annotations_color, "Time:", 110, "posture");
+
+                if (Directory.Exists(path + "\\annotation\\tabletannotation\\"))
                 {
-                    paneOrdering++;
+                    CreateDiaryGraph(aPane, file_annotations, path_annotations_color, "Time:", 220, "smoking");
+                    CreateDiaryGraph(aPane, file_annotations, path_annotations_color, "Time:", 330, "puffing");
                 }
-                else
-                {
-                    //Uncomment if Heart Rate Graph is deleted
-                    paneOrders.Add(ann_title, paneOrdering);
-                }
+            }
 
-                
-                
-               //Hack - Dummy curve that forces the scale of the Y-axis and alignment not to change
-               PointPairList listACT = new PointPairList();
-               listACT.Add(0, 0);
-               aPane.AddCurve("annotation", listACT, Color.White, SymbolType.TriangleDown);
-               
+            #endregion
 
-                //Add GPS
-                paneOrders.Add("Locations", paneOrdering);
-                filepath = Path.Combine(path + "\\merged\\", "GPSlog.csv");
+
+            //add phone annotations
+            #region Phone Annotations
+
+            if (Directory.Exists(path + "\\annotation\\phoneannotation\\"))
+            {
+                filepath = Path.Combine(path + "\\annotation\\phoneannotation\\", "photos.csv");
                 if (File.Exists(filepath))
-                    CreateGPSGraph(hPane, filepath);
-                filepath = Path.Combine(path + "\\merged\\", "POIlog.csv");
+                    CreatePhotoGraph(hPane, filepath, path + "\\annotation\\phoneannotation\\");
+
+                filepath = Path.Combine(path + "\\annotation\\phoneannotation\\", "surveys.csv");
                 if (File.Exists(filepath))
-                    CreatePOIGraph(hPane, filepath);
+                    CreateSurveyGraph(hPane, filepath);
 
 
+                files = Directory.GetFiles(path + "\\annotation\\phoneannotation\\", "average-*");
+                if (files.Length > 0)
+                    CreateAgreementGraph(hPane, files);
+            }
 
-
-                //====  add audio annotations  =======
-                #region Audio/Phone Annottations
-                
-                //reading the corrected annotations in the merged folder
-                string file_annotations = path + "\\merged\\" + "AnnotationIntervals.csv";
-
-                if (File.Exists(file_annotations))
-                {
-                    string path_annotations_color = "";
-
-                    if (Directory.Exists(path + "\\annotation\\audioannotation\\"))
-                        path_annotations_color = path + "\\annotation\\audioannotation\\";
-                    else if (Directory.Exists(path + "\\annotation\\phoneannotation\\"))
-                        path_annotations_color = path + "\\annotation\\phoneannotation\\";
-                    else if (Directory.Exists(path + "\\annotation\\tabletannotation\\"))
-                        path_annotations_color = path + "\\annotation\\tabletannotation\\";
-
-                    //CreateDiaryGraph(aPane, file_annotations, path_annotations_color, "Time: ", 20, "activity");
-                    //CreateDiaryGraph(aPane, file_annotations, path_annotations_color, "Time:", 130, "posture");
-
-                    CreateDiaryGraph(aPane, file_annotations, path_annotations_color, "Time: ", 0, "activity");
-                    CreateDiaryGraph(aPane, file_annotations, path_annotations_color, "Time:", 110, "posture");
-                    
-                    if (Directory.Exists(path + "\\annotation\\tabletannotation\\"))
-                    {
-                        CreateDiaryGraph(aPane, file_annotations, path_annotations_color, "Time:", 220, "smoking");
-                        CreateDiaryGraph(aPane, file_annotations, path_annotations_color, "Time:", 330, "puffing");
-                    }
-                }
-
-                #endregion
-
-
-                //add phone annotations
-                #region Phone Annotations
-
-                if (Directory.Exists(path + "\\annotation\\phoneannotation\\"))
-                {
-                    filepath = Path.Combine(path + "\\annotation\\phoneannotation\\", "photos.csv");
-                    if (File.Exists(filepath))
-                        CreatePhotoGraph(hPane, filepath, path + "\\annotation\\phoneannotation\\");
-
-                    filepath = Path.Combine(path + "\\annotation\\phoneannotation\\", "surveys.csv");
-                    if (File.Exists(filepath))
-                        CreateSurveyGraph(hPane, filepath);
-
-
-                    files = Directory.GetFiles(path + "\\annotation\\phoneannotation\\", "average-*");
-                    if (files.Length > 0)
-                        CreateAgreementGraph(hPane, files);
-                }
-
-                #endregion
-
-
-            
             #endregion
 
 
 
             #endregion
 
-            hScrollBar1.Value = 0;            
+            #endregion
+
+            hScrollBar1.Value = 0;
             SetTimes();
             RefreshMasterPaneLayout();
+
+            return true;
+
         }
 
-
-
-        /// <summary>
-        /// Determines whether there is at least one file matching one of the supplied filename patterns
-        /// </summary>
-        /// <param name="pathSearchDirectory">absolute path of the directory to search</param>
-        /// <param name="filePatterns">comma separated list of file patterns (using wild cards such as asterisk) to match against directory file list</param>
-        /// <returns>true if any files matched for one or more of the supplied patterns within the directory specified by the path</returns>
-        private bool AnyMatches(string pathSearchDirectory, string filePatterns)
-        {
-            bool isMatch = false;
-            string[] patternsToMatch = filePatterns.Split(',');
-            int i = 0;
-
-           
-                while (!isMatch && (i < patternsToMatch.Length))
-                {
-                    if (Directory.GetFiles(pathSearchDirectory, patternsToMatch[i]).Length > 0) isMatch = true;
-                    i++;
-                }
-
-                return isMatch;
-            
-        }
-        
-
+        //DONE
         #region INTERACTION
 
+        //DONE
         #region OPEN DATASET
+
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
@@ -2693,6 +2645,7 @@ namespace DataViewer
                 OpenDataset(_pathDataset);
             }
         }
+
         private void OpenDataset(string path)
         {
             if (Directory.Exists(path))
@@ -2701,40 +2654,40 @@ namespace DataViewer
                 Reset();
                 SetEnable(false);
                 this.Refresh();
-
-                BuildCharts(path);
+                if (!BuildCharts(path)) Logger.LogError("OpenDataset", path + " does not appear to contain a dataset");
                 SetEnable(true);
                 this.Cursor = Cursors.Default;
             }
             else Logger.LogError("OpenDataset", path + " does not exist");
         }
+
         #endregion
 
+        //DONE
         #region ZOOM
+
         private void hScrollBar1_ValueChanged(object sender, EventArgs e)
         {
             this.Cursor = Cursors.WaitCursor;
             XDate startx = new XDate(_firstDate.Year, _firstDate.Month, _firstDate.Day, _firstDate.Hour, _firstDate.Minute, _firstDate.Second);
-            
             XDate endx = new XDate(startx);
-            startx.AddMinutes(hScrollBar1.Value*_minutesPage);
-            endx.AddMinutes((hScrollBar1.Value + 1)*_minutesPage);
+            startx.AddMinutes(hScrollBar1.Value * _minutesPage);
+            endx.AddMinutes((hScrollBar1.Value + 1) * _minutesPage);
             for (int i = 0; i < zedGraphControl1.MasterPane.PaneList.Count; i++)
             {
                 zedGraphControl1.MasterPane[i].XAxis.Scale.Min = (double)startx;
                 zedGraphControl1.MasterPane[i].XAxis.Scale.Max = (double)endx;
             }
             int pixelunits = (int)Math.Ceiling((double)(hScrollBar1.Width - 130) / hScrollBar1.Maximum);
-            lbScrollTime.Location = new Point(hScrollBar1.Left + pixelunits* hScrollBar1.Value,lbScrollTime.Location.Y);
+            lbScrollTime.Location = new Point(hScrollBar1.Left + pixelunits * hScrollBar1.Value, lbScrollTime.Location.Y);
             lbScrollTime.Text = String.Format("{0}-{1}", startx.DateTime.ToShortTimeString(), endx.DateTime.ToShortTimeString());
 
             if (_isAdaptingPointSize) SetPointSize();
 
             zedGraphControl1.AxisChange();
             zedGraphControl1.Refresh();
-            
+
             this.Cursor = Cursors.Default;
-            
         }
 
         private void buttonZoomOut_Click(object sender, EventArgs e)
@@ -2768,11 +2721,11 @@ namespace DataViewer
             }
         }
 
-
-      
         #endregion
 
+        //DONE
         #region SHOW/HIDE PANES
+
         private void checkBox_CheckedChanged(object sender, EventArgs e)
         {
             string item = ((CheckBox)sender).Text;
@@ -2786,7 +2739,6 @@ namespace DataViewer
             {
                 if (isPane) ShowPane(item);
             }
-           
             RefreshMasterPaneLayout();
         }
 
@@ -2796,30 +2748,27 @@ namespace DataViewer
             int index = 0;
             //determine placement of pane
             bool isFound = false;
-     
-            
-            int insertedPane=(int)paneOrders[pane]-1;
+            int insertedPane = (int)paneOrders[pane] - 1;
             for (int i = 0; i < zedGraphControl1.MasterPane.PaneList.Count; i++)
             {
                 if (!isFound)
                 {
                     string panetitle = zedGraphControl1.MasterPane.PaneList[i].Title.Text;
                     //if (panetitle.CompareTo(pane) > 0)
-                    int paneIndex=(int)paneOrders[panetitle] -1;
+                    int paneIndex = (int)paneOrders[panetitle] - 1;
                     if (paneIndex > insertedPane)
                     {
                         index = i;
                         isFound = true;
                     }
-                    
                 }
             }
-             
+
             if (!isFound) index = zedGraphControl1.MasterPane.PaneList.Count;
 
             if (gp != null)
                 zedGraphControl1.MasterPane.PaneList.Insert(index, gp);
-    
+
         }
 
         private void RemovePane(string pane)
@@ -2829,12 +2778,12 @@ namespace DataViewer
                 zedGraphControl1.MasterPane.PaneList.Remove(gp);
 
         }
-        
-        #endregion       
 
+        #endregion
 
-
+        //DONE
         #region HOVER
+
         PointPair ppHover = null;
         private void HighlightGraphs(double x, double z)
         {
@@ -2862,8 +2811,7 @@ namespace DataViewer
                 this.Refresh();
             }
         }
-        
-        
+
         string zedGraphControl1_PointValueEvent(ZedGraphControl sender, GraphPane pane, CurveItem curve, int iPt)
         {
 
@@ -2903,16 +2851,10 @@ namespace DataViewer
 
         #endregion
 
-        private void hScrollBar1_Scroll(object sender, ScrollEventArgs e)
-        {
+        #endregion INTERACTION
 
-        }
-
-
-
-        #endregion
-
-        #region Buttons & ZOOM
+        //DONE
+        #region BUTTONS & ZOOM
 
         RawDataViewForm rawForm = null;
         void buttonDisplayRaw_Click(object sender, System.EventArgs e)
@@ -2937,7 +2879,6 @@ namespace DataViewer
                 rawForm.Show();
 
         }
-
 
         SyncViewForm syncForm = null;
         private void button_sync_Click(object sender, EventArgs e)
@@ -2965,15 +2906,28 @@ namespace DataViewer
 
         }
 
-
-
         #endregion Buttons & ZOOM
 
+        public static DateTime DateTimeParse(string DateString)
+        {
+            string[] dateArray = DateString.Split(' ');
+            string[] timeArray = dateArray[dateArray.Length - 1].Split(':');
+            string[] secondArray = timeArray[2].Split('.');
+            string[] newDateArray = new string[3];
+            if (dateArray.Length > 1)                       //Create array to store date
+                newDateArray = dateArray[0].Split('-');
+            else                                            //Handle cases where date component is not defined in string
+                newDateArray = new string[] { "1999", "01", "01" };
+            int milliseconds = 0;
+            // **** JPN: POSSIBLY MAKE THIS SO IT REJECTS INCORRECT TIME STAMPS
+            if (secondArray.Length > 1) milliseconds = Convert.ToInt32(secondArray[1]);
+            return new DateTime(Convert.ToInt32(newDateArray[0]), Convert.ToInt32(newDateArray[1]), Convert.ToInt32(newDateArray[2]), Convert.ToInt32(timeArray[0]), Convert.ToInt32(timeArray[1]), Convert.ToInt32(secondArray[0]), milliseconds);
+        }
 
     }
 
-
-
+    //DONE
+    #region CLASS LineSegment
 
     public class LineSegment
     {
@@ -3039,5 +2993,6 @@ namespace DataViewer
         }
     }
 
+    #endregion
 
 }
