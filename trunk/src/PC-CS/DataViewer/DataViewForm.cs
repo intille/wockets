@@ -1052,7 +1052,7 @@ namespace DataViewer
             for (int i = 0; i < files.Length; i++)
             {
                 string sensorType = Path.GetFileNameWithoutExtension(files[i]);
-                if (!sensorType.Contains("RAW_DATA_JPN"))
+                if (!sensorType.Contains("RAW_DATA"))
                 {
                     GraphPane ePane = AddPane(sensorType, "Y-TITLE");
                     CreateGenericGraph(ePane, files[i]);
