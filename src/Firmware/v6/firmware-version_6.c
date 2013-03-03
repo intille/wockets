@@ -365,7 +365,7 @@ int main() {
 						batch_counter = rawTail - rawHead;
 					else 
 						batch_counter = DATA_SIZE - rawHead - 1 + rawTail;*/
-					_send_batch_count(batch_counter);	// Send the number (devided by 4) of raw data packets that are going to be sent 
+					_send_batch_count(batch_counter * 4);	// Send the number of raw data packets that are going to be sent 
 					batch_counter = 0;
 					
 					while(rawHead != rawTail) { //Send raw data from Circular buffer
