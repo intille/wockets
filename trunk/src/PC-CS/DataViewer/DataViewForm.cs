@@ -41,7 +41,13 @@ namespace DataViewer
         bool _isAdaptingPointSize = true; //as graph gets larger/smaller, changes point size to match
         bool _zoomedOut = true;
 
-        Color[] _colorPalette = new Color[9] { Color.Red, Color.YellowGreen, Color.Beige, Color.Aqua, Color.Violet, Color.Bisque, Color.Cyan, Color.DarkOrange, Color.Khaki };
+        Color[] _seriesColorPalette = new Color[9] { Color.Red, Color.YellowGreen, Color.Blue, Color.Aqua, Color.Violet, Color.Bisque, Color.Cyan, Color.DarkOrange, Color.Khaki };
+        Color[] _annotationColorPalette = new Color[9] { Color.Red, Color.YellowGreen, Color.Blue, Color.Aqua, Color.Violet, Color.Bisque, Color.Cyan, Color.DarkOrange, Color.Khaki };
+
+        private const string ANNOTATION_EXTENSION = @"*annotation.csv.xml";
+        private const string SUMMARY_DATA_EXTENSION = @"*.csv";
+        private const string RAW_DATA_FLAG = @"RAW_DATA";
+        private const string ANNOTATION_AXIS_TITLE = @"Annotation";
 
         Hashtable paneOrders;
 
@@ -370,8 +376,8 @@ namespace DataViewer
             for (int j = 0; j < pointsCurves.Length; j++)
             {
                 pointsCurves[j] = new LineItem("TEST_LABEL");
-                pointsCurves[j] = gp.AddCurve("JPN SERIES", listDataPoints[j], _colorPalette[j], SymbolType.Circle);
-                pointsCurves[j].Symbol.Fill = new Fill(_colorPalette[j]);
+                pointsCurves[j] = gp.AddCurve(headers[j], listDataPoints[j], _seriesColorPalette[j], SymbolType.Circle);
+                pointsCurves[j].Symbol.Fill = new Fill(_seriesColorPalette[j]);
                 if (!_isAdaptingPointSize) pointsCurves[j].Symbol.Size = 1F;
                 // **** JPN SET TO TRUE IF A LINE IS DESIRED
                 pointsCurves[j].Line.IsVisible = true;
@@ -382,148 +388,12 @@ namespace DataViewer
         }
 
         #endregion GENERIC GRAPH
-    
-        #region ANNOTATION LABELS
 
-        private void CreateDiaryGraph(GraphPane gp, string filepath, string title, int y)
-        {
-            gp.BarSettings.Base = BarBase.Y;
-            gp.BarSettings.Type = BarType.Overlay;
+        //IN PROGRESS
+        #region ANNOTATION GRAPH
 
-            PointPairList labelList = new PointPairList();
-
-            string[] values = FileReadWrite.ReadLinesFromFile(filepath);
-            for (int i = 0; i < values.Length; i++)
-            {
-                try
-                {
-                    string[] split = values[i].Split(',');
-                    string[] datetime = split[0].Split(' ');
-                    string[] startDate = datetime[0].Split('-');
-                    string[] startTime = datetime[1].Split('-')[0].Split(':');
-
-                    DateTime dtStart = new DateTime(Convert.ToInt32(startDate[0]), Convert.ToInt32(startDate[1]), Convert.ToInt32(startDate[2]), Convert.ToInt32(startTime[0]), Convert.ToInt32(startTime[1]), Convert.ToInt32(startTime[2]));//DateTime.Parse(split[0]);
-                    double startx = (double)new XDate(dtStart);
-                    if (split[1].Length > 0)
-                    {
-                        #region END DATE
-                        string[] enddatetime = split[1].Split(' ');
-                        string[] endDate = enddatetime[0].Split('-');
-                        string[] endTime = enddatetime[1].Split('-')[0].Split(':');
-
-                        DateTime dtEnd = new DateTime(Convert.ToInt32(endDate[0]), Convert.ToInt32(endDate[1]), Convert.ToInt32(endDate[2]), Convert.ToInt32(endTime[0]), Convert.ToInt32(endTime[1]), Convert.ToInt32(endTime[2]));//DateTime.Parse(split[0]);
-                        //DateTime dtEnd = DateTime.Parse(split[1]);
-                        double endx = (double)new XDate(dtEnd);
-                        #endregion
-
-                        #region COLOR OF BAR
-                        string color = "black";
-                        bool isSolid = false;
-                        if ((split.Length > 2) && (split[2].Length > 0))
-                        {
-                            color = split[2];
-                            isSolid = true;
-                        }
-                        #endregion
-
-
-                        #region LABEL AND POINT
-                        string label = "";
-                        for (int c = 3; c < split.Length; c++)
-                        {
-                            label += split[c].Replace("_", ", ").Replace("-", " ").Trim(',', ' ') + "\n ";
-                        }
-                        labelList = new PointPairList();
-                        labelList.Add(endx, y, startx, String.Format("{3} {0}-{1}\n,{2}", dtStart.ToShortTimeString(), dtEnd.ToShortTimeString(), label, title));
-                        #endregion
-
-                        #region ADD BAR
-                        HiLowBarItem myBar = gp.AddHiLowBar(title, labelList, Color.FromName(color));
-                        if (isSolid) myBar.Bar.Fill.Type = FillType.Solid;
-                        else myBar.Bar.Fill.Type = FillType.None;
-                        #endregion
-                    }
-                }
-                catch { }
-            }
-
-
-
-
-        }
-
-        #region commented
-        /*
-        private void CreateDiaryGraph(GraphPane gp, string filepath,string filepath_colors, string title, int y, string type)
-        {
-            gp.BarSettings.Base = BarBase.Y;
-            gp.BarSettings.Type = BarType.Overlay;
-
-            PointPairList labelList = new PointPairList();
-
-            string[] values = FileReadWrite.ReadLinesFromFile(filepath);
-
-
-            for (int i = 0; i < values.Length; i++)
-            {
-                try
-                {
-                    string[] split = values[i].Split(',');
-                    string[] datetime = split[0].Split(' ');
-                    string[] startDate = datetime[0].Split('-');
-                    string[] startTime = datetime[1].Split('-')[0].Split(':');
-
-                    DateTime dtStart = new DateTime(Convert.ToInt32(startDate[0]), Convert.ToInt32(startDate[1]), Convert.ToInt32(startDate[2]), Convert.ToInt32(startTime[0]), Convert.ToInt32(startTime[1]), Convert.ToInt32(startTime[2]));//DateTime.Parse(split[0]);
-                    double startx = (double)new XDate(dtStart);
-                    if (split[1].Length > 0)
-                    {
-                        #region END DATE
-                        string[] enddatetime = split[1].Split(' ');
-                        string[] endDate = enddatetime[0].Split('-');
-                        string[] endTime = enddatetime[1].Split('-')[0].Split(':');
-
-                        DateTime dtEnd = new DateTime(Convert.ToInt32(endDate[0]), Convert.ToInt32(endDate[1]), Convert.ToInt32(endDate[2]), Convert.ToInt32(endTime[0]), Convert.ToInt32(endTime[1]), Convert.ToInt32(endTime[2]));//DateTime.Parse(split[0]);
-                        //DateTime dtEnd = DateTime.Parse(split[1]);
-                        double endx = (double)new XDate(dtEnd);
-                        #endregion
-
-                        #region COLOR OF BAR
-                        string color = "black";
-                        bool isSolid = false;
-                        if ((split.Length > 2) && (split[2].Length > 0))
-                        {
-                            color = split[2];
-                            isSolid = true;
-                        }
-                        #endregion
-                        
-
-                        #region LABEL AND POINT
-                        string label = "";
-                        for (int c = 3; c < split.Length; c++)
-                        {
-                            label += split[c].Replace("_", ", ").Replace("-", " ").Trim(',',' ') + "\n ";
-                        }
-                        labelList = new PointPairList();
-                        labelList.Add(endx, y, startx, String.Format("{3} {0}-{1}\n,{2}",dtStart.ToShortTimeString(),dtEnd.ToShortTimeString(),label,title));
-                        #endregion
-
-                        #region ADD BAR
-                        HiLowBarItem myBar = gp.AddHiLowBar(title, labelList, Color.FromName(color));
-                        if (isSolid) myBar.Bar.Fill.Type = FillType.Solid;
-                        else myBar.Bar.Fill.Type = FillType.None;
-                        #endregion
-                    }
-                }
-                catch { }
-            }
-
-        }
-  */
-        #endregion
-
-
-        #region labels colors on bar
+        //JPN COLOR MAPPING
+        Dictionary<string, Color> annotationColorMap = new Dictionary<string,Color>();
 
         private void CreateDiaryGraph(GraphPane gp, string filepath, string dirpath_colors,
                                       string title, int yoffset, string type)
@@ -535,509 +405,52 @@ namespace DataViewer
             PointPairList labelList = new PointPairList();
             string[] values = FileReadWrite.ReadLinesFromFile(filepath);
 
-            bool is_category_1 = false;
-            bool is_category_2 = false;
-            bool is_category_3 = false;
-            bool is_category_4 = false;
-
-            string[] lines_read = null;
-            string[] label_color = null;
-            BindingList<string[]> labels_color_list_1 = null;
-            BindingList<string[]> labels_color_list_2 = null;
-            BindingList<string[]> labels_color_list_3 = null;
-            BindingList<string[]> labels_color_list_4 = null;
-
-
-
-            #region read colors files
-
-            if (type.CompareTo("posture") == 0)
-            {
-                is_category_1 = true;
-
-                if (File.Exists(dirpath_colors + "ActivityLabelsColors_1.csv"))
-                {
-                    labels_color_list_1 = new BindingList<string[]>();
-                    lines_read = FileReadWrite.ReadLinesFromFile(dirpath_colors + "ActivityLabelsColors_1.csv");
-
-                    foreach (string line in lines_read)
-                    {
-                        label_color = line.Split(',');
-                        labels_color_list_1.Add(label_color);
-                    }
-                }
-            }
-            else if (type.CompareTo("activity") == 0)
-            {
-                is_category_2 = true;
-
-                if (File.Exists(dirpath_colors + "ActivityLabelsColors_2.csv"))
-                {
-                    labels_color_list_2 = new BindingList<string[]>();
-                    lines_read = FileReadWrite.ReadLinesFromFile(dirpath_colors + "ActivityLabelsColors_2.csv");
-
-                    foreach (string line in lines_read)
-                    {
-                        label_color = line.Split(',');
-                        labels_color_list_2.Add(label_color);
-                    }
-                }
-            }
-            else if (type.CompareTo("smoking") == 0)
-            {
-                is_category_3 = true;
-
-                if (File.Exists(dirpath_colors + "ActivityLabelsColors_3.csv"))
-                {
-                    labels_color_list_3 = new BindingList<string[]>();
-                    lines_read = FileReadWrite.ReadLinesFromFile(dirpath_colors + "ActivityLabelsColors_3.csv");
-
-                    foreach (string line in lines_read)
-                    {
-                        label_color = line.Split(',');
-                        labels_color_list_3.Add(label_color);
-                    }
-                }
-            }
-            else if (type.CompareTo("puffing") == 0)
-            {
-                is_category_4 = true;
-
-                if (File.Exists(dirpath_colors + "ActivityLabelsColors_4.csv"))
-                {
-                    labels_color_list_4 = new BindingList<string[]>();
-                    lines_read = FileReadWrite.ReadLinesFromFile(dirpath_colors + "ActivityLabelsColors_4.csv");
-
-                    foreach (string line in lines_read)
-                    {
-                        label_color = line.Split(',');
-                        labels_color_list_4.Add(label_color);
-                    }
-                }
-            }
-
-            #endregion
-
-
-            for (int i = 0; i < values.Length; i++)
+            for (int i = 1; i < values.Length; i++)
             {
                 try
                 {
                     string[] split = values[i].Split(',');
-                    string[] datetime = split[0].Split(' ');
-                    string[] startDate = datetime[0].Split('-');
-                    string[] startTime = datetime[1].Split('-')[0].Split(':');
+            
+                    DateTime dtStart = DateTime.MinValue;
+                    DateTime dtEnd = DateTime.MaxValue;
 
-                    DateTime dtStart = new DateTime(Convert.ToInt32(startDate[0]), Convert.ToInt32(startDate[1]), Convert.ToInt32(startDate[2]), Convert.ToInt32(startTime[0]), Convert.ToInt32(startTime[1]), Convert.ToInt32(startTime[2]));//DateTime.Parse(split[0]);
-                    double startx = (double)new XDate(dtStart);
-                    if (split[1].Length > 0)
+                    double startx = 0;
+                    double endx = 0;
+
+                    if (split.Length > 0 && split[0].Length > 0)
                     {
-                        #region END DATE
-                        string[] enddatetime = split[1].Split(' ');
-                        string[] endDate = enddatetime[0].Split('-');
-                        string[] endTime = enddatetime[1].Split('-')[0].Split(':');
+                        dtStart = DateTimeParse(split[0]);
+                        startx = (double)new XDate(dtStart);
+                    }
+                    if (split.Length > 1 && split[1].Length > 0)
+                    {
+                        dtEnd = DateTimeParse(split[1]);
+                        endx = (double)new XDate(dtEnd);
+                    }
 
-                        DateTime dtEnd = new DateTime(Convert.ToInt32(endDate[0]), Convert.ToInt32(endDate[1]), Convert.ToInt32(endDate[2]), Convert.ToInt32(endTime[0]), Convert.ToInt32(endTime[1]), Convert.ToInt32(endTime[2]));//DateTime.Parse(split[0]);
-                        //DateTime dtEnd = DateTime.Parse(split[1]);
-                        double endx = (double)new XDate(dtEnd);
-                        #endregion
+                    Color color = Color.White;
+                    bool isSolid = false;
+                    string clabel = "";
 
-                        #region COLOR OF BAR
-                        string color = "white";
-                        bool isSolid = false;
-
-                        string clabel = "";
-
-
-                        #region Match color with label
-
-                        //determine colors according to the graph type
-                        if (is_category_1)
-                        {
-                            //if log contains postures
-                            if ((split.Length > 2) && (split[3].Length > 0))
-                            {
-                                clabel = split[3];
-
-                                for (int j = 0; j < labels_color_list_1.Count; j++)
-                                {
-                                    if (labels_color_list_1[j][1].CompareTo(clabel) == 0)
-                                    {
-                                        color = labels_color_list_1[j][3];
-                                        isSolid = true;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                        else if (is_category_2)
-                        {
-                            //if log contains activities
-                            if ((split.Length > 2) && (split[4].Length > 0))
-                            {
-                                clabel = split[4];
-
-                                for (int j = 0; j < labels_color_list_2.Count; j++)
-                                {
-                                    if (labels_color_list_2[j][1].CompareTo(clabel) == 0)
-                                    {
-                                        color = labels_color_list_2[j][3];
-                                        isSolid = true;
-                                        break;
-                                    }
-                                }
-                            }
-
-                        }
-                        else if (is_category_3)
-                        {
-                            if ((split.Length > 2) && (split[5].Length > 0))
-                            {
-                                clabel = split[5];
-
-                                for (int j = 0; j < labels_color_list_3.Count; j++)
-                                {
-                                    if (labels_color_list_3[j][1].CompareTo(clabel) == 0)
-                                    {
-                                        color = labels_color_list_3[j][3];
-                                        isSolid = true;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                        else if (is_category_4)
-                        {
-                            if ((split.Length > 2) && (split[6].Length > 0))
-                            {
-                                clabel = split[6];
-
-                                for (int j = 0; j < labels_color_list_4.Count; j++)
-                                {
-                                    if (labels_color_list_4[j][1].CompareTo(clabel) == 0)
-                                    {
-                                        color = labels_color_list_4[j][3];
-                                        isSolid = true;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-
-
-                        #endregion
-
-
-                        #region commented
-                        /*if ((split.Length > 2) && (split[2].Length > 0))
-                            {
-                                color = split[2];
-                                isSolid = true;
-                            }
-                            */
-                        #endregion
-
-
-                        #endregion Color of bar
-
-                        #region LABEL AND POINT
-
-                        string label = "";
-                        for (int c = 3; c < split.Length; c++)
-                        {
-                            label += split[c].Replace("_", ", ").Replace("-", " ").Trim(',', ' ') + "\n ";
-                        }
-
+                    if (split.Length > 2 && split[2].Length > 0)
+                    {
+                        clabel = split[2];
+                        if (!annotationColorMap.ContainsKey(clabel))
+                            annotationColorMap.Add(clabel, _annotationColorPalette[annotationColorMap.Count]);
+                        color = annotationColorMap[clabel];
+                        isSolid = true;
                         labelList = new PointPairList();
-                        labelList.Add(endx, yoffset, startx, String.Format("{3}: {0}  -  {1}\n {2}", dtStart.ToLongTimeString(), dtEnd.ToLongTimeString(), label, title));
-
-                        #endregion
-
-                        #region ADD BAR
-
-
-                        //HiLowBarItem myBar = gp.AddHiLowBar(title, labelList, Color.FromName(color
-                        HiLowBarItem myBar = gp.AddHiLowBar(title, labelList, Color.FromArgb(Int32.Parse(color)));
-
-
+                        labelList.Add(endx, yoffset, startx, String.Format("{3}: {0} - {1}\n {2}", dtStart.ToLongTimeString(), dtEnd.ToLongTimeString(), clabel, title));
+                        HiLowBarItem myBar = gp.AddHiLowBar(title, labelList, color);
+                        myBar.Bar.Border.IsVisible = false;
                         if (isSolid) myBar.Bar.Fill.Type = FillType.Solid;
                         else myBar.Bar.Fill.Type = FillType.None;
-
-                        #endregion
                     }
                 }
                 catch { }
             }
         }
-
-        #endregion
-
-
-        #endregion
-
-        #region PHOTOS and SURVEYS
-        private void CreatePhotoGraph(GraphPane gp, string filepath, string imagedir)
-        {
-            PointPairList list_Photo = new PointPairList();
-            string[] values = FileReadWrite.ReadLinesFromFile(filepath);
-            for (int i = 0; i < values.Length; i++)
-            {
-                try
-                {
-                    string[] split = values[i].Split(',');
-                    double x = (double)new XDate(DateTime.Parse(split[0]));
-                    list_Photo.Add(x, 25, split[2] + "," + Path.Combine(imagedir, split[1]));
-                }
-                catch { }
-            }
-
-            LineItem pointsCurve = gp.AddCurve("photos", list_Photo, Color.Black, SymbolType.Square);
-            pointsCurve.Line.IsVisible = false;
-            pointsCurve.Symbol.Fill = new Fill(Color.LightGray);
-            pointsCurve.Symbol.Size = 10F;
-
-            WidenDatesIfNeeded(list_Photo);
-        }
-
-        private void CreateSurveyGraph(GraphPane gp, string filepath)
-        {
-            PointPairList list = new PointPairList();
-            string[] values = FileReadWrite.ReadLinesFromFile(filepath);
-            for (int i = 0; i < values.Length; i++)
-            {
-                try
-                {
-                    string[] split = values[i].Split(',');
-                    double x = (double)new XDate(DateTime.Parse(split[0]));
-                    list.Add(x, 20, split[1].Replace(";", "\n"));
-                }
-                catch { }
-            }
-
-            LineItem pointsCurve = gp.AddCurve("surveys", list, Color.Purple, SymbolType.Diamond);
-            pointsCurve.Line.IsVisible = false;
-            pointsCurve.Symbol.Fill = new Fill(Color.Plum);
-            pointsCurve.Symbol.Size = 10F;
-
-            WidenDatesIfNeeded(list);
-        }
-
-        #endregion
-
-        #region ANNOTATOR-CLASSIFIER
-        private void CreateAgreementGraph(GraphPane gp, string[] files)
-        {
-            DateTime dtLastDate = DateTime.Now;
-            for (int f = 0; f < files.Length; f++)
-            {
-                DateTime dt = dtLastDate.AddMinutes(5);
-
-                string[] values = FileReadWrite.ReadLinesFromFile(files[f]);
-                string name = Path.GetFileNameWithoutExtension(files[f]).Replace("average-a_", "");
-
-                PointPairList listAnnotator = new PointPairList();
-                PointPairList listClassifier = new PointPairList();
-                PointPairList listDifference = new PointPairList();
-                ArrayList alAgree_lists = new ArrayList();
-                ArrayList alAgree_values = new ArrayList();
-                double lastDifference = 0;
-
-                //PointPairList listAgree = new PointPairList();
-                //PointPairList listDisagree = new PointPairList();
-                //PointPairList listConfusion = new PointPairList();
-                double yClass = 2.3, yAnnotate = 1.1;
-                for (int i = 0; i < values.Length; i++)
-                {
-                    try
-                    {
-                        string[] split = values[i].Split(',');
-                        if (split.Length > 2)
-                        {
-
-                            int msec = Convert.ToInt32(split[0]);
-                            dtLastDate = dt.AddMilliseconds(msec * 400);
-                            double x = (double)new XDate(dtLastDate);
-
-                            #region BLOCK GRAPH ANNOTATOR
-                            double yA = Convert.ToDouble(split[1]) + 1.1;
-                            if (yA != yAnnotate)
-                            {
-                                listAnnotator.Add(x, yAnnotate);
-                                yAnnotate = yA;
-                            }
-                            listAnnotator.Add(x, yA);
-                            yA -= 1.1;
-                            #endregion
-
-                            #region BLOCK GRAPH CLASSIFIER
-                            double yC = Convert.ToDouble(split[2]) + 2.3;
-                            if (yC != yClass)
-                            {
-                                listClassifier.Add(x, yClass);
-                                yClass = yC;
-                            }
-                            listClassifier.Add(x, yC);
-                            yC -= 2.3;
-                            #endregion
-
-                            double difference = yC - yA;
-                            if (!alAgree_values.Contains(difference))
-                            {
-                                alAgree_values.Add(difference);
-                                alAgree_lists.Add(new PointPairList());
-                            }
-                            int index = alAgree_values.IndexOf(difference);
-
-                            if (difference != lastDifference)
-                            {
-                                listDifference.Add(x, lastDifference);
-                                int lastindex = alAgree_values.IndexOf(lastDifference);
-                                ((PointPairList)alAgree_lists[lastindex]).Add(x, 1);
-                                ((PointPairList)alAgree_lists[index]).Add(x, 0);
-                                lastDifference = difference;
-                            }
-
-
-                            for (int a = 0; a < alAgree_lists.Count; a++)
-                            {
-                                if (a != index)
-                                    ((PointPairList)alAgree_lists[a]).Add(x, 0);
-                            }
-                            ((PointPairList)alAgree_lists[index]).Add(x, 1);
-
-                            listDifference.Add(x, difference);
-
-                            //double nyA = 0, nyD = 0, nyC = 0;
-                            //if (split[1] == split[2])
-                            //{
-                            //    if (split[2] == split[3])
-                            //        nyA = 3;
-                            //    else
-                            //        nyD = 3;
-
-                            //}
-                            //else nyC = 3;
-
-                            //if (yA != nyA) listAgree.Add(x, yA);
-                            //if (yC != nyC) listConfusion.Add(x, yC);
-                            //if (yD != nyD) listDisagree.Add(x, yD);
-                            //listAgree.Add(x, nyA);
-                            //listDisagree.Add(x, nyD);
-                            //listConfusion.Add(x, nyC);
-                            //yA = nyA; yC = nyC; yD = nyD;
-
-                        }
-
-                    }
-                    catch { }
-                }
-                AddHorizontalText(gp, name, (double)new XDate(dt), Color.Black);
-                LineItem lineCurve1 = gp.AddCurve("Annotator 1 " + name, listAnnotator, Color.Green, SymbolType.Default);
-                lineCurve1.Symbol.IsVisible = false;
-                lineCurve1.Line.IsVisible = true;
-                _alLinesWithSymbols.Add(lineCurve1);
-
-                AddVerticalText(gp, "Annotators", 1.1F, Color.Green);
-
-
-                LineItem lineCurveC = gp.AddCurve("Classifier " + name, listClassifier, Color.Blue, SymbolType.Default);
-                lineCurveC.Line.IsVisible = true;
-                lineCurveC.Symbol.IsVisible = false;
-
-                AddVerticalText(gp, "Classifier", 2.3F, Color.Blue);
-
-                LineItem lineCurveD = gp.AddCurve("Difference " + name, listDifference, Color.Tomato, SymbolType.Default);
-                lineCurveD.Line.IsVisible = true;
-                lineCurveD.Line.Width = 0.5F;
-                lineCurveD.Symbol.IsVisible = false;
-                lineCurveD.Line.Fill = new Fill(Color.Tomato);
-
-                AddVerticalText(gp, "Over\nestimate", 0, Color.Tomato);
-                AddVerticalText(gp, "Under\nestimate", -1.0F, Color.Tomato);
-
-
-                //for (int a = 0; a < alAgree_lists.Count; a++)
-                //{
-                //    Color fillColor = Color.Yellow;
-                //    double diff = ((double)alAgree_values[a]);
-                //    if (diff != 0)
-                //    {
-                //        int percent = Convert.ToInt32(Math.Round((1.1 - Math.Abs(diff)) * 255));
-                //        if (diff < 0) fillColor = Color.FromArgb(percent, percent, 255);
-                //        else fillColor = Color.FromArgb(255, percent, percent);
-                //    }
-                //    LineItem lineCurveAgree = gp.AddCurve("Agreement " + name + " " + alAgree_values[a].ToString(), ((PointPairList)alAgree_lists[a]), fillColor, SymbolType.Default);
-                //    lineCurveAgree.Line.IsVisible = true;
-                //    lineCurveAgree.Symbol.IsVisible = false;
-                //    // Fill the area under the curve with a white-red gradient at 45 degrees
-                //    lineCurveAgree.Line.Fill = new Fill(fillColor);
-                //}
-
-                //LineItem lineCurveAgree = gp.AddCurve("Agreement " + name, listAgree, Color.Green, SymbolType.Default);
-                //lineCurveAgree.Line.IsVisible = true;
-                //lineCurveAgree.Symbol.IsVisible = false;
-                //// Fill the area under the curve with a white-red gradient at 45 degrees
-                //lineCurveAgree.Line.Fill = new Fill(Color.White, Color.Green, 45F);
-
-                //LineItem lineCurveDisagree = gp.AddCurve("Disgreement " + name, listDisagree, Color.Red, SymbolType.Default);
-                //lineCurveDisagree.Line.IsVisible = true;
-                //lineCurveDisagree.Symbol.IsVisible = false;
-                //// Fill the area under the curve with a white-red gradient at 45 degrees
-                //lineCurveDisagree.Line.Fill = new Fill(Color.White, Color.Red, 45F);
-
-                //LineItem lineCurveConfusion = gp.AddCurve("Confusion " + name, listConfusion, Color.Yellow, SymbolType.Default);
-                //lineCurveConfusion.Line.IsVisible = true;
-                //lineCurveConfusion.Symbol.IsVisible = false;
-                //// Fill the area under the curve with a white-red gradient at 45 degrees
-                //lineCurveConfusion.Line.Fill = new Fill(Color.White, Color.Yellow, 45F);
-
-
-
-                WidenDatesIfNeeded(listAnnotator);
-
-
-
-
-            }
-
-        }
-        private void AddVerticalText(GraphPane gp, string label, double y, Color color)
-        {
-            TextObj text = new TextObj(label, 0, y);
-            // use ChartFraction coordinates so the text is placed relative to the Chart.Rect
-            text.Location.CoordinateFrame = CoordType.XChartFractionYScale;
-            // rotate the text 90 degrees
-            text.FontSpec.Angle = 90.0F;
-            text.FontSpec.FontColor = color;
-            text.FontSpec.IsBold = true;
-            text.FontSpec.Size = 10;
-            // Disable the border and background fill options for the text
-            text.FontSpec.Border.IsVisible = false;
-            text.FontSpec.Fill.IsVisible = false;
-            // Align the text such the the Left-Bottom corner is at the specified coordinates
-            text.Location.AlignH = AlignH.Left;
-            text.Location.AlignV = AlignV.Bottom;
-            gp.GraphObjList.Add(text);
-        }
-        private void AddHorizontalText(GraphPane gp, string label, double x, Color color)
-        {
-            TextObj text = new TextObj(label, x, 0.05);
-            // use ChartFraction coordinates so the text is placed relative to the Chart.Rect
-            text.Location.CoordinateFrame = CoordType.XScaleYChartFraction;
-            // rotate the text 90 degrees
-            text.FontSpec.Angle = 0.0F;
-            text.FontSpec.FontColor = color;
-            text.FontSpec.IsBold = true;
-            text.FontSpec.Size = 10;
-            // Disable the border and background fill options for the text
-            text.FontSpec.Border.IsVisible = false;
-            text.FontSpec.Fill.IsVisible = false;
-            // Align the text such the the Left-Bottom corner is at the specified coordinates
-            text.Location.AlignH = AlignH.Left;
-            text.Location.AlignV = AlignV.Bottom;
-            gp.GraphObjList.Add(text);
-        }
-
+  
         #endregion
 
         #region CHART BUILDER
@@ -1048,71 +461,41 @@ namespace DataViewer
             int paneOrdering = 1;
             SetGraphPanels();
             string[] files;
-            files = Directory.GetFiles(path + "\\", "*.csv");
+            files = Directory.GetFiles(path, SUMMARY_DATA_EXTENSION);
             for (int i = 0; i < files.Length; i++)
             {
                 string sensorType = Path.GetFileNameWithoutExtension(files[i]);
-                if (!sensorType.Contains("RAW_DATA"))
+                if (!sensorType.Contains(RAW_DATA_FLAG))
                 {
+                    //JPN: FIX THE Y-TITLE PLACE HOLDER
                     GraphPane ePane = AddPane(sensorType, "Y-TITLE");
                     CreateGenericGraph(ePane, files[i]);
-                    paneOrders.Add(sensorType, "Y-TITLE");
+                    paneOrders.Add(sensorType, i);
                     paneOrdering++;
                 }
             }
-            GraphPane hPane = null;
-            string filepath = "";
 
-            // Add annotations
-            string ann_title = "Annotations";
-            GraphPane aPane = AddPane(ann_title, "Annotations");
-            aPane.YAxis.IsVisible = true;
-
-            if (hPane != null) paneOrdering++;
-            else paneOrders.Add(ann_title, paneOrdering);
-           
-            //Hack - Dummy curve that forces the scale of the Y-axis and alignment not to change
-            PointPairList listACT = new PointPairList();
-            listACT.Add(0, 0);
-            aPane.AddCurve("annotation", listACT, Color.White, SymbolType.TriangleDown);
-
-            //reading the corrected annotations in the merged folder
-            string file_annotations = path + "\\merged\\" + "AnnotationIntervals.csv";
-
-            if (File.Exists(file_annotations))
+            files = Directory.GetFiles(path, ANNOTATION_EXTENSION);
+            for (int i = 0; i < files.Length; i++)
             {
+                string annotationType = Path.GetFileNameWithoutExtension(files[i]);
+                GraphPane ePane = AddPane(annotationType, ANNOTATION_AXIS_TITLE);
+
                 string path_annotations_color = "";
 
-                if (Directory.Exists(path + "\\annotation\\audioannotation\\"))
-                    path_annotations_color = path + "\\annotation\\audioannotation\\";
-                else if (Directory.Exists(path + "\\annotation\\phoneannotation\\"))
-                    path_annotations_color = path + "\\annotation\\phoneannotation\\";
-                else if (Directory.Exists(path + "\\annotation\\tabletannotation\\"))
-                    path_annotations_color = path + "\\annotation\\tabletannotation\\";
+                CreateDiaryGraph(ePane, files[i], path_annotations_color, "Time: ", 0, annotationType);
+                
+                paneOrders.Add(annotationType, i);
+                paneOrdering++;
 
-                CreateDiaryGraph(aPane, file_annotations, path_annotations_color, "Time: ", 0, "activity");
-                CreateDiaryGraph(aPane, file_annotations, path_annotations_color, "Time:", 110, "posture");
-
-                if (Directory.Exists(path + "\\annotation\\tabletannotation\\"))
-                {
-                    CreateDiaryGraph(aPane, file_annotations, path_annotations_color, "Time:", 220, "smoking");
-                    CreateDiaryGraph(aPane, file_annotations, path_annotations_color, "Time:", 330, "puffing");
-                }
+                // JPN: Make sure the Annotations are showing up correctly.               
+                ////Hack - Dummy curve that forces the scale of the Y-axis and alignment not to change
+                ePane.YAxis.IsVisible = true;
+                //PointPairList listACT = new PointPairList();
+                //listACT.Add(0, 0);
+                //aPane.AddCurve("annotation", listACT, Color.White, SymbolType.TriangleDown);
             }
-
-            // Add phone annotations
-            if (Directory.Exists(path + "\\annotation\\phoneannotation\\"))
-            {
-                filepath = Path.Combine(path + "\\annotation\\phoneannotation\\", "photos.csv");
-                if (File.Exists(filepath))
-                    CreatePhotoGraph(hPane, filepath, path + "\\annotation\\phoneannotation\\");
-                filepath = Path.Combine(path + "\\annotation\\phoneannotation\\", "surveys.csv");
-                if (File.Exists(filepath))
-                    CreateSurveyGraph(hPane, filepath);
-                files = Directory.GetFiles(path + "\\annotation\\phoneannotation\\", "average-*");
-                if (files.Length > 0)
-                    CreateAgreementGraph(hPane, files);
-            }
+       
             hScrollBar1.Value = 0;
             SetTimes();
             RefreshMasterPaneLayout();
@@ -1238,6 +621,7 @@ namespace DataViewer
             int index = 0;
             //determine placement of pane
             bool isFound = false;
+
             int insertedPane = (int)paneOrders[pane] - 1;
             for (int i = 0; i < zedGraphControl1.MasterPane.PaneList.Count; i++)
             {
@@ -1268,6 +652,8 @@ namespace DataViewer
                 zedGraphControl1.MasterPane.PaneList.Remove(gp);
 
         }
+
+
 
         #endregion
 
@@ -1302,38 +688,18 @@ namespace DataViewer
             }
         }
 
+        // Highlight the section of the data associated with the selected annotation label
         string zedGraphControl1_PointValueEvent(ZedGraphControl sender, GraphPane pane, CurveItem curve, int iPt)
         {
-
             if (curve[iPt] != ppHover)
             {
                 ppHover = curve[iPt];
-                if (pictureBox1.Visible)
-                {
-                    pictureBox1.Visible = false;
-                }
-                if (curve.Label.Text == "photos")
-                {
-                    PointF pf = pane.GeneralTransform(curve[iPt].X, curve[iPt].Y, CoordType.AxisXYScale);
-                    string[] split = curve[iPt].Tag.ToString().Split(',');
-                    pictureBox1.Image = Image.FromFile(split[1]);
-                    pictureBox1.Location = new Point(Convert.ToInt32(pf.X), Convert.ToInt32(pf.Y) - pictureBox1.Height);
-                    pictureBox1.BringToFront();
-                    pictureBox1.Visible = true;
-                    return split[0];
-                }
-                else if (curve.Label.Text.StartsWith("Time"))
+                // JPN: look for a better way to determine what series this belongs to
+                if (curve.Label.Text.StartsWith("Time"))
                 {
                     HighlightGraphs(curve[iPt].Z, curve[iPt].X - curve[iPt].Z);
                 }
-
             }
-            else if (curve.Label.Text == "photos")
-            {
-                string[] split = curve[iPt].Tag.ToString().Split(',');
-                return split[0];
-            }
-
             if (curve[iPt].Tag != null)
                 return curve[iPt].Tag.ToString();
             else return curve[iPt].ToString();
@@ -1417,14 +783,14 @@ namespace DataViewer
             return new DateTime(Convert.ToInt32(newDateArray[0]), Convert.ToInt32(newDateArray[1]), Convert.ToInt32(newDateArray[2]), Convert.ToInt32(timeArray[0]), Convert.ToInt32(timeArray[1]), Convert.ToInt32(secondArray[0]), milliseconds);
         }
 
-        private static DateTime ConvertUNIXDateTime(double timestamp)
-        {
-            // First make a System.DateTime equivalent to the UNIX Epoch.
-            DateTime dateTime = new System.DateTime(1970, 1, 1, 0, 0, 0, 0);
-            // Add the number of seconds in UNIX timestamp to be converted.
-            dateTime = dateTime.AddSeconds(timestamp / 1000);
-            return dateTime;
-        }
+        //private static DateTime ConvertUNIXDateTime(double timestamp)
+        //{
+        //    // First make a System.DateTime equivalent to the UNIX Epoch.
+        //    DateTime dateTime = new System.DateTime(1970, 1, 1, 0, 0, 0, 0);
+        //    // Add the number of seconds in UNIX timestamp to be converted.
+        //    dateTime = dateTime.AddSeconds(timestamp / 1000);
+        //    return dateTime;
+        //}
 
         #endregion DATETIME OPERATIONS
 
