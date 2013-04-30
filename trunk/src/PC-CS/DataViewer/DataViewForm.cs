@@ -31,6 +31,8 @@ namespace DataViewer
         ArrayList _alLinesWithSymbols = new ArrayList();
         Hashtable _htBoxes = new Hashtable();
 
+        Dictionary<string, Color> annotationColorMap = new Dictionary<string, Color>();
+
         bool _isFirstTime = true; //used to determine whether graphs need to be cleared on Reset
         bool _doesShowHover = true;
 
@@ -44,9 +46,10 @@ namespace DataViewer
         Color[] _seriesColorPalette = new Color[9] { Color.Red, Color.YellowGreen, Color.Blue, Color.Aqua, Color.Violet, Color.Bisque, Color.Cyan, Color.DarkOrange, Color.Khaki };
         Color[] _annotationColorPalette = new Color[9] { Color.Red, Color.YellowGreen, Color.Blue, Color.Aqua, Color.Violet, Color.Bisque, Color.Cyan, Color.DarkOrange, Color.Khaki };
 
-        private const string ANNOTATION_EXTENSION = @"*annotation.csv.xml";
+        private const string ANNOTATION_EXTENSION = @"*annotation.csv";
         private const string SUMMARY_DATA_EXTENSION = @"*.csv";
         private const string RAW_DATA_FLAG = @"RAW_DATA";
+        private const string ANNOTATION_FLAG = @"annotation";
         private const string ANNOTATION_AXIS_TITLE = @"Annotation";
 
         Hashtable paneOrders;
@@ -392,9 +395,6 @@ namespace DataViewer
         //IN PROGRESS
         #region ANNOTATION GRAPH
 
-        //JPN COLOR MAPPING
-        Dictionary<string, Color> annotationColorMap = new Dictionary<string,Color>();
-
         private void CreateDiaryGraph(GraphPane gp, string filepath, string dirpath_colors,
                                       string title, int yoffset, string type)
         {
@@ -465,7 +465,7 @@ namespace DataViewer
             for (int i = 0; i < files.Length; i++)
             {
                 string sensorType = Path.GetFileNameWithoutExtension(files[i]);
-                if (!sensorType.Contains(RAW_DATA_FLAG))
+                if (!sensorType.Contains(RAW_DATA_FLAG) && !sensorType.Contains(ANNOTATION_FLAG))
                 {
                     //JPN: FIX THE Y-TITLE PLACE HOLDER
                     GraphPane ePane = AddPane(sensorType, "Y-TITLE");
