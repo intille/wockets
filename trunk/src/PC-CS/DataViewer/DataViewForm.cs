@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using Wockets;
 using System.Collections; //ArrayList
 using System.IO;
+using System.Xml;
 
 using ZedGraph;
 using DataViewer.Utilities;//FileReadWrite
@@ -46,7 +47,8 @@ namespace DataViewer
         Color[] _seriesColorPalette = new Color[9] { Color.Red, Color.YellowGreen, Color.Blue, Color.Aqua, Color.Violet, Color.Bisque, Color.Cyan, Color.DarkOrange, Color.Khaki };
         Color[] _annotationColorPalette = new Color[9] { Color.Red, Color.YellowGreen, Color.Blue, Color.Aqua, Color.Violet, Color.Bisque, Color.Cyan, Color.DarkOrange, Color.Khaki };
 
-        private const string ANNOTATION_EXTENSION = @"*annotation.csv";
+        private const string ANNOTATION_EXTENSION_CSV = @"*annotation.csv";
+        private const string ANNOTATION_EXTENSION_XML = @"*annotation.xml";
         private const string SUMMARY_DATA_EXTENSION = @"*.csv";
         private const string RAW_DATA_FLAG = @"RAW_DATA";
         private const string ANNOTATION_FLAG = @"annotation";
@@ -403,38 +405,77 @@ namespace DataViewer
             gp.BarSettings.Type = BarType.Overlay;
 
             PointPairList labelList = new PointPairList();
-            string[] values = FileReadWrite.ReadLinesFromFile(filepath);
 
-            for (int i = 1; i < values.Length; i++)
+            if (filepath.Contains(".csv"))
             {
-                try
+
+                string[] values = FileReadWrite.ReadLinesFromFile(filepath);
+
+                for (int i = 1; i < values.Length; i++)
                 {
-                    string[] split = values[i].Split(',');
-            
-                    DateTime dtStart = DateTime.MinValue;
-                    DateTime dtEnd = DateTime.MaxValue;
-
-                    double startx = 0;
-                    double endx = 0;
-
-                    if (split.Length > 0 && split[0].Length > 0)
+                    try
                     {
-                        dtStart = DateTimeParse(split[0]);
-                        startx = (double)new XDate(dtStart);
+                        string[] split = values[i].Split(',');
+
+                        DateTime dtStart = DateTime.MinValue;
+                        DateTime dtEnd = DateTime.MaxValue;
+
+                        double startx = 0;
+                        double endx = 0;
+
+                        if (split.Length > 0 && split[0].Length > 0)
+                        {
+                            dtStart = DateTimeParse(split[0]);
+                            startx = (double)new XDate(dtStart);
+                        }
+                        if (split.Length > 1 && split[1].Length > 0)
+                        {
+                            dtEnd = DateTimeParse(split[1]);
+                            endx = (double)new XDate(dtEnd);
+                        }
+
+                        Color color = Color.White;
+                        bool isSolid = false;
+                        string clabel = "";
+
+                        if (split.Length > 2 && split[2].Length > 0)
+                        {
+                            clabel = split[2];
+                            if (!annotationColorMap.ContainsKey(clabel))
+                                annotationColorMap.Add(clabel, _annotationColorPalette[annotationColorMap.Count]);
+                            color = annotationColorMap[clabel];
+                            isSolid = true;
+                            labelList = new PointPairList();
+                            labelList.Add(endx, yoffset, startx, String.Format("{3}: {0} - {1}\n {2}", dtStart.ToLongTimeString(), dtEnd.ToLongTimeString(), clabel, title));
+                            HiLowBarItem myBar = gp.AddHiLowBar(title, labelList, color);
+                            myBar.Bar.Border.IsVisible = false;
+                            if (isSolid) myBar.Bar.Fill.Type = FillType.Solid;
+                            else myBar.Bar.Fill.Type = FillType.None;
+                        }
                     }
-                    if (split.Length > 1 && split[1].Length > 0)
-                    {
-                        dtEnd = DateTimeParse(split[1]);
-                        endx = (double)new XDate(dtEnd);
-                    }
+                    catch { }
+                }
+            }
+            else if (filepath.Contains(".xml"))
+            {
+                XmlDocument doc = new XmlDocument();
+                doc.Load(filepath);
+                XmlNodeList nodes = doc.GetElementsByTagName("ANNOTATION");
 
-                    Color color = Color.White;
-                    bool isSolid = false;
-                    string clabel = "";
-
-                    if (split.Length > 2 && split[2].Length > 0)
+                foreach (XmlNode xn in nodes)
+                {
+                    try
                     {
-                        clabel = split[2];
+                        DateTime dtStart = DateTimeParse(xn["START_DT"].InnerText);
+                        DateTime dtEnd = DateTimeParse(xn["STOP_DT"].InnerText);
+
+                        double startx = (double)new XDate(dtStart);
+                        double endx = (double)new XDate(dtEnd);
+
+                        Color color = Color.White;
+                        bool isSolid = false;
+                        string clabel = xn["LABEL"].InnerText;
+
                         if (!annotationColorMap.ContainsKey(clabel))
                             annotationColorMap.Add(clabel, _annotationColorPalette[annotationColorMap.Count]);
                         color = annotationColorMap[clabel];
@@ -446,11 +487,14 @@ namespace DataViewer
                         if (isSolid) myBar.Bar.Fill.Type = FillType.Solid;
                         else myBar.Bar.Fill.Type = FillType.None;
                     }
+                    catch { }
                 }
-                catch { }
+
             }
+
+
         }
-  
+
         #endregion
 
         #region CHART BUILDER
@@ -475,7 +519,7 @@ namespace DataViewer
                 }
             }
 
-            files = Directory.GetFiles(path, ANNOTATION_EXTENSION);
+            files = Directory.GetFiles(path, ANNOTATION_EXTENSION_CSV);
             for (int i = 0; i < files.Length; i++)
             {
                 string annotationType = Path.GetFileNameWithoutExtension(files[i]);
@@ -484,18 +528,46 @@ namespace DataViewer
                 string path_annotations_color = "";
 
                 CreateDiaryGraph(ePane, files[i], path_annotations_color, "Time: ", 0, annotationType);
-                
+
                 paneOrders.Add(annotationType, i);
                 paneOrdering++;
 
                 // JPN: Make sure the Annotations are showing up correctly.               
-                ////Hack - Dummy curve that forces the scale of the Y-axis and alignment not to change
                 ePane.YAxis.IsVisible = true;
-                //PointPairList listACT = new PointPairList();
-                //listACT.Add(0, 0);
-                //aPane.AddCurve("annotation", listACT, Color.White, SymbolType.TriangleDown);
+
+                ////Hack - Dummy curve that forces the scale of the Y-axis and alignment not to change
+                // JPN: Is this really necessary?
+                PointPairList listACT = new PointPairList();
+                listACT.Add(0, 0);
+                ePane.AddCurve("annotation", listACT, Color.White, SymbolType.TriangleDown);
             }
-       
+
+            files = Directory.GetFiles(path, ANNOTATION_EXTENSION_XML);
+            for (int i = 0; i < files.Length; i++)
+            {
+                string annotationType = Path.GetFileNameWithoutExtension(files[i]);
+                GraphPane ePane = AddPane(annotationType, ANNOTATION_AXIS_TITLE);
+
+                string path_annotations_color = "";
+
+                CreateDiaryGraph(ePane, files[i], path_annotations_color, "Time: ", 0, annotationType);
+
+                paneOrders.Add(annotationType, i);
+                paneOrdering++;
+
+                // JPN: Make sure the Annotations are showing up correctly.               
+                ePane.YAxis.IsVisible = true;
+
+                ////Hack - Dummy curve that forces the scale of the Y-axis and alignment not to change
+                // JPN: Is this really necessary?
+                PointPairList listACT = new PointPairList();
+                listACT.Add(0, 0);
+                ePane.AddCurve("annotation", listACT, Color.White, SymbolType.TriangleDown);
+            }
+
+
+
+
             hScrollBar1.Value = 0;
             SetTimes();
             RefreshMasterPaneLayout();
