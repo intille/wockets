@@ -20,7 +20,7 @@ namespace DataViewer
 
     public partial class DataViewForm : Form
     {
-        //DONE
+        //DONE COPIED
         #region FIELDS
 
         string _pathDataset = "";
@@ -32,7 +32,7 @@ namespace DataViewer
         ArrayList _alLinesWithSymbols = new ArrayList();
         Hashtable _htBoxes = new Hashtable();
 
-        Dictionary<string, Color> annotationColorMap = new Dictionary<string, Color>();
+        public static Dictionary<string, Color> annotationColorMap = new Dictionary<string, Color>();
 
         bool _isFirstTime = true; //used to determine whether graphs need to be cleared on Reset
         bool _doesShowHover = true;
@@ -44,12 +44,13 @@ namespace DataViewer
         bool _isAdaptingPointSize = true; //as graph gets larger/smaller, changes point size to match
         bool _zoomedOut = true;
 
-        Color[] _seriesColorPalette = new Color[9] { Color.Red, Color.YellowGreen, Color.Blue, Color.Aqua, Color.Violet, Color.Bisque, Color.Cyan, Color.DarkOrange, Color.Khaki };
-        Color[] _annotationColorPalette = new Color[9] { Color.Red, Color.YellowGreen, Color.Blue, Color.Aqua, Color.Violet, Color.Bisque, Color.Cyan, Color.DarkOrange, Color.Khaki };
+        public static Color[] _seriesColorPalette = new Color[9] { Color.Red, Color.YellowGreen, Color.Blue, Color.Aqua, Color.Violet, Color.Bisque, Color.Cyan, Color.DarkOrange, Color.Khaki };
+        public static Color[] _annotationColorPalette = new Color[9] { Color.Red, Color.YellowGreen, Color.Blue, Color.Aqua, Color.Violet, Color.Bisque, Color.Cyan, Color.DarkOrange, Color.Khaki };
 
         private const string ANNOTATION_EXTENSION_CSV = @"*annotation.csv";
         private const string ANNOTATION_EXTENSION_XML = @"*annotation.xml";
         private const string SUMMARY_DATA_EXTENSION = @"*.csv";
+        private const string RAW_DATA_EXTENSION = @"*.csv";
         private const string RAW_DATA_FLAG = @"RAW_DATA";
         private const string ANNOTATION_FLAG = @"annotation";
         private const string ANNOTATION_AXIS_TITLE = @"Annotation";
@@ -58,7 +59,7 @@ namespace DataViewer
 
         #endregion
 
-        //DONE
+        //DONE COPIED
         #region INITIALIZE
 
         public DataViewForm()
@@ -94,19 +95,21 @@ namespace DataViewer
         //DONE
         #region LAYOUT and FORMATTING
 
+        //DONE COPIED
         private void DataViewForm_Resize(object sender, EventArgs e)
         {
             SetLayout();
         }
 
+        //DONE COPIED
         private void SetLayout()
         {
             int graphwidth = ClientRectangle.Width - groupBox1.Width;
             int graphheight = ClientRectangle.Height - 110;
 
             // Control Group dimentions
-            groupBox1.Location = new Point(graphwidth, MainMenuStrip.Bottom + 5);//+5
-            groupBox1.Size = new Size(groupBox1.Width, graphheight - 15); // added          
+            groupBox1.Location = new Point(graphwidth, MainMenuStrip.Bottom); // +5 added
+            groupBox1.Size = new Size(groupBox1.Width, graphheight); // -15 added          
 
             //Graph Dimensions
             zedGraphControl1.Location = new Point(0, MainMenuStrip.Bottom);
@@ -128,6 +131,7 @@ namespace DataViewer
             hScrollBar1.Visible = false;
         }
 
+        //DONE COPIED
         private void SetGraphPanels()
         {
             MasterPane myMaster = zedGraphControl1.MasterPane;
@@ -162,6 +166,7 @@ namespace DataViewer
             zedGraphControl1.IsSynchronizeXAxes = true;
         }
 
+        //DONE COPIED
         private GraphPane AddPane(string name, string ytitle)
         {
             GraphPane pane = new GraphPane();
@@ -199,6 +204,7 @@ namespace DataViewer
             return pane;
         }
 
+        //DONE COPIED
         private void RefreshMasterPaneLayout()
         {
             // Tell ZedGraph to auto layout all the panes
@@ -237,6 +243,7 @@ namespace DataViewer
             else groupBox1.Visible = false;
         }
 
+        //DONE COPIED
         private void SetPointSize()
         {
             if (zedGraphControl1.MasterPane.PaneList.Count > 0)
@@ -254,6 +261,7 @@ namespace DataViewer
             }
         }
 
+        //DONE
         private void SetTimes()
         {
             lbFirstDate.Text = _firstDate.ToString();
@@ -297,12 +305,14 @@ namespace DataViewer
                 WidenDatesIfNeeded(new XDate(pl[0].X), new XDate(pl[pl.Count - 1].X));
         }
 
+        //DONE COPIED
         private void WidenDatesIfNeeded(XDate fDate, XDate lDate)
         {
             if (fDate.DateTime < _firstDate) _firstDate = fDate.DateTime;
             if (lDate.DateTime > _lastDate) _lastDate = lDate.DateTime;
         }
 
+        //DONE COPIED
         private void SetEnable(bool isEnabled)
         {
             zedGraphControl1.Enabled = isEnabled;
@@ -313,6 +323,7 @@ namespace DataViewer
             zedGraphControl1.Visible = isEnabled;
         }
 
+        //DONE COPIED
         private void Reset()
         {
             if (!_isFirstTime)
@@ -392,7 +403,7 @@ namespace DataViewer
 
         #endregion GENERIC GRAPH
 
-        //IN PROGRESS
+        //IN PROGRESS COPIED
         #region ANNOTATION GRAPH
 
         private void CreateDiaryGraph(GraphPane gp, string filepath, string dirpath_colors,
@@ -503,6 +514,7 @@ namespace DataViewer
             int paneOrdering = 1;
             SetGraphPanels();
             string[] files;
+
             files = Directory.GetFiles(path, SUMMARY_DATA_EXTENSION);
             for (int i = 0; i < files.Length; i++)
             {
@@ -574,10 +586,10 @@ namespace DataViewer
 
         #endregion CHART BUILDER
 
-        //DONE
+        //DONE COPIED
         #region INTERACTION
 
-        //DONE
+        //DONE COPIED
         #region OPEN DATASET
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
@@ -606,7 +618,7 @@ namespace DataViewer
 
         #endregion
 
-        //DONE
+        //DONE COPIED
         #region ZOOM
 
         private void hScrollBar1_ValueChanged(object sender, EventArgs e)
@@ -666,7 +678,7 @@ namespace DataViewer
 
         #endregion
 
-        //DONE
+        //DONE COPIED
         #region SHOW/HIDE PANES
 
         private void checkBox_CheckedChanged(object sender, EventArgs e)
@@ -691,7 +703,6 @@ namespace DataViewer
             int index = 0;
             //determine placement of pane
             bool isFound = false;
-
             int insertedPane = (int)paneOrders[pane] - 1;
             for (int i = 0; i < zedGraphControl1.MasterPane.PaneList.Count; i++)
             {
@@ -699,6 +710,7 @@ namespace DataViewer
                 {
                     string panetitle = zedGraphControl1.MasterPane.PaneList[i].Title.Text;
                     //if (panetitle.CompareTo(pane) > 0)
+
                     int paneIndex = (int)paneOrders[panetitle] - 1;
                     if (paneIndex > insertedPane)
                     {
@@ -727,7 +739,7 @@ namespace DataViewer
 
         #endregion
 
-        //DONE
+        //DONE COPIED
         #region HOVER
 
         PointPair ppHover = null;
@@ -780,7 +792,7 @@ namespace DataViewer
         #endregion INTERACTION
 
         //DONE
-        #region BUTTONS & ZOOM
+        #region BUTTONS
 
         RawDataViewForm rawForm = null;
         void buttonDisplayRaw_Click(object sender, System.EventArgs e)
@@ -808,7 +820,7 @@ namespace DataViewer
 
         #endregion Buttons & ZOOM
 
-        //DONE
+        //DONE COPIED
         #region DATETIME OPERATIONS
 
         public static DateTime DateTimeParse(string DateString)

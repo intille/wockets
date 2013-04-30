@@ -176,8 +176,8 @@ namespace DataViewer
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form2";
             this.Text = "Wockets Raw Data Viewer - Version " + CurrentWockets._Version + " " + CurrentWockets._Date;
-            this.Load += new System.EventHandler(this.Form2_Load);
-            this.Resize += new System.EventHandler(this.Form2_Resize);
+            this.Load += new System.EventHandler(this.RawDataViewForm_Load);
+            this.Resize += new System.EventHandler(this.RawDataViewForm_Resize);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
