@@ -45,7 +45,6 @@ namespace DataViewer
             this.buttonZoomOut = new System.Windows.Forms.Button();
             this.buttonDisplayRaw = new System.Windows.Forms.Button();
             this.lbScrollTime = new System.Windows.Forms.Label();
-            this.button_sync = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -78,20 +77,20 @@ namespace DataViewer
             // lbFirstDate
             // 
             this.lbFirstDate.AutoSize = true;
-            this.lbFirstDate.Font = new System.Drawing.Font("Arial Narrow", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbFirstDate.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lbFirstDate.Location = new System.Drawing.Point(12, 404);
             this.lbFirstDate.Name = "lbFirstDate";
-            this.lbFirstDate.Size = new System.Drawing.Size(63, 20);
+            this.lbFirstDate.Size = new System.Drawing.Size(77, 18);
             this.lbFirstDate.TabIndex = 4;
             this.lbFirstDate.Text = "startDate";
             // 
             // lbSecondDate
             // 
             this.lbSecondDate.AutoSize = true;
-            this.lbSecondDate.Font = new System.Drawing.Font("Arial Narrow", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbSecondDate.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lbSecondDate.Location = new System.Drawing.Point(354, 404);
             this.lbSecondDate.Name = "lbSecondDate";
-            this.lbSecondDate.Size = new System.Drawing.Size(59, 20);
+            this.lbSecondDate.Size = new System.Drawing.Size(70, 18);
             this.lbSecondDate.TabIndex = 5;
             this.lbSecondDate.Text = "endDate";
             // 
@@ -168,31 +167,17 @@ namespace DataViewer
             // lbScrollTime
             // 
             this.lbScrollTime.AutoSize = true;
-            this.lbScrollTime.Font = new System.Drawing.Font("Arial Narrow", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbScrollTime.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lbScrollTime.Location = new System.Drawing.Point(171, 344);
             this.lbScrollTime.Name = "lbScrollTime";
             this.lbScrollTime.Size = new System.Drawing.Size(0, 16);
             this.lbScrollTime.TabIndex = 11;
-            // 
-            // button_sync
-            // 
-            this.button_sync.Enabled = false;
-            this.button_sync.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button_sync.Location = new System.Drawing.Point(326, 455);
-            this.button_sync.Name = "button_sync";
-            this.button_sync.Size = new System.Drawing.Size(87, 25);
-            this.button_sync.TabIndex = 12;
-            this.button_sync.Text = "Sync";
-            this.button_sync.UseVisualStyleBackColor = true;
-            this.button_sync.MouseCaptureChanged += new System.EventHandler(this.button_sync_Click);
-            this.button_sync.Click += new System.EventHandler(this.button_sync_Click);
             // 
             // DataViewForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(531, 510);
-            this.Controls.Add(this.button_sync);
             this.Controls.Add(this.lbScrollTime);
             this.Controls.Add(this.buttonZoomOut);
             this.Controls.Add(this.buttonDisplayRaw);
@@ -205,7 +190,7 @@ namespace DataViewer
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "DataViewForm";
-            this.Text = "Wockets Data Viewer Version 20130205";
+            this.Text = "Wockets Data Viewer Version 20130501";
             this.Load += new System.EventHandler(this.DataViewForm_Load);
             this.Resize += new System.EventHandler(this.DataViewForm_Resize);
             this.menuStrip1.ResumeLayout(false);
@@ -233,7 +218,6 @@ namespace DataViewer
         private System.Windows.Forms.Button buttonZoomOut;
         private System.Windows.Forms.Button buttonDisplayRaw;
         private System.Windows.Forms.Label lbScrollTime;
-        private System.Windows.Forms.Button button_sync;
     }
 }
 
