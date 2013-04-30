@@ -124,7 +124,6 @@ namespace DataViewer
             //Buttons Location
             buttonZoomOut.Location = new Point(hScrollBar1.Right + 5, hScrollBar1.Top - 20); //-30
             buttonDisplayRaw.Location = new Point(hScrollBar1.Right + 5, hScrollBar1.Top + 5);//+5
-            button_sync.Location = new Point(hScrollBar1.Right + 5, hScrollBar1.Top + 30);
 
             hScrollBar1.Visible = false;
         }
@@ -311,7 +310,6 @@ namespace DataViewer
             hScrollBar1.Enabled = isEnabled;
             buttonZoomOut.Enabled = isEnabled;
             buttonDisplayRaw.Enabled = isEnabled;
-            button_sync.Enabled = isEnabled;
             zedGraphControl1.Visible = isEnabled;
         }
 
@@ -512,7 +510,7 @@ namespace DataViewer
                 if (!sensorType.Contains(RAW_DATA_FLAG) && !sensorType.Contains(ANNOTATION_FLAG))
                 {
                     //JPN: FIX THE Y-TITLE PLACE HOLDER
-                    GraphPane ePane = AddPane(sensorType, "Y-TITLE");
+                    GraphPane ePane = AddPane(sensorType, "Y-TITLE PLACEHOLDER");
                     CreateGenericGraph(ePane, files[i]);
                     paneOrders.Add(sensorType, i);
                     paneOrdering++;
@@ -808,32 +806,6 @@ namespace DataViewer
 
         }
 
-        SyncViewForm syncForm = null;
-        private void button_sync_Click(object sender, EventArgs e)
-        {
-            XDate startx = (XDate)zedGraphControl1.MasterPane[0].XAxis.Scale.Min;
-            XDate endx = (XDate)zedGraphControl1.MasterPane[0].XAxis.Scale.Max;
-
-            /*if (((TimeSpan)(endx.DateTime.Subtract(startx.DateTime))).TotalMinutes > 20)
-            {
-                MessageBox.Show("Cannot display more than 20 minutes of raw data at a time. Please select a 20 minute segment or less then click Display Raw");
-                return;
-            }
-             */
-
-
-            if ((syncForm == null) || (syncForm.IsDisposed))
-                syncForm = new SyncViewForm(_pathDataset);
-
-            //syncForm.StartX = startx;
-            //syncForm.EndX = endx;
-            //syncForm.PathDataset = _pathDataset;
-
-            if (syncForm.Visible == false)
-                syncForm.Show();
-
-        }
-
         #endregion Buttons & ZOOM
 
         //DONE
@@ -854,15 +826,6 @@ namespace DataViewer
             if (secondArray.Length > 1) milliseconds = Convert.ToInt32(secondArray[1]);
             return new DateTime(Convert.ToInt32(newDateArray[0]), Convert.ToInt32(newDateArray[1]), Convert.ToInt32(newDateArray[2]), Convert.ToInt32(timeArray[0]), Convert.ToInt32(timeArray[1]), Convert.ToInt32(secondArray[0]), milliseconds);
         }
-
-        //private static DateTime ConvertUNIXDateTime(double timestamp)
-        //{
-        //    // First make a System.DateTime equivalent to the UNIX Epoch.
-        //    DateTime dateTime = new System.DateTime(1970, 1, 1, 0, 0, 0, 0);
-        //    // Add the number of seconds in UNIX timestamp to be converted.
-        //    dateTime = dateTime.AddSeconds(timestamp / 1000);
-        //    return dateTime;
-        //}
 
         #endregion DATETIME OPERATIONS
 
